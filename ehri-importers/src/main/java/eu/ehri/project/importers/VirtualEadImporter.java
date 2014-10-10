@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * should not be any c-levels beneath such a c-level
  *
  *
- * @author lindar
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  *
  */
 public class VirtualEadImporter extends EaImporter {

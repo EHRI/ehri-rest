@@ -18,7 +18,7 @@ import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
  * Mapping of Entity type names to Frames interfaces classes and
  * their associated IdGenerator functors.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  *
  */
 public enum EntityClass {

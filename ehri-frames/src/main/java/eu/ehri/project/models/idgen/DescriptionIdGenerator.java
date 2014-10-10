@@ -13,7 +13,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * The graph id is a combination of the parent scopes, plus the description
  * language code, plus an optional description identifier (say, 'alt').
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public enum DescriptionIdGenerator implements IdGenerator {

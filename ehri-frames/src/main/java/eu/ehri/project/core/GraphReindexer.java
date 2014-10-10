@@ -13,18 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reindex a graph 
- *  
+ * Reindex a graph
+ * <p/>
  * Should be part of SingleIndexGraphManager, so implicitly assumed it is compatible
- * 
- * @author paulboon
  *
+ * @author Paul Boon (http://github.com/PaulBoon)
  */
 public class GraphReindexer<T extends TransactionalGraph & IndexableGraph> {
     private static Logger logger = LoggerFactory.getLogger(GraphReindexer.class);
     public static final String INDEX_NAME = "entities";
 
-    private final FramedGraph<T> graph ;
+    private final FramedGraph<T> graph;
 
     public GraphReindexer(FramedGraph<T> graph) {
         this.graph = graph;
@@ -34,15 +33,15 @@ public class GraphReindexer<T extends TransactionalGraph & IndexableGraph> {
      * recreate the index for all the Entity vertices
      */
     public void reindex(String indexName) {
-    	// clear the index
+        // clear the index
         try {
             graph.getBaseGraph().dropIndex(indexName);
             Index<Vertex> index = graph.getBaseGraph().createIndex(indexName, Vertex.class);
 
             // index vertices
-            for(Vertex vertex : graph.getVertices()) {
+            for (Vertex vertex : graph.getVertices()) {
                 for (String key : propertyKeysToIndex(vertex)) {
-                    logger.debug("("+ key + ", "+ vertex.getProperty(key) + ")");
+                    logger.debug("(" + key + ", " + vertex.getProperty(key) + ")");
                     Object val = vertex.getProperty(key);
                     if (val != null) {
                         index.put(key, val, vertex);
@@ -55,21 +54,14 @@ public class GraphReindexer<T extends TransactionalGraph & IndexableGraph> {
             graph.getBaseGraph().rollback();
         }
     }
-    
-    /**
-     * collect the vertex property keys that exist in the Frame class with an @Property annotation
-     * 
-     * @param vertex
-     * @return
-     */
+
     private static Iterable<String> propertyKeysToIndex(Vertex vertex) {
-    	String typeName = (String) vertex.getProperty(EntityType.TYPE_KEY);
-    	try {
-	    	EntityClass entityClass = EntityClass.withName(typeName); 
-	    	Iterable<String> props = ClassUtils.getPropertyKeys(entityClass.getEntityClass());
-	    	return props;
-    	} catch (Exception e) {
-    		return new EmptyIterable<String>();
-    	}
+        String typeName = vertex.getProperty(EntityType.TYPE_KEY);
+        try {
+            EntityClass entityClass = EntityClass.withName(typeName);
+            return ClassUtils.getPropertyKeys(entityClass.getEntityClass());
+        } catch (Exception e) {
+            return new EmptyIterable<String>();
+        }
     }
 }

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -21,8 +17,7 @@ import static org.junit.Assert.*;
 import org.junit.Ignore;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class BundesarchiveSplitTest extends AbstractImporterTest{
     

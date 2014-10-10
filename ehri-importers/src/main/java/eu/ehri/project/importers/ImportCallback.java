@@ -5,7 +5,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 /**
  * Functor class
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public interface ImportCallback {

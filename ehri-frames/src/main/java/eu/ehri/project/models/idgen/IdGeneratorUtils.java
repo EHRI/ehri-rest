@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Delegation functions for ID generation.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public class IdGeneratorUtils  {

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,10 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- *
  * to be used in conjunction with EagImporter
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagHandler extends SaxXmlHandler {
 

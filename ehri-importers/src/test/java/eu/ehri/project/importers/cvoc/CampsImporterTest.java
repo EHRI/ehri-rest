@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CampsImporterTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(CampsImporterTest.class);

@@ -10,7 +10,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 /**
  * Interface for import managers. Currently empty.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public interface ImportManager {

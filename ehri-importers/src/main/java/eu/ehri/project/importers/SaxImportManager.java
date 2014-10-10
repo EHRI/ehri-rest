@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
  * Class that provides a front-end for importing XML files like EAD and EAC and
  * nested lists of EAD documents into the graph.
  *
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class SaxImportManager extends XmlImportManager implements ImportManager {
 
@@ -152,6 +152,18 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         }
     }
 
+    public SaxImportManager setProperties(XmlImportProperties properties) {
+        return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass, handlerClass, properties);
+    }
+
+    public SaxImportManager setProperties(String properties) {
+        if (properties == null) {
+            return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass, handlerClass, null);
+        } else {
+            XmlImportProperties xmlImportProperties = new XmlImportProperties(properties);
+            return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass, handlerClass, xmlImportProperties);
+        }
+    }
     
     public void setVirtualCollection(VirtualUnit virtualcollection) {
         this.virtualcollection=virtualcollection;

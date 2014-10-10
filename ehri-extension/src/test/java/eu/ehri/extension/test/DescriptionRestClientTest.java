@@ -5,7 +5,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +16,6 @@ import static org.junit.Assert.*;
 
 public class DescriptionRestClientTest extends BaseRestClientTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
     private String descriptionTestStr;
     private String accessPointTestStr;
     static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
@@ -38,7 +36,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
 
         // Check ID is the correct concatenation of all the scope IDs...
@@ -64,7 +62,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 .entity(descriptionTestStr).put(ClientResponse.class);
         assertStatus(OK, response);
 
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode idValue = rootNode
                 .path(Bundle.DATA_KEY)
@@ -92,7 +90,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 ehriUri("description", "c2", "cd2", Entities.UNDETERMINED_RELATIONSHIP))
                 .entity(accessPointTestStr).post(ClientResponse.class);
         assertStatus(CREATED, response);
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode idNode = rootNode
                 .path(Bundle.ID_KEY);

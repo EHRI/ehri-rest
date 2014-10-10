@@ -7,7 +7,7 @@ import eu.ehri.project.persistence.ErrorSet;
 /**
  * Validation error. This exception holds a map of field=error(s) values.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public class ValidationError extends Exception {

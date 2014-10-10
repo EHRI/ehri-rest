@@ -1,11 +1,5 @@
 package eu.ehri.project.importers.cvoc;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 import static org.junit.Assert.assertEquals;
 
 import java.io.InputStream;
@@ -20,8 +14,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
 

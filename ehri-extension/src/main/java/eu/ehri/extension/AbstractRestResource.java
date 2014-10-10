@@ -7,6 +7,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.extension.base.TxCheckedResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.core.GraphManager;
@@ -70,6 +71,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Header names
      */
+    public static final String RANGE_HEADER_NAME = "Content-Range";
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final String PATCH_HEADER_NAME = "Patch";
     public static final String LOG_MESSAGE_HEADER_NAME = "logMessage";
@@ -299,7 +301,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         final Charset utf8 = Charset.forName("UTF-8");
         final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">\n",
                 page.getTotal(), page.getPage(), page.getTotal());
-        final String tail = "</page>\n";
+        final String tail = "</listItems>\n";
 
         return Response.ok(new StreamingOutput() {
             @Override
@@ -315,7 +317,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 }
                 os.write(tail.getBytes(utf8));
             }
-        }).header("Content-Range", getPaginationResponseHeader(page))
+        }).header(RANGE_HEADER_NAME, getPaginationResponseHeader(page))
                 .build();
     }
 
@@ -360,7 +362,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
             }
         };
         return Response.ok(output)
-                .header("Content-Range", getPaginationResponseHeader(page))
+                .header(RANGE_HEADER_NAME, getPaginationResponseHeader(page))
                 .build();
     }
 

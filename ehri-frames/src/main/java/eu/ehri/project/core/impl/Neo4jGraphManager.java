@@ -211,7 +211,7 @@ public final class Neo4jGraphManager<T extends Neo4jGraph> implements GraphManag
     }
 
     @Override
-    public void setProperty(Vertex vertex, String key, String value) {
+    public void setProperty(Vertex vertex, String key, Object value) {
         Preconditions.checkNotNull(vertex);
         Preconditions.checkNotNull(key);
         Preconditions.checkArgument(

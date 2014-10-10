@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.*;
@@ -79,10 +80,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * List all instances of the 'entity' accessible to the given user.
      *
      * @return List of entities
-     * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response page() throws ItemNotFound, BadRequester {
+    public Response listItems() throws BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         return streamingPage(getQuery(cls).page(getRequesterUserProfile()));
     }
@@ -93,9 +93,56 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return Number of items.
      * @throws BadRequester
      */
-    public long count() throws BadRequester {
+    public long countItems() throws BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         return getQuery(cls).count();
+    }
+
+    /**
+     * Create an instance of the 'entity' in the database
+     *
+     * @param entityBundle A bundle of item data
+     *                     'id' fields)
+     * @param accessorIds  List of accessors who can initially view this item
+     * @param handler      A callback function that allows additional operations
+     *                     to be run on the created object after it is initialised
+     *                     but before the response is generated. This is useful for adding
+     *                     relationships to the new item.
+     * @param views        The view instance to use to create the item. This allows callers
+     *                     to override the scope and the class used.
+     * @param <T>          The generic type of class T
+     * @return The response of the create request, the 'location' will contain
+     *         the url of the newly created instance.
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     * @throws BadRequester
+     */
+    public <T extends AccessibleEntity> Response createItem(Bundle entityBundle, List<String> accessorIds,
+                                                            Handler<T> handler, LoggingCrudViews<T> views)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
+        graph.getBaseGraph().checkNotInTransaction();
+        try {
+            Accessor user = getRequesterUserProfile();
+            T entity = views
+                    .create(entityBundle, user, getLogMessage());
+            if (!accessorIds.isEmpty()) {
+                aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
+            }
+
+            // run post-creation callbacks
+            handler.process(entity);
+
+            graph.getBaseGraph().commit();
+            return creationResponse(entity);
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
+        }
     }
 
     /**
@@ -116,32 +163,16 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
+    public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        Accessor user = getRequesterUserProfile();
-        try {
-            E entity = views.create(entityBundle, user, getLogMessage());
-            aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
-
-            // run post-creation callbacks
-            handler.process(entity);
-
-            graph.getBaseGraph().commit();
-            return creationResponse(entity);
-        } catch (SerializationError serializationError) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(serializationError);
-        } finally {
-            cleanupTransaction();
-        }
+        return createItem(entityBundle, accessorIds, handler, views);
     }
 
-    public Response create(Bundle entityBundle, List<String> accessorIds)
+    public Response createItem(Bundle entityBundle, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        return create(entityBundle, accessorIds, noOpHandler);
+        return createItem(entityBundle, accessorIds, noOpHandler);
     }
 
     /**
@@ -154,7 +185,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws AccessDenied
      * @throws BadRequester
      */
-    public Response retrieve(String id) throws AccessDenied, ItemNotFound,
+    public Response getItem(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
@@ -182,7 +213,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response update(Bundle entityBundle) throws PermissionDenied,
+    public Response updateItem(Bundle entityBundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             BadRequester, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
@@ -219,7 +250,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response update(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
+    public Response updateItem(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         try {
@@ -227,9 +258,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
                 Bundle existing = depSerializer.vertexFrameToBundle(entity);
-                return update(existing.mergeDataWith(rawBundle));
+                return updateItem(existing.mergeDataWith(rawBundle));
             } else {
-                return update(rawBundle.withId(entity.getId()));
+                return updateItem(rawBundle.withId(entity.getId()));
             }
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
@@ -252,7 +283,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id, Handler<E> preProcess) throws AccessDenied, PermissionDenied,
+    protected Response deleteItem(String id, Handler<E> preProcess) throws AccessDenied, PermissionDenied,
             ItemNotFound,
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -281,10 +312,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id) throws AccessDenied, PermissionDenied,
+    protected Response deleteItem(String id) throws AccessDenied, PermissionDenied,
             ItemNotFound,
             ValidationError, BadRequester {
-        return delete(id, noOpHandler);
+        return deleteItem(id, noOpHandler);
     }
     // Helpers
 

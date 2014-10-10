@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
@@ -25,9 +26,12 @@ import java.util.List;
  * Provides a RESTful interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.SYSTEM_EVENT)
-public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
+public class SystemEventResource extends AbstractAccessibleEntityResource<SystemEvent>
+        implements GetResource {
 
     public final static String ITEM_TYPE_PARAM = "type";
     public final static String ITEM_ID_PARAM = "item";
@@ -40,7 +44,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
 
     private final Serializer subjectSerializer;
 
-    public EventResource(@Context GraphDatabaseService database) {
+    public SystemEventResource(@Context GraphDatabaseService database) {
         super(database, SystemEvent.class);
 
         // Subjects are only serialized to depth 1 for efficiency...
@@ -51,9 +55,10 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getEvent(@PathParam("id") String id) throws ItemNotFound,
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     /**

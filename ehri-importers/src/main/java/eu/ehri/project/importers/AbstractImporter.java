@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * constituent logical data, description(s), and date periods.
  *
  * @param <T>
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public abstract class AbstractImporter<T> {
 

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers.properties;
 
 import java.io.FileInputStream;
@@ -13,14 +9,14 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * wrapper class for the mapping of xml files to be imported.
  *
- * wrapper class for the mapping of xml files to be imported. 
- * 
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class XmlImportProperties implements ImportProperties {
 
@@ -45,30 +41,32 @@ public class XmlImportProperties implements ImportProperties {
     public String getProperty(String key) {
         return getProperties().getProperty(key);
     }
-    
-    public Set<String> getPropertiesWithValue(String value){
+
+    public Set<String> getPropertiesWithValue(String value) {
         Set<String> ps = new HashSet<String>();
         Properties p = getProperties();
-        for(Object key : p.keySet()){
-            if(value.equals(p.get(key).toString()))
+        for (Object key : p.keySet()) {
+            if (value.equals(p.get(key).toString()))
                 ps.add(key.toString());
         }
         return ps;
     }
-    public String getFirstPropertyWithValue(String value){
+
+    public String getFirstPropertyWithValue(String value) {
         Properties p = getProperties();
-        for(Object key : p.keySet()){
-            if(value.equals(p.get(key).toString()))
+        for (Object key : p.keySet()) {
+            if (value.equals(p.get(key).toString()))
                 return key.toString();
         }
         return null;
     }
-    public Set<String> getAllNonAttributeProperties(){
+
+    public Set<String> getAllNonAttributeProperties() {
         Set<String> ps = new HashSet<String>();
         Properties p = getProperties();
-        for(Object key : p.keySet()){
-            if( ! key.toString().startsWith("@"))
-            ps.add(key.toString());
+        for (Object key : p.keySet()) {
+            if (!key.toString().startsWith("@"))
+                ps.add(key.toString());
         }
         return ps;
     }
@@ -85,19 +83,20 @@ public class XmlImportProperties implements ImportProperties {
     private void setConfigFileName(String configFileName) {
         this.configFileName = configFileName;
     }
-    
-    
+
+
     //TODO: should be a deep copy
     public Set<Entry<Object, Object>> getEntries() {
         return getProperties().entrySet();
     }
+
     @Override
-    public Set<String> getAllNonAttributeValues(){
+    public Set<String> getAllNonAttributeValues() {
         Set<String> values = new HashSet<String>();
         Properties p = getProperties();
-        for(Object key : p.keySet()){
-            if( ! key.toString().startsWith("@"))
-            values.add(p.getProperty(key.toString()).toString());
+        for (Object key : p.keySet()) {
+            if (!key.toString().startsWith("@"))
+                values.add(p.getProperty(key.toString()));
         }
         return values;
     }
@@ -108,8 +107,7 @@ public class XmlImportProperties implements ImportProperties {
     }
 
     /**
-     *
-     * @param key
+     * @param key Attribute key name
      * @return returns whether this key is mentioned as an attribute in the property file
      */
     @Override
@@ -121,18 +119,21 @@ public class XmlImportProperties implements ImportProperties {
     public String getAttributeProperty(String key) {
         return getProperty("@" + key);
     }
+
     /**
-     * used to try to find the xml attribute value 'ehri_main_identifier' in properties like 'did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier'
-     * @param key did/unitid/
+     * used to try to find the xml attribute value 'ehri_main_identifier' in
+     * properties like 'did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier'
+     *
+     * @param key       did/unitid/
      * @param attribute @ehrilabel
      * @return ehri_main_identifier or null if no attribute value could be found in this property file
      */
-    public String getValueForAttributeProperty(String key, String attribute){
+    public String getValueForAttributeProperty(String key, String attribute) {
         Properties p = getProperties();
-        for(Object k_object : p.keySet()){
+        for (Object k_object : p.keySet()) {
             String k = k_object.toString();
-            if(k.startsWith(key+attribute) && k.contains("$")){
-                return k.substring(1+k.indexOf("$"));
+            if (k.startsWith(key + attribute) && k.contains("$")) {
+                return k.substring(1 + k.indexOf("$"));
             }
         }
         return null;
@@ -147,7 +148,7 @@ abstract class PropertyLoader {
      * Looks up a resource named 'name' in the classpath. The resource must map to a file with .properties extention.
      * The name is assumed to be absolute and can use either "/" or "." for package segment separation with an optional
      * leading "/" and optional ".properties" suffix. Thus, the following names refer to the same resource:
-     *
+     * <p/>
      * <pre>
      * some.pkg.Resource
      * some.pkg.Resource.properties
@@ -157,21 +158,16 @@ abstract class PropertyLoader {
      * /some/pkg/Resource.properties
      * </pre>
      *
-     * @param name classpath resource name [may not be null]
+     * @param name   classpath resource name [may not be null]
      * @param loader classloader through which to load the resource [null is equivalent to the application loader]
-     *
      * @return resource converted to java.util.Properties [may be null if the resource was not found and
-     * THROW_ON_LOAD_FAILURE is false]
+     *         THROW_ON_LOAD_FAILURE is false]
      * @throws IllegalArgumentException if the resource was not found and THROW_ON_LOAD_FAILURE is true
      */
     public static Properties loadProperties(String name, ClassLoader loader) {
         if (name == null) {
             throw new IllegalArgumentException("null input: name");
         }
-
-//        if (name.startsWith("/")) {
-//            name = name.substring(1);
-//        }
 
         if (name.endsWith(SUFFIX)) {
             name = name.substring(0, name.length() - SUFFIX.length());
@@ -193,7 +189,7 @@ abstract class PropertyLoader {
 
                 result = new Properties();
                 for (Enumeration<String> keys = rb.getKeys(); keys
-                        .hasMoreElements();) {
+                        .hasMoreElements(); ) {
                     final String key = keys.nextElement();
                     final String value = rb.getString(key);
 
@@ -202,7 +198,6 @@ abstract class PropertyLoader {
             } else {
 
                 name = name.replace('.', '/');
-//				logger.info(name);
 
                 if (!name.endsWith(SUFFIX)) {
                     name = name.concat(SUFFIX);
@@ -216,8 +211,8 @@ abstract class PropertyLoader {
                 } else {
                     logger.error(name + " is not a Resource");
                     FileInputStream ios = new FileInputStream(name);
-                    logger.info("trying to read " +name + " as fileinputstream");
-                    
+                    logger.info("trying to read " + name + " as fileinputstream");
+
                     in = ios;
                     result = new Properties();
                     result.load(in); // Can throw IOException
@@ -255,6 +250,7 @@ abstract class PropertyLoader {
         return loadProperties(name, Thread.currentThread()
                 .getContextClassLoader());
     }
+
     private static final boolean THROW_ON_LOAD_FAILURE = true;
     private static final boolean LOAD_AS_RESOURCE_BUNDLE = false;
     private static final String SUFFIX = ".properties";

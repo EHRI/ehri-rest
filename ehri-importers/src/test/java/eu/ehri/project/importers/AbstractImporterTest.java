@@ -23,9 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -22,8 +18,9 @@ import static org.junit.Assert.*;
 /**
  * Test the import of a Cegesoma AA EAD file.
  * This file was based on BundesarchiveTest.java.
- * @author linda
- * @author ben
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Ben Companjen (http://github.com/bencomp)
  */
 public class CegesomaAATest extends AbstractImporterTest{
     

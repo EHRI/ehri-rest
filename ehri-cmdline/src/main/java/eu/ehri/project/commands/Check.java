@@ -23,7 +23,8 @@ import static eu.ehri.project.models.EntityClass.*;
 
 /**
  * Sanity check various parts of the graph.
- * 
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Check extends BaseCommand implements Command {
 

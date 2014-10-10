@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -25,14 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CsvImportManager extends XmlImportManager {
 
     public static final Character VALUE_DELIMITER = ';';
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
-    private XmlImporter<Map<String, Object>> importer;
     private Class<? extends XmlImporter> importerClass;
 
     public CsvImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
@@ -44,9 +39,9 @@ public class CsvImportManager extends XmlImportManager {
     /**
      * Import XML from the given InputStream, as part of the given action.
      *
-     * @param ios
-     * @param eventContext
-     * @param log
+     * @param ios The input stream
+     * @param eventContext The event context in which the ingest is happening
+     * @param log An import log instance
      * @throws IOException
      * @throws ValidationError
      * @throws InvalidInputFormatError
@@ -56,7 +51,7 @@ public class CsvImportManager extends XmlImportManager {
             final ImportLog log) throws IOException, ValidationError, InvalidInputFormatError {
 
         try {
-            importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
+            XmlImporter importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.debug("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {

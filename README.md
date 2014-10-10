@@ -1,15 +1,13 @@
-Neo4j server plugin for use by the EHRI project
-===============================================
-The 'neo4j-ehri-plugin' provides an internal RESTful API 
-for the collection registry of the EHRI project WP19. 
+The EHRI Data Backend
+=====================
 
-This server plugin is actually implemented by an unmanaged neo4j extension. 
-This 'ehri-extension' project depends mainly on the 'ehri-frames' project, 
-which handles the business logic and data persistency. 
+A business layer and JAX-RS resource classes for managing [EHRI](http://ehri-project.eu) data.
 
+Integrates with the [Neo4j](http://www.neo4j.org) graph database via a server plugin. 
 
 For documentation (a work-in-progress, but better than nothing) see the docs:
 
-* [Installing and running from the code repository](docs/INSTALL.md)
-* [Importing data](docs/IMPORT.md)
-* [Writing management scripts](docs/SCRIPTING.md)
+* [All the docs](http://ehri.github.io/docs/api/ehri-rest/index.html)
+* [Installing and running from the code repository](http://ehri.github.io/docs/api/ehri-rest/install.html)
+* [Importing data](http://ehri.github.io/docs/api/ehri-rest/import.html)
+* [Writing management scripts](http://ehri.github.io/docs/api/ehri-rest/scripting.html)

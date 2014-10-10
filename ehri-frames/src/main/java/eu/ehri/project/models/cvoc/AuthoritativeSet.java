@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.blueprints.Direction;
@@ -16,8 +12,7 @@ import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
 public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,

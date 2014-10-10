@@ -2,13 +2,12 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.EventResource;
+import eu.ehri.extension.SystemEventResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.EventViews;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -47,6 +46,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         List<Map<String, Object>> actionsAfter = getEntityList(
                 Entities.SYSTEM_EVENT, getAdminUserProfileId());
+        System.out.println(actionsAfter);
 
         // Having created a new Repository, we should have at least one Event.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());
@@ -64,11 +64,11 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Add a good user filter...
         MultivaluedMap<String, String> goodFilters = new MultivaluedMapImpl();
-        goodFilters.add(EventResource.USER_PARAM, getAdminUserProfileId());
+        goodFilters.add(SystemEventResource.USER_PARAM, getAdminUserProfileId());
 
         // Add a useless filter that should remove all results
         MultivaluedMap<String, String> badFilters = new MultivaluedMapImpl();
-        badFilters.add(EventResource.USER_PARAM, "nobody");
+        badFilters.add(SystemEventResource.USER_PARAM, "nobody");
 
         List<Map<String, Object>> goodFiltered = getEntityList(
                 Entities.SYSTEM_EVENT, getAdminUserProfileId(), goodFilters);
@@ -116,8 +116,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         String json = response.getEntity(String.class);
         // Check the response contains a new version
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(json, JsonNode.class);
         assertFalse(rootNode.path(0).path(Bundle.DATA_KEY)
                 .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
         assertStatus(OK, response);
@@ -155,7 +154,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Only get events for people we follow, excluding those
         // for items we watch...
-        events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
+        events = getItemList(personalisedEventUrl + "?" + SystemEventResource.SHOW
                 + "=" + EventViews.ShowType.followed, user);
         assertEquals(0, events.size());
 
@@ -168,7 +167,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         jsonCallAs(user, followUrl).post(ClientResponse.class);
 
         // We should get the event again...
-        events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
+        events = getItemList(personalisedEventUrl + "?" + SystemEventResource.SHOW
                 + "=" + EventViews.ShowType.followed, user);
         assertEquals(1, events.size());
     }

@@ -28,8 +28,8 @@ import org.xml.sax.SAXException;
  * If there is no language, it does set the language of the description to English.
  * makes use of icaatom.properties with format: part/of/path/=attribute
  *
- * @author linda
- * @author ben
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Ben Companjen (http://github.com/bencomp)
  */
 public class EadHandler extends SaxXmlHandler {
     

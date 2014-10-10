@@ -23,7 +23,7 @@ import org.apache.commons.cli.Option;
  */
 public class DeleteEntities extends BaseCommand implements Command {
 
-    final static String NAME = "delete";
+    final static String NAME = "delete-all";
 
     /**
      * Constructor.
@@ -46,13 +46,12 @@ public class DeleteEntities extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: delete [OPTIONS] <type>";
+        return String.format("Usage: %s [OPTIONS] <type>", NAME);
     }
 
     @Override
     public String getUsage() {
-        String help = "Delete entities of a given type.";
-        return help;
+        return "Delete ALL entities of a given type.";
     }
 
     /**
@@ -98,14 +97,6 @@ public class DeleteEntities extends BaseCommand implements Command {
         return 0;
     }
 
-    /**
-     * Output node IDs only.
-     *
-     * @param graph
-     * @param manager
-     * @param type
-     * @param user
-     */
     private void deleteIds(FramedGraph<? extends TransactionalGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
         CrudViews<AccessibleEntity> views = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class);

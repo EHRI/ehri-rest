@@ -27,6 +27,8 @@ import java.util.List;
 
 /**
  * Provides a RESTful interface for generic items.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("entities")
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {
