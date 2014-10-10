@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -112,6 +112,9 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <compilerArgs>
+                        <arg>-Xlint</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -134,9 +137,10 @@
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.7</version>
                 <configuration>
-                    <!-- The drastically speeds up the build by preventing it
-                        downloading info for every dependency -->
+                    <!-- The drastically speeds up the build by preventing 
+                        it downloading info for every dependency -->
                     <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                    <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 </configuration>
             </plugin>
             <plugin>
@@ -144,8 +148,8 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.1</version>
                 <configuration>
-                    <!-- Since we host the docs on Git, the timestamp causes lots
-                        of unnecessary file changes. -->
+                    <!-- Since we host the docs on Git, the timestamp causes 
+                        lots of unnecessary file changes. -->
                     <notimestamp>true</notimestamp>
                 </configuration>
                 <reportSets>
@@ -162,6 +166,37 @@
                         </reports>
                     </reportSet>
                 </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <xmlOutput>true</xmlOutput>
+                    <!-- Optional directory to put findbugs xdoc xml report -->
+                    <xmlOutputDirectory>target/site</xmlOutputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.13</version>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>false</failsOnError>
+                    <linkXRef>true</linkXRef>
+                    <failOnViolation>false</failOnViolation>
+                    <outputFileFormat>xml</outputFileFormat>
+                    <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
+                    <useFile>true</useFile>
+                </configuration>
             </plugin>
         </plugins>
     </reporting>
