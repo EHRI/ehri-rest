@@ -1,5 +1,6 @@
 package eu.ehri.project.views;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -20,6 +21,8 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+import java.util.List;
+
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -36,6 +39,15 @@ public class VirtualUnitViews {
         this.aclManager = new AclManager(graph);
         this.viewHelper = new ViewHelper(graph);
 
+    }
+
+    public void moveIncludedUnits(VirtualUnit from, VirtualUnit to, Iterable<DocumentaryUnit> included,
+            Accessor accessor) throws PermissionDenied {
+        // Wrap this in a list as a precaution because it
+        // will be iterated twice!
+        List<DocumentaryUnit> items = Lists.newArrayList(included);
+        removeIncludedUnits(from, items, accessor);
+        addIncludedUnits(to, items, accessor);
     }
 
     /**

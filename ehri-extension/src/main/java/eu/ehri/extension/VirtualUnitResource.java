@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
@@ -134,8 +135,7 @@ public final class VirtualUnitResource extends
             VirtualUnit fromVu = views.detail(fromId, currentUser);
             VirtualUnit toVu = views.detail(toId, currentUser);
             Iterable<DocumentaryUnit> units = getIncludedUnits(includedIds, currentUser);
-            vuViews.removeIncludedUnits(fromVu, units, currentUser);
-            vuViews.addIncludedUnits(toVu, units, currentUser);
+            vuViews.moveIncludedUnits(fromVu, toVu, units, currentUser);
             graph.getBaseGraph().commit();
             return Response.status(Response.Status.OK).build();
         } finally {
@@ -254,7 +254,7 @@ public final class VirtualUnitResource extends
      * We filter these for accessibility and content type (to ensure
      * they actually are the right type.
      */
-    private Iterable<DocumentaryUnit> getIncludedUnits(
+    private List<DocumentaryUnit> getIncludedUnits(
             List<String> ids, Accessor accessor)
             throws ItemNotFound, BadRequester {
         Iterable<Vertex> vertices = manager.getVertices(ids);
@@ -272,7 +272,6 @@ public final class VirtualUnitResource extends
 
         GremlinPipeline<Vertex, Vertex> units = new GremlinPipeline<Vertex, Vertex>(
                 vertices).filter(typeFilter).filter(aclFilter);
-
-        return graph.frameVertices(units, DocumentaryUnit.class);
+        return Lists.newArrayList(graph.frameVertices(units, DocumentaryUnit.class));
     }
 }
