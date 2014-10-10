@@ -58,7 +58,10 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
         //bundesarchive: 1906/19
         Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
-        Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})")
+        Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})"),
+//       1935-03/1935-05
+        Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
+        Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
     public XmlImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {

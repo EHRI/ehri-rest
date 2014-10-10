@@ -1,5 +1,7 @@
 package eu.ehri.project.importers;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
@@ -61,14 +63,16 @@ public class ItsTest extends AbstractImporterTest {
 //               printGraph(graph);
 
         /**
+         * relationship: 2
          * null: 10 
          * documentaryUnit: 4 
          * documentDescription: 8 
          * property: 8 
          * maintenanceEvent: 8 (1+3)*2 
          * systemEvent: 2
+         * date: 2
          */
-        int createCount = origCount + 40;
+        int createCount = origCount + 44;
         assertEquals(createCount, getNodeCount(graph));
 
         // The first import creates 4? units
@@ -90,16 +94,25 @@ public class ItsTest extends AbstractImporterTest {
         assertEquals(new Long(1), unit.getChildCount());
 
 
+        
         for (Description d : unit.getDocumentDescriptions()) {
+            boolean hasDate=false;
+            for(Edge e : d.asVertex().getEdges(Direction.OUT)){
+                if(e.getLabel().equals("hasDate"))
+                    hasDate=true;
+            }
+            assertTrue(hasDate);
             logger.debug("Description language: " + d.getLanguageOfDescription());
             if (d.getLanguageOfDescription().equals("eng")) {
                 assertEquals("Concentration Camp Esterwegen", d.getName());
+                assertEquals("draft by Susanne Laux", d.asVertex().getProperty("notes"));
 
             } else if (d.getLanguageOfDescription().equals("deu")) {
                 assertEquals("Konzentrationslager Esterwegen", d.getName());
             } else {
                 fail();
             }
+            
         }
 
 
@@ -127,20 +140,21 @@ public class ItsTest extends AbstractImporterTest {
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(GESTAPO);
         // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
+//        List<VertexProxy> graphState1 = getGraphState(graph);
 
         XmlImportManager sim = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log_en = sim.importFile(ios, logMessage);
 
 // After...
-        List<VertexProxy> graphState2 = getGraphState(graph);
-        GraphDiff diff = diffGraph(graphState1, graphState2);
-        diff.printDebug(System.out);
+//        List<VertexProxy> graphState2 = getGraphState(graph);
+//        GraphDiff diff = diffGraph(graphState1, graphState2);
+//        diff.printDebug(System.out);
 
-               printGraph(graph);
+//               printGraph(graph);
 
-        /* null: 9
+        /* relationship: 1
+         * null: 9
          * documentaryUnit: 8
          * property: 8
          * documentDescription: 8
@@ -148,7 +162,7 @@ public class ItsTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 2
          */
-        int createCount = origCount + 40;
+        int createCount = origCount + 41;
         assertEquals(createCount, getNodeCount(graph));
         
         DocumentaryUnit u = graph.frame(
@@ -230,7 +244,6 @@ public class ItsTest extends AbstractImporterTest {
     }
 
     @Test
-    @Ignore
     public void testEsterwegenWhole() throws ItemNotFound, IOException, ValidationError, InputParseError {
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing the esterwegen (pertinence) EAD by ItsTest";
@@ -250,9 +263,18 @@ public class ItsTest extends AbstractImporterTest {
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
+        /*
+         * relationship: 1
+         * null: 5
+         * documentaryUnit: 4
+         * documentDescription: 4
+         * property: 4
+         * maintenanceEvent: 4
+         * systemEvent: 1
+         * datePeriod: 1
+         */
 
-
-        int createCount = origCount + 21;
+        int createCount = origCount + 24;
         assertEquals(createCount, getNodeCount(graph));
 
     }

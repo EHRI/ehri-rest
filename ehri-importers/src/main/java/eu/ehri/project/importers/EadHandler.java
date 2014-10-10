@@ -68,9 +68,6 @@ public class EadHandler extends SaxXmlHandler {
      * EAD identifier as found in `<eadid>` in the currently handled EAD file
      */
     Map<String, String> eadfileValues;
-//    private String eadId;
-//    private String author;
-//    private String mainagency;
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -165,6 +162,7 @@ public class EadHandler extends SaxXmlHandler {
     	// If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
     	if (localName.equals("eadid") || qName.equals("eadid")) {
+            logger.debug(currentPath.lastElement() + "-"+ getImportantPath(currentPath) + "-"+ qName + ":"+ (String) currentGraphPath.peek().get(SOURCEFILEID));
             eadfileValues.put(EADID, (String) currentGraphPath.peek().get(SOURCEFILEID));
     	    logger.debug("Found <eadid>: "+ eadfileValues.get(EADID));
     	}
@@ -262,7 +260,9 @@ public class EadHandler extends SaxXmlHandler {
      * @return the <code><eadid></code> or null if it was not parsed yet or empty
      */
     protected String getEadId() {
-        logger.error("EADID not set yet, or not given in eadfile");
+        if(eadfileValues.get(EADID) == null){
+            logger.error("EADID not set yet, or not given in eadfile");
+        }
     	return eadfileValues.get(EADID);
     }
     /**

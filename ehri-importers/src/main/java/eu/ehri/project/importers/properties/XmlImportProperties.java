@@ -165,6 +165,7 @@ abstract class PropertyLoader {
      * @throws IllegalArgumentException if the resource was not found and THROW_ON_LOAD_FAILURE is true
      */
     public static Properties loadProperties(String name, ClassLoader loader) {
+        logger.debug("loading " + name + " ...");
         if (name == null) {
             throw new IllegalArgumentException("null input: name");
         }
