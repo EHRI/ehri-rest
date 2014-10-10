@@ -11,6 +11,7 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
+import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,8 +72,6 @@ public class CegesomaABTest extends AbstractImporterTest{
                 getVertexByIdentifier(graph,ARCHDESC),
                 DocumentaryUnit.class);
         
-        
-        
         //José Gotovitch
         for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
             boolean hasPersonAccess = false;
@@ -86,17 +85,27 @@ public class CegesomaABTest extends AbstractImporterTest{
             assertTrue(hasPersonAccess);
         }
 
-        /**
-         * Test titles
-         */
         // There should be one DocumentDescription for the <archdesc>
         for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("Liste des objets, documents et témoignages rassemblés pour l'exposition : (\"Résister à la solution finale\")", dd.getName());
             assertEquals("fra", dd.getLanguageOfDescription());
-//            for(String key : dd.asVertex().getPropertyKeys())
-//                System.out.println(key);
             assertEquals("Cege Soma", dd.asVertex().getProperty("processInfo"));
             assertEquals("en français et en anglais", dd.asVertex().getProperty("languageOfMaterial"));
+        }
+        
+        //test MaintenanceEvent order
+        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+
+            boolean meFound = false;
+            for(MaintenanceEvent me : dd.getMaintenanceEvents()){
+                meFound=true;
+                if(me.asVertex().getProperty("order").equals(0)){
+                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty("eventType"));
+                }else{
+                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.asVertex().getProperty("eventType"));
+                }
+            }
+            assertTrue(meFound);
         }
         
         
