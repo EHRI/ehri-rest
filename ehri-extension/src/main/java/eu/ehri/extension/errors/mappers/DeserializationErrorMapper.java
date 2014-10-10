@@ -1,5 +1,6 @@
 package eu.ehri.extension.errors.mappers;
 
+import com.google.common.base.Charsets;
 import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.DeserializationError;
 
@@ -28,6 +29,6 @@ public class DeserializationErrorMapper implements
         return Response
                 .status(Status.BAD_REQUEST)
                 .entity(WebDeserializationError.errorToJson(e)
-                        .getBytes()).build();
+                        .getBytes(Charsets.UTF_8)).build();
     }
 }

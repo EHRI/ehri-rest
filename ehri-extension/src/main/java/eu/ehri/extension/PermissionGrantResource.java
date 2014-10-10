@@ -49,8 +49,7 @@ public class PermissionGrantResource extends AbstractRestResource {
         // TODO: Should we add ACL checks here???
         PermissionGrant grant = manager.getFrame(id,
                 EntityClass.PERMISSION_GRANT, PermissionGrant.class);
-        return Response.status(Status.OK).entity(
-                getSerializer().vertexFrameToJson(grant).getBytes()).build();
+        return single(grant);
     }
     /**
      * Revoke a particular permission grant.

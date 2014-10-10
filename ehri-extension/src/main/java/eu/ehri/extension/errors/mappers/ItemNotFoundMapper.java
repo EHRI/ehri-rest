@@ -1,5 +1,6 @@
 package eu.ehri.extension.errors.mappers;
 
+import com.google.common.base.Charsets;
 import eu.ehri.project.exceptions.ItemNotFound;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -32,7 +33,8 @@ public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
         };
         try {
             return Response.status(Status.NOT_FOUND)
-                .entity(mapper.writeValueAsString(out).getBytes()).build();
+                .entity(mapper.writeValueAsString(out)
+                        .getBytes(Charsets.UTF_8)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }

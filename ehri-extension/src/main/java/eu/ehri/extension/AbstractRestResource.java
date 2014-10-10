@@ -1,7 +1,7 @@
 package eu.ehri.extension;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -35,7 +35,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -264,6 +263,42 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
+     * Return a default response from a single frame item.
+     *
+     * @param item The item
+     * @param <T>  The item's generic type
+     * @return A serialized representation, with location and cache control
+     *         headers.
+     */
+    protected <T extends Frame> Response single(final T item) {
+        try {
+            return Response.status(Response.Status.OK)
+                    .entity(getRepresentation(item).getBytes(Charsets.UTF_8))
+                    .location(getItemUri(item))
+                    .cacheControl(getCacheControl(item)).build();
+        } catch (SerializationError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Create a default response from a single vertex.
+     *
+     * @param item A graph vertex
+     * @return A serialized representation.
+     */
+    protected Response single(final Vertex item) {
+        try {
+            // FIXME: We can add cache control and location here
+            return Response.status(Response.Status.OK)
+                    .entity(getRepresentation(item).getBytes(Charsets.UTF_8))
+                    .build();
+        } catch (SerializationError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Stream a single page with total, limit, and offset info.
      *
      * @param page A page of data
@@ -467,80 +502,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Return a streaming response from an iterable, using the given
-     * entity converter.
-     * <p/>
-     * FIXME: I shouldn't be here, or the other method should. Redesign API.
-     *
-     * @param map A map of vertices
-     * @return A streaming response
-     */
-    protected Response streamingVertexMap(
-            final Map<String, Vertex> map, final Serializer serializer) {
-        return Response.ok(new StreamingOutput() {
-            @Override
-            public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
-                g.writeStartObject();
-                for (Map.Entry<String, Vertex> keypair : map.entrySet()) {
-                    try {
-                        g.writeFieldName(keypair.getKey());
-                        jsonMapper.writeValue(g, serializer.vertexToData(keypair.getValue()));
-                    } catch (SerializationError e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                g.writeEndObject();
-                g.close();
-            }
-        }).build();
-    }
-
-    /**
-     * Return a streaming response from an iterable.
-     *
-     * @param map A multimap of vertices
-     * @return A streaming response
-     */
-    protected <T extends Frame> Response streamingMultimap(
-            final ListMultimap<String, T> map) {
-        return streamingMultimap(map, getSerializer());
-    }
-
-    /**
-     * Return a streaming response from an iterable, using the given
-     * entity converter.
-     *
-     * @param map        A map of vertices
-     * @param serializer A custom serializer
-     * @return A streaming response
-     */
-    protected <T extends Frame> Response streamingMultimap(
-            final ListMultimap<String, T> map, final Serializer serializer) {
-        return Response.ok(new StreamingOutput() {
-            @Override
-            public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
-                g.writeStartObject();
-                for (String itemId : map.keySet()) {
-                    g.writeFieldName(itemId);
-                    g.writeStartArray();
-                    for (T item : map.get(itemId)) {
-                        try {
-                            jsonMapper.writeValue(g, serializer.vertexFrameToData(item));
-                        } catch (SerializationError e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    g.writeEndArray();
-                }
-                g.writeEndObject();
-                g.close();
-            }
-        }).build();
-    }
-
-    /**
      * Get the URI for a given item.
      *
      * @param item The item
@@ -587,5 +548,26 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getSerializer().vertexFrameToXmlString(frame)
                 : getSerializer().vertexFrameToJson(frame);
+    }
+
+
+    /**
+     * Get a cache control header based on the access restrictions
+     * set on the item. If it is restricted, instruct clients not
+     * to cache the response.
+     *
+     * @param item The item
+     * @return A cache control object.
+     */
+    protected <T extends Frame> CacheControl getCacheControl(T item) {
+        CacheControl cc = new CacheControl();
+        if (!(item instanceof AccessibleEntity)
+                || !(((AccessibleEntity) item).hasAccessRestriction())) {
+            cc.setMaxAge(ITEM_CACHE_TIME);
+        } else {
+            cc.setNoStore(true);
+            cc.setNoCache(true);
+        }
+        return cc;
     }
 }
