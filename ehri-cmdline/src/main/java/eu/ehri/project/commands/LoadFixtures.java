@@ -38,8 +38,7 @@ public class LoadFixtures extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Load the fixtures into the database.";
-        return help;
+        return "Load the fixtures into the database.";
     }
 
     /**
@@ -53,7 +52,7 @@ public class LoadFixtures extends BaseCommand implements Command {
         boolean initialize = cmdLine.hasOption("init");
         FixtureLoader loader = FixtureLoaderFactory.getInstance(graph, initialize);
         if (cmdLine.getArgList().size() == 1) {
-            String path = (String)cmdLine.getArgs()[0];
+            String path = cmdLine.getArgs()[0];
             File file = new File(path);
             if (!file.exists() || !file.isFile()) {
                 throw new RuntimeException(String.format(

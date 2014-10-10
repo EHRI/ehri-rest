@@ -72,7 +72,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         for(Description d : unit.getDocumentDescriptions())
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
 
-        assertEquals(Long.valueOf(2), unit.getChildCount());
+        assertEquals(2L, unit.getChildCount());
         List<DocumentaryUnit> children = Lists.newArrayList(unit.getChildren());
         DocumentaryUnit child1 = children.get(0);
         DocumentaryUnit child2 = children.get(1);

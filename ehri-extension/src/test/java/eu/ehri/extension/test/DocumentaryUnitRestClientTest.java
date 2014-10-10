@@ -22,7 +22,7 @@ import java.util.Map;
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.hamcrest.CoreMatchers.containsString;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 

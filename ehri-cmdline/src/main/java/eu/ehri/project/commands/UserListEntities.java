@@ -33,8 +33,7 @@ public class UserListEntities extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "List entities of a given type as a given user.";
-        return help;
+        return "List entities of a given type as a given user.";
     }
     
     @Override
@@ -43,13 +42,6 @@ public class UserListEntities extends BaseCommand implements Command {
                 "Identifier of user to list items as"));
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @param graph
-     * @param cmdLine
-     * @throws Exception
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {

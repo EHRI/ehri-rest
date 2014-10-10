@@ -28,17 +28,9 @@ public class Initialize extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Initialize graph DB with minimal nodes (admin account, permissions, types).";
-        return help;
+        return "Initialize graph DB with minimal nodes (admin account, permissions, types).";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @param graph
-     * @param cmdLine
-     * @throws Exception 
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
         GraphInitializer initializer = new GraphInitializer(graph);

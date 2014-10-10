@@ -25,9 +25,8 @@ public class EacImport extends ImportCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an EAC file into the graph database, using the specified"
+        return "Import an EAC file into the graph database, using the specified"
                 + sep + "Repository and User.";
-        return help;
     }
 
    

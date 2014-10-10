@@ -16,7 +16,6 @@ public class EagImport  extends ImportCommand implements Command {
     public EagImport() {
         super(EagHandler.class, EagImporter.class);
     }
-
     
     @Override
     public String getHelp() {

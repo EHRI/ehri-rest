@@ -28,17 +28,10 @@ public class Reindex extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Drop and rebuild the (internal) graph index.";
-        return help;
+        return "Drop and rebuild the (internal) graph index.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @param graph
-     * @param cmdLine
-     * @throws Exception 
-     */
+
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
         GraphReindexer<?> reIndexer = new GraphReindexer(graph);

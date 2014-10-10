@@ -79,7 +79,7 @@ public interface VirtualUnit extends AbstractUnit {
     public Iterable<Repository> getRepositories();
     
     @JavaHandler
-    public void addIncludedUnit(final DocumentaryUnit unit);
+    public boolean addIncludedUnit(final DocumentaryUnit unit);
 
     @JavaHandler
     public void removeIncludedUnit(final DocumentaryUnit unit);
@@ -105,20 +105,20 @@ public interface VirtualUnit extends AbstractUnit {
         }
 
         public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, childCount(it(), gremlin()));
+            it().setProperty(CHILD_COUNT, childCount(it()));
         }
 
         public void removeIncludedUnit(final DocumentaryUnit unit) {
             boolean done = removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
             if (done) {
-                decrementChildCount(it(), gremlin());
+                decrementChildCount(it());
             }
         }
 
         public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                return childCount(it(), gremlin());
+                return childCount(it());
             }
             return count;
         }
@@ -141,7 +141,7 @@ public interface VirtualUnit extends AbstractUnit {
 
             boolean done = addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
             if (done) {
-                incrementChildCount(it(), gremlin());
+                incrementChildCount(it());
             }
             return done;
         }
@@ -149,7 +149,7 @@ public interface VirtualUnit extends AbstractUnit {
         public boolean removeChild(final VirtualUnit child) {
             boolean done = removeAllRelationships(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
             if (done) {
-                decrementChildCount(it(), gremlin());
+                decrementChildCount(it());
             }
             return done;
         }
@@ -172,33 +172,33 @@ public interface VirtualUnit extends AbstractUnit {
             return frameVertices(traverseAncestors());
         }
 
-        public void addIncludedUnit(final DocumentaryUnit unit) {
-            addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+        public boolean addIncludedUnit(final DocumentaryUnit unit) {
             boolean done = addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
             if (done) {
-                incrementChildCount(it(), gremlin());
+                incrementChildCount(it());
             }
+            return done;
         }
 
-        private static long childCount(Vertex self, GremlinPipeline<Vertex, Object> selfPipe) {
+        private static long childCount(Vertex self) {
             int incCount = Iterables.size(self.getVertices(Direction.OUT, Ontology.VC_INCLUDES_UNIT));
             int vcCount = Iterables.size(self.getVertices(Direction.IN, Ontology.VC_IS_PART_OF));
             return incCount + vcCount;
         }
 
-        private static void incrementChildCount(Vertex self, GremlinPipeline<Vertex, Object> selfPipe) {
+        private static void incrementChildCount(Vertex self) {
             Long count = self.getProperty(CHILD_COUNT);
             if (count == null) {
-                self.setProperty(CHILD_COUNT, childCount(self, selfPipe));
+                self.setProperty(CHILD_COUNT, childCount(self));
             } else {
                 self.setProperty(CHILD_COUNT, count + 1);
             }
         }
 
-        private static void decrementChildCount(Vertex self, GremlinPipeline<Vertex, Object> selfPipe) {
+        private static void decrementChildCount(Vertex self) {
             Long count = self.getProperty(CHILD_COUNT);
             if (count == null) {
-                self.setProperty(CHILD_COUNT, childCount(self, selfPipe));
+                self.setProperty(CHILD_COUNT, childCount(self));
             } else {
                 self.setProperty(CHILD_COUNT, Math.max(0, count - 1));
             }

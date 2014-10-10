@@ -46,8 +46,7 @@ public class CountryAdd extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Create a new country";
-        return help;
+        return "Create a new country";
     }
 
     /**

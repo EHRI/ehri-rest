@@ -11,7 +11,7 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 import org.junit.Ignore;
 
 public class GenericRestClientTest extends BaseRestClientTest {

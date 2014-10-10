@@ -38,7 +38,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     public Iterable<Accessor> getMembers();
 
     @JavaHandler
-    public Long getChildCount();
+    public long getChildCount();
 
     @JavaHandler
     public void updateChildCountCache();
@@ -67,7 +67,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
             it().setProperty(CHILD_COUNT, gremlin().in(Ontology.ACCESSOR_BELONGS_TO_GROUP).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().in(Ontology.ACCESSOR_BELONGS_TO_GROUP).count();

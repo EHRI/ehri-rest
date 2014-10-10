@@ -45,13 +45,7 @@ public class GraphViz extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Dump a dot file.";
-        return help;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return true;
+        return "Dump a dot file.";
     }
 
     /**

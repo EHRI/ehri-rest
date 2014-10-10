@@ -58,9 +58,8 @@ public class GraphML extends BaseCommand implements Command {
     
 	@Override
 	public String getHelp() {
-        String help = "export or import a GraphML file." + 
+        return "export or import a GraphML file." +
         		"\n" + getUsage();
-        return help;
 	}
 	
     @Override

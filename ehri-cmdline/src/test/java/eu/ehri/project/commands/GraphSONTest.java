@@ -6,14 +6,12 @@ import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.PosixParser;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
