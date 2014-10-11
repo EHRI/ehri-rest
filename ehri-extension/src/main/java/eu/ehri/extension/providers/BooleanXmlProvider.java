@@ -1,5 +1,7 @@
 package eu.ehri.extension.providers;
 
+import com.google.common.base.Charsets;
+
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +35,6 @@ public class BooleanXmlProvider implements MessageBodyWriter<Boolean> {
     public void writeTo(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, Object> headers,
             OutputStream outputStream) throws IOException, WebApplicationException {
-        outputStream.write(("<boolean>" + bool + "</boolean>").getBytes());
+        outputStream.write(("<boolean>" + bool + "</boolean>").getBytes(Charsets.UTF_8));
     }
 }

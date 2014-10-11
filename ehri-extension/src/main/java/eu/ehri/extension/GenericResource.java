@@ -26,7 +26,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for generic items.
+ * Provides a means of fetching items and lists of items
+ * regardless of their specific type.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -38,42 +39,57 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     }
 
     /**
-     * POST alternative to 'list', which allows passing a much larger
-     * list of ids to fetch via a JSON body.
+     * Fetch a list of items by their ID.
+     *
+     * @param ids A list of string IDs
+     * @return A serialized list of items
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
+     */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound,
+            PermissionDenied, BadRequester {
+        // Object a lazily-computed view of the ids->vertices...
+        Iterable<Vertex> vertices = manager.getVertices(ids);
+        PipeFunction<Vertex, Boolean> filter = aclManager
+                .getAclFilterFunction(getRequesterUserProfile());
+        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
+                vertices)
+                .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
+        return streamingVertexList(filtered, getSerializer());
+    }
+
+    /**
+     * Fetch a list of items by their ID.
+     *
+     * @param json A JSON-encoded list of string IDs
+     * @return A serialized list of items
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
      */
     @POST
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listFromJson(String json)
             throws ItemNotFound, PermissionDenied, BadRequester, DeserializationError, IOException {
         return list(parseIds(json));
     }
 
+    /**
+     * Fetch a list of items by their internal graph ID (gid), which is
+     * provided in the bundle metadata section of the default response.
+     *
+     * @param ids A list of graph IDs
+     * @return A serialized list of items
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
+     */
     @GET
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound,
-            PermissionDenied, BadRequester {
-        // Object a lazily-computed view of the ids->vertices...
-        Iterable<Vertex> vertices = manager.getVertices(ids);
-        PipeFunction<Vertex,Boolean> filter = aclManager
-                .getAclFilterFunction(getRequesterUserProfile());
-        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
-                vertices)
-                    .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-        return streamingVertexList(filtered, getSerializer());
-    }
-
-    @POST
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    @Path("/listByGraphId")
-    public Response listByGidFromJson(String json) throws ItemNotFound,
-            PermissionDenied, DeserializationError, BadRequester, IOException {
-
-        return listByGid(parseGraphIds(json));
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/listByGraphId")
     public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
@@ -88,12 +104,12 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
 
         FluentIterable<Vertex> vertices = FluentIterable.from(ids)
                 .transform(new Function<Long, Vertex>() {
-            public Vertex apply(Long id) {
-                return graph.getVertex(id);
-            }
-        });
+                    public Vertex apply(Long id) {
+                        return graph.getVertex(id);
+                    }
+                });
 
-        PipeFunction<Vertex,Boolean> filter = aclManager
+        PipeFunction<Vertex, Boolean> filter = aclManager
                 .getAclFilterFunction(getRequesterUserProfile());
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)
@@ -101,8 +117,37 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         return streamingVertexList(filtered, getSerializer());
     }
 
+    /**
+     * Fetch a list of items by their internal graph ID (gid), which is
+     * provided in the bundle metadata section of the default response.
+     *
+     * @param json A JSON-encoded list of graph IDs
+     * @return A serialized list of items
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
+     */
+    @POST
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Path("/listByGraphId")
+    public Response listByGidFromJson(String json) throws ItemNotFound,
+            PermissionDenied, DeserializationError, BadRequester, IOException {
+
+        return listByGid(parseGraphIds(json));
+    }
+
+    /**
+     * Fetch an item of any type by ID.
+     *
+     * @param id The item's ID
+     * @return A serialized representation.
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
+     * @throws SerializationError
+     */
     @GET
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/{id:.+}")
     public Response get(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied, BadRequester, SerializationError {
@@ -110,15 +155,13 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         // gremlin acl and type filtering for one item...
         List<String> ids = Lists.newArrayList(id);
         Iterable<Vertex> vertices = manager.getVertices(ids);
-        PipeFunction<Vertex,Boolean> filter = aclManager
+        PipeFunction<Vertex, Boolean> filter = aclManager
                 .getAclFilterFunction(getRequesterUserProfile());
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)
                 .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
         if (filtered.iterator().hasNext()) {
-            return Response.status(Response.Status.OK)
-                    .entity(getRepresentation(filtered.iterator().next()).getBytes())
-                    .build();
+            return single(filtered.iterator().next());
         } else {
             throw new ItemNotFound(id);
         }

@@ -2,7 +2,6 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.*;
@@ -17,8 +16,6 @@ import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -188,17 +185,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response getItem(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        try {
-            E entity = views.detail(id, getRequesterUserProfile());
-            if (!manager.getEntityClass(entity).getEntityClass().equals(cls)) {
-                throw new ItemNotFound(id);
-            }
-            return Response.status(Status.OK)
-                    .entity(getRepresentation(entity).getBytes())
-                    .cacheControl(getCacheControl(entity)).build();
-        } catch (SerializationError e) {
-            throw new WebApplicationException(e);
+        E entity = views.detail(id, getRequesterUserProfile());
+        if (!manager.getEntityClass(entity).getEntityClass().equals(cls)) {
+            throw new ItemNotFound(id);
         }
+        return single(entity);
     }
 
     /**
@@ -221,13 +212,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             Mutation<E> update = views
                     .update(entityBundle, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK)
-                    .entity(getRepresentation(update.getNode()).getBytes())
-                    .cacheControl(getCacheControl(update.getNode()))
-                    .build();
-        } catch (SerializationError serializationError) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(serializationError);
+            return single(update.getNode());
         } finally {
             cleanupTransaction();
         }
@@ -339,24 +324,5 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             accessors.add(current);
         }
         return accessors;
-    }
-
-    /**
-     * Get a cache control header based on the access restrictions
-     * set on the item. If it is restricted, instruct clients not
-     * to cache the response.
-     *
-     * @param item The item
-     * @return A cache control object.
-     */
-    protected CacheControl getCacheControl(E item) {
-        CacheControl cc = new CacheControl();
-        if (!item.hasAccessRestriction()) {
-            cc.setMaxAge(ITEM_CACHE_TIME);
-        } else {
-            cc.setNoStore(true);
-            cc.setNoCache(true);
-        }
-        return cc;
     }
 }

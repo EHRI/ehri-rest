@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import com.google.common.base.Charsets;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -118,12 +119,9 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     private Response buildResponse(DescribedEntity item, Frame data, Response.Status status)
             throws SerializationError {
-        try {
-            return Response.status(status).location(getItemUri(item))
-                    .entity((getSerializer().vertexFrameToJson(data)).getBytes()).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return Response.status(status).location(getItemUri(item))
+                .entity((getSerializer().vertexFrameToJson(data))
+                        .getBytes(Charsets.UTF_8)).build();
     }
 
     @POST

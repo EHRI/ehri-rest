@@ -15,7 +15,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Set;
 
@@ -52,9 +51,7 @@ public class AccessResource extends
             Set<Accessor> accessors = extractAccessors(accessorIds);
             aclViews.setAccessors(item, accessors, getRequesterUserProfile());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK).location(getItemUri(item))
-                    .entity((getSerializer().vertexFrameToJson(item)).getBytes())
-                    .build();
+            return single(item);
         } finally {
             cleanupTransaction();
         }

@@ -1,5 +1,7 @@
 package eu.ehri.extension.providers;
 
+import com.google.common.base.Charsets;
+
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +35,6 @@ public class NumberXmlProvider implements MessageBodyWriter<Number> {
     public void writeTo(Number number, Class<?> aClass, Type type, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, Object> headers,
             OutputStream outputStream) throws IOException, WebApplicationException {
-        outputStream.write(("<count>" + number + "</count>").getBytes());
+        outputStream.write(("<count>" + number + "</count>").getBytes(Charsets.UTF_8));
     }
 }
