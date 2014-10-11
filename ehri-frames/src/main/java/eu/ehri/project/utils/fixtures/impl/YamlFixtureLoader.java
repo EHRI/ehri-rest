@@ -98,19 +98,22 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public void loadTestData(String resourceNameOrPath) {
         File file = new File(resourceNameOrPath);
-        if (file.exists() && file.isFile()) {
+        try {
+            InputStream stream = file.exists() && file.isFile()
+                    ? new FileInputStream(file)
+                    : this.getClass().getClassLoader()
+                        .getResourceAsStream(resourceNameOrPath);
             try {
-                loadTestData(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
+                loadTestData(stream);
+            } finally {
+                if (stream != null) {
+                    stream.close();
+                }
             }
-        } else {
-            InputStream stream = this.getClass().getClassLoader()
-                    .getResourceAsStream(resourceNameOrPath);
-            if (stream == null) {
-                throw new IllegalArgumentException("File or resource " + resourceNameOrPath + " does not exist.");
-            }
-            loadTestData(stream);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -133,7 +136,6 @@ public class YamlFixtureLoader implements FixtureLoader {
             graph.getBaseGraph().commit();
         } catch (Exception e) {
             graph.getBaseGraph().rollback();
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
