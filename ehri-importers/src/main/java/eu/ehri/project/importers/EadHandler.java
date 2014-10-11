@@ -261,7 +261,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph
      */
     protected void extractEadLanguage(Map<String, Object> currentGraph) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -280,7 +280,7 @@ public class EadHandler extends SaxXmlHandler {
      * for the description if no language is found.
      *
      * @param currentGraph    Data at the current node level
-     * @param eadLanguage Language code to use as default
+     * @param defaultLanguage Language code to use as default
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 

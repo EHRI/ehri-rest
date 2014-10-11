@@ -38,13 +38,17 @@ public class Helpers {
         for (String language : languages) {
             Locale locale = new Locale(language);
             locale2Map.put(language, locale);
-            localeNameMap.put(locale.getDisplayLanguage().toLowerCase(), locale);
+            localeNameMap.put(locale.getDisplayLanguage(Locale.ENGLISH).toLowerCase(), locale);
         }
 
     }
 
     /**
      * Take a nameOrCode or a language name and try and map to a valid ISO639-2 nameOrCode.
+     * 
+     * @param nameOrCode a language code or name to convert
+     * @return the ISO 639-2t language code for that code or name, or the input string if 
+     *         no conversion was found
      */
     public static String iso639DashTwoCode(String nameOrCode) {
         if (nameOrCode.length() == 2 && locale2Map.containsKey(nameOrCode)) {
@@ -53,6 +57,10 @@ public class Helpers {
             return iso639BibTermLookup.get(nameOrCode);
         } else if (nameOrCode.length() > 3 && localeNameMap.containsKey(nameOrCode.toLowerCase())) {
             return localeNameMap.get(nameOrCode.toLowerCase()).getISO3Language();
+            /* FIXME the localeNameMap depends on locale and translating an 
+             * English name to a code fails when executed on 
+             * e.g. a server with non-English locale
+             */
         }
         // FAIL!!!
         return nameOrCode;
