@@ -9,7 +9,6 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.test.AbstractFixtureTest;
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,18 +86,5 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     protected Vertex getVertexById(FramedGraph<?> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(EntityType.ID_KEY, id);
         return docs.iterator().next();
-    }
-    protected int getNodeCount(FramedGraph<?> graph) {
-        long l = Iterables.count(graph.getVertices());
-        if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
-            throw new RuntimeException("Too many vertex items in graph to fit into an integer!");
-        return (int)l;
-    }
-
-    protected int getEdgeCount(FramedGraph<?> graph) {
-        long l = Iterables.count(graph.getEdges());
-        if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
-            throw new RuntimeException("Too many edge items in graph to fit into an integer!");
-        return (int)l;
     }
 }
