@@ -34,8 +34,8 @@ final class PathSection {
                                     + "Non-terminal paths should contain relation name and index.",
                             pt));
         }
-        return new PathSection(matcher.group(1), Integer.valueOf(matcher
-                .group(2)));
+        return new PathSection(matcher.group(1), Integer.parseInt(
+                matcher.group(2)));
     }
     
     @Override

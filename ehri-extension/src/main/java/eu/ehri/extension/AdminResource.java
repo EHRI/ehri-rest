@@ -38,8 +38,8 @@ import java.util.Set;
 @Path("admin")
 public class AdminResource extends AbstractRestResource {
 
-    public static String DEFAULT_USER_ID_PREFIX = "user";
-    public static String DEFAULT_USER_ID_FORMAT = "%s%06d";
+    public static final String DEFAULT_USER_ID_PREFIX = "user";
+    public static final String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
     public AdminResource(@Context GraphDatabaseService database) {
         super(database);

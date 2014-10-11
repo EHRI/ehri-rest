@@ -19,7 +19,7 @@ import java.util.SortedMap;
  */
 public class QueryUtils {
 
-    public static Logger logger = LoggerFactory.getLogger(QueryUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(QueryUtils.class);
 
     /**
      * Parse a list of string filter specifications.

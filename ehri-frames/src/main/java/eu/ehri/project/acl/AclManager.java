@@ -309,7 +309,6 @@ public final class AclManager {
         }
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
-                Preconditions.checkNotNull(v);
                 return v != null && typeStrings.contains(manager.getType(v));
             }
         };
