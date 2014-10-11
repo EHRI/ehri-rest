@@ -12,7 +12,8 @@ import java.io.FileInputStream;
 
 /**
  * Import EAD from the command line...
- * 
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class LoadFixtures extends BaseCommand implements Command {
 

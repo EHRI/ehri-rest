@@ -3,7 +3,7 @@ package eu.ehri.project.exceptions;
 public class IntegrityError extends Exception {
     private String idValue;
     public IntegrityError(String idValue) {
-        super(String.format("Integity error for id value: %s", idValue));
+        super("Integrity error for id value: " + idValue);
         this.idValue = idValue;
     }
 

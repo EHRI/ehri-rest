@@ -19,7 +19,7 @@ public class JavaHandlerUtils {
 
     public static final Logger logger = LoggerFactory.getLogger(JavaHandlerUtils.class);
 
-    public static int LOOP_MAX = 20;
+    public static final int LOOP_MAX = 20;
 
     /**
      * Pipe function that quits after a certain number of loops

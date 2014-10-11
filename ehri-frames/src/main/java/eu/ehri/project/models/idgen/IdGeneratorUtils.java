@@ -28,7 +28,7 @@ public class IdGeneratorUtils  {
      */
     public static final String SEPARATOR = "-";
 
-    protected static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
+    protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
     public static ListMultimap<String,String> handleIdCollision(final Iterable<String> scopeIds,
             String dataKey, String ident) {
