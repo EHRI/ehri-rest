@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -121,7 +122,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         InputStream stream = listFile.contentEquals("-")
                 ? System.in
                 : new FileInputStream(new File(listFile));
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
         try {
             String file;
             while ((file = br.readLine()) != null) {
