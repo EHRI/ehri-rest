@@ -2,20 +2,23 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.exceptions.ValidationError;
 
+import com.tinkerpop.frames.FramedGraph;
+
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Description;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,8 +26,10 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -75,6 +80,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         logger.debug("nr of dates found: " + extractedDates.size());
 
     }
+    
     /**
      * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
@@ -83,16 +89,16 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = new LinkedList<Map<String, Object>>();
         Object value;
-        for (String key : data.keySet()) {
-            if (dates.containsProperty(key) && (value = data.get(key)) != null) {
-                logger.debug("---- extract dates -------" + key + ": " + value);
+        for (Entry<String, Object> property : data.entrySet()) {
+            if (dates.containsProperty(property.getKey()) && (value = property.getValue()) != null) {
+                logger.debug("---- extract dates -------" + property + ": " + value);
                 try {
-                    if (data.get(key) instanceof String) {
+                    if (property.getValue() instanceof String) {
                         String dateValue = (String) value;
                         for(String d : dateValue.split(",")){
                             extractDateFromValue(extractedDates, d);
                         }
-                    } else if (data.get(key) instanceof List) {
+                    } else if (property.getValue() instanceof List) {
                         for (String s : (List<String>) value) {
                             extractDateFromValue(extractedDates, s);
                         }
@@ -111,6 +117,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         }
         return extractedDates;
     }
+    
     /**
      * Extract an Iterable of representations of maintenance events from the itemData.
      * 
@@ -120,17 +127,17 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     @Override
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (String key : itemData.keySet()) {
-            if (key.equals("maintenanceEvent")) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
+        for (Entry<String, Object> itemProperty : itemData.entrySet()) {
+            if (itemProperty.getKey().equals("maintenanceEvent")) {
+                for (Map<String, Object> event : (List<Map<String, Object>>) itemProperty.getValue()) {
                     Map<String, Object> e2 = new HashMap<String, Object>();
-                    for (String eventkey : event.keySet()) {
-                        if (eventkey.equals("maintenanceEvent/type")) {
-                            e2.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-                        } else if (eventkey.equals("maintenanceEvent/agentType")) {
-                            e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
+                    for (Entry<String, Object> eventInstance : event.entrySet()) {
+                        if (eventInstance.getKey().equals("maintenanceEvent/type")) {
+                            e2.put(MaintenanceEvent.EVENTTYPE, eventInstance.getValue());
+                        } else if (eventInstance.getKey().equals("maintenanceEvent/agentType")) {
+                            e2.put(MaintenanceEvent.AGENTTYPE, eventInstance.getValue());
                         } else {
-                            e2.put(eventkey, event.get(eventkey));
+                            e2.put(eventInstance.getKey(), eventInstance.getValue());
                         }
                     }
                     if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){
@@ -160,14 +167,14 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
 
 
     }
+    
     /**
      * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
      * @param date
      * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
-     * @throws ValidationError
      */
-    private Map<String, Object> extractDate(Object date) throws ValidationError {
+    private Map<String, Object> extractDate(Object date) /*throws ValidationError*/ {
         logger.debug("date value: " + date);
         Map<String, Object> data = matchDate((String) date);
         return data.isEmpty() ? null : data;
@@ -192,13 +199,21 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         return normaliseDate(date, Ontology.DATE_PERIOD_START_DATE);
     }
     
+    /**
+     * Normalise a date in a string.
+     * 
+     * @param date a String date that needs formatting
+     * @param beginOrEnd a string signifying whether this date is the begin of
+     * a period or the end of a period
+     * @return a String containing the formatted date.
+     */
     public static String normaliseDate(String date, String beginOrEnd) {
         DateTimeFormatter fmt = ISODateTimeFormat.date();
         String returndate = fmt.print(DateTime.parse(date));
-        if(returndate.startsWith("00")){
+        if (returndate.startsWith("00")) {
 //            logger.debug("strange date: " + returndate);
-            returndate = "19"+returndate.substring(2);
-            date = "19"+date;
+            returndate = "19" + returndate.substring(2);
+            date = "19" + date;
 //            logger.debug("strange date: " + returndate);
         }
         if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
@@ -218,6 +233,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         }
         return returndate;
     }
+    
     //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several
     /**
      * extract data nodes from the data, that are not covered by their respectable properties file.
@@ -228,9 +244,9 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data) {
         List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
         Map<String, Object> unit = new HashMap<String, Object>();
-        for (String key : data.keySet()) {
-            if (key.startsWith(SaxXmlHandler.UNKNOWN)) {
-                unit.put(key.replace(SaxXmlHandler.UNKNOWN, ""), data.get(key));
+        for (Entry<String, Object> property : data.entrySet()) {
+            if (property.getKey().startsWith(SaxXmlHandler.UNKNOWN)) {
+                unit.put(property.getKey().replace(SaxXmlHandler.UNKNOWN, ""), property.getValue());
             }
         }
         l.add(unit);
