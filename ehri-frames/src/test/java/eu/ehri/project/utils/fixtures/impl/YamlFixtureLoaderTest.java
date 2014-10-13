@@ -1,6 +1,5 @@
 package eu.ehri.project.utils.fixtures.impl;
 
-import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.test.GraphTestBase;
@@ -9,9 +8,7 @@ import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 
 import static org.junit.Assert.*;
 
@@ -48,8 +45,8 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
         // NB: An initialized Neo4j 1.9 graph has a root node
         assertEquals(1, getNodeCount(testGraph));
         new GraphInitializer(testGraph).initialize();
-        FixtureLoader loader = new YamlFixtureLoader(testGraph);
-        loader.setInitializing(false);
+        FixtureLoader loader = new YamlFixtureLoader(testGraph)
+            .setInitializing(false);
         loader.loadTestData();
         assertTrue(getNodeCount(testGraph) > 1);
     }
@@ -80,10 +77,5 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
         FixtureLoader loader = new YamlFixtureLoader(testGraph);
         loader.loadTestData(inputStream);
         assertTrue(getNodeCount(testGraph) > 1);
-    }
-
-    private static String getFixtureFilePath(final String resourceName) throws Exception {
-        URL resource = Resources.getResource(resourceName);
-        return new File(resource.toURI()).getAbsolutePath();
     }
 }

@@ -1,6 +1,5 @@
 package eu.ehri.project.commands;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -17,10 +16,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -122,10 +118,10 @@ public abstract class ImportCommand extends BaseCommand implements Command{
      * @throws Exception
      */
     protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
-        InputStreamReader reader = listFile.trim().equals("-")
-                ? new InputStreamReader(System.in, Charsets.UTF_8)
-                : new FileReader(new File(listFile));
-        BufferedReader br = new BufferedReader(reader);
+        InputStream stream = listFile.contentEquals("-")
+                ? System.in
+                : new FileInputStream(new File(listFile));
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
         try {
             String file;
             while ((file = br.readLine()) != null) {

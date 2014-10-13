@@ -3,6 +3,7 @@ package eu.ehri.project.test;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -18,7 +19,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import java.io.File;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -45,6 +48,11 @@ public abstract class GraphTestBase {
         Set<VertexProxy> removed = Sets.newHashSet(list1);
         removed.removeAll(list2);
         return new GraphDiff(added, removed);
+    }
+
+    protected static String getFixtureFilePath(final String resourceName) throws Exception {
+        URL resource = Resources.getResource(resourceName);
+        return new File(resource.toURI()).getAbsolutePath();
     }
 
     @Before

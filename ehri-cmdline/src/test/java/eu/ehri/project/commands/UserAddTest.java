@@ -17,5 +17,4 @@ public class UserAddTest extends AbstractFixtureTest {
 		CommandLine cmdLine = ua.getCmdLine(args);
         assertEquals(0, ua.execWithOptions(graph, cmdLine));
 	}
-
 }
