@@ -31,14 +31,14 @@ public class EadImport extends ImportCommand implements Command {
 
         @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
+        return String.format("Usage: %s [OPTIONS] -user <user-id> " +
+                "-scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>", NAME);
     }
 
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an EAD file into the graph database, using the specified"
+        return  "Import an EAD file into the graph database, using the specified"
                 + sep + "Repository and User.";
-        return help;
     }
 }

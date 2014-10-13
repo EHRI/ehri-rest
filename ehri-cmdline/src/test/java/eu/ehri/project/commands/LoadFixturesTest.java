@@ -1,6 +1,5 @@
 package eu.ehri.project.commands;
 
-import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.test.GraphTestBase;
@@ -9,8 +8,6 @@ import org.apache.commons.cli.CommandLine;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.net.URL;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -46,10 +43,5 @@ public class LoadFixturesTest extends GraphTestBase {
         assertTrue(graphDiff.added.size() > 0);
         assertFalse(graphDiff.removed.size() > 0);
 
-    }
-
-    private static String getFixtureFilePath(final String resourceName) throws Exception {
-        URL resource = Resources.getResource(resourceName);
-        return new File(resource.toURI()).getAbsolutePath();
     }
 }

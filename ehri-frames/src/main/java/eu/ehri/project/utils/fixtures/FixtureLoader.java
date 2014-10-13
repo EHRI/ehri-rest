@@ -14,7 +14,7 @@ public interface FixtureLoader {
      * Toggle whether or not initialization occurs before
      * loading (default: true)
      */
-    public void setInitializing(boolean toggle);
+    public FixtureLoader setInitializing(boolean toggle);
 
     /**
      * Load the default fixtures.
@@ -24,14 +24,15 @@ public interface FixtureLoader {
     /**
      * Load a given InputStream as test data. The stream
      * will be closed automatically.
-     * @param inputStream
+     * @param inputStream An imput stream of fixture data
      */
     public void loadTestData(InputStream inputStream);
 
     /**
      * Load a given file as test data.
      *
-     * @param resourceNameOrPath
+     * @param resourceNameOrPath A resource name or file path
+     *                           containing fixture data.
      */
     public void loadTestData(String resourceNameOrPath);
 }
