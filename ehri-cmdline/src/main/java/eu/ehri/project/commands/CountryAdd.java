@@ -90,15 +90,11 @@ public class CountryAdd extends BaseCommand implements Command {
         try {
             LoggingCrudViews<Country> view = new LoggingCrudViews<Country>(
                     graph, Country.class);
-            Country newCountry = view.create(bundle, admin, getLogMessage(logMessage));
-//            for (String groupId : groups) {
-//                Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
-//                group.addMember(newUser);
-//            }
+            view.create(bundle, admin, getLogMessage(logMessage));
             graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
             graph.getBaseGraph().rollback();
-            System.err.printf("A country with id: '%s' already exists\n", nodeId);
+            System.err.printf("A country with id: '%s' already exists%n", nodeId);
             return 9;
         } catch (Exception e) {
             graph.getBaseGraph().rollback();

@@ -133,7 +133,7 @@ public interface VirtualUnit extends AbstractUnit {
                 return false;
             }
             for (Vertex parent : traverseAncestors()) {
-                if (child.equals(parent)) {
+                if (child.asVertex().equals(parent)) {
                     // Loop
                     return false;
                 }

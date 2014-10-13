@@ -34,8 +34,8 @@ public class Reindex extends BaseCommand implements Command {
 
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
-        GraphReindexer<?> reIndexer = new GraphReindexer(graph);
-        reIndexer.reindex(GraphReindexer.INDEX_NAME);
+        GraphReindexer reIndexer = new GraphReindexer(graph);
+        reIndexer.reindex();
         return 0;
     }
 }

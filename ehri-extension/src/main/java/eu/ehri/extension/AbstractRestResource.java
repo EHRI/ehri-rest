@@ -144,7 +144,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected int getIntQueryParam(String key, int defaultValue) {
         String value = uriInfo.getQueryParameters().getFirst(key);
         try {
-            return Integer.valueOf(value);
+            return Integer.parseInt(value);
         } catch (Exception e) {
             return defaultValue;
         }
@@ -334,9 +334,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     private <T extends Frame> Response getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer) {
         final Charset utf8 = Charset.forName("UTF-8");
-        final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">\n",
+        final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">%n",
                 page.getTotal(), page.getPage(), page.getTotal());
-        final String tail = "</listItems>\n";
+        final String tail = String.format("</listItems>%n");
 
         return Response.ok(new StreamingOutput() {
             @Override

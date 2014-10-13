@@ -12,6 +12,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.models.utils.EmptyIterable;
 
 import java.util.Collection;
 import java.util.List;
@@ -290,5 +292,30 @@ public final class BlueprintsGraphManager<T extends IndexableGraph> implements G
             index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
         }
         return index;
+    }
+
+    public void rebuildIndex() {
+        graph.getBaseGraph().dropIndex(INDEX_NAME);
+        Index<Vertex> index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
+
+        // index vertices
+        for (Vertex vertex : graph.getVertices()) {
+            for (String key : propertyKeysToIndex(vertex)) {
+                Object val = vertex.getProperty(key);
+                if (val != null) {
+                    index.put(key, val, vertex);
+                }
+            }
+        }
+    }
+
+    private static Iterable<String> propertyKeysToIndex(Vertex vertex) {
+        String typeName = vertex.getProperty(EntityType.TYPE_KEY);
+        try {
+            EntityClass entityClass = EntityClass.withName(typeName);
+            return ClassUtils.getPropertyKeys(entityClass.getEntityClass());
+        } catch (Exception e) {
+            return new EmptyIterable<String>();
+        }
     }
 }

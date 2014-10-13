@@ -62,20 +62,21 @@ public class CmdEntryPoint extends BaseCommand {
     @Override
     public String getHelp() {
         String sep = System.getProperty("line.separator");
-        String help = "Command line interface for the EHRI graph database."
-                + sep + sep + "The following commands are available:" + sep
-                + sep;
+        StringBuilder buffer = new StringBuilder(String.format(
+                "Command line interface for the EHRI graph database.%n%n " +
+                        "The following commands are available:%n%n"));
         for (String key : Ordering.natural().sortedCopy(CmdEntryPoint.COMMANDS.keySet())) {
-            help += "  " + key + sep;
+            buffer.append("  ");
+            buffer.append(key);
+            buffer.append(sep);
         }
-
-        help += "\nUse 'help <command>' for usage details.";
-        return help;
+        buffer.append(sep);
+        buffer.append("Use 'help <command>' for usage details.");
+        return buffer.toString();
     }
 
     @Override
     public String getUsage() {
-        // "Usage: cmd <graph-db> <command> <command-args ... >": we don't use the <graph-db> option?
         return "Usage: cmd <command> <command-args ... >";
     }
 

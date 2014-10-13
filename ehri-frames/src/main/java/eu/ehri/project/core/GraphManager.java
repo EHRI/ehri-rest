@@ -219,4 +219,8 @@ public interface GraphManager {
      */
     public void deleteVertex(Vertex vertex);
 
+    /**
+     * Rebuild the internal graph index.
+     */
+    public void rebuildIndex();
 }

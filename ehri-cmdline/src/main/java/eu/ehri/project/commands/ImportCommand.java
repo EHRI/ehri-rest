@@ -121,7 +121,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
      * @throws Exception
      */
     protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
-        InputStreamReader reader = listFile.contentEquals("-")
+        InputStreamReader reader = listFile.trim().equals("-")
                 ? new InputStreamReader(System.in)
                 : new FileReader(new File(listFile));
         BufferedReader br = new BufferedReader(reader);

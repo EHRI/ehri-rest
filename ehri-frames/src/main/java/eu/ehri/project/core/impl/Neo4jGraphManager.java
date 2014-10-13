@@ -15,6 +15,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.models.utils.EmptyIterable;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -154,7 +156,7 @@ public final class Neo4jGraphManager<T extends Neo4jGraph> implements GraphManag
             EntityClass type) {
         String queryStr = getLuceneQuery(key, value, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return (CloseableIterable<Vertex>)new Neo4jVertexIterable(rawQuery,
+        return (CloseableIterable<Vertex>) new Neo4jVertexIterable(rawQuery,
                 graph.getBaseGraph(), false);
     }
 
@@ -315,5 +317,30 @@ public final class Neo4jGraphManager<T extends Neo4jGraph> implements GraphManag
                 QueryParser.escape(String.valueOf(value)),
                 QueryParser.escape(EntityType.TYPE_KEY),
                 QueryParser.escape(type));
+    }
+
+    public void rebuildIndex() {
+        graph.getBaseGraph().dropIndex(INDEX_NAME);
+        Index<Vertex> index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
+
+        // index vertices
+        for (Vertex vertex : graph.getVertices()) {
+            for (String key : propertyKeysToIndex(vertex)) {
+                Object val = vertex.getProperty(key);
+                if (val != null) {
+                    index.put(key, val, vertex);
+                }
+            }
+        }
+    }
+
+    private static Iterable<String> propertyKeysToIndex(Vertex vertex) {
+        String typeName = vertex.getProperty(EntityType.TYPE_KEY);
+        try {
+            EntityClass entityClass = EntityClass.withName(typeName);
+            return ClassUtils.getPropertyKeys(entityClass.getEntityClass());
+        } catch (Exception e) {
+            return new EmptyIterable<String>();
+        }
     }
 }

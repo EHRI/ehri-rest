@@ -11,18 +11,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * User: mike
- * <p/>
- * Utilities for dealing with Gremlin pipelines.
+ * Utilities for dealing with Gremlin pipelines and common
+ * graph-manipulation functions.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
-public class JavaHandlerUtils {
+public final class JavaHandlerUtils {
 
     public static final Logger logger = LoggerFactory.getLogger(JavaHandlerUtils.class);
 
     public static final int LOOP_MAX = 20;
 
     /**
-     * Pipe function that quits after a certain number of loops
+     * Pipe function that quits after a certain number of loops.
+     *
+     * @param maxLoops The number of loops to run
+     * @return A pipe function
      */
     public static <S> PipeFunction<LoopPipe.LoopBundle<S>, Boolean> maxLoopFuncFactory(final int maxLoops) {
         return new PipeFunction<LoopPipe.LoopBundle<S>,
@@ -37,13 +41,13 @@ public class JavaHandlerUtils {
     /**
      * Pipe function with a max loop clause with the default of 20.
      */
-    public static PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> defaultMaxLoops
+    public static final PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> defaultMaxLoops
             = maxLoopFuncFactory(LOOP_MAX);
 
     /**
      * Pipe function that always allows looping to continue.
      */
-    public static PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noopLoopFunc
+    public static final PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noopLoopFunc
             = new PipeFunction<com.tinkerpop.pipes.branch.LoopPipe.LoopBundle<Vertex>, Boolean>() {
         @Override
         public Boolean compute(com.tinkerpop.pipes.branch.LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
