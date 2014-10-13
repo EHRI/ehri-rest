@@ -116,9 +116,12 @@ public class GraphML extends BaseCommand implements Command {
         } else {
             // try to open or create the file for writing
             OutputStream out = new FileOutputStream(filepath);
-            writer.outputGraph(out); 
-            out.close();
-        }        
+            try {
+                writer.outputGraph(out);
+            } finally {
+                out.close();
+            }
+        }
     } 
     
    public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
