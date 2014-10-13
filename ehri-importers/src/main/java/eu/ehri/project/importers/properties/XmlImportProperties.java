@@ -42,21 +42,26 @@ public class XmlImportProperties implements ImportProperties {
         return getProperties().getProperty(key);
     }
 
+    /**
+     * Get a set of property keys that have a given value
+     * @param value the value that requested properties must have
+     * @return a set of key names that have the given value
+     */
     public Set<String> getPropertiesWithValue(String value) {
         Set<String> ps = new HashSet<String>();
         Properties p = getProperties();
-        for (Object key : p.keySet()) {
-            if (value.equals(p.get(key).toString()))
-                ps.add(key.toString());
+        for (Entry<Object, Object> property : p.entrySet()) {
+            if (value.equals(property.getValue().toString()))
+                ps.add(property.getKey().toString());
         }
         return ps;
     }
 
     public String getFirstPropertyWithValue(String value) {
         Properties p = getProperties();
-        for (Object key : p.keySet()) {
-            if (value.equals(p.get(key).toString()))
-                return key.toString();
+        for (Entry<Object, Object> property : p.entrySet()) {
+            if (value.equals(property.getValue().toString()))
+                return property.getKey().toString();
         }
         return null;
     }
