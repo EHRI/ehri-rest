@@ -38,8 +38,6 @@ public class GraphSON extends BaseCommand implements Command {
 
     final static String NAME = "graphson";
 
-    private static final String INDEX_NAME = "entities"; // FIXME!!
-
     /**
      * Constructor.
      */
@@ -116,6 +114,6 @@ public class GraphSON extends BaseCommand implements Command {
         String filepath = (String) cmdLine.getArgList().get(0);
         InputStream in = new FileInputStream(filepath);
         reader.inputGraph(in);
-        new GraphReindexer(graph).reindex(INDEX_NAME);
+        new GraphReindexer(graph).reindex();
     }
 }

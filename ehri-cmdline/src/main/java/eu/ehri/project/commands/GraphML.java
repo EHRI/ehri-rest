@@ -4,8 +4,6 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.core.GraphReindexer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -47,8 +45,6 @@ import java.io.OutputStream;
 public class GraphML extends BaseCommand implements Command {
 
     final static String NAME = "graphml";
-
-    private static final String INDEX_NAME = "entities"; // FIXME!!
 
     /**
      * Constructor.
@@ -107,7 +103,6 @@ public class GraphML extends BaseCommand implements Command {
 
     public void saveDump(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
-        final GraphManager manager = GraphManagerFactory.getInstance(graph);
 
         GraphMLWriter writer = new GraphMLWriter(graph);
         writer.setNormalize(true);
@@ -132,6 +127,6 @@ public class GraphML extends BaseCommand implements Command {
        String filepath = (String)cmdLine.getArgList().get(0);
 	   InputStream in = new FileInputStream(filepath);
 	   reader.inputGraph(in);
-	   new GraphReindexer(graph).reindex(INDEX_NAME);
+	   new GraphReindexer(graph).reindex();
    }
 }

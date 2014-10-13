@@ -12,6 +12,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.models.utils.EmptyIterable;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,14 +23,17 @@ import java.util.NoSuchElementException;
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
  *
+ * This class can be extended for when specific graph implementations (such
+ * as Neo4j) can provide more efficient implementations of certain methods.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public final class BlueprintsGraphManager<T extends IndexableGraph> implements GraphManager {
+public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphManager {
 
-    private static final String INDEX_NAME = "entities";
-    private static final String METADATA_PREFIX = "_";
+    protected static final String INDEX_NAME = "entities";
+    protected static final String METADATA_PREFIX = "_";
 
-    private final FramedGraph<T> graph;
+    protected final FramedGraph<T> graph;
 
     public FramedGraph<T> getGraph() {
         return graph;
@@ -290,5 +295,30 @@ public final class BlueprintsGraphManager<T extends IndexableGraph> implements G
             index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
         }
         return index;
+    }
+
+    public void rebuildIndex() {
+        graph.getBaseGraph().dropIndex(INDEX_NAME);
+        Index<Vertex> index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
+
+        // index vertices
+        for (Vertex vertex : graph.getVertices()) {
+            for (String key : propertyKeysToIndex(vertex)) {
+                Object val = vertex.getProperty(key);
+                if (val != null) {
+                    index.put(key, val, vertex);
+                }
+            }
+        }
+    }
+
+    private static Iterable<String> propertyKeysToIndex(Vertex vertex) {
+        String typeName = vertex.getProperty(EntityType.TYPE_KEY);
+        try {
+            EntityClass entityClass = EntityClass.withName(typeName);
+            return ClassUtils.getPropertyKeys(entityClass.getEntityClass());
+        } catch (Exception e) {
+            return new EmptyIterable<String>();
+        }
     }
 }
