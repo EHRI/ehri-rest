@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -101,11 +102,11 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {
-                    System.out.printf(" - %-20s : %s\n", entry.getKey(),
+                    System.out.printf(" - %-20s : %s%n", entry.getKey(),
                             entry.getValue());
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             return 1;
         }
@@ -122,7 +123,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
      */
     protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
         InputStreamReader reader = listFile.trim().equals("-")
-                ? new InputStreamReader(System.in)
+                ? new InputStreamReader(System.in, Charsets.UTF_8)
                 : new FileReader(new File(listFile));
         BufferedReader br = new BufferedReader(reader);
         try {

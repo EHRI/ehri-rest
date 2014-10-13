@@ -100,7 +100,7 @@ public class UserAdd extends BaseCommand implements Command {
             graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
             graph.getBaseGraph().rollback();
-            System.err.printf("A user a id: '%s' already exists\n", nodeId);
+            System.err.printf("A user a id: '%s' already exists%n", nodeId);
             return 9;
         } catch (Exception e) {
             graph.getBaseGraph().rollback();

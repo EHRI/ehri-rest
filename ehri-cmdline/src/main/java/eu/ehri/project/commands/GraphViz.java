@@ -15,7 +15,6 @@ import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -72,6 +71,10 @@ public class GraphViz extends BaseCommand implements Command {
                     (Long)manager.getVertex(cmdLine.getArgs()[i]).getId()));
         }
 
+        if (!cmdLine.hasOption("relationship")) {
+            throw new RuntimeException("No --relationship arguments given");
+        }
+
         DynamicRelationshipType[] rels = new DynamicRelationshipType[
                 cmdLine.getOptionValues("relationship").length];
         if (cmdLine.hasOption("relationship")) {
@@ -81,14 +84,11 @@ public class GraphViz extends BaseCommand implements Command {
             }
         }
 
-        OutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         GraphvizWriter writer = new GraphvizWriter();
 
-        System.out.println("Nodes: " + nodes);
-        System.out.println("Rels:  " + Lists.newArrayList(rels));
-
         writer.emit(out, Walker.crosscut(nodes, rels));
-        System.out.println(out.toString());
+        out.writeTo(System.out);
         return 0;
     }
 }
