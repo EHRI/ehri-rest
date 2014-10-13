@@ -23,14 +23,17 @@ import java.util.NoSuchElementException;
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
  *
+ * This class can be extended for when specific graph implementations (such
+ * as Neo4j) can provide more efficient implementations of certain methods.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public final class BlueprintsGraphManager<T extends IndexableGraph> implements GraphManager {
+public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphManager {
 
-    private static final String INDEX_NAME = "entities";
-    private static final String METADATA_PREFIX = "_";
+    protected static final String INDEX_NAME = "entities";
+    protected static final String METADATA_PREFIX = "_";
 
-    private final FramedGraph<T> graph;
+    protected final FramedGraph<T> graph;
 
     public FramedGraph<T> getGraph() {
         return graph;
