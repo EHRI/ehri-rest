@@ -112,8 +112,12 @@ public class GraphSON extends BaseCommand implements Command {
             CommandLine cmdLine) throws Exception {
         GraphSONReader reader = new GraphSONReader(graph);
         String filepath = (String) cmdLine.getArgList().get(0);
-        InputStream in = new FileInputStream(filepath);
-        reader.inputGraph(in);
-        new GraphReindexer(graph).reindex();
+        InputStream inputStream = new FileInputStream(filepath);
+        try {
+            reader.inputGraph(inputStream);
+            new GraphReindexer(graph).reindex();
+        } finally {
+            inputStream.close();
+        }
     }
 }

@@ -45,6 +45,7 @@
                 <include>stax:stax-api</include>
                 <include>org.codehaus.jettison:jettison</include>
                 <include>org.javassist:javassist</include>
+                <include>org.neo4j:neo4j-graphviz</include>
 
                 <!-- Additional EHRI deps -->
                 <include>joda-time:joda-time</include>

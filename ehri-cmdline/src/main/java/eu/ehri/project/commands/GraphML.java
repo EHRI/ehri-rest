@@ -125,8 +125,12 @@ public class GraphML extends BaseCommand implements Command {
            CommandLine cmdLine) throws Exception {
        GraphMLReader reader = new GraphMLReader(graph);
        String filepath = (String)cmdLine.getArgList().get(0);
-	   InputStream in = new FileInputStream(filepath);
-	   reader.inputGraph(in);
-	   new GraphReindexer(graph).reindex();
+	   InputStream inputStream = new FileInputStream(filepath);
+       try {
+           reader.inputGraph(inputStream);
+           new GraphReindexer(graph).reindex();
+       } finally {
+           inputStream.close();
+       }
    }
 }

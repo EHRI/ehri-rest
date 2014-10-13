@@ -78,7 +78,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {
-                    System.out.printf(" - %-20s : %s\n", entry.getKey(),
+                    System.out.printf(" - %-20s : %s%n", entry.getKey(),
                             entry.getValue());
                 }
             }
