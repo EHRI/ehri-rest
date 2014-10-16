@@ -13,7 +13,7 @@
             <agencyName>European Holocaust Research Infrastructure (EHRI)</agencyName>
         </maintenanceAgency>
         <languageDeclaration>
-            <language languageCode="eng">English</language>
+            <language languageCode="ger">German</language>
             <script scriptCode="Latn">Latin</script>
         </languageDeclaration>
         <conventionDeclaration>
@@ -84,6 +84,14 @@
             <occupation>
                 <term>King of Bulgaria</term>
             </occupation>
+             <place>
+                <placeRole>Place of birth</placeRole>
+                <placeEntry>Lębork, Poland</placeEntry>
+            </place>
+            <place>
+                <placeRole>Place of death</placeRole>
+                <placeEntry>Munich, Germany</placeEntry>
+            </place>
             <localDescription localType="subject">
                 <term vocabularySource="FAST" xml:id="fst894382"
                     xmlns:xml="http://www.w3.org/XML/1998/namespace">Diplomatic documents
