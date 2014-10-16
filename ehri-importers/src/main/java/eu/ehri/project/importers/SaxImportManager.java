@@ -137,6 +137,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             logger.error("IllegalAccess: " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
             logger.error("IllegalArgumentException: " + ex.getMessage());
+            ex.printStackTrace(System.out);
         } catch (InvocationTargetException ex) {
             logger.error("InvocationTargetException: " + ex.getMessage());
         } catch (NoSuchMethodException ex) {

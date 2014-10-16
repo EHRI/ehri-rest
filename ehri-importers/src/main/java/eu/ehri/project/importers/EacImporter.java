@@ -21,6 +21,7 @@ import java.util.Map;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.impl.CrudViews;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +96,10 @@ public class EacImporter extends EaImporter {
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
             logger.debug("relation found");
-            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            for(String key : rel.keySet()){
+                logger.debug(key + ":"+rel.get(key));
+            }
+//            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
 
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
@@ -127,7 +131,7 @@ public class EacImporter extends EaImporter {
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
-            } else if (key.startsWith("name")) {
+            } else if (key.startsWith("otherFormsOfName")) {
                 Object name = itemData.get(key);
                 if (name instanceof List) {
                     for (Object nameentry : (List) name) {
@@ -145,7 +149,51 @@ public class EacImporter extends EaImporter {
                         }
                     }
                 }
-            } else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
+            } else if(key.equals("book")){
+                List<String> createdBy = new ArrayList<String>();
+                List<String> subjectOf = new ArrayList<String>();
+                Object books =  itemData.get(key);
+                if(books instanceof List){
+                   for(Object book : (List)books){
+                       if(book instanceof Map){
+                           Map<String, Object> bookentry = (Map) book;
+                           boolean created=false;
+                               String publication="";
+                           for(String entrykey : bookentry.keySet()){
+                               if(entrykey.equals("bookentry")){
+                                   if(bookentry.get(entrykey) instanceof List){
+                                       for(Object entry : (List)bookentry.get(entrykey)){
+                                           if(entry instanceof Map){
+                                               String type =((Map<String, Object>)entry).get("type").toString();
+                                               String value = ((Map<String, Object>)entry).get("bookentry").toString();
+                                                publication = publication.concat(
+                                                        (type.equals("isbn") || type.equals("creator") 
+                                                                ? " "+type+":"
+                                                                : ""
+                                                                )
+                                                        + value )
+                                                                ;
+                                           }
+                                       }
+                                   }
+                               }else if(entrykey.equals("type")){
+                                   created = (bookentry.get(entrykey).equals("creatorOf"));
+                               }else{
+                                   publication = publication.concat(entrykey+":"+bookentry.get(entrykey));
+                               }
+                           }
+                           if(created)
+                               createdBy.add(publication);
+                           else{
+                               subjectOf.add(publication);
+                           }
+                           
+                       }
+                   }
+                }
+                description.put("createdBy", createdBy);
+                description.put("subjectOf", subjectOf);
+            }else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
                     && !key.equals("objectIdentifier")
                     && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith("maintenanceEvent")
@@ -177,10 +225,14 @@ public class EacImporter extends EaImporter {
         //we need the id (not the identifier) of the description, this requires some checking
         for (Description thisAgentDescription : frame.getDescriptions()) {
             //is thisAgentDescription the one we just created?
-            if (thisAgentDescription.asVertex().getProperty(Ontology.IDENTIFIER_KEY).equals(descBundle.getData().get(Ontology.IDENTIFIER_KEY))) {
-                histdesc = thisAgentDescription;
-                break;
+            for(String key : thisAgentDescription.asVertex().getPropertyKeys()){
+                logger.debug("solve:" + key +"-"+ thisAgentDescription.asVertex().getProperty(key));
             }
+//            if (thisAgentDescription.asVertex().getProperty(Ontology.IDENTIFIER_KEY)
+//                    .equals(descBundle.getData().get(Ontology.IDENTIFIER_KEY))) {
+                histdesc = thisAgentDescription;
+//                break;
+//            }
         }
         if (histdesc == null) {
             logger.warn("newly created description not found");

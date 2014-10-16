@@ -35,6 +35,9 @@ public class EacHandler extends EaHandler {
             = ImmutableMap.<String, Class<? extends Frame>>builder()
                 .put("maintenanceEvent", MaintenanceEvent.class)
                 .put("relation", Annotation.class)
+                .put("book", Annotation.class)
+                .put("bookentry", Annotation.class)
+                .put("accessPoint", Annotation.class)
                 .put("name", UnknownProperty.class).build();
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
@@ -42,7 +45,9 @@ public class EacHandler extends EaHandler {
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("eac.properties"));
     }
-
+    public EacHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
+        super(importer, properties);
+    }
     @Override
     protected boolean needToCreateSubNode(String key) {
         return possibleSubnodes.containsKey(getImportantPath(currentPath));
@@ -70,15 +75,15 @@ public class EacHandler extends EaHandler {
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName
-//                if (currentGraphPath.peek().containsKey(Description.NAME_KEY)) {
-//                    String name = chooseName(currentGraphPath.peek().get(Description.NAME_KEY));
-//                    overwritePropertyInCurrentGraph(Description.NAME_KEY, name);
-//
-//                }
+                if (currentGraphPath.peek().containsKey(Ontology.NAME_KEY)) {
+                    String name = chooseName(currentGraphPath.peek().get(Ontology.NAME_KEY));
+                    overwritePropertyInCurrentGraph(Ontology.NAME_KEY, name);
+                }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                     logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
                     putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
+
                 importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
 
             } catch (ValidationError ex) {

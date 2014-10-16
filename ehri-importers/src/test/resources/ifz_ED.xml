@@ -93,6 +93,8 @@
                         <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
                             Dachau
                         </subject>
+                        <subject encodinganalog="Sachregister"> 
+                        </subject>
                     </controlaccess>
                     <controlaccess>
                         <head>Personen</head>

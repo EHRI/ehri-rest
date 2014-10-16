@@ -68,6 +68,8 @@ public final class JenaSkosImporter implements SkosImporter {
     public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
             .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
             .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
+            .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
+            .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
             .build();
 
     // Properties that end up as undeterminedRelation nodes.
@@ -331,7 +333,15 @@ public final class JenaSkosImporter implements SkosImporter {
             for (Map.Entry<String, URI> prop : GENERAL_PROPS.entrySet()) {
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                     if (target.isLiteral()) {
-                        builder.addDataValue(prop.getKey(), target.asLiteral().getString());
+                        if(prop.getKey().equals("latitude/longitude")){
+                            String[] latlong = target.asLiteral().getString().split(",");
+                            builder.addDataValue("latitude", latlong[0]);
+                            builder.addDataValue("longitude", latlong[1]);
+                        }else{
+                            builder.addDataValue(prop.getKey(), target.asLiteral().getString());
+                        }
+                    }else{
+                        builder.addDataValue(prop.getKey(), target.toString());
                     }
                 }
             }

@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.Link;
@@ -22,82 +23,75 @@ import org.slf4j.LoggerFactory;
  *
  * @author linda
  */
-public class EacImporterTest extends AbstractImporterTest {
+public class PersonalitiesV2Test extends AbstractImporterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(PersonalitiesV2Test.class);
 
     @Test
-    @Ignore("these referred nodes are done differently now")
     public void testAbwehrWithAllReferredNodes() throws Exception {
-        final String SINGLE_EAC = "abwehr.xml";
+        final String SINGLE_EAC = "PersonalitiesV2.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC + " and creating all two relations with previously created HistoricalAgents";
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("geheime-feldpolizei.xml"), logMessage);
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("ss-rasse.xml"), logMessage);
+//        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
+//                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("geheime-feldpolizei.xml"), logMessage);
+//        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
+//                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("ss-rasse.xml"), logMessage);
         //import abwehr last, so it will find the other UR's
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
-        printGraph(graph);
-        HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
-        logger.debug(abwehr.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
-        assertTrue(abwehr != null);
-        for(Description abwehrDesc : abwehr.getDescriptions()){
-            logger.debug(abwehrDesc.getName());
-        }
-        for(Link a : abwehr.getLinks()){
-            logger.info(a.getId() + " has targets: " + toList(a.getLinkTargets()).size());
-            for (LinkableEntity e : a.getLinkTargets()){
-                logger.debug(e.getType());
-            }
-            assertEquals(2, toList(a.getLinkBodies()).size());
-        }
-        assertEquals(2, toList(abwehr.getLinks()).size());
-
-        HistoricalAgent ssrasse = manager.getFrame("418", HistoricalAgent.class);
-        logger.debug(ssrasse.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, ssrasse.getType());
-        assertEquals(1, toList(ssrasse.getLinks()).size());
-
-        HistoricalAgent feldpolizei = manager.getFrame("717", HistoricalAgent.class);
-        logger.debug(feldpolizei.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.getType());
-        assertEquals(1, toList(feldpolizei.getLinks()).size());
-        for(Description polizeiDesc : feldpolizei.getDescriptions()){
-            assertEquals("Geheime Feldpolizei", polizeiDesc.getName());
-        }
+                EacHandler.class, new XmlImportProperties("personalitiesv2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+//        printGraph(graph);
+//        HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
+//        logger.debug(abwehr.getId());
+//        assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
+//        assertTrue(abwehr != null);
+//        for(Description abwehrDesc : abwehr.getDescriptions()){
+//            logger.debug(abwehrDesc.getName());
+//        }
+//        for(Link a : abwehr.getLinks()){
+//            logger.info(a.getId() + " has targets: " + toList(a.getLinkTargets()).size());
+//            for (LinkableEntity e : a.getLinkTargets()){
+//                logger.debug(e.getType());
+//            }
+//            assertEquals(2, toList(a.getLinkBodies()).size());
+//        }
+//        assertEquals(2, toList(abwehr.getLinks()).size());
+//
+//        HistoricalAgent ssrasse = manager.getFrame("418", HistoricalAgent.class);
+//        logger.debug(ssrasse.getId());
+//        assertEquals(Entities.HISTORICAL_AGENT, ssrasse.getType());
+//        assertEquals(1, toList(ssrasse.getLinks()).size());
+//
+//        HistoricalAgent feldpolizei = manager.getFrame("717", HistoricalAgent.class);
+//        logger.debug(feldpolizei.getId());
+//        assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.getType());
+//        assertEquals(1, toList(feldpolizei.getLinks()).size());
+//        for(Description polizeiDesc : feldpolizei.getDescriptions()){
+//            assertEquals("Geheime Feldpolizei", polizeiDesc.getName());
+//        }
 
     }
 
         @Test
+        @Ignore
     public void testAbwehrWithOUTAllReferredNodes() throws Exception {
         final String SINGLE_EAC = "abwehr.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC + " without creating any annotation, since the targets are not present in the graph";
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
-        
-                // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
-        // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
-
-//        printGraph(graph);
+        printGraph(graph);
         /**
          * How many new nodes will have been created? We should have
-         * null: 2
-         * historicalAgent: 1
-         * property: 1
-         * maintenanceEvent: 2
-         * systemEvent: 1
-         * historicalAgentDescription: 1
+         * - 1 more Repository
+         * - 1 more RepositoryDescription
+         * - 1 more UnknownProperty
+         * - 2 more MaintenanceEvent
+         * - 2 more UnknownRelations 
+         * - 2 more linkEvents (1 for the Repository, 1 for the User)
+         * - 1 more SystemEvent        
         **/
-        assertEquals(count + 8, getNodeCount(graph));
+        assertEquals(count + 10, getNodeCount(graph));
         
         HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());

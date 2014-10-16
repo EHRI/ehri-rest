@@ -121,17 +121,28 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         assertEquals(2, nrOfDesc);
         int count_eng = getNodeCount(graph);
 // // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
-//        ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-//        log = importManager.importFile(ios, logMessage);        
+       List<VertexProxy> graphState1a = getGraphState(graph);
+        ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
+        log = importManager.importFile(ios, logMessage);        
 // // After...
-//       List<VertexProxy> graphState2 = getGraphState(graph);
-//       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
+       List<VertexProxy> graphState2a = getGraphState(graph);
+       GraphDiff diffa = diffGraph(graphState1a, graphState2a);
+       diffa.printDebug(System.out);
         
         System.out.println(count + " " + count_fin + " " + count_eng);
 
-        assertEquals(count_eng, getNodeCount(graph));
+        /**
+         * CREATED:
+         * null: 2
+         * maintenanceEvent: 1
+         * systemEvent: 1
+         * datePeriod: 1
+         * 
+         * REMOVED: 
+         * maintenanceEvent: 1
+         * datePeriod: 1
+         */
+        assertEquals(count_eng + (5-2), getNodeCount(graph));
         
     }
 
