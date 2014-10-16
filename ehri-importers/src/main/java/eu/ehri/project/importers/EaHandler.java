@@ -23,7 +23,14 @@ public abstract class EaHandler extends SaxXmlHandler {
         if (names instanceof String) {
             nameValue = names.toString();
         } else if (names instanceof List) {
-            nameValue = ((List) names).get(0).toString();
+           Object firstname = ((List) names).get(0);
+           if(firstname instanceof String){
+            nameValue=firstname.toString();
+        }else {
+               Map<String, Object> nameMap = (Map)firstname;
+               nameValue = nameMap.get("namePart").toString();
+           }
+//            nameValue = ((List) names).get(0).toString();
             for (int i = 1; i < ((List) names).size(); i++) {
                 putPropertyInCurrentGraph("otherFormsOfName", ((List) names).get(i).toString());
             }

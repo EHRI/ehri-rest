@@ -16,10 +16,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author linda
  */
-public class GhettosImporterTest extends AbstractImporterTest {
+public class GhettosImporterV20140831Test extends AbstractImporterTest {
     protected final String SKOS_FILE = "cvoc/ghettos.rdf";
+    protected final String SKOS_V2_FILE = "cvoc/ghettos-v20140831.rdf.xml";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -33,7 +34,7 @@ public class GhettosImporterTest extends AbstractImporterTest {
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
-        //printGraph(graph);
+//        printGraph(graph);
 
         /*  How many new nodes will have been created? We should have
          * 2 more Concepts
@@ -51,10 +52,10 @@ public class GhettosImporterTest extends AbstractImporterTest {
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
 
         // Query for document identifier.
-        List<Concept> list = toList(query.setLimit(1).page(
+        List<Concept> list = toList(query.setCount(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
-        Concept ghetto0 = list.get(0);
+        Concept ghetto0 = manager.getFrame("cvoc1-0", Concept.class);
         //  <geo:lat>52.43333333333333</geo:lat>
         //	<geo:long>20.716666666666665</geo:long>
         Iterable<Description> ghetto0desc = ghetto0.getDescriptions();
@@ -64,7 +65,38 @@ public class GhettosImporterTest extends AbstractImporterTest {
         }
 
         // and print the tree
-        printConceptTree(System.out, list.get(0));
+//        printConceptTree(System.out, list.get(0));
+//        printGraph(graph);
+        //add a Link from a DocUnit/DocDesc to the Ghetto-0
+        
+       InputStream iosV2 = ClassLoader.getSystemResourceAsStream(SKOS_V2_FILE);
+       int origCount = getNodeCount(graph);
+        // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
+        ImportLog logv2 = importer.importFile(iosV2, logMessage);
+        // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+       /*
+        * CREATED:
+        * null: 3
+        * cvocConceptDescription: 7
+        * systemEvent: 1
+        * 
+        * REMOVED:
+        * relationship: 4
+        * cvocConceptDescription: 4
+        */
+       assertEquals(origCount + (11-8), getNodeCount(graph));
         printGraph(graph);
+        
+        Concept ghetto0v2 = manager.getFrame("cvoc1-0", Concept.class);
+        assertEquals(ghetto0, ghetto0v2);
+        
+        for(Description d : ghetto0v2.getDescriptions()){
+            assertEquals("48.6666666667", d.asVertex().getProperty("latitude"));
+            assertEquals("26.5666666667", d.asVertex().getProperty("longitude"));
+        }
     }
 }
