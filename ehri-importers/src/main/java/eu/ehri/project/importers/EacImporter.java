@@ -95,11 +95,10 @@ public class EacImporter extends EaImporter {
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
-            logger.debug("relation found");
-            for(String key : rel.keySet()){
-                logger.debug(key + ":"+rel.get(key));
+            if(rel.containsKey("type") && rel.get("type").equals("subjectAccess")){
+                logger.debug("relation found");
+               descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
             }
-//            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
 
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
@@ -124,6 +123,37 @@ public class EacImporter extends EaImporter {
     }
 
     @Override
+    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
+        final String REL = "relation";
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        for (String key : itemData.keySet()) {
+            if (key.equals(REL)) {
+                //name identifier
+                for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemData.get(key)) {
+                    Map<String, Object> relationNode = new HashMap<String, Object>();
+                    for (String eventkey : origRelation.keySet()) {
+                        if (eventkey.equals("type")) {
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, origRelation.get(eventkey)+"Access");
+                        } else if (eventkey.equals("name") && origRelation.get("type").equals("subject")) {
+                            Map<String, Object> m = (Map)((List)origRelation.get(eventkey)).get(0);
+                            //try to find the original identifier
+                            relationNode.put(LINK_TARGET, m.get("identifier"));
+                            //try to find the original name
+                            relationNode.put(Ontology.NAME_KEY, m.get("name"));
+                        } else {
+                            relationNode.put(eventkey, origRelation.get(eventkey));
+                        }
+                    }
+                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                    }
+                    list.add(relationNode);
+                }
+            }
+        }
+        return list;
+    }
+    @Override
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
         description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
@@ -131,72 +161,31 @@ public class EacImporter extends EaImporter {
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
-            } else if (key.startsWith("otherFormsOfName")) {
-                Object name = itemData.get(key);
-                if (name instanceof List) {
-                    for (Object nameentry : (List) name) {
-                        if (nameentry instanceof Map) {
-                            String nameType = (String) ((Map<String, Object>) nameentry).get("name/nameType");
-                            String namePart = (String) ((Map<String, Object>) nameentry).get("name/namePart");
-                            if (namePart != null && nameType != null) {
-                                if (nameType.equals("authorized"))
-                                    description.put(Ontology.NAME_KEY, namePart);
-                                else if (nameType.equals("parallel"))
-                                    description.put("parallelFormsOfName", namePart);
-                                else
-                                    description.put("otherFormsOfName", namePart);
-                            }
-                        }
-                    }
-                }
+//            } else if (key.startsWith("otherFormsOfName")) {
+//                Object name = itemData.get(key);
+//                if (name instanceof List) {
+//                    for (Object nameentry : (List) name) {
+//                        if (nameentry instanceof Map) {
+//                            String nameType = (String) ((Map<String, Object>) nameentry).get("name/nameType");
+//                            String namePart = (String) ((Map<String, Object>) nameentry).get("name/namePart");
+//                            if (namePart != null && nameType != null) {
+//                                if (nameType.equals("authorized"))
+//                                    description.put(Ontology.NAME_KEY, namePart);
+//                                else if (nameType.equals("parallel"))
+//                                    description.put("parallelFormsOfName", namePart);
+//                                else
+//                                    description.put("otherFormsOfName", namePart);
+//                            }
+//                        }
+//                    }
+//                }
             } else if(key.equals("book")){
-                List<String> createdBy = new ArrayList<String>();
-                List<String> subjectOf = new ArrayList<String>();
-                Object books =  itemData.get(key);
-                if(books instanceof List){
-                   for(Object book : (List)books){
-                       if(book instanceof Map){
-                           Map<String, Object> bookentry = (Map) book;
-                           boolean created=false;
-                               String publication="";
-                           for(String entrykey : bookentry.keySet()){
-                               if(entrykey.equals("bookentry")){
-                                   if(bookentry.get(entrykey) instanceof List){
-                                       for(Object entry : (List)bookentry.get(entrykey)){
-                                           if(entry instanceof Map){
-                                               String type =((Map<String, Object>)entry).get("type").toString();
-                                               String value = ((Map<String, Object>)entry).get("bookentry").toString();
-                                                publication = publication.concat(
-                                                        (type.equals("isbn") || type.equals("creator") 
-                                                                ? " "+type+":"
-                                                                : ""
-                                                                )
-                                                        + value )
-                                                                ;
-                                           }
-                                       }
-                                   }
-                               }else if(entrykey.equals("type")){
-                                   created = (bookentry.get(entrykey).equals("creatorOf"));
-                               }else{
-                                   publication = publication.concat(entrykey+":"+bookentry.get(entrykey));
-                               }
-                           }
-                           if(created)
-                               createdBy.add(publication);
-                           else{
-                               subjectOf.add(publication);
-                           }
-                           
-                       }
-                   }
-                }
-                description.put("createdBy", createdBy);
-                description.put("subjectOf", subjectOf);
+                extractBooks(itemData.get(key), description);
             }else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
                     && !key.equals("objectIdentifier")
                     && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith("maintenanceEvent")
+                    && !key.startsWith("IGNORE")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
                 description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
@@ -279,5 +268,58 @@ public class EacImporter extends EaImporter {
                 }
             }
         }
+    }
+
+    /**
+     * 
+     * extract the books and add them to the description-map
+     * @param books
+     * @param description 
+     */
+    private void extractBooks(Object books, Map<String, Object> description) {
+                List<String> createdBy = new ArrayList<String>();
+                List<String> subjectOf = new ArrayList<String>();
+               
+                if(books instanceof List){
+                   for(Object book : (List)books){
+                       if(book instanceof Map){
+                           Map<String, Object> bookentry = (Map) book;
+                           boolean created=false;
+                               String publication="";
+                           for(String entrykey : bookentry.keySet()){
+                               if(entrykey.equals("bookentry")){
+                                   if(bookentry.get(entrykey) instanceof List){
+                                       for(Object entry : (List)bookentry.get(entrykey)){
+                                           if(entry instanceof Map){
+                                               String type =((Map<String, Object>)entry).get("type").toString();
+                                               String value = ((Map<String, Object>)entry).get("bookentry").toString();
+                                                publication = publication.concat(
+                                                        (type.equals("isbn") || type.equals("creator") 
+                                                                ? " "+type+":"
+                                                                : ""
+                                                                )
+                                                        + value )
+                                                                ;
+                                           }
+                                       }
+                                   }
+                               }else if(entrykey.equals("type")){
+                                   created = (bookentry.get(entrykey).equals("creatorOf"));
+                               }else{
+                                   publication = publication.concat(entrykey+":"+bookentry.get(entrykey));
+                               }
+                           }
+                           if(created)
+                               createdBy.add(publication);
+                           else{
+                               subjectOf.add(publication);
+                           }
+                           
+                       }
+                   }
+                }
+                description.put("createdBy", createdBy);
+                description.put("subjectOf", subjectOf);
+
     }
 }
