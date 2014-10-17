@@ -58,8 +58,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     public static final String SORT_PARAM = "sort";
     public static final String FILTER_PARAM = "filter";
-    public static final String COUNT_PARAM = "limit";
-    public static final String PAGE_PARAM = "page";
+    public static final String LIMIT_PARAM = "limit";
+    public static final String OFFSET_PARAM = "offset";
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
     public static final String ALL_PARAM = "all";
@@ -152,8 +152,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     protected <T extends AccessibleEntity> Query<T> getQuery(Class<T> cls) {
         return new Query<T>(graph, cls)
-                .setPage(getIntQueryParam(PAGE_PARAM, 1))
-                .setCount(getIntQueryParam(COUNT_PARAM, DEFAULT_LIST_LIMIT))
+                .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
+                .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
                 .filter(getStringListQueryParam(FILTER_PARAM))
                 .orderBy(getStringListQueryParam(SORT_PARAM))
                 .setStream(isStreaming());
@@ -335,7 +335,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     private <T extends Frame> Response getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer) {
         final Charset utf8 = Charset.forName("UTF-8");
         final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">%n",
-                page.getTotal(), page.getPage(), page.getTotal());
+                page.getTotal(), page.getOffset(), page.getLimit());
         final String tail = String.format("</listItems>%n");
 
         return Response.ok(new StreamingOutput() {
@@ -365,8 +365,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return The pagination data formatted as a string.
      */
     private String getPaginationResponseHeader(Query.Page<?> page) {
-        return String.format("page=%d; count=%d; total=%d",
-                page.getPage(), page.getCount(), page.getTotal());
+        return String.format("offset=%d; limit=%d; total=%d",
+                page.getOffset(), page.getLimit(), page.getTotal());
     }
 
     /**
