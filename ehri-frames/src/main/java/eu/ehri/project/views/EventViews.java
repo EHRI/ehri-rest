@@ -145,7 +145,7 @@ public class EventViews {
                 manager.cast(byUser, Actioner.class).getActions());
 
         // Add additional generic filters
-        return applyAclFilter(filterEvents(pipe), user);
+        return query.page(applyAclFilter(filterEvents(pipe), user), user);
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> applyAclFilter(GremlinPipeline<SystemEvent, SystemEvent> pipe,
