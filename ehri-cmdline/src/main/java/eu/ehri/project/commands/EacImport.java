@@ -1,15 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.EacHandler;
 import eu.ehri.project.importers.EacImporter;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EacImport extends ImportCommand implements Command {
 
@@ -30,9 +25,8 @@ public class EacImport extends ImportCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an EAC file into the graph database, using the specified"
+        return "Import an EAC file into the graph database, using the specified"
                 + sep + "Repository and User.";
-        return help;
     }
 
    

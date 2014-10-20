@@ -7,7 +7,7 @@ import eu.ehri.project.persistence.ErrorSet;
 /**
  * Validation error. This exception holds a map of field=error(s) values.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public class ValidationError extends Exception {
@@ -31,7 +31,7 @@ public class ValidationError extends Exception {
 
     private static String formatErrors(String clsName, ErrorSet errorSet) {
         StringBuilder buf = new StringBuilder(String.format(
-                "A validation error occurred building %s: %s\n", clsName, errorSet.toJson()));
+                "A validation error occurred building %s: %s%n", clsName, errorSet.toJson()));
         return buf.toString();
     }
     

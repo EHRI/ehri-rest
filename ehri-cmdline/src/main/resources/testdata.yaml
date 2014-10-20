@@ -1,0 +1,578 @@
+#
+# This file provides a standard set of test fixtures for the EHRI collection registry
+# database.
+#
+
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+- id: nl
+  type: country
+  data:
+    identifier: nl
+
+- id: be
+  type: country
+  data:
+    identifier: be
+
+# NIOD. NIOD belongs to admin, so everyone who belongs
+# to the NIOD group also belongs to admin by extension.
+- id: niod
+  type: group
+  data:
+    identifier: niod-group
+    name: NIOD
+  relationships:
+    belongsTo:
+      - admin
+
+- id: kcl
+  type: group
+  data:
+    identifier: kcl-group
+    name: KCL
+    
+- id: dans
+  type: group
+  data:
+    identifier: dans-group
+    name: DANS    
+    
+- id: soma
+  type: group
+  data:
+    identifier: soma-group
+    name: CEGES-SOMA
+
+- id: portal
+  type: group
+  data:
+    identifier: portal
+    name: Portal
+    description: Group for users of the EHRI Portal
+
+--- # Users Mike, Tim, Linda, and Reto
+
+# Mike is a member of the KCL group, but he is ALSO a member of Admin
+# separately
+- id: mike
+  type: userProfile
+  data:
+    identifier: mike
+    name: Mike
+  relationships:
+    belongsTo:
+      - admin
+      - kcl
+    hasAnnotation: ann1
+
+# Reto is a member of the KCL group
+# separately
+- id: reto
+  type: userProfile
+  data:
+    identifier: reto
+    name: Reto
+  relationships:
+    belongsTo: kcl
+
+# Tim is a member of NIOD, which is itself a member of Admin, so Tim
+# belongs to Admin by extension
+- id: tim
+  type: userProfile
+  data:
+    identifier: tim
+    name: Tim
+  relationships:
+    belongsTo: niod
+    hasAnnotation: ann2
+      
+# Linda belongs to DANS
+- id: linda
+  type: userProfile
+  data:
+    identifier: linda
+    name: Linda
+  relationships:
+    belongsTo: dans
+
+# Veerle is a member of CEGES-SOMA, and also a member of Admin
+- id: veerle
+  type: userProfile
+  data:
+    identifier: veerle
+    name: Veerle
+  relationships:
+    belongsTo:
+      - soma
+      - admin
+
+# Institutions
+- id: r1 # should be renamed niod
+  type: repository
+  data:
+    identifier: r1
+    name: Repository 1
+  relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
+    describes:
+      - id: rd1
+        type: repositoryDescription
+        data:
+          identifier: niod-en
+          name: NIOD Description
+          languageCode: eng
+        relationships:
+          hasAddress:
+            - id: ar1
+              type: address
+              data:
+                name: "An Address"
+                streetAddress: 1 Some St.
+                city: Amsterdam
+
+- id: r2 # should be named kcl
+  type: repository
+  data:
+    identifier: r2
+    name: King's College London
+  relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
+    describes:
+      - id: rd2
+        type: repositoryDescription
+        data:
+          identifier: kcl-en
+          name: KCL Description
+          languageCode: eng
+        relationships:
+          hasAddress:
+            - id: ar2
+              type: address
+              data:
+                name: "An Address"
+                streetAddress: Strand
+                city: London
+                         
+- id: r3 # should be dans
+  type: repository
+  data:
+    identifier: r3
+    name: DANS
+  relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
+    describes:
+      - id: rd3
+        type: repositoryDescription
+        data:
+          identifier: dans-en
+          name: DANS Description
+          languageCode: eng
+        relationships:
+          hasAddress:
+            - id: ar3
+              type: address
+              data:
+                name: "An Address"
+                city: The Hague
+
+- id: r4 # should be soma
+  type: repository
+  data:
+    identifier: r4
+    name: CEGES SOMA
+  relationships:
+    hasCountry: be
+    hasPermissionScope: be
+    describes:
+      - id: rd4
+        type: repositoryDescription
+        data:
+          identifier: soma-en
+          name: SOMA Description
+          languageCode: eng
+        relationships:
+          hasAddress:
+            - id: ar4
+              type: address
+              data:
+                name: "An Address"
+                city: Brussels
+      
+      
+--- # Collections
+
+# C1 is a top-level documentary unit which, held by NIOD, which contains
+# child items.
+- id: c1
+  type: documentaryUnit
+  data:
+    identifier: c1
+    name: Collection 1
+  relationships:
+    describes:
+      - id: cd1
+        type: documentDescription
+        data:
+          identifier: c1-desc
+          name: Documentary Unit 1
+          languageCode: eng
+          scopeAndContent: Some description text for c1
+        relationships:
+          hasDate:
+            - id: c1-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+            - id: c1-dp2
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+          relatesTo:
+            - id: ur1
+              type: relationship
+              data:
+                name: Subject Access 1
+                type: subjectAccess
+                description: test description
+                category: associative
+            - id: ur2
+              type: relationship
+              data:
+                name: Person Access 1
+                type: personAccess
+                description: test description
+                category: associative
+      - id: cd1-2
+        type: documentDescription
+        data:
+          identifier: c1-desc2
+          name: Documentary Unit 1
+          languageCode: eng
+          scopeAndContent: Some alternate description text for c1
+    heldBy: r1
+    hasPermissionScope: r1
+    access:
+      - mike
+      - admin
+
+# C2 is also held by NIOD, and is a child item of C1
+- id: c2
+  type: documentaryUnit
+  data:
+    identifier: c2
+    name: Collection 2
+  relationships:
+    describes:
+      - id: cd2
+        type: documentDescription
+        data:
+          identifier: c2-desc
+          name: Documentary Unit 2
+          languageCode: eng
+          scopeAndContent: Some description text for c2
+        relationships:
+          hasDate:
+            - id: c2-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+    childOf: c1
+    hasPermissionScope: c1
+    access:
+      - tim
+      - admin
+
+# C3 is also held by NIOD, and is a child item of C2
+- id: c3
+  type: documentaryUnit
+  data:
+    identifier: c3
+    name: Collection 3
+  relationships:
+    describes:
+      - id: cd3
+        type: documentDescription
+        data:
+          identifier: c3-desc
+          name: Documentary Unit 3
+          languageCode: eng
+          scopeAndContent: Some description text for c3
+        relationships:
+          hasDate:
+            - id: c3-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+    childOf: c2
+    hasPermissionScope: c2    
+    access:
+      - tim
+
+# C4 is a standalone item
+- id: c4
+  type: documentaryUnit
+  data:
+    identifier: c4
+    name: Collection 4
+  relationships:
+    describes:
+      - id: cd4
+        type: documentDescription
+        data:
+          identifier: c4-desc
+          name: Documentary Unit 4
+          languageCode: eng
+          scopeAndContent: Some description text for c4
+        relationships:
+          hasDate:
+            - id: c4-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+          hasUnknownProperty:
+            - id: c4-unp1
+              type: property
+              data:
+                test1: Arbitrary text
+                test2: More arbitrary text
+    heldBy: r1
+    hasPermissionScope: r1
+
+--- # Authority Set
+- id: auths
+  type: authoritativeSet
+  data:
+    identifier: auths
+    name: Authorities
+
+--- # Authorities
+- id: a1
+  type: historicalAgent
+  data:
+    identifier: a1
+  relationships:
+    describes:
+      - id: ad1
+        type: historicalAgentDescription
+        data:
+          typeOfEntity: person
+          name: An Authority 1
+          languageCode: eng
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
+
+- id: a2
+  type: historicalAgent
+  data:
+    identifier: a2
+  relationships:
+    describes:
+      - id: ad2
+        type: historicalAgentDescription
+        data:
+          typeOfEntity: person
+          name: An Authority 2
+          languageCode: eng
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
+
+
+--- # Annotations
+- id: ann1
+  type: annotation
+  data:
+    identifier: ann1
+    body: Test Annotation
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c1
+    
+- id: ann2
+  type: annotation
+  data:
+    identifier: ann2
+    body: Test Annotation of Annotation
+  relationships:
+    hasAnnotationTarget: ann1
+    
+- id: ann3
+  type: annotation
+  data:
+    identifier: ann3
+    body: Created by
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    access: mike
+
+# This annotation is was originally
+# private to mike, but marked promotable
+# and subsequently promoted by tim.
+- id: ann4
+  type: annotation
+  data:
+    identifier: ann4
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    access: mike
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    promotedBy: tim
+
+# This annotation is marked promotable
+# but isn't yet promoted.
+- id: ann5
+  type: annotation
+  data:
+    identifier: ann5
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    access: mike
+
+
+--- # Links
+ - id: link1
+   type: link
+   data:
+     type: associative
+     body: Test link
+   relationships:
+     hasLinkTarget:
+      - c1
+      - c4
+     hasLinker: mike
+
+ - id: link2
+   type: link
+   data:
+     type: associative
+     body: Test access point link
+   relationships:
+     hasLinkTarget:
+      - c1
+      - a1
+     hasLinkBody: ur1
+     hasLinker: mike
+
+--- # Permission grants
+
+# Allow user Reto to create doc units within r1 scope
+- id: retoKclWriteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasScope: r1 # need to change this so reto belongs to kcl/r2
+    hasAccessor: reto
+    hasGrantee: mike
+    
+# Allow user Reto to edit the r2 record directly (because, say, he
+# works for KCL and has responsibility for this.)
+- id: retoKclUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: r2
+    hasAccessor: reto
+    hasGrantee: mike
+
+# Allow user Linda to create doc units anywhere
+- id: lindaGlobalWriteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasAccessor: linda
+    hasGrantee: mike
+
+# Allow portal users to create annotations
+- id: portalAnnotationGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: annotate
+    hasTarget:
+      - documentaryUnit
+      - repository
+      - historicalAgent
+      - cvocConcept
+    hasAccessor: portal
+
+--- # Vocabularies
+- id: cvoc1
+  type: cvocVocabulary
+  data:
+    identifier: cvoc1
+    name: Vocabulary 1
+
+- id: cvoc2
+  type: cvocVocabulary
+  data:
+    identifier: cvoc2
+    name: Vocabulary 2
+
+--- # Concepts
+- id: cvocc1
+  type: cvocConcept
+  data:
+    identifier: cvocc1
+  relationships:
+    inAuthoritativeSet: cvoc1
+
+--- # Virtual Units
+
+# Here we have a top-level 'collection' unit, with its own description
+# This contains a total of 3 unit items in a hierarchy, that each reference
+# other descriptions.
+- id: vc1
+  type: virtualUnit
+  data:
+    identifier: vc1
+  relationships:
+    hasAuthor: linda
+    describes:
+      - id: vcd1
+        type: documentDescription
+        data:
+          identifier: vcd1
+          name: Virtual Collection 1
+          languageCode: eng
+          scopeAndContent: Some description text for vc1
+
+- id: vu1
+  type: virtualUnit
+  data:
+    identifier: vu1
+  relationships:
+    isPartOf: vc1
+    includesUnit: c1
+
+- id: vu2
+  type: virtualUnit
+  data:
+    identifier: vu2
+  relationships:
+    isPartOf: vu1
+    includesUnit: c4
+
+- id: vu3  # NB: Not part of vu2 yet
+  type: virtualUnit
+  data:
+    identifier: vu3

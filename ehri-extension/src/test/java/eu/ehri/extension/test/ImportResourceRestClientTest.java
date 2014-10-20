@@ -5,14 +5,12 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.importers.IcaAtomEadHandler;
+import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -59,7 +57,8 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
-        URI uri = getImportUrl("r1", "Testing import", false)
+        String logText = "Testing import";
+        URI uri = getImportUrl("r1", logText, false)
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -74,6 +73,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
     }
 
     @Test
@@ -118,6 +118,30 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
                 .contains("not an instance of"));
     }
 
+    @Test
+    public void testImportEadWithFileLogMessage() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
+
+        String logText = "Testing import";
+        URI uri = getImportUrl("r1", getTestLogFilePath(logText), false)
+                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .header("Content-Type", "text/plain")
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        assertStatus(ClientResponse.Status.OK, response);
+        String output = response.getEntity(String.class);
+
+        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        assertEquals(1, rootNode.path("created").asInt());
+        assertEquals(0, rootNode.path("updated").asInt());
+        assertEquals(0, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
+    }
+
     private UriBuilder getImportUrl(String scopeId, String log, boolean tolerant) {
         return ehriUriBuilder("import", "ead")
                 .queryParam(LOG_PARAM, log)
@@ -135,5 +159,12 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         String payloadText = Joiner.on("\n").join(paths) + "\n";
         return new ByteArrayInputStream(
                 payloadText.getBytes("UTF-8"));
+    }
+
+    private String getTestLogFilePath(String text) throws IOException {
+        File temp = File.createTempFile("test-log", ".tmp");
+        temp.deleteOnExit();
+        FileUtils.writeStringToFile(temp, text);
+        return temp.getAbsolutePath();
     }
 }

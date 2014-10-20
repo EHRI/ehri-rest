@@ -44,26 +44,33 @@ import java.util.Map.Entry;
  * single item and it will be loaded as if it were a list containing just one
  * item, i.e, instead of writing
  * <p/>
+ * <pre>
+ *     <code>
  * relationships: heldBy: - some-repo
+ *     </code>
+ * </pre>
  * <p/>
  * we can just write:
  * <p/>
+ * <pre>
+ *     <code>
  * relationships: heldBy: some-repo
+ *     </code>
+ * </pre>
  *
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class YamlFixtureLoader implements FixtureLoader {
 
-    public static final String DEFAULT_FIXTURE_FILE = "testdata.yaml";
+    private static final boolean DEFAULT_INIT = true;
+    private static final String GENERATE_ID_PLACEHOLDER = "?";
+    private static final String DEFAULT_FIXTURE_FILE = "testdata.yaml";
 
-    public static final String GENERATE_ID_PLACEHOLDER = "?";
+    private static final Logger logger = LoggerFactory.getLogger(YamlFixtureLoader.class);
 
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
-    private static final Logger logger = LoggerFactory
-            .getLogger(YamlFixtureLoader.class);
-
-    private boolean initialize;
+    private final boolean initialize;
 
     /**
      * Constructor
@@ -83,37 +90,61 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param graph The graph
      */
     public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph) {
-        this(graph, true);
+        this(graph, DEFAULT_INIT);
     }
 
-    public void setInitializing(boolean initialize) {
-        this.initialize = initialize;
+    /**
+     * Perform graph initialization (creating the event log structure and
+     * default nodes) prior to importing fixtures.
+     *
+     * @param initialize Whether or not to initialize the graph: default
+     *                   {@value YamlFixtureLoader#DEFAULT_INIT}
+     */
+    public YamlFixtureLoader setInitializing(boolean initialize) {
+        return new YamlFixtureLoader(graph, initialize);
     }
 
+    /**
+     * Load default fixtures.
+     */
     private void loadFixtures() {
         InputStream ios = this.getClass().getClassLoader()
                 .getResourceAsStream(DEFAULT_FIXTURE_FILE);
         loadTestData(ios);
     }
 
+    /**
+     * Load fixtures from a resource or file path.
+     *
+     * @param resourceNameOrPath Either a classloader-accessible
+     *                           resource, or a local file path.
+     */
     public void loadTestData(String resourceNameOrPath) {
         File file = new File(resourceNameOrPath);
-        if (file.exists() && file.isFile()) {
-            try {
-                loadTestData(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            InputStream stream = this.getClass().getClassLoader()
+        try {
+            InputStream stream = file.exists() && file.isFile()
+                    ? new FileInputStream(file)
+                    : this.getClass().getClassLoader()
                     .getResourceAsStream(resourceNameOrPath);
-            if (stream == null) {
-                throw new IllegalArgumentException("File or resource " + resourceNameOrPath + " does not exist.");
+            try {
+                loadTestData(stream);
+            } finally {
+                if (stream != null) {
+                    stream.close();
+                }
             }
-            loadTestData(stream);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Load test data from an input stream.
+     *
+     * @param stream A input stream of valid YAML data.
+     */
     public void loadTestData(InputStream stream) {
 
         // Ensure we're not currently in a transaction!
@@ -133,13 +164,12 @@ public class YamlFixtureLoader implements FixtureLoader {
             graph.getBaseGraph().commit();
         } catch (Exception e) {
             graph.getBaseGraph().rollback();
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void loadFixtureFileStream(InputStream yamlStream) {
+    private void loadFixtureFileStream(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
             Map<Vertex, ListMultimap<String, String>> links = Maps.newHashMap();

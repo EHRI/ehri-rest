@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -23,8 +19,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IpnTest extends AbstractImporterTest{
     
@@ -149,7 +144,7 @@ public class IpnTest extends AbstractImporterTest{
                 assertEquals("Cukrownia w Pszennie – August Gross i Synowie [August Gross & Söhne Zuckerfabrik Weizenrodau]", desc.getName());
         }
     //test hierarchy
-        assertEquals(new Long(2), archdesc.getChildCount());
+        assertEquals(2L, archdesc.getChildCount());
         
     //test level-of-desc
         for(DocumentDescription d : c1_1.getDocumentDescriptions()){
@@ -235,7 +230,7 @@ public class IpnTest extends AbstractImporterTest{
                 assertEquals("Areszt Śledczy Sądowy w Poznaniu [Untersuchungshaftanstalt Posen]", desc.getName());
         }
     //test hierarchy
-        assertEquals(new Long(2), archdesc.getChildCount());
+        assertEquals(2L, archdesc.getChildCount());
         
     //test level-of-desc
         for(DocumentDescription d : c1_1.getDocumentDescriptions()){

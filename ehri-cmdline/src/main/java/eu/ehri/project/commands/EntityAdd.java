@@ -8,6 +8,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -19,7 +20,6 @@ import java.util.Properties;
 
 /**
  * Add a user.
- * 
  */
 public class EntityAdd extends BaseCommand implements Command {
 
@@ -27,17 +27,17 @@ public class EntityAdd extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     *
      */
     public EntityAdd() {
     }
 
     @Override
+    @SuppressWarnings("static-access")
     protected void setCustomOptions() {
         options.addOption(OptionBuilder.withArgName("property=value")
                 .hasArgs(2)
                 .withValueSeparator()
-                .withDescription( "Add a property with the given value" )
+                .withDescription("Add a property with the given value")
                 .create("P"));
         options.addOption(new Option("scope", true,
                 "Identifier of scope to create item in, i.e. a repository"));
@@ -51,23 +51,14 @@ public class EntityAdd extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: add <type> [OPTIONS] [-Pkey=value]";
+        return String.format("Usage: %s <type> [OPTIONS] [-Pkey=value]", NAME);
     }
 
     @Override
     public String getUsage() {
-        String help = "Create a new entity with the given id and properties";
-        return help;
+        return "Create a new entity with the given id and properties";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     *
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     * @throws eu.ehri.project.exceptions.DeserializationError
-     * @throws eu.ehri.project.exceptions.PermissionDenied
-     * @throws eu.ehri.project.exceptions.ValidationError
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
@@ -96,29 +87,51 @@ public class EntityAdd extends BaseCommand implements Command {
         EntityClass entityClass = EntityClass.withName(typeName);
         Properties properties = cmdLine.getOptionProperties("P");
 
-        Bundle bundle = new Bundle(entityClass);
+        Bundle.Builder builder = Bundle.Builder.withClass(entityClass);
         for (Object prop : properties.keySet()) {
-            bundle = bundle.withDataValue((String)prop, properties.getProperty((String)prop));
+            builder.addDataValue((String) prop, properties.getProperty((String) prop));
         }
-
+        Bundle bundle = builder.build();
         String id = entityClass.getIdgen().generateId(scope.idPath(), bundle);
 
         try {
-            LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
-            if (cmdLine.hasOption("update"))
-                view.createOrUpdate(bundle.withId(id), user, getLogMessage(logMessage));
-            else
-                view.create(bundle.withId(id), user, getLogMessage(logMessage));
+            createItem(graph, cmdLine, id, bundle, scope, user, logMessage);
             graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
             graph.getBaseGraph().rollback();
-            System.err.printf("A user a id: '%s' already exists\n", id);
-            return 9;
-        } catch (Exception e) {
+            System.err.printf("A user a id: '%s' already exists%n", id);
+            return CmdEntryPoint.RetCode.BAD_DATA.getCode();
+        } catch (PermissionDenied e) {
             graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+            System.err.printf("User %s does not have permission to perform that action.%n", user.getId());
+            return CmdEntryPoint.RetCode.BAD_PERMS.getCode();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            System.err.println(e.getMessage());
+            return CmdEntryPoint.RetCode.BAD_DATA.getCode();
         }
 
         return 0;
+    }
+
+    // Suppressing warnings here because we throw a RuntimeException if the
+    // item class is not of an acceptable type.
+    @SuppressWarnings("unchecked")
+    public void createItem(final FramedGraph<? extends TransactionalGraph> graph,
+            CommandLine cmdLine, String id, Bundle bundle,
+            PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
+            IntegrityError, ValidationError, PermissionDenied {
+
+        if (!AccessibleEntity.class.isAssignableFrom(bundle.getBundleClass())) {
+            throw new DeserializationError("Item class: " + bundle.getBundleClass().getSimpleName() +
+                    " is not a first-class database item");
+        }
+
+        LoggingCrudViews<?> view = new LoggingCrudViews(graph, bundle.getBundleClass(), scope);
+        if (cmdLine.hasOption("update")) {
+            view.createOrUpdate(bundle.withId(id), user, getLogMessage(logMessage));
+        } else {
+            view.create(bundle.withId(id), user, getLogMessage(logMessage));
+        }
     }
 }

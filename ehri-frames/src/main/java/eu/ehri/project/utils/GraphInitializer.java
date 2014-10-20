@@ -20,7 +20,7 @@ import java.util.HashMap;
  * <p/>
  * - an admin account - permissions - content types
  *
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class GraphInitializer {
     private final FramedGraph<? extends TransactionalGraph> graph;

@@ -48,8 +48,7 @@ public class UserAdd extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Create a new user, and optionally add them to a group";
-        return help;
+        return "Create a new user, and optionally add them to a group";
     }
 
     /**
@@ -101,7 +100,7 @@ public class UserAdd extends BaseCommand implements Command {
             graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
             graph.getBaseGraph().rollback();
-            System.err.printf("A user a id: '%s' already exists\n", nodeId);
+            System.err.printf("A user a id: '%s' already exists%n", nodeId);
             return 9;
         } catch (Exception e) {
             graph.getBaseGraph().rollback();

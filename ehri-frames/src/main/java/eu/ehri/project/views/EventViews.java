@@ -2,6 +2,7 @@ package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
@@ -18,7 +19,9 @@ import eu.ehri.project.persistence.ActionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -31,13 +34,13 @@ public class EventViews {
     private final GraphManager manager;
     private final ActionManager actionManager;
     private final AclManager aclManager;
-    private final List<String> users;
-    private final List<String> ids;
-    private final List<EntityClass> entityTypes;
-    private final List<EventTypes> eventTypes;
+    private final Set<String> users;
+    private final Set<String> ids;
+    private final Set<EntityClass> entityTypes;
+    private final Set<EventTypes> eventTypes;
     private final Optional<String> from;
     private final Optional<String> to;
-    private final List<ShowType> showType;
+    private final Set<ShowType> showType;
 
     public static enum ShowType {
         watched, followed
@@ -45,24 +48,24 @@ public class EventViews {
 
     private EventViews(
             final FramedGraph<?> graph,
-            final List<String> users,
-            final List<String> ids,
-            final List<EntityClass> entityTypes,
-            final List<EventTypes> eventTypes,
+            final Collection<String> users,
+            final Collection<String> ids,
+            final Collection<EntityClass> entityTypes,
+            final Collection<EventTypes> eventTypes,
             final Optional<String> from,
             final Optional<String> to,
-            final List<ShowType> showType) {
+            final Collection<ShowType> showType) {
         this.graph = graph;
         this.actionManager = new ActionManager(graph);
         this.aclManager = new AclManager(graph);
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.users = users;
-        this.ids = ids;
-        this.entityTypes = entityTypes;
-        this.eventTypes = eventTypes;
+        this.users = Sets.newHashSet(users);
+        this.ids = Sets.newHashSet(ids);
+        this.entityTypes = Sets.newEnumSet(entityTypes, EntityClass.class);
+        this.eventTypes = Sets.newEnumSet(eventTypes, EventTypes.class);
         this.from = from;
         this.to = to;
-        this.showType = showType;
+        this.showType = Sets.newEnumSet(showType, ShowType.class);
 
     }
 
@@ -82,7 +85,7 @@ public class EventViews {
                 actionManager.getLatestGlobalEvents());
 
         // Add additional generic filters
-        return query.page(filterEvents(pipe), accessor);
+        return query.setStream(true).page(applyAclFilter(filterEvents(pipe), accessor), accessor);
     }
 
     /**
@@ -90,7 +93,6 @@ public class EventViews {
      * to items they watch or users they follow.
      */
     public Iterable<SystemEvent> listAsUser(Query<SystemEvent> query, UserProfile asUser, Accessor accessor) {
-        final PipeFunction<Vertex, Boolean> aclFilterTest = aclManager.getAclFilterFunction(asUser);
 
         // Set IDs to items this asUser is watching...
         final List<String> watching = Lists.newArrayList();
@@ -134,10 +136,26 @@ public class EventViews {
             });
         }
 
+        return query.page(applyAclFilter(pipe, asUser), accessor);
+    }
+
+    public Iterable<SystemEvent> listByUser(Query<SystemEvent> query, UserProfile byUser, Accessor user) {
+        // Add optional filters for event type, item type, and asUser...
+        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
+                manager.cast(byUser, Actioner.class).getActions());
+
+        // Add additional generic filters
+        return applyAclFilter(filterEvents(pipe), user);
+    }
+
+    private GremlinPipeline<SystemEvent, SystemEvent> applyAclFilter(GremlinPipeline<SystemEvent, SystemEvent> pipe,
+            Accessor asUser) {
+        final PipeFunction<Vertex, Boolean> aclFilterTest = aclManager.getAclFilterFunction(asUser);
+
         // Filter items accessible to this asUser... hide the
         // event if any subjects or the scope are inaccessible
         // to the asUser.
-        pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
+        return pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
             @Override
             public Boolean compute(SystemEvent event) {
                 Frame eventScope = event.getEventScope();
@@ -152,14 +170,13 @@ public class EventViews {
                 return true;
             }
         });
-
-        return query.page(pipe, accessor);
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> filterEvents(
             GremlinPipeline<SystemEvent, SystemEvent> pipe) {
 
         if (!eventTypes.isEmpty()) {
+            System.out.println("Applying event type filter...");
             pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
                 @Override
                 public Boolean compute(SystemEvent event) {
@@ -226,6 +243,7 @@ public class EventViews {
                 }
             });
         }
+
         return pipe;
     }
 

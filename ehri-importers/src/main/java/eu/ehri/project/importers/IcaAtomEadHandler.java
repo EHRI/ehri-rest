@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * Only titles have to be handled in a special way.
  * makes use of icaatom.properties with format: part/of/path/=attribute
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadHandler extends EadHandler {
 

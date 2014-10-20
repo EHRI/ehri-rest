@@ -7,4 +7,6 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandler;
  */
 public interface ItemHolder {
     public static final String CHILD_COUNT = "_childCount";
+
+    public long getChildCount();
 }

@@ -48,20 +48,9 @@ public class UserMod extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Create a new user, and optionally add them to a group";
-        return help;
+        return "Create a new user, and optionally add them to a group";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @param graph
-     * @param cmdLine
-     * @throws ItemNotFound
-     * @throws DeserializationError
-     * @throws PermissionDenied
-     * @throws ValidationError
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError,

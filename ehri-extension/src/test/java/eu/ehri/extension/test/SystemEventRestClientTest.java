@@ -2,7 +2,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.EventResource;
+import eu.ehri.extension.SystemEventResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -64,11 +64,11 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Add a good user filter...
         MultivaluedMap<String, String> goodFilters = new MultivaluedMapImpl();
-        goodFilters.add(EventResource.USER_PARAM, getAdminUserProfileId());
+        goodFilters.add(SystemEventResource.USER_PARAM, getAdminUserProfileId());
 
         // Add a useless filter that should remove all results
         MultivaluedMap<String, String> badFilters = new MultivaluedMapImpl();
-        badFilters.add(EventResource.USER_PARAM, "nobody");
+        badFilters.add(SystemEventResource.USER_PARAM, "nobody");
 
         List<Map<String, Object>> goodFiltered = getEntityList(
                 Entities.SYSTEM_EVENT, getAdminUserProfileId(), goodFilters);
@@ -154,7 +154,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Only get events for people we follow, excluding those
         // for items we watch...
-        events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
+        events = getItemList(personalisedEventUrl + "?" + SystemEventResource.SHOW
                 + "=" + EventViews.ShowType.followed, user);
         assertEquals(0, events.size());
 
@@ -167,7 +167,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         jsonCallAs(user, followUrl).post(ClientResponse.class);
 
         // We should get the event again...
-        events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
+        events = getItemList(personalisedEventUrl + "?" + SystemEventResource.SHOW
                 + "=" + EventViews.ShowType.followed, user);
         assertEquals(1, events.size());
     }

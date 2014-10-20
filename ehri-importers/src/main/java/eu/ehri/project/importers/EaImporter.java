@@ -1,23 +1,27 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Import EAC for a given repository into the database.
  *
- * @author lindar
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  *
  */
 public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
@@ -72,13 +76,13 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      * 
      * @param itemData a Map containing raw properties of a unit
      * @return returns a Map with all keys from itemData that start with SaxXmlHandler.UNKNOWN
-     * @throws ValidationError 
+     * @throws ValidationError never
      */
     protected Map<String, Object> extractUnknownProperties(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unknowns = new HashMap<String, Object>();
-        for (String key : itemData.keySet()) {
-            if (key.startsWith(SaxXmlHandler.UNKNOWN)) {
-                unknowns.put(key.substring(SaxXmlHandler.UNKNOWN.length()), itemData.get(key));
+        for (Entry<String, Object> key : itemData.entrySet()) {
+            if (key.getKey().startsWith(SaxXmlHandler.UNKNOWN)) {
+                unknowns.put(key.getKey().substring(SaxXmlHandler.UNKNOWN.length()), key.getValue());
             }
         }
         return unknowns;
@@ -92,35 +96,36 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      */
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
         final String REL = "relation";
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (String key : itemData.keySet()) {
-            if (key.equals(REL)) {
+        List<Map<String, Object>> listOfRelations = new ArrayList<Map<String, Object>>();
+        for (Entry<String, Object> itemProperty : itemData.entrySet()) {
+            if (itemProperty.getKey().equals(REL)) {
                 //type, targetUrl, targetName, notes
-                for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemData.get(key)) {
+                for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemProperty.getValue()) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
-                    for (String eventkey : origRelation.keySet()) {
-                        if (eventkey.equals(REL + "/type")) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL + "/url")) {
+                    for (Entry<String, Object> relationProperty : origRelation.entrySet()) {
+                        if (relationProperty.getKey().equals(REL + "/type")) {
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, relationProperty.getValue());
+                        } else if (relationProperty.getKey().equals(REL + "/url")) {
                             //try to find the original identifier
-                            relationNode.put(LINK_TARGET, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL + "/" + Ontology.NAME_KEY)) {
+                            relationNode.put(LINK_TARGET, relationProperty.getValue());
+                        } else if (relationProperty.getKey().equals(REL + "/" + Ontology.NAME_KEY)) {
                             //try to find the original identifier
-                            relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL + "/notes")) {
-                            relationNode.put(Ontology.LINK_HAS_DESCRIPTION, origRelation.get(eventkey));
+                            relationNode.put(Ontology.NAME_KEY, relationProperty.getValue());
+                        } else if (relationProperty.getKey().equals(REL + "/notes")) {
+                            relationNode.put(Ontology.LINK_HAS_DESCRIPTION, relationProperty.getValue());
                         } else {
-                            relationNode.put(eventkey, origRelation.get(eventkey));
+                            relationNode.put(relationProperty.getKey(), relationProperty.getValue());
                         }
                     }
+                    // Set a default relationship type if no type was found in the relationship
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
                         relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
-                    list.add(relationNode);
+                    listOfRelations.add(relationNode);
                 }
             }
         }
-        return list;
+        return listOfRelations;
     }
 
     /**
@@ -129,30 +134,30 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      * addresses and *Access relations.
      * 
      * @param itemData a Map containing raw properties of a unit 
-     * @param entity
-     * @return
+     * @param entity an EntityClass to get the multi-valuedness of properties for
+     * @return a Map representation of a DocumentDescription
      */
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
 
         description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
-        for (String key : itemData.keySet()) {
-            if (key.equals("descriptionIdentifier")) {
-                description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
-            }else if(key.equals("conditionsOfAccess")){
-                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
-            }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
-                    && ! key.equals("objectIdentifier") 
-                    && ! key.equals(Ontology.IDENTIFIER_KEY)
-                    && ! key.equals(Ontology.OTHER_IDENTIFIERS)
-                    && ! key.startsWith("maintenanceEvent") 
-                    && ! key.startsWith("relation")
-                    && ! key.startsWith("IGNORE")
-                    && ! key.startsWith("address/")
-                    && ! key.endsWith("Access")
-                    && ! key.endsWith("AccessPoint")) {
-               description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
+        for (Entry<String, Object> itemProperty : itemData.entrySet()) {
+            if (itemProperty.getKey().equals("descriptionIdentifier")) {
+                description.put(Ontology.IDENTIFIER_KEY, itemProperty.getValue());
+            } else if (itemProperty.getKey().equals("conditionsOfAccess")) {
+                description.put(itemProperty.getKey(), changeForbiddenMultivaluedProperties(itemProperty.getKey(), itemProperty.getValue(), entity));
+            } else if ( !itemProperty.getKey().startsWith(SaxXmlHandler.UNKNOWN) 
+                    && ! itemProperty.getKey().equals("objectIdentifier") 
+                    && ! itemProperty.getKey().equals(Ontology.IDENTIFIER_KEY)
+                    && ! itemProperty.getKey().equals(Ontology.OTHER_IDENTIFIERS)
+                    && ! itemProperty.getKey().startsWith("maintenanceEvent") 
+                    && ! itemProperty.getKey().startsWith("relation")
+                    && ! itemProperty.getKey().startsWith("IGNORE")
+                    && ! itemProperty.getKey().startsWith("address/")
+                    && ! itemProperty.getKey().endsWith("Access")
+                    && ! itemProperty.getKey().endsWith("AccessPoint")) {
+               description.put(itemProperty.getKey(), changeForbiddenMultivaluedProperties(itemProperty.getKey(), itemProperty.getValue(), entity));
             }
         }
 //        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
@@ -167,9 +172,9 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      */
     protected Map<String, Object> extractAddress(Map<String, Object> itemData)  {
         Map<String, Object> address = new HashMap<String, Object>();
-        for (String key : itemData.keySet()) {
-            if (key.startsWith("address/")) {
-                address.put(key.substring(8), itemData.get(key));
+        for (Entry<String, Object> itemProperty : itemData.entrySet()) {
+            if (itemProperty.getKey().startsWith("address/")) {
+                address.put(itemProperty.getKey().substring(8), itemProperty.getValue());
             }
         }
         return address;

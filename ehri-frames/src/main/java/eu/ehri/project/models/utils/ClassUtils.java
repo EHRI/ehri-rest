@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * Helper functions for managing EntityType classes.
  *
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ClassUtils {
 

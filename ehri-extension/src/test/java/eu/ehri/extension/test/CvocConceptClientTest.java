@@ -92,7 +92,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // get fruit's narrower concepts
-        response = testGet(fruitLocation + "/narrower/list");
+        response = testGet(fruitLocation + "/list");
         // check if apple is in there
         assertTrue(containsIdentifier(response, "apple"));
 
@@ -116,7 +116,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // but not as a narrower of fruit!
-        response = testGet(fruitLocation + "/narrower/list");
+        response = testGet(fruitLocation + "/list");
         // check if apple is NOT in there
         assertFalse(containsIdentifier(response, "apple"));
     }

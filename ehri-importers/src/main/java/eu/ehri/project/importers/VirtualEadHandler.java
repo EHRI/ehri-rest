@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 /**
  * Handler of Virtual EAD files. 
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class VirtualEadHandler extends SaxXmlHandler {
     public static final String AUTHOR = "authors",
@@ -304,7 +304,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * for the description if no language is found.
      *
      * @param currentGraph    Data at the current node level
-     * @param eadLanguage Language code to use as default
+     * @param defaultLanguage Language code to use as default
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 

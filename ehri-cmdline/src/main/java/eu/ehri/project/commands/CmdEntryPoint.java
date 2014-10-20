@@ -18,6 +18,24 @@ import java.util.*;
  */
 public class CmdEntryPoint extends BaseCommand {
 
+    public static enum RetCode {
+
+        OK(0),
+        BAD_ARGS(1),
+        BAD_DATA(2),
+        BAD_PERMS(3);
+
+        private final int code;
+
+        private RetCode(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+    }
+
     /**
      * Constructor.
      */
@@ -62,20 +80,21 @@ public class CmdEntryPoint extends BaseCommand {
     @Override
     public String getHelp() {
         String sep = System.getProperty("line.separator");
-        String help = "Command line interface for the EHRI graph database."
-                + sep + sep + "The following commands are available:" + sep
-                + sep;
+        StringBuilder buffer = new StringBuilder(String.format(
+                "Command line interface for the EHRI graph database.%n%n " +
+                        "The following commands are available:%n%n"));
         for (String key : Ordering.natural().sortedCopy(CmdEntryPoint.COMMANDS.keySet())) {
-            help += "  " + key + sep;
+            buffer.append("  ");
+            buffer.append(key);
+            buffer.append(sep);
         }
-
-        help += "\nUse 'help <command>' for usage details.";
-        return help;
+        buffer.append(sep);
+        buffer.append("Use 'help <command>' for usage details.");
+        return buffer.toString();
     }
 
     @Override
     public String getUsage() {
-        // "Usage: cmd <graph-db> <command> <command-args ... >": we don't use the <graph-db> option?
         return "Usage: cmd <command> <command-args ... >";
     }
 
@@ -93,7 +112,7 @@ public class CmdEntryPoint extends BaseCommand {
             if (args.length > 2 && CmdEntryPoint.COMMANDS.containsKey(args[2])) {
                 Command cmd = CmdEntryPoint.COMMANDS.get(args[2]).getConstructor().newInstance();
                 System.err.println(cmd.getHelp());
-                return 1;
+                return RetCode.BAD_ARGS.getCode();
             } else {
                 return new CmdEntryPoint().exec(null, args);
             }
@@ -109,33 +128,33 @@ public class CmdEntryPoint extends BaseCommand {
                     // options or parameters where not correct, so print the correct usage
                     System.err.println(e.getMessage());
                     System.err.println(cmd.getUsage());
-                    return 1;
+                    return RetCode.BAD_ARGS.getCode();
                 } catch (MissingOptionException e) {
                     System.err.println(e.getMessage());
                     System.err.println(cmd.getUsage());
-                    return 1;
+                    return RetCode.BAD_ARGS.getCode();
                 } catch (AlreadySelectedException e) {
                     System.err.println(e.getMessage());
                     System.err.println(cmd.getUsage());
-                    return 1;
+                    return RetCode.BAD_ARGS.getCode();
                 } catch (UnrecognizedOptionException e) {
                     // options or parameters where not correct, so print the correct usage
                     System.err.println(e.getMessage());
                     System.err.println(cmd.getUsage());
-                    return 1;
+                    return RetCode.BAD_ARGS.getCode();
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.err.println("Error: " + e.getMessage());
-                    return 1;
+                    return RetCode.BAD_ARGS.getCode();
                 } finally {
                     graph.shutdown();
                 }
             } else {
                 System.err.println("Unrecognised command: " + args[1]);
-                return 1;
+                return RetCode.BAD_ARGS.getCode();
             }
         }
-        return 0;
+        return RetCode.OK.getCode();
     }
 
     /**

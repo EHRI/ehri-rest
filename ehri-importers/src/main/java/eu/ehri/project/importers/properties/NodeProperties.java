@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers.properties;
 
 import java.util.ArrayList;
@@ -13,8 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class NodeProperties {
 

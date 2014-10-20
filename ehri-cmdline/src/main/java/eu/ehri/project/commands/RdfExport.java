@@ -24,7 +24,7 @@ public class RdfExport extends BaseCommand implements Command {
 
     public final static String NAME = "export-rdf";
 
-    public final static String DEFAULT_FORMAT = "n-triples";
+    public final static String DEFAULT_FORMAT = "turtle";
 
     @Override
     public String getHelp() {
@@ -33,18 +33,23 @@ public class RdfExport extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String usage = "Usage: " + NAME + " <filename>\n\n" +
-                "  Accepted formats are: \n\n";
+        String sep = System.getProperty("line.separator");
+        StringBuilder buffer = new StringBuilder(String.format(
+                "Usage: %s -f [format] <filename>%n%n " +
+                        "Accepted formats are: %n%n", NAME));
         for (String fmt : SailGraph.formats.keySet()) {
-            usage = usage + "  " + fmt + "\n";
+            buffer.append("  ");
+            buffer.append(fmt);
+            buffer.append(sep);
         }
-        usage = usage + "\n";
-        return usage;
+        buffer.append(sep);
+        buffer.append("The default format is: " + DEFAULT_FORMAT);
+        return buffer.toString();
     }
 
     @Override
     protected void setCustomOptions() {
-        options.addOption(new Option("f", true, "RDF format"));
+        options.addOption(new Option("format", "f", true, "RDF format"));
     }
 
     @Override
@@ -53,9 +58,7 @@ public class RdfExport extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 1) {
             throw new MissingArgumentException("Output file path missing");
         }
-        String fmt = cmdLine.getOptionValue("f", DEFAULT_FORMAT);
-
-        System.out.println(fmt);
+        String fmt = cmdLine.getOptionValue("format", DEFAULT_FORMAT);
 
         PropertyGraphSail propertyGraphSail = new PropertyGraphSail(graph.getBaseGraph(), false);
         SailGraph sailGraph = new SailGraph(propertyGraphSail);

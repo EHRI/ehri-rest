@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.google.common.collect.Lists;
@@ -32,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class Wp2PersonalitiesImporter extends XmlImporter<Object> {
 

@@ -29,8 +29,8 @@ import org.xml.sax.SAXException;
  * If there is no language, it does set the language of the description to English.
  * makes use of icaatom.properties with format: part/of/path/=attribute
  *
- * @author linda
- * @author ben
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Ben Companjen (http://github.com/bencomp)
  */
 public class EadHandler extends SaxXmlHandler {
     
@@ -50,6 +50,11 @@ public class EadHandler extends SaxXmlHandler {
             .getLogger(EadHandler.class);
     
     protected final List<DocumentaryUnit>[] children = new ArrayList[12];
+    
+    /**
+     * Stack of identifiers of archival units. Push/pop the identifier of the current
+     * node on top/from the top of the stack.
+     */
     protected final Stack<String> scopeIds = new Stack<String>();
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
@@ -127,6 +132,11 @@ public class EadHandler extends SaxXmlHandler {
             
     }
 
+    /**
+     * Get the full 'path of identifiers' of the current node.
+     * 
+     * @return a List of Strings, i.e. identifiers, representing the path of the current node
+     */
     protected List<String> pathIds() {
         if (scopeIds.isEmpty()) {
             return scopeIds;
@@ -174,9 +184,9 @@ public class EadHandler extends SaxXmlHandler {
     		logger.debug("Found <author>: "+ eadfileValues.get(AUTHOR));
     	}
         
-        if(localName.equals("language") || qName.equals("language")){
-            String lang = (String) currentGraphPath.peek().get ("languageCode");
-            if(lang != null)
+        if (localName.equals("language") || qName.equals("language")) {
+            String lang = (String) currentGraphPath.peek().get("languageCode");
+            if (lang != null)
                 eadLanguage=lang;
         }
 
@@ -301,7 +311,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph
      */
     protected void extractEadLanguage(Map<String, Object> currentGraph) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -320,7 +330,7 @@ public class EadHandler extends SaxXmlHandler {
      * for the description if no language is found.
      *
      * @param currentGraph    Data at the current node level
-     * @param eadLanguage Language code to use as default
+     * @param defaultLanguage Language code to use as default
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 

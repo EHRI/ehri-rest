@@ -14,6 +14,7 @@ public class HelpersTest {
         // bibliographic to term
         assertEquals("sqi", Helpers.iso639DashTwoCode("alb"));
         // name to code
+        // FIXME fails when executed on a server with a Dutch locale
         assertEquals("eng", Helpers.iso639DashTwoCode("English"));
     }
 }

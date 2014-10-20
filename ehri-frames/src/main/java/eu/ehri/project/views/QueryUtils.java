@@ -15,11 +15,16 @@ import java.util.List;
 import java.util.SortedMap;
 
 /**
- * User: michaelb
+ * Utilities for parsing filter and order specifiers
+ * for the ad-hoc (and out-dated) query syntax. This
+ * is mainly used internally for testing and not exposed
+ * externally.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class QueryUtils {
 
-    public static Logger logger = LoggerFactory.getLogger(QueryUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(QueryUtils.class);
 
     /**
      * Parse a list of string filter specifications.
@@ -39,17 +44,13 @@ public class QueryUtils {
                 String ppred = kv.get(0);
                 String value = kv.get(1);
                 List<String> pp = Iterables.toList(psplit.split(ppred));
-                switch (pp.size()) {
-                    case 1:
-                        builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
-                                Query.FilterPredicate.EQUALS, value));
-                        break;
-                    case 2:
-                        builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
-                                Query.FilterPredicate.valueOf(pp.get(1)), value));
-                        break;
+                if (pp.size() == 1) {
+                    builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
+                            Query.FilterPredicate.EQUALS, value));
+                } else if (pp.size() > 1) {
+                    builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
+                            Query.FilterPredicate.valueOf(pp.get(1)), value));
                 }
-
             }
         }
         return builder.build();
@@ -67,13 +68,10 @@ public class QueryUtils {
         Splitter psplit = Splitter.on("__");
         for (String spec : orderSpecs) {
             List<String> od = Iterables.toList(psplit.split(spec));
-            switch (od.size()) {
-                case 1:
-                    builder.put(od.get(0), Query.Sort.ASC);
-                    break;
-                case 2:
-                    builder.put(od.get(0), Query.Sort.valueOf(od.get(1)));
-                    break;
+            if (od.size() == 1) {
+                builder.put(od.get(0), Query.Sort.ASC);
+            } else if (od.size() > 1) {
+                builder.put(od.get(0), Query.Sort.valueOf(od.get(1)));
             }
         }
         return builder.build();

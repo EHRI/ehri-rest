@@ -123,7 +123,7 @@ public class IfzTest extends AbstractImporterTest{
         /**
          * Test hierarchy
          */
-        assertEquals(new Long(1), archdesc.getChildCount());
+        assertEquals(1L, archdesc.getChildCount());
         for(DocumentaryUnit du : archdesc.getChildren()){
             assertEquals(C01, du.getIdentifier());
         }

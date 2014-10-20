@@ -38,8 +38,7 @@ public class DcImport extends ImportCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an DC file into the graph database, using the specified"
+        return "Import an DC file into the graph database, using the specified"
                 + sep + "Repository and User.";
-        return help;
     }
 }

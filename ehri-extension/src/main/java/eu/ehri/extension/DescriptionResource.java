@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import com.google.common.base.Charsets;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -21,6 +22,8 @@ import javax.ws.rs.core.Response;
 
 /**
  * Provides a RESTful interface for dealing with described entities.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("description")
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {
@@ -116,12 +119,9 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     private Response buildResponse(DescribedEntity item, Frame data, Response.Status status)
             throws SerializationError {
-        try {
-            return Response.status(status).location(getItemUri(item))
-                    .entity((getSerializer().vertexFrameToJson(data)).getBytes()).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return Response.status(status).location(getItemUri(item))
+                .entity((getSerializer().vertexFrameToJson(data))
+                        .getBytes(Charsets.UTF_8)).build();
     }
 
     @POST

@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
@@ -15,7 +16,11 @@ import eu.ehri.project.views.EventViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -25,9 +30,12 @@ import java.util.List;
  * Provides a RESTful interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.SYSTEM_EVENT)
-public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
+public class SystemEventResource extends AbstractAccessibleEntityResource<SystemEvent>
+        implements GetResource {
 
     public final static String ITEM_TYPE_PARAM = "type";
     public final static String ITEM_ID_PARAM = "item";
@@ -40,7 +48,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
 
     private final Serializer subjectSerializer;
 
-    public EventResource(@Context GraphDatabaseService database) {
+    public SystemEventResource(@Context GraphDatabaseService database) {
         super(database, SystemEvent.class);
 
         // Subjects are only serialized to depth 1 for efficiency...
@@ -51,15 +59,21 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getEvent(@PathParam("id") String id) throws ItemNotFound,
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     /**
-     * List actions.
+     * List global events. Standard list parameters for paging apply.
      *
-     * @throws ItemNotFound
+     * @param eventTypes Filter events by type
+     * @param itemTypes  Filter events based on the item type of their subjects
+     * @param itemIds    Filter events pertaining to specific item IDs
+     * @param users      Filter events based on the user IDs they involve
+     * @param from       Exclude events prior to this data
+     * @param to         Exclude events after this data
      * @throws BadRequester
      */
     @GET
@@ -72,7 +86,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             final @QueryParam(USER_PARAM) List<String> users,
             final @QueryParam(FROM_PARAM) String from,
             final @QueryParam(TO_PARAM) String to)
-            throws ItemNotFound, BadRequester {
+            throws BadRequester {
 
         Accessor user = getRequesterUserProfile();
         EventViews eventViews = new EventViews(graph)
@@ -86,9 +100,43 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         return streamingList(eventViews.list(getQuery(cls), user));
     }
 
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/byUser/{userId:.+}")
+    public Response listEventsByUser(
+            final @PathParam("userId") String userId,
+            final @QueryParam(EVENT_TYPE_PARAM) List<EventTypes> eventTypes,
+            final @QueryParam(ITEM_TYPE_PARAM) List<String> itemTypes,
+            final @QueryParam(ITEM_ID_PARAM) List<String> itemIds,
+            final @QueryParam(USER_PARAM) List<String> users,
+            final @QueryParam(FROM_PARAM) String from,
+            final @QueryParam(TO_PARAM) String to)
+            throws ItemNotFound, BadRequester {
+
+        Accessor user = getRequesterUserProfile();
+        UserProfile byUser = manager.getFrame(userId, UserProfile.class);
+        EventViews eventViews = new EventViews(graph)
+                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
+                .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
+                .withIds(itemIds.toArray(new String[itemIds.size()]))
+                .withUsers(users.toArray(new String[users.size()]))
+                .from(from)
+                .to(to);
+
+        return streamingList(eventViews.listByUser(getQuery(cls), byUser, user));
+    }
+
     /**
-     * List actions.
+     * List actions that are relevant to a given user based on
+     * the other users that they follow and the items they watch.
      *
+     * @param userId     The user's ID
+     * @param eventTypes Filter events by type
+     * @param itemTypes  Filter events based on the item type of their subjects
+     * @param itemIds    Filter events pertaining to specific item IDs
+     * @param users      Filter events based on the user IDs they involve
+     * @param from       Exclude events prior to this data
+     * @param to         Exclude events after this data
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -122,7 +170,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
 
     /**
      * Lookup and page the history for a given item.
-     * 
+     *
      * @param id The event id
      * @return A list of events
      * @throws ItemNotFound

@@ -186,10 +186,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
                             }
                             // Exclude other groups...
                             String type = vertex.getProperty(EntityType.TYPE_KEY);
-                            if (type == null || !type.equals(Entities.USER_PROFILE)) {
-                                return false;
-                            }
-                            return true;
+                            return !(type == null || !type.equals(Entities.USER_PROFILE));
                         }
                     }));
         }

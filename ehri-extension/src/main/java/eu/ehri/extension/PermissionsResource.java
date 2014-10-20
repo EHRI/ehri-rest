@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.
  *
- * @author http://github.com/mikesname
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.PERMISSION)
 public class PermissionsResource extends AbstractRestResource {

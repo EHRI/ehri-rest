@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -24,7 +20,7 @@ import static org.junit.Assert.*;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Eag2896Test extends AbstractImporterTest {
 

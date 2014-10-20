@@ -10,12 +10,12 @@
     </parent>
     <artifactId>ehri-frames</artifactId>
     <packaging>jar</packaging>
-    <description>ehri-frames</description>
+
+
     <version>0.1-SNAPSHOT</version>
-    <name>ehri-frames</name>
-    <organization>
-        <name>EHRI</name>
-    </organization>
+
+    <name>EHRI Core API</name>
+    <description>Java API for data access and permissions.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -163,6 +163,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>

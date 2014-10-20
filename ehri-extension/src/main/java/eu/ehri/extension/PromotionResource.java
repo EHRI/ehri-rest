@@ -18,6 +18,8 @@ import javax.ws.rs.core.Response;
 
 /**
  * Endpoints for promoting and demoting items.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("promote")
 public class PromotionResource extends AbstractRestResource {
@@ -29,11 +31,11 @@ public class PromotionResource extends AbstractRestResource {
     /**
      * Promote an item.
      *
-     * @param id id of item to promote.
+     * @param id ID of item to promote.
      * @return 200 response
-     * @throws eu.ehri.project.exceptions.PermissionDenied
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     * @throws eu.ehri.extension.errors.BadRequester
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
      */
     @POST
     @Path("/{id:.+}")
@@ -50,20 +52,18 @@ public class PromotionResource extends AbstractRestResource {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
     /**
      * Demote an item (removing the user's promotion).
      *
-     * @param id id of item to remove
+     * @param id ID of item to remove
      * @return 200 response
-     * @throws eu.ehri.project.exceptions.PermissionDenied
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     * @throws eu.ehri.extension.errors.BadRequester
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
      */
     @DELETE
     @Path("/{id:.+}")
@@ -77,9 +77,7 @@ public class PromotionResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return Response.ok().location(getItemUri(item)).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 }

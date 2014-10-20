@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.PersonalitiesImporter;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PersonalitiesImport extends ImportCsvCommand implements Command {
 
@@ -30,9 +25,8 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import a CSV file into the graph database, using the specified"
+        return "Import a CSV file into the graph database, using the specified"
                 + sep + "scope and user.";
-        return help;
     }
 
    

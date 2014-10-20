@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
- * @author lindar
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  *
  */
 public class EadImporter extends EaImporter {

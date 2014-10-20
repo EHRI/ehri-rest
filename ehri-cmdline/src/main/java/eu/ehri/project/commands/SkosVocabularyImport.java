@@ -91,7 +91,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Entry<String, String> entry : log.getErrors().entrySet()) {
-                    System.out.printf(" - %-20s : %s\n", entry.getKey(),
+                    System.out.printf(" - %-20s : %s%n", entry.getKey(),
                             entry.getValue());
                 }
             }

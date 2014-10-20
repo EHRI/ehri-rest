@@ -23,7 +23,8 @@ import static eu.ehri.project.models.EntityClass.*;
 
 /**
  * Sanity check various parts of the graph.
- * 
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Check extends BaseCommand implements Command {
 
@@ -63,7 +64,7 @@ public class Check extends BaseCommand implements Command {
 
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
         checkPermissionScopes(graph, manager);
-        checkOwnerPermGrantsHaveNoScope(graph, manager);
+        checkOwnerPermGrantsHaveNoScope(manager);
 
         return 0;
     }
@@ -124,8 +125,7 @@ public class Check extends BaseCommand implements Command {
         }
     }
 
-    private void checkOwnerPermGrantsHaveNoScope(final FramedGraph<? extends TransactionalGraph> graph,
-            final GraphManager manager) throws Exception {
+    private void checkOwnerPermGrantsHaveNoScope(final GraphManager manager) throws Exception {
         CloseableIterable<PermissionGrant> items
                 = manager.getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class);
         try {

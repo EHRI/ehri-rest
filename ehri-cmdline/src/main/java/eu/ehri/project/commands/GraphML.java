@@ -4,8 +4,6 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.core.GraphReindexer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -48,8 +46,6 @@ public class GraphML extends BaseCommand implements Command {
 
     final static String NAME = "graphml";
 
-    private static final String INDEX_NAME = "entities"; // FIXME!!
-
     /**
      * Constructor.
      */
@@ -58,9 +54,8 @@ public class GraphML extends BaseCommand implements Command {
     
 	@Override
 	public String getHelp() {
-        String help = "export or import a GraphML file." + 
+        return "export or import a GraphML file." +
         		"\n" + getUsage();
-        return help;
 	}
 	
     @Override
@@ -108,7 +103,6 @@ public class GraphML extends BaseCommand implements Command {
 
     public void saveDump(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
-        final GraphManager manager = GraphManagerFactory.getInstance(graph);
 
         GraphMLWriter writer = new GraphMLWriter(graph);
         writer.setNormalize(true);
@@ -122,17 +116,24 @@ public class GraphML extends BaseCommand implements Command {
         } else {
             // try to open or create the file for writing
             OutputStream out = new FileOutputStream(filepath);
-            writer.outputGraph(out); 
-            out.close();
-        }        
+            try {
+                writer.outputGraph(out);
+            } finally {
+                out.close();
+            }
+        }
     } 
     
    public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
            CommandLine cmdLine) throws Exception {
        GraphMLReader reader = new GraphMLReader(graph);
        String filepath = (String)cmdLine.getArgList().get(0);
-	   InputStream in = new FileInputStream(filepath);
-	   reader.inputGraph(in);
-	   new GraphReindexer(graph).reindex(INDEX_NAME);
+	   InputStream inputStream = new FileInputStream(filepath);
+       try {
+           reader.inputGraph(inputStream);
+           new GraphReindexer(graph).reindex();
+       } finally {
+           inputStream.close();
+       }
    }
 }

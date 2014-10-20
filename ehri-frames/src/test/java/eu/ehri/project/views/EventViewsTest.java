@@ -124,6 +124,22 @@ public class EventViewsTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testListByUser() throws Exception {
+        List<SystemEvent> events = Lists
+                .newArrayList(eventViews
+                        .listByUser(query, user1, user2));
+        assertEquals(0, events.size());
+
+        createItemWithIdentifier("foo", user1);
+        createItemWithIdentifier("bar", user1);
+
+        List<SystemEvent> events2 = Lists
+                .newArrayList(eventViews
+                        .listByUser(query, user1, user2));
+        assertEquals(2, events2.size());
+    }
+
+    @Test
     public void testListAsUserWatching() throws Exception {
         DocumentaryUnit doc1 = createItemWithIdentifier("foo", user1);
         Thread.sleep(10);

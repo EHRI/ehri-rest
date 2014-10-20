@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -15,9 +16,12 @@ import java.util.List;
 
 /**
  * Provides a RESTful interface for the HistoricalAgent model.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.HISTORICAL_AGENT)
-public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent> {
+public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent>
+        implements GetResource, ListResource, CreateResource, UpdateResource, DeleteResource {
 
     public HistoricalAgentResource(@Context GraphDatabaseService database) {
         super(database, HistoricalAgent.class);
@@ -26,59 +30,66 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getAuthority(@PathParam("id") String id) throws ItemNotFound,
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listAuthorities() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countHistoricalAgents() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createAuthority(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response create(Bundle bundle,
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(bundle, accessors);
+        return createItem(bundle, accessors);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateAuthority(Bundle bundle) throws PermissionDenied,
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateAuthority(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAuthority(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 }

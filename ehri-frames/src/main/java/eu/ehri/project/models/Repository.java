@@ -17,7 +17,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity, PermissionScope, ItemHolder, Watchable {
 
     @JavaHandler
-    public Long getChildCount();
+    public long getChildCount();
 
     @Adjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getCollections();
@@ -47,7 +47,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count();

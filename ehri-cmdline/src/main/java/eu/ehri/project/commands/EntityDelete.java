@@ -5,18 +5,8 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.impl.CrudViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -32,11 +22,6 @@ public class EntityDelete extends BaseCommand implements Command {
      * Constructor.
      */
     public EntityDelete() {
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return true;
     }
 
     @Override
@@ -66,10 +51,10 @@ public class EntityDelete extends BaseCommand implements Command {
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
-        // the first argument is the entity type, and that must be specified
+        // the first argument is the item ID, and that must be specified
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
-        String id = cmdLine.getArgs()[1];
+        String id = cmdLine.getArgs()[0];
 
         String logMessage = "Deleting item " + id + " via the command-line";
         if (cmdLine.hasOption("log")) {

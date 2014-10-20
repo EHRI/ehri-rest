@@ -10,13 +10,13 @@ import java.util.UUID;
 /**
  * Generates a generic ID for tertiary node types.
  *
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum GenericIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    public static TimeBasedGenerator timeBasedGenerator
+    public static final TimeBasedGenerator timeBasedGenerator
             = Generators.timeBasedGenerator();
 
     public ListMultimap<String, String> handleIdCollision(Iterable<String> scopeIds, Bundle bundle) {

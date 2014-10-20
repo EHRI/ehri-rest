@@ -30,13 +30,7 @@ public class GetEntity extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Get an entity by its identifier.";
-        return help;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return true;
+        return "Get an entity by its identifier.";
     }
 
     /**

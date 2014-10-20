@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonValue;
  * detailing how many items were created and updated,
  * and how many failed.
  *
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ImportLog {
 
@@ -134,11 +134,12 @@ public class ImportLog {
     }
 
     @JsonValue
-    public Map<String,Integer> getData() {
-        Map<String,Integer> data = Maps.newHashMap();
+    public Map<String,Object> getData() {
+        Map<String,Object> data = Maps.newHashMap();
         data.put("created", created);
         data.put("updated", updated);
         data.put("unchanged", unchanged);
+        data.put("message", eventContext.getLogMessage().orNull());
         return data;
     }
 

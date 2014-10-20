@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
@@ -22,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCsvCommand extends BaseCommand implements Command{
     Class<? extends XmlImporter<Object>> importer;
@@ -83,7 +78,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {
-                    System.out.printf(" - %-20s : %s\n", entry.getKey(),
+                    System.out.printf(" - %-20s : %s%n", entry.getKey(),
                             entry.getValue());
                 }
             }

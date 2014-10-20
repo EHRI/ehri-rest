@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.commands;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -20,16 +17,12 @@ import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCommand extends BaseCommand implements Command{
     protected Class<? extends SaxXmlHandler> handler;
@@ -106,11 +99,11 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {
-                    System.out.printf(" - %-20s : %s\n", entry.getKey(),
+                    System.out.printf(" - %-20s : %s%n", entry.getKey(),
                             entry.getValue());
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             return 1;
         }
@@ -120,17 +113,18 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     /**
      * Read a set of file paths from an input, either a file or standard in
      * if given the path '-'.
-     * @param listFile
-     * @param filePaths
+     * @param listFile A path to a local file
+     * @param filePaths An output parameter for file paths contained in
+     *                  the given file.
      * @throws Exception
      */
     protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
-        InputStreamReader reader = listFile.contentEquals("-")
-                ? new InputStreamReader(System.in)
-                : new FileReader(new File(listFile));
-        BufferedReader br = new BufferedReader(reader);
+        InputStream stream = listFile.contentEquals("-")
+                ? System.in
+                : new FileInputStream(new File(listFile));
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
         try {
-            String file = null;
+            String file;
             while ((file = br.readLine()) != null) {
                 filePaths.add(file);
             }

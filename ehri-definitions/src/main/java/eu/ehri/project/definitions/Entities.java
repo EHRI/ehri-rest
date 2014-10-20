@@ -1,5 +1,9 @@
 package eu.ehri.project.definitions;
 
+/**
+ * Collection of constants to denote the entity type of graph vertices.
+ *
+ */
 public class Entities {
     public static final String SYSTEM_EVENT = "systemEvent";
     public static final String REPOSITORY = "repository";

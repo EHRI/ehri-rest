@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
- * @author lindar
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadImporter extends EaImporter {
 

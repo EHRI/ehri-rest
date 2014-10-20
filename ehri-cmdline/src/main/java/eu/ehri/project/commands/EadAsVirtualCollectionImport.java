@@ -1,7 +1,5 @@
 package eu.ehri.project.commands;
 
-import org.apache.commons.cli.Option;
-
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.VirtualEadHandler;
 import eu.ehri.project.importers.VirtualEadImporter;

@@ -1,5 +1,6 @@
 package eu.ehri.extension.errors.mappers;
 
+import com.google.common.base.Charsets;
 import eu.ehri.project.exceptions.ValidationError;
 
 import javax.ws.rs.core.Response;
@@ -32,7 +33,7 @@ import javax.ws.rs.ext.Provider;
  *   }
  * }
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  *
  */
 @Provider
@@ -41,7 +42,8 @@ public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
     public Response toResponse(final ValidationError e) {
         try {
             return Response.status(Status.BAD_REQUEST)
-                    .entity(e.getErrorSet().toJson().getBytes()).build();
+                    .entity(e.getErrorSet().toJson()
+                            .getBytes(Charsets.UTF_8)).build();
         } catch (Exception e1) {
             e1.printStackTrace();
             throw new RuntimeException(e1);

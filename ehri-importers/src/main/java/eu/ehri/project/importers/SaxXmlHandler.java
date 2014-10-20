@@ -2,7 +2,9 @@ package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+
 import eu.ehri.project.importers.properties.XmlImportProperties;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import eu.ehri.project.importers.util.Helpers;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +40,25 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node, 
  * with an edge to the unit-description.
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
+    
+    /**
+     * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
+     */
+    public static final String LANGUAGE_KEY_PREFIX = "language";
+    
+    /**
+     * Keys in the node that denote unknown properties must start with the value of UNKNOWN.
+     */
     public static final String UNKNOWN = "UNKNOWN_";
+    
+    /**
+     * Key in the node that denotes the object's identifier. 
+     */
     public static final String OBJECT_IDENTIFIER = "objectIdentifier";
     protected final Stack<Map<String, Object>> currentGraphPath = new Stack<Map<String, Object>>();
     protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
@@ -265,18 +281,16 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value the value to store
      */
     protected static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
-        if(value == null)
+        if (value == null)
             return;
         String valuetrimmed = value.trim();
         if (valuetrimmed.isEmpty()) {
             return;
         }
 
-        // FIXME: Badness alert. Need to find a letter way to detect these transformations
-        // then relying on the name of the property containing 'language'
-        // MB: Egregious hack - translate 3-letter language codes to 2-letter ones!!!
+        // Language properties 
 
-        if (property.startsWith("language")) {
+        if (property.startsWith(LANGUAGE_KEY_PREFIX)) {
             valuetrimmed = Helpers.iso639DashTwoCode(valuetrimmed);
         }
 

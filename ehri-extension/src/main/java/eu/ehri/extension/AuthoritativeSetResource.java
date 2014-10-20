@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -19,15 +20,17 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the AuthoritativeSet Also for managing the
- * HistoricalAgents that are in the AuthoritativeSet
+ * Provides a RESTful interface for the AuthoritativeSet items.
+ * Authoritative Sets are containers for Historical Agents
+ * (authority files.)
  * 
- * @author mikeb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 @Path(Entities.AUTHORITATIVE_SET)
 public class AuthoritativeSetResource extends
-        AbstractAccessibleEntityResource<AuthoritativeSet> {
+        AbstractAccessibleEntityResource<AuthoritativeSet>
+            implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
     public AuthoritativeSetResource(@Context GraphDatabaseService database) {
         super(database, AuthoritativeSet.class);
@@ -36,31 +39,36 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getAuthoritativeSet(@PathParam("id") String id)
+    @Override
+    public Response get(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listAuthoritativeSets() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countAuthoritativeSets() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public Response listAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+    @Override
+    public Response listChildren(
+            @PathParam("id") String id,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
         return streamingPage(getQuery(AuthoritativeItem.class)
@@ -70,9 +78,11 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public long countAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+    @Override
+    public long countChildren(
+            @PathParam("id") String id,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
         return getQuery(AuthoritativeItem.class).count(set.getAuthoritativeItems());
@@ -81,42 +91,43 @@ public class AuthoritativeSetResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createAuthoritativeSet(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response create(Bundle bundle,
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(bundle, accessors);
+        return createItem(bundle, accessors);
     }
 
-    // Note: json contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateAuthoritativeSet(Bundle bundle) throws PermissionDenied,
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateAuthoritativeSet(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAuthoritativeSet(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
-
-    /*** HistoricalAgent manipulation ***/
 
     @DELETE
     @Path("/{id:.+}/all")
@@ -145,31 +156,19 @@ public class AuthoritativeSetResource extends
         }
     }
 
-    /**
-     * Create a top-level agent unit for this set.
-     *
-     * @param id The set ID
-     * @param bundle The item data
-     * @return A new item
-     * @throws eu.ehri.project.exceptions.PermissionDenied
-     * @throws eu.ehri.project.exceptions.ValidationError
-     * @throws eu.ehri.project.exceptions.IntegrityError
-     * @throws eu.ehri.project.exceptions.DeserializationError
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     * @throws eu.ehri.extension.errors.BadRequester
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.HISTORICAL_AGENT)
-    public Response createAuthoritativeSetHistoricalAgent(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response createChild(@PathParam("id") String id,
+                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         try {
             Accessor user = getRequesterUserProfile();
             final AuthoritativeSet set = views.detail(id, user);
-            return create(bundle, accessors, new Handler<HistoricalAgent>() {
+            return createItem(bundle, accessors, new Handler<HistoricalAgent>() {
                 @Override
                 public void process(HistoricalAgent agent) throws PermissionDenied {
                     set.addItem(agent);

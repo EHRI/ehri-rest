@@ -201,7 +201,7 @@ public interface GraphManager {
      * @param key    The property key
      * @param value  The property value
      */
-    public void setProperty(Vertex vertex, String key, String value);
+    public void setProperty(Vertex vertex, String key, Object value);
 
     // CRUD functions
 
@@ -219,4 +219,8 @@ public interface GraphManager {
      */
     public void deleteVertex(Vertex vertex);
 
+    /**
+     * Rebuild the internal graph index.
+     */
+    public void rebuildIndex();
 }

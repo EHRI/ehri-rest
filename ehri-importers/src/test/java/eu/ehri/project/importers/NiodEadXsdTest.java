@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import eu.ehri.project.definitions.Ontology;
@@ -23,8 +19,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
 /**
- *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class NiodEadXsdTest extends AbstractImporterTest{
     
@@ -138,7 +133,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
                 assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
         }
     //test hierarchy
-        assertEquals(new Long(1), archdesc.getChildCount());
+        assertEquals(1L, archdesc.getChildCount());
         for(DocumentaryUnit d : archdesc.getChildren()){
             assertEquals(C01, d.getIdentifier());
         }

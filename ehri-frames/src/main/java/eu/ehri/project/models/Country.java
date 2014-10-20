@@ -29,14 +29,14 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
 
     /**
      * Alias function for fetching the country code identifier.
-     * @return
+     * @return The country code
      */
     @Mandatory
     @Property(COUNTRY_CODE)
     public String getCode();
 
     @JavaHandler
-    public Long getChildCount();
+    public long getChildCount();
 
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN)
     public Iterable<Repository> getRepositories();
@@ -56,7 +56,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
             it().setProperty(CHILD_COUNT, gremlin().in(Ontology.REPOSITORY_HAS_COUNTRY).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count();

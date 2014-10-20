@@ -12,6 +12,9 @@
     <artifactId>ehri-extension-sparql</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <name>Web Service SparQL Extension</name>
+    <description>SparQL endpoint for web service.</description>
+
     <properties>
         <sesame.version>2.6.10</sesame.version>
     </properties>

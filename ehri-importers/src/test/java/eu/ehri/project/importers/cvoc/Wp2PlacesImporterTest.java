@@ -16,7 +16,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Wp2PlacesImporterTest extends AbstractImporterTest {
     protected final String SKOS_FILE = "cvoc/wp2_skos_places.xml";

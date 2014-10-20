@@ -1,5 +1,6 @@
 package eu.ehri.extension.errors;
 
+import com.google.common.base.Charsets;
 import eu.ehri.project.exceptions.DeserializationError;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -17,7 +18,7 @@ public class WebDeserializationError extends WebApplicationException {
 
     public WebDeserializationError(DeserializationError e) {
         super(Response.status(Status.BAD_REQUEST)
-                .entity(errorToJson(e).getBytes()).build());
+                .entity(errorToJson(e).getBytes(Charsets.UTF_8)).build());
     }
 
     public static String errorToJson(final DeserializationError e) {

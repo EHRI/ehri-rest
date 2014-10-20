@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
@@ -14,6 +15,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -43,6 +45,7 @@ public class ImportResource extends AbstractRestResource {
     public static final String TOLERANT_PARAM = "tolerant";
     public static final String HANDLER_PARAM = "handler";
     public static final String IMPORTER_PARAM = "importer";
+    public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
 
     public ImportResource(@Context GraphDatabaseService database) {
@@ -66,7 +69,8 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId    The id of the import scope (i.e. repository)
      * @param tolerant   Whether or not to die on the first validation error
-     * @param logMessage Log message for import
+     * @param logMessage Log message for import. If this refers to a local file
+     *                   its contents will be used.
      * @param format     The RDF format of the POSTed data
      * @param stream     A stream of SKOS data in a valid format.
      * @return A JSON object showing how many records were created,
@@ -94,7 +98,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importer
                     .setFormat(format)
                     .setTolerant(tolerant)
-                    .importFile(stream, logMessage);
+                    .importFile(stream, getLogMessage(logMessage).orNull());
 
             graph.getBaseGraph().commit();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
@@ -103,9 +107,7 @@ public class ImportResource extends AbstractRestResource {
         } catch (NoReaderForLangException e) {
             throw new DeserializationError("Unable to read language: " + format);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -119,7 +121,6 @@ public class ImportResource extends AbstractRestResource {
      * <pre>
      * <code>curl -X POST \
      *      -H "Authorization: mike" \
-     *      -H "Content-type: text/plain" \
      *      --data-binary @ead-list.txt \
      *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&log=testing&tolerant=true"
      *
@@ -134,11 +135,14 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
-     * @param logMessage    Log message for import
+     * @param logMessage    Log message for import. If this refers to a local file
+     *                      its contents will be used.
      * @param handlerClass  The fully-qualified handler class name
      *                      (defaults to IcaAtomEadHandler)
      * @param importerClass The fully-qualified import class name
      *                      (defaults to IcaAtomEadImporter)
+     * @param propertyFile  A local file path pointing to an import properties
+     *                      configuration file.
      * @param pathList      A string containing a list of local file paths
      *                      to import.
      * @return A JSON object showing how many records were created,
@@ -146,12 +150,12 @@ public class ImportResource extends AbstractRestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
     @Path("/ead")
     public Response importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             String pathList)
@@ -159,6 +163,7 @@ public class ImportResource extends AbstractRestResource {
             IOException, DeserializationError {
 
         try {
+            checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
             Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
 
@@ -172,17 +177,18 @@ public class ImportResource extends AbstractRestResource {
 
             // Run the import!
             ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
+                    .setProperties(propertyFile)
                     .setTolerant(tolerant)
-                    .importFiles(paths, logMessage);
+                    .importFiles(paths, getLogMessage(logMessage).orNull());
 
             graph.getBaseGraph().commit();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -196,11 +202,22 @@ public class ImportResource extends AbstractRestResource {
         List<String> files = Lists.newArrayList();
         for (String path : Splitter.on("\n").omitEmptyStrings().trimResults().split(pathList)) {
             if (!new File(path).exists()) {
-                throw new IllegalArgumentException("File not found: " + path);
+                throw new IllegalArgumentException("File specified in payload not found: " + path);
             }
             files.add(path);
         }
         return files;
+    }
+
+    private static void checkPropertyFile(String properties) {
+        // Null properties are allowed
+        if (properties != null) {
+            File file = new File(properties);
+            if (!(file.isFile() && file.exists())) {
+                throw new IllegalArgumentException("Properties file '" + properties + "' " +
+                        "either does not exist, or is not a file.");
+            }
+        }
     }
 
     /**
@@ -248,6 +265,19 @@ public class ImportResource extends AbstractRestResource {
                         " not an instance of " + AbstractImporter.class.getSimpleName());
             }
             return (Class<? extends AbstractImporter>) importer;
+        }
+    }
+
+    private Optional<String> getLogMessage(String logMessage) throws IOException {
+        if (logMessage == null || logMessage.isEmpty()) {
+            return Optional.absent();
+        } else {
+            File fileTest = new File(logMessage);
+            if (fileTest.exists()) {
+                return Optional.of(FileUtils.readFileToString(fileTest, "UTF-8"));
+            } else {
+                return Optional.of(logMessage);
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ import com.tinkerpop.frames.FramedGraph;
  * 
  * Note: This does NOT reset the Neo4j node auto-increment id.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public class GraphCleaner<T extends TransactionalGraph & IndexableGraph> {

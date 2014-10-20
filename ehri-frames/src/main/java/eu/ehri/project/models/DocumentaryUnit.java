@@ -24,7 +24,7 @@ public interface DocumentaryUnit extends AbstractUnit {
 
     /**
      * Get the repository that holds this documentary unit.
-     * @return
+     * @return the Repository that holds this DocumentaryUnit
      */
     @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
     @JavaHandler
@@ -39,7 +39,7 @@ public interface DocumentaryUnit extends AbstractUnit {
 
     /**
      * Get parent documentary unit, if any
-     * @return
+     * @return a DocumentaryUnit that is this DocumentaryUnit's parent or null
      */
     @Fetch(Ontology.DOC_IS_CHILD_OF)
     @Adjacency(label = Ontology.DOC_IS_CHILD_OF)
@@ -48,18 +48,19 @@ public interface DocumentaryUnit extends AbstractUnit {
     @JavaHandler
     public void addChild(final DocumentaryUnit child);
 
-    /*
+    /**
      * Fetches a list of all ancestors (parent -> parent -> parent)
+     * @return an Iterable of DocumentaryUnits that are ancestors
      */
     @JavaHandler
     public Iterable<DocumentaryUnit> getAncestors();
 
     @JavaHandler
-    public Long getChildCount();
+    public long getChildCount();
 
     /**
      * Get child documentary units
-     * @return
+     * @return an Iterable of DocumentaryUnits that are children
      */
     @JavaHandler
     public Iterable<DocumentaryUnit> getChildren();
@@ -82,7 +83,7 @@ public interface DocumentaryUnit extends AbstractUnit {
             it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().in(Ontology.DOC_IS_CHILD_OF).count();

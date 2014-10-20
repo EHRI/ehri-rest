@@ -1,4 +1,4 @@
-package eu.ehri.extension;
+package eu.ehri.extension.base;
 
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
