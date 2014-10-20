@@ -16,7 +16,6 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -93,7 +92,7 @@ public class EventViewsTest extends AbstractFixtureTest {
 
         // Test paging...
         List<SystemEvent> eventPage = Lists.newArrayList(eventViews.list(query
-                .setCount(1).setPage(2), user1));
+                .setLimit(1).setOffset(1), user1));
         assertEquals(1, eventPage.size());
         // events are temporally ordered, so the second item
         // in the queue will be the first thing created.

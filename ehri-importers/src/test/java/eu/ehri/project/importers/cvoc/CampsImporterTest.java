@@ -57,7 +57,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         String skosConceptId = "675";
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
-        List<Concept> list = toList(query.setCount(1).page(
+        List<Concept> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
@@ -96,7 +96,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         String skosConceptId = "675";
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
-        List<Concept> list = toList(query.setCount(1).page(
+        List<Concept> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());

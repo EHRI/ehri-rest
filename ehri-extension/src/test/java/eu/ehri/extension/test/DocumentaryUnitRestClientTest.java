@@ -3,6 +3,7 @@ package eu.ehri.extension.test;
 import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
@@ -13,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Comparator;
@@ -193,18 +195,30 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         List<Map<String, Object>> data = getEntityList(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
         assertTrue(data.size() > 0);
-        Collections.sort(data, new Comparator<Map<String, Object>>() {
-            @Override
-            public int compare(Map<String, Object> c1, Map<String, Object> c2) {
-                return ((String) c1.get("id")).compareTo((String) c2.get("id"));
-            }
-        });
+        Collections.sort(data, dataSort);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
         @SuppressWarnings("unchecked")
         Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
                 "data");
         assertEquals(FIRST_DOC_ID, c1data.get(Ontology.IDENTIFIER_KEY));
+    }
+
+    @Test
+    public void testListDocumentaryUnitWithOffset() throws Exception {
+        // Fetch the second and third doc unit items (c2 and c3)
+        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<String>();
+        params.add(AbstractRestResource.OFFSET_PARAM, "1");
+        params.add(AbstractRestResource.LIMIT_PARAM, "1");
+        List<Map<String, Object>> data = getEntityList(
+                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
+        assertEquals(1, data.size());
+        Collections.sort(data, dataSort);
+        // Extract the second documentary unit. According to the fixtures this
+        // should be named 'c2'.
+        @SuppressWarnings("unchecked")
+        Map<String, Object> c2data = (Map<String, Object>) data.get(0).get("data");
+        assertEquals("c2", c2data.get(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -319,4 +333,11 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     private URI getCreationUri() {
         return ehriUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, Entities.DOCUMENTARY_UNIT);
     }
+
+    private Comparator<Map<String, Object>> dataSort = new Comparator<Map<String, Object>>() {
+        @Override
+        public int compare(Map<String, Object> a, Map<String, Object> b) {
+            return ((String) a.get("id")).compareTo((String) b.get("id"));
+        }
+    };
 }

@@ -35,7 +35,7 @@ public class BaseRestClientTest extends RunningServerTest {
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
 
-    protected static Pattern paginationPattern = Pattern.compile("page=(-?\\d+); count=(-?\\d+); total=(-?\\d+)");
+    protected static Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
