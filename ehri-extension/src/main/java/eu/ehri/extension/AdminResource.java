@@ -3,6 +3,8 @@ package eu.ehri.extension;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Ontology;
@@ -23,7 +25,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +91,24 @@ public class AdminResource extends AbstractRestResource {
         } finally {
             cleanupTransaction();
         }
+    }
+
+    /**
+     * Export the DB as a stream of JSON in
+     * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
+     * <p/>
+     * The mode used is EXTENDED.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_exportGraphSON")
+    public Response getGraphSON() throws Exception {
+        return Response.ok(new StreamingOutput() {
+            @Override
+            public void write(OutputStream stream) throws IOException, WebApplicationException {
+                GraphSONWriter.outputGraph(graph, stream, GraphSONMode.EXTENDED);
+            }
+        }).build();
     }
 
     /**
