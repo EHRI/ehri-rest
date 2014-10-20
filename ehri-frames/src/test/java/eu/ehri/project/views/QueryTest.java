@@ -50,22 +50,27 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals(toList(allDocs).size(), list.size());
 
         // Test the limit function
-        Page<DocumentaryUnit> page = query.setCount(1).page(validUser);
+        Page<DocumentaryUnit> page = query.setLimit(1).page(validUser);
         list = toList(page);
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
 
         // Test the offset function
-        list = toList(query.setCount(2).setPage(1).page(validUser));
+        list = toList(query.setLimit(2).setOffset(0).page(validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
 
         // Test negative count (all items)
-        list = toList(query.setCount(-1).setPage(1).page(validUser));
+        list = toList(query.setLimit(-1).page(validUser));
         assertFalse(list.isEmpty());
         assertEquals(4, list.size());
 
-        list = toList(query.setCount(0).setPage(1).page(validUser));
+        // Test negative count (all items) and an offset
+        list = toList(query.setOffset(1).setLimit(-1).page(validUser));
+        assertFalse(list.isEmpty());
+        assertEquals(3, list.size());
+
+        list = toList(query.setLimit(0).page(validUser));
         assertEquals(0, list.size());
     }
 
@@ -82,7 +87,7 @@ public class QueryTest extends AbstractFixtureTest {
                 .getVertices(EntityClass.DOCUMENTARY_UNIT);
 
         // Test the limit function
-        Query.Page<DocumentaryUnit> page = query.setCount(1).page(validUser);
+        Query.Page<DocumentaryUnit> page = query.setLimit(1).page(validUser);
         List<DocumentaryUnit> list = toList(page.getIterable());
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
@@ -118,7 +123,7 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Query for document identifier c1.
-        List<DocumentaryUnit> list = toList(query.setCount(1).page(
+        List<DocumentaryUnit> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
@@ -130,7 +135,7 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class).setStream(true);
 
         // Query for document identifier c1.
-        Page<DocumentaryUnit> list = query.setCount(1).page(
+        Page<DocumentaryUnit> list = query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", validUser);
         assertEquals(-1L, list.getTotal());
     }

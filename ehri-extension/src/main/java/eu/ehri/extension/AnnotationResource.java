@@ -135,7 +135,7 @@ public class AnnotationResource
 
     /**
      * Return a map of annotations for the subtree of the given item and its
-     * child items.
+     * child items. Standard list parameters apply.
      *
      * @param id The item ID
      * @return A list of annotations on the item and it's dependent children.
@@ -147,17 +147,11 @@ public class AnnotationResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public Response listAnnotationsForSubtree(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @PathParam("id") String id)
             throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
         AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
                 .detail(id, getRequesterUserProfile());
-        Query<Annotation> query = new Query<Annotation>(graph, cls)
-                .setPage(page).setCount(count).filter(filters)
-                .orderBy(order).filter(filters)
+        Query<Annotation> query = getQuery(Annotation.class)
                 .setStream(isStreaming());
         return streamingPage(query.page(item.getAnnotations(), getRequesterUserProfile()));
 

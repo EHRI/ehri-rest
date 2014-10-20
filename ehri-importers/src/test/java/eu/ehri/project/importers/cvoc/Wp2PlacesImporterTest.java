@@ -50,7 +50,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
 
         // Query for document identifier.
-        List<Concept> list = toList(query.setCount(1).page(
+        List<Concept> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
         Concept location = list.get(0);
