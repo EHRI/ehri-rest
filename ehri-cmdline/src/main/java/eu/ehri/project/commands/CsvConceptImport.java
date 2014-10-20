@@ -1,19 +1,19 @@
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.PersonalitiesImporter;
+import eu.ehri.project.importers.CsvConceptImporter;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class PersonalitiesImport extends ImportCsvCommand implements Command {
+public class CsvConceptImport extends ImportCsvCommand implements Command {
 
-    final static String NAME = "csv-pers-import";
+    final static String NAME = "csv-concept-import";
 
     /**
      * Constructor.
      */
-    public PersonalitiesImport() {
-        super(PersonalitiesImporter.class);
+    public CsvConceptImport() {
+        super(CsvConceptImporter.class);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        return "Import a CSV file as Personalities into the graph database, using the specified"
+        return "Import a CSV file as concepts into the graph database, using the specified"
                 + sep + "scope and user.";
     }
 
