@@ -18,6 +18,8 @@ import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
@@ -142,9 +144,10 @@ public class EacImporter extends EaImporter {
                         } else if (eventkey.equals("name") && origRelation.get("type").equals("subject")) {
                             Map<String, Object> m = (Map)((List)origRelation.get(eventkey)).get(0);
                             //try to find the original identifier
-                            relationNode.put(LINK_TARGET, m.get("identifier"));
+                            relationNode.put(LINK_TARGET, m.get("concept"));
                             //try to find the original name
                             relationNode.put(Ontology.NAME_KEY, m.get("name"));
+                            relationNode.put("cvoc", m.get("cvoc"));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
@@ -166,6 +169,7 @@ public class EacImporter extends EaImporter {
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
+                //resolved in EacHandler
 //            } else if (key.startsWith("otherFormsOfName")) {
 //                Object name = itemData.get(key);
 //                if (name instanceof List) {
@@ -201,79 +205,132 @@ public class EacImporter extends EaImporter {
         return description;
     }
 
+    protected void solveUndeterminedRelationships(HistoricalAgent unit, Bundle descBundle) throws ValidationError {
+        
+        //Try to resolve the undetermined relationships
+        //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
+        //so they have id's. 
+        for (Description unitdesc : unit.getDescriptions()) {
+            // Put the set of relationships into a HashSet to remove duplicates.
+            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
+                for(String key : rel.asVertex().getPropertyKeys()){
+                logger.debug("solving undetermindRels: " + key + " " +  rel.asVertex().getProperty(key));
+                }
+                /*
+                 * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
+                 * they need to be found in the vocabularies that are in the graph
+                 */
+                if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
+                    String cvoc_id = (String) rel.asVertex().getProperty("cvoc");
+                    String concept_id = (String) rel.asVertex().getProperty(LINK_TARGET);
+                    logger.debug(cvoc_id + "  " + concept_id);
+                    Vocabulary vocabulary;
+                    try {
+                        vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                        for (Concept concept : vocabulary.getConcepts()) {
+                        logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
+                        if (concept.getIdentifier().equals(concept_id)) {
+                            try {
+                                Bundle linkBundle = new Bundle(EntityClass.LINK)
+                                        .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
+                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
+                                Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
+                                unit.addLink(link);
+                                concept.addLink(link);
+                                link.addLinkBody(rel);
+                            } catch (PermissionDenied ex) {
+                                logger.error(ex.getMessage());
+                            } catch (IntegrityError ex) {
+                                logger.error(ex.getMessage());
+                            }
+
+                        }
+
+                    }
+                    } catch (ItemNotFound ex) {
+                        logger.error("Vocabulary with id " + cvoc_id +" not found. "+ex.getMessage());
+                    }
+                    
+                }
+            }
+        }
+    }
+    
     /**
      * Tries to resolve the undetermined relationships for IcaAtoM eac files by iterating through all UndeterminedRelationships,
      * finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating an Annotation for it.
+     * This was used for importing the eac organisations.  
      *
      *
      * @param frame
      * @param descBundle
      * @throws ValidationError
      */
-    private void solveUndeterminedRelationships(HistoricalAgent frame, Bundle descBundle)
-            throws ValidationError {
-        //Try to resolve the undetermined relationships
-        //we can only create the annotations after the HistoricalAgent and it Description have been added to the graph,
-        //so they have id's. 
-        Description histdesc = null;
-        //we need the id (not the identifier) of the description, this requires some checking
-        for (Description thisAgentDescription : frame.getDescriptions()) {
-            //is thisAgentDescription the one we just created?
-            for(String key : thisAgentDescription.asVertex().getPropertyKeys()){
-                logger.debug("solve:" + key +"-"+ thisAgentDescription.asVertex().getProperty(key));
-            }
-//            if (thisAgentDescription.asVertex().getProperty(Ontology.IDENTIFIER_KEY)
-//                    .equals(descBundle.getData().get(Ontology.IDENTIFIER_KEY))) {
-                histdesc = thisAgentDescription;
-//                break;
+//    private void solveUndeterminedRelationships(HistoricalAgent frame, Bundle descBundle)
+//            throws ValidationError {
+//        //Try to resolve the undetermined relationships
+//        //we can only create the annotations after the HistoricalAgent and it Description have been added to the graph,
+//        //so they have id's. 
+//        Description histdesc = null;
+//        //we need the id (not the identifier) of the description, this requires some checking
+//        for (Description thisAgentDescription : frame.getDescriptions()) {
+//            //is thisAgentDescription the one we just created?
+//            for(String key : thisAgentDescription.asVertex().getPropertyKeys()){
+//                logger.debug("solve:" + key +"-"+ thisAgentDescription.asVertex().getProperty(key));
 //            }
-        }
-        if (histdesc == null) {
-            logger.warn("newly created description not found");
-        } else {
-            // Put the set of relationships into a HashSet to remove duplicates.
-            for (UndeterminedRelationship rel : Sets.newHashSet(histdesc.getUndeterminedRelationships())) {
-                //our own ica-atom generated eac files have as target of a relation the url of the ica-atom
-                //this must be matched back to descriptionUrl property in a previously created HistoricalAgentDescription
-                String targetUrl = (String)rel.asVertex().getProperty(LINK_TARGET);
-                Iterable<Vertex> docs = framedGraph.getVertices("descriptionUrl", targetUrl);
-                if (docs.iterator().hasNext()) {
-                    String annotationType = rel.asVertex().getProperty(Ontology.LINK_HAS_TYPE).toString();
-                    DescribedEntity targetEntity = framedGraph.frame(docs.iterator().next(), Description.class).getEntity();
-                    try {
-                        Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                .withDataValue(Ontology.LINK_HAS_TYPE, annotationType)
-                                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, rel.asVertex().getProperty(Ontology.LINK_HAS_DESCRIPTION));
-                        Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, userProfile);
-                        frame.addLink(link);
-                        targetEntity.addLink(link);
-                        link.addLinkBody(rel);
-
-                        //attach the mirror Undetermined Relationship as a body to this Annotation
-                        String thisUrl = descBundle.getData().get("descriptionUrl").toString();
-                        for (Description targetEntityDescription : targetEntity.getDescriptions()) {
-                            for (UndeterminedRelationship remoteRel : Sets.newHashSet(targetEntityDescription.getUndeterminedRelationships())) {
-                                //check that both the body targeturl and the type are the same
-                                if (thisUrl.equals(remoteRel.asVertex().getProperty(LINK_TARGET))
-                                        && annotationType.equals(remoteRel.asVertex().getProperty(Ontology.LINK_HAS_TYPE))
-                                        ) {
-                                    link.addLinkBody(remoteRel);
-                                }
-                            }
-                        }
-                    } catch (IntegrityError e) {
-                        logger.error(e.getMessage());
-                        throw new RuntimeException(e);
-                    } catch (PermissionDenied ex) {
-                        logger.error(ex.getMessage());
-                        throw new RuntimeException(ex);
-                    }
-                } else {
-                    logger.info("relation found, but target " + rel.asVertex().getProperty(LINK_TARGET) + " not in graph");
-                }
-            }
-        }
-    }
+////            if (thisAgentDescription.asVertex().getProperty(Ontology.IDENTIFIER_KEY)
+////                    .equals(descBundle.getData().get(Ontology.IDENTIFIER_KEY))) {
+//                histdesc = thisAgentDescription;
+////                break;
+////            }
+//        }
+//        if (histdesc == null) {
+//            logger.warn("newly created description not found");
+//        } else {
+//            // Put the set of relationships into a HashSet to remove duplicates.
+//            for (UndeterminedRelationship rel : Sets.newHashSet(histdesc.getUndeterminedRelationships())) {
+//                //our own ica-atom generated eac files have as target of a relation the url of the ica-atom
+//                //this must be matched back to descriptionUrl property in a previously created HistoricalAgentDescription
+//                String targetUrl = (String)rel.asVertex().getProperty(LINK_TARGET);
+//                Iterable<Vertex> docs = framedGraph.getVertices("descriptionUrl", targetUrl);
+//                if (docs.iterator().hasNext()) {
+//                    String annotationType = rel.asVertex().getProperty(Ontology.LINK_HAS_TYPE).toString();
+//                    DescribedEntity targetEntity = framedGraph.frame(docs.iterator().next(), Description.class).getEntity();
+//                    try {
+//                        Bundle linkBundle = new Bundle(EntityClass.LINK)
+//                                .withDataValue(Ontology.LINK_HAS_TYPE, annotationType)
+//                                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, rel.asVertex().getProperty(Ontology.LINK_HAS_DESCRIPTION));
+//                        Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, userProfile);
+//                        frame.addLink(link);
+//                        targetEntity.addLink(link);
+//                        link.addLinkBody(rel);
+//
+//                        //attach the mirror Undetermined Relationship as a body to this Annotation
+//                        String thisUrl = descBundle.getData().get("descriptionUrl").toString();
+//                        for (Description targetEntityDescription : targetEntity.getDescriptions()) {
+//                            for (UndeterminedRelationship remoteRel : Sets.newHashSet(targetEntityDescription.getUndeterminedRelationships())) {
+//                                //check that both the body targeturl and the type are the same
+//                                if (thisUrl.equals(remoteRel.asVertex().getProperty(LINK_TARGET))
+//                                        && annotationType.equals(remoteRel.asVertex().getProperty(Ontology.LINK_HAS_TYPE))
+//                                        ) {
+//                                    link.addLinkBody(remoteRel);
+//                                }
+//                            }
+//                        }
+//                    } catch (IntegrityError e) {
+//                        logger.error(e.getMessage());
+//                        throw new RuntimeException(e);
+//                    } catch (PermissionDenied ex) {
+//                        logger.error(ex.getMessage());
+//                        throw new RuntimeException(ex);
+//                    }
+//                } else {
+//                    logger.info("relation found, but target " + rel.asVertex().getProperty(LINK_TARGET) + " not in graph");
+//                }
+//            }
+//        }
+//    }
 
     /**
      * 
