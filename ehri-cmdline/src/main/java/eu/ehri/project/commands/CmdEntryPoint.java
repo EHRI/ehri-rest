@@ -68,6 +68,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(RdfExport.NAME, RdfExport.class);
         mmap.put(RelationAdd.NAME, RelationAdd.class);
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
+        mmap.put(CsvConceptImport.NAME, CsvConceptImport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
         mmap.put(EadAsVirtualCollectionImport.NAME, EadAsVirtualCollectionImport.class);

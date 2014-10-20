@@ -117,15 +117,6 @@
             <resourceRelation resourceRelationType="subjectOf" xlink:href="http://www.worldcat.org/identities/nc-waffen ss$ss armeekorps xiv" xlink:role="archivalRecords" xlink:type="simple">
                 <relationEntry>Waffen-SS</relationEntry>
             </resourceRelation>
-                        <resourceRelation resourceRelationType="creatorOf" xlink:href="http://worldcat.org/oclc/749019594" xlink:role="resource" xlink:type="simple">
-                <relationEntry localType="book"/>
-                <relationEntry localType="creator">CHAIKOVS'KY, Danilo</relationEntry>
-            </resourceRelation>
-            <resourceRelation resourceRelationType="creatorOf" xlink:href="http://worldcat.org/oclc/557895421" xlink:role="resource" xlink:type="simple">
-                <relationEntry localType="book">Boris oder Arsen. Ein Beitrag zur Lösung der bulgarischen Frage</relationEntry>
-                <relationEntry localType="creator">Boris</relationEntry>
-                <relationEntry localType="VIAF">64024407</relationEntry>
-            </resourceRelation>
             <resourceRelation resourceRelationType="subjectOf" xlink:href="http://worldcat.org/oclc/055220201" xlink:role="resource" xlink:type="simple">
                 <relationEntry localType="book">King's ransom : a novel based on a true story</relationEntry>
                 <relationEntry localType="isbn">1578567785</relationEntry>
