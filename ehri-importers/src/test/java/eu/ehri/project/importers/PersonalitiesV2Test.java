@@ -40,6 +40,42 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesV2Test.class);
 
+     @Test
+    public void newPersonalitiesWithoutCreatedBy() throws Exception {
+        final String SINGLE_EAC = "PersonalitiesV2withoutCreatedBy.xml";
+        final String logMessage = "Importing EAC " + SINGLE_EAC;
+        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
+        int count = getNodeCount(graph);
+
+        // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
+        
+        ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
+                EacHandler.class, new XmlImportProperties("personalitiesv2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+       /**
+        * null: 2
+        * relationship: 1
+        * historicalAgent: 1
+        * maintenanceEvent: 1
+        * systemEvent: 1
+        * historicalAgentDescription: 1
+        */
+        assertEquals(count+7, getNodeCount(graph));
+        printGraph(graph);
+        HistoricalAgent person = manager.getFrame("ehri-pers-000051", HistoricalAgent.class);
+        for(Description d : person.getDescriptions()){
+            assertEquals("deu", d.getLanguageOfDescription());
+            assertTrue(d.asVertex().getProperty("otherFormsOfName") instanceof List);
+            assertEquals(2, ((List)d.asVertex().getProperty("otherFormsOfName")).size());
+            assertTrue(d.asVertex().getProperty("place") instanceof List);
+            assertEquals(2, ((List)d.asVertex().getProperty("place")).size());
+        }
+    }
+    
     @Test
     public void newPersonalitiesWithoutReferredNodes() throws Exception {
         final String SINGLE_EAC = "PersonalitiesV2.xml";

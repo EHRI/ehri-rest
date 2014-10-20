@@ -1,7 +1,6 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
@@ -353,6 +352,7 @@ public class EacImporter extends EaImporter {
                                    if(bookentry.get(entrykey) instanceof List){
                                        for(Object entry : (List)bookentry.get(entrykey)){
                                            if(entry instanceof Map){
+                                               if(((Map<String, Object>)entry).containsKey("type") && ((Map<String, Object>)entry).containsKey("bookentry")){
                                                String type =((Map<String, Object>)entry).get("type").toString();
                                                String value = ((Map<String, Object>)entry).get("bookentry").toString();
                                                 publication = publication.concat(
@@ -362,6 +362,7 @@ public class EacImporter extends EaImporter {
                                                                 )
                                                         + value )
                                                                 ;
+                                                }
                                            }
                                        }
                                    }
@@ -371,17 +372,25 @@ public class EacImporter extends EaImporter {
                                    publication = publication.concat(entrykey+":"+bookentry.get(entrykey));
                                }
                            }
-                           if(created)
-                               createdBy.add(publication);
+                           if(created){
+                               if(publication != null){
+                           
+                           
+                               createdBy.add(publication);}
+                           }
                            else{
+                               if(publication != null){
                                subjectOf.add(publication);
+                               }
                            }
                            
                        }
                    }
                 }
-                description.put("createdBy", createdBy);
-                description.put("subjectOf", subjectOf);
+                if(createdBy != null && !createdBy.isEmpty())
+                    description.put("createdBy", createdBy);
+                if(subjectOf != null && !subjectOf.isEmpty())
+                    description.put("subjectOf", subjectOf);
 
     }
 }
