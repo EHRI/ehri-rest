@@ -6,7 +6,12 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Promotable;
+import eu.ehri.project.models.base.TemporalEntity;
 
 /**
  * Links two items together with a given body, with may either be

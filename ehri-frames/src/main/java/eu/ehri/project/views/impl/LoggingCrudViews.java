@@ -4,9 +4,19 @@ import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistence.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.Crud;
 
 /**

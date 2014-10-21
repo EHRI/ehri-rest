@@ -3,18 +3,17 @@ package eu.ehri.project.importers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.MaintenanceEvent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * to be used in conjunction with EagImporter

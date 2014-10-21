@@ -1,11 +1,10 @@
 package eu.ehri.project.commands;
 
-import static org.junit.Assert.*;
-
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.apache.commons.cli.CommandLine;
 import org.junit.Test;
 
-import eu.ehri.project.test.AbstractFixtureTest;
+import static org.junit.Assert.assertEquals;
 
 public class UserAddTest extends AbstractFixtureTest {
 

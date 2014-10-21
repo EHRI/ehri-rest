@@ -21,10 +21,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 

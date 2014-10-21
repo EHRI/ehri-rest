@@ -1,11 +1,14 @@
 package eu.ehri.extension.base;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.persistence.Bundle;
 
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
 

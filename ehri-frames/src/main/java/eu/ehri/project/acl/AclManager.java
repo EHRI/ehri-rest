@@ -2,7 +2,10 @@ package eu.ehri.project.acl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -12,11 +15,23 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.ContentType;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Permission;
+import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionGrantTarget;
+import eu.ehri.project.models.base.PermissionScope;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Helper class for checking and asserting access and write permissions.

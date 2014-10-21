@@ -2,8 +2,17 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistence.utils.BundleUtils;
@@ -15,7 +24,9 @@ import org.junit.Test;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BundleDAOTest extends ModelTestBase {
 

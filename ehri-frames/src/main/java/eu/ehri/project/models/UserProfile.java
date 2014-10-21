@@ -11,10 +11,18 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.models.base.Watchable;
 
+import static eu.ehri.project.definitions.Ontology.ACCESSOR_BELONGS_TO_GROUP;
+import static eu.ehri.project.definitions.Ontology.USER_FOLLOWS_USER;
+import static eu.ehri.project.definitions.Ontology.USER_WATCHING_ITEM;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
-import static eu.ehri.project.definitions.Ontology.*;
 
 @EntityType(EntityClass.USER_PROFILE)
 public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity, 

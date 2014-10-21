@@ -7,7 +7,13 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.*;
+import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.Country;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.GraphTestBase;
@@ -26,8 +32,13 @@ import java.util.Map;
 import static eu.ehri.project.acl.ContentTypes.COUNTRY;
 import static eu.ehri.project.acl.ContentTypes.DOCUMENTARY_UNIT;
 import static eu.ehri.project.acl.ContentTypes.REPOSITORY;
-import static eu.ehri.project.acl.PermissionType.*;
-import static org.junit.Assert.*;
+import static eu.ehri.project.acl.PermissionType.CREATE;
+import static eu.ehri.project.acl.PermissionType.DELETE;
+import static eu.ehri.project.acl.PermissionType.OWNER;
+import static eu.ehri.project.acl.PermissionType.UPDATE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: michaelb

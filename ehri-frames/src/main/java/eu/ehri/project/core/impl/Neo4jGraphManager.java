@@ -1,7 +1,8 @@
 package eu.ehri.project.core.impl;
 
 import com.google.common.base.Preconditions;
-import com.tinkerpop.blueprints.*;
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;

@@ -1,7 +1,8 @@
 package eu.ehri.extension.base;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.ItemNotFound;
 
 import javax.ws.rs.core.Response;
 

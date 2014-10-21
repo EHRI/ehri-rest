@@ -11,7 +11,8 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addSingleRelationship;

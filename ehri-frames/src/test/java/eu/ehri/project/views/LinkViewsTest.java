@@ -4,7 +4,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.*;
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.models.Link;
+import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.persistence.Bundle;
@@ -12,7 +17,6 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;

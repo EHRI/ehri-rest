@@ -4,18 +4,24 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.VirtualUnit;
+import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:

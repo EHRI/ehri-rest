@@ -21,7 +21,9 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.AbstractRestResource.ID_PARAM;
 import static eu.ehri.extension.UserProfileResource.FOLLOWING;
 import static eu.ehri.extension.UserProfileResource.WATCHING;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class SystemEventRestClientTest extends BaseRestClientTest {
 

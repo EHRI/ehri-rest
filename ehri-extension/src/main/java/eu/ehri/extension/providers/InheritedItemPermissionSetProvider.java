@@ -1,12 +1,10 @@
 package eu.ehri.extension.providers;
 
-import com.sun.net.httpserver.Headers;
 import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.acl.InheritedItemPermissionSet;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
@@ -14,7 +12,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import javax.xml.ws.Response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;

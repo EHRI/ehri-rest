@@ -12,14 +12,20 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
 import java.util.List;
 
-import static eu.ehri.project.models.EntityClass.*;
+import static eu.ehri.project.models.EntityClass.CVOC_CONCEPT;
+import static eu.ehri.project.models.EntityClass.DOCUMENTARY_UNIT;
+import static eu.ehri.project.models.EntityClass.HISTORICAL_AGENT;
+import static eu.ehri.project.models.EntityClass.REPOSITORY;
 
 /**
  * Sanity check various parts of the graph.
