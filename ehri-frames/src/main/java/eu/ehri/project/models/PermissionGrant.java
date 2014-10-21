@@ -9,6 +9,12 @@ import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
+/**
+ * Frame class representing a grant of a permission
+ * to a user.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 @EntityType(EntityClass.PERMISSION_GRANT)
 public interface PermissionGrant extends Frame {
 

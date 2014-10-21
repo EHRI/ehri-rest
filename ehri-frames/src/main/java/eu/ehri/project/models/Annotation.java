@@ -12,31 +12,65 @@ import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.Promotable;
 
+/**
+ * A frame class representing an annotation.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 @EntityType(EntityClass.ANNOTATION)
 public interface Annotation extends AnnotatableEntity, AccessibleEntity, Promotable {
 
+    /**
+     * Fetch annotations that have been made <i>on this annotation.</i>
+     *
+     * @return an iterable of annotation frames
+     */
     @Fetch(Ontology.ANNOTATION_ANNOTATES)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
     public Iterable<Annotation> getAnnotations();
 
+    /**
+     * Fetch the annotator of this annotation.
+     *
+     * @return an annotator frame
+     */
     @Fetch(value = Ontology.ANNOTATOR_HAS_ANNOTATION, depth = 1)
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
     public Annotator getAnnotator();
 
+    /**
+     * Set the annotator of this annotation.
+     *
+     * @param annotator an annotator frame
+     * @return
+     */
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
-    public Annotator setAnnotator(final Annotator annotator);
+    public void setAnnotator(final Annotator annotator);
 
+    /**
+     * Fetch all targets of this annotation, including sub-parts
+     * of an item.
+     *
+     * @return an iterable of annotatable items
+     */
     @Fetch(Ontology.ANNOTATES_PART)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART)
     public Iterable<AnnotatableEntity> getTargetParts();
 
+    /**
+     * Fetch the targets of this annotation.
+     *
+     * @return an iterable of annotatable items
+     */
     @Fetch(Ontology.ANNOTATES)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
 
-    @Adjacency(label = Ontology.ANNOTATION_HAS_SOURCE)
-    public void addSource(final Annotator annotator);
-
+    /**
+     * Get the body of this annotation.
+     *
+     * @return the body text
+     */
     @Mandatory
     @Property(Ontology.ANNOTATION_NOTES_BODY)
     public String getBody();

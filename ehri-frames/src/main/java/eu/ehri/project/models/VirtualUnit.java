@@ -28,11 +28,11 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.removeAllRelationshi
  * an incoming "isDescribedBy" relationship from a VU. The difference
  * denotes ownership (dependency) which likewise controls cascading
  * deletions.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.VIRTUAL_UNIT)
-
 public interface VirtualUnit extends AbstractUnit {
-
 
     @JavaHandler
     public long getChildCount();
@@ -53,9 +53,19 @@ public interface VirtualUnit extends AbstractUnit {
     @JavaHandler
     public boolean addChild(final VirtualUnit child);
 
+    /**
+     * Remove a child virtual unit from this one.
+     *
+     * @param child a virtual unit frame
+     * @return whether or not the item was removed
+     */
     @JavaHandler
     public boolean removeChild(final VirtualUnit child);
 
+    /**
+     * Update/reset the cache counting the number of
+     * items both included in the VU, or subordinate to it.
+     */
     @JavaHandler
     public void updateChildCountCache();
 
@@ -65,33 +75,81 @@ public interface VirtualUnit extends AbstractUnit {
     @JavaHandler
     public Iterable<VirtualUnit> getAncestors();
 
+    /**
+     * Get the child virtual units subordinate to this one.
+     *
+     * @return an iterable of virtual unit frames
+     */
     @JavaHandler
     public Iterable<VirtualUnit> getChildren();
 
+    /**
+     * Fetch <b>all</b> child virtual units and their children
+     * recursively.
+     *
+     * @return an iterable of virtual unit frames
+     */
     @JavaHandler
     public Iterable<VirtualUnit> getAllChildren();
 
+    /**
+     * Fetch documentary unit items included in this virtual unit.
+     *
+     * @return an iterable of documentary unit frames
+     */
     @Fetch(value = Ontology.VC_INCLUDES_UNIT, full = true)
     @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.OUT)
     public Iterable<DocumentaryUnit> getIncludedUnits();
 
+    /**
+     * Get the repositories which hold the documentary unit items
+     * included in this virtual unit.
+     *
+     * @return an iterable of repository frames
+     */
     @JavaHandler
     public Iterable<Repository> getRepositories();
-    
+
+    /**
+     * Add a documentary unit to be included in this virtual unit.
+     *
+     * @param unit a documentary unit frame
+     * @return whether or not the item was newly added
+     */
     @JavaHandler
     public boolean addIncludedUnit(final DocumentaryUnit unit);
 
+    /**
+     * Remove a documentary unit item from this virtual unit.
+     *
+     * @param unit a documentary unit frame
+     */
     @JavaHandler
     public void removeIncludedUnit(final DocumentaryUnit unit);
 
+    /**
+     * Fetch the author of this virtual unit.
+     *
+     * @return a user or group frame
+     */
     @Fetch(Ontology.VC_HAS_AUTHOR)
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
 
+    /**
+     * Set the author of this virtual unit.
+     *
+     * @param accessor a user or group frame
+     */
     @Fetch(Ontology.VC_HAS_AUTHOR)
     @JavaHandler
     public void setAuthor(final Accessor accessor);
 
+    /**
+     * Fetch the descriptions of this virtual unit.
+     *
+     * @return an iterable of documentary unit description frames
+     */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getVirtualDescriptions();
 

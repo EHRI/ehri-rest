@@ -20,12 +20,27 @@ import eu.ehri.project.models.base.NamedEntity;
 @EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
 public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity, Annotator {
 
+    /**
+     * Fetch the description to which this UR belongs.
+     *
+     * @return a description frame
+     */
     @Adjacency(label = Ontology.HAS_ACCESS_POINT, direction = Direction.IN)
     public Description getDescription();
 
+    /**
+     * Fetch the links which make up the body of this UR (if any.)
+     *
+     * @return an iterable of link frames
+     */
     @Adjacency(label = Ontology.LINK_HAS_BODY, direction = Direction.IN)
     public Iterable<Link> getLinks();
 
+    /**
+     * Get the relationship type of this UR.
+     *
+     * @return A type string
+     */
     @Mandatory
     @Property(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)
     public String getRelationshipType();
