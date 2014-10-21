@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
 public class EadHandler extends SaxXmlHandler {
     
     public static final String EADID = "eadId",
-            SOURCEFILEID = "sourceFileId",
+//            SOURCEFILEID = "sourceFileId",
             MAINAGENCYCODE = "mainagencycode",
             AUTHOR = "author";
     
@@ -176,7 +176,7 @@ public class EadHandler extends SaxXmlHandler {
     	// If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
     	if (localName.equals("eadid") || qName.equals("eadid")) {
-            eadfileValues.put(EADID, (String) currentGraphPath.peek().get(SOURCEFILEID));
+            eadfileValues.put(EADID, (String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
     	    logger.debug("Found <eadid>: "+ eadfileValues.get(EADID));
     	}
         else if (localName.equals("author") || qName.equals("author")) {
@@ -218,7 +218,7 @@ public class EadHandler extends SaxXmlHandler {
                     extractDate(currentGraph);
                     
                     //add eadid as sourceFileId
-                    currentGraph.put(SOURCEFILEID, getSourceFileId());
+                    currentGraph.put(Ontology.SOURCEFILE_KEY, getSourceFileId());
                     
                     //only on toplevel description:
                     if(qName.equals("archdesc")){
@@ -229,7 +229,7 @@ public class EadHandler extends SaxXmlHandler {
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
                     //add the maintenanceEvents, but only to the DD that was just created
                     for(DocumentDescription dd : current.getDocumentDescriptions()){
-                        if(getSourceFileId().equals(dd.asVertex().getProperty(SOURCEFILEID))){
+                        if(getSourceFileId().equals(dd.asVertex().getProperty(Ontology.SOURCEFILE_KEY))){
                             for(MaintenanceEvent me : maintenanceEvents){
                                 dd.addMaintenanceEvent(me);
                             }

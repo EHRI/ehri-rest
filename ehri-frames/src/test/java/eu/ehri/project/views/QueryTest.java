@@ -63,7 +63,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Test negative count (all items)
         list = toList(query.setCount(-1).setPage(1).page(validUser));
         assertFalse(list.isEmpty());
-        assertEquals(4, list.size());
+        assertEquals(5, list.size());
 
         list = toList(query.setCount(0).setPage(1).page(validUser));
         assertEquals(0, list.size());
@@ -92,7 +92,7 @@ public class QueryTest extends AbstractFixtureTest {
     @Test
     public void testCount() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, DocumentaryUnit.class);
-        assertEquals(4, query.count());
+        assertEquals(5, query.count());
     }
 
     @Test
@@ -146,13 +146,13 @@ public class QueryTest extends AbstractFixtureTest {
                 Ontology.DOC_IS_CHILD_OF, Direction.OUT, 0).page(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
-        assertEquals(2, list.size());
+        assertEquals(3, list.size());
 
         // The same query with a depth filter of 1 should get 3 items
         list = toList(query.depthFilter(Ontology.DOC_IS_CHILD_OF,
                 Direction.OUT, 1).page(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
-        assertEquals(3, list.size());
+        assertEquals(4, list.size());
 
     }
 
@@ -202,7 +202,7 @@ public class QueryTest extends AbstractFixtureTest {
         list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.GT, "c3").page(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
-        assertEquals(1, list.size());
+        assertEquals(2, list.size());
         assertEquals("c4", list.get(0).getIdentifier());
 
         // Less than or equal... should get twos items (c1,c2)
@@ -220,10 +220,11 @@ public class QueryTest extends AbstractFixtureTest {
                 .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC);
         list = toList(fQuery
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser));
-        assertEquals(2, list.size());
+        assertEquals(3, list.size());
         assertEquals("c3", list.get(0).getIdentifier());
         assertEquals("c4", list.get(1).getIdentifier());
-        assertEquals(4, toList(fQuery.clearFilters()
+        assertEquals("nl-r1-m19", list.get(2).getIdentifier());
+        assertEquals(5, toList(fQuery.clearFilters()
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser)).size());
 
     }
@@ -288,7 +289,8 @@ public class QueryTest extends AbstractFixtureTest {
 
         // NB: This will break if other collections are added to the
         // fixtures. Adjust as necessary.
-        assertEquals("c4", toList(page.getIterable()).get(0).getIdentifier());
+        assertEquals("nl-r1-m19", toList(page.getIterable()).get(0).getIdentifier());
+//        assertEquals("c4", toList(page.getIterable()).get(1).getIdentifier());
         assertEquals("c1", toList(orderQuery
                 .clearOrdering()
                 .defaultOrderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)

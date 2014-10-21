@@ -13,16 +13,18 @@ import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author linda
  */
 public class YadVashemTest extends AbstractImporterTest{
-    
+    private static final Logger logger = LoggerFactory.getLogger(YadVashemTest.class);
        protected final String SINGLE_EAD = "YV_m19_eng.xml";
        protected final String SINGLE_EAD_HEB = "YV_m19_heb.xml";
+       protected final String SINGLE_EAD_C1 = "YV_c1.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1",
             ARCHDESC = "M.19",
@@ -31,7 +33,35 @@ public class YadVashemTest extends AbstractImporterTest{
     
     protected final String SOURCE_FILE_ID="10660245#ENG";
     
-    
+
+    @Test
+    public void testWithExistingDescription() throws Exception{
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        final String logMessage = "Importing a single EAD";
+        DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
+        
+        assertEquals("nl-r1-m19", m19.getIdentifier());
+        assertEquals(1, toList(m19.getDocumentDescriptions()).size());
+
+        int count = getNodeCount(graph);
+        System.out.println(count);
+         // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
+
+        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
+        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+                .setTolerant(Boolean.TRUE);
+        ImportLog log = importManager.importFile(ios, logMessage);
+//        printGraph(graph);
+        // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+              //for now, it wrongfully deleted the previous description!
+
+        assertEquals(count + 19, getNodeCount(graph));
+        assertEquals(2, toList(m19.getDocumentDescriptions()).size());
+    }
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -62,8 +92,7 @@ public class YadVashemTest extends AbstractImporterTest{
         * systemEvent: 1
         * datePeriod: 1
         */
-       int newCount = count + 20;
-        assertEquals(newCount, getNodeCount(graph));
+        assertEquals(count + 20, getNodeCount(graph));
 
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
