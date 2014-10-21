@@ -112,9 +112,9 @@ public class EacImporter extends EaImporter {
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
-        if (mutation.created()) {
+//        if (mutation.created()) {
             solveUndeterminedRelationships(frame, descBundle);
-        }
+//        }
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())

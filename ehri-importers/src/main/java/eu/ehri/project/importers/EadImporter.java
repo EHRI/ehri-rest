@@ -122,6 +122,7 @@ public class EadImporter extends EaImporter {
             }
         }
         handleCallbacks(mutation);
+        logger.debug("============== "+frame.getIdentifier()+" created:" + mutation.created());
         if (mutation.created()) {
             solveUndeterminedRelationships(frame, descBundle);
         }
@@ -141,6 +142,7 @@ public class EadImporter extends EaImporter {
 
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
+        final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
         /*
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
@@ -167,9 +169,12 @@ public class EadImporter extends EaImporter {
                     @Override
                     public boolean remove(String relationLabel, Bundle bundle) {
                         String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                        String sourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
                         return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
                                 && (lang != null
-                                && lang.equals(languageOfDesc));
+                                && lang.equals(languageOfDesc)
+                                && (sourceFileId != null && sourceFileId.equals(thisSourceFileId))
+                                );
                     }
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);

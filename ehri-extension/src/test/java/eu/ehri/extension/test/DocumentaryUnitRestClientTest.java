@@ -231,7 +231,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void testCountDocumentaryUnits() throws Exception {
         Long data = getEntityCount(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
-        assertEquals(Long.valueOf(4), data);
+        assertEquals(Long.valueOf(5), data);
     }
 
     @Test
