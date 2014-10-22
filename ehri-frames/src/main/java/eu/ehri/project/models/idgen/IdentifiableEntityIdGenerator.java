@@ -3,7 +3,6 @@ package eu.ehri.project.models.idgen;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
-
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 
 /**

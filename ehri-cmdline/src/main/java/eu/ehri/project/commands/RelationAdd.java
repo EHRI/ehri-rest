@@ -5,7 +5,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;

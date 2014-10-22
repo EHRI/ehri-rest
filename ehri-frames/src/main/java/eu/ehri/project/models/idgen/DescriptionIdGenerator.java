@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
-
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 

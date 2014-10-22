@@ -6,8 +6,8 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import org.apache.commons.cli.CommandLine;
 import org.junit.Test;
 
-import static eu.ehri.project.commands.CmdEntryPoint.RetCode.*;
-
+import static eu.ehri.project.commands.CmdEntryPoint.RetCode.BAD_DATA;
+import static eu.ehri.project.commands.CmdEntryPoint.RetCode.OK;
 import static org.junit.Assert.assertEquals;
 
 /**

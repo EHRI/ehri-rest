@@ -7,7 +7,9 @@ import org.junit.Test;
 
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
 
 public class CvocVocabularyClientTest extends BaseRestClientTest {

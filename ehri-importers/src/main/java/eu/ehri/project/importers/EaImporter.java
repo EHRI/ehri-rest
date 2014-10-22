@@ -1,22 +1,19 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.PermissionScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionScope;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Import EAC for a given repository into the database.

@@ -14,11 +14,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 
+import static eu.ehri.project.persistence.ActionManager.sameAs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import static eu.ehri.project.persistence.ActionManager.sameAs;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)

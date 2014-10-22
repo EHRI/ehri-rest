@@ -1,9 +1,9 @@
 package eu.ehri.project.models.idgen;
 
+import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedGenerator;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
-import com.fasterxml.uuid.Generators;
 
 import java.util.UUID;
 

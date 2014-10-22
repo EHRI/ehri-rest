@@ -3,6 +3,7 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
@@ -11,8 +12,9 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.*;
-import org.junit.Ignore;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class GenericRestClientTest extends BaseRestClientTest {
 

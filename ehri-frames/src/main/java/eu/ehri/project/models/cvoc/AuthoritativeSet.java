@@ -8,7 +8,11 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.ItemHolder;
+import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**

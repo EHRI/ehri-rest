@@ -1,12 +1,12 @@
 package eu.ehri.project.importers;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager.EventContext;
 import org.codehaus.jackson.annotate.JsonValue;
+
+import java.util.Map;
 
 /**
  * Class that serves as a manifest for an import batch,

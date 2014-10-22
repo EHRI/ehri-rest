@@ -1,8 +1,17 @@
 package eu.ehri.project.test;
 
-import eu.ehri.project.acl.*;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.GlobalPermissionSet;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -14,13 +23,15 @@ import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Map;
 
+import static eu.ehri.project.acl.PermissionType.ANNOTATE;
+import static eu.ehri.project.acl.PermissionType.CREATE;
+import static eu.ehri.project.acl.PermissionType.DELETE;
+import static eu.ehri.project.acl.PermissionType.OWNER;
+import static eu.ehri.project.models.EntityClass.DOCUMENTARY_UNIT;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
-import static eu.ehri.project.models.EntityClass.*;
-import static eu.ehri.project.acl.PermissionType.*;
 
 /**
  * Exercise various aspects of the permission system.

@@ -1,5 +1,8 @@
 package eu.ehri.project.importers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -11,8 +14,6 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

@@ -5,7 +5,10 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)

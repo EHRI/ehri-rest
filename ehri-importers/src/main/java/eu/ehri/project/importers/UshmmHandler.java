@@ -3,15 +3,13 @@
  */
 package eu.ehri.project.importers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.properties.XmlImportProperties;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handler for importing EAD files converted from the USHMM Solr index file.

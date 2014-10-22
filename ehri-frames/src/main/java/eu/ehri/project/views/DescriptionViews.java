@@ -10,8 +10,17 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistence.*;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
