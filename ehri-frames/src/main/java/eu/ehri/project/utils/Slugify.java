@@ -1,17 +1,18 @@
 package eu.ehri.project.utils;
 
-/**
- * michaelb
- *
- * Adapted from:
- * https://github.com/slugify/slugify/blob/master/src/main/java/com/github/slugify/Slugify.java
- */
-
 import com.ibm.icu.text.Transliterator;
 import org.apache.commons.lang.StringUtils;
 
 import java.text.Normalizer;
 
+/**
+ * Class for handling slugification of strings, for use
+ * in identifiers.
+ *
+ * This is largely adapted from <a href="https://github.com/slugify/slugify/blob/master/src/main/java/com/github/slugify/Slugify.java">Slugify on Github</a>.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public class Slugify {
 
     private static final Transliterator transliterator

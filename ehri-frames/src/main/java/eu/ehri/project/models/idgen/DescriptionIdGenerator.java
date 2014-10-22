@@ -13,7 +13,6 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * language code, plus an optional description identifier (say, 'alt').
  * 
  * @author Mike Bryant (http://github.com/mikesname)
- * 
  */
 public enum DescriptionIdGenerator implements IdGenerator {
 

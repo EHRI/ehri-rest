@@ -8,6 +8,8 @@ import java.util.Map;
 
 /**
  * A pairing of an accessor and their non-inherited permissions.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 class AccessorPermissions<T> {
     final Accessor accessor;

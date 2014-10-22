@@ -13,7 +13,6 @@ import org.neo4j.helpers.collection.Iterables;
  * permissions and ID namespaces.
  * 
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public enum SystemScope implements PermissionScope {
     

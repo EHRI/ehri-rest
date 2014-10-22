@@ -7,15 +7,19 @@ import org.codehaus.jackson.annotate.JsonValue;
 import java.util.Set;
 
 /**
- * User: mike
- *
  * Convenience wrapper for the permission set data structure, which
  * looks like:
- *
+ * <p/>
+ * <pre>
+ *     <code>
  *  {
  *      contentType -> [perms...],
  *      ...
  *  }
+ *     </code>
+ * </pre>
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ItemPermissionSet {
 

@@ -29,6 +29,8 @@ import java.util.Set;
 
 /**
  * Views class for permission operations.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class AclViews implements Scoped<AclViews> {
 

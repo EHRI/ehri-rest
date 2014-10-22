@@ -12,6 +12,14 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 
+/**
+ * Interface for CRUD operations on types that derive
+ * from {@link AccessibleEntity}.
+ *
+ * @param <E>
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public interface Crud<E extends AccessibleEntity> {
     public Crud<E> setScope(PermissionScope scope);
     

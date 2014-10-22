@@ -6,6 +6,8 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
+ * An item that belongs in some authoritative set.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public interface AuthoritativeItem extends AccessibleEntity {

@@ -16,7 +16,9 @@ public enum GenericIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    public static final TimeBasedGenerator timeBasedGenerator
+    // NB: We use a time-based UUID generator here because
+    // sequential UUIDs prevent index fragmentation.
+    private static final TimeBasedGenerator timeBasedGenerator
             = Generators.timeBasedGenerator();
 
     public ListMultimap<String, String> handleIdCollision(Iterable<String> scopeIds, Bundle bundle) {

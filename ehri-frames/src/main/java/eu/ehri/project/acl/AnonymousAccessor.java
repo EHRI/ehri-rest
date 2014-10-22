@@ -11,7 +11,6 @@ import eu.ehri.project.models.utils.EmptyIterable;
  * Implementation of an anonymous user singleton.
  * 
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public enum AnonymousAccessor implements Accessor {
     

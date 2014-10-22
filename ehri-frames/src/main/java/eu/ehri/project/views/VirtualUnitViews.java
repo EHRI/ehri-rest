@@ -24,6 +24,8 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 import java.util.List;
 
 /**
+ * View class for interacting with virtual units.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class VirtualUnitViews {
