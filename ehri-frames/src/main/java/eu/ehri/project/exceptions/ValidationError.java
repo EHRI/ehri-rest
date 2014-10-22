@@ -5,10 +5,12 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
 
 /**
- * Validation error. This exception holds a map of field=error(s) values.
+ * Represents the failure of incoming data to confirm to
+ * some expected format. Like the {@link Bundle} class,
+ * errors are held as a sub-tree corresponding to the
+ * branches of the incoming data.
  * 
  * @author Mike Bryant (http://github.com/mikesname)
- * 
  */
 public class ValidationError extends Exception {
 

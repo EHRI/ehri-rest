@@ -11,7 +11,6 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import eu.ehri.project.core.impl.BlueprintsGraphManager;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
-import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
@@ -243,7 +242,7 @@ public class GraphManagerTest {
         }
 
         @Test
-        public void testSelectiveIndexing() throws IndexNotFoundException,
+        public void testSelectiveIndexing() throws Exception,
                 IntegrityError {
             // We need to create one first, sorry
             Map<String, ?> data = ImmutableMap.of(

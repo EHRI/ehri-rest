@@ -43,10 +43,7 @@ public interface VirtualUnit extends AbstractUnit {
     public VirtualUnit getParent();
 
     /**
-     * Add a child. Note: this should throw an exception like
-     * IllegalEdgeLoop if the operation is self-referential or
-     * results in a loop, but due to a frames limitation we can't
-     * Instead it returns a boolean indicating success/failure.
+     * Add a child.
      *
      * @param child The child collection
      * @return Whether or not the operation was allowed.

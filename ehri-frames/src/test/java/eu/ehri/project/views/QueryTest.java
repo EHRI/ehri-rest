@@ -7,8 +7,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IndexNotFoundException;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -35,7 +33,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testAdminCanListEverything() throws IndexNotFoundException {
+    public void testAdminCanListEverything() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -77,7 +75,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testPage() throws IndexNotFoundException {
+    public void testPage() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -103,8 +101,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testUserCannotListPrivate() throws IndexNotFoundException,
-            ItemNotFound {
+    public void testUserCannotListPrivate() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -120,7 +117,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithFilter() throws IndexNotFoundException {
+    public void testListWithFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -132,7 +129,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithStreaming() throws IndexNotFoundException {
+    public void testListWithStreaming() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setStream(true);
 
@@ -143,7 +140,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithDepthFilter() throws IndexNotFoundException {
+    public void testListWithDepthFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -164,7 +161,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithPredicateFilter() throws IndexNotFoundException {
+    public void testListWithPredicateFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -276,7 +273,7 @@ public class QueryTest extends AbstractFixtureTest {
 
 
     @Test
-    public void testListWithSort() throws IndexNotFoundException {
+    public void testListWithSort() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -304,7 +301,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithGlobFilter() throws IndexNotFoundException {
+    public void testListWithGlobFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -321,7 +318,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithFailFilter() throws IndexNotFoundException {
+    public void testListWithFailFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 

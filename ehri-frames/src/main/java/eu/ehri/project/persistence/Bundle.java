@@ -24,7 +24,8 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Class that represents a graph entity and subtree relations.
+ * Class that represents a graph entity and subtree relations
+ * prior to being materialised as vertices and edges.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
