@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the Event class. Note: Event instances
+ * Provides a web service interface for the Event model. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  *

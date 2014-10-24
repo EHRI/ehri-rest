@@ -183,9 +183,9 @@ public class BaseRestClientTest extends RunningServerTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME, user);
     }
 
-    protected String readFileAsString(String filePath)
+    protected String readResourceFileAsString(String resourceName)
             throws java.io.IOException {
-        URL url = Resources.getResource(filePath);
+        URL url = Resources.getResource(resourceName);
         return Resources.toString(url, Charsets.UTF_8);
     }
 }

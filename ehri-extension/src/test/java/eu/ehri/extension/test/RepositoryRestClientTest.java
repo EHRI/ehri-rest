@@ -27,8 +27,8 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        agentTestData = readFileAsString("repository.json");
-        docTestData = readFileAsString("documentaryUnit.json");
+        agentTestData = readResourceFileAsString("repository.json");
+        docTestData = readResourceFileAsString("documentaryUnit.json");
     }
 
     @Test

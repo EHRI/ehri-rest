@@ -23,7 +23,7 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        authorityTestData = readFileAsString("historicalAgent.json");
+        authorityTestData = readResourceFileAsString("historicalAgent.json");
     }
 
     @Test

@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 /**
- * Provides a RESTful interface for the PermissionGrant class.
+ * Provides a web service interface for the PermissionGrant model.
  * 
  * FIXME: PermissionGrant is not currently an AccessibleEntity so
  * handling it is complicated. We need to re-architect the REST views

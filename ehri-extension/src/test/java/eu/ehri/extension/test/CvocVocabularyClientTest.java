@@ -21,7 +21,7 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonApplesTestStr = readFileAsString("apples.json");
+        jsonApplesTestStr = readResourceFileAsString("apples.json");
     }
 
     /**

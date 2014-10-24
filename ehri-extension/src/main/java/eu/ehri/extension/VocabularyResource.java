@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the Vocabulary items. Vocabularies are
+ * Provides a web service interface for the Vocabulary model. Vocabularies are
  * containers for Concepts.
  *
  * @author Paul Boon (http://github.com/PaulBoon)

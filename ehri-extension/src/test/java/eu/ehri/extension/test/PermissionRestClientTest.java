@@ -40,7 +40,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
+        jsonDocumentaryUnitTestStr = readResourceFileAsString("documentaryUnit.json");
     }
 
     @Test

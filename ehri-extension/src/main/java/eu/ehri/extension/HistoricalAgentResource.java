@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the HistoricalAgent model.
+ * Provides a web service interface for the HistoricalAgent model.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */

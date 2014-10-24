@@ -39,8 +39,8 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonVirtualUnitStr = readFileAsString("virtualUnit.json");
-        partialJsonVirtualUnitTestStr = readFileAsString("partialVirtualUnit.json");
+        jsonVirtualUnitStr = readResourceFileAsString("virtualUnit.json");
+        partialJsonVirtualUnitTestStr = readResourceFileAsString("partialVirtualUnit.json");
     }
 
     /**

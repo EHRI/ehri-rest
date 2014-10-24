@@ -25,8 +25,8 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        descriptionTestStr = readFileAsString("documentDescription.json");
-        accessPointTestStr = readFileAsString("undeterminedRelationship.json");
+        descriptionTestStr = readResourceFileAsString("documentDescription.json");
+        accessPointTestStr = readResourceFileAsString("undeterminedRelationship.json");
     }
 
     @Test

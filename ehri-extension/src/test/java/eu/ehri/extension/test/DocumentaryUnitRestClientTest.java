@@ -48,9 +48,9 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
-        invalidJsonDocumentaryUnitTestStr = readFileAsString("invalidDocumentaryUnit.json");
-        partialJsonDocumentaryUnitTestStr = readFileAsString("partialDocumentaryUnit.json");
+        jsonDocumentaryUnitTestStr = readResourceFileAsString("documentaryUnit.json");
+        invalidJsonDocumentaryUnitTestStr = readResourceFileAsString("invalidDocumentaryUnit.json");
+        partialJsonDocumentaryUnitTestStr = readResourceFileAsString("partialDocumentaryUnit.json");
     }
 
     /**

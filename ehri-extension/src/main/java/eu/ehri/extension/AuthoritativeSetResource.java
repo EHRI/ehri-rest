@@ -40,7 +40,7 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the AuthoritativeSet items.
+ * Provides a web service interface for the AuthoritativeSet items. model.
  * Authoritative Sets are containers for Historical Agents
  * (authority files.)
  * 
