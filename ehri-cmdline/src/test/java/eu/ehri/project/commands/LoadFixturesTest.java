@@ -31,7 +31,7 @@ public class LoadFixturesTest extends GraphTestBase {
     @Test
     public void testWithResourceFilePath() throws Exception {
         List<VertexProxy> before = getGraphState(testGraph);
-        String path = getFixtureFilePath("testdata.yaml");
+        String path = getFixtureFilePath("test-fixture.yaml");
         String[] args = new String[]{path};
         LoadFixtures load = new LoadFixtures();
         CommandLine cmdLine = load.getCmdLine(args);
@@ -42,6 +42,5 @@ public class LoadFixturesTest extends GraphTestBase {
         GraphDiff graphDiff = diffGraph(before, after);
         assertTrue(graphDiff.added.size() > 0);
         assertFalse(graphDiff.removed.size() > 0);
-
     }
 }

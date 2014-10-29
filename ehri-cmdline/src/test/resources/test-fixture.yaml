@@ -1,0 +1,15 @@
+- id: kcl
+  type: group
+  data:
+    identifier: kcl-group
+    name: KCL
+
+- id: mike
+  type: userProfile
+  data:
+    identifier: mike
+    name: Mike
+  relationships:
+    belongsTo:
+      - admin
+      - kcl
