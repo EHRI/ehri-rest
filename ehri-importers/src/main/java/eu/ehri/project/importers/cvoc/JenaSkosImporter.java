@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
@@ -17,19 +18,29 @@ import com.hp.hpl.jena.util.iterator.Filter;
 import com.hp.hpl.jena.util.iterator.Map1;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Link;
+import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +50,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class JenaSkosImporter implements SkosImporter {
-    private static final Logger logger = LoggerFactory
-            .getLogger(JenaSkosImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JenaSkosImporter.class);
 
     private final FramedGraph<? extends TransactionalGraph> framedGraph;
     private final Actioner actioner;
@@ -77,9 +88,15 @@ public final class JenaSkosImporter implements SkosImporter {
             .build();
 
     // Properties that end up as undeterminedRelation nodes.
-    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.of(
-            "owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs")
-    );
+        public static final Map<String, URI> RELATION_PROPS = ImmutableMap.<String, URI>builder()
+                .put("owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs"))
+                .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
+                .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
+                .build();
+
+//    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.of(
+//            "owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs")
+//    );
 
     /**
      * Constructor
@@ -176,6 +193,7 @@ public final class JenaSkosImporter implements SkosImporter {
             OntModel model = ModelFactory.createOntologyModel();
             model.read(ios, null, format);
             OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
+            logger.debug("in import file: "+SkosRDFVocabulary.CONCEPT.getURI().toString());
             ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
             Map<Resource, Concept> imported = Maps.newHashMap();
 
@@ -244,7 +262,58 @@ public final class JenaSkosImporter implements SkosImporter {
             builder.addRelation(Ontology.DESCRIPTION_FOR_ENTITY, withRels);
         }
 
-        return dao.createOrUpdate(builder.build(), Concept.class);
+        Mutation<Concept> mut = dao.createOrUpdate(builder.build(), Concept.class);
+        solveUndeterminedRelationships(mut.getNode());
+        return mut;
+    }
+    
+    private void solveUndeterminedRelationships(Concept unit) {
+        for (Description unitdesc : unit.getDescriptions()) {
+            // Put the set of relationships into a HashSet to remove duplicates.
+            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
+                /*
+                 * the skos undetermined relationship that can be resolved have a identifier of the concept, and of the vocab.
+                 * http://data.ehri-project.eu/terms/ehri-terms/?tema-967
+                 * they need to be found in the vocabularies that are in the graph
+                 */
+                if (rel.getName() != null) {
+                    String[] domains = rel.getName().split("/");
+                    if (domains.length > 2) {
+                        String cvoc_id = domains[domains.length - 2];
+                        String concept_id = domains[domains.length - 1];
+                        Vocabulary vocabulary;
+                        try {
+                            GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
+                            vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                            for (Concept concept : vocabulary.getConcepts()) {
+                                logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
+                                if (concept.getIdentifier().equals(concept_id)) {
+                                    try {
+                                        Bundle linkBundle = new Bundle(EntityClass.LINK)
+                                                .withDataValue(Ontology.LINK_HAS_TYPE, rel.getRelationshipType().toString())
+                                                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                        UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
+                                        Link link;
+                                        link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
+                                        unit.addLink(link);
+                                        concept.addLink(link);
+                                        link.addLinkBody(rel);
+                                    } catch (PermissionDenied ex) {
+                                        logger.error(ex.getMessage());
+                                    } catch (IntegrityError ex) {
+                                        logger.error(ex.getMessage());
+                                    } catch (ValidationError ex) {
+                                        java.util.logging.Logger.getLogger(JenaSkosImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+                            }
+                        } catch (ItemNotFound ex) {
+                            logger.error("Vocabulary with id " + cvoc_id + " not found. " + ex.getMessage());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private List<Bundle> getUndeterminedRelations(Resource item) {
@@ -256,7 +325,14 @@ public final class JenaSkosImporter implements SkosImporter {
                     undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
                             .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
                             .withDataValue(Ontology.NAME_KEY, annotation.toString()));
+                }else{
+                    if(rel.getKey().startsWith("skos:")){
+                    undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                            .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                            .withDataValue(Ontology.NAME_KEY, annotation.toString()));                        
+                    }
                 }
+                
             }
         }
 
@@ -345,8 +421,10 @@ public final class JenaSkosImporter implements SkosImporter {
                     if (target.isLiteral()) {
                         if(prop.getKey().equals("latitude/longitude")){
                             String[] latlong = target.asLiteral().getString().split(",");
-                            builder.addDataValue("latitude", latlong[0]);
-                            builder.addDataValue("longitude", latlong[1]);
+                            if(latlong.length > 1){
+                                builder.addDataValue("latitude", latlong[0]);
+                                builder.addDataValue("longitude", latlong[1]);
+                            }
                         }else{
                             builder.addDataValue(prop.getKey(), target.asLiteral().getString());
                         }
