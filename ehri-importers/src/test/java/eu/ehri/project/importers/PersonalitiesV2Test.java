@@ -1,8 +1,6 @@
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -12,29 +10,25 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UndeterminedRelationship;
-import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PersonalitiesV2Test extends AbstractImporterTest {
 
