@@ -16,7 +16,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class GhettosImporterV20140831Test extends AbstractImporterTest {
     protected final String SKOS_FILE = "cvoc/ghettos.rdf";

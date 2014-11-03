@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:dct="http://purl.org/dc/terms/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:skos-ehri="http://data.ehri-project.eu/skos-extension#"
+    >
+    
+    <rdf:Description rdf:about="http://data.ehri-project.eu/terms/niod-trefwoorden/joodse-raad">
+        <skos:prefLabel xml:lang="nld">Joodse Raad</skos:prefLabel>
+        <skos:inScheme rdf:resource="http://data.ehri-project.eu/niod-trefwoorden"/>
+        <skos:exactMatch rdf:resource="http://data.ehri-project.eu/terms/cvoc1/698"/>
+        <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+        <dct:created>2012-08-16 08:13:53</dct:created>
+    </rdf:Description>
+    <!--
+   <rdf:Description rdf:about="http://data.ehri-project.eu/terms/niod-trefwoorden/antifascisme">
+      <skos:prefLabel xml:lang="nld">Antifascisme</skos:prefLabel>
+      <skos:exactMatch rdf:resource="http://data.ehri-project.eu/terms/ehri-terms/?tema-967"/>
+      <skos:inScheme rdf:resource="http://data.ehri-project.eu/terms/niod-trefwoorden/"/>
+      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+   </rdf:Description>
+   <rdf:Description rdf:about="http://data.ehri-project.eu/terms/niod-trefwoorden/hillesum-etty">
+      <skos:prefLabel xml:lang="nld">Hillesum, Etty</skos:prefLabel>
+      <skos:inScheme rdf:resource="http://data.ehri-project.eu/terms/niod-trefwoorden/"/>
+      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+   </rdf:Description>
+   <rdf:Description
+      rdf:about="http://data.ehri-project.eu/terms/niod-trefwoorden/anti-joodse-maatregelen">
+      <skos:prefLabel xml:lang="nld">Anti-joodse maatregelen</skos:prefLabel>
+      <skos:inScheme rdf:resource="http://data.ehri-project.eu/terms/niod-trefwoorden/"/>
+      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+   </rdf:Description>
+-->
+</rdf:RDF>

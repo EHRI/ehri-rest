@@ -7,7 +7,24 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
 >
-
+<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-ghettos/">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+    <dc:subject></dc:subject>
+    <dc:title>EHRI</dc:title>
+    <dct:modified>2014-08-31</dct:modified>
+    <dc:creator>EHRI</dc:creator>
+    <dc:contributor></dc:contributor>
+    <dc:date>2013-03-03</dc:date>
+    <dc:publisher>EHRI</dc:publisher>
+    <dc:language>en</dc:language>
+    <dc:rights>EHRI</dc:rights>
+    <skos:hasTopConcept rdf:resource="http://data.ehri-project.eu/ehri-ghettos/ehri-ghettos"/>
+    <dc:description>This Authority list of Ghettos consists of 1,105 Ghetto names, expressed as
+      concept. This AF is base on the entries of the Online Ghettos Encyclopedia published on the
+      Yad Vashem's Website:
+      "http://www.yadvashem.org/yv/he/research/ghettos_encyclopedia/"</dc:description>
+  </rdf:Description>
+  
  <rdf:Description rdf:about="http://data.ehri-project.eu/ehri-ghettos/0">
     <skos:prefLabel xml:lang="heb-hebr">קמנץ-פודולסקי</skos:prefLabel>
     <skos:prefLabel xml:lang="yid-hebr">קמניץ</skos:prefLabel>
