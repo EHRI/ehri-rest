@@ -443,7 +443,6 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private void addAuthor(Map<String, Object> currentGraph) {
-        logger.info("in addAuthor "+ getAuthor());
         if(getAuthor() != null ){
             putPropertyInGraph(currentGraph, "processInfo", getAuthor());
         }

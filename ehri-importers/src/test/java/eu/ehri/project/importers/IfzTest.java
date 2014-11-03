@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 /**
  * Test the import of a Ifz EAD file.
  * This file was based on BundesarchiveTest.java.
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  * @author ben
  */
 public class IfzTest extends AbstractImporterTest{
