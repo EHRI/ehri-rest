@@ -129,6 +129,22 @@ def load_queue():
         start()
 
 @task
+def import_ead(scope, log, properties, file_dir):
+    """Import EAD files via REST
+    
+    Supply the scope, log message as a file name or as an URL encoded message, the path to a
+    properties file and path to a directory relative to /opt/webapps/data/import-data containing
+    the paths of files to import. File paths are local on the remote machine.
+    
+    For example, to import all files from the Wiener Library, use:
+    
+    fab stage import_ead:scope=gb-003348,log=/opt/webapps/data/import-data/gb/wiener-library/wiener-log.txt,properties=/opt/webapps/data/import-data/properties/wienerlib.properties,file_dir=gb/wiener-library"""
+    
+    run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
+    file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log, properties) )
+
+@task
 def online_clone_db(local_dir):
     """Copy a Neo4j DB from a server using the backup tool.
     This creates a copy of the running DB in /tmp, zips it,

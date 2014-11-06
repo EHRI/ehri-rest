@@ -132,7 +132,7 @@ public class IpnTest extends AbstractImporterTest{
             assertEquals("Collections from Oddział Instytutu Pamięci Narodowej we Wrocławiu", d.getName());
             boolean hasProvenance=false;
             for(String property : d.asVertex().getPropertyKeys()){
-                if(property.equals("provenance")){
+                if(property.equals("processInfo")){
                     hasProvenance=true;
                     System.out.println(d.asVertex().getProperty(property));
                     assertTrue(d.asVertex().getProperty(property).toString().startsWith("This selection has been "));
@@ -218,7 +218,7 @@ public class IpnTest extends AbstractImporterTest{
             assertEquals("Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie", d.getName());
             boolean hasProvenance=false;
             for(String property : d.asVertex().getPropertyKeys()){
-                if(property.equals("provenance")){
+                if(property.equals("processInfo")){
                     hasProvenance=true;
                     System.out.println(d.asVertex().getProperty(property));
                     assertTrue(d.asVertex().getProperty(property).toString().startsWith("This selection has been "));
