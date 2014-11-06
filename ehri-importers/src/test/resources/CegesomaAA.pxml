@@ -42,6 +42,8 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <physdesc encodinganalog="300$a" label="Omvang:">41 fardes</physdesc>
       <!-- changed from original : label added -->
       <unitid encodinganalog="099" countrycode="BE" label="ehri_main_identifier">AA 1134</unitid>
+      <unitid label="ehri_multiple_identifier">AA 627</unitid>
+      <unitid label="ehri_multiple_identifier">AA 627 / II</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>

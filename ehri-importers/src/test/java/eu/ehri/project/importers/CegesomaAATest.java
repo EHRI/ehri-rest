@@ -54,19 +54,18 @@ public class CegesomaAATest extends AbstractImporterTest{
        GraphDiff diff = diffGraph(graphState1, graphState2);
 //       diff.printDebug(System.out);
         
-//        printGraph(graph);
+        printGraph(graph);
         // How many new nodes will have been created? We should have
         /** 
          * event links: 6
          * relationship: 34
          * documentaryUnit: 5
          * documentDescription: 5
-         * unknown property: 1
          * systemEvent: 1
          * datePeriod: 4
          * maintenanceEvent: 1
          */
-        int newCount = origCount + 57;
+        int newCount = origCount + 56;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
