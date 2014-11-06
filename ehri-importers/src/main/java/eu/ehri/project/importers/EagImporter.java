@@ -4,21 +4,20 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Country;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import eu.ehri.project.persistence.BundleDAO;
-import eu.ehri.project.persistence.Mutation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

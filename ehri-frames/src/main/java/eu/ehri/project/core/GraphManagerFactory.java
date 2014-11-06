@@ -7,6 +7,11 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.impl.BlueprintsGraphManager;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 
+/**
+ * A factory class for obtaining a {@link GraphManager} instance.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public class GraphManagerFactory {
 
     /**

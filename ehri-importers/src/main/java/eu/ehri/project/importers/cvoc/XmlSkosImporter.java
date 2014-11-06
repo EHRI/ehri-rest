@@ -1,24 +1,24 @@
 package eu.ehri.project.importers.cvoc;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
+import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.ActionManager.EventContext;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
@@ -33,19 +33,17 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
-import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistence.ActionManager.EventContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Importer for the controlled vocabulary (TemaTres thesaurus)

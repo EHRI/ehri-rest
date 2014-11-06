@@ -12,7 +12,9 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -25,7 +27,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonApplesTestStr = readFileAsString("apples.json");
+        jsonApplesTestStr = readResourceFileAsString("apples.json");
     }
 
     /**

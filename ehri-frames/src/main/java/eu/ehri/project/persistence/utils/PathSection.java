@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 /**
  * Class representing one section of a bundle path.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 final class PathSection {
     private static final Pattern pattern = Pattern

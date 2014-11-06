@@ -3,10 +3,6 @@ package eu.ehri.project.importers;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -15,11 +11,14 @@ import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
-import java.util.List;
-
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 abstract public class XmlImportManager implements ImportManager {
     private static final Logger logger = LoggerFactory.getLogger(XmlImportManager.class);

@@ -10,14 +10,18 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 /**
- * Provides a RESTful interface for the PermissionGrant class.
+ * Provides a web service interface for the PermissionGrant model.
  * 
  * FIXME: PermissionGrant is not currently an AccessibleEntity so
  * handling it is complicated. We need to re-architect the REST views

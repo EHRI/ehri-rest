@@ -6,7 +6,13 @@ import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.*;
+import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistence.Bundle;
@@ -18,7 +24,9 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class CrudViewsTest extends AbstractFixtureTest {
 

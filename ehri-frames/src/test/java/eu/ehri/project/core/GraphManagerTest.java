@@ -11,7 +11,6 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import eu.ehri.project.core.impl.BlueprintsGraphManager;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
-import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
@@ -26,7 +25,10 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Graph Manager tests. These do a bit of funky
@@ -240,7 +242,7 @@ public class GraphManagerTest {
         }
 
         @Test
-        public void testSelectiveIndexing() throws IndexNotFoundException,
+        public void testSelectiveIndexing() throws Exception,
                 IntegrityError {
             // We need to create one first, sorry
             Map<String, ?> data = ImmutableMap.of(

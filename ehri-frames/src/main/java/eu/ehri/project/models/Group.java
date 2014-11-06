@@ -13,9 +13,20 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.ItemHolder;
+import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+/**
+ * Frame class representing a group of users or other groups
+ * that can be assigned permissions.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 @EntityType(EntityClass.GROUP)
 public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
         PermissionScope, NamedEntity, ItemHolder {
@@ -24,6 +35,11 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
     String ADMIN_GROUP_NAME = "Administrators";
 
+    /**
+     * Fetch the groups to which this group belongs.
+     *
+     * @return an iterable of group frames
+     */
     @Fetch(Ontology.ACCESSOR_BELONGS_TO_GROUP)
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP)
     public Iterable<Group> getGroups();
@@ -34,27 +50,52 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
     public Iterable<AccessibleEntity> getMembersAsEntities();
 
+    /**
+     * Get members of this group.
+     *
+     * @return an iterable of user or group frames
+     */
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
     public Iterable<Accessor> getMembers();
 
+    /**
+     * Get the number of items within this group.
+     *
+     * @return a count of group members
+     */
     @JavaHandler
     public long getChildCount();
 
+    /**
+     * Update/reset the cache of the number of items
+     * in this group.
+     */
     @JavaHandler
     public void updateChildCountCache();
 
 
     /**
-     * adds a Accessor as a member to this Group, so it has the permissions of the Group.
+     * Adds a Accessor as a member to this Group, so it has the permissions of the Group.
+     *
+     * @param accessor a user or group frame
      */
     @JavaHandler
     public void addMember(final Accessor accessor);
-    
+
+    /**
+     * Removes a member from this group.
+     *
+     * @param accessor a user or group frame
+     */
     @JavaHandler
     public void removeMember(final Accessor accessor);
 
-    // FIXME: Use of __ISA__ here breaks encapsulation of indexing details quite horribly
-    // FIXME: Should return an Accessor here, hierarchies are confusing.
+    /**
+     * Get <b>all</b> members of this group, including members of
+     * groups within this group.
+     *
+     * @return an iterable of user or group frames
+     */
     @JavaHandler
     public Iterable<AccessibleEntity> getAllUserProfileMembers();
 

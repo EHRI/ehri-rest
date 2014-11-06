@@ -10,6 +10,9 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 
 /**
+ * Frame class representing a pre-ingest event that took place
+ * upon some documentary unit item.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.MAINTENANCE_EVENT)

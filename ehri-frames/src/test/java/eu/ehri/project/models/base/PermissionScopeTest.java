@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;

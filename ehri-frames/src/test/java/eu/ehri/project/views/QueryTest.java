@@ -7,8 +7,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IndexNotFoundException;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -20,7 +18,9 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class QueryTest extends AbstractFixtureTest {
 
@@ -33,7 +33,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testAdminCanListEverything() throws IndexNotFoundException {
+    public void testAdminCanListEverything() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -50,27 +50,32 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals(toList(allDocs).size(), list.size());
 
         // Test the limit function
-        Page<DocumentaryUnit> page = query.setCount(1).page(validUser);
+        Page<DocumentaryUnit> page = query.setLimit(1).page(validUser);
         list = toList(page);
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
 
         // Test the offset function
-        list = toList(query.setCount(2).setPage(1).page(validUser));
+        list = toList(query.setLimit(2).setOffset(0).page(validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
 
         // Test negative count (all items)
-        list = toList(query.setCount(-1).setPage(1).page(validUser));
+        list = toList(query.setLimit(-1).page(validUser));
         assertFalse(list.isEmpty());
         assertEquals(5, list.size());
 
-        list = toList(query.setCount(0).setPage(1).page(validUser));
+        // Test negative count (all items) and an offset
+        list = toList(query.setOffset(1).setLimit(-1).page(validUser));
+        assertFalse(list.isEmpty());
+        assertEquals(4, list.size());
+
+        list = toList(query.setLimit(0).page(validUser));
         assertEquals(0, list.size());
     }
 
     @Test
-    public void testPage() throws IndexNotFoundException {
+    public void testPage() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -82,7 +87,7 @@ public class QueryTest extends AbstractFixtureTest {
                 .getVertices(EntityClass.DOCUMENTARY_UNIT);
 
         // Test the limit function
-        Query.Page<DocumentaryUnit> page = query.setCount(1).page(validUser);
+        Query.Page<DocumentaryUnit> page = query.setLimit(1).page(validUser);
         List<DocumentaryUnit> list = toList(page.getIterable());
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
@@ -96,8 +101,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testUserCannotListPrivate() throws IndexNotFoundException,
-            ItemNotFound {
+    public void testUserCannotListPrivate() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -113,30 +117,30 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithFilter() throws IndexNotFoundException {
+    public void testListWithFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
         // Query for document identifier c1.
-        List<DocumentaryUnit> list = toList(query.setCount(1).page(
+        List<DocumentaryUnit> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
     }
 
     @Test
-    public void testListWithStreaming() throws IndexNotFoundException {
+    public void testListWithStreaming() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setStream(true);
 
         // Query for document identifier c1.
-        Page<DocumentaryUnit> list = query.setCount(1).page(
+        Page<DocumentaryUnit> list = query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", validUser);
         assertEquals(-1L, list.getTotal());
     }
 
     @Test
-    public void testListWithDepthFilter() throws IndexNotFoundException {
+    public void testListWithDepthFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -157,7 +161,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithPredicateFilter() throws IndexNotFoundException {
+    public void testListWithPredicateFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -270,7 +274,7 @@ public class QueryTest extends AbstractFixtureTest {
 
 
     @Test
-    public void testListWithSort() throws IndexNotFoundException {
+    public void testListWithSort() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -299,7 +303,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithGlobFilter() throws IndexNotFoundException {
+    public void testListWithGlobFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -316,7 +320,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithFailFilter() throws IndexNotFoundException {
+    public void testListWithFailFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 

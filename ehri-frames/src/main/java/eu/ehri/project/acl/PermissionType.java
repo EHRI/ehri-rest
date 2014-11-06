@@ -3,6 +3,14 @@ package eu.ehri.project.acl;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
 
+/**
+ * An enum of permission types that can be assigned to
+ * permission grants. Like the {@link ContentTypes} enum,
+ * each permission value has an equivalent node in the grant
+ * to which permission grants point.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public enum PermissionType {
     CREATE("create", 1)
     , UPDATE("update", 2)
@@ -27,6 +35,11 @@ public enum PermissionType {
         this.mask = mask;
     }
 
+    /**
+     * Fetch a textual representation of this permission.
+     *
+     * @return  name string
+     */
     @JsonValue
     public String getName() {
         return name;
@@ -38,9 +51,10 @@ public enum PermissionType {
 
     /**
      * Return whether a given other permission is encompassed
-     * by the current one...
-     * @param other
-     * @return
+     * by the current one.
+     *
+     * @param other another permission
+     * @return if this permission is subordinate to the other
      */
     public boolean contains(PermissionType other) {
         return (mask & other.mask) == other.mask;

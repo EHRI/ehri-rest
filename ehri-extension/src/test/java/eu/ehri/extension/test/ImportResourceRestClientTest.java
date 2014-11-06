@@ -10,13 +10,17 @@ import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import static eu.ehri.extension.ImportResource.*;
 
+import static eu.ehri.extension.ImportResource.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

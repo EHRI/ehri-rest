@@ -14,8 +14,18 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistence.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.persistence.TraversalCallback;
 
 import java.util.Set;
 

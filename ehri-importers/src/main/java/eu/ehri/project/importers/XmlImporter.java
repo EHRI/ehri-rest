@@ -1,18 +1,25 @@
 package eu.ehri.project.importers;
 
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.properties.XmlImportProperties;
-
 import com.tinkerpop.frames.FramedGraph;
-
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentDescription;
-import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,20 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
-import eu.ehri.project.persistence.Mutation;
-
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *

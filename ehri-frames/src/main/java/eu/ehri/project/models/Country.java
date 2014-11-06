@@ -16,10 +16,10 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
- * User: michaelb
- *
  * Frame class representing a country. It's identifier should
  * be represented by an ISO3166 Alpha 2 code, lower cased.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.COUNTRY)
 public interface Country extends IdentifiableEntity, AccessibleEntity,
@@ -29,21 +29,41 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
 
     /**
      * Alias function for fetching the country code identifier.
+     *
      * @return The country code
      */
     @Mandatory
     @Property(COUNTRY_CODE)
     public String getCode();
 
+    /**
+     * Fetch a count of the number of repositories in this country.
+     *
+     * @return the repository count
+     */
     @JavaHandler
     public long getChildCount();
 
+    /**
+     * Fetch all repositories in this country.
+     *
+     * @return an iterable of repository frames
+     */
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN)
     public Iterable<Repository> getRepositories();
 
+    /**
+     * Add a repository to this country.
+     *
+     * @param repository a repository frame
+     */
     @JavaHandler
     public void addRepository(final Repository repository);
 
+    /**
+     * Update/reset the cache of the number of repositories
+     * in this country.
+     */
     @JavaHandler
     public void updateChildCountCache();
 

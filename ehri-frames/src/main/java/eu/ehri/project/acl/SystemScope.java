@@ -1,6 +1,5 @@
 package eu.ehri.project.acl;
 
-import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
@@ -14,7 +13,6 @@ import org.neo4j.helpers.collection.Iterables;
  * permissions and ID namespaces.
  * 
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public enum SystemScope implements PermissionScope {
     

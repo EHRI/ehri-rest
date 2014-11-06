@@ -1,6 +1,13 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.LinkedHashMultiset;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
@@ -17,7 +24,8 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Class that represents a graph entity and subtree relations.
+ * Class that represents a graph entity and subtree relations
+ * prior to being materialised as vertices and edges.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */

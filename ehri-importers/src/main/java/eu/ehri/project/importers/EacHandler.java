@@ -8,16 +8,16 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
+import eu.ehri.project.models.base.Frame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.models.base.Frame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 //import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
 
 /**
  * makes use of eac.properties with format: part/of/path/=attribute

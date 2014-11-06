@@ -18,7 +18,11 @@ import java.util.HashMap;
 /**
  * Initialize the graph with a minimal set of vertices. This includes:
  * <p/>
- * - an admin account - permissions - content types
+ * <ul>
+ *     <li>an admin account</li>
+ *     <li>permission nodes</li>
+ *     <li>content type nodes</li>
+ * </ul>
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */

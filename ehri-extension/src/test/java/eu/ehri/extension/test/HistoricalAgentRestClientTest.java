@@ -9,9 +9,10 @@ import org.junit.Test;
 
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
 public class HistoricalAgentRestClientTest extends BaseRestClientTest {
 
@@ -22,7 +23,7 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        authorityTestData = readFileAsString("historicalAgent.json");
+        authorityTestData = readResourceFileAsString("historicalAgent.json");
     }
 
     @Test

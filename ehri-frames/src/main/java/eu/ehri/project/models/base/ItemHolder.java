@@ -1,7 +1,5 @@
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */

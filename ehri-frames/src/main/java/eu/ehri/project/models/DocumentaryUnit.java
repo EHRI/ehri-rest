@@ -12,11 +12,17 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A frame class for graph nodes representing documentary
+ * unit items.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AbstractUnit {
 
@@ -24,6 +30,7 @@ public interface DocumentaryUnit extends AbstractUnit {
 
     /**
      * Get the repository that holds this documentary unit.
+     *
      * @return the Repository that holds this DocumentaryUnit
      */
     @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
@@ -32,45 +39,74 @@ public interface DocumentaryUnit extends AbstractUnit {
 
     /**
      * Set the repository that holds this documentary unit.
-     * @param institution
+     *
+     * @param repository a repository instance
      */
     @JavaHandler
-    public void setRepository(final Repository institution);
+    public void setRepository(final Repository repository);
 
     /**
      * Get parent documentary unit, if any
+     *
      * @return a DocumentaryUnit that is this DocumentaryUnit's parent or null
      */
     @Fetch(Ontology.DOC_IS_CHILD_OF)
     @Adjacency(label = Ontology.DOC_IS_CHILD_OF)
     public DocumentaryUnit getParent();
 
+    /**
+     * Add a child document to this one.
+     *
+     * @param child a documentary unit instance
+     */
     @JavaHandler
     public void addChild(final DocumentaryUnit child);
 
     /**
      * Fetches a list of all ancestors (parent -> parent -> parent)
+     *
      * @return an Iterable of DocumentaryUnits that are ancestors
      */
     @JavaHandler
     public Iterable<DocumentaryUnit> getAncestors();
 
+    /**
+     * Count the number of child units at the immediate lower
+     * level (not counting grand-children and lower ancestors.)
+     *
+     * @return the number of immediate child items
+     */
     @JavaHandler
     public long getChildCount();
 
     /**
      * Get child documentary units
+     *
      * @return an Iterable of DocumentaryUnits that are children
      */
     @JavaHandler
     public Iterable<DocumentaryUnit> getChildren();
 
+    /**
+     * Fetch <b>all</b> ancestor items, including children of
+     * children to all depths.
+     *
+     * @return child items at all lower levels
+     */
     @JavaHandler
     public Iterable<DocumentaryUnit> getAllChildren();
 
+    /**
+     * Update/reset the cache of child items at the lower level.
+     */
     @JavaHandler
     public void updateChildCountCache();
 
+    /**
+     * Get the description items for this documentary unit.
+     *
+     * @return a iterable of document descriptions
+     */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getDocumentDescriptions();
 
@@ -103,7 +139,7 @@ public interface DocumentaryUnit extends AbstractUnit {
         }
 
         public Iterable<DocumentaryUnit> getAllChildren() {
-            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(Ontology.DOC_IS_CHILD_OF)
+            Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").in(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
             return frameVertices(gremlin().in(Ontology.DOC_IS_CHILD_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)
@@ -111,14 +147,14 @@ public interface DocumentaryUnit extends AbstractUnit {
         }
 
 
-        public void setRepository(final Repository institution) {
+        public void setRepository(final Repository repository) {
             // NB: Convenience methods that proxies addCollection (which
             // in turn maintains the child item cache.)
-            institution.addCollection(frame(it(), DocumentaryUnit.class));
+            repository.addCollection(frame(it(), DocumentaryUnit.class));
         }
 
         public Repository getRepository() {
-            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").out(Ontology.DOC_IS_CHILD_OF)
+            Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").out(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
@@ -127,10 +163,10 @@ public interface DocumentaryUnit extends AbstractUnit {
                         }
                     });
 
-            GremlinPipeline<Vertex,Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
+            GremlinPipeline<Vertex, Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);
 
-            return (Repository)(out.hasNext() ? frame(out.next()) : null);
+            return (Repository) (out.hasNext() ? frame(out.next()) : null);
         }
 
         public Iterable<DocumentaryUnit> getAncestors() {

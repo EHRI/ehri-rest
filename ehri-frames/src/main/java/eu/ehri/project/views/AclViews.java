@@ -2,7 +2,12 @@ package eu.ehri.project.views;
 
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.*;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.GlobalPermissionSet;
+import eu.ehri.project.acl.InheritedGlobalPermissionSet;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -11,7 +16,11 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.PermissionGrantTarget;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 
 import java.util.Collection;
@@ -20,6 +29,8 @@ import java.util.Set;
 
 /**
  * Views class for permission operations.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class AclViews implements Scoped<AclViews> {
 

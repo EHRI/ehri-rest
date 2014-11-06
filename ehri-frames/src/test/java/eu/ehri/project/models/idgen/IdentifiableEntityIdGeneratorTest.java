@@ -3,8 +3,6 @@ package eu.ehri.project.models.idgen;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;

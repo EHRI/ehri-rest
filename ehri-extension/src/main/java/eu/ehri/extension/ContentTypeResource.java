@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Provides a RESTful interface for the ContentType class. Note: ContentType instances
+ * Provides a web service interface for the ContentType model. Note: ContentType instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  *

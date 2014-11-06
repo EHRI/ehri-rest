@@ -4,6 +4,17 @@ import eu.ehri.project.definitions.Entities;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
 
+/**
+ * An enum of entity types that represent first-class
+ * content types, meaning that permissions can be
+ * granted up all items of that type. Each value of this
+ * enum has an equivalent node in the graph to which
+ * individual permission grant nodes refer if they
+ * pertain to an entire class of items rather than a
+ * single item.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public enum ContentTypes {
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT),
     REPOSITORY(Entities.REPOSITORY),

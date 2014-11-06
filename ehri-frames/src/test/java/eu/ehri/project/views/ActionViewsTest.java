@@ -1,8 +1,16 @@
 package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
@@ -16,7 +24,9 @@ import org.neo4j.helpers.collection.Iterables;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ActionViewsTest extends AbstractFixtureTest {
 

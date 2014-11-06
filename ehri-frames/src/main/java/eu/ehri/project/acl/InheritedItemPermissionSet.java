@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A user's permissions on an individual item, including
+ * those inherited from groups to which they belong.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class InheritedItemPermissionSet {

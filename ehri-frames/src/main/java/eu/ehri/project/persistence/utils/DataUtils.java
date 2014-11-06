@@ -2,6 +2,9 @@ package eu.ehri.project.persistence.utils;
 
 import java.util.Collection;
 
+/**
+ * Bag of miscellaneous methods!
+ */
 public class DataUtils {
     /**
      * Ensure a value isn't an empty array or list, which will

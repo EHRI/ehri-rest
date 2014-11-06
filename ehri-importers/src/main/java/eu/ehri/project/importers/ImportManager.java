@@ -1,11 +1,11 @@
 package eu.ehri.project.importers;
 
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.exceptions.InputParseError;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.exceptions.InputParseError;
 
 /**
  * Interface for import managers. Currently empty.

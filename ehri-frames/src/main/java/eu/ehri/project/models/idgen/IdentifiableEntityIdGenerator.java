@@ -3,15 +3,14 @@ package eu.ehri.project.models.idgen;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
-
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 
 /**
  * Generates an ID for nodes which represent IdentifiableEntities, where
- * The graph id is .
+ * The graph id is derived from a property called
+ * {@value eu.ehri.project.definitions.Ontology#IDENTIFIER_KEY}.
  * 
  * @author Mike Bryant (http://github.com/mikesname)
- * 
  */
 public enum IdentifiableEntityIdGenerator implements IdGenerator {
 

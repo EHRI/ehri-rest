@@ -1,9 +1,18 @@
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.*;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -13,7 +22,15 @@ import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -135,7 +152,7 @@ public class AnnotationResource
 
     /**
      * Return a map of annotations for the subtree of the given item and its
-     * child items.
+     * child items. Standard list parameters apply.
      *
      * @param id The item ID
      * @return A list of annotations on the item and it's dependent children.
@@ -147,17 +164,11 @@ public class AnnotationResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public Response listAnnotationsForSubtree(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @PathParam("id") String id)
             throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
         AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
                 .detail(id, getRequesterUserProfile());
-        Query<Annotation> query = new Query<Annotation>(graph, cls)
-                .setPage(page).setCount(count).filter(filters)
-                .orderBy(order).filter(filters)
+        Query<Annotation> query = getQuery(Annotation.class)
                 .setStream(isStreaming());
         return streamingPage(query.page(item.getAnnotations(), getRequesterUserProfile()));
 

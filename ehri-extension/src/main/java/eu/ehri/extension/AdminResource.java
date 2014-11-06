@@ -3,10 +3,18 @@ package eu.ehri.extension;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.*;
+import eu.ehri.project.models.Country;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -18,12 +26,20 @@ import eu.ehri.project.views.ViewFactory;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +103,24 @@ public class AdminResource extends AbstractRestResource {
         } finally {
             cleanupTransaction();
         }
+    }
+
+    /**
+     * Export the DB as a stream of JSON in
+     * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
+     * <p/>
+     * The mode used is EXTENDED.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_exportGraphSON")
+    public Response getGraphSON() throws Exception {
+        return Response.ok(new StreamingOutput() {
+            @Override
+            public void write(OutputStream stream) throws IOException, WebApplicationException {
+                GraphSONWriter.outputGraph(graph, stream, GraphSONMode.EXTENDED);
+            }
+        }).build();
     }
 
     /**

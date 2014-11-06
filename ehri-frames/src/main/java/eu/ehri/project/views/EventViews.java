@@ -13,7 +13,11 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import org.slf4j.Logger;
@@ -24,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * View class for handling event streams.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class EventViews {
@@ -145,7 +151,7 @@ public class EventViews {
                 manager.cast(byUser, Actioner.class).getActions());
 
         // Add additional generic filters
-        return applyAclFilter(filterEvents(pipe), user);
+        return query.page(applyAclFilter(filterEvents(pipe), user), user);
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> applyAclFilter(GremlinPipeline<SystemEvent, SystemEvent> pipe,

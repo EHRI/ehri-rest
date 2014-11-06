@@ -1,5 +1,11 @@
 package eu.ehri.project.exceptions;
 
+/**
+ * Represents a violation of the permission system constraints
+ * on the modification of data.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public class PermissionDenied extends Exception {
 
     private static final long serialVersionUID = -3948097018322416889L;
