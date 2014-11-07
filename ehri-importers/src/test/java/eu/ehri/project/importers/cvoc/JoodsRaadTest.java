@@ -5,9 +5,10 @@ import com.tinkerpop.blueprints.Edge;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
 
@@ -119,12 +120,11 @@ public class JoodsRaadTest extends AbstractImporterTest {
         /*  How many new nodes will have been created? We should have
          * 1 more Concepts
        	 * 1 more ConceptDescription
-         * 1 more UndeterminedRelationship
          * 1 more Link
 	 * 2 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        assertEquals(count + 7, getNodeCount(graph));
+        assertEquals(count + 6, getNodeCount(graph));
         assertEquals(voccount + 1, toList(cvoc2.getConcepts()).size());
 
         Concept term698 = manager.getFrame("cvoc1-698", Concept.class);
@@ -136,19 +136,17 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertTrue(found);
 
         Concept termJR = manager.getFrame("cvoc2-joodse-raad", Concept.class);
-        ConceptDescription termJRdesc = manager.getFrame("cvoc2-joodse-raad-nld", ConceptDescription.class);
-        found=false;
-        for(Edge e : termJRdesc.asVertex().getEdges(Direction.OUT, "relatesTo")){
-            for(String k : e.getVertex(Direction.IN).getPropertyKeys()){
-                logger.debug(k + ":" + e.getVertex(Direction.IN).getProperty(k));
-            }
-            found=true;
-        }
-        assertTrue(found);
 
         Concept concept698 = manager.getFrame("cvoc1-698", Concept.class);
         found=false;
         for(Edge e : concept698.asVertex().getEdges(Direction.IN, "hasLinkTarget")){
+            Link l = graph.frame(e.getVertex(Direction.OUT), Link.class);
+            boolean bothTargetsFound = false;
+            for (LinkableEntity entity : l.getLinkTargets()){
+                if(entity.equals(termJR))
+                    bothTargetsFound=true;
+            }
+            assertTrue(bothTargetsFound);
             for(String k : e.getVertex(Direction.OUT).getPropertyKeys()){
                 logger.debug(k + ":" + e.getVertex(Direction.OUT).getProperty(k));
             }
