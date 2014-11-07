@@ -55,6 +55,7 @@ public final class AclManager {
             .newHashMap();
     private final Map<ContentType, ContentTypes> contentTypeEnumMap = Maps
             .newHashMap();
+    private final Set<String> typeStrings = Sets.newHashSet();
 
     /**
      * Scoped constructor.
@@ -242,14 +243,13 @@ public final class AclManager {
         for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap.entrySet()) {
             ContentType target = centry.getValue();
             Collection<PermissionType> pset = globalsMap.get(centry.getKey());
-            if (pset == null) {
-                continue;
-            }
-            for (PermissionType perm : PermissionType.values()) {
-                if (pset.contains(perm)) {
-                    grantPermission(target, perm, accessor);
-                } else {
-                    revokePermission(target, perm, accessor);
+            if (pset != null) {
+                for (PermissionType perm : PermissionType.values()) {
+                    if (pset.contains(perm)) {
+                        grantPermission(target, perm, accessor);
+                    } else {
+                        revokePermission(target, perm, accessor);
+                    }
                 }
             }
         }
@@ -266,10 +266,8 @@ public final class AclManager {
     public PermissionGrant grantPermission(PermissionGrantTarget target,
             PermissionType permType, Accessor accessor) {
         assertNoGrantOnAdminOrAnon(accessor);
-        // If we can find an existing grant, use that, otherwise create a new
-        // one.
-        Optional<PermissionGrant> maybeGrant = findPermission(target, permType, accessor
-        );
+        // If we can find an existing grant, use that, otherwise create a new one.
+        Optional<PermissionGrant> maybeGrant = findPermission(target, permType, accessor);
         if (maybeGrant.isPresent()) {
             return maybeGrant.get();
         } else {
@@ -277,7 +275,7 @@ public final class AclManager {
             accessor.addPermissionGrant(grant);
             grant.setPermission(vertexForPermission(permType));
             grant.addTarget(target);
-            if (!scope.equals(SystemScope.getInstance())) {
+            if (!isSystemScope()) {
                 grant.setScope(scope);
             }
             return grant;
@@ -293,9 +291,7 @@ public final class AclManager {
      */
     public void revokePermission(AccessibleEntity entity, PermissionType permType,
             Accessor accessor) {
-
-        Optional<PermissionGrant> maybeGrant = findPermission(entity, permType, accessor
-        );
+        Optional<PermissionGrant> maybeGrant = findPermission(entity, permType, accessor);
         if (maybeGrant.isPresent()) {
             manager.deleteVertex(maybeGrant.get().asVertex());
         }
@@ -317,11 +313,6 @@ public final class AclManager {
      * @return A PipeFunction for filtering vertices that are content types.
      */
     public PipeFunction<Vertex, Boolean> getContentTypeFilterFunction() {
-        // TODO: This lookup could be cached
-        final Set<String> typeStrings = Sets.newHashSet();
-        for (ContentTypes t : ContentTypes.values()) {
-            typeStrings.add(t.getName());
-        }
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 return v != null && typeStrings.contains(manager.getType(v));
@@ -630,9 +621,6 @@ public final class AclManager {
     private GlobalPermissionSet getAccessorPermissions(Accessor accessor) {
         GlobalPermissionSet.Builder builder = GlobalPermissionSet.newBuilder();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            // Since these are global perms only include those where the target
-            // is a content type. FIXME: if it has been deleted, the target
-            // could well be null.
             PermissionScope scope = grant.getScope();
             if (scope == null || scopes.contains(scope)) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
@@ -694,13 +682,15 @@ public final class AclManager {
             enumPermissionMap.put(pt, p);
             permissionEnumMap.put(p, pt);
         }
+        for (ContentTypes t : ContentTypes.values()) {
+            typeStrings.add(t.getName());
+        }
     }
 
     // Get a list of the current scope and its parents
     private HashSet<PermissionScope> getAllScopes() {
         HashSet<PermissionScope> all = Sets.newHashSet(scope.getPermissionScopes());
-        // Maybe remove systemscope completely...???
-        if (!scope.equals(SystemScope.getInstance())) {
+        if (!isSystemScope()) {
             all.add(scope);
         }
         return all;
