@@ -14,6 +14,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -94,7 +95,10 @@ public class IfzTest extends AbstractImporterTest{
         for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("TO BE FILLED", dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
-            assertEquals("IfZ", dd.asVertex().getProperty("processInfo"));
+            List<String> s = new ArrayList<String>();
+            s.add("TO BE FILLED with selection");
+            s.add("IfZ");
+            assertEquals(s, dd.asVertex().getProperty("processInfo"));
             assertEquals("recordgrp", dd.asVertex().getProperty("levelOfDescription"));
             
         }
