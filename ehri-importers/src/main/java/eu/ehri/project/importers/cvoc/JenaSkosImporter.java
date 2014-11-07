@@ -48,8 +48,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -93,10 +96,6 @@ public final class JenaSkosImporter implements SkosImporter {
                 .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
                 .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
                 .build();
-
-//    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.of(
-//            "owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs")
-//    );
 
     /**
      * Constructor
@@ -249,7 +248,9 @@ public final class JenaSkosImporter implements SkosImporter {
         Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())));
 
-        List<Bundle> undetermined = getUndeterminedRelations(item);
+        Map<Concept, String> linkedConcepts = new HashMap<Concept, String>();
+
+        List<Bundle> undetermined = getUndeterminedRelations(item, linkedConcepts);
         for (Bundle description : getDescriptions(item)) {
             Bundle withRels = description
                     .withRelations(Ontology.HAS_ACCESS_POINT, undetermined);
@@ -257,60 +258,36 @@ public final class JenaSkosImporter implements SkosImporter {
         }
 
         Mutation<Concept> mut = dao.createOrUpdate(builder.build(), Concept.class);
-        solveUndeterminedRelationships(mut.getNode());
+        solveUndeterminedRelationships(mut.getNode(), linkedConcepts);
         return mut;
     }
     
-    private void solveUndeterminedRelationships(Concept unit) {
-        for (Description unitdesc : unit.getDescriptions()) {
-            // Put the set of relationships into a HashSet to remove duplicates.
-            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
-                /*
-                 * the skos undetermined relationship that can be resolved have a identifier of the concept, and of the vocab.
-                 * http://data.ehri-project.eu/terms/ehri-terms/?tema-967
-                 * they need to be found in the vocabularies that are in the graph
-                 */
-                if (rel.getName() != null) {
-                    String[] domains = rel.getName().split("/");
-                    if (domains.length > 2) {
-                        String cvoc_id = domains[domains.length - 2];
-                        String concept_id = domains[domains.length - 1];
-                        Vocabulary vocabulary;
-                        try {
-                            GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
-                            vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
-                            for (Concept concept : vocabulary.getConcepts()) {
-                                logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
-                                if (concept.getIdentifier().equals(concept_id)) {
-                                    try {
-                                        Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                                .withDataValue(Ontology.LINK_HAS_TYPE, rel.getRelationshipType().toString())
-                                                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
-                                        UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
-                                        Link link;
-                                        link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
-                                        unit.addLink(link);
-                                        concept.addLink(link);
-                                        link.addLinkBody(rel);
-                                    } catch (PermissionDenied ex) {
-                                        logger.error(ex.getMessage());
-                                    } catch (IntegrityError ex) {
-                                        logger.error(ex.getMessage());
-                                    } catch (ValidationError ex) {
-                                        java.util.logging.Logger.getLogger(JenaSkosImporter.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                }
-                            }
-                        } catch (ItemNotFound ex) {
-                            logger.error("Vocabulary with id " + cvoc_id + " not found. " + ex.getMessage());
-                        }
-                    }
-                }
+    private void solveUndeterminedRelationships(Concept unit, Map<Concept, String> linkedConcepts) {
+        GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
+        for (Concept concept : linkedConcepts.keySet()) {
+            try {
+                Bundle linkBundle = new Bundle(EntityClass.LINK)
+                        .withDataValue(Ontology.LINK_HAS_TYPE, linkedConcepts.get(concept))
+                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
+                Link link;
+                link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
+                unit.addLink(link);
+                concept.addLink(link);
+            } catch (ItemNotFound ex) {
+                logger.error(ex.getMessage());
+            } catch (PermissionDenied ex) {
+                logger.error(ex.getMessage());
+            } catch (IntegrityError ex) {
+                logger.error(ex.getMessage());
+            } catch (ValidationError ex) {
+                java.util.logging.Logger.getLogger(JenaSkosImporter.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }
     }
 
-    private List<Bundle> getUndeterminedRelations(Resource item) {
+    private List<Bundle> getUndeterminedRelations(Resource item, Map<Concept, String> linkedConcepts) {
         List<Bundle> undetermined = Lists.newArrayList();
 
         for (Map.Entry<String, URI> rel : RELATION_PROPS.entrySet()) {
@@ -321,9 +298,14 @@ public final class JenaSkosImporter implements SkosImporter {
                             .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                 }else{
                     if(rel.getKey().startsWith("skos:")){
-                    undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
-                            .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
-                            .withDataValue(Ontology.NAME_KEY, annotation.toString()));                        
+                        Concept found = findRelatedConcept(annotation.toString());
+                        if(found != null){
+                            linkedConcepts.put(found, rel.getKey()) ; 
+                        }else{
+                            undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                                .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                                .withDataValue(Ontology.NAME_KEY, annotation.toString()));                        
+                        }
                     }
                 }
                 
@@ -331,6 +313,29 @@ public final class JenaSkosImporter implements SkosImporter {
         }
 
         return undetermined;
+    }
+
+    private Concept findRelatedConcept(String name) {
+        if (name != null) {
+            String[] domains = name.split("/");
+            if (domains.length > 2) {
+                String cvoc_id = domains[domains.length - 2];
+                String concept_id = domains[domains.length - 1];
+                Vocabulary referredvocabulary;
+                try {
+                    GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
+                    referredvocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                    for (Concept concept : referredvocabulary.getConcepts()) {
+                        if (concept.getIdentifier().equals(concept_id)) {
+                            return concept;
+                        }
+                    }
+                } catch (ItemNotFound ex) {
+                    logger.error("Vocabulary with id " + cvoc_id + " not found. " + ex.getMessage());
+                }
+            }
+        }
+        return null;
     }
 
     private static interface ConnectFunc {
