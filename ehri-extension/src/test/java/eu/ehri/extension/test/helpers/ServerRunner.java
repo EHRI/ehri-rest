@@ -55,6 +55,9 @@ public class ServerRunner {
     }
 
     public void start() throws IOException {
+        if (neoServer != null) {
+            throw new IOException("Server is already running: " + neoServer.baseUri());
+        }
         sunLogger.setLevel(logLevel);
         neoLogger.setLevel(logLevel);
         neoServer = ServerBuilder.server()
@@ -92,6 +95,7 @@ public class ServerRunner {
     public void stop() {
         if (neoServer != null) {
             neoServer.stop();
+            neoServer = null;
         }
     }
 }
