@@ -135,7 +135,7 @@ public class IpnTest extends AbstractImporterTest{
                 if(property.equals("processInfo")){
                     hasProvenance=true;
                     System.out.println(d.asVertex().getProperty(property));
-                    assertTrue(d.asVertex().getProperty(property).toString().startsWith("This selection has been "));
+                    assertTrue(((List<String>)d.asVertex().getProperty(property)).get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
@@ -221,7 +221,7 @@ public class IpnTest extends AbstractImporterTest{
                 if(property.equals("processInfo")){
                     hasProvenance=true;
                     System.out.println(d.asVertex().getProperty(property));
-                    assertTrue(d.asVertex().getProperty(property).toString().startsWith("This selection has been "));
+                    assertTrue(((List<String>)d.asVertex().getProperty(property)).get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
