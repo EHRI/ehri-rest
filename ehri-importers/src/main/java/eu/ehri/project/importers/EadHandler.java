@@ -90,7 +90,6 @@ public class EadHandler extends SaxXmlHandler {
      * 
      * @param importer
      */
-    @SuppressWarnings("unchecked")
     public EadHandler(AbstractImporter<Map<String, Object>> importer) {
         this(importer, new XmlImportProperties("icaatom.properties"));
         logger.warn("icaatom.properties used");

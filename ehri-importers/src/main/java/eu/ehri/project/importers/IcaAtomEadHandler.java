@@ -40,7 +40,6 @@ public class IcaAtomEadHandler extends EadHandler {
         super(importer, properties);
         children[depth] = new ArrayList<DocumentaryUnit>();
     }
-    @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         this(importer, new XmlImportProperties("icaatom.properties"));
     }
