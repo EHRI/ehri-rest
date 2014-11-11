@@ -48,12 +48,13 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
+        assertValidJsonData(response);
 
         // Get created entity via the response location?
         response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
                 .get(ClientResponse.class);
         assertStatus(OK, response);
-        // TODO again test json
+        assertValidJsonData(response);
     }
 
     @Test
@@ -85,8 +86,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
-        // TODO test if json is valid?
-        // response.getEntity(String.class)
+        assertValidJsonData(response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
