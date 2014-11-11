@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -261,23 +262,15 @@ public class AdminResource extends AbstractRestResource {
     // Helpers...
 
     private String getNextDefaultUserId() {
-        // FIXME: It's crappy to have to iterate all the items to count them...
-        long userCount = 0;
-        CloseableIterable<Vertex> query = manager
-                .getVertices(EntityClass.USER_PROFILE);
+        CloseableIterable<Vertex> query = manager.getVertices(EntityClass.USER_PROFILE);
         try {
-            for (@SuppressWarnings("unused")
-            Vertex _ : query)
-                userCount++;
+            long start = Iterables.size(query) + 1;
+            while (manager.exists(String.format(DEFAULT_USER_ID_FORMAT,
+                    DEFAULT_USER_ID_PREFIX, start))) start++;
+            return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start);
         } finally {
             query.close();
         }
-        long start = userCount + 1;
-        while (manager.exists(String.format(DEFAULT_USER_ID_FORMAT,
-                DEFAULT_USER_ID_PREFIX, start)))
-            start++;
-        return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
-                start);
     }
 
     private Map<String, Object> parseUserData(String json) throws IOException {
@@ -285,8 +278,8 @@ public class AdminResource extends AbstractRestResource {
             return Maps.newHashMap();
         } else {
             TypeReference<HashMap<String, Object>> typeRef = new TypeReference<
-                                HashMap<String, Object>
-                                >() {
+                    HashMap<String, Object>
+                    >() {
             };
             return jsonMapper.readValue(json, typeRef);
         }

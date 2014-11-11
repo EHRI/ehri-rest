@@ -8,6 +8,8 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
@@ -169,6 +171,14 @@ public class BaseRestClientTest extends RunningServerTest {
 
     public void assertStatus(ClientResponse.Status status, ClientResponse response) {
         org.junit.Assert.assertEquals(status.getStatusCode(), response.getStatus());
+    }
+
+    public void assertValidJsonData(ClientResponse response) {
+        try {
+            Bundle.fromString(response.getEntity(String.class));
+        } catch (DeserializationError deserializationError) {
+            throw new RuntimeException(deserializationError);
+        }
     }
 
     protected WebResource.Builder jsonCallAs(String user, String... segments) {

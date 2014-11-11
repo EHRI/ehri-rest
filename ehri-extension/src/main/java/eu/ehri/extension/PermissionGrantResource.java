@@ -50,7 +50,6 @@ public class PermissionGrantResource extends AbstractRestResource {
     @Path("/{id:.+}")
     public Response getPermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester, SerializationError {
-        // TODO: Should we add ACL checks here???
         PermissionGrant grant = manager.getFrame(id,
                 EntityClass.PERMISSION_GRANT, PermissionGrant.class);
         return single(grant);

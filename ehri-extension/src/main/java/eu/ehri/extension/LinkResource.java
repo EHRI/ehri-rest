@@ -23,7 +23,6 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
-import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.views.LinkViews;
@@ -46,7 +45,7 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
- * Provides a RESTful(ish) interface for creating/reading item links.
+ * Provides a web service interface for creating/reading item links.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -56,11 +55,13 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
 
     public static final String BODY_PARAM = "body";
 
-    private LinkViews linkViews;
+    private final LinkViews linkViews;
+    private final BundleDAO dao;
 
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
         linkViews = new LinkViews(graph);
+        dao = new BundleDAO(graph);
     }
 
     @GET
@@ -170,8 +171,8 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
 
             helper.checkEntityPermission(item, userProfile, PermissionType.UPDATE);
 
-            // FIXME: No logging here?
-            new BundleDAO(graph).delete(getSerializer().vertexFrameToBundle(rel));
+            // NB: Deliberately not logging this!
+            dao.delete(getSerializer().vertexFrameToBundle(rel));
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
@@ -207,9 +208,9 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
         try {
             helper.checkEntityPermission(manager.getFrame(id, AccessibleEntity.class),
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
-            Actioner actioner = graph.frame(getRequesterUserProfile().asVertex(), Actioner.class);
+            Actioner actioner = manager.cast(getRequesterUserProfile(), Actioner.class);
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
-            new ActionManager(graph).logEvent(link, actioner, EventTypes.deletion);
+            actionManager.logEvent(link, actioner, EventTypes.deletion);
             manager.deleteVertex(link.asVertex());
             graph.getBaseGraph().commit();
             return Response.ok().build();

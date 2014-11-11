@@ -2,16 +2,16 @@ package eu.ehri.extension;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -99,7 +99,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @Path("/listByGraphId")
     public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
-        // FIXME: This is ugly, but to return 404 on a bad item we have to
+        // This is ugly, but to return 404 on a bad item we have to
         // iterate the list first otherwise the streaming response will be
         // broken.
         for (Long id : ids) {
@@ -148,29 +148,23 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @param id The item's ID
      * @return A serialized representation.
      * @throws ItemNotFound
-     * @throws PermissionDenied
      * @throws BadRequester
-     * @throws SerializationError
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/{id:.+}")
-    public Response get(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester, SerializationError {
-        // TODO: Make this more efficient - it's wasteful to use the
-        // gremlin acl and type filtering for one item...
-        List<String> ids = Lists.newArrayList(id);
-        Iterable<Vertex> vertices = manager.getVertices(ids);
-        PipeFunction<Vertex, Boolean> filter = aclManager
-                .getAclFilterFunction(getRequesterUserProfile());
-        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
-                vertices)
-                .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-        if (filtered.iterator().hasNext()) {
-            return single(filtered.iterator().next());
-        } else {
+    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied, BadRequester {
+        Vertex item = manager.getVertex(id);
+
+        // If the item doesn't exist or isn't a content type throw 404
+        Accessor currentUser = getRequesterUserProfile();
+        if (item == null || !aclManager.getContentTypeFilterFunction().compute(item)) {
             throw new ItemNotFound(id);
+        } else if (!aclManager.getAclFilterFunction(currentUser).compute(item)) {
+            throw new AccessDenied(currentUser.getId(), id);
         }
+
+        return single(item);
     }
 
     private List<Long> parseGraphIds(String json) throws IOException, DeserializationError {

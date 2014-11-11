@@ -186,7 +186,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
-        // TODO test if json is valid?
+        assertValidJsonData(response);
         // response.getEntity(String.class)
 
         // Get created doc via the response location?
