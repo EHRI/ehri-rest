@@ -13,6 +13,12 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import java.util.List;
 
+/**
+ * The scope of permissions granted to users. A permission scope always has an identifier.
+ * 
+ * @author Mike Bryant (https://github.com/mikesname)
+ *
+ */
 public interface PermissionScope extends IdentifiableEntity {
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE, direction = Direction.IN)
     public Iterable<PermissionGrant> getPermissionGrants();
