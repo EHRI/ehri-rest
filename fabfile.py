@@ -124,18 +124,20 @@ def update_properties():
     """
     Put a fresh copy of the working copy .properties files on the server.
     """
-    with cd(env.path):
-        srcname = "props.tgz" # FIXME: Get this programatically...
-        dstpath = env.properties_location
-        dstfile = os.path.join(dstpath, srcname)
 
-        local("tar -czf props.tgz ehri-importers/target/classes/*.properties")
+    srcname = "props.tgz" # FIXME: Get this programatically...
+    dstpath = env.properties_location
+    dstfile = os.path.join(dstpath, srcname)
+
+    with lcd("ehri-importers/src/main/resources/"):
+        local("tar -czf %s *.properties" % srcname)
+
         # upload the assembly gzip
         print("Running put")
         put(srcname, dstfile)
         # extract it
         with cd(dstpath):
-            run("tar --extract --gzip --overwrite --file %s" % srcname)
+            run("tar --extract --gzip --no-overwrite-dir --touch --overwrite --file %s" % srcname)
         # delete the zip
         run("rm %s" % dstfile)
         local("rm %s" % srcname)
