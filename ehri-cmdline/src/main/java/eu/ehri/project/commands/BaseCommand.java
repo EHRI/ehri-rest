@@ -9,7 +9,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-public abstract class BaseCommand {
+public abstract class BaseCommand implements Command {
     
     Options options = new Options();
     CommandLineParser parser = new PosixParser();

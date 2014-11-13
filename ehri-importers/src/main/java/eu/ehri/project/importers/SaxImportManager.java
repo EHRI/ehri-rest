@@ -33,6 +33,7 @@ import java.util.Map;
 public class SaxImportManager extends XmlImportManager implements ImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxImportManager.class);
+
     private AbstractImporter<Map<String, Object>> importer;
     private Class<? extends AbstractImporter> importerClass;
     Class<? extends SaxXmlHandler> handlerClass;
@@ -55,6 +56,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         logger.info("importer used: " + importerClass);
         logger.info("handler used: " + handlerClass);
     }
+
     /**
      * Constructor.
      *
@@ -68,7 +70,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         this(framedGraph, permissionScope, actioner, importerClass, handlerClass);
         this.properties=properties;
     }
-//
+
     /**
      * Import XML from the given InputStream, as part of the given action.
      *
