@@ -21,36 +21,40 @@ import java.io.InputStream;
 import java.util.List;
 
 abstract public class XmlImportManager implements ImportManager {
-    private static final Logger logger = LoggerFactory.getLogger(XmlImportManager.class);
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(XmlImportManager.class);
     protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
     private boolean tolerant = false;
 
-        // Ugly stateful variables for tracking import state
+    // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
     private String currentFile = null;
     private Integer currentPosition = null;
 
-
-        /**
+    /**
      * Constructor.
      *
      * @param framedGraph
      * @param permissionScope
      * @param actioner
      */
-    public XmlImportManager(FramedGraph<? extends TransactionalGraph> framedGraph, final PermissionScope permissionScope,
-            final Actioner actioner) {
+    public XmlImportManager(
+            FramedGraph<? extends TransactionalGraph> framedGraph,
+            final PermissionScope permissionScope, final Actioner actioner) {
         this.framedGraph = framedGraph;
         this.permissionScope = permissionScope;
         this.actioner = actioner;
     }
+
     /**
      * Tell the importer to simply skip invalid items rather than throwing an
      * exception.
      *
-     * @param tolerant true means it won't validateData the xml file
+     * @param tolerant
+     *            true means it won't validateData the xml file
      */
     public XmlImportManager setTolerant(boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);
@@ -58,14 +62,13 @@ abstract public class XmlImportManager implements ImportManager {
         return this;
     }
 
-    public boolean isTolerant(){
+    public boolean isTolerant() {
         return tolerant;
     }
 
-    
     /**
-     * Import an Description file by specifying it's path.
-     * 
+     * Import a Description file by specifying its path.
+     *
      * @param filePath
      * @param logMessage
      *
@@ -88,20 +91,20 @@ abstract public class XmlImportManager implements ImportManager {
      *
      * @param ios
      * @param logMessage
-     * @return returns an ImportLog for the given InputStream
+     * @return an ImportLog for the given InputStream
      *
      * @throws IOException
      * @throws ValidationError
      * @throws InputParseError
      */
-     @Override
+    @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
         try {
             // Create a new action for this import
             final ActionManager.EventContext action = new ActionManager(
-                    framedGraph, permissionScope).logEvent(
-                        actioner, EventTypes.ingest, getLogMessage(logMessage));
+                    framedGraph, permissionScope).logEvent(actioner,
+                    EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
 
@@ -118,9 +121,7 @@ abstract public class XmlImportManager implements ImportManager {
             commitOrRollback(false);
             throw new RuntimeException(e);
         }
-    }    
-     
-
+    }
 
     /**
      * Import multiple files in the same batch/transaction.
@@ -138,8 +139,8 @@ abstract public class XmlImportManager implements ImportManager {
         try {
 
             final ActionManager.EventContext action = new ActionManager(
-                    framedGraph, permissionScope).logEvent(
-                        actioner, EventTypes.ingest, getLogMessage(logMessage));
+                    framedGraph, permissionScope).logEvent(actioner,
+                    EventTypes.ingest, getLogMessage(logMessage));
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
                 try {
@@ -179,12 +180,14 @@ abstract public class XmlImportManager implements ImportManager {
                 currentPosition);
     }
 
-    protected abstract void importFile(InputStream ios, final ActionManager.EventContext eventContext,
-            final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidXmlDocument, InvalidInputFormatError;
+    protected abstract void importFile(InputStream ios,
+            final ActionManager.EventContext eventContext, final ImportLog log)
+            throws IOException, ValidationError, InputParseError,
+            InvalidXmlDocument, InvalidInputFormatError;
 
     private Optional<String> getLogMessage(String msg) {
-        return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+        return msg.trim().isEmpty() ? Optional.<String> absent() : Optional
+                .of(msg);
     }
 
     private void commitOrRollback(boolean okay) {

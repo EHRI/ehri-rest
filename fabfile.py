@@ -21,6 +21,7 @@ env.prod = False
 env.path = '/opt/webapps/' + env.project_name
 env.neo4j_install = '/opt/webapps/' + 'neo4j-version'
 env.index_helper = "/opt/webapps/docview/bin/indexer.jar"
+env.properties_location = '/opt/webapps/data/import-data/properties/'
 env.user = os.getenv("USER")
 env.use_ssh_config = True
 
@@ -119,6 +120,29 @@ def online_backup(remote_dir):
         run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
 
 @task
+def update_properties():
+    """
+    Put a fresh copy of the working copy .properties files on the server.
+    """
+
+    srcname = "props.tgz" # FIXME: Get this programatically...
+    dstpath = env.properties_location
+    dstfile = os.path.join(dstpath, srcname)
+
+    with lcd("ehri-importers/src/main/resources/"):
+        local("tar -czf %s *.properties" % srcname)
+
+        # upload the assembly gzip
+        print("Running put")
+        put(srcname, dstfile)
+        # extract it
+        with cd(dstpath):
+            run("tar --extract --gzip --no-overwrite-dir --touch --overwrite --file %s" % srcname)
+        # delete the zip
+        run("rm %s" % dstfile)
+        local("rm %s" % srcname)
+
+@task
 def load_queue():
     """Run the queue.sh script to run imports from the queue.
     
@@ -127,6 +151,40 @@ def load_queue():
         stop()
         run("./scripts/queue.sh")
         start()
+
+@task
+def import_ead(scope, log, properties, file_dir):
+    """Import EAD files remotely via REST
+    
+    Supply the scope, log message as a file name or as an URL encoded message, the path to a
+    properties file and path to a directory relative to /opt/webapps/data/import-data containing
+    the files to import. File paths are local on the remote machine.
+    The $USER is used to run the import, and tolerant is always true when using this import.
+    
+    For example, to import all files from the Wiener Library, use:
+    
+    fab stage import_ead:scope=gb-003348,log=/opt/webapps/data/import-data/gb/wiener-library/wiener-log.txt,properties=/opt/webapps/data/import-data/properties/wienerlib.properties,file_dir=gb/wiener-library"""
+    
+    run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
+    file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log, properties) )
+
+@task
+def import_skos(scope, log, file):
+    """Import SKOS files remotely via REST
+    
+    Supply the scope, log message as a file name or as an URL encoded message and path 
+    to an RDF file relative to /opt/webapps/data/import-data containing
+    the vocabulary to import. File paths are local on the remote machine.
+    The $USER is used to run the import, and tolerant is always true when using this import.
+    
+    For example, to import the list of camps, use:
+    
+    fab stage import_skos:scope=ehri-camps,log=This+list+of+camps+has+been+compiled+by+EHRI+in+2014,file=authoritativeSet/camps-import.rdf"""
+    
+    full_file_path = "/opt/webapps/data/import-data/" + file
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
+
 
 @task
 def online_clone_db(local_dir):
