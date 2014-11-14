@@ -183,11 +183,8 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         SystemEvent event = views.detail(id, user);
-        // NB: Taking a pragmatic decision here to only stream the first
-        // level of the subject's tree.
         return streamingPage(getQuery(AccessibleEntity.class)
-                .setStream(true).page(event.getSubjects(), user),
-                subjectSerializer.withCache());
+                .page(event.getSubjects(), user), subjectSerializer.withCache());
     }
 
     /**
