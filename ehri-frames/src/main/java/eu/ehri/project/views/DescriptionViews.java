@@ -47,7 +47,7 @@ public class DescriptionViews <E extends DescribedEntity> {
         this.actionManager = new ActionManager(graph);
     }
 
-    public Integer delete(String parentId, String id, Accessor user, Optional<String> logMessage)
+    public int delete(String parentId, String id, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError {
         E parent = crud.detail(parentId, user);
         AccessibleEntity dependentItem = manager.getFrame(id, AccessibleEntity.class);

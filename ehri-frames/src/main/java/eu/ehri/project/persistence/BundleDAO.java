@@ -111,7 +111,7 @@ public final class BundleDAO {
      * @param bundle The bundle to delete
      * @return The number of vertices deleted
      */
-    public Integer delete(Bundle bundle) {
+    public int delete(Bundle bundle) {
         try {
             return deleteCount(bundle, 0);
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public final class BundleDAO {
     }
 
     // Helpers
-    private Integer deleteCount(Bundle bundle, int count) throws Exception {
+    private int deleteCount(Bundle bundle, int count) throws Exception {
         Integer c = count;
 
         for (Bundle child : bundle.getDependentRelations().values()) {
