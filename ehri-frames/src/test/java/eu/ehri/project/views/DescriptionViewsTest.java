@@ -172,9 +172,9 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         Bundle desc = Bundle.fromData(TestData.getTestAgentBundle())
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
         DescriptionViews<Repository> lcv = new DescriptionViews<Repository>(graph, Repository.class);
-        lcv.create("r1", desc, RepositoryDescription.class,
+        RepositoryDescription r11 = lcv.create("r1", desc, RepositoryDescription.class,
                 validUser, Optional.<String>absent());
-        assertEquals(r1, am.getLatestGlobalEvent()
+        assertEquals(r11, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
     }
 

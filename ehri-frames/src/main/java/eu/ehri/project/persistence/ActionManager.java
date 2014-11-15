@@ -1,6 +1,7 @@
 package eu.ehri.project.persistence;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -25,6 +26,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Class for dealing with actions.
@@ -106,6 +108,7 @@ public final class ActionManager {
         private final Actioner actioner;
         private final EventTypes actionType;
         private final Optional<String> logMessage;
+        private final Set<Frame> subjects;
 
         /**
          * Create a new event context.
@@ -123,6 +126,7 @@ public final class ActionManager {
             this.systemEvent = systemEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
+            this.subjects = Sets.newHashSet();
         }
 
         public SystemEvent getSystemEvent() {
@@ -200,12 +204,15 @@ public final class ActionManager {
          */
         public EventContext addSubjects(AccessibleEntity... entities) {
             for (AccessibleEntity entity : entities) {
-                Vertex vertex = actionManager.getLinkNode(
-                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
-                actionManager.replaceAtHead(entity.asVertex(), vertex,
-                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
-                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
-                actionManager.addSubjectAndIncrementCount(systemEvent.asVertex(), vertex);
+                if (!subjects.contains(entity)) {
+                    Vertex vertex = actionManager.getLinkNode(
+                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
+                    actionManager.replaceAtHead(entity.asVertex(), vertex,
+                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
+                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
+                    actionManager.addSubjectAndIncrementCount(systemEvent.asVertex(), vertex);
+                    subjects.add(entity);
+                }
             }
             return this;
         }
