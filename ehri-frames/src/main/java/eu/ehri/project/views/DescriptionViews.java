@@ -55,8 +55,7 @@ public class DescriptionViews <E extends DescribedEntity> {
             throw new PermissionDenied("Given description does not belong to its parent item");
         }
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        actionManager.setScope(parent)
-                .logEvent(manager.cast(user, Actioner.class),
+        actionManager.logEvent(parent, manager.cast(user, Actioner.class),
                         EventTypes.deleteDependent, logMessage)
                 .createVersion(dependentItem);
         return getPersister(parent)
@@ -69,8 +68,7 @@ public class DescriptionViews <E extends DescribedEntity> {
         E parent = crud.detail(parentId, user);
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
         T out = getPersister(parent).create(data, descriptionClass);
-        actionManager
-                .setScope(parent).logEvent(out, manager.cast(user, Actioner.class),
+        actionManager.logEvent(parent, manager.cast(user, Actioner.class),
                     EventTypes.createDependent, logMessage);
         return out;
     }
@@ -82,8 +80,8 @@ public class DescriptionViews <E extends DescribedEntity> {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
         Mutation<T> out = getPersister(parent).update(data, descriptionClass);
         if (!out.unchanged()) {
-            actionManager.setScope(parent)
-                    .logEvent(out.getNode(), manager.cast(user, Actioner.class),
+            actionManager
+                    .logEvent(parent, manager.cast(user, Actioner.class),
                             EventTypes.modifyDependent, logMessage)
                     .createVersion(out.getNode(), out.getPrior().get());
         }

@@ -188,12 +188,13 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateDependentLogging() throws Exception {
+        Repository r1 = manager.getFrame("r1", Repository.class);
         Bundle desc = Bundle.fromData(TestData.getTestAgentBundle())
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
         DescriptionViews<Repository> lcv = getView(Repository.class);
         RepositoryDescription r11 = lcv.create("r1", desc, RepositoryDescription.class,
                 validUser, Optional.<String>absent());
-        assertEquals(r11, am.getLatestGlobalEvent()
+        assertEquals(r1, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
     }
 
