@@ -133,9 +133,12 @@
             - id: ar1
               type: address
               data:
-                name: "An Address"
+                name: An Address
                 streetAddress: 1 Some St.
                 city: Amsterdam
+                webpage:
+                  - http://www.niod.nl
+                  - http://www.niod.nl/en
 
 - id: r2 # should be named kcl
   type: repository
@@ -157,9 +160,10 @@
             - id: ar2
               type: address
               data:
-                name: "An Address"
+                name: An Address
                 streetAddress: Strand
                 city: London
+                webpage: http://www.kcl.ac.uk
                          
 - id: r3 # should be dans
   type: repository
@@ -181,7 +185,7 @@
             - id: ar3
               type: address
               data:
-                name: "An Address"
+                name: An Address
                 city: The Hague
 
 - id: r4 # should be soma
@@ -204,7 +208,7 @@
             - id: ar4
               type: address
               data:
-                name: "An Address"
+                name: An Address
                 city: Brussels
       
       

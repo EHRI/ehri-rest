@@ -16,13 +16,13 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.Utilities;
 import eu.ehri.project.views.ViewFactory;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -44,7 +44,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Provides additional Admin methods needed by client systems
@@ -58,8 +58,11 @@ public class AdminResource extends AbstractRestResource {
     public static final String DEFAULT_USER_ID_PREFIX = "user";
     public static final String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
+    private final Utilities utilViews;
+
     public AdminResource(@Context GraphDatabaseService database) {
         super(database);
+        utilViews = new Utilities(graph);
     }
 
     /**
@@ -128,50 +131,75 @@ public class AdminResource extends AbstractRestResource {
      * Find an replace a property value across an entire entity class, e.g.
      * if a DocumentaryUnit has a property with name &quot;foo&quot; and value &quot;bar&quot;,
      * change the value to &quot;baz&quot; on all items.
+     * <p/>
+     * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
      * @param propName   The name of the property to find and replace
      * @param oldValue   The property value to change
      * @param newValue   The new value
      * @return How many items have been changed
-     * @throws Exception
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/_findReplacePropertyValue")
-    public Long renamePropertyValue(
+    public long renamePropertyValue(
             @QueryParam("type") String entityType,
             @QueryParam("name") String propName,
             @QueryParam("from") String oldValue,
             @QueryParam("to") String newValue) throws Exception {
         graph.getBaseGraph().checkNotInTransaction();
         EntityClass entityClass = EntityClass.withName(entityType);
-        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
-        if (propName == null
-                || propName.trim().isEmpty()
-                || propName.equals(EntityType.ID_KEY)
-                || propName.equals(EntityType.TYPE_KEY)) {
-            throw new IllegalArgumentException("Invalid property key: " + propName);
-        }
         try {
-            Long changes = 0L;
-            for (Vertex v : vertices) {
-                Object current = v.getProperty(propName);
-                if (oldValue.equals(current)) {
-                    changes++;
-                    manager.setProperty(v, propName, newValue);
-                }
-            }
+            long changes = utilViews
+                    .findReplacePropertyValue(entityClass, propName, oldValue, newValue);
             graph.getBaseGraph().commit();
             return changes;
         } finally {
-            vertices.close();
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Find an replace a regex-specified substring of a property value
+     * across an entire entity class e.g.
+     * if an Address has a property with name &quot;url&quot; and value &quot;www.foo.com/bar&quot;,
+     * providing a regex value <code>^www</code> and replacement <code>http://www</code> will
+     * give the property a value of &quot;http://www.foo.com/bar&quot;.
+     * <p/>
+     * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
+     *
+     * @param entityType The type of entity
+     * @param propName   The name of the property to find and replace
+     * @param regex      A regex specifying a substring of the property value
+     * @param replace    A replacement substring
+     * @return How many items have been changed
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_findReplacePropertyValueRE")
+    public long renamePropertyValueRE(
+            @QueryParam("type") String entityType,
+            @QueryParam("name") String propName,
+            @QueryParam("pattern") String regex,
+            @QueryParam("replace") String replace) throws Exception {
+        graph.getBaseGraph().checkNotInTransaction();
+        EntityClass entityClass = EntityClass.withName(entityType);
+        Pattern pattern = Pattern.compile(regex);
+        try {
+            long changes = utilViews
+                    .findReplacePropertyValueRE(entityClass, propName, pattern, replace);
+            graph.getBaseGraph().commit();
+            return changes;
+        } finally {
             cleanupTransaction();
         }
     }
 
     /**
      * Change a property key name across an entire entity class.
+     *
+     * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
      * @param oldKeyName The existing property key name
@@ -182,34 +210,18 @@ public class AdminResource extends AbstractRestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/_findReplacePropertyName")
-    public Long renamePropertyName(
+    public long renamePropertyName(
             @QueryParam("type") String entityType,
             @QueryParam("from") String oldKeyName,
             @QueryParam("to") String newKeyName) throws Exception {
         graph.getBaseGraph().checkNotInTransaction();
         EntityClass entityClass = EntityClass.withName(entityType);
-        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
-        if (oldKeyName == null
-                || oldKeyName.trim().isEmpty()
-                || oldKeyName.equals(EntityType.ID_KEY)
-                || oldKeyName.equals(EntityType.TYPE_KEY)) {
-            throw new IllegalArgumentException("Invalid property name: " + oldKeyName);
-        }
         try {
-            Long changes = 0L;
-            for (Vertex v : vertices) {
-                Set<String> propertyKeys = v.getPropertyKeys();
-                if (propertyKeys.contains(oldKeyName)) {
-                    Object current = v.getProperty(oldKeyName);
-                    manager.setProperty(v, newKeyName, current);
-                    manager.setProperty(v, oldKeyName, null);
-                    changes++;
-                }
-            }
+            long changes = utilViews
+                    .replacePropertyName(entityClass, oldKeyName, newKeyName);
             graph.getBaseGraph().commit();
             return changes;
         } finally {
-            vertices.close();
             cleanupTransaction();
         }
     }
