@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<!DOCTYPE ead SYSTEM "ead.dtd">
+<ead>
+    <eadheader countryencoding="iso3166-1" langencoding="iso639-2b" dateencoding="iso8601"
+        relatedencoding="MARC21">
+        <eadid countrycode="CZ" identifier="COLLECTION.JMP.ARCHIVE/NAD3"
+            >COLLECTION.JMP.ARCHIVE/NAD3</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Jewish Religious Community Beroun</titleproper>
+                <author>Archives of the Jewish Museum in Prague</author>
+            </titlestmt>
+            <publicationstmt>
+                <date normal="20141114">November 14, 2014</date>
+            </publicationstmt>
+        </filedesc>
+    </eadheader>
+    <archdesc level="fonds">
+        <did>
+            <unittitle>Jewish Religious Community Beroun</unittitle>
+            <unitid>COLLECTION.JMP.ARCHIVE/NAD3</unitid>
+            <unitdate>1802 - 1942</unitdate>
+            <repository>
+                <corpname authfilenumber="ORGANISATION.JMP.7039" source="organisationlist-JMP"
+                    >Archives of the Jewish Museum in Prague</corpname><!-- Alternative: use EHRI repository code! (in this case: cz-002279) -->
+            </repository>
+            <origination>
+                <corpname authfilenumber="ORGANISATION.JMP.4337" source="organisationlist-JMP"
+                    >Jewish Religious Community Beroun</corpname>
+            </origination>
+            <langmaterial label="Language(s)">
+                <language langcode="ger">German</language>
+                <language langcode="cze">Czech</language>
+                <language langcode="heb">Hebrew</language>
+                <language langcode="jud">Judendeutsch</language><!-- Judendeutsch has no official ISO code. -->
+            </langmaterial>
+            <physdesc>
+                <extent>3.55 Meter</extent>
+            </physdesc>
+        </did>
+        <scopecontent>
+            <scopecontent>
+                <p> The fonds contains the articles of the Jewish Religious Community including
+                    changes from 1871 – 1933, file records, committee meetings records, election and
+                    personal files, register and financial administration files, and files of the
+                    Funeral Society. Financial books and files of affiliated communities of Mořina
+                    and Liteň are included. Preserved documents of the Jewish Religious Community
+                    Beroun describes the community administration from the half of the 19th century
+                    to 1930s, only Funeral Society book were kept from the first half of the 19th
+                    century. There is a larger unit of documents from the Nazi occupation period
+                    (1939 – 1942) such as the file records and the files continuing from the pre-war
+                    administration (religious and other various taxes, employee insurance and the
+                    social care), most importantly the documents connected to the persecution of the
+                    Jewish population, such as directives (mainly from the Jewish Religious
+                    Community in Prague), emigration files, files of housing and registration
+                    issues, employment questionnaires, various documents concerning the labour duty,
+                    travel permits and community mailing concerning the Jewish property records,
+                    issues of Jews of “non-Mosaic” religion, records of the seized objects from the
+                    Jewish property. </p>
+            </scopecontent>
+            <arrangement>
+                <p>The fond is processed, but not inventoried yet.</p>
+            </arrangement>
+        </scopecontent>
+        <controlaccess>
+            <controlaccess>
+                <head>Keywords</head>
+                <subject authfilenumber="KEYWORD.JMP.228">Jewish Communities</subject>
+            </controlaccess>
+            <controlaccess>
+                <head>Places</head>
+                <geogname authfilenumber="PLACE.&#x10C;S&#xDA;.531057">Beroun</geogname>
+                <geogname authfilenumber="PLACE.&#x10C;S&#xDA;.531456">Liten</geogname>
+            </controlaccess>
+            <controlaccess>
+                <corpname authfilenumber="ORGANISATION.JMP.4337" source="organisationlist-JMP"
+                    >Jewish Religious Community Beroun</corpname>
+            </controlaccess>
+        </controlaccess>
+        <dsc> </dsc>
+        <acqinfo>
+            <p>The documents were acquired by the Jewish Museum as part of the wartime shipment of
+                artefacts and documents from Jewish Religious Communities liquidated during the
+                Holocaust.</p>
+        </acqinfo>
+        <otherfindaid>
+            <bibref>Dolista K. – Heřman J., Židovská náboženská obec Beroun 1802 - 1942, Prozatímní
+                inventární seznam, 1971, 7 s., ev. č. 3</bibref>
+        </otherfindaid>
+        <otherfindaid>
+            <extref href="http://www.badatelna.eu/fond/157499/"/>
+        </otherfindaid>
+        <userestrict>
+            <p>The fonds is accessible with no restriction.</p>
+        </userestrict>
+    </archdesc>
+</ead>
