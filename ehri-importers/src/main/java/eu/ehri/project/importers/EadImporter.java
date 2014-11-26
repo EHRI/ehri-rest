@@ -260,32 +260,41 @@ public class EadImporter extends EaImporter {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(ACCESS_POINT)) {
+
                 logger.debug(key + data.get(key).getClass());
-                for(Object o : (List) data.get(key)){
-                    logger.debug(""+o.getClass());
-                }
-                //type, targetUrl, targetName, notes
-                for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
-                    if(origRelation.isEmpty()){
-                        break;
+                if (data.get(key) instanceof List) {
+                    for (Object o : (List) data.get(key)) {
+                        logger.debug("" + o.getClass());
                     }
-                    Map<String, Object> relationNode = new HashMap<String, Object>();
-                    for (String eventkey : origRelation.keySet()) {
-                        if (eventkey.endsWith(ACCESS_POINT)) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
-                            relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
+                    //type, targetUrl, targetName, notes
+                    for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
+                        if (origRelation.isEmpty()) {
+                            break;
+                        }
+                        Map<String, Object> relationNode = new HashMap<String, Object>();
+                        for (String eventkey : origRelation.keySet()) {
+                            if (eventkey.endsWith(ACCESS_POINT)) {
+                                relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
+                                relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
 //logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
-                        } else {
-                            relationNode.put(eventkey, origRelation.get(eventkey));
+                            } else {
+                                relationNode.put(eventkey, origRelation.get(eventkey));
+                            }
+                        }
+                        if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        }
+                        //if no name is given, it was apparently an empty <controlaccess> tag?
+                        if (relationNode.containsKey(Ontology.NAME_KEY)) {
+                            list.add(relationNode);
                         }
                     }
-                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
-                    }
-                    //if no name is given, it was apparently an empty <controlaccess> tag?
-                    if(relationNode.containsKey(Ontology.NAME_KEY)){
+                } else {
+                        Map<String, Object> relationNode = new HashMap<String, Object>();
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, key.substring(0, key.indexOf("Point")));
+                        relationNode.put(Ontology.NAME_KEY, data.get(key));
                         list.add(relationNode);
-                    }
+                    
                 }
             }
         }
@@ -355,7 +364,11 @@ public class EadImporter extends EaImporter {
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        throw new UnsupportedOperationException("Not supported yet.");
+        List<String> a = new ArrayList<String>();
+        for(String s : this.permissionScope.idPath()){
+            a.add(s);
+        }
+        return importItem(itemData, a);
     }
     
     public void importAsVirtualCollection(){
