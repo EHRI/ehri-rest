@@ -10,11 +10,13 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.CsvImportManager;
 import eu.ehri.project.importers.IcaAtomEadHandler;
 import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.XmlImporter;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -194,6 +196,77 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
                     .setProperties(propertyFile)
                     .setTolerant(tolerant)
+                    .importFiles(paths, getLogMessage(logMessage).orNull());
+
+            graph.getBaseGraph().commit();
+            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+        } catch (ClassNotFoundException e) {
+            throw new DeserializationError("Class not found: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Import a set of CSV files. The body of the POST
+     * request should be a newline separated list of file
+     * paths.
+     * <p/>
+     * The way you would run with would typically be:
+     * <p/>
+     * <pre>
+     * <code>curl -X POST \
+     *      -H "Authorization: mike" \
+     *      --data-binary @csv-list.txt \
+     *      "http://localhost:7474/ehri/import/csv?scope=my-repo-id&log=testing"
+     *
+     * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
+     * # it needs url encoding.
+     * </code>
+     * </pre>
+     * <p/>
+     * (Assuming <code>csv-list.txt</code> is a list of newline separated CSV file paths.)
+     * <p/>
+     * (TODO: Might be better to use a different way of encoding the local file paths...)
+     *
+     * @param scopeId       The id of the import scope (i.e. repository)
+     * @param logMessage    Log message for import. If this refers to a local file
+     *                      its contents will be used.
+     * @param importerClass The fully-qualified import class name
+     * @param pathList      A string containing a list of local file paths
+     *                      to import.
+     * 
+     * There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
+     * @return A JSON object showing how many records were created,
+     *         updated, or unchanged.
+     */
+    
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/csv")
+    public Response importCsv(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            String pathList)
+            throws BadRequester, ItemNotFound, ValidationError,
+            IOException, DeserializationError {
+
+        try {
+            Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
+
+            // Get the current user from the Authorization header and the scope
+            // from the query params...
+            UserProfile user = getCurrentUser();
+            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+
+            // Extract our list of paths...
+            List<String> paths = getFilePaths(pathList);
+
+            // Run the import!
+            ImportLog log = new CsvImportManager(graph, scope, user, importer)
                     .importFiles(paths, getLogMessage(logMessage).orNull());
 
             graph.getBaseGraph().commit();

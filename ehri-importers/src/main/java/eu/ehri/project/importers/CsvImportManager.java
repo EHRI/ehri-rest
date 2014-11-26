@@ -27,10 +27,10 @@ public class CsvImportManager extends XmlImportManager {
     public static final Character VALUE_DELIMITER = ';';
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
-    private Class<? extends XmlImporter> importerClass;
+    private Class<? extends AbstractImporter> importerClass;
 
     public CsvImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
-            final PermissionScope permissionScope, final Actioner actioner, Class<? extends XmlImporter> importerClass) {
+            final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
     }
@@ -50,7 +50,7 @@ public class CsvImportManager extends XmlImportManager {
             final ImportLog log) throws IOException, ValidationError, InvalidInputFormatError {
 
         try {
-            XmlImporter importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
+            AbstractImporter importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.debug("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
