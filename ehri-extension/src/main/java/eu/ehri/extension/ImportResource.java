@@ -10,12 +10,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.CsvImportManager;
-import eu.ehri.project.importers.IcaAtomEadHandler;
-import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.EadHandler;
+import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
-import eu.ehri.project.importers.XmlImporter;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -47,9 +46,9 @@ import java.util.List;
 public class ImportResource extends AbstractRestResource {
 
     private static final Class<? extends SaxXmlHandler> DEFAULT_EAD_HANDLER
-            = IcaAtomEadHandler.class;
+            = EadHandler.class;
     private static final Class<? extends AbstractImporter> DEFAULT_EAD_IMPORTER
-            = IcaAtomEadImporter.class;
+            = EadImporter.class;
 
     public static final String LOG_PARAM = "log";
     public static final String SCOPE_PARAM = "scope";
@@ -149,9 +148,9 @@ public class ImportResource extends AbstractRestResource {
      * @param logMessage    Log message for import. If this refers to a local file
      *                      its contents will be used.
      * @param handlerClass  The fully-qualified handler class name
-     *                      (defaults to IcaAtomEadHandler)
+     *                      (defaults to EadHandler)
      * @param importerClass The fully-qualified import class name
-     *                      (defaults to IcaAtomEadImporter)
+     *                      (defaults to EadImporter)
      * @param propertyFile  A local file path pointing to an import properties
      *                      configuration file.
      * @param pathList      A string containing a list of local file paths
