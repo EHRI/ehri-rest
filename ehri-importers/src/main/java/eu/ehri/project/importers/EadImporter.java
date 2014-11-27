@@ -362,16 +362,13 @@ public class EadImporter extends EaImporter {
         return unit;
     }
 
-    @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        List<String> a = new ArrayList<String>();
-        for(String s : this.permissionScope.idPath()){
-            a.add(s);
-        }
-        return importItem(itemData, a);
-    }
     
     public void importAsVirtualCollection(){
       unitEntity = EntityClass.VIRTUAL_UNIT;
+    }
+
+    @Override
+    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
