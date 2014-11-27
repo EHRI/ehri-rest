@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
@@ -96,7 +97,7 @@ public class CsvImportManager extends XmlImportManager {
                     SaxXmlHandler.putPropertyInGraph(dataMap, headers[i], data[i]);
                 }
                 try {
-                    importer.importItem(dataMap);
+                    importer.importItem(dataMap, new Stack<String>());
                 } catch (ValidationError e) {
                     if (isTolerant()) {
                         logger.error("Validation error importing item: {}", e);

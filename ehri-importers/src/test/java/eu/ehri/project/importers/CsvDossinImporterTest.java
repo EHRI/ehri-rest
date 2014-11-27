@@ -1,6 +1,8 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.InputStream;
 
@@ -23,7 +25,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
     @Test
     public void testImportItemsT() throws Exception {
         
-        PermissionScope repo = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope ps = manager.getFrame(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing some Dossin records";
         XmlImportProperties p = new XmlImportProperties("dossin.properties");
 //        assertTrue(p.containsProperty("Creator"));
@@ -34,7 +36,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, repo, validUser, EadImporter.class).importFile(ios, logMessage);
+        ImportLog log = new CsvImportManager(graph, ps, validUser, EadImporter.class).importFile(ios, logMessage);
         // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -50,5 +52,17 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
         assertEquals(count+21, getNodeCount(graph));
         
         printGraph(graph);
+        DocumentaryUnit unit = graph.frame(
+                getVertexByIdentifier(graph,"kd3"),
+                DocumentaryUnit.class);
+        
+        assertNotNull(unit);
+        Repository r = unit.getRepository();
+        System.out.println(r.getId());
+        Repository repo = graph.frame(
+                getVertexByIdentifier(graph,TEST_REPO),
+                Repository.class);
+        assertEquals(repo, r);
+        
     }
 }
