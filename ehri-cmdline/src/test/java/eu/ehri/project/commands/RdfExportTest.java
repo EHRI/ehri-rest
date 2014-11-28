@@ -2,6 +2,7 @@ package eu.ehri.project.commands;
 
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.apache.commons.cli.CommandLine;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import static org.junit.Assert.assertTrue;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class RdfExportTest extends AbstractFixtureTest {
+    @Ignore("Ignored until SailGraph supports array properties (which we need). It doesn't as of Blueprints 2.5.0")
     @Test
     public void testExportTurtle() throws Exception {
         File temp = File.createTempFile("temp-file-name", ".turtle");
