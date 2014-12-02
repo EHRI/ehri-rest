@@ -350,7 +350,7 @@ def reindex_all():
     all_types = ["documentaryUnit", "repository", "country",
             "historicalAgent", "cvocVocabulary", "cvocConcept",
             "authoritativeSet", "userProfile", "group",
-            "virtualUnit"]
+            "virtualUnit", "annotation", "link"]
     indexer_cmd = [
         "java", "-jar", env.index_helper,
         "--clear-all",
