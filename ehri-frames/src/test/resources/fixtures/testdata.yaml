@@ -380,7 +380,6 @@
   type: authoritativeSet
   data:
     identifier: auths
-    name: Authorities
 
 --- # Authorities
 - id: a1
@@ -543,13 +542,11 @@
   type: cvocVocabulary
   data:
     identifier: cvoc1
-    name: Vocabulary 1
 
 - id: cvoc2
   type: cvocVocabulary
   data:
     identifier: cvoc2
-    name: Vocabulary 2
 
 --- # Concepts
 - id: cvocc1

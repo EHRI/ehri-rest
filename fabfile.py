@@ -153,7 +153,7 @@ def load_queue():
         start()
 
 @task
-def import_ead(scope, log, properties, file_dir):
+def import_ead(scope, log, properties, file_dir, handler):
     """Import EAD files remotely via REST
     
     Supply the scope, log message as a file name or as an URL encoded message, the path to a
@@ -167,7 +167,7 @@ def import_ead(scope, log, properties, file_dir):
     
     run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log, properties) )
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log, properties, handler) )
 
 @task
 def import_skos(scope, log, file):
@@ -184,6 +184,22 @@ def import_skos(scope, log, file):
     
     full_file_path = "/opt/webapps/data/import-data/" + file
     run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
+
+@task
+def import_csv(scope, log, importer, file):
+    """Import CSV files remotely via REST
+    
+    Supply the scope, log message as a file name or as an URL encoded message, the fully
+    qualified name of a CSV importer class and path to a file relative to 
+    /opt/webapps/data/import-data to import. File paths are local on the remote machine.
+    The $USER is used to run the import.
+    
+    For example, to import something, use:
+    
+    fab stage import_csv:scope=terezin-victims,log=/opt/webapps/data/import-data/wp2/terezin/authoritativeSet/terezin-victims-log.txt,importer=,file=wp2/terezin/authoritativeSet/terezin-victims.csv"""
+    
+    full_file_path = "/opt/webapps/data/import-data/" + file
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, log, importer) )
 
 
 @task
