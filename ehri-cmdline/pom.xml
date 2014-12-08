@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graphviz</artifactId>
-            <version>1.9.7</version>
+            <version>1.9.9</version>
         </dependency>
 
         <!-- Command line parsing -->
@@ -82,7 +82,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>1.9.7</version>
+            <version>1.9.9</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>

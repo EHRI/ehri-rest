@@ -128,12 +128,12 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>1.9.7</version>
+            <version>1.9.9</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>1.9.7</version>
+            <version>1.9.9</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
