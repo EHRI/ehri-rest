@@ -60,6 +60,7 @@ public class Ontology {
     // Annotation/Link promotion
     public static final String IS_PROMOTABLE = "isPromotable";
     public static final String PROMOTED_BY = "promotedBy";
+    public static final String DEMOTED_BY = "demotedBy";
 
     // Users/groups
     public static final String ACCESSOR_BELONGS_TO_GROUP = "belongsTo";

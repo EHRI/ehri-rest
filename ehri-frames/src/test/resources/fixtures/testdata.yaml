@@ -451,6 +451,21 @@
     hasAnnotationBody: mike
     access: mike
 
+# This annotation is promoted by one user
+# and demoted by another, so they it's effectively
+# not promoted.
+- id: ann6
+  type: annotation
+  data:
+    identifier: ann6
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    access: mike
+    promotedBy: tim
+    demotedBy: linda
 
 --- # Links
  - id: link1

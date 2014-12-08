@@ -1,5 +1,6 @@
 package eu.ehri.project.views;
 
+import com.google.common.collect.Iterables;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
@@ -42,7 +43,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     public void testPromotingUnpromotableItemThrowsAnError() throws Exception {
         Annotation ann = manager.getFrame("ann3", Annotation.class);
         assertFalse(acl.canAccess(ann, viewer));
-        promotionViews.promoteItem(ann, promoter);
+        promotionViews.upVote(ann, promoter);
         assertTrue(acl.canAccess(ann, viewer));
     }
 
@@ -50,7 +51,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     public void testDemoteItem() throws Exception {
         Annotation ann = manager.getFrame("ann4", Annotation.class);
         assertTrue(acl.canAccess(ann, viewer));
-        promotionViews.demoteItem(ann, promoter);
+        promotionViews.removeUpVote(ann, promoter);
         assertFalse(acl.canAccess(ann, viewer));
     }
 
@@ -59,7 +60,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
         UserProfile promoter2 = manager.getFrame("mike", UserProfile.class);
         Annotation ann = manager.getFrame("ann4", Annotation.class);
         assertTrue(acl.canAccess(ann, viewer));
-        promotionViews.demoteItem(ann, promoter2);
+        promotionViews.removeDownVote(ann, promoter2);
         // Item is *still* promoted by an other user
         // so we can still see it.
         assertTrue(acl.canAccess(ann, viewer));
@@ -69,7 +70,15 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     public void testPromoteItem() throws Exception {
         Annotation ann = manager.getFrame("ann5", Annotation.class);
         assertFalse(acl.canAccess(ann, viewer));
-        promotionViews.promoteItem(ann, promoter);
+        promotionViews.upVote(ann, promoter);
         assertTrue(acl.canAccess(ann, viewer));
     }
+
+//    @Test
+//    public void testIsPromoted() throws Exception {
+//        Annotation ann = manager.getFrame("ann6", Annotation.class);
+//        assertFalse(ann.isPromoted());
+//        assertTrue(Iterables.contains(ann.getUpVoters(), promoter));
+//        assertTrue(ann.isPromotedBy(promoter));
+//    }
 }

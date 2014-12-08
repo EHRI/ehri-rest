@@ -8,7 +8,8 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.utils.JavaHandlerUtils;
+
+import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -17,16 +18,29 @@ public interface Promotable extends AccessibleEntity {
 
     @Fetch(Ontology.PROMOTED_BY)
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
-    public Iterable<UserProfile> getPromotors();
+    public Iterable<UserProfile> getUpVoters();
+
+    @Fetch(Ontology.DEMOTED_BY)
+    @Adjacency(label = Ontology.DEMOTED_BY, direction = Direction.OUT)
+    public Iterable<UserProfile> getDownVoters();
 
     @JavaHandler
-    public void addPromotion(final UserProfile user);
+    public void upVote(final UserProfile user);
+
+    @JavaHandler
+    public void downVote(final UserProfile user);
 
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
-    public void removePromotion(final UserProfile user);
+    public void removeUpVote(final UserProfile user);
+
+    @Adjacency(label = Ontology.DEMOTED_BY, direction = Direction.OUT)
+    public void removeDownVote(final UserProfile user);
 
     @JavaHandler
     public boolean isPromoted();
+
+    @JavaHandler
+    public boolean isPromotedBy(final UserProfile user);
 
     @JavaHandler
     public boolean isPromotable();
@@ -36,13 +50,22 @@ public interface Promotable extends AccessibleEntity {
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Promotable {
 
-        public void addPromotion(final UserProfile user) {
-            JavaHandlerUtils.addUniqueRelationship(it(), user.asVertex(),
-                    Ontology.PROMOTED_BY);
+        public void upVote(final UserProfile user) {
+            addUniqueRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
+            removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
+        }
+
+        public void downVote(final UserProfile user) {
+            addUniqueRelationship(it(), user.asVertex(), Ontology.DEMOTED_BY);
+            removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
         }
 
         public boolean isPromoted() {
-            return gremlin().out(Ontology.PROMOTED_BY).hasNext();
+            return gremlin().out(Ontology.PROMOTED_BY).count() > gremlin().out(Ontology.DEMOTED_BY).count();
+        }
+
+        public boolean isPromotedBy(final UserProfile user) {
+            return hasRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
         }
 
         public boolean isPromotable() {
