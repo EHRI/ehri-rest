@@ -74,11 +74,11 @@ public class PromotionViewsTest extends AbstractFixtureTest {
         assertTrue(acl.canAccess(ann, viewer));
     }
 
-//    @Test
-//    public void testIsPromoted() throws Exception {
-//        Annotation ann = manager.getFrame("ann6", Annotation.class);
-//        assertFalse(ann.isPromoted());
-//        assertTrue(Iterables.contains(ann.getUpVoters(), promoter));
-//        assertTrue(ann.isPromotedBy(promoter));
-//    }
+    @Test
+    public void testIsPromoted() throws Exception {
+        Annotation ann = manager.getFrame("ann6", Annotation.class);
+        assertFalse(ann.isPromoted());
+        assertTrue(Iterables.contains(ann.getUpVoters(), promoter));
+        assertTrue(ann.isPromotedBy(promoter));
+    }
 }

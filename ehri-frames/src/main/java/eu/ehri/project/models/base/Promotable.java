@@ -25,16 +25,16 @@ public interface Promotable extends AccessibleEntity {
     public Iterable<UserProfile> getDownVoters();
 
     @JavaHandler
-    public void upVote(final UserProfile user);
+    public void promote(final UserProfile user);
 
     @JavaHandler
-    public void downVote(final UserProfile user);
+    public void demote(final UserProfile user);
 
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
-    public void removeUpVote(final UserProfile user);
+    public void removePromotion(final UserProfile user);
 
     @Adjacency(label = Ontology.DEMOTED_BY, direction = Direction.OUT)
-    public void removeDownVote(final UserProfile user);
+    public void removeDemotion(final UserProfile user);
 
     @JavaHandler
     public boolean isPromoted();
@@ -50,12 +50,12 @@ public interface Promotable extends AccessibleEntity {
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Promotable {
 
-        public void upVote(final UserProfile user) {
+        public void promote(final UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
         }
 
-        public void downVote(final UserProfile user) {
+        public void demote(final UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.DEMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
         }

@@ -61,7 +61,7 @@ public class PromotionViews implements Scoped<PromotionViews> {
         if (!item.isPromotable()) {
             throw new NotPromotableError(item.getId());
         }
-        item.upVote(user);
+        item.promote(user);
         actionManager.logEvent(item, user, EventTypes.promotion);
     }
 
@@ -73,7 +73,7 @@ public class PromotionViews implements Scoped<PromotionViews> {
      * @throws PermissionDenied
      */
     public void removeUpVote(Promotable item, UserProfile user) throws PermissionDenied {
-        item.removeUpVote(user);
+        item.removePromotion(user);
     }
 
     /**
@@ -89,7 +89,7 @@ public class PromotionViews implements Scoped<PromotionViews> {
         if (!item.isPromotable()) {
             throw new NotPromotableError(item.getId());
         }
-        item.downVote(user);
+        item.demote(user);
         actionManager.logEvent(item, user, EventTypes.demotion);
     }
 
@@ -101,7 +101,7 @@ public class PromotionViews implements Scoped<PromotionViews> {
      * @throws PermissionDenied
      */
     public void removeDownVote(Promotable item, UserProfile user) throws PermissionDenied {
-        item.removeDownVote(user);
+        item.removeDemotion(user);
     }
 
     @Override
