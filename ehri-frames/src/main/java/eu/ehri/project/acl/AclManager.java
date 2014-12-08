@@ -731,6 +731,8 @@ public final class AclManager {
     }
 
     private static boolean isPromoted(Vertex v) {
-        return v.getEdges(Direction.OUT, Ontology.PROMOTED_BY).iterator().hasNext();
+        int promotions = Iterables.size(v.getEdges(Direction.OUT, Ontology.PROMOTED_BY));
+        return promotions > 0
+                && promotions > Iterables.size(v.getEdges(Direction.OUT, Ontology.DEMOTED_BY));
     }
 }

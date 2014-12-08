@@ -212,12 +212,13 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testListDocumentaryUnitWithOffset() throws Exception {
-        // Fetch the second and third doc unit items (c2 and c3)
+        // Fetch the second doc unit item (c2)
         MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<String>();
         params.add(AbstractRestResource.OFFSET_PARAM, "1");
         params.add(AbstractRestResource.LIMIT_PARAM, "1");
         List<Map<String, Object>> data = getEntityList(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
+        System.out.println(data);
         assertEquals(1, data.size());
         Collections.sort(data, dataSort);
         // Extract the second documentary unit. According to the fixtures this

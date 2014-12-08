@@ -24,12 +24,15 @@ import javax.ws.rs.core.Response;
 @Path("promote")
 public class PromotionResource extends AbstractRestResource {
 
+    private final PromotionViews pv;
+
     public PromotionResource(@Context GraphDatabaseService database) {
         super(database);
+        pv = new PromotionViews(graph);
     }
 
     /**
-     * Promote an item.
+     * Up vote an item.
      *
      * @param id ID of item to promote.
      * @return 200 response
@@ -38,14 +41,13 @@ public class PromotionResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @POST
-    @Path("/{id:.+}")
-    public Response promoteItem(@PathParam("id") String id)
+    @Path("/{id:.+}/up")
+    public Response upVote(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         try {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
-            PromotionViews pv = new PromotionViews(graph);
-            pv.promoteItem(item, currentUser);
+            pv.upVote(item, currentUser);
             graph.getBaseGraph().commit();
             return Response.ok().location(getItemUri(item)).build();
         } catch (PromotionViews.NotPromotableError e) {
@@ -57,7 +59,7 @@ public class PromotionResource extends AbstractRestResource {
     }
 
     /**
-     * Demote an item (removing the user's promotion).
+     * Remove an up vote.
      *
      * @param id ID of item to remove
      * @return 200 response
@@ -66,14 +68,64 @@ public class PromotionResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:.+}")
-    public Response demoteItem(@PathParam("id") String id)
+    @Path("/{id:.+}/up")
+    public Response removeUpVote(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
         try {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
-            PromotionViews pv = new PromotionViews(graph);
-            pv.demoteItem(item, currentUser);
+            pv.removeUpVote(item, currentUser);
+            graph.getBaseGraph().commit();
+            return Response.ok().location(getItemUri(item)).build();
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Down vote an item
+     *
+     * @param id ID of item to promote.
+     * @return 200 response
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @POST
+    @Path("/{id:.+}/down")
+    public Response downVote(@PathParam("id") String id)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        try {
+            Promotable item = manager.getFrame(id, Promotable.class);
+            UserProfile currentUser = getCurrentUser();
+            pv.downVote(item, currentUser);
+            graph.getBaseGraph().commit();
+            return Response.ok().location(getItemUri(item)).build();
+        } catch (PromotionViews.NotPromotableError e) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .entity(e.getMessage()).build();
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Remove a down vote.
+     *
+     * @param id ID of item to remove
+     * @return 200 response
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @DELETE
+    @Path("/{id:.+}/down")
+    public Response removeDownVote(@PathParam("id") String id)
+            throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
+        try {
+            Promotable item = manager.getFrame(id, Promotable.class);
+            UserProfile currentUser = getCurrentUser();
+            pv.removeDownVote(item, currentUser);
             graph.getBaseGraph().commit();
             return Response.ok().location(getItemUri(item)).build();
         } finally {
