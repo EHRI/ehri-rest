@@ -198,8 +198,10 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testListDocumentaryUnit() throws Exception {
+        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<String>();
+        params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Map<String, Object>> data = getEntityList(
-                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
+                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
         assertTrue(data.size() > 0);
         Collections.sort(data, dataSort);
         // Extract the first documentary unit. According to the fixtures this
@@ -216,6 +218,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<String>();
         params.add(AbstractRestResource.OFFSET_PARAM, "1");
         params.add(AbstractRestResource.LIMIT_PARAM, "1");
+        params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Map<String, Object>> data = getEntityList(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
         assertEquals(1, data.size());
