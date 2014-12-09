@@ -97,7 +97,7 @@ public class CsvImportManager extends XmlImportManager {
                     SaxXmlHandler.putPropertyInGraph(dataMap, headers[i], data[i]);
                 }
                 try {
-                    importer.importItem(dataMap, new Stack<String>());
+                    importer.importItem(dataMap);
                 } catch (ValidationError e) {
                     if (isTolerant()) {
                         logger.error("Validation error importing item: {}", e);
