@@ -42,14 +42,14 @@ public class PromotionResource extends AbstractRestResource {
      */
     @POST
     @Path("/{id:.+}/up")
-    public Response upVote(@PathParam("id") String id)
+    public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         try {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.upVote(item, currentUser);
             graph.getBaseGraph().commit();
-            return Response.ok().location(getItemUri(item)).build();
+            return single(item);
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -69,14 +69,14 @@ public class PromotionResource extends AbstractRestResource {
      */
     @DELETE
     @Path("/{id:.+}/up")
-    public Response removeUpVote(@PathParam("id") String id)
+    public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
         try {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeUpVote(item, currentUser);
             graph.getBaseGraph().commit();
-            return Response.ok().location(getItemUri(item)).build();
+            return single(item);
         } finally {
             cleanupTransaction();
         }
@@ -93,14 +93,14 @@ public class PromotionResource extends AbstractRestResource {
      */
     @POST
     @Path("/{id:.+}/down")
-    public Response downVote(@PathParam("id") String id)
+    public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         try {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.downVote(item, currentUser);
             graph.getBaseGraph().commit();
-            return Response.ok().location(getItemUri(item)).build();
+            return single(item);
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -120,14 +120,14 @@ public class PromotionResource extends AbstractRestResource {
      */
     @DELETE
     @Path("/{id:.+}/down")
-    public Response removeDownVote(@PathParam("id") String id)
+    public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
         try {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeDownVote(item, currentUser);
             graph.getBaseGraph().commit();
-            return Response.ok().location(getItemUri(item)).build();
+            return single(item);
         } finally {
             cleanupTransaction();
         }
