@@ -21,7 +21,6 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     private String descriptionTestStr;
     private String accessPointTestStr;
     static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
-    // FIXME: This ID is temporaty and will break when we decide on a proper
 
     @Before
     public void setUp() throws Exception {

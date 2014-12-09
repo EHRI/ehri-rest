@@ -105,6 +105,7 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param vocabulary  The target vocabulary
      * @param tolerant    Whether or not to ignore single item validation errors.
      * @param format      The RDF format
+     * @param defaultLang The language to use for elements without specified language
      */
     public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary, boolean tolerant, String format, String defaultLang) {
@@ -129,17 +130,20 @@ public final class JenaSkosImporter implements SkosImporter {
         this(framedGraph, actioner, vocabulary, false, null, DEFAULT_LANG);
     }
 
+    @Override
     public JenaSkosImporter setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: " + tolerant);
         return new JenaSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
     }
 
+    @Override
     public JenaSkosImporter setFormat(String format) {
         return new JenaSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
     }
 
+    @Override
     public JenaSkosImporter setDefaultLang(String lang) {
         return new JenaSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, format,
@@ -155,6 +159,7 @@ public final class JenaSkosImporter implements SkosImporter {
      * @throws IOException
      * @throws ValidationError
      */
+    @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, ValidationError {
         FileInputStream ios = new FileInputStream(filePath);
@@ -174,6 +179,7 @@ public final class JenaSkosImporter implements SkosImporter {
      * @throws IOException
      * @throws ValidationError
      */
+    @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError {
         try {

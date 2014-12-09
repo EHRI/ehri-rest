@@ -38,8 +38,6 @@ import java.util.Map.Entry;
 /**
  * Load data from YAML fixtures.
  * <p/>
- * FIXME: Try and clean up the rather horrible code in here.
- * <p/>
  * The YAML fixture format is almost identical to the plain bundle format, but
  * has some extensions to a) allow for creating non-dependent relationships, and
  * b) allow for single relations to be more naturally expressed. For example,
@@ -74,6 +72,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
+    private final BundleDAO dao;
     private final boolean initialize;
 
     /**
@@ -86,6 +85,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         this.graph = graph;
         this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
+        dao = new BundleDAO(graph);
     }
 
     /**
@@ -208,14 +208,13 @@ public class YamlFixtureLoader implements FixtureLoader {
     private void addRelationship(Vertex src, Vertex dst, String relname) {
         boolean found = false;
         for (Vertex v : src.getVertices(Direction.OUT, relname)) {
-            if (v == dst) {
+            if (v.equals(dst)) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            logger.trace(String.format(" - %s -[%s]-> %s", src, dst,
-                    relname));
+            logger.trace(String.format(" - %s -[%s]-> %s", src, dst, relname));
             graph.addEdge(null, src, dst, relname);
         }
     }
@@ -241,9 +240,8 @@ public class YamlFixtureLoader implements FixtureLoader {
         // bundle converter to load it.
         Bundle entityBundle = createBundle(id, isa, nodeData,
                 getDependentRelations(nodeRels));
-        BundleDAO persister = new BundleDAO(graph);
         logger.trace("Creating node with id: {}", id);
-        Mutation<Frame> frame = persister.createOrUpdate(entityBundle,
+        Mutation<Frame> frame = dao.createOrUpdate(entityBundle,
                 Frame.class);
 
         ListMultimap<String, String> linkRels = getLinkedRelations(nodeRels);

@@ -1,7 +1,6 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.AccessDenied;
@@ -13,6 +12,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
@@ -41,6 +41,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
     protected final LoggingCrudViews<E> views;
     protected final AclManager aclManager;
+    protected final ActionManager actionManager;
     protected final AclViews aclViews;
     protected final Query<E> querier;
     protected final Class<E> cls;
@@ -74,6 +75,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         this.cls = cls;
         views = new LoggingCrudViews<E>(graph, cls);
         aclManager = new AclManager(graph);
+        actionManager = new ActionManager(graph);
         aclViews = new AclViews(graph);
         querier = new Query<E>(graph, cls);
         helper = new ViewHelper(graph);
@@ -308,25 +310,30 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             ValidationError, BadRequester {
         return deleteItem(id, noOpHandler);
     }
+
     // Helpers
 
-    protected Set<Accessor> getAccessors(List<String> accessorIds,
-            Accessor current) {
+    /**
+     * Get a set of accessor frames given a list of names.
+     *
+     * @param accessorIds a list of accessor IDs
+     * @param current the current accessor
+     * @return a set a accessors
+     */
+    protected Set<Accessor> getAccessors(List<String> accessorIds, Accessor current) {
 
-        Set<Vertex> accessorV = Sets.newHashSet();
         Set<Accessor> accessors = Sets.newHashSet();
         for (String id : accessorIds) {
             try {
                 Accessor av = manager.getFrame(id, Accessor.class);
                 accessors.add(av);
-                accessorV.add(av.asVertex());
             } catch (ItemNotFound e) {
-                System.err.println("Invalid accessor given: " + id);
+                logger.warn("Invalid accessor given: {}", id);
             }
         }
         // The current user should always be among the accessors, so add
         // them unless the list is empty.
-        if (!accessors.isEmpty() && !accessorV.contains(current.asVertex())) {
+        if (!accessors.isEmpty()) {
             accessors.add(current);
         }
         return accessors;

@@ -2,11 +2,13 @@ package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
+import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
@@ -42,8 +44,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     public void testCreateDependent() throws Exception {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews
-                = new DescriptionViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
@@ -72,8 +73,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     public void testCreateDependentWithValidationError() throws Exception {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews
-                = new DescriptionViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
@@ -91,8 +91,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     public void testUpdateDependent() throws Exception {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews
-                = new DescriptionViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
@@ -113,8 +112,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     public void testUpdateDependentWithValidationError() throws Exception {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews
-                = new DescriptionViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
@@ -132,8 +130,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     public void testDeleteDependent() throws Exception {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews
-                = new DescriptionViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
@@ -148,11 +145,34 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         assertEquals(descCount - 1, Iterables.count(unit.getDocumentDescriptions()));
     }
 
+    @Test
+    public void testDeleteDependentDescription() throws Exception {
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
+        // This should throw permission denied since c1 is not in the new item's subtree...
+        int delete = descViews.delete("c1", "cd1", validUser, Optional.<String>absent());
+        // the number of items deleted should be 1 desc, 2 dates, 2 access points = 5
+        assertEquals(5, delete);
+    }
+
+    @Test
+    public void testDeleteDependentAccessPoint() throws Exception {
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
+        // This should throw permission denied since c1 is not in the new item's subtree...
+        int delete = descViews.delete("c1", "ur1", validUser, Optional.<String>absent());
+        assertEquals(1, delete);
+    }
+
+    @Test(expected = PermissionDenied.class)
+    public void testDeleteNonDependent() throws Exception {
+        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
+        // This should throw permission denied since c1 is not in the new item's subtree...
+        descViews.delete("c1", "cd2", validUser, Optional.<String>absent());
+    }
 
     @Test
     public void testUpdateDependentLogging() throws Exception {
         Repository r1 = manager.getFrame("r1", Repository.class);
-        DescriptionViews<Repository> lcv = new DescriptionViews<Repository>(graph, Repository.class);
+        DescriptionViews<Repository> lcv = getView(Repository.class);
         Description description = r1.getDescriptions().iterator().next();
         Bundle desc = depSerializer.vertexFrameToBundle(description);
         Mutation<RepositoryDescription> cou = lcv.update(
@@ -171,8 +191,8 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         Repository r1 = manager.getFrame("r1", Repository.class);
         Bundle desc = Bundle.fromData(TestData.getTestAgentBundle())
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
-        DescriptionViews<Repository> lcv = new DescriptionViews<Repository>(graph, Repository.class);
-        lcv.create("r1", desc, RepositoryDescription.class,
+        DescriptionViews<Repository> lcv = getView(Repository.class);
+        RepositoryDescription r11 = lcv.create("r1", desc, RepositoryDescription.class,
                 validUser, Optional.<String>absent());
         assertEquals(r1, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
@@ -181,7 +201,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     @Test
     public void testDeleteDependentLogging() throws Exception {
         Repository r1 = manager.getFrame("r1", Repository.class);
-        DescriptionViews<Repository> lcv = new DescriptionViews<Repository>(graph, Repository.class);
+        DescriptionViews<Repository> lcv = getView(Repository.class);
         Description description = r1.getDescriptions().iterator().next();
         Bundle desc = depSerializer.vertexFrameToBundle(description);
         lcv.delete("r1", description.getId(), validUser, Optional.<String>absent());
@@ -189,5 +209,9 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(desc, old);
+    }
+
+    private <T  extends DescribedEntity> DescriptionViews<T> getView(Class<T> cls) {
+        return new DescriptionViews<T>(graph, cls);
     }
 }

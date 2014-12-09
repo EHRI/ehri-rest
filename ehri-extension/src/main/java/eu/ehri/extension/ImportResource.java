@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
+
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -21,9 +22,11 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+
 import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -32,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +83,7 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId    The id of the import scope (i.e. repository)
      * @param tolerant   Whether or not to die on the first validation error
-     * @param logMessage Log message for import. If this refers to a local file
+     * @param logMessage Log message for import. If this refers to an accessible local file
      *                   its contents will be used.
      * @param format     The RDF format of the POSTed data
      * @param stream     A stream of SKOS data in a valid format.
@@ -87,6 +91,7 @@ public class ImportResource extends AbstractRestResource {
      *         updated, or unchanged.
      */
     @POST
+//    @Consumes({"application/rdf+xml","text/turtle","application/n-triples","application/trig","application/n-quads","application/ld+json"})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/skos")
     public Response importSkos(
@@ -145,7 +150,7 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
-     * @param logMessage    Log message for import. If this refers to a local file
+     * @param logMessage    Log message for import. If this refers to an accessible local file
      *                      its contents will be used.
      * @param handlerClass  The fully-qualified handler class name
      *                      (defaults to EadHandler)
@@ -159,6 +164,7 @@ public class ImportResource extends AbstractRestResource {
      *         updated, or unchanged.
      */
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/ead")
     public Response importEad(

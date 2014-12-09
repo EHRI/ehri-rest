@@ -11,12 +11,12 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.DescriptionViews;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -44,7 +44,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     public DescriptionResource(@Context GraphDatabaseService database) {
         super(database, DescribedEntity.class);
-        descriptionViews = new DescriptionViews<DescribedEntity>(graph, DescribedEntity.class);
+            descriptionViews = new DescriptionViews<DescribedEntity>(graph, DescribedEntity.class);
     }
 
     @POST
@@ -102,14 +102,12 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("did") String did, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
-        // FIXME: Inefficient conversion to/from JSON just to insert the ID. We
-        // should rethink this somehow.
         return updateDescription(id, bundle.withId(did));
     }
 
     @DELETE
     @Path("/{id:.+}/{did:.+}")
-    public Response deleteDocumentaryUnitDescription(
+    public Response deleteDescription(
             @PathParam("id") String id, @PathParam("did") String did)
             throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
@@ -162,6 +160,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
         }
     }
 
+    @SuppressWarnings("unused")
     @DELETE
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
@@ -170,17 +169,8 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            DescribedEntity doc = views.detail(id, getRequesterUserProfile());
-            Description desc = manager.getFrame(did, Description.class);
-            if (!doc.equals(desc.getDescribedEntity())) {
-                throw new PermissionDenied("Description does not belong to given entity.");
-            }
-            UndeterminedRelationship rel = manager.getFrame(apid, UndeterminedRelationship.class);
-            if (!rel.getDescription().equals(desc)) {
-                throw new PermissionDenied("Access point does not belong to given description.");
-            }
-            // FIXME: This could definitely be better
-            new BundleDAO(graph).delete(getSerializer().vertexFrameToBundle(rel));
+            UserProfile user = getCurrentUser();
+            descriptionViews.delete(id, apid, user, getLogMessage());
             graph.getBaseGraph().commit();
             return Response.ok().build();
         } catch (SerializationError serializationError) {

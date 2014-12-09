@@ -73,6 +73,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String ALL_PARAM = "all";
     public static final String ID_PARAM = "id";
 
+    /**
+     * Serialization config parameters.
+     */
     public static final String INCLUDE_PROPS_PARAM = "_ip";
 
     /**
@@ -95,7 +98,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     @Context
     private Request request;
 
-
+    /**
+     * Fetch the media type of the incoming request.
+     *
+     * @return a media type variant.
+     */
     protected MediaType checkMediaType() {
         MediaType applicationJson = MediaType.APPLICATION_JSON_TYPE;
         MediaType applicationXml = MediaType.TEXT_XML_TYPE;
@@ -120,19 +127,34 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     @Context
     protected UriInfo uriInfo;
 
-    protected final GraphDatabaseService database;
     protected final FramedGraph<TxCheckedNeo4jGraph> graph;
     protected final GraphManager manager;
     private final Serializer serializer;
 
+    /**
+     * Constructer.
+     *
+     * @param database A Neo4j graph database
+     */
     public AbstractRestResource(@Context GraphDatabaseService database) {
-        this.database = database;
         graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();
     }
 
-    public Serializer getSerializer() {
+    public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
+        return graph;
+    }
+
+    /**
+     * Get a serializer according to passed-in serialization config.
+     * <p/>
+     * Currently the only parameter is <code>_ip=[propertyName]</code> which
+     * ensures a given property is always included in the output.
+     *
+     * @return a vertex serializer
+     */
+    protected Serializer getSerializer() {
         Optional<List<String>> includeProps = Optional.fromNullable(uriInfo.getQueryParameters(true)
                 .get(INCLUDE_PROPS_PARAM));
         return includeProps.isPresent()
@@ -140,15 +162,25 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 : serializer;
     }
 
-    public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
-        return graph;
-    }
-
+    /**
+     * Get a list of values for a given query parameter key.
+     *
+     * @param key the parameter name
+     * @return a list of string values
+     */
     protected List<String> getStringListQueryParam(String key) {
         List<String> value = uriInfo.getQueryParameters().get(key);
         return value == null ? Lists.<String>newArrayList() : value;
     }
 
+    /**
+     * Get an integer value for a given query parameter, falling back
+     * on a default.
+     *
+     * @param key          the parameter name
+     * @param defaultValue the default value
+     * @return an integer value
+     */
     protected int getIntQueryParam(String key, int defaultValue) {
         String value = uriInfo.getQueryParameters().getFirst(key);
         try {
@@ -158,6 +190,13 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         }
     }
 
+    /**
+     * Get a query object configured according to incoming parameters.
+     *
+     * @param cls the class of the query object
+     * @param <T> the generic type of the query object
+     * @return a query object
+     */
     protected <T extends AccessibleEntity> Query<T> getQuery(Class<T> cls) {
         return new Query<T>(graph, cls)
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
@@ -258,9 +297,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Retreive the id string of the requester's UserProfile.
+     * Retrieve the id string of the requester's user profile.
      *
-     * @return String ID
+     * @return the user's id, if present
      */
     private Optional<String> getRequesterIdentifier() {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
@@ -276,7 +315,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param item The item
      * @param <T>  The item's generic type
      * @return A serialized representation, with location and cache control
-     *         headers.
+     * headers.
      */
     protected <T extends Frame> Response single(final T item) {
         try {
@@ -481,11 +520,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Return a streaming response from an iterable, using the given
      * entity converter.
-     * <p/>
-     * FIXME: I shouldn't be here, or the other method should. Redesign API.
      *
-     * @param list A list of vertices
-     * @return A streaming response
+     * @param list          an iterable of vertices
+     * @param serializer    a serializer object
+     * @return a streaming response
      */
     protected Response streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer) {
@@ -557,7 +595,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 ? getSerializer().vertexFrameToXmlString(frame)
                 : getSerializer().vertexFrameToJson(frame);
     }
-
 
     /**
      * Get a cache control header based on the access restrictions

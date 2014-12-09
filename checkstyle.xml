@@ -7,7 +7,9 @@
     <module name="JavadocPackage"/>
 	<module name="TreeWalker">
 		<!-- Require Javadoc for each type -->
-		<module name="JavadocType" />
+		<module name="JavadocType">
+            <property name="authorFormat" value="(Mike Bryant \(http(s)?://github.com/mikesname(/)?\)|Ben Companjen \(http(s)?://github.com/bencomp(/)?\)|Linda Reijnhoudt \(http(s)?://github.com/lindareijnhoudt(/)?\)|Paul Boon \(http(s)?://github.com/(paulboon|PaulBoon)(/)?\))"/>
+        </module>
 		<module name="AvoidStarImport" />
 		<module name="EmptyBlock" />
 	</module>

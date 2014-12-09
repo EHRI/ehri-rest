@@ -181,7 +181,6 @@ public class GroupResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-        // TODO: Fix generic types
         Iterable<AccessibleEntity> members = all
                 ? group.getAllUserProfileMembers()
                 : group.getMembersAsEntities();
