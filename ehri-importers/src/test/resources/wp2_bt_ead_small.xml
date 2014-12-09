@@ -15,7 +15,7 @@
                 <date>2013-12-19</date>
             </creation>
             <langusage>
-                <language langcode="cze" scriptcode="Latn">Czech</language>
+                <language langcode="mul" scriptcode="Latn">Multiple languages</language>
             </langusage>
         </profiledesc>
     </eadheader>

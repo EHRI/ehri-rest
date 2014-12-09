@@ -7,7 +7,7 @@ import eu.ehri.project.importers.PersonalitiesImporter;
  */
 public class PersonalitiesImport extends ImportCsvCommand implements Command {
 
-    final static String NAME = "csv-import";
+    final static String NAME = "csv-pers-import";
 
     /**
      * Constructor.
@@ -25,7 +25,7 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        return "Import a CSV file into the graph database, using the specified"
+        return "Import a CSV file as Personalities into the graph database, using the specified"
                 + sep + "scope and user.";
     }
 

@@ -1,5 +1,7 @@
 package eu.ehri.project.importers;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -7,6 +9,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,20 +52,19 @@ public class CegesomaAATest extends AbstractImporterTest{
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+//       diff.printDebug(System.out);
         
-//        printGraph(graph);
+        printGraph(graph);
         // How many new nodes will have been created? We should have
         /** 
          * event links: 6
          * relationship: 34
          * documentaryUnit: 5
          * documentDescription: 5
-         * unknown property: 1
          * systemEvent: 1
          * datePeriod: 4
+         * maintenanceEvent: 1
          */
-        // --- = 56
         int newCount = origCount + 56;
         assertEquals(newCount, getNodeCount(graph));
         
@@ -97,13 +99,21 @@ public class CegesomaAATest extends AbstractImporterTest{
             assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.asVertex().getProperty("findingAids"));
 //            for(String key : dd.asVertex().getPropertyKeys())
 //                System.out.println(key);
-            assertEquals("Automatisch gegenereerd door PALLAS systeem", dd.asVertex().getProperty(EadHandler.AUTHOR));
+            for (MaintenanceEvent me : dd.getMaintenanceEvents()){
+              assertEquals("Automatisch gegenereerd door PALLAS systeem", me.asVertex().getProperty("source"));
+              assertEquals("28/03/2013", me.asVertex().getProperty("date"));
+              assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty("eventType"));
+            }
+            assertEquals("SOMA_CEGES_72695#NLD", dd.asVertex().getProperty("sourceFileId"));
         }
         
         // There should be one DocumentDescription for the (only) <c01>
         for(DocumentDescription dd : c1.getDocumentDescriptions()){
             assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
+            assertEquals("SOMA_CEGES_72695#NLD", dd.asVertex().getProperty("sourceFileId"));
+//            TODO
+//            assertEquals(1, toList(dd.getMaintenanceEvents()).size());
         }
 
         // There should be one DocumentDescription for the (second) <c02>
@@ -120,23 +130,31 @@ public class CegesomaAATest extends AbstractImporterTest{
         for(DocumentaryUnit du : archdesc.getChildren()){
             assertEquals(C01, du.getIdentifier());
         }
-//    //test dates
-        for(DocumentDescription d : c2_1.getDocumentDescriptions()){
-        	// Single date is just a string
-        	assertEquals("1944-1948", d.asVertex().getProperty("unitDates"));
-        	for (DatePeriod dp : d.getDatePeriods()){
-        		assertEquals("1944-01-01", dp.getStartDate());
-        		assertEquals("1948-12-31", dp.getEndDate());
-        	}
+    //test dates
+        for (DocumentDescription d : c2_1.getDocumentDescriptions()) {
+            // Single date is just a string
+            assertEquals("1944-1948", d.asVertex().getProperty("unitDates"));
+            for (DatePeriod dp : d.getDatePeriods()) {
+                assertEquals("1944-01-01", dp.getStartDate());
+                assertEquals("1948-12-31", dp.getEndDate());
+            }
+            for (MaintenanceEvent me : d.getMaintenanceEvents()) {
+                //one to each documentDescription:
+                assertEquals(5, toList(me.asVertex().getEdges(Direction.OUT)).size());
+            }
         }
         
         // Fonds has two dates with different types -> list
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
-        	// start and end dates correctly parsed and setup
-        	List<DatePeriod> dp = toList(d.getDatePeriods());
-        	assertEquals(2, dp.size());
-        	assertEquals("1944-01-01", dp.get(0).getStartDate());
-        	assertEquals("1979-12-31", dp.get(0).getEndDate());
+        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+            // start and end dates correctly parsed and setup
+            List<DatePeriod> dp = toList(d.getDatePeriods());
+            assertEquals(2, dp.size());
+            assertEquals("1944-01-01", dp.get(0).getStartDate());
+            assertEquals("1979-12-31", dp.get(0).getEndDate());
+            for (MaintenanceEvent me : d.getMaintenanceEvents()) {
+                //one to each documentDescription:
+                assertEquals(5, toList(me.asVertex().getEdges(Direction.OUT)).size());
+            }
         }
         
     }

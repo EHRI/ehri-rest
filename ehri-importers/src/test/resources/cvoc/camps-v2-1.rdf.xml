@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:dcterms="http://purl.org/dc/terms/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+>
+  <rdf:Description rdf:about="http://data.ehri-project.eu/camps/989">
+      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-31</dc:date>
+    <dcterms:provenance xml:lang="en-Latn">This resource has been created by ITS. Modification and editorial changes were made in March 2014 by EHRI project team members</dcterms:provenance>
+    <skos:prefLabel xml:lang="de-Latn">Wien - Magdalenenhof</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.ehri-project.eu/camps#"/>
+    <dc:contributor xml:lang="en-Latn">European Holocaust Research Infrastructure (EHRI - http://www.ehri-project.eu)</dc:contributor>
+    <dc:creator xml:lang="en-Latn">the International Tracing Service (ITS) in Bad Arolsen</dc:creator>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://data.ehri-project.eu/camps/386">
+      <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:broader rdf:resource="http://data.ehri-project.eu/camps/989"/>
+    <dcterms:provenance xml:lang="en-Latn">This resource has been created by ITS. Modification and editorial changes were made in March 2014 by EHRI project team members</dcterms:provenance>
+    <dc:contributor xml:lang="en-Latn">European Holocaust Research Infrastructure (EHRI - http://www.ehri-project.eu)</dc:contributor>
+    <dc:creator xml:lang="en-Latn">the International Tracing Service (ITS) in Bad Arolsen</dc:creator>
+    <skos:inScheme rdf:resource="http://data.ehri-project.eu/camps#"/>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-31</dc:date>
+    <skos:prefLabel xml:lang="de-Latn">Nachhammer</skos:prefLabel>
+  </rdf:Description>
+</rdf:RDF>

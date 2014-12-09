@@ -13,6 +13,7 @@ import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ public class EacImporterTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.class);
 
     @Test
+    @Ignore("these referred nodes are done differently now")
     public void testAbwehrWithAllReferredNodes() throws Exception {
         final String SINGLE_EAC = "abwehr.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC + " and creating all two relations with previously created HistoricalAgents";
@@ -75,20 +77,27 @@ public class EacImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing EAC " + SINGLE_EAC + " without creating any annotation, since the targets are not present in the graph";
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
+        
+                // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
-        printGraph(graph);
+        // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+
+//        printGraph(graph);
         /**
          * How many new nodes will have been created? We should have
-         * - 1 more Repository
-         * - 1 more RepositoryDescription
-         * - 1 more UnknownProperty
-         * - 2 more MaintenanceEvent
-         * - 2 more UnknownRelations 
-         * - 2 more linkEvents (1 for the Repository, 1 for the User)
-         * - 1 more SystemEvent        
+         * null: 2
+         * historicalAgent: 1
+         * property: 1
+         * maintenanceEvent: 2
+         * systemEvent: 1
+         * historicalAgentDescription: 1
         **/
-        assertEquals(count + 10, getNodeCount(graph));
+        assertEquals(count + 8, getNodeCount(graph));
         
         HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());

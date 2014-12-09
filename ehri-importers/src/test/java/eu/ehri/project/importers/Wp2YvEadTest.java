@@ -111,14 +111,23 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         //assert keywords are matched to cvocs
         assertTrue(toList(c3.getLinks()).size() > 0);
         for(Link a : c3.getLinks()){
-            logger.debug(a.getLinkType());
+            logger.debug(a.getLinkType() + " " + a.getDescription());
             assertEquals("subjectAccess", a.getLinkType());
+            int hasBody = 0;
+            for(AccessibleEntity body : a.getLinkBodies()){
+                hasBody++;
+//                logger.debug("body: "+ body.getId() + " " + body.getType());
+            }
+            assertEquals(1, hasBody);
         }
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        int countSubject=0;
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
+            countSubject++;
         }
+        assertTrue(countSubject > 0);
 
         assertEquals(4, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
@@ -129,11 +138,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c3.getPermissionScope());
         
-        // Check the author of the description
-        for (DocumentDescription d : c1.getDocumentDescriptions()){
-            for(String key : d.asVertex().getPropertyKeys())
-                logger.debug("key: " + key);
-            assertEquals("BT", d.asVertex().getProperty(EadHandler.AUTHOR));
+        // Check the author of the top level description
+        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+            assertEquals("BT", d.asVertex().getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

@@ -24,7 +24,10 @@
 </change>
 <change>
 <date>2014/07/07 17:12:52</date>
-<item>EHRI added a unitid with label ehri_main_identifier to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item></change><change><date>07-07-2014</date><item>Deze toegang is voorbewerkt door EHRI met behulp van https://github.com/EHRI/ehri-ead-preprocessing/commit/c1e1265a8b8dfb446e33738051a255d3d61277f6</item>
+<item>EHRI added a unitid with label ehri_main_identifier to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item></change>
+<change>
+    <date>07-07-2014</date>
+    <item>Deze toegang is voorbewerkt door EHRI met behulp van https://github.com/EHRI/ehri-ead-preprocessing/commit/c1e1265a8b8dfb446e33738051a255d3d61277f6</item>
 </change>
 <change>
 <date>2014/07/07 17:11:11</date>
@@ -34,7 +37,9 @@
 <date>2014/07/07 17:09:16</date>
 <item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
 </change>
-<change><date>07-07-2014</date><item>Deze toegang is voorbewerkt door EHRI met behulp van https://github.com/EHRI/ehri-ead-preprocessing/commit/c1e1265a8b8dfb446e33738051a255d3d61277f6. De volgende wijzigingen zijn aangebracht: (1) language gewijzigd naar ISO-639-2. (2) eadid heeft suffix met taal-aanduiding (om onderscheid tussen fre/nld beschrijving van dezelfde toegang mogelijk te maken) (3) author aangepast. hier stond ten onrechte Pallas. Dit is naar de creation verplaatst. author=Cege Soma</item></change></revisiondesc></eadheader>
+<change><date>07-07-2014</date><item>Deze toegang is voorbewerkt door EHRI met behulp van https://github.com/EHRI/ehri-ead-preprocessing/commit/c1e1265a8b8dfb446e33738051a255d3d61277f6. De volgende wijzigingen zijn aangebracht: (1) language gewijzigd naar ISO-639-2. (2) eadid heeft suffix met taal-aanduiding (om onderscheid tussen fre/nld beschrijving van dezelfde toegang mogelijk te maken) (3) author aangepast. hier stond ten onrechte Pallas. Dit is naar de creation verplaatst. author=Cege Soma</item></change>
+  </revisiondesc>
+  </eadheader>
   <archdesc level="otherlevel" langmaterial="en français et en anglais" type="inventory">
     <did id="a1">
       <head>Liste des objets, documents et témoignages rassemblés pour l'exposition : ("Résister à la solution finale")</head>

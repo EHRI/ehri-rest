@@ -42,9 +42,13 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         diff.printDebug(System.out);
 
         /**
-         * How many new nodes will have been created? We should have 1 more DocumentaryUnits (record) 1 more
-         * DocumentDescription 1 more DatePeriod 3 more subject 1 more Place 2 more import Event links (1 for each Unit,
-         * 1 for the User) 1 more import Event --- = 10
+         * How many new nodes will have been created? We should have 
+         * 1 more DocumentaryUnits (record) 
+         * 1 more DocumentDescription 
+         * 1 more DatePeriod 
+         * 4 relations (3 more subject + 1 more Place )
+         * 2 more import Event links (1 for each Unit, 1 for the User) 
+         * 1 more import Event 
          */
         int newCount = origCount + 10;
         assertEquals(newCount, getNodeCount(graph));
@@ -52,6 +56,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         DocumentaryUnit archdesc = graph.frame(getVertexByIdentifier(graph, ARCHDESC), DocumentaryUnit.class);
         for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("More refugee children arrive from Germany - in time ...", d.getName());
+            assertEquals("1505", d.asVertex().getProperty("sourceFileId"));
+            System.out.println(d.getId() + " - " + archdesc.asVertex().getProperty("identifier"));
         }
     }
 }

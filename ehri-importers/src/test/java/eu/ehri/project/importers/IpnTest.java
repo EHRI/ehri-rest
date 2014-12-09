@@ -102,9 +102,9 @@ public class IpnTest extends AbstractImporterTest{
         // - 4 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 1 more DatePeriod
+        // - 1 more MaintenanceEvent
 
-        // - 0 more MaintenanceEvents
-        int newCount = origCount + 15; 
+        int newCount = origCount + 16; 
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(
@@ -135,7 +135,7 @@ public class IpnTest extends AbstractImporterTest{
                 if(property.equals("processInfo")){
                     hasProvenance=true;
                     System.out.println(d.asVertex().getProperty(property));
-                    assertTrue(d.asVertex().getProperty(property).toString().startsWith("This selection has been "));
+                    assertTrue(((List<String>)d.asVertex().getProperty(property)).get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
@@ -189,8 +189,8 @@ public class IpnTest extends AbstractImporterTest{
         // - 1 more import Event
         // - 1 more DatePeriod
 
-        // - 0 more MaintenanceEvents
-        int newCount = origCount + 15; 
+        // - 1 more MaintenanceEvents
+        int newCount = origCount + 16; 
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(
@@ -221,7 +221,7 @@ public class IpnTest extends AbstractImporterTest{
                 if(property.equals("processInfo")){
                     hasProvenance=true;
                     System.out.println(d.asVertex().getProperty(property));
-                    assertTrue(d.asVertex().getProperty(property).toString().startsWith("This selection has been "));
+                    assertTrue(((List<String>)d.asVertex().getProperty(property)).get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
