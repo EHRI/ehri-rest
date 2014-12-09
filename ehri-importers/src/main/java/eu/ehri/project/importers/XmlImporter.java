@@ -127,6 +127,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
             if (key.equals("maintenanceEvent")) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
                     list.add(getMaintenanceEvent(event));
+
                 }
             }
         }
