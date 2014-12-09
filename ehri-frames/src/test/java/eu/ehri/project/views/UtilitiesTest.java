@@ -59,7 +59,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
         // with the same thing...
         long allDocs = utilities.findReplacePropertyValueRE(EntityClass.DOCUMENT_DESCRIPTION,
                 "name", Pattern.compile(".*"), "allTheSameName!");
-        assertEquals(6, allDocs);
+        assertEquals(7, allDocs);
     }
 
     @Test(expected = PatternSyntaxException.class)
