@@ -153,21 +153,42 @@ def load_queue():
         start()
 
 @task
-def import_ead(scope, log, properties, file_dir, handler):
+def import_ead(scope, log, properties, file_dir):
     """Import EAD files remotely via REST
     
-    Supply the scope, log message as a file name or as an URL encoded message, the path to a
+    Supply the scope, log message as a file name, the path to a
     properties file and path to a directory relative to /opt/webapps/data/import-data containing
     the files to import. File paths are local on the remote machine.
     The $USER is used to run the import, and tolerant is always true when using this import.
     
     For example, to import all files from the Wiener Library, use:
     
-    fab stage import_ead:scope=gb-003348,log=/opt/webapps/data/import-data/gb/wiener-library/wiener-log.txt,properties=/opt/webapps/data/import-data/properties/wienerlib.properties,file_dir=gb/wiener-library"""
+    fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
     
     run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
+    log_file = "/opt/webapps/data/import-data/logs/%s" % log
+    properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log, properties, handler) )
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
+
+@task
+def import_ead_with_handler(scope, log, properties, file_dir, handler):
+    """Import EAD files remotely via REST
+    
+    Supply the scope, log message as a file name, the path to a
+    properties file and path to a directory relative to /opt/webapps/data/import-data containing
+    the files to import. File paths are local on the remote machine.
+    The $USER is used to run the import, and tolerant is always true when using this import.
+    
+    For example, to import all files from the Wiener Library, use:
+    
+    fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
+    
+    run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
+    log_file = "/opt/webapps/data/import-data/logs/%s" % log
+    properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
+    file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
 
 @task
 def import_skos(scope, log, file):
