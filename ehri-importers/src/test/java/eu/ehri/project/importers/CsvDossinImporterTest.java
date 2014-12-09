@@ -47,11 +47,11 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
          * documentaryUnit: 4
          * documentDescription: 4
          * systemEvent: 1
-         * datePeriod: 3
+         * datePeriod: 4
          */
-        assertEquals(count+21, getNodeCount(graph));
+//        printGraph(graph);
+        assertEquals(count+22, getNodeCount(graph));
         
-        printGraph(graph);
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph,"kd3"),
                 DocumentaryUnit.class);
