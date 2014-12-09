@@ -91,7 +91,7 @@
   relationships:
     belongsTo: niod
     hasAnnotation: ann2
-
+      
 # Linda belongs to DANS
 - id: linda
   type: userProfile
@@ -133,12 +133,9 @@
             - id: ar1
               type: address
               data:
-                name: An Address
+                name: "An Address"
                 streetAddress: 1 Some St.
                 city: Amsterdam
-                webpage:
-                  - http://www.niod.nl
-                  - http://www.niod.nl/en
 
 - id: r2 # should be named kcl
   type: repository
@@ -160,11 +157,10 @@
             - id: ar2
               type: address
               data:
-                name: An Address
+                name: "An Address"
                 streetAddress: Strand
                 city: London
-                webpage: http://www.kcl.ac.uk
-
+                         
 - id: r3 # should be dans
   type: repository
   data:
@@ -185,7 +181,7 @@
             - id: ar3
               type: address
               data:
-                name: An Address
+                name: "An Address"
                 city: The Hague
 
 - id: r4 # should be soma
@@ -208,10 +204,10 @@
             - id: ar4
               type: address
               data:
-                name: An Address
+                name: "An Address"
                 city: Brussels
-
-
+      
+      
 --- # Collections
 
 # C1 is a top-level documentary unit which, held by NIOD, which contains
@@ -356,30 +352,12 @@
     heldBy: r1
     hasPermissionScope: r1
 
-# m19 is a standalone item
-- id: nl-r1-m19
-  type: documentaryUnit
-  data:
-    identifier: nl-r1-m19
-    name: m.19
-  relationships:
-    describes:
-      - id: m19-eng
-        type: documentDescription
-        data:
-          identifier: m19-desc
-          name: Documentary Unit m19
-          languageCode: eng
-          scopeAndContent: Some description text for m19
-    heldBy: r1
-    hasPermissionScope: r1
-
-
 --- # Authority Set
 - id: auths
   type: authoritativeSet
   data:
     identifier: auths
+    name: Authorities
 
 --- # Authorities
 - id: a1
@@ -542,11 +520,13 @@
   type: cvocVocabulary
   data:
     identifier: cvoc1
+    name: Vocabulary 1
 
 - id: cvoc2
   type: cvocVocabulary
   data:
     identifier: cvoc2
+    name: Vocabulary 2
 
 --- # Concepts
 - id: cvocc1

@@ -124,7 +124,7 @@ public class IfzTest extends AbstractImporterTest{
             assertEquals("file", dd.asVertex().getProperty("levelOfDescription"));
             assertEquals("Band", dd.asVertex().getProperty("extentAndMedium"));
         }
-        
+
         /**
          * Test hierarchy
          */

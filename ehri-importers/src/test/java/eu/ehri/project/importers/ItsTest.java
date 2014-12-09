@@ -91,10 +91,9 @@ public class ItsTest extends AbstractImporterTest {
         for (DocumentaryUnit d : unit.getChildren()) {
             logger.debug("Child: " + d.getIdentifier());
         }
-        
+
         assertEquals(1L, unit.getChildCount());
 
-        
         for (Description d : unit.getDocumentDescriptions()) {
             boolean hasDate=false;
             for(Edge e : d.asVertex().getEdges(Direction.OUT)){
@@ -202,7 +201,6 @@ public class ItsTest extends AbstractImporterTest {
         assertTrue(foundDoc);
         
         
-
     }
 
     @Test

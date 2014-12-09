@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><ead xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink">
+   <eadheader>
+      <eadid>irn30474#eng</eadid>
+      <filedesc>
+         <titlestmt>
+            <titleproper>Ernest and Guy Loewenstein papers.</titleproper>
+            <subtitle>Loewenstein family papers</subtitle>
+            <author></author>
+         </titlestmt>
+         <publicationstmt>
+            <publisher>USHMM / EHRI partners</publisher>
+            <date>2014-06-09 14:52:38</date>
+         </publicationstmt>
+      </filedesc>
+      <profiledesc>
+         <creation>Automatically converted from USHMM's Solr index file using solr2ead.xsl (https://github.com/EHRI/solr2ead)
+                  <date normal="2014-11-20" era="ce" calendar="gregorian">2014-11-20T17:09:53.532+01:00</date>
+         </creation>
+         <langusage>
+            <language langcode="eng">English</language>
+         </langusage>
+      </profiledesc>
+<revisiondesc>
+<change>
+<date>2014-11-20 17:30:20</date>
+<item>EHRI added a unitid with label "ehri_main_identifier" to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item>
+</change>
+<change>
+<date>2014-11-20 17:29:58</date>
+<item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+</change>
+</revisiondesc>
+   </eadheader>
+   <frontmatter>
+      <titlepage>
+         <titleproper>Ernest and Guy Loewenstein papers.</titleproper>
+         <date era="ce" calendar="gregorian">1938-1942</date>
+      </titlepage>
+   </frontmatter>
+   <archdesc level="otherlevel">
+      <did>
+<unitid label="ehri_structure">0</unitid>
+         <unittitle>Loewenstein family papers</unittitle>
+         <unitdate era="ce" calendar="gregorian">1938-1942</unitdate>
+         <unitid type="irn">irn30474</unitid>
+<unitid label="ehri_main_identifier">irn30474</unitid>
+
+         <unitid label="Accession number" type="acc_num">2001.65.1</unitid>
+         <origination></origination>
+         <physdesc>
+            <extent>2 passports </extent>
+            <extent>36 documents </extent>
+            <extent>1 photograph album </extent>
+            <extent>15 photographs </extent>
+         </physdesc>
+         <langmaterial>
+            <language>German</language>
+         </langmaterial>
+      
+<unitid label="ehri_main_identifier">2001.65.1</unitid>
+</did>
+      <custodhist>
+         <p>Ernest and Guy Loewenstein donated the collection to the United States Holocaust Memorial Museum in 2001.</p>
+      </custodhist>
+      <acqinfo>
+         <p>Accession number: 2001.65.1</p>
+         <p>Credit: United States Holocaust Memorial Museum Collection, Gift of Ernest Lowenstein and Guy Lowenstein</p>
+      </acqinfo>
+      <scopecontent>
+         <p>Consists of two passports, 36 documents, one photograph album and fifteen photographs from the collection of Ernest and Guy Loewenstein.</p>
+      </scopecontent>
+      <odd>
+         <p>Record type: Document</p>
+      </odd>
+      <otherfindaid>
+         <extref xlink:href="http://collections.ushmm.org/findingaids/2001.65.1.pdf" xlink:type="simple"></extref>
+      </otherfindaid>
+      <controlaccess>
+         <persname>Loewenstein, Ernest.</persname>
+         <persname>Loewenstein, Guy.</persname>
+      </controlaccess>
+   </archdesc>
+</ead>

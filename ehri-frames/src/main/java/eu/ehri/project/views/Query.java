@@ -49,6 +49,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     private static final int DEFAULT_LIMIT = 20;
     private static final long NO_COUNT = -1L;
 
+    
     private static final Logger logger = LoggerFactory.getLogger(Query.class);
 
     private final int offset;

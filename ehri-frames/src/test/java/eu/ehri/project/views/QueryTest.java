@@ -68,7 +68,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Test negative count (all items) and an offset
         list = toList(query.setOffset(1).setLimit(-1).page(validUser));
         assertFalse(list.isEmpty());
-        assertEquals(3, list.size());
+        assertEquals(4, list.size());
 
         list = toList(query.setLimit(0).page(validUser));
         assertEquals(0, list.size());
