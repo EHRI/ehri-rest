@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
@@ -369,6 +370,6 @@ public class EadImporter extends EaImporter {
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return importItem(itemData, new Stack<String>());
     }
 }
