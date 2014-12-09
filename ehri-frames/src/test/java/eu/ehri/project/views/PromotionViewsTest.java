@@ -78,7 +78,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     public void testIsPromoted() throws Exception {
         Annotation ann = manager.getFrame("ann6", Annotation.class);
         assertFalse(ann.isPromoted());
-        assertTrue(Iterables.contains(ann.getUpVoters(), promoter));
+        assertTrue(Iterables.contains(ann.getPromoters(), promoter));
         assertTrue(ann.isPromotedBy(promoter));
     }
 }

@@ -61,7 +61,7 @@ public class PromotionViews implements Scoped<PromotionViews> {
         if (!item.isPromotable()) {
             throw new NotPromotableError(item.getId());
         }
-        item.promote(user);
+        item.addPromotion(user);
         actionManager.logEvent(item, user, EventTypes.promotion);
     }
 
@@ -89,7 +89,7 @@ public class PromotionViews implements Scoped<PromotionViews> {
         if (!item.isPromotable()) {
             throw new NotPromotableError(item.getId());
         }
-        item.demote(user);
+        item.addDemotion(user);
         actionManager.logEvent(item, user, EventTypes.demotion);
     }
 
