@@ -45,7 +45,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
        List<VertexProxy> graphState1 = getGraphState(graph);
         
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties("personalitiesv2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+                EacHandler.class, new XmlImportProperties("personalitiesV2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
