@@ -169,7 +169,7 @@ def import_ead(scope, log, properties, file_dir):
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
 
 @task
 def import_ead_with_handler(scope, log, properties, file_dir, handler):
@@ -188,7 +188,7 @@ def import_ead_with_handler(scope, log, properties, file_dir, handler):
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
 
 @task
 def import_skos(scope, log, file):
