@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 public class PersonalitiesV2Test extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesV2Test.class);
+    
+    private static final String PROPERTIES = "personalitiesV2.properties";
 
      @Test
     public void newPersonalitiesWithoutCreatedBy() throws Exception {
@@ -45,7 +47,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
        List<VertexProxy> graphState1 = getGraphState(graph);
         
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties("personalitiesV2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+                EacHandler.class, new XmlImportProperties(PROPERTIES)).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -81,7 +83,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
        List<VertexProxy> graphState1 = getGraphState(graph);
         
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties("personalitiesv2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+                EacHandler.class, new XmlImportProperties(PROPERTIES)).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -135,7 +137,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties("personalitiesv2.properties")).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+                EacHandler.class, new XmlImportProperties(PROPERTIES)).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
        // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
