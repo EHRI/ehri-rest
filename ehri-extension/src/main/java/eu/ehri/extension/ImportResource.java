@@ -193,7 +193,7 @@ public class ImportResource extends AbstractRestResource {
 
             // Run the import!
             ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
-                    .setProperties(propertyFile)
+                    .withProperties(propertyFile)
                     .setTolerant(tolerant)
                     .importFiles(paths, getLogMessage(logMessage).orNull());
 
