@@ -258,9 +258,35 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
+        final String REL = "relation";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
-            if (key.endsWith(ACCESS_POINT)) {
+//            if (key.equals(REL)) {
+//                logger.debug("found a RELATION " + key);
+//                //name identifier
+//                for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
+//                    Map<String, Object> relationNode = new HashMap<String, Object>();
+//                    for (String eventkey : origRelation.keySet()) {
+//                        if (eventkey.equals("name")) {
+//                            Map<String, Object> m = (Map)((List)origRelation.get(eventkey)).get(0);
+//                            //try to find the original identifier
+//                            relationNode.put(LINK_TARGET, m.get("concept"));
+//                            //try to find the original name
+//                            relationNode.put(Ontology.NAME_KEY, m.get("name"));
+//                            relationNode.put("cvoc", m.get("cvoc"));
+//                        } else {
+//                            relationNode.put(eventkey, origRelation.get(eventkey));
+//                        }
+//                    }
+//                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+//                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+//                    }
+//                    list.add(relationNode);
+//                }
+//            }
+
+//            else 
+    if (key.endsWith(ACCESS_POINT)) {
 
                 logger.debug(key + data.get(key).getClass());
                 if (data.get(key) instanceof List) {
