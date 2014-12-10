@@ -51,7 +51,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
          */
 //        printGraph(graph);
         assertEquals(count+22, getNodeCount(graph));
-        
+
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph,"kd3"),
                 DocumentaryUnit.class);

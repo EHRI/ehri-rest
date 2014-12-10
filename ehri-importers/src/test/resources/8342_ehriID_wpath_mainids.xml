@@ -1,0 +1,200 @@
+<!-- Exception scanning External DTD Subset.  True contents of DTD cannot be determined.  Processing will continue as XMLInputFactory.IS_VALIDATING == false. --><ead>
+   <eadheader repositoryencoding="iso15511"
+              langencoding="iso639-2b"
+              countryencoding="iso3166-1"
+              dateencoding="iso8601"
+              scriptencoding="iso15924"
+              relatedencoding="Dublin Core">
+      <eadid countrycode="GB" mainagencycode="1556" identifier="WL 1500">
+GB 1556 WL 1500
+    </eadid>
+      <filedesc>
+         <titlestmt>
+            <titleproper>
+Wiener Library: Dokumentationszentrum des Bundes Juedischer Verfolgter des Naziregimes: Reports
+        </titleproper>
+            <author encodinganalog="creator">
+Wiener Library
+        </author>
+         </titlestmt>
+         <publicationstmt>
+            <publisher>
+
+              AIM25 
+            
+        </publisher>
+         </publicationstmt>
+      </filedesc>
+      <profiledesc>
+         <creation>
+            <date era="ce" calendar="gregorian">
+March 2008
+        </date>
+         </creation>
+         <langusage>
+            <language langcode="eng">
+
+              English 
+            
+        </language>
+         </langusage>
+         <descrules>
+Compiled in compliance with General International Standard Archival Description, ISAD(G), second edition, 2000; National Council on Archives Rules for the Construction of Personal, Place and Corporate Names, 1997.
+      </descrules>
+      </profiledesc>
+      <revisiondesc xmlns:fn="http://www.w3.org/2005/xpath-functions">
+         <change>
+            <date normal="2014-11-06">2014-11-06 18:22:41</date>
+            <item>If there were any, EAD element extref inside accessrestrict elements have been converted to their Markdown equivalents by EHRI's preprocessing tool. 
+      For example: &lt;extref href="http://example.com"&gt;some text&lt;/extref&gt; becomes [some text](http://example.com).</item>
+         </change>
+         <change>
+            <date normal="2014-11-06">2014-11-06 18:15:58</date>
+            <item>If there were any, EAD formatting elements emph inside p elements have been converted to their Markdown equivalents by EHRI's preprocessing tool. 
+      For example: &lt;emph render="italic"&gt;some text&lt;/emph&gt; becomes _some text_.</item>
+         </change>
+         <change>
+            <date normal="2014-11-06">2014-11-06 18:09:27</date>
+            <item>If there were any emph elements inside elements other than p, the emph tags have been stripped by EHRI's preprocessing tool.
+      For example, &lt;emph altrender="firstname"&gt;Ben&lt;/emph&gt; became Ben. Multiple occurrences have been padded with commas. 
+      Empty subject elements have been removed too.</item>
+         </change>
+         <change>
+            <date>2014-11-06 18:05:22</date>
+            <item>EHRI added a unitid with label "ehri_main_identifier" to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item>
+         </change>
+         <change>
+            <date>2014-11-06 18:04:06</date>
+            <item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+         </change>
+      </revisiondesc>
+   </eadheader>
+   <archdesc level="collection" relatedencoding="ISAD(G)v2">
+      <did>
+         <unitid label="ehri_structure">0</unitid>
+         <origination encodinganalog="3.2.1">
+            <corpname rules="ncarules">
+Dokumentationszentrum des Bundes Juedischer Verfolgter des Naziregimes
+        </corpname>
+         </origination>
+         <langmaterial>
+            <language langcode="ger">
+German
+        </language>
+         </langmaterial>
+         <unittitle encodinganalog="3.1.2">
+Dokumentationszentrum des Bundes Juedischer Verfolgter des Naziregimes: Reports
+      </unittitle>
+         <unitdate encodinganalog="3.1.3.2"
+                   normal="1962/1998"
+                   datechar="creation"
+                   era="ce"
+                   calendar="gregorian">
+1962-1998
+      </unitdate>
+         <physdesc encodinganalog="3.1.5" label="Extent">
+            <extent>
+2  files
+        </extent>
+         </physdesc>
+         <repository encodinganalog="3.1.2">
+            <corpname rules="ncarules">
+Wiener Library
+        </corpname>
+         </repository>
+         <unitid repositorycode="1556"
+                 encodinganalog="3.1.1"
+                 countrycode="GB"
+                 label="Reference"
+                 identifier="WL 1500">
+WL 1500
+      </unitid>
+
+         <unitid label="ehri_main_identifier">
+WL 1500
+      </unitid>
+      </did>
+      <processinfo>
+         <p>
+Entry compiled by Howard Falksohn.
+      </p>
+      </processinfo>
+      <bioghist encodinganalog="3.2.2">
+         <p>
+The 
+        _Dokumentationszentrum des Bundes Juedischer Verfolgter des Naziregimes_
+ (Documentation Centre for the League of Jews Persecuted by the Nazis) was founded in October 1961 by Simon Wiesenthal with a staff initially of 2 people. Its aims were to identify and evaluate the vast and growing corpus of material on the subject of the Holocaust; to locate witnesses for war crimes trials; to support the judiciary and police authorities through contact with other documentation centres throughout the world in the prosecution of war criminals; and to observe and collect material on neo-Nazi organisations.
+      </p>
+      </bioghist>
+      <scopecontent encodinganalog="3.3.1">
+         <p>
+Reports on the activities of the 
+        _Dokumentationszentrum des Bundes Juedischer Verfolgter des Naziregimes_
+ (Documentation Centre for the League of Jews Persecuted by the Nazis), 1962-1998.
+      </p>
+      </scopecontent>
+      <arrangement encodinganalog="3.3.4">
+         <p>
+Chronological
+      </p>
+      </arrangement>
+      <controlaccess>
+         <subject source="unesco">
+Genocide
+      </subject>
+         <subject source="aim25">
+Holocaust
+      </subject>
+         <subject source="unesco">
+Humanitarian law
+      </subject>
+         <subject source="unesco">
+Jews
+      </subject>
+         <subject source="unesco">
+Religious groups
+      </subject>
+         <subject source="unesco">
+War crimes
+      </subject>
+         <subject source="aim25">
+World wars (events)
+      </subject>
+         <subject source="aim25">
+World War Two (1939-1945)
+      </subject>
+         <subject source="aim25">
+Wars (events)
+      </subject>
+         <persname rules="ncarules">
+Wiesenthal, 
+Simon, 
+1908, 
+war crimes campaigner, 
+</persname>
+         <corpname rules="ncarules">
+Dokumentationszentrum des Bundes Juedischer Verfolgter des Naziregimes
+      </corpname>
+      </controlaccess>
+      <accessrestrict encodinganalog="3.4.1">
+         <p>
+Open
+      </p>
+      </accessrestrict>
+      <acqinfo encodinganalog="3.2.4">
+         <p>
+Hella Pick
+      </p>
+      </acqinfo>
+      <userestrict encodinganalog="3.4.2">
+         <p>
+Copies can be made for personal use. Permission must be sought for publication.
+      </p>
+      </userestrict>
+      <otherfindaid encodinganalog="3.4.5">
+         <p>
+Description exists to this archive on the Wiener Library's online catalogue www.wienerlibrary.co.uk
+      </p>
+      </otherfindaid>
+   </archdesc>
+</ead>

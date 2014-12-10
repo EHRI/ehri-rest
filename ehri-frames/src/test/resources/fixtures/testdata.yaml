@@ -91,7 +91,7 @@
   relationships:
     belongsTo: niod
     hasAnnotation: ann2
-      
+
 # Linda belongs to DANS
 - id: linda
   type: userProfile
@@ -164,7 +164,7 @@
                 streetAddress: Strand
                 city: London
                 webpage: http://www.kcl.ac.uk
-                         
+
 - id: r3 # should be dans
   type: repository
   data:
@@ -210,8 +210,8 @@
               data:
                 name: An Address
                 city: Brussels
-      
-      
+
+
 --- # Collections
 
 # C1 is a top-level documentary unit which, held by NIOD, which contains
