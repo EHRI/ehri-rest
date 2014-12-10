@@ -32,6 +32,7 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <unittitle encodinganalog="245$a" label="Titel:">Dessin caricatural d&#39;un juif ayant tir&#233; sur des troupes Allemandes en Russie</unittitle>
       <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1940-1945</unitdate>
       <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">CA FE 1437</unitid>
+      <unitid label="ehri_main_identifier">CA FE 1437</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>

@@ -156,18 +156,39 @@ def load_queue():
 def import_ead(scope, log, properties, file_dir):
     """Import EAD files remotely via REST
     
-    Supply the scope, log message as a file name or as an URL encoded message, the path to a
+    Supply the scope, log message as a file name, the path to a
     properties file and path to a directory relative to /opt/webapps/data/import-data containing
     the files to import. File paths are local on the remote machine.
     The $USER is used to run the import, and tolerant is always true when using this import.
     
     For example, to import all files from the Wiener Library, use:
     
-    fab stage import_ead:scope=gb-003348,log=/opt/webapps/data/import-data/gb/wiener-library/wiener-log.txt,properties=/opt/webapps/data/import-data/properties/wienerlib.properties,file_dir=gb/wiener-library"""
+    fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
     
     run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
+    log_file = "/opt/webapps/data/import-data/logs/%s" % log
+    properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log, properties) )
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
+
+@task
+def import_ead_with_handler(scope, log, properties, file_dir, handler):
+    """Import EAD files remotely via REST
+    
+    Supply the scope, log message as a file name, the path to a
+    properties file and path to a directory relative to /opt/webapps/data/import-data containing
+    the files to import. File paths are local on the remote machine.
+    The $USER is used to run the import, and tolerant is always true when using this import.
+    
+    For example, to import all files from the Wiener Library, use:
+    
+    fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
+    
+    run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
+    log_file = "/opt/webapps/data/import-data/logs/%s" % log
+    properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
+    file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
 
 @task
 def import_skos(scope, log, file):
@@ -184,6 +205,22 @@ def import_skos(scope, log, file):
     
     full_file_path = "/opt/webapps/data/import-data/" + file
     run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
+
+@task
+def import_csv(scope, log, importer, file):
+    """Import CSV files remotely via REST
+    
+    Supply the scope, log message as a file name or as an URL encoded message, the fully
+    qualified name of a CSV importer class and path to a file relative to 
+    /opt/webapps/data/import-data to import. File paths are local on the remote machine.
+    The $USER is used to run the import.
+    
+    For example, to import something, use:
+    
+    fab stage import_csv:scope=terezin-victims,log=/opt/webapps/data/import-data/wp2/terezin/authoritativeSet/terezin-victims-log.txt,importer=,file=wp2/terezin/authoritativeSet/terezin-victims.csv"""
+    
+    full_file_path = "/opt/webapps/data/import-data/" + file
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, log, importer) )
 
 
 @task
@@ -327,6 +364,48 @@ def update_db_test(local_dir):
     run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
     run("chmod -R g+w " + remote_db_dir)
     
+@task
+def reindex_users():
+    "Run a partial reindex of Neo4j -> Solr data"
+    all_types = ["userProfile", "group"]
+    indexer_cmd = [
+       "java", "-jar", env.index_helper,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
+
+@task
+def reindex_concepts():
+    "Run a partial reindex of Neo4j -> Solr data"
+    all_types = ["historicalAgent", "cvocVocabulary", 
+                 "cvocConcept", "authoritativeSet"]
+    indexer_cmd = [
+       "java", "-jar", env.index_helper,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
+
+@task
+def reindex_virtualcollections():
+    "Run a partial reindex of Neo4j -> Solr data"
+    all_types = ["virtualUnit"]
+    indexer_cmd = [
+       "java", "-jar", env.index_helper,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
 
 @task
 def reindex_repository(repo_id):

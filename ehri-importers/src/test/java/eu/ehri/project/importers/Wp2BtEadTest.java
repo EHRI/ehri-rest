@@ -97,6 +97,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         int countDocDesc = 0;
         while(i.hasNext()){
             DocumentDescription desc  = i.next();
+            assertEquals("mul", desc.getLanguageOfDescription());
             countDocDesc++;
         }        
         assertEquals(1, countDocDesc);
@@ -148,8 +149,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(c1_b, c1_b_c2_b.getPermissionScope());
         
         // Check the author of the description
-        for (DocumentDescription d : c1_a.getDocumentDescriptions()){
-            assertEquals("EHRI", d.asVertex().getProperty(EadHandler.AUTHOR));
+        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+            assertEquals("EHRI", d.asVertex().getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+   <eadheader langencoding="iso639-2b"
+              scriptencoding="iso15924"
+              dateencoding="iso8601"
+              countryencoding="iso3166-1"
+              repositoryencoding="iso15511">
+      <eadid countrycode="IL" mainagencycode="IL-YV-ARC">10660245#ENG</eadid>
+      <filedesc>
+         <titlestmt>
+            <titleproper>Inventory of M.19 - The Friesland District Joodse Raad (Jewish Council) Collection, the Netherlands, 1940-1943 M.19</titleproper>
+            <author>Yad Vashem Archives</author>
+         </titlestmt>
+      </filedesc>
+      <profiledesc>
+         <creation>
+            <date calendar="gregorian" era="ce">2014-03-04</date>
+         </creation>
+         <langusage>
+            <language langcode="eng" scriptcode="Latn">English</language>
+         </langusage>
+      </profiledesc>
+   </eadheader>
+   <frontmatter/>
+   <archdesc level="recordgrp">
+      <did>
+         <langmaterial>
+            <language langcode="nld">Dutch</language>
+         </langmaterial>
+         <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>The file was created by</origination>
+         <physdesc>
+            <extent>Paper, 37 files</extent>
+            <genreform>Certification</genreform>
+         </physdesc>
+         <repository>Yad Vashem</repository>
+         <unitdate type="inclusive"
+                   era="ce"
+                   calendar="gregorian"
+                   normal="1940-01-01/1943-12-31">1940-1943</unitdate>
+         <unitid>M.19</unitid>
+         <unittitle>M.19 - The Friesland District Joodse Raad (Jewish Council) Collection, the Netherlands, 1940-1943</unittitle>
+      </did>
+      <accruals>
+         <p>No additional accurals will be added to this collection.</p>
+      </accruals>
+      <controlaccess>
+         <subject>Jewish Council</subject>
+         <geogname>&lt;&gt;,Friesland,&lt;&gt;,The Netherlands</geogname>
+         <corpname>Joodse Raad voor Amsterdam</corpname>
+      </controlaccess>
+      <originalsloc>
+         <p>Originals held by Yad Vashem</p>
+      </originalsloc>
+      <scopecontent>
+         <p>M.19 - The Friesland District Joodse Raad (Jewish Council) Collection, the Netherlands, 1940-1943 The Collection contains correspondence between the Friesland district Joodse Raad and the Amsterdam Joodse Raad on various issues, and correspondence of the Joodse Raad with various organizations regarding help to Dutch Jews in camps and help to Jewish refugees from Germany. There are also reports received from the Amsterdam Joodse Raad regarding the Jews, documentation of decrees and restrictions on Dutch Jews, Jewish education, Jewish owned property, mixed marriages, persecution and deportation of Dutch Jews. The Friesland Joodse Raad documentation includes correspondence and directives from the Amsterdam Joodse Raad to its principal representatives in Leeuwarden and directives and correspondence from the Leeuwarden Joodse Raad to its representatives in Drachten, Gorredijk, Sneek and Harlingen. Besides the Joodse Raad material, the documentation also contains material from the Coordinatie Commissie (Coordinating Committee) and the Leeuwarden community from the years 1938-1943. Archival history: The Friesland Joodse Raad representatives were the Chief Rabbi, Rabbi A. S. Levinson and Attorney M. Troostwik. Rabbi Levinson was deported, and perished in Bergen-Belsen. Attorney Troostwijk escaped and went into hiding in August 1943. Before his escape, Attorney Troostwijk entrusted all the documentation to the Leeuwarden community comptroller for safe-keeping. After the war, Mr. H. N. Been was responsible for the documentation which he submitted to Yad Vashem in 1958. Scope: The documentation includes 37 files sorted by subject matter. Four files arrived at Yad Vashem already sorted, and they have been left in their original form. For technical reasons, the list was compiled in German. Ms. Bronka Klibansky sorted and entered the material with the help of Mr. H. N. Been; the work was completed 05 April 1959.</p>
+      </scopecontent>
+      <userestrict>
+         <p>No access and usage restrictions</p>
+      </userestrict>
+      <dsc>
+         <c01 level="file">
+            <did>
+               <langmaterial>
+                  <language langcode="nld">Dutch</language>
+                  <language langcode="deu">German</language>
+               </langmaterial>
+               <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>
+               </origination>
+               <physdesc>
+                  <extent type="pages">416</extent>
+                  <genreform>Official documentation</genreform>
+                  <physfacet>Typewritten copy</physfacet>
+               </physdesc>
+               <unitdate type="inclusive"
+                         era="ce"
+                         calendar="gregorian"
+                         normal="1942-09-18/1943-06-02">18/09/1942-02/06/1943</unitdate>
+               <unitid>M.19/7</unitid>
+               <unittitle>Correspondence of Rabbi A. S. Levisson with relatives of inmates in Westerbork, the Amsterdam Joodse Raad (Jewish Council) and Joodse Raad branches regarding the condition of inmates in the camp and other, exemptions from deportations and deportation lists of Jews in the Friesland district, 1942-1943</unittitle>
+            </did>
+            <custodhist>
+               <p>The materials were transferred to Yad Vashem by<persname>Hartog Beem</persname>
+               </p>
+            </custodhist>
+            <scopecontent>
+               <p>Correspondence of Rabbi A. S. Levisson with relatives of inmates in Westerbork, the Amsterdam Joodse Raad (Jewish Council) and Joodse Raad branches regarding the condition of inmates in the camp and other, exemptions from deportations and deportation lists of Jews in the Friesland district, 1942-1943 Correspondence of Rabbi A. S. Levisson with relatives of inmates in Westerbork, the Amsterdam Joodse Raad and Joodse Raad branches regarding the condition of inmates in the camp, care of the Joodse Raad of personal packages and food for inmates, medical certificates with the intention of postponing deportation to the East and deportation of Jews; The file also includes: Instructions of the Joodse Raad on the release of deportations to Westerbork for sectors such as Jews and Portuguese, mixed marriages, specific ages, sick, pregnant women and various skilled professionals (pp. 384-402) (no date); Correspondence of the Friesland district Joodse Raad regarding the safeguard of details of Jews from the population registry in Borculo in the case of the liquidation of the Jewish community (p. 282), 1942; Letter of the Friesland district Joodse Raad to I. Maarssen regarding the transfer of books and religious articles from synagogues that were closed in Westerbork (p. 161), December 1942; Correspondence of the Friesland Joodse Raad with the Amsterdam Joodse Raad regarding the number of Jews and the number of deportees from Winterswijk and from the Jewish communities of Zutphen, Borculp, Doetinchem and Nijmegan (p. 276), 22 November 1942; Letters of Rabbi A. S. Levisson to the Amsterdam Joodse Raad regarding the problems associated with the establishment of a crematorium in Westerbork and the suggestion to establish a cemetery (p. 249 and p. 307), 1942; The file also includes: List of names of Jews who were born in Westerbork and Jews who died correct to May 1943 (p. 39); List of names of Friesland district Joodse Raad clerks deported to Westerbork (p. 42), February 1943; List of names of Friesland district people where there is hope they are still in Westerbork (pp. 43-44) (no date); List of names of Friesland district Joodse Raad clerks who were deported to Westerbork (p. 208), 28 November 1942; List of names of Winterswijk residents who were deported to Westerbork (p. 288), 18 November 1942; List of names of Harlingen residents who were deported (pp. 305-306);</p>
+            </scopecontent>
+            <c02 level="item">
+               <did>
+                  <langmaterial>
+                     <language langcode="nld">Dutch</language>
+                  </langmaterial>
+                  <physdesc>
+                     <extent type="pages">1</extent>
+                     <genreform>List of murdered Jews from the Netherlands</genreform>
+                  </physdesc>
+                  <unitdate type="inclusive"
+                            era="ce"
+                            calendar="gregorian"
+                            normal="1943-05-18/1943-05-18">18/05/1943-18/05/1943</unitdate>
+                  <unitid>M.19/7.1</unitid>
+                  <unittitle>List of Jews who perished in Westerbork, 12-18/05/1943</unittitle>
+               </did>
+               <scopecontent>
+                  <p>List of Jews who perished in Westerbork, 12-18/05/1943</p>
+                  <p>The list/s contain approximately 20 names</p>
+               </scopecontent>
+            </c02>
+         </c01>
+      </dsc>
+   </archdesc>
+</ead>

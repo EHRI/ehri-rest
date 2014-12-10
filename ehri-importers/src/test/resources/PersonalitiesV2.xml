@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eac-cpf
+    xmlns="urn:isbn:1-931666-33-4"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="urn:isbn:1-931666-33-4 http://eac.staatsbibliothek-berlin.de/schema/cpf.xsd">
+    <control>
+        <recordId>ehri-pers-000051</recordId>
+        <otherRecordId localType="WCI:LCCN">lccn-n85157841</otherRecordId>
+        <otherRecordId localType="WCI:VIAF">64024407</otherRecordId>
+        <maintenanceStatus>new</maintenanceStatus>
+        <publicationStatus>inProcess</publicationStatus>
+        <maintenanceAgency>
+            <agencyName>European Holocaust Research Infrastructure (EHRI)</agencyName>
+        </maintenanceAgency>
+        <languageDeclaration>
+            <language languageCode="ger">German</language>
+            <script scriptCode="Latn">Latin</script>
+        </languageDeclaration>
+        <conventionDeclaration>
+            <abbreviation>FAST</abbreviation>
+            <citation>Faceted Application of Subject Terminology</citation>
+        </conventionDeclaration>
+        <conventionDeclaration>
+            <abbreviation>LCCN</abbreviation>
+            <citation>Library of Congress Control Number</citation>
+        </conventionDeclaration>
+        <conventionDeclaration>
+            <abbreviation>VIAF</abbreviation>
+            <citation>Virtual International Authority File</citation>
+        </conventionDeclaration>
+        <conventionDeclaration>
+            <abbreviation>WCI</abbreviation>
+            <citation>WorldCat Identities</citation>
+        </conventionDeclaration>
+        <maintenanceHistory>
+            <maintenanceEvent>
+                <eventType>created</eventType>
+                <eventDateTime standardDateTime="2014-04-22"/>
+                <agentType>human</agentType>
+                <agent>XSLT ead2eac.xsl/libxslt</agent>
+                <eventDescription>Record created in RAMP.</eventDescription>
+            </maintenanceEvent>
+        </maintenanceHistory>
+        <sources>
+            <source>
+                <sourceEntry>Biographical dictionary of World War II / Boatner III, Mark M. - Novato, CA : Presidio Press, 1996. - p. 54</sourceEntry>
+            </source>
+            <source xlink:href="http://worldcat.org/identities/lccn-n85157841" xlink:type="simple"/>
+            <source xlink:href="http://viaf.org/viaf/64024407" xlink:type="simple"/>
+        </sources>
+    </control>
+    <cpfDescription>
+        <identity>
+            <entityType>person</entityType>
+            <nameEntry scriptCode="Latn" xml:lang="en"
+                xmlns:xml="http://www.w3.org/XML/1998/namespace">
+                <part>Boris III</part>
+                <authorizedForm>local</authorizedForm>
+            </nameEntry>
+            <nameEntry>
+                <part>Boris III, Czar of Bulgaria, 1894-1943</part>
+                <authorizedForm>NLI</authorizedForm>
+                <authorizedForm>NLI</authorizedForm>
+                <authorizedForm>NLI</authorizedForm>
+                <authorizedForm>LC</authorizedForm>
+                <alternativeForm>SELIBR</alternativeForm>
+            </nameEntry>
+            <nameEntry>
+                <part>Boris III, King of Bulgaria, 1894-1943</part>
+                <alternativeForm>NLI</alternativeForm>
+                <alternativeForm>NLI</alternativeForm>
+                <alternativeForm>NLI</alternativeForm>
+                <alternativeForm>SELIBR</alternativeForm>
+                <alternativeForm>LC</alternativeForm>
+            </nameEntry>
+        </identity>
+        <description>
+            <existDates>
+                <dateRange>
+                    <fromDate standardDate="1894">1894</fromDate>
+                    <toDate standardDate="1943-08-28">28/08/1943</toDate>
+                </dateRange>
+            </existDates>
+            <occupation>
+                <term>King of Bulgaria</term>
+            </occupation>
+             <place>
+                <placeRole>Place of birth</placeRole>
+                <placeEntry>Lębork, Poland</placeEntry>
+            </place>
+            <place>
+                <placeRole>Place of death</placeRole>
+                <placeEntry>Munich, Germany</placeEntry>
+            </place>
+            <localDescription localType="subject">
+                <term vocabularySource="fast-keywords" xml:id="fst894382"
+                    xmlns:xml="http://www.w3.org/XML/1998/namespace">Diplomatic documents
+                </term>
+            </localDescription>
+            <localDescription localType="gender">
+                <term>male</term>
+            </localDescription>
+            <biogHist>
+                <abstract>King of Bulgaria. "Boris III believed Bulgaria's future lay in maintaining neutrality while tilting politically towards the Axis. This policy regained him South Dobruja from Romania in 1940. Still refusing to declare war against the Allies or supply troops to Hitler, he was killed by a pro-Soviet assassin.</abstract>
+            </biogHist>
+        </description>
+        <relations>
+            <cpfRelation cpfRelationType="associative" xlink:role="http://rdvocab.info/uri/schema/FRBRentitiesRDA/Person" xlink:type="simple">
+                <relationEntry>Boris III</relationEntry>
+            </cpfRelation>
+            <cpfRelation cpfRelationType="associative" xlink:href="http://id.loc.gov/authorities/names/n50031027" xlink:role="http://rdvocab.info/uri/schema/FRBRentitiesRDA/CorporateBody" xlink:type="simple">
+                <relationEntry>Movement</relationEntry>
+            </cpfRelation>
+            <cpfRelation cpfRelationType="associative" xlink:href="http://www.worldcat.org/identities/viaf-282076796" xlink:role="http://rdvocab.info/uri/schema/FRBRentitiesRDA/Person" xlink:type="simple">
+                <relationEntry>Dimitroff, Pashanko</relationEntry>
+            </cpfRelation>
+            <resourceRelation resourceRelationType="subjectOf" xlink:href="http://www.worldcat.org/identities/nc-waffen ss$ss armeekorps xiv" xlink:role="archivalRecords" xlink:type="simple">
+                <relationEntry>Waffen-SS</relationEntry>
+            </resourceRelation>
+                        <resourceRelation resourceRelationType="creatorOf" xlink:href="http://worldcat.org/oclc/749019594" xlink:role="resource" xlink:type="simple">
+                <relationEntry localType="book"/>
+                <relationEntry localType="creator">CHAIKOVS'KY, Danilo</relationEntry>
+            </resourceRelation>
+            <resourceRelation resourceRelationType="creatorOf" xlink:href="http://worldcat.org/oclc/557895421" xlink:role="resource" xlink:type="simple">
+                <relationEntry localType="book">Boris oder Arsen. Ein Beitrag zur Lösung der bulgarischen Frage</relationEntry>
+                <relationEntry localType="creator">Boris</relationEntry>
+                <relationEntry localType="VIAF">64024407</relationEntry>
+            </resourceRelation>
+            <resourceRelation resourceRelationType="subjectOf" xlink:href="http://worldcat.org/oclc/055220201" xlink:role="resource" xlink:type="simple">
+                <relationEntry localType="book">King's ransom : a novel based on a true story</relationEntry>
+                <relationEntry localType="isbn">1578567785</relationEntry>
+                <relationEntry localType="creator">Beazely, Jan</relationEntry>
+            </resourceRelation>
+            <resourceRelation resourceRelationType="subjectOf" xlink:href="http://worldcat.org/oclc/015790421" xlink:role="resource" xlink:type="simple">
+                <relationEntry localType="book">Crown of thorns</relationEntry>
+                <relationEntry localType="isbn">1568331142</relationEntry>
+                <relationEntry localType="creator">Groueff, Stéphane</relationEntry>
+            </resourceRelation>
+        </relations>
+    </cpfDescription>
+</eac-cpf>

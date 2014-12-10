@@ -53,8 +53,9 @@ public class PermissionScopeTest extends AbstractFixtureTest {
         PermissionScope c2 = manager.getFrame("c2", PermissionScope.class);
         PermissionScope c3 = manager.getFrame("c3", PermissionScope.class);
         PermissionScope c4 = manager.getFrame("c4", PermissionScope.class);
+        PermissionScope m19 = manager.getFrame("nl-r1-m19", PermissionScope.class);
         List<Frame> r1contained = Lists.newArrayList(r1.getAllContainedItems());
-        assertEquals(4L, r1contained.size());
+        assertEquals(5L, r1contained.size());
         assertTrue(r1contained.contains(c1));
         assertTrue(r1contained.contains(c2));
         assertTrue(r1contained.contains(c3));

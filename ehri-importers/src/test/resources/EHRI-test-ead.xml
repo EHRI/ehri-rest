@@ -64,7 +64,7 @@
 				<c02 level="item">
 					<did>
 						<unittitle encodinganalog="3.1.2">Condolences, etc.</unittitle>
-						<unitdate>-</unitdate>
+<!--						<unitdate>-</unitdate>-->
 						<unitid encodinganalog="3.1.1" identifier="VAKKA-3058289.KA" countrycode="FI" repositorycode="FI-HeNAF">2</unitid>
 						<physloc>KA</physloc>
 						<container type="KOTELO">412</container>

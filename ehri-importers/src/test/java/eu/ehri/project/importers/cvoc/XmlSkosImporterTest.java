@@ -49,6 +49,7 @@ public class XmlSkosImporterTest extends AbstractSkosImporterTest {
         ImportLog importLog2 = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE4), "camps");
         assertEquals(8, importLog2.getUnchanged());
+//        printGraph(graph);
     }
 
     @Test

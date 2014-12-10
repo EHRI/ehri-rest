@@ -15,17 +15,17 @@ public class RepositoryTest extends AbstractFixtureTest {
     @Test
     public void testGetCollections() throws Exception {
         Repository r1 = manager.getFrame("r1", Repository.class);
-        assertEquals(2L, Iterables.size(r1.getCollections()));
+        assertEquals(3L, Iterables.size(r1.getCollections()));
 
         // Check the cached size
-        assertEquals(2L, r1.getChildCount());
+        assertEquals(3L, r1.getChildCount());
     }
 
     @Test
     public void testRepositoryCanGetAllCollections() throws ItemNotFound {
         Repository agent = manager.getFrame("r1", Repository.class);
-        assertEquals(2, Iterables.size(agent.getCollections()));
-        assertEquals(4, Iterables.size(agent.getAllCollections()));
+        assertEquals(3, Iterables.size(agent.getCollections()));
+        assertEquals(5, Iterables.size(agent.getAllCollections()));
 
     }
 

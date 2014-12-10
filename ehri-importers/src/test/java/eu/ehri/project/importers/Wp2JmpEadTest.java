@@ -46,7 +46,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         ImportLog log = importManager.importFile(ios, logMessage);
 
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 7 more DocumentaryUnits fonds C1 C2 C3 4,5,6
         // - 7 more DocumentDescription
@@ -87,6 +87,14 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 //        for(Link a : c6.getLinks()){
 //            logger.debug(a.getLinkType());
 //        }
+        
+//        languages
+        for(DocumentDescription d : c2.getDocumentDescriptions()){
+            for(String key : d.asVertex().getPropertyKeys()){
+                System.out.println(key);
+            }
+            assertEquals("deu", d.asVertex().getProperty("languageOfMaterial").toString());
+        }
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         for (AccessibleEntity subject : subjects) {
@@ -103,8 +111,8 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         assertEquals(c2, c3.getPermissionScope());
         
         // Check the author of the description
-        for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty(EadHandler.AUTHOR));
+        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

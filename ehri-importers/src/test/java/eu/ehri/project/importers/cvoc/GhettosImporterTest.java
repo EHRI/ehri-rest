@@ -65,5 +65,6 @@ public class GhettosImporterTest extends AbstractImporterTest {
 
         // and print the tree
         printConceptTree(System.out, list.get(0));
+        printGraph(graph);
     }
 }

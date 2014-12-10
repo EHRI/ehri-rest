@@ -91,7 +91,7 @@
   relationships:
     belongsTo: niod
     hasAnnotation: ann2
-      
+
 # Linda belongs to DANS
 - id: linda
   type: userProfile
@@ -164,7 +164,7 @@
                 streetAddress: Strand
                 city: London
                 webpage: http://www.kcl.ac.uk
-                         
+
 - id: r3 # should be dans
   type: repository
   data:
@@ -210,8 +210,8 @@
               data:
                 name: An Address
                 city: Brussels
-      
-      
+
+
 --- # Collections
 
 # C1 is a top-level documentary unit which, held by NIOD, which contains
@@ -355,6 +355,25 @@
                 test2: More arbitrary text
     heldBy: r1
     hasPermissionScope: r1
+
+# m19 is a standalone item
+- id: nl-r1-m19
+  type: documentaryUnit
+  data:
+    identifier: nl-r1-m19
+    name: m.19
+  relationships:
+    describes:
+      - id: m19-eng
+        type: documentDescription
+        data:
+          identifier: m19-desc
+          name: Documentary Unit m19
+          languageCode: eng
+          scopeAndContent: Some description text for m19
+    heldBy: r1
+    hasPermissionScope: r1
+
 
 --- # Authority Set
 - id: auths

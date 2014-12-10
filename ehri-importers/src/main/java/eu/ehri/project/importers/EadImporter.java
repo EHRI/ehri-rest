@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
@@ -101,11 +102,6 @@ public class EadImporter extends EaImporter {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
-            logger.debug("maintenance event found");
-            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
-        }
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
@@ -127,6 +123,7 @@ public class EadImporter extends EaImporter {
             }
         }
         handleCallbacks(mutation);
+        logger.debug("============== "+frame.getIdentifier()+" created:" + mutation.created());
         if (mutation.created()) {
             solveUndeterminedRelationships(frame, descBundle);
         }
@@ -146,6 +143,7 @@ public class EadImporter extends EaImporter {
 
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
+        final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
         /*
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
@@ -172,9 +170,12 @@ public class EadImporter extends EaImporter {
                     @Override
                     public boolean remove(String relationLabel, Bundle bundle) {
                         String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                        String sourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
                         return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
                                 && (lang != null
-                                && lang.equals(languageOfDesc));
+                                && lang.equals(languageOfDesc)
+                                && (sourceFileId != null && sourceFileId.equals(thisSourceFileId))
+                                );
                     }
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
@@ -260,27 +261,41 @@ public class EadImporter extends EaImporter {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(ACCESS_POINT)) {
+
                 logger.debug(key + data.get(key).getClass());
-                for(Object o : (List) data.get(key)){
-                    logger.debug(""+o.getClass());
-                }
-                //type, targetUrl, targetName, notes
-                for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
-                    Map<String, Object> relationNode = new HashMap<String, Object>();
-                    for (String eventkey : origRelation.keySet()) {
-//                        logger.debug(eventkey);
-                        if (eventkey.endsWith(ACCESS_POINT)) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
-                            relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
-logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
-                        } else {
-                            relationNode.put(eventkey, origRelation.get(eventkey));
+                if (data.get(key) instanceof List) {
+                    for (Object o : (List) data.get(key)) {
+                        logger.debug("" + o.getClass());
+                    }
+                    //type, targetUrl, targetName, notes
+                    for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
+                        if (origRelation.isEmpty()) {
+                            break;
+                        }
+                        Map<String, Object> relationNode = new HashMap<String, Object>();
+                        for (String eventkey : origRelation.keySet()) {
+                            if (eventkey.endsWith(ACCESS_POINT)) {
+                                relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
+                                relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
+//logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
+                            } else {
+                                relationNode.put(eventkey, origRelation.get(eventkey));
+                            }
+                        }
+                        if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        }
+                        //if no name is given, it was apparently an empty <controlaccess> tag?
+                        if (relationNode.containsKey(Ontology.NAME_KEY)) {
+                            list.add(relationNode);
                         }
                     }
-                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
-                    }
-                    list.add(relationNode);
+                } else {
+                        Map<String, Object> relationNode = new HashMap<String, Object>();
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, key.substring(0, key.indexOf("Point")));
+                        relationNode.put(Ontology.NAME_KEY, data.get(key));
+                        list.add(relationNode);
+                    
                 }
             }
         }
@@ -348,12 +363,13 @@ logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Poin
         return unit;
     }
 
-    @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
     
     public void importAsVirtualCollection(){
       unitEntity = EntityClass.VIRTUAL_UNIT;
+    }
+
+    @Override
+    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+        return importItem(itemData, new Stack<String>());
     }
 }
