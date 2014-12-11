@@ -37,15 +37,15 @@ abstract public class XmlImportManager implements ImportManager {
     /**
      * Constructor.
      *
-     * @param framedGraph
-     * @param permissionScope
-     * @param actioner
+     * @param graph     the framed graph
+     * @param scope     the permission scope
+     * @param actioner  the actioner
      */
     public XmlImportManager(
-            FramedGraph<? extends TransactionalGraph> framedGraph,
-            final PermissionScope permissionScope, final Actioner actioner) {
-        this.framedGraph = framedGraph;
-        this.permissionScope = permissionScope;
+            FramedGraph<? extends TransactionalGraph> graph,
+            final PermissionScope scope, final Actioner actioner) {
+        this.framedGraph = graph;
+        this.permissionScope = scope;
         this.actioner = actioner;
     }
 
@@ -69,8 +69,8 @@ abstract public class XmlImportManager implements ImportManager {
     /**
      * Import a Description file by specifying its path.
      *
-     * @param filePath
-     * @param logMessage
+     * @param filePath      a path to a description XML file
+     * @param logMessage    the log message
      *
      * @throws IOException
      * @throws ValidationError
@@ -89,8 +89,8 @@ abstract public class XmlImportManager implements ImportManager {
     /**
      * Import a file, creating a new action with the given log message.
      *
-     * @param ios
-     * @param logMessage
+     * @param ios           an input stream object
+     * @param logMessage    the log message
      * @return an ImportLog for the given InputStream
      *
      * @throws IOException
@@ -126,8 +126,8 @@ abstract public class XmlImportManager implements ImportManager {
     /**
      * Import multiple files in the same batch/transaction.
      *
-     * @param paths
-     * @param logMessage
+     * @param paths         a list of file paths to description objects
+     * @param logMessage    a log message
      *
      * @throws IOException
      * @throws ValidationError

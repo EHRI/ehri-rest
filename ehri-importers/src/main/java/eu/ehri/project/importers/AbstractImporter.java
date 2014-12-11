@@ -38,32 +38,20 @@ public abstract class AbstractImporter<T> {
     private static final String NODE_PROPERTIES = "allowedNodeProperties.csv";
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporter.class);
+    private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
+
     protected final PermissionScope permissionScope;
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
-    protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
-    protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
-    protected List<ImportCallback> unchangedCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> callbacks = new LinkedList<ImportCallback>();
 
     private NodeProperties pc;
-    private Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
 
     protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation) {
-        switch (mutation.getState()) {
-            case CREATED:
-                for (ImportCallback cb: createCallbacks)
-                    cb.itemImported(mutation.getNode());
-                break;
-            case UPDATED:
-                for (ImportCallback cb: updateCallbacks)
-                    cb.itemImported(mutation.getNode());
-                break;
-            case UNCHANGED:
-                for (ImportCallback cb: unchangedCallbacks)
-                    cb.itemImported(mutation.getNode());
-                break;
+        for (ImportCallback callback : callbacks) {
+            callback.itemImported(mutation);
         }
     }
 
@@ -83,55 +71,37 @@ public abstract class AbstractImporter<T> {
     /**
      * Constructor.
      *
-     * @param framedGraph
-     * @param permissionScope
-     * @param log
-     * @param documentContext
+     * @param graph     the framed graph
+     * @param scope     the permission scope
+     * @param log       the log object
+     * @param context   the document context
      */
-    public AbstractImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log,
-            T documentContext) {
-        this.permissionScope = permissionScope;
-        this.framedGraph = framedGraph;
+    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log,
+            T context) {
+        this.permissionScope = scope;
+        this.framedGraph = graph;
         this.log = log;
-        this.documentContext = documentContext;
-        manager = GraphManagerFactory.getInstance(framedGraph);
+        this.documentContext = context;
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
      * Constructor without a document context.
-     * @param framedGraph
-     * @param permissionScope
-     * @param log
+     * @param graph the graph
+     * @param scope the permission scope
+     * @param log   the logger object
      */
-    public AbstractImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        this(framedGraph, permissionScope, log, null);
+    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log) {
+        this(graph, scope, log, null);
     }
 
     /**
      * Add a callback to run when an item is created.
      *
-     * @param cb
+     * @param callback a callback function object
      */
-    public void addCreationCallback(final ImportCallback cb) {
-        createCallbacks.add(cb);
-    }
-
-    /**
-     * Add a callback to run when an item is updated.
-     *
-     * @param cb
-     */
-    public void addUpdateCallback(final ImportCallback cb) {
-        updateCallbacks.add(cb);
-    }
-
-    /**
-     * Add a callback to run when an item is left unchanged.
-     *
-     * @param cb
-     */
-    public void addUnchangedCallback(final ImportCallback cb) {
-        unchangedCallbacks.add(cb);
+    public void addCallback(final ImportCallback callback) {
+        callbacks.add(callback);
     }
 
     /**
@@ -158,7 +128,7 @@ public abstract class AbstractImporter<T> {
     /**
      * Extract a list of DatePeriod bundles from an item's data.
      *
-     * @param data
+     * @param data  the raw map of date data
      * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
@@ -168,9 +138,9 @@ public abstract class AbstractImporter<T> {
      * only properties that have the multivalued-status can actually be multivalued. all other properties will be
      * flattened by this method.
      *
-     * @param key
-     * @param value
-     * @param entity - the EntityClass with which this frameMap must comply
+     * @param key       a property key
+     * @param value     a property value
+     * @param entity    the EntityClass with which this frameMap must comply
      */
     protected Object changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
         if (pc == null) {

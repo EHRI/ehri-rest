@@ -1,6 +1,7 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -8,6 +9,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
@@ -88,18 +90,19 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
             
-            ImportLog log;
-
+            Optional<XmlImportProperties> optionalProperties = Optional.absent();
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
-                logMessage += "Using properties file : " + cmdLine.getOptionValue("properties");
-                log = new SaxImportManager(graph, scope, user, importer, handler, properties).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
-            } else {
-                log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
+                logMessage += " Using properties file : " + cmdLine.getOptionValue("properties");
+                optionalProperties = Optional.of(properties);
             }
-            
-            System.out.println("Import completed. Created: " + log.getCreated()
-                    + ", Updated: " + log.getUpdated() + ", Unchanged: " + log.getUnchanged());
+
+            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler, optionalProperties,
+                    Lists.<ImportCallback>newArrayList())
+                    .setTolerant(cmdLine.hasOption("tolerant"))
+                    .importFiles(filePaths, logMessage);
+            log.printReport();
+
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {

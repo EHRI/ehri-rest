@@ -227,7 +227,7 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals(3, list.size());
         assertEquals("c3", list.get(0).getIdentifier());
         assertEquals("c4", list.get(1).getIdentifier());
-        assertEquals("nl-r1-m19", list.get(2).getIdentifier());
+        assertEquals("m19", list.get(2).getIdentifier());
         assertEquals(5, toList(fQuery.clearFilters()
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser)).size());
 
@@ -293,7 +293,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // NB: This will break if other collections are added to the
         // fixtures. Adjust as necessary.
-        assertEquals("nl-r1-m19", toList(page.getIterable()).get(0).getIdentifier());
+        assertEquals("m19", toList(page.getIterable()).get(0).getIdentifier());
 //        assertEquals("c4", toList(page.getIterable()).get(1).getIdentifier());
         assertEquals("c1", toList(orderQuery
                 .clearOrdering()

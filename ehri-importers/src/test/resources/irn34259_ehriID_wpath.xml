@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><ead xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:isbn:1-931666-22-9">
+   <eadheader>
+      <eadid>irn34259#eng
+          </eadid>
+      <filedesc>
+         <titlestmt>
+            <titleproper>Chester C. Boone collection</titleproper>
+            <subtitle>Chester C. Boone collection</subtitle>
+            <author></author>
+         </titlestmt>
+         <publicationstmt>
+            <publisher>USHMM / EHRI partners</publisher>
+            <date></date>
+         </publicationstmt>
+      </filedesc>
+      <profiledesc>
+         <creation>Automatically converted from USHMM's Solr index file using solr2ead.xsl (https://github.com/EHRI/solr2ead)
+                  <date normal="2014-11-11" era="ce" calendar="gregorian">2014-11-11T15:20:54.061+01:00</date>
+         </creation>
+         <langusage>
+            <language langcode="eng">English</language>
+         </langusage>
+      </profiledesc>
+<revisiondesc>
+<change>
+<date>2014-11-13 14:19:36</date>
+<item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+</change>
+</revisiondesc>
+   </eadheader>
+   <frontmatter>
+      <titlepage>
+         <titleproper>Chester C. Boone collection</titleproper>
+         <date era="ce" calendar="gregorian"></date>
+      </titlepage>
+   </frontmatter>
+   <archdesc level="otherlevel">
+      <did>
+<unitid label="ehri_structure">0</unitid>
+         <unittitle>Chester C. Boone collection</unittitle>
+         <unitdate era="ce" calendar="gregorian"></unitdate>
+         <unitid type="irn">irn34259</unitid>
+         <unitid label="Accession number" type="acc_num">2007.486</unitid>
+         <origination></origination>
+         <physdesc></physdesc>
+         <langmaterial></langmaterial>
+      </did>
+      <acqinfo>
+         <p>Accession number: 2007.486</p>
+      </acqinfo>
+      <scopecontent>
+         <p>The collection consists of artifacts related to the experiences of Chester C. "Jack" Boone of the United States Army at the Dora Mittelbau V2 rocket factory during World War II.</p>
+      </scopecontent>
+      <odd>
+         <p>Record type: Collection</p>
+      </odd>
+      <dsc>
+         <c01 level="otherlevel">
+            <did>
+<unitid label="ehri_structure">0.0</unitid>
+<unitid label="ehri_internal_id">0</unitid>
+               <unittitle>Welding torch handle with tip from the Dora Mittelbau V2 factory</unittitle>
+               <unitdate era="ce" calendar="gregorian">1945</unitdate>
+               <unitid type="irn">irn35701</unitid>
+               <unitid label="Accession number" type="acc_num">2007.486.3</unitid>
+               <origination></origination>
+               <physdesc>
+                  <dimensions>overall : 18.000 in. (45.72 cm.)</dimensions>
+                  <physfacet>Welding torch with two prongs at one end, two dials, a tip at 90 degrees from body of torch. There is a second piece attached to tip, parallel to the body of the torch with a valve at the end.</physfacet>
+                  <physfacet>Oxyacetylene torches (aat)</physfacet>
+               </physdesc>
+               <langmaterial></langmaterial>
+            </did>
+            <acqinfo>
+               <p>Accession number: 2007.486.3</p>
+               <p>Credit: United States Holocaust Memorial Museum Collection, Gift of Dave Johnson and the Boone Family</p>
+            </acqinfo>
+            <bioghist>
+               <p>Chester C. “Jack” Boone entered the United States Armed Forces in 1942. He initially served in the Maritime branch, then transferred to the Army Transport System, where the skills learned in the family machine shop were put to use. Boone earned Second Lieutenant status and received training as an amphibious engineer at an Air Force training center. He served in the European Theater, under General Omar Bradley. He maintained the mechanics of a ship that transported troops, to the north of Omaha Beach, prior to the June 6, 1944, D-Day assault. In 1945, Boone was put in charge of the army detachment that took over the underground V-1 and V-2 rocket factory outside of Nordhausen, Germany. Upon arrival at Nordhausen in April 1945, Boone saw the piles of bodies of the slave labor workers that the Nazis had enclosed in barbed wire and massacred, leaving their bodies where they fell. The underground factory was “very weird” in Boone’s words. It was not discovered by US forces until the war was almost over. It was built under a mountain, and consisted of two mile-long tunnels that stretched from one end of the mountain to the other, with cross tunnels connecting them. The tunnels were equipped with lights and railroad tracks. Train cars were loaded with raw materials and slave labor assembled the rockets, as the cars moved down the tracks. When Boone arrived, there were 120 V-2 rockets present. A forced labor camp of 6,000 people was attached to the factory, by a blacktop path, lined with barbed wire. When the inmates were freed by the US troops, few people left; they had nowhere to go. Boone’s detachment was charged with securing, and then, dismantling, the factory. However, after six months of work, little progress had been made. When Germany was divided in 1945, the factory was in Russian territory, so Boone’s detachment left. They were able to remove all of the rockets from the factory, but were unable to dismantle it. Boone believes that the Russians began producing their own rockets in the factory, the day after the US troops departed. Boone took the set of German welding torches with him when he left the factory. During his time there, Boone met Werner von Braun, the father of German rocketry and spoke with him about German advancements. Braun was eventually offered a contract for him and his team to continue their research in the United States. The reaction Boone received from other people while in Germany was, overall, a positive one. At the Russian checkpoint at Berlin, he was not received with the warmest reception, so he never saw Berlin. In 1947 Boone withdrew from active service and was honorably discharged in 1952.</p>
+            </bioghist>
+            <scopecontent>
+               <p>Welding torch handle with tip acquired by Chester C. Boone from the Dora Mittelbau V2 rocket factory in Nordhausen, Germany. Boone was a 2nd Lieutenant in the United States Army detachment that took over the factory after the liberation of the Dora-Mittelbau concentration camp by US forces in April 1945. The secret, underground factory complex was operated with a slave labor force, many of whom were massacred by the Germans as they evacuated the camp. Boone's group oversaw the dismantling of the factory for six months, until it came under Soviet control, with the postwar partition of Germany.</p>
+            </scopecontent>
+            <accessrestrict>
+               <p>No restrictions on access</p>
+            </accessrestrict>
+            <userestrict>
+               <p>No restrictions on use</p>
+            </userestrict>
+            <odd>
+               <p>Object type: Oxyacetylene torches (aat)</p>
+            </odd>
+            <odd>
+               <p>Record type: Object</p>
+            </odd>
+            <odd>
+               <p>EMU Classification: Tools and Equipment</p>
+            </odd>
+            <odd>
+               <p>EMU Category: Equipment</p>
+            </odd>
+            <controlaccess>
+               <subject>Soldiers--United States--Biography.</subject>
+               <subject>Rocketry--Germany--History--20th century.</subject>
+               <subject>V-2--History.</subject>
+               <subject>World War, 1939-1945--Campaigns--Western Front.</subject>
+               <subject>World War, 1939-1945--Personal narratives, American.</subject>
+               <name role="subject">Chester C. Boone</name>
+            </controlaccess>
+         </c01>
+         <c01 level="otherlevel">
+            <did>
+<unitid label="ehri_structure">0.1</unitid>
+<unitid label="ehri_internal_id">1</unitid>
+               <unittitle>Welding torch handle with brazing tip from the Dora Mittelbau V2 factory</unittitle>
+               <unitdate era="ce" calendar="gregorian">1945</unitdate>
+               <unitid type="irn">irn35699</unitid>
+               <unitid label="Accession number" type="acc_num">2007.486.1</unitid>
+               <origination></origination>
+               <physdesc>
+                  <dimensions>overall : 15.200 in. (38.608 cm.)</dimensions>
+                  <physfacet>Welding torch, with two prongs at one end, three dials, and a tip at 90 degreeangle from body.</physfacet>
+                  <physfacet>Oxyacetylene torches (aat)</physfacet>
+               </physdesc>
+               <langmaterial></langmaterial>
+            </did>
+            <acqinfo>
+               <p>Accession number: 2007.486.1</p>
+               <p>Credit: United States Holocaust Memorial Museum Collection, Gift of Dave Johnson and the Boone Family</p>
+            </acqinfo>
+            <bioghist>
+               <p>Chester C. “Jack” Boone entered the United States Armed Forces in 1942. He initially served in the Maritime branch, then transferred to the Army Transport System, where the skills learned in the family machine shop were put to use. Boone earned Second Lieutenant status and received training as an amphibious engineer at an Air Force training center. He served in the European Theater, under General Omar Bradley. He maintained the mechanics of a ship that transported troops, to the north of Omaha Beach, prior to the June 6, 1944, D-Day assault. In 1945, Boone was put in charge of the army detachment that took over the underground V-1 and V-2 rocket factory outside of Nordhausen, Germany. Upon arrival at Nordhausen in April 1945, Boone saw the piles of bodies of the slave labor workers that the Nazis had enclosed in barbed wire and massacred, leaving their bodies where they fell. The underground factory was “very weird” in Boone’s words. It was not discovered by US forces until the war was almost over. It was built under a mountain, and consisted of two mile-long tunnels that stretched from one end of the mountain to the other, with cross tunnels connecting them. The tunnels were equipped with lights and railroad tracks. Train cars were loaded with raw materials and slave labor assembled the rockets, as the cars moved down the tracks. When Boone arrived, there were 120 V-2 rockets present. A forced labor camp of 6,000 people was attached to the factory, by a blacktop path, lined with barbed wire. When the inmates were freed by the US troops, few people left; they had nowhere to go. Boone’s detachment was charged with securing, and then, dismantling, the factory. However, after six months of work, little progress had been made. When Germany was divided in 1945, the factory was in Russian territory, so Boone’s detachment left. They were able to remove all of the rockets from the factory, but were unable to dismantle it. Boone believes that the Russians began producing their own rockets in the factory, the day after the US troops departed. Boone took the set of German welding torches with him when he left the factory. During his time there, Boone met Werner von Braun, the father of German rocketry and spoke with him about German advancements. Braun was eventually offered a contract for him and his team to continue their research in the United States. The reaction Boone received from other people while in Germany was, overall, a positive one. At the Russian checkpoint at Berlin, he was not received with the warmest reception, so he never saw Berlin. In 1947 Boone withdrew from active service and was honorably discharged in 1952.</p>
+            </bioghist>
+            <scopecontent>
+               <p>Welding torch handle, with brazing tip, acquired by Chester C. Boone from the Dora Mittelbau V2 rocket factory in Nordhausen, Germany. Boone was a 2nd Lieutenant in the United States Army detachment that took over the factory after the liberation of the Dora-Mittelbau concentration camp by US forces in April 1945. The secret, underground factory complex was operated with a slave labor force, many of whom were massacred by the Germans as they evacuated the camp. Boone's group oversaw the dismantling of the factory for six months, until it came under Soviet control, with the postwar partition of Germany.</p>
+            </scopecontent>
+            <accessrestrict>
+               <p>No restrictions on access</p>
+            </accessrestrict>
+            <userestrict>
+               <p>No restrictions on use</p>
+            </userestrict>
+            <odd>
+               <p>Object type: Oxyacetylene torches (aat)</p>
+            </odd>
+            <odd>
+               <p>Record type: Object</p>
+            </odd>
+            <odd>
+               <p>EMU Classification: Tools and Equipment</p>
+            </odd>
+            <odd>
+               <p>EMU Category: Equipment</p>
+            </odd>
+            <controlaccess>
+               <subject>Soldiers--United States--Biography.</subject>
+               <subject>Rocketry--Germany--History--20th century.</subject>
+               <subject>V-2--History.</subject>
+               <subject>World War, 1939-1945--Campaigns--Western Front.</subject>
+               <subject>World War, 1939-1945--Personal narratives, American.</subject>
+               <name role="subject">Chester C. Boone</name>
+            </controlaccess>
+         </c01>
+      </dsc>
+   </archdesc>
+</ead>

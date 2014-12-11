@@ -94,7 +94,6 @@ public class ItsTest extends AbstractImporterTest {
 
         assertEquals(1L, unit.getChildCount());
 
-        
         for (Description d : unit.getDocumentDescriptions()) {
             boolean hasDate=false;
             for(Edge e : d.asVertex().getEdges(Direction.OUT)){
@@ -112,7 +111,7 @@ public class ItsTest extends AbstractImporterTest {
             } else {
                 fail();
             }
-            
+
         }
 
 

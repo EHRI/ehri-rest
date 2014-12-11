@@ -57,8 +57,6 @@ public class CampsV2_1Test extends AbstractImporterTest {
         String skosConceptId = "675";
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
-        
-        
         List<Concept> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 

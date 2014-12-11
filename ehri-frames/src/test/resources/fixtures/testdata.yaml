@@ -91,7 +91,7 @@
   relationships:
     belongsTo: niod
     hasAnnotation: ann2
-      
+
 # Linda belongs to DANS
 - id: linda
   type: userProfile
@@ -164,7 +164,7 @@
                 streetAddress: Strand
                 city: London
                 webpage: http://www.kcl.ac.uk
-                         
+
 - id: r3 # should be dans
   type: repository
   data:
@@ -210,8 +210,8 @@
               data:
                 name: An Address
                 city: Brussels
-      
-      
+
+
 --- # Collections
 
 # C1 is a top-level documentary unit which, held by NIOD, which contains
@@ -356,11 +356,15 @@
     heldBy: r1
     hasPermissionScope: r1
 
-# m19 is a standalone item
+# m19 is a standalone item - it is named differently
+# to the others because it's used to test partial EAD
+# updates to existing items (corresponding to file
+# YV_c1.xml), and therefore has a hierarchical id.
+# The other fixtures do not for simplicity's sake.
 - id: nl-r1-m19
   type: documentaryUnit
   data:
-    identifier: nl-r1-m19
+    identifier: m19
     name: m.19
   relationships:
     describes:
@@ -470,6 +474,21 @@
     hasAnnotationBody: mike
     access: mike
 
+# This annotation is promoted by one user
+# and demoted by another, so they it's effectively
+# not promoted.
+- id: ann6
+  type: annotation
+  data:
+    identifier: ann6
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    access: mike
+    promotedBy: tim
+    demotedBy: linda
 
 --- # Links
  - id: link1

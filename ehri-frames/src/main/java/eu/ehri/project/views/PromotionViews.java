@@ -49,12 +49,13 @@ public class PromotionViews implements Scoped<PromotionViews> {
     }
 
     /**
-     * Add a promotion to an item.
+     * Up vote an item, removing a down vote if there is one.
+     *
      * @param item The promotable item
      * @param user The item's promoter
      * @throws PermissionDenied
      */
-    public void promoteItem(Promotable item, UserProfile user) throws PermissionDenied,
+    public void upVote(Promotable item, UserProfile user) throws PermissionDenied,
             NotPromotableError {
         helper.checkEntityPermission(item, user, PermissionType.PROMOTE);
         if (!item.isPromotable()) {
@@ -65,17 +66,42 @@ public class PromotionViews implements Scoped<PromotionViews> {
     }
 
     /**
-     * Remove a promotion from an item
+     * Remove an up vote.
+     *
      * @param item The promotable item
      * @param user The item's promoter
      * @throws PermissionDenied
      */
-    public void demoteItem(Promotable item, UserProfile user) throws PermissionDenied {
-        helper.checkEntityPermission(item, user, PermissionType.PROMOTE);
-        // Should we complain here if the item is not promotable?
-        // I think probably not, since this is then correcting an error...
+    public void removeUpVote(Promotable item, UserProfile user) throws PermissionDenied {
         item.removePromotion(user);
+    }
+
+    /**
+     * Down vote an item, removing an up vote if there is one.
+     *
+     * @param item The promotable item
+     * @param user The item's promoter
+     * @throws PermissionDenied
+     */
+    public void downVote(Promotable item, UserProfile user) throws PermissionDenied,
+            NotPromotableError {
+        helper.checkEntityPermission(item, user, PermissionType.PROMOTE);
+        if (!item.isPromotable()) {
+            throw new NotPromotableError(item.getId());
+        }
+        item.addDemotion(user);
         actionManager.logEvent(item, user, EventTypes.demotion);
+    }
+
+    /**
+     * Remove a down vote.
+     *
+     * @param item The promotable item
+     * @param user The item's promoter
+     * @throws PermissionDenied
+     */
+    public void removeDownVote(Promotable item, UserProfile user) throws PermissionDenied {
+        item.removeDemotion(user);
     }
 
     @Override
