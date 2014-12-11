@@ -40,7 +40,7 @@ public class YadVashemTest extends AbstractImporterTest{
         final String logMessage = "Importing a single EAD";
         DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
         
-        assertEquals("nl-r1-m19", m19.getIdentifier());
+        assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());
 
         int count = getNodeCount(graph);

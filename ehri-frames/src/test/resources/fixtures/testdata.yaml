@@ -356,11 +356,15 @@
     heldBy: r1
     hasPermissionScope: r1
 
-# m19 is a standalone item
+# m19 is a standalone item - it is named differently
+# to the others because it's used to test partial EAD
+# updates to existing items (corresponding to file
+# YV_c1.xml), and therefore has a hierarchical id.
+# The other fixtures do not for simplicity's sake.
 - id: nl-r1-m19
   type: documentaryUnit
   data:
-    identifier: nl-r1-m19
+    identifier: m19
     name: m.19
   relationships:
     describes:
