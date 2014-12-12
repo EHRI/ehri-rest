@@ -155,16 +155,16 @@ def load_queue():
 @task
 def import_ead(scope, log, properties, file_dir):
     """Import EAD files remotely via REST
-    
+
     Supply the scope, log message as a file name, the path to a
     properties file and path to a directory relative to /opt/webapps/data/import-data containing
     the files to import. File paths are local on the remote machine.
     The $USER is used to run the import, and tolerant is always true when using this import.
-    
+
     For example, to import all files from the Wiener Library, use:
-    
+
     fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
-    
+
     run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
@@ -174,16 +174,16 @@ def import_ead(scope, log, properties, file_dir):
 @task
 def import_ead_with_handler(scope, log, properties, file_dir, handler):
     """Import EAD files remotely via REST
-    
+
     Supply the scope, log message as a file name, the path to a
     properties file and path to a directory relative to /opt/webapps/data/import-data containing
     the files to import. File paths are local on the remote machine.
     The $USER is used to run the import, and tolerant is always true when using this import.
-    
+
     For example, to import all files from the Wiener Library, use:
-    
+
     fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
-    
+
     run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
@@ -193,35 +193,35 @@ def import_ead_with_handler(scope, log, properties, file_dir, handler):
 @task
 def import_skos(scope, log, file):
     """Import SKOS files remotely via REST
-    
+
     Supply the scope, log message as a file name or as an URL encoded message and path 
     to an RDF file relative to /opt/webapps/data/import-data containing
     the vocabulary to import. File paths are local on the remote machine.
     The $USER is used to run the import, and tolerant is always true when using this import.
-    
+
     For example, to import the list of camps, use:
-    
+
     fab stage import_skos:scope=ehri-camps,log=This+list+of+camps+has+been+compiled+by+EHRI+in+2014,file=authoritativeSet/camps-import.rdf"""
-    
+
     full_file_path = "/opt/webapps/data/import-data/" + file
     run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
 
 @task
 def import_csv(scope, log, importer, file):
     """Import CSV files remotely via REST
-    
+
     Supply the scope, log message as a file name or as an URL encoded message, the fully
     qualified name of a CSV importer class and path to a file relative to 
     /opt/webapps/data/import-data to import. File paths are local on the remote machine.
     The $USER is used to run the import.
-    
-    For example, to import something, use:
-    
-    fab stage import_csv:scope=terezin-victims,log=/opt/webapps/data/import-data/wp2/terezin/authoritativeSet/terezin-victims-log.txt,importer=,file=wp2/terezin/authoritativeSet/terezin-victims.csv"""
-    
-    full_file_path = "/opt/webapps/data/import-data/" + file
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, log, importer) )
 
+    For example, to import something, use:
+
+    fab stage import_csv:scope=terezin-victims,log=terezin.log,importer=PersonalitiesImporter,file=wp2/terezin/authoritativeSet/terezin-victims.csv"""
+
+    full_file_path = "/opt/webapps/data/import-data/" + file
+    full_log_path= "/opt/webapps/data/import-data/logs/" + log
+    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, full_log_path, importer) )
 
 @task
 def online_clone_db(local_dir):
