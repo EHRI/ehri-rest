@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
@@ -22,7 +21,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -30,10 +28,8 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
@@ -49,10 +45,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -283,8 +277,6 @@ public final class JenaSkosImporter implements SkosImporter {
             } catch (ItemNotFound ex) {
                 logger.error(ex.getMessage());
             } catch (PermissionDenied ex) {
-                logger.error(ex.getMessage());
-            } catch (IntegrityError ex) {
                 logger.error(ex.getMessage());
             } catch (ValidationError ex) {
                 java.util.logging.Logger.getLogger(JenaSkosImporter.class.getName()).log(Level.SEVERE, null, ex);

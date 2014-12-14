@@ -7,7 +7,6 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -83,11 +82,10 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws ItemNotFound
      */
     public Mutation<E> update(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
+            throws PermissionDenied, ValidationError, ItemNotFound {
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         return getPersister(scope).update(bundle, cls);
@@ -102,11 +100,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      */
     public E create(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError,
-            IntegrityError {
+            throws PermissionDenied, ValidationError {
         helper.checkContentPermission(user, helper.getContentTypeEnum(cls),
                 PermissionType.CREATE);
         E item = getPersister(scope).create(bundle, cls);
@@ -135,10 +131,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, IntegrityError {
+            throws PermissionDenied, ValidationError {
         helper.checkContentPermission(user, helper.getContentTypeEnum(cls),
                 PermissionType.CREATE);
         helper.checkContentPermission(user, helper.getContentTypeEnum(cls),

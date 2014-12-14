@@ -26,14 +26,13 @@ public interface Crud<E extends AccessibleEntity> {
     public E detail(String id, Accessor user) throws ItemNotFound;
 
     public Mutation<E> update(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, ItemNotFound;
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
 
     public E create(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
+            throws PermissionDenied, ValidationError, DeserializationError;
 
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
+            throws PermissionDenied, ValidationError, DeserializationError;
 
     public Integer delete(String id, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError, ItemNotFound;

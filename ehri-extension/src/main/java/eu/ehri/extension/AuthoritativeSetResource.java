@@ -10,7 +10,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -114,7 +113,7 @@ public class AuthoritativeSetResource extends
     @Override
     public Response create(Bundle bundle,
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return createItem(bundle, accessors);
     }
@@ -124,7 +123,7 @@ public class AuthoritativeSetResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
     public Response update(Bundle bundle) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError,
+            ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return updateItem(bundle);
     }
@@ -135,7 +134,7 @@ public class AuthoritativeSetResource extends
     @Path("/{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return updateItem(id, bundle);
     }
@@ -183,7 +182,7 @@ public class AuthoritativeSetResource extends
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try {
             Accessor user = getRequesterUserProfile();

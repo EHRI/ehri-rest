@@ -5,7 +5,6 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -159,7 +158,7 @@ public final class XmlSkosImporter implements SkosImporter {
 
     private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidXmlDocument, InvalidInputFormatError, IntegrityError {
+            InputParseError, InvalidXmlDocument, InvalidInputFormatError {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -192,11 +191,10 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param eventContext
      * @throws ValidationError
      * @throws InvalidInputFormatError
-     * @throws IntegrityError
      */
     private void importDocWithinAction(Document doc, final ActionManager.EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
-            InvalidInputFormatError, IntegrityError {
+            InvalidInputFormatError {
 
         createConcepts(doc, eventContext, manifest);
         createVocabularyStructure(doc, eventContext, manifest);
@@ -210,11 +208,10 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
-     * @throws IntegrityError
      */
     private void createConcepts(Document doc, final ActionManager.EventContext action,
             final ImportLog manifest) throws ValidationError,
-            InvalidInputFormatError, IntegrityError {
+            InvalidInputFormatError {
 
         // the Concept is extracted from the XML
         // but how to use the namespacing properly?
@@ -359,11 +356,10 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
-     * @throws IntegrityError
      */
     private void createVocabularyStructure(Document doc, final EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
-            InvalidInputFormatError, IntegrityError {
+            InvalidInputFormatError {
 
         logger.debug("Number of concepts in lookup: " + conceptLookup.size());
 
@@ -379,11 +375,10 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
-     * @throws IntegrityError
      */
     private void createBroaderNarrowerRelations(Document doc, final EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
-            InvalidInputFormatError, IntegrityError {
+            InvalidInputFormatError {
 
         // check the lookup and start making the BT relations (and narrower implicit)
         // visit all concepts an see if they have broader concepts
@@ -438,11 +433,10 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
-     * @throws IntegrityError
      */
     private void createNonspecificRelations(Document doc, final EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
-            InvalidInputFormatError, IntegrityError {
+            InvalidInputFormatError {
 
         // check the lookup and start making the relations
         // visit all concepts an see if they have a related concept
