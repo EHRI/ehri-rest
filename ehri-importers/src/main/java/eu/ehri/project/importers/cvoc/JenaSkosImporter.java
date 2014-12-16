@@ -26,6 +26,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.EaImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
@@ -274,7 +275,7 @@ public final class JenaSkosImporter implements SkosImporter {
             try {
                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                         .withDataValue(Ontology.LINK_HAS_TYPE, linkedConcepts.get(concept))
-                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
                 Link link;
                 link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);

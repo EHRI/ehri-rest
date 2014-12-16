@@ -1,8 +1,11 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -21,7 +24,9 @@ import java.util.regex.Pattern;
 public class DcEuropeanaHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DcEuropeanaHandler.class);
-
+private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Frame>>builder()
+                .put("relation", Annotation.class).build();
     public DcEuropeanaHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
     }
@@ -79,9 +84,10 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
     @Override
     protected boolean needToCreateSubNode(String qName) {
         boolean need = isUnitDelimiter(qName);
+        need = need || possibleSubnodes.containsKey(getImportantPath(currentPath));
         String path = getImportantPath(currentPath);
         logger.debug(path);
-        return need || path.endsWith(EadImporter.ACCESS_POINT);
+        return  need || path.endsWith(EadImporter.ACCESS_POINT);
     }
 
     private String replaceOpname(String toString) {

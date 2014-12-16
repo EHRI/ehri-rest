@@ -95,6 +95,9 @@ public class EadImporter extends EaImporter {
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
             logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
+            for(String s : rel.keySet()){
+                logger.debug(s);
+            }
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
@@ -221,7 +224,10 @@ public class EadImporter extends EaImporter {
                 if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
                     String cvoc_id = (String) rel.asVertex().getProperty("cvoc");
                     String concept_id = (String) rel.asVertex().getProperty("concept");
-                    logger.debug(cvoc_id + "  " + concept_id);
+                    if(concept_id == null){
+                      concept_id = (String) rel.asVertex().getProperty("target");
+                    }
+                    logger.debug("cvoc:"+cvoc_id + "  concept:" + concept_id);
                     Vocabulary vocabulary;
                     try {
                         vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
@@ -231,7 +237,7 @@ public class EadImporter extends EaImporter {
                             try {
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                                         .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
-                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
                                 UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
                                 unit.addLink(link);
@@ -250,7 +256,10 @@ public class EadImporter extends EaImporter {
                         logger.error("Vocabulary with id " + cvoc_id +" not found. "+ex.getMessage());
                     }
                     
+                }else{
+                    logger.debug("no cvoc found");
                 }
+                
             }
         }
     }
@@ -258,9 +267,32 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
+        final String REL = "relation";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
-            if (key.endsWith(ACCESS_POINT)) {
+            if (key.equals(REL)) {
+                //name identifier
+                for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
+                    Map<String, Object> relationNode = new HashMap<String, Object>();
+                    if(origRelation.containsKey("type")){
+                            //try to find the original identifier
+                            relationNode.put(LINK_TARGET, origRelation.get("concept"));
+                            //try to find the original name
+                            relationNode.put(Ontology.NAME_KEY, origRelation.get("name"));
+                            relationNode.put("cvoc", origRelation.get("cvoc"));
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, origRelation.get("type"));
+                    } else {
+                        relationNode.put(Ontology.NAME_KEY, origRelation.get(REL));
+                    }
+                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                        logger.debug("relationNode without type: "+relationNode.get(Ontology.NAME_KEY));
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                    }
+                    list.add(relationNode);
+                }
+            }
+            else 
+    if (key.endsWith(ACCESS_POINT)) {
 
                 logger.debug(key + data.get(key).getClass());
                 if (data.get(key) instanceof List) {

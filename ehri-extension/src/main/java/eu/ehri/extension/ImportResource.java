@@ -40,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resource class for import endpoints.
@@ -249,7 +251,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(SCOPE_PARAM) String scopeId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            String pathList)
+            InputStream stream)
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
@@ -261,15 +263,14 @@ public class ImportResource extends AbstractRestResource {
             UserProfile user = getCurrentUser();
             PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
 
-            // Extract our list of paths...
-            List<String> paths = getFilePaths(pathList);
-
             // Run the import!
             ImportLog log = new CsvImportManager(graph, scope, user, importer)
-                    .importFiles(paths, getLogMessage(logMessage).orNull());
+                    .importFile(stream, getLogMessage(logMessage).orNull());
 
             graph.getBaseGraph().commit();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+        } catch (InputParseError ex) {
+            throw new DeserializationError("ParseError: " + ex.getMessage());
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException e) {

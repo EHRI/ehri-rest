@@ -54,7 +54,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
        diff.printDebug(System.out);
        
 
-        printGraph(graph);
+//        printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 3 more Concepts
        	 * 7 more ConceptDescription
@@ -150,6 +150,14 @@ public class JoodsRaadTest extends AbstractImporterTest {
             for(String k : e.getVertex(Direction.OUT).getPropertyKeys()){
                 logger.debug(k + ":" + e.getVertex(Direction.OUT).getProperty(k));
             }
+            int countHasLinkTarget=0;
+            for(Edge out : e.getVertex(Direction.OUT).getEdges(Direction.OUT)){
+                logger.debug(out.getLabel());
+                if(out.getLabel().equals("hasLinkTarget")){
+                    countHasLinkTarget++;
+                }
+            }
+            assertEquals(2, countHasLinkTarget);
             found=true;
         }
         assertTrue(found);

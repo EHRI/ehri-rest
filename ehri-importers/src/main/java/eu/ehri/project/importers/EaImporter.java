@@ -26,6 +26,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     private static final Logger logger = LoggerFactory.getLogger(EaImporter.class);
     protected static final String LINK_TARGET = "target";
 
+    public static final String RESOLVED_LINK_DESC = "Link created on behalf of the institute during import.";
 
     /**
      * Construct an EadImporter object.
