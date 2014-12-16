@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -14,7 +13,6 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -241,8 +239,6 @@ public class EacImporter extends EaImporter {
                                 link.addLinkBody(rel);
                             } catch (PermissionDenied ex) {
                                 logger.error(ex.getMessage());
-                            } catch (IntegrityError ex) {
-                                logger.error(ex.getMessage());
                             }
 
                         }
@@ -318,9 +314,6 @@ public class EacImporter extends EaImporter {
 //                                }
 //                            }
 //                        }
-//                    } catch (IntegrityError e) {
-//                        logger.error(e.getMessage());
-//                        throw new RuntimeException(e);
 //                    } catch (PermissionDenied ex) {
 //                        logger.error(ex.getMessage());
 //                        throw new RuntimeException(ex);

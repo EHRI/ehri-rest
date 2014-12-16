@@ -2,7 +2,6 @@ package eu.ehri.extension.base;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -24,12 +23,11 @@ public interface CreateResource {
      * @return A serialized resource representation.
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      * @throws ItemNotFound
      * @throws BadRequester
      */
     public Response create(Bundle bundle, List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester;
 }

@@ -2,7 +2,6 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -109,7 +108,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
     }
     
     @Test
-    public void newPersonalitiesWithReferredNodes() throws ItemNotFound, PermissionDenied, ValidationError, IntegrityError, IOException, InputParseError{
+    public void newPersonalitiesWithReferredNodes() throws ItemNotFound, PermissionDenied, ValidationError, IOException, InputParseError{
         final String TEST_REPO = "r1";
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);

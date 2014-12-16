@@ -6,7 +6,6 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -101,7 +100,7 @@ public class EntityAdd extends BaseCommand implements Command {
         try {
             createItem(graph, cmdLine, id, bundle, scope, user, logMessage);
             graph.getBaseGraph().commit();
-        } catch (IntegrityError e) {
+        } catch (ValidationError e) {
             graph.getBaseGraph().rollback();
             System.err.printf("A user a id: '%s' already exists%n", id);
             return CmdEntryPoint.RetCode.BAD_DATA.getCode();
@@ -124,7 +123,7 @@ public class EntityAdd extends BaseCommand implements Command {
     public void createItem(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine, String id, Bundle bundle,
             PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
-            IntegrityError, ValidationError, PermissionDenied {
+            ValidationError, PermissionDenied {
 
         if (!AccessibleEntity.class.isAssignableFrom(bundle.getBundleClass())) {
             throw new DeserializationError("Item class: " + bundle.getBundleClass().getSimpleName() +

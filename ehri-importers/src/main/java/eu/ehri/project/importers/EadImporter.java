@@ -3,7 +3,6 @@ package eu.ehri.project.importers;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -244,8 +243,6 @@ public class EadImporter extends EaImporter {
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
                             } catch (PermissionDenied ex) {
-                                logger.error(ex.getMessage());
-                            } catch (IntegrityError ex) {
                                 logger.error(ex.getMessage());
                             }
 

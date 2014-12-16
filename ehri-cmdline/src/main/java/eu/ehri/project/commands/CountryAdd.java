@@ -8,7 +8,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -96,7 +95,7 @@ public class CountryAdd extends BaseCommand implements Command {
                     graph, Country.class);
             view.create(bundle, admin, getLogMessage(logMessage));
             graph.getBaseGraph().commit();
-        } catch (IntegrityError e) {
+        } catch (ValidationError e) {
             graph.getBaseGraph().rollback();
             System.err.printf("A country with id: '%s' already exists%n", nodeId);
             return 9;
