@@ -4,6 +4,7 @@ import eu.ehri.project.models.Address;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.tools.FindReplace;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,17 +15,17 @@ import java.util.regex.PatternSyntaxException;
 import static org.junit.Assert.*;
 
 public class UtilitiesTest extends AbstractFixtureTest {
-    private Utilities utilities;
+    private FindReplace findReplace;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        utilities = new Utilities(graph);
+        findReplace = new FindReplace(graph);
     }
 
     @Test
     public void testFindReplacePropertyValue() throws Exception {
-        long count = utilities.findReplacePropertyValue(EntityClass.ADDRESS,
+        long count = findReplace.propertyValue(EntityClass.ADDRESS,
                 "streetAddress", "Strand", "Drury Lane");
         assertEquals(1L, count);
         assertEquals("Drury Lane", manager.getFrame("ar2", Address.class)
@@ -35,7 +36,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
     public void testFindReplacePropertyValueWithBadKeys() throws Exception {
         for (String badKey : new String[]{EntityType.ID_KEY, EntityType.TYPE_KEY}) {
             try {
-                utilities.findReplacePropertyValue(EntityClass.ADDRESS, badKey, "foo", "bar");
+                findReplace.propertyValue(EntityClass.ADDRESS, badKey, "foo", "bar");
                 fail("Find/replace should have thrown an error with bad key: " + badKey);
             } catch (IllegalArgumentException e) {
                 // okay
@@ -45,7 +46,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
 
     @Test
     public void testFindReplacePropertyValueRE() throws Exception {
-        long count = utilities.findReplacePropertyValueRE(EntityClass.ADDRESS,
+        long count = findReplace.propertyValueRE(EntityClass.ADDRESS,
                 "webpage", Pattern.compile("^http:"), "https:");
         assertEquals(3L, count);
         // Check the replacement works for both scalar and array values
@@ -57,7 +58,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
 
         // Illustrating what a sharp tool this is, the names of all documentary units
         // with the same thing...
-        long allDocs = utilities.findReplacePropertyValueRE(EntityClass.DOCUMENT_DESCRIPTION,
+        long allDocs = findReplace.propertyValueRE(EntityClass.DOCUMENT_DESCRIPTION,
                 "name", Pattern.compile(".*"), "allTheSameName!");
         assertEquals(7, allDocs);
     }
@@ -65,13 +66,13 @@ public class UtilitiesTest extends AbstractFixtureTest {
     @Test(expected = PatternSyntaxException.class)
     public void testFindReplacePropertyValueREWithBadPattern() throws Exception {
         String badRe = "[http:"; // mismatched quotes...
-        utilities.findReplacePropertyValueRE(EntityClass.ADDRESS,
+        findReplace.propertyValueRE(EntityClass.ADDRESS,
                 "webpage", Pattern.compile(badRe), "https:");
     }
 
     @Test
     public void testReplacePropertyName() throws Exception {
-        long count = utilities.replacePropertyName(EntityClass.ADDRESS, "webpage", "url");
+        long count = findReplace.propertyName(EntityClass.ADDRESS, "webpage", "url");
         assertEquals(2L, count);
         assertEquals("http://www.kcl.ac.uk", manager.getFrame("ar2", Address.class)
                 .asVertex().getProperty("url"));
@@ -81,7 +82,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
     public void testReplacePropertyNameWithBadKeys() throws Exception {
         for (String badKey : new String[]{EntityType.ID_KEY, EntityType.TYPE_KEY}) {
             try {
-                utilities.replacePropertyName(EntityClass.ADDRESS, badKey, "foo");
+                findReplace.propertyName(EntityClass.ADDRESS, badKey, "foo");
                 fail("Replace property name should have thrown an error with bad key: " + badKey);
             } catch (IllegalArgumentException e) {
                 // okay

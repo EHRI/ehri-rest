@@ -1,4 +1,4 @@
-package eu.ehri.project.views;
+package eu.ehri.project.tools;
 
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * A grab-bag of useful functions for making changes to the
  * graph data.
- *
+ * <p/>
  * NB: Most uses of the methods here can be trivially accomplished
  * with mutating Cypher but that's an even sharper tool. The purpose
  * here is to formalise some very common operations with specific
@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class Utilities {
+public class FindReplace {
     private final GraphManager manager;
 
-    public Utilities(FramedGraph<?> graph) {
+    public FindReplace(FramedGraph<?> graph) {
         this.manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -41,8 +41,8 @@ public class Utilities {
      * @param newValue      the new value
      * @return the number of items changed
      */
-    public long findReplacePropertyValue(EntityClass entityClass, String propertyName,
-                                         String existingValue, String newValue) {
+    public long propertyValue(EntityClass entityClass, String propertyName,
+            String existingValue, String newValue) {
         checkLegalPropertyName(propertyName);
         CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
         try {
@@ -80,8 +80,8 @@ public class Utilities {
      * @param replacement  the new value
      * @return the number of properties changed
      */
-    public long findReplacePropertyValueRE(EntityClass entityClass, String propertyName,
-                                           Pattern pattern, String replacement) {
+    public long propertyValueRE(EntityClass entityClass, String propertyName,
+            Pattern pattern, String replacement) {
         checkLegalPropertyName(propertyName);
         CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
         try {
@@ -117,7 +117,7 @@ public class Utilities {
      * @param newPropertyName the new property name
      * @return the number of items changed
      */
-    public long replacePropertyName(EntityClass entityClass, String propertyName, String newPropertyName) {
+    public long propertyName(EntityClass entityClass, String propertyName, String newPropertyName) {
         checkLegalPropertyName(propertyName);
         CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
         try {
