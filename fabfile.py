@@ -182,13 +182,31 @@ def import_ead_with_handler(scope, log, properties, file_dir, handler):
 
     For example, to import all files from the Wiener Library, use:
 
-    fab stage import_ead:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library"""
+    fab stage import_ead_with_handler:scope=gb-003348,log=wiener-log.txt,properties=wienerlib.properties,file_dir=gb/wiener-library,handler=eu.ehri.project.importers.EadHandler"""
 
     run("ls /opt/webapps/data/import-data/%s/*.xml > /opt/webapps/data/import-metadata/%s.txt" % (file_dir, scope))
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
     run("curl -m 7200 -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
+
+@task
+def import_large_ead_with_handler(scope, log, properties, file_dir, handler):
+    """Import a large number of EAD files remotely via REST
+
+    Supply the scope, log message as a file name, the path to a
+    properties file and path to a directory relative to /opt/webapps/data/import-data containing
+    the files to import. File paths are local on the remote machine.
+    The $USER is used to run the import, and tolerant is always true when using this import.
+
+    For example, to import all files from the USHMM, use:
+
+    fab stage import_large_ead_with_handler:scope=us-005578,log=us-005578.log,properties=ushmm.properties,file_dir=us/ushmm,handler=eu.ehri.project.importers.UshmmHandler"""
+
+    log_file = "/opt/webapps/data/import-data/logs/%s" % log
+    properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
+    with cd(env.path):
+        run("./scripts/import-large-batch.sh %s %s %s %s %s" % (file_dir, scope, log_file, properties_file, handler) )
 
 @task
 def import_skos(scope, log, file):
