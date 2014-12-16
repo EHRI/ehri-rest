@@ -11,9 +11,9 @@ PROPERTIES=$4
 HANDLER=$5
 
 for FILE in `ls /opt/webapps/data/import-data/$DATADIR`; do
-    echo "/opt/webapps/data/import-data/$DATADIR/$FILE" >> /opt/webapps/data/import-metadata/$SCOPE-$DATADIR.txt
+    echo "/opt/webapps/data/import-data/$DATADIR/$FILE" >> /opt/webapps/data/import-metadata/$SCOPE.txt
 done
-split -l 100 /opt/webapps/data/import-metadata/$SCOPE-$DIR.txt /opt/webapps/data/import-metadata/$SCOPE-split-$DIR-
+split -l 100 /opt/webapps/data/import-metadata/$SCOPE.txt /opt/webapps/data/import-metadata/$SCOPE-split-
 
 for TFILE in `ls /opt/webapps/data/import-metadata/$SCOPE-split*`; do
     echo "importing $TFILE..."
