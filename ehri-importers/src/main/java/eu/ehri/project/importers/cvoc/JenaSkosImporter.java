@@ -263,7 +263,8 @@ public final class JenaSkosImporter implements SkosImporter {
         for (Concept concept : linkedConcepts.keySet()) {
             try {
                 Bundle linkBundle = new Bundle(EntityClass.LINK)
-                        .withDataValue(Ontology.LINK_HAS_TYPE, linkedConcepts.get(concept))
+                        .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
+                        .withDataValue("skos", linkedConcepts.get(concept))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
                 Link link;
@@ -296,10 +297,11 @@ public final class JenaSkosImporter implements SkosImporter {
                     if (rel.getKey().startsWith("skos:")) {
                         Concept found = findRelatedConcept(annotation.toString());
                         if (found != null) {
-                            linkedConcepts.put(found, rel.getKey());
+                            linkedConcepts.put(found, rel.getKey().substring(5));
                         } else {
                             undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
-                                    .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                                    .withDataValue(Ontology.ANNOTATION_TYPE, "associate")
+                                    .withDataValue("skos", rel.getKey().substring(5))
                                     .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                         }
                     }

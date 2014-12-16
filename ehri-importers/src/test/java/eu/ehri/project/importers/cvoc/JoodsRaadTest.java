@@ -7,8 +7,10 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
 
@@ -136,6 +138,13 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertTrue(found);
 
         Concept termJR = manager.getFrame("cvoc2-joodse-raad", Concept.class);
+        
+        for(Link desc : termJR.getLinks()){
+            assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
+            assertEquals("associate", desc.asVertex().getProperty("type"));
+            assertTrue(desc.asVertex().getPropertyKeys().contains("skos"));
+            assertEquals("exactMatch", desc.asVertex().getProperty("skos"));
+        }
 
         Concept concept698 = manager.getFrame("cvoc1-698", Concept.class);
         found=false;
