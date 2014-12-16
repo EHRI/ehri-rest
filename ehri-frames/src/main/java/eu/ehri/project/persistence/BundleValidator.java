@@ -11,6 +11,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,11 +22,11 @@ import java.util.Map;
 public final class BundleValidator {
 
     private final GraphManager manager;
-    private final Iterable<String> scopes;
+    private final List<String> scopes;
 
     public BundleValidator(GraphManager manager, Iterable<String> scopes) {
         this.manager = manager;
-        this.scopes = Optional.fromNullable(scopes).or(Lists.<String>newArrayList());
+        this.scopes = Lists.newArrayList(Optional.fromNullable(scopes).or(Lists.<String>newArrayList()));
     }
 
     /**
