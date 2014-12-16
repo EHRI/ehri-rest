@@ -67,7 +67,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/autoLinkRepositoryDocs/{repositoryId:.+}/{vocabularyId:.+}")
+    @Path("/generateConcepts/{repositoryId:.+}/{vocabularyId:.+}")
     public long autoLinkRepositoryDocs(
             @PathParam("repositoryId") String repositoryId,
             @PathParam("vocabularyId") String vocabularyId,
