@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/EHRI/ehri-rest.svg?branch=master)](https://travis-ci.org/EHRI/ehri-rest)
+
 The EHRI Data Backend
 =====================
 
