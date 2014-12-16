@@ -186,7 +186,9 @@ public class EadImporter extends EaImporter {
                 //change the desc-id
                 String defaultDescIdentifier= withIds.getId()+"-"+languageOfDesc.toLowerCase();
                 String newDescIdentifier=withIds.getId()+"-"+thisSourceFileId.toLowerCase().replace("#", "-");
-                if(manager.exists(defaultDescIdentifier)){
+                if(manager.exists(newDescIdentifier)){
+                        descBundle=descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
+                } else if(manager.exists(defaultDescIdentifier)){
                     Bundle oldDescBundle = mergeSerializer
                         .vertexFrameToBundle(manager.getVertex(defaultDescIdentifier));
                     //if the previous had NO sourcefile_key OR it was different:
