@@ -36,8 +36,10 @@ import javax.ws.rs.core.Response;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("description")
+@Path(DescriptionResource.ENDPOINT)
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {
+
+    public static final String ENDPOINT = "description";
 
     private final DescriptionViews<DescribedEntity> descriptionViews;
 

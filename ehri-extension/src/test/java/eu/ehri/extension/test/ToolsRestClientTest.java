@@ -2,6 +2,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import eu.ehri.extension.ToolsResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
@@ -9,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
-
+import static eu.ehri.extension.ToolsResource.ENDPOINT;
 /**
  * Test admin REST functions.
  *
@@ -18,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class ToolsRestClientTest extends BaseRestClientTest {
     @Test
     public void testPropertyRename() throws Exception {
-        WebResource resource = client.resource(ehriUri("tools", "_findReplacePropertyValue"))
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_findReplacePropertyValue"))
                 .queryParam("type", Entities.ADDRESS)
                 .queryParam("name", "streetAddress")
                 .queryParam("from", "Strand")
@@ -31,7 +32,7 @@ public class ToolsRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testPropertyRenameRE() throws Exception {
-        WebResource resource = client.resource(ehriUri("tools", "_findReplacePropertyValueRE"))
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_findReplacePropertyValueRE"))
                 .queryParam("type", Entities.ADDRESS)
                 .queryParam("name", "webpage")
                 .queryParam("pattern", "^http:")
@@ -44,7 +45,7 @@ public class ToolsRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testPropertyKeyRename() throws Exception {
-        WebResource resource = client.resource(ehriUri("tools", "_findReplacePropertyName"))
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_findReplacePropertyName"))
                 .queryParam("type", Entities.ADDRESS)
                 .queryParam("from", "streetAddress")
                 .queryParam("to", "somethingElse");

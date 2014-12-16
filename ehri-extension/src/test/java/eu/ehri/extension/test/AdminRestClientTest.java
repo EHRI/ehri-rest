@@ -13,6 +13,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static eu.ehri.extension.AdminResource.ENDPOINT;
 
 /**
  * Test admin REST functions.
@@ -23,7 +24,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testHouseKeeping() throws Exception {
-        WebResource resource = client.resource(ehriUri("admin", "_rebuildChildCache"));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_rebuildChildCache"));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
         assertStatus(OK, response);
@@ -32,7 +33,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
-        WebResource resource = client.resource(ehriUri("admin", "createDefaultUserProfile"));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "createDefaultUserProfile"));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
@@ -45,7 +46,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
         // Create another user and ensure their idents are different and
         // incremental
-        WebResource resource2 = client.resource(ehriUri("admin", "createDefaultUserProfile"));
+        WebResource resource2 = client.resource(ehriUri(ENDPOINT, "createDefaultUserProfile"));
         response = resource2.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 

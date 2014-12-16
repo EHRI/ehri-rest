@@ -15,6 +15,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static eu.ehri.extension.GenericResource.ENDPOINT;
 
 public class GenericRestClientTest extends BaseRestClientTest {
 
@@ -26,7 +27,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
     public void getMultipleGenericEntities() throws IOException {
         // Create
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
-                .segment("entities")
+                .segment(ENDPOINT)
                 .queryParam("id", ITEM1)
                 .queryParam("id", ITEM2).build();
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
@@ -40,7 +41,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
         // Create
         String payload = String.format("[\"%s\", \"%s\"]", ITEM1, ITEM2);
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
-                .segment("entities").build();
+                .segment(ENDPOINT).build();
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(payload)
                 .post(ClientResponse.class);
@@ -52,7 +53,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
     public void getSingleGenericEntity() throws IOException {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("entities", ITEM1)).get(ClientResponse.class);
+                ehriUri(ENDPOINT, ITEM1)).get(ClientResponse.class);
         assertStatus(OK, response);
         JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
@@ -66,7 +67,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
     public void getCannotFetchNonContentTypes() throws IOException {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("entities", BAD_ITEM)).get(ClientResponse.class);
+                ehriUri(ENDPOINT, BAD_ITEM)).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }
 
@@ -74,7 +75,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
     public void listEntitiesByGidThrows404() throws IOException {
         // Create
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
-                .segment("entities")
+                .segment(ENDPOINT)
                 .segment("listByGraphId")
                 .queryParam("gid", -1L).build();
 

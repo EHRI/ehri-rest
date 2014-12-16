@@ -21,9 +21,10 @@ import javax.ws.rs.core.Response;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("promote")
+@Path(PromotionResource.ENDPOINT)
 public class PromotionResource extends AbstractRestResource {
 
+    public static final String ENDPOINT = "promote";
     private final PromotionViews pv;
 
     public PromotionResource(@Context GraphDatabaseService database) {

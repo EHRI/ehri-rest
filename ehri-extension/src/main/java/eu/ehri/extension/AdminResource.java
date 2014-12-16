@@ -50,9 +50,10 @@ import java.util.Map;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("admin")
+@Path(AdminResource.ENDPOINT)
 public class AdminResource extends AbstractRestResource {
 
+    public static final String ENDPOINT = "admin";
     public static final String DEFAULT_USER_ID_PREFIX = "user";
     public static final String DEFAULT_USER_ID_FORMAT = "%s%06d";
 

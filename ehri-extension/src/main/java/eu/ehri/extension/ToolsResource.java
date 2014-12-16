@@ -30,12 +30,13 @@ import java.util.regex.Pattern;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("tools")
+@Path(ToolsResource.ENDPOINT)
 public class ToolsResource extends AbstractRestResource {
 
     private final FindReplace findReplace;
     private final Linker linker;
 
+    public static final String ENDPOINT = "tools";
     public static final String TOLERANT_PARAM = "tolerant";
     public static final String LANG_PARAM = "lang";
     public static final String ACCESS_POINT_TYPE_PARAM = "apt";
