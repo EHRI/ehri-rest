@@ -15,6 +15,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static eu.ehri.extension.DescriptionResource.ENDPOINT;
 
 public class DescriptionRestClientTest extends BaseRestClientTest {
 
@@ -33,7 +34,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         // Create additional description for c2
         // C2 initially has one description, so it should have two afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("description", "c2"))
+                ehriUri(ENDPOINT, "c2"))
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
@@ -59,7 +60,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         // Update description for c2
         // C2 initially has one description, and should still have one afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("description", "c2", "cd2"))
+                ehriUri(ENDPOINT, "c2", "cd2"))
                 .entity(descriptionTestStr).put(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -80,7 +81,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         // Delete description for c2
         // C2 initially has one description, so there should be none afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("description", "c2", "cd2"))
+                ehriUri(ENDPOINT, "c2", "cd2"))
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -88,7 +89,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteAccessPoints() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("description", "c2", "cd2", Entities.UNDETERMINED_RELATIONSHIP))
+                ehriUri(ENDPOINT, "c2", "cd2", Entities.UNDETERMINED_RELATIONSHIP))
                 .entity(accessPointTestStr).post(ClientResponse.class);
         assertStatus(CREATED, response);
         JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
@@ -99,7 +100,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         String value = idNode.asText();
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("description", "c2", "cd2",
+                ehriUri(ENDPOINT, "c2", "cd2",
                         Entities.UNDETERMINED_RELATIONSHIP, value))
                 .delete(ClientResponse.class);
         assertStatus(OK, response);

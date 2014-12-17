@@ -37,8 +37,10 @@ import java.util.List;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("entities")
+@Path(GenericResource.ENDPOINT)
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {
+
+    public static final String ENDPOINT = "entities";
 
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, AccessibleEntity.class);

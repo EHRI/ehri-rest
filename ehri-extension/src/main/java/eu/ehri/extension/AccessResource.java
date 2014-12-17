@@ -1,6 +1,5 @@
 package eu.ehri.extension;
 
-import com.google.common.collect.Sets;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -21,9 +20,11 @@ import java.util.Set;
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.
  */
-@Path("access")
+@Path(AccessResource.ENDPOINT)
 public class AccessResource extends
         AbstractAccessibleEntityResource<AccessibleEntity> {
+
+    public static final String ENDPOINT = "access";
 
     public AccessResource(@Context GraphDatabaseService database) {
         super(database, AccessibleEntity.class);
@@ -48,24 +49,13 @@ public class AccessResource extends
         graph.getBaseGraph().checkNotInTransaction();
         try {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
-            Set<Accessor> accessors = extractAccessors(accessorIds);
-            aclViews.setAccessors(item, accessors, getRequesterUserProfile());
+            Accessor current = getRequesterUserProfile();
+            Set<Accessor> accessors = getAccessors(accessorIds, current);
+            aclViews.setAccessors(item, accessors, current);
             graph.getBaseGraph().commit();
             return single(item);
         } finally {
             cleanupTransaction();
         }
-
-    }
-
-    /**
-     * Get a set of Accessors from the given IDs.
-     */
-    private Set<Accessor> extractAccessors(Iterable<String> accessorIds) throws ItemNotFound {
-        Set<Accessor> accs = Sets.newHashSet();
-        for (String at : accessorIds) {
-            accs.add(manager.getFrame(at, Accessor.class));
-        }
-        return accs;
     }
 }
