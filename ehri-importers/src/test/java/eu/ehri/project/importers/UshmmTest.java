@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 public class UshmmTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(UshmmTest.class);
     
-    protected final String SINGLE_EAD = "irn50845.xml";
-    protected final String IMPORTED_ITEM_ID = "50845";
-    protected final String IMPORTED_ITEM_ALT_ID = "RG-50.586*0138";
+    protected final String SINGLE_EAD = "irn44515.xml";
+    protected final String IMPORTED_ITEM_ID = "irn44645";
+    protected final String IMPORTED_ITEM_ALT_ID = "RG-50.586*0032";
 
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -39,26 +39,25 @@ public class UshmmTest extends AbstractImporterTest{
 
         printGraph(graph);
         /* How many new nodes will have been created? We should have
-        * 1 more DocumentaryUnit
-        * 1 more DocumentDescription
-        * 1 more Date Period
-        * 2 more import Event links
+        * 2 more DocumentaryUnit
+        * 2 more DocumentDescription
+        * 1 more DatePeriod
+        * 3 more import Event links
         * 1 more import Event
-        * 4 more UndeterminedRelationships
-        * 1 more UnknownProperty
+        * 17 more AccessPoints
         * 1 more MaintenanceEvent (creation)
         */
-        int createCount = origCount + 9;
+        int createCount = origCount + 27;
         assertEquals(createCount, getNodeCount(graph));
 
-        // Yet we've only created 1 *logical* item...
-        assertEquals(1, log.getChanged());
+        // Yet we've only created 2 *logical* item...
+        assertEquals(2, log.getChanged());
 
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
         for(Description d : unit.getDocumentDescriptions()) {
-            assertEquals("Oral history interview with Marijan Perić", d.getName());
+            assertEquals("Oral history interview with Dobrila Kukolj", d.getName());
         	assertEquals("eng", d.getLanguageOfDescription());
         }
         SystemEvent event = unit.getLatestEvent();
@@ -82,7 +81,7 @@ public class UshmmTest extends AbstractImporterTest{
         assertEquals(logMessage, actions.get(0).getLogMessage());
 
         // Check scope is correct...
-        assertEquals(agent, unit.getPermissionScope());
+        assertEquals(agent, unit.getAncestors().iterator().next().getPermissionScope());
 
 //        // Now re-import the same file
 //        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
