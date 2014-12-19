@@ -511,12 +511,12 @@ def symlink_current():
 
 @task
 def copy_lib_sh():
-    "Put the lib.sh, import-ushmm.sh and cmd scripts on the server."
+    "Put the lib.sh, import-large-batch.sh and cmd scripts on the server."
     with cd(env.path):
         put("scripts/lib.sh", "scripts/lib.sh")
-        put("scripts/import-ushmm.sh", "scripts/import-ushmm.sh")
-        run("chmod g+x scripts/import-ushmm.sh") 
+        put("scripts/import-large-batch.sh", "scripts/import-large-batch.sh")
+        run("chmod g+x scripts/import-large-batch.sh")
         put("scripts/cmd", "scripts/cmd")
-        run("chmod g+x scripts/cmd")  
+        run("chmod g+x scripts/cmd")
         put("scripts/export-wienerlibrary", "scripts/export-wienerlibrary")
-        run("chmod g+x scripts/export-wienerlibrary") 
+        run("chmod g+x scripts/export-wienerlibrary")
