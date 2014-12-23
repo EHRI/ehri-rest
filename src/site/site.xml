@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<project name="EHRI Backend" xmlns="http://maven.apache.org/DECORATION/1.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
+<project name="EHRI Backend" xmlns="http://maven.apache.org/DECORATION/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
     <bannerLeft>
         <name>EHRI Backend</name>
         <src>https://ehri-project.eu/sites/all/themes/ehri_new/images/logo.png</src>
@@ -16,6 +14,7 @@
     <custom>
         <fluidoSkin>
             <sideBarEnabled>true</sideBarEnabled>
+            <skipGenerationDate>true</skipGenerationDate>
         </fluidoSkin>
     </custom>
 
@@ -25,16 +24,16 @@
         </breadcrumbs>
 
         <menu name="Developer Notes">
-            <item href="install.html" name="Installation" />
-            <item href="deployment.html" name="Deployment" />
-            <item href="import.html" name="Importing Data" />
-            <item href="gotchas.html" name="Gotchas" />
-            <item href="migrations.html" name="DB Migration History" />
-            <item href="scripting.html" name="Scripting" />
-            <item href="permissions.html" name="Permissions" />
-            <item href="serialization.html" name="Data Serialization Config" />
-            <item href="validation.html" name="Validation" />
-            <item href="identifiers.html" name="Identifiers" />
+            <item href="install.html" name="Installation"/>
+            <item href="deployment.html" name="Deployment"/>
+            <item href="import.html" name="Importing Data"/>
+            <item href="gotchas.html" name="Gotchas"/>
+            <item href="migrations.html" name="DB Migration History"/>
+            <item href="scripting.html" name="Scripting"/>
+            <item href="permissions.html" name="Permissions"/>
+            <item href="serialization.html" name="Data Serialization Config"/>
+            <item href="validation.html" name="Validation"/>
+            <item href="identifiers.html" name="Identifiers"/>
         </menu>
 
         <!-- Doing this manually instead of using ref="modules" because we want
@@ -47,7 +46,7 @@
             <item href="ehri-cmdline/index.html" name="Command Line Utilities"/>
         </menu>
 
-        <menu ref="reports" />
+        <menu ref="reports"/>
 
         <menu name="API Docs">
             <item href="apidocs/index.html" name="Javadocs"/>
