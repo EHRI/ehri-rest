@@ -16,6 +16,7 @@
     <custom>
         <fluidoSkin>
             <sideBarEnabled>true</sideBarEnabled>
+            <skipGenerationDate>true</skipGenerationDate>
         </fluidoSkin>
     </custom>
 
