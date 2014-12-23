@@ -23,6 +23,7 @@
     <body>
         <menu name="Notes">
             <item href="configuration.html" name="Neo4j Configuration" />
+            <item href="backup-restore.html" name="Backup &amp; Restore" />
         </menu>
 
         <menu name="Web Service Docs">
