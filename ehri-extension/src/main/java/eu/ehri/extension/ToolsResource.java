@@ -38,6 +38,7 @@ public class ToolsResource extends AbstractRestResource {
 
     public static final String ENDPOINT = "tools";
     public static final String TOLERANT_PARAM = "tolerant";
+    public static final String SINGLE_PARAM = "single";
     public static final String LANG_PARAM = "lang";
     public static final String ACCESS_POINT_TYPE_PARAM = "apt";
     public static final String DEFAULT_LANG = "eng";
@@ -58,6 +59,8 @@ public class ToolsResource extends AbstractRestResource {
      * @param accessPointTypes the access point types to process
      * @param tolerant         proceed even if there are integrity errors due
      *                         to slug collisions in the created concepts
+     * @param excludeSingle    don't create concepts/links for access points that
+     *                         are unique to a single item
      * @return the number of links created
      * @throws ItemNotFound
      * @throws BadRequester
@@ -72,7 +75,8 @@ public class ToolsResource extends AbstractRestResource {
             @PathParam("repositoryId") String repositoryId,
             @PathParam("vocabularyId") String vocabularyId,
             @QueryParam(ACCESS_POINT_TYPE_PARAM) List<String> accessPointTypes,
-            @DefaultValue(DEFAULT_LANG) @QueryParam(LANG_PARAM) String languageCode,
+            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String languageCode,
+            @QueryParam(SINGLE_PARAM) @DefaultValue("true") boolean excludeSingle,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
             throws ItemNotFound, BadRequester, ValidationError,
             PermissionDenied, DeserializationError {
@@ -83,9 +87,13 @@ public class ToolsResource extends AbstractRestResource {
             Repository repository = manager.getFrame(repositoryId, Repository.class);
             Vocabulary vocabulary = manager.getFrame(vocabularyId, Vocabulary.class);
 
-            long linkCount = linker.createAndLinkRepositoryVocabulary(
-                    repository, vocabulary, user, languageCode,
-                    accessPointTypes, getLogMessage(), tolerant);
+            long linkCount = linker
+                    .withAccessPointTypes(accessPointTypes)
+                    .withTolerant(tolerant)
+                    .withExcludeSingles(excludeSingle)
+                    .withDefaultLanguage(languageCode)
+                    .withLogMessage(getLogMessage())
+                    .createAndLinkRepositoryVocabulary(repository, vocabulary, user);
 
             graph.getBaseGraph().commit();
             return linkCount;
