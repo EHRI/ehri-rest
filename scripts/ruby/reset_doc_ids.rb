@@ -45,7 +45,7 @@ module Ehri
         idgen = cls.getIdgen
         bundle = serializer.vertex_frame_to_bundle(doc)
         scope = doc.get_permission_scope
-        newid = idgen.generate_id(cls, scope, bundle)
+        newid = idgen.generate_id(scope.id_path, bundle)
         if newid != doc.get_id
           puts "ID diff: #{doc.get_id} -> #{newid}"
           doc.as_vertex.set_property("__ID__", newid)
