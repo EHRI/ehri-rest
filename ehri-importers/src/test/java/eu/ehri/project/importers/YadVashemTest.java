@@ -63,12 +63,12 @@ public class YadVashemTest extends AbstractImporterTest{
         * relationship: 5
         * documentaryUnit: 2
         * documentDescription: 3
-        * property: 3
+        * property: 1
         * systemEvent: 1
         * datePeriod: 1
         */
 
-        assertEquals(count + 19, getNodeCount(graph));
+        assertEquals(count + 17, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
     }
 
@@ -101,11 +101,11 @@ public class YadVashemTest extends AbstractImporterTest{
         * relationship: 5 (2 creator, 1 place, 1 subject, 1 geog)
         * documentaryUnit: 2
         * documentDescription: 3
-        * property: 3
+        * property: 1
         * systemEvent: 1
         * datePeriod: 1
         */
-        assertEquals(count + 19, getNodeCount(graph));
+        assertEquals(count + 17, getNodeCount(graph));
         //ENG also imported:
 assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);

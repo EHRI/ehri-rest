@@ -104,7 +104,11 @@ public class EadImporter extends EaImporter {
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
-            logger.debug("Unknown Properties found");
+            StringBuilder unknownProperties = new StringBuilder();
+            for(String u : unknowns.keySet()){
+                unknownProperties.append(u);
+            }
+            logger.info("Unknown Properties found: " + unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 

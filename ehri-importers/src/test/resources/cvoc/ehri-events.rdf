@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:dct="http://dublincore.org/schemas/xmls/qdc/dcterms.xsd"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:sem="http://semanticweb.cs.vu.nl/2009/11/sem/"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+
+<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/1">
+	<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel>"Blut für Ware", 1944</skos:prefLabel>
+	<rdfs:comment>A proposal that the Nazis would release up to one million Jews in exchange for 10,000 trucks and other goods from the Western Allies.</rdfs:comment>
+	<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944</sem:hasTime>
+	<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-terms/1073" ehri-id="ehri-skos--tema-1073" type="term" xml:lang="en">Negotiations</sem:eventType>
+	<skos:broadMatch rdf:resource="http://data.ehri-project.eu/cvoc1/tema=1073" ehri-id="ehri-skos--tema-1073" type="term" xml:lang="en">Negotiations</skos:broadMatch>
+	<skos:altLabel xml:lang="en">"Blood for goods"</skos:altLabel>
+	<skos:altLabel xml:lang="en">Blood for goods</skos:altLabel>
+	<foaf:isPrimaryTopicOf rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb-001402" ehri-id="ehri-cb-001402" type="corporate body">Budapest Rescue Committee</foaf:isPrimaryTopicOf>
+	<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country">France</sem:hasPlace>
+	<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/2">
+	<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<skos:prefLabel>"Teheran Children", 1942-1943</skos:prefLabel>
+	<rdfs:comment>Aliya (emigration to Palestine)</rdfs:comment>
+	<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942/1943</sem:hasTime>
+	<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-terms/866" ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</sem:eventType>
+	<skos:broadMatch rdf:resource="http://data.ehri-project.eu/cvoc1/tema=866" ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</skos:broadMatch>
+	<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+        <skos:broader rdf:resource="http://data.ehri-project.eu/ehri-events/1"/>
+</rdf:Description>
+</rdf:RDF>

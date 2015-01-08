@@ -30,7 +30,7 @@
          <langmaterial>
             <language langcode="nld">Dutch</language>
          </langmaterial>
-         <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>The file was created by</origination>
+         <origination>The file was created by Joodse Raad Friesland</origination>
          <physdesc>
             <extent>Paper, 37 files</extent>
             <genreform>Certification</genreform>
@@ -67,7 +67,7 @@
                   <language langcode="nld">Dutch</language>
                   <language langcode="deu">German</language>
                </langmaterial>
-               <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>
+               <origination>The file was created by Joodse Raad Friesland
                </origination>
                <physdesc>
                   <extent type="pages">416</extent>

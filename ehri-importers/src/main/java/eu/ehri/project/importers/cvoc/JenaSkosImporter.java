@@ -86,6 +86,7 @@ public final class JenaSkosImporter implements SkosImporter {
             .put("owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs"))
             .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
             .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
+            .put("skos:broadMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
             .build();
 
     /**
@@ -262,9 +263,10 @@ public final class JenaSkosImporter implements SkosImporter {
         GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
         for (Concept concept : linkedConcepts.keySet()) {
             try {
+                String reltype = linkedConcepts.get(concept);
                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
-                        .withDataValue("skos", linkedConcepts.get(concept))
+                        .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":")+1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
                 Link link;
@@ -294,14 +296,15 @@ public final class JenaSkosImporter implements SkosImporter {
                             .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
                             .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                 } else {
-                    if (rel.getKey().startsWith("skos:")) {
+                    if (rel.getKey().startsWith("skos:") || rel.getKey().startsWith("sem:") ) {
+                        String prefix = rel.getKey().startsWith("skos:") ? "skos" : "sem";
                         Concept found = findRelatedConcept(annotation.toString());
                         if (found != null) {
-                            linkedConcepts.put(found, rel.getKey().substring(5));
+                            linkedConcepts.put(found, rel.getKey());
                         } else {
                             undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
                                     .withDataValue(Ontology.ANNOTATION_TYPE, "associate")
-                                    .withDataValue("skos", rel.getKey().substring(5))
+                                    .withDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":")+1))
                                     .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                         }
                     }
