@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:isbn:1-931666-22-9" xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+    <eadheader>
+        <eadid countrycode="DE">Beständeübersicht</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Beständeübersicht des Bundesarchivs</titleproper>
+                <author>Bundesarchivs</author>
+            </titlestmt>
+            <publicationstmt>
+                <publisher>Bundesarchiv / Basys2</publisher>
+                <date>17.06.2013 13:06</date>
+            </publicationstmt>
+        </filedesc>
+        <profiledesc>
+            <creation> Created by the EHRI project (http://www.ehri-project.eu) from the Beständeübersicht des Bundesarchivs <date era="ce" calendar="gregorian">2014-11-14 17:16:04</date></creation>
+            <langusage>
+                <language scriptcode="Latn" langcode="ger">German</language>
+                <!-- should we add English, because some additional metadata is in English? -->
+            </langusage>
+        </profiledesc>
+        <revisiondesc>
+<change>
+<date>2015-01-13 14:16:24</date>
+<item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+</change>
+
+            <change>
+                <date>2014-07-13 14:57:59</date>
+                <item>EHRI added a unitid with label "ehri_cleaned_date" to include normalized version of chunks of the unitdate Bestandskatalog.
+                    Dates have been normalized following ISO-8601. Normalized date will be used for data selection purposes and for functions of the
+                    EHRI portal</item>
+            </change>
+        </revisiondesc>
+    </eadheader>
+    <archdesc level="otherlevel" otherlevel="holding_guide">
+        <did>
+            <unittitle>Beständeübersicht des Bundesarchivs</unittitle>
+            <unitid label="ehri_main_identifier">Beständeübersicht</unitid>
+        </did>
+        <scopecontent>
+            <p>TO BE FILLED</p>
+            <!-- who will create a description? -->
+        </scopecontent>
+        <processinfo>
+            <p>EHRI has made a selection of relevant fonds based on data range and subject, excluding non-holocaust relevant material.</p>
+        </processinfo>
+        <dsc type="othertype">
+            <c01 level="otherlevel" otherlevel="holding_guide">
+                <did>
+<unitid label="ehri_main_identifier">0.0</unitid>
+                    <unittitle>Bundesarchiv</unittitle>
+                </did>
+
+                <c02 level="otherlevel" otherlevel="plan_of_record_groups">
+                    <did>
+<unitid label="ehri_main_identifier">0.0.0</unitid>
+                        <unittitle>Norddeutscher Bund und Deutsches Reich (1867/1871-1945)</unittitle>
+                    </did>
+
+                    <c03 level="otherlevel" otherlevel="plan_of_record_groups">
+                        <did>
+<unitid label="ehri_main_identifier">0.0.0.0</unitid>
+                            <unittitle>Inneres, Polizei und SS, Volkstum</unittitle>
+                        </did>
+                        <c04 level="fonds">
+                            <did>
+                                <unitid label="ehri_main_identifier">NS 1</unitid>
+                                <repository label="ehri_repository_vc">r1</repository>
+                            </did>
+                        </c04>
+                    </c03>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>
