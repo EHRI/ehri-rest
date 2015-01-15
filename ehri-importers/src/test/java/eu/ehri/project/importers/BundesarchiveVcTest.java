@@ -66,7 +66,7 @@ public class BundesarchiveVcTest extends AbstractImporterTest{
 
         InputStream iosvc = ClassLoader.getSystemResourceAsStream(VCFILE);
         ImportLog logvc = new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(iosvc, logMessage);
-//        printGraph(graph);
+        printGraph(graph);
         
         VirtualUnit ss= graph.frame(getVertexByIdentifier(graph, "0.0.0.0"), VirtualUnit.class);
         System.out.println("-----------");

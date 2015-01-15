@@ -80,6 +80,9 @@ public final class JenaSkosImporter implements SkosImporter {
             .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
             .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
             .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
+            .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
+            .put("personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .build();
     // Properties that end up as undeterminedRelation nodes.
     public static final Map<String, URI> RELATION_PROPS = ImmutableMap.<String, URI>builder()

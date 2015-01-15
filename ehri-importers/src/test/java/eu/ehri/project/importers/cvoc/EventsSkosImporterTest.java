@@ -23,9 +23,9 @@ import static org.junit.Assert.*;
  */
 public class EventsSkosImporterTest extends AbstractImporterTest {
 
-    protected final String SINGLE_SKOS = "cvoc/ehri-events.rdf";
+    protected final String EVENT_SKOS = "cvoc/ehri-events.rdf";
     protected final String EHRI_SKOS_TERM = "cvoc/joods_raad.xml";
-    final String logMessage = "Importing a single skos: " + SINGLE_SKOS;
+    final String logMessage = "Importing a single skos: " + EVENT_SKOS;
 
   
     @Test
@@ -33,7 +33,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_SKOS);
+        InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
 //        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
@@ -70,7 +70,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
 
            int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_SKOS);
+        InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
 //        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);

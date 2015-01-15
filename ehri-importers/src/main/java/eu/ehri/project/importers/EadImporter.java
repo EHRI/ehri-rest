@@ -1,6 +1,5 @@
 package eu.ehri.project.importers;
 
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
@@ -9,7 +8,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -108,7 +106,7 @@ public class EadImporter extends EaImporter {
             for(String u : unknowns.keySet()){
                 unknownProperties.append(u);
             }
-            logger.info("Unknown Properties found: " + unknownProperties.toString());
+            logger.debug("Unknown Properties found: " + unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
@@ -199,7 +197,7 @@ public class EadImporter extends EaImporter {
                     if(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
                             || ! thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())){
                         descBundle=descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                        logger.info("other description found, creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString());
+                        logger.info("other description found ("+defaultDescIdentifier+"), creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString());
                     }
                 }
 

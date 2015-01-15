@@ -60,10 +60,9 @@ public class YadVashemTest extends AbstractImporterTest{
        diff.printDebug(System.out);
        /**
         * null: 4
-        * relationship: 5
+        * relationship: 6
         * documentaryUnit: 2
         * documentDescription: 3
-        * property: 1
         * systemEvent: 1
         * datePeriod: 1
         */
