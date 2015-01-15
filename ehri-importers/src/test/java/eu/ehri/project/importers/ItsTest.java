@@ -103,7 +103,9 @@ public class ItsTest extends AbstractImporterTest {
             logger.debug("Description language: " + d.getLanguageOfDescription());
             if (d.getLanguageOfDescription().equals("eng")) {
                 assertEquals("Concentration Camp Esterwegen", d.getName());
-                assertEquals("draft by Susanne Laux", d.asVertex().getProperty("notes"));
+                assertTrue(d.asVertex().getProperty("extentAndMedium").toString().endsWith("draft by Susanne Laux"));
+                
+                assertEquals("2 folders\n\ndigitised\n\n7\n\nOriginals, Photocopies\n\ndraft by Susanne Laux", d.asVertex().getProperty("extentAndMedium"));
 
             } else if (d.getLanguageOfDescription().equals("deu")) {
                 assertEquals("Konzentrationslager Esterwegen", d.getName());
