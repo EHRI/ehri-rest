@@ -9,7 +9,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -92,7 +91,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, DeserializationError, IntegrityError {
+            BadRequester, DeserializationError {
         return updateItem(id, bundle);
     }
 
@@ -100,7 +99,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @Override
     public Response update(Bundle bundle)
             throws PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, DeserializationError, IntegrityError {
+            BadRequester, DeserializationError {
         return updateItem(bundle);
     }
 

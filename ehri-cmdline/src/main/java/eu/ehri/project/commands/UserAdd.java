@@ -8,7 +8,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -102,7 +101,7 @@ public class UserAdd extends BaseCommand implements Command {
                 group.addMember(newUser);
             }
             graph.getBaseGraph().commit();
-        } catch (IntegrityError e) {
+        } catch (ValidationError e) {
             graph.getBaseGraph().rollback();
             System.err.printf("A user a id: '%s' already exists%n", nodeId);
             return 9;

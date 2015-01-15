@@ -3,7 +3,6 @@ package eu.ehri.extension.base;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -61,13 +60,12 @@ public interface ParentResource {
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      * @throws ItemNotFound
      * @throws BadRequester
      */
     public Response createChild(String id,
                                 Bundle bundle, List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester;
 }

@@ -21,7 +21,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -279,8 +278,6 @@ public final class JenaSkosImporter implements SkosImporter {
             } catch (ItemNotFound ex) {
                 logger.error(ex.getMessage());
             } catch (PermissionDenied ex) {
-                logger.error(ex.getMessage());
-            } catch (IntegrityError ex) {
                 logger.error(ex.getMessage());
             } catch (ValidationError ex) {
                 java.util.logging.Logger.getLogger(JenaSkosImporter.class.getName()).log(Level.SEVERE, null, ex);

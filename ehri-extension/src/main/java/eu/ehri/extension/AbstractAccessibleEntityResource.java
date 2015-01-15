@@ -5,7 +5,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -120,13 +119,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      *         the url of the newly created instance.
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      * @throws BadRequester
      */
     public <T extends AccessibleEntity> Response createItem(Bundle entityBundle, List<String> accessorIds,
                                                             Handler<T> handler, LoggingCrudViews<T> views)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
@@ -164,18 +162,16 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      *         the url of the newly created instance.
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      * @throws BadRequester
      */
     public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
-            throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, BadRequester {
+            throws PermissionDenied, ValidationError, DeserializationError, BadRequester {
         return createItem(entityBundle, accessorIds, handler, views);
     }
 
     public Response createItem(Bundle entityBundle, List<String> accessorIds)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, BadRequester {
         return createItem(entityBundle, accessorIds, noOpHandler);
     }
@@ -207,13 +203,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the update request
      * @throws ItemNotFound
      * @throws PermissionDenied
-     * @throws IntegrityError
      * @throws ValidationError
      * @throws DeserializationError
      * @throws BadRequester
      */
     public Response updateItem(Bundle entityBundle) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError,
+            ValidationError, DeserializationError,
             BadRequester, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         try {
@@ -237,14 +232,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the update request
      * @throws AccessDenied
      * @throws PermissionDenied
-     * @throws IntegrityError
      * @throws ValidationError
      * @throws DeserializationError
      * @throws ItemNotFound
      * @throws BadRequester
      */
     public Response updateItem(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError,
+            ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         try {
             E entity = views.detail(id, getRequesterUserProfile());

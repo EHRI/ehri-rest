@@ -56,6 +56,13 @@
     name: Portal
     description: Group for users of the EHRI Portal
 
+- id: moderators
+  type: group
+  data:
+    identifier: moderators
+    name: Moderators
+    description: Users who can moderate (promote, demote) annotations and links
+
 --- # Users Mike, Tim, Linda, and Reto
 
 # Mike is a member of the KCL group, but he is ALSO a member of Admin
@@ -99,7 +106,9 @@
     identifier: linda
     name: Linda
   relationships:
-    belongsTo: dans
+    belongsTo:
+      - dans
+      - moderators
 
 # Veerle is a member of CEGES-SOMA, and also a member of Admin
 - id: veerle
@@ -456,7 +465,9 @@
     body: Created by
     isPromotable: !!bool true
   relationships:
-    access: mike
+    access:
+      - mike
+      - moderators
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
     promotedBy: tim
@@ -472,7 +483,9 @@
   relationships:
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
-    access: mike
+    access:
+      - mike
+      - moderators
 
 # This annotation is promoted by one user
 # and demoted by another, so they it's effectively
@@ -486,7 +499,9 @@
   relationships:
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
-    access: mike
+    access:
+      - mike
+      - moderators
     promotedBy: tim
     demotedBy: linda
 
@@ -556,6 +571,16 @@
       - historicalAgent
       - cvocConcept
     hasAccessor: portal
+
+# Allow moderators group to promote/demote annotations
+- id: moderatorsPromotionGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: promote
+    hasTarget:
+      - annotation
+      - link
+    hasAccessor: moderators
 
 --- # Vocabularies
 - id: cvoc1

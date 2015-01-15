@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<project name="Command Line Tools" xmlns="http://maven.apache.org/DECORATION/1.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
+<project name="Command Line Tools" xmlns="http://maven.apache.org/DECORATION/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
     <bannerLeft>
         <name>Command-line Helpers</name>
         <src>https://ehri-project.eu/sites/all/themes/ehri_new/images/logo.png</src>
@@ -16,13 +14,14 @@
     <custom>
         <fluidoSkin>
             <sideBarEnabled>true</sideBarEnabled>
+            <skipGenerationDate>true</skipGenerationDate>
         </fluidoSkin>
     </custom>
 
 
     <body>
         <menu name="Notes">
-            <item href="configuration.html" name="Neo4j Configuration" />
+            <item href="configuration.html" name="Neo4j Configuration"/>
         </menu>
 
         <menu name="Web Service Docs">

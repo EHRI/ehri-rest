@@ -1,7 +1,6 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -46,14 +45,14 @@ public class VirtualEadTest extends AbstractImporterTest{
 int origCount=0;
 
 @Test
-public void setStageTest() throws PermissionDenied, ValidationError, IntegrityError{
+public void setStageTest() throws PermissionDenied, ValidationError {
      setStage();
      assertEquals(REPO1, repository1.getIdentifier());
      assertEquals(UNIT1, unit1.getIdentifier());
 }
 
     @Test
-    public void virtualUnitTest() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied, IntegrityError {
+    public void virtualUnitTest() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied {
         
         setStage();
         
@@ -114,7 +113,7 @@ public void setStageTest() throws PermissionDenied, ValidationError, IntegrityEr
         
     }
 
-    private void setStage() throws PermissionDenied, ValidationError, IntegrityError {
+    private void setStage() throws PermissionDenied, ValidationError {
         Bundle repo1Bundle = new Bundle(EntityClass.REPOSITORY)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO1);
         Bundle repo2Bundle = new Bundle(EntityClass.REPOSITORY)

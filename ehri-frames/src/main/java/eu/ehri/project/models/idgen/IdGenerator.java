@@ -3,6 +3,9 @@ package eu.ehri.project.models.idgen;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Generate an ID given an entity type, a set of scopes, and some data.
  *
@@ -14,11 +17,13 @@ public interface IdGenerator {
      * Handle an id collision by either a validation error depending
      * on how the id was generated, or a RuntimeError.
      *
+     *
+     *
      * @param scopeIds  The entity's parent scope identifiers
      * @param bundle The entity's bundle data
      * @return A set of errors
      */
-    public ListMultimap<String, String> handleIdCollision(Iterable<String> scopeIds, Bundle bundle);
+    public ListMultimap<String, String> handleIdCollision(List<String> scopeIds, Bundle bundle);
 
     /**
      * Generate an ID given an array of scope IDs. This can be used

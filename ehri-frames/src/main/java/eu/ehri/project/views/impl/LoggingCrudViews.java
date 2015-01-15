@@ -5,7 +5,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -69,11 +68,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      */
     public E create(Bundle bundle, Accessor user) throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+            ValidationError, DeserializationError {
         return create(bundle, user, Optional.<String>absent());
     }
 
@@ -87,12 +85,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      */
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         E out = views.create(bundle, user);
         actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
                 EventTypes.creation, logMessage);
@@ -108,12 +104,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         return createOrUpdate(bundle, user, Optional.<String>absent());
     }
 
@@ -127,12 +121,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         Mutation<E> out = views.createOrUpdate(bundle, user);
         if (out.updated()) {
             actionManager
@@ -152,11 +144,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      */
     public Mutation<E> update(Bundle bundle, Accessor user) throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+            ValidationError, DeserializationError {
         return update(bundle, user, Optional.<String>absent());
     }
 
@@ -170,12 +161,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws DeserializationError
      */
     public Mutation<E> update(Bundle bundle, Accessor user, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         try {
             Mutation<E> out = views.update(bundle, user);
             if (!out.unchanged()) {

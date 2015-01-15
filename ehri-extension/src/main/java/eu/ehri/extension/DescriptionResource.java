@@ -5,7 +5,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -37,8 +36,10 @@ import javax.ws.rs.core.Response;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("description")
+@Path(DescriptionResource.ENDPOINT)
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {
+
+    public static final String ENDPOINT = "description";
 
     private final DescriptionViews<DescribedEntity> descriptionViews;
 
@@ -52,7 +53,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response createDescription(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
@@ -76,7 +77,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateDescription(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
         try {
@@ -100,7 +101,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Path("/{id:.+}/{did:.+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         return updateDescription(id, bundle.withId(did));
     }
@@ -140,7 +141,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP)
     public Response createAccessPoint(@PathParam("id") String id,
                 @PathParam("did") String did, Bundle bundle)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
@@ -165,7 +166,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, @PathParam("apid") String apid)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
