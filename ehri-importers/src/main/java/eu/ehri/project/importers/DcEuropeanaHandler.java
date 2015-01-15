@@ -50,10 +50,10 @@ private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
                     if (currentMap.containsKey("unitDates")) {
                         if (currentMap.get("unitDates") instanceof List) {
                             for (Object d : (List) currentMap.get("unitDates")) {
-                                putPropertyInGraph(currentMap, "unitDates", replaceOpname(d.toString()));
+                                putPropertyInGraph(currentMap, "unitDates", d.toString());
                             }
                         } else {
-                            putPropertyInGraph(currentMap, "unitDates", replaceOpname(currentMap.get("unitDates").toString()));
+                            putPropertyInGraph(currentMap, "unitDates", currentMap.get("unitDates").toString());
                         }
 
                     }
@@ -90,17 +90,18 @@ private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
         return  need || path.endsWith(EadImporter.ACCESS_POINT);
     }
 
-    private String replaceOpname(String toString) {
-         String date =  toString.replace(" (Opname)", "");
-                     //dceuropeana
-        Pattern dcdate = Pattern.compile("^(\\d{1,2})-(\\d{1,2})-(\\d{4})$");
-        Matcher m = dcdate.matcher(date);
-        if(m.matches()){
-            date = m.group(3)+"-"+m.group(2)+"-"+m.group(1);
-        }
-        logger.debug(date);
-        return date;
-    }
+//    private String replaceOpname(String toString) {
+//        //done especially for the BBWO2 set
+//         String date =  toString.replace(" (Opname)", "").replace(" (Vrijgegeven)", "").replace(" (circa)", "");
+//                     //dceuropeana
+//        Pattern dcdate = Pattern.compile("^(\\d{1,2})-(\\d{1,2})-(\\d{4})$");
+//        Matcher m = dcdate.matcher(date);
+//        if(m.matches()){
+//            date = m.group(3)+"-"+m.group(2)+"-"+m.group(1);
+//        }
+//        logger.debug(date);
+//        return date;
+//    }
 
     private boolean isUnitDelimiter(String qName) {
         return qName.equals("europeana:record");
