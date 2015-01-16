@@ -29,7 +29,7 @@ Stanisław Sokół, Anna Włoch, Jacek Woyno, Ewa Wójcicka, Monika Żak, Domini
    </eadheader>
    <archdesc level="otherlevel">
       <did>
-          <unitid>Biuro Udostępniania</unitid>
+          <unitid label="ehri_main_identifier">Biuro Udostępniania</unitid>
          <unittitle>Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie</unittitle>
          <repository>
             <corpname>"Instytut Pamięci Narodowej – Komisja Ścigania Zbrodni przeciwko
@@ -44,7 +44,7 @@ Stanisław Sokół, Anna Włoch, Jacek Woyno, Ewa Wójcicka, Monika Żak, Domini
       <dsc>
          <c01 level="collection">
             <did>
-               <unitid label="book_id">1</unitid>
+               <unitid  label="ehri_main_identifier">1</unitid>
                <unittitle>Areszt Śledczy Sądowy w Poznaniu [Untersuchungshaftanstalt Posen]
 </unittitle>
                <origination>
@@ -57,7 +57,7 @@ Więzienie w Poznaniu [Gefängnis Posen] (1939–1940)</corpname>
                <langmaterial>
                   <language>J. niemiecki </language>
                </langmaterial>
-               <unitdate>1940-1943</unitdate>
+               <unitdate label="ehri_cleaned_date">1940/1943</unitdate>
                <physdesc>
                   <dimensions>40 j.a.; 0,15 mb</dimensions>
                </physdesc>
@@ -79,7 +79,7 @@ Uniwersytetu w Poznaniu oraz Instytutowi Anatomii Medycznej w Gdańsku)
          </c01>
          <c01 level="collection">
             <did>
-               <unitid label="book_id">2</unitid>
+               <unitid  label="ehri_main_identifier">2</unitid>
                <unittitle>Burmistrz jako Miejscowa Władza Policyjna. Oddział Policji Ochronnej w Krapkowicach
 [Der Bürgermeister als Ortspolizeibehörde-Schutzpolizei. Dienstabteilung Krappitz] 
 </unittitle>
@@ -91,7 +91,7 @@ Burmistrz jako Miejscowa Władza Policyjna. Oddział Policji Ochronnej w Krapkow
                <langmaterial>
                   <language>J. niemiecki</language>
                </langmaterial>
-               <unitdate>1936–1944</unitdate>
+               <unitdate label="ehri_cleaned_date">1936/1944</unitdate>
                <physdesc>
                   <dimensions>72 j.a.; 1 mb</dimensions>
                </physdesc>

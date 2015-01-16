@@ -1,61 +1,53 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE ead PUBLIC "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN" "ead.dtd">
 <ead audience="external">
-    <eadheader findaidstatus="unverified-full-draft">
-        <eadid>FRMEMSH_000002</eadid>
-        <filedesc>
-            <titlestmt>
-                <titleproper>Ambassade d'Allemagne</titleproper>
-                <subtitle>German Embassy</subtitle>
-                <author>Cecile Lauvergeon</author>
-            </titlestmt>
-            <publicationstmt>
-                <publisher>Mémorial de la Shoah</publisher>
-                <date normal="2014">2014</date>
-                <address><addressline>17 rue Geoffroy l'Asnier 75004 Paris, FRANCE</addressline></address>
-            </publicationstmt>
-        </filedesc>
-        <profiledesc>
-            <creation>Instrument de recherche produit au moyen du logiciel Mnesys classement de la société Naoned Systèmes</creation>
-            <langusage>Instrument de recherche rédigé en <language langcode="eng">english</language></langusage>
-        </profiledesc>
-    </eadheader>
-    <archdesc level="fonds" id="a011412176198CJLwjd">
-        <runner>Ambassade d'Allemagne</runner>
-        <did>
-            <unittitle>Ambassade d'Allemagne (German Embassy)</unittitle>
-            <repository>Mémorial de la Shoah</repository>
-            <unitid identifier="II;V;VI;VIA">II, V, VI, VIa</unitid>
-            <physdesc>6 boxes</physdesc>
-            <physloc>Mémorial de la Shoah</physloc>
-            <origination>German Embassy in Paris : 1939-1943.</origination>
-            <langmaterial>German, French</langmaterial>
-            <unitdate normal="1939-01-01/1943-12-31" type="inclusive">1939-1943</unitdate>
-        </did>
-        <note type="mnesysinternal">
-            <p/>
-        </note>
-        <scopecontent>
-            <p>This collection contains files and correspondence of Carltheo Zeitschel, counselor of legation (Legationsrat) at the German Embassy, in
-                charge of Jewish affairs in connection with the Sipo-SD France in Paris. It also contains is correspondence with Theodor Dannecker,
-                head of the Jewish Affairs department within the Sipo-SD in Paris. It also includes verbal notes, certificates, telegrams, circulars,
-                lists, notes prepared for Otto Abetz, extracts from the Journal Officiel de la République française, reports, resumes, brochures,
-                minutes, as well as individual files. Most of the correspondence dates from the years 1941 and 1942 and deals with the persecution of
-                Jews in France. It contains a large number of copies and translations. </p>
-        </scopecontent>
-        <accessrestrict type="formate">
-            <p>Communicable </p>
-        </accessrestrict>
-        <otherfindaid>
-            <head>Item level descriptions in the online catalog</head>
-        </otherfindaid>
-        <accessrestrict>
-            <head>Microfilm available in the reading room</head>
-        </accessrestrict>
-        <controlaccess>
-            <persname>Zeitschel Carltheo</persname>
-        </controlaccess>
-
-        <dsc type="in-depth"> </dsc>
-    </archdesc>
+	<eadheader findaidstatus="unverified-full-draft">
+		<eadid>FRMEMSH_000002</eadid>
+		<filedesc>
+			<titlestmt>
+				<titleproper>Ambassade d'Allemagne</titleproper>
+				<subtitle>German Embassy</subtitle>
+				<author>Cecile Lauvergeon</author>
+			</titlestmt>
+			<publicationstmt>
+				<publisher>Mémorial de la Shoah</publisher>
+				
+				
+				<date normal="2014">2014</date><address><addressline>17 rue Geoffroy l'Asnier 75004 Paris, FRANCE</addressline></address>
+			</publicationstmt>
+		</filedesc>
+		<profiledesc>
+			<creation>Instrument de recherche produit au moyen du logiciel Mnesys classement de la société Naoned Systèmes</creation>
+			<langusage>Instrument de recherche rédigé en <language langcode="eng">english</language></langusage>
+		</profiledesc>
+	</eadheader>
+	<archdesc level="fonds" id="a011412176198CJLwjd">
+		<runner>Ambassade d'Allemagne</runner>
+		<did>
+			<unittitle>Ambassade d'Allemagne (German Embassy)</unittitle>
+			<repository>Mémorial de la Shoah</repository>
+                        <unitid identifier="II;V;VI;VIA">II, V, VI, VIa</unitid>
+                        <physdesc>6 boxes</physdesc>
+                        <physloc>Mémorial de la Shoah</physloc>
+                        <origination>German Embassy in Paris : 1939-1943.</origination>
+                        <langmaterial>German, French</langmaterial>
+                        <unitdate normal="1939-01-01/1943-12-31" type="inclusive">1939-1943</unitdate>
+		</did>
+                <note type="mnesysinternal">
+                    <p/>
+                </note>
+<scopecontent>This collection contains files and correspondence of Carltheo Zeitschel, counselor of legation (Legationsrat) at the German Embassy, in charge of Jewish affairs in connection with the Sipo-SD France in Paris. It also contains his correspondence with Theodor Dannecker, head of the Jewish Affairs department within the Sipo-SD in Paris. It also includes verbal notes, certificates, telegrams, circulars, lists, notes prepared for Otto Abetz, extracts from the Journal Officiel de la République française, reports, resumes, brochures, minutes, as well as individual files. Most of the correspondence dates from the years 1941 and 1942 and deals with the persecution of Jews in France. It contains a large number of copies and translations.  
+</scopecontent>
+<accessrestrict type="formate"><p>Communicable </p></accessrestrict>
+<otherfindaid>Item level descriptions in the online catalog 
+</otherfindaid>
+<accessrestrict>Microfilm available in the reading room 
+</accessrestrict>
+<userestrict>copyright : Mémorial de la Shoah. All rights reserved. No unauthorized use without permission. 
+</userestrict>
+		
+		<dsc type="in-depth">
+			
+		</dsc>
+	</archdesc>
 </ead>

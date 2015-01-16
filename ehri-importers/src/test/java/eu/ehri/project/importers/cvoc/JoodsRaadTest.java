@@ -56,13 +56,13 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
 //        printGraph(graph);
         /*  How many new nodes will have been created? We should have
-         * 3 more Concepts
-       	 * 7 more ConceptDescription
-	 * 4 more import Event links (8 for every Unit, 1 for the User)
+         * 5 more Concepts
+       	 * 9 more ConceptDescription
+	 * 6 more import Event links 
          * 1 more import Event
          */
-        assertEquals(count + 15, getNodeCount(graph));
-        assertEquals(voccount + 3, toList(vocabulary.getConcepts()).size());
+        assertEquals(count + 21, getNodeCount(graph));
+        assertEquals(voccount + 5, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "698";
@@ -136,6 +136,13 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertTrue(found);
 
         Concept termJR = manager.getFrame("cvoc2-joodse-raad", Concept.class);
+        
+        for(Link desc : termJR.getLinks()){
+            assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
+            assertEquals("associate", desc.asVertex().getProperty("type"));
+            assertTrue(desc.asVertex().getPropertyKeys().contains("skos"));
+            assertEquals("exactMatch", desc.asVertex().getProperty("skos"));
+        }
 
         Concept concept698 = manager.getFrame("cvoc1-698", Concept.class);
         found=false;
