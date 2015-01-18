@@ -1,12 +1,14 @@
 package eu.ehri.project.acl;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
-import org.neo4j.helpers.collection.Iterables;
+
+import java.util.Collection;
 
 /**
  * Singleton class representing the system scope for
@@ -66,7 +68,7 @@ public enum SystemScope implements PermissionScope {
     }
 
     @Override
-    public Iterable<String> idPath() {
-        return Iterables.empty();
+    public Collection<String> idPath() {
+        return Lists.newArrayList();
     }
 }

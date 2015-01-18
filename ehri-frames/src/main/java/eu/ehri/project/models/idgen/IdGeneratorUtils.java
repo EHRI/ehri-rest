@@ -1,7 +1,7 @@
 package eu.ehri.project.models.idgen;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.acl.SystemScope;
@@ -13,15 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Delegation functions for ID generation.
- * 
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class IdGeneratorUtils  {
+public class IdGeneratorUtils {
     /**
      * Separate or ID components.
      */
@@ -29,12 +30,12 @@ public class IdGeneratorUtils  {
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
-    public static ListMultimap<String,String> handleIdCollision(final Iterable<String> scopeIds,
+    public static ListMultimap<String, String> handleIdCollision(final Collection<String> scopeIds,
             String dataKey, String ident) {
 
         logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, Lists.newArrayList(scopeIds));
-        ListMultimap<String,String> errors = LinkedListMultimap.create();
-        errors.put(dataKey,  MessageFormat.format(
+        ListMultimap<String, String> errors = ArrayListMultimap.create();
+        errors.put(dataKey, MessageFormat.format(
                 Messages.getString("BundleDAO.uniquenessError"), ident));
         return errors;
     }
@@ -43,13 +44,17 @@ public class IdGeneratorUtils  {
     /**
      * Uses the items identifier and its entity type to generate a (supposedly)
      * unique ID.
+     *
+     * @param scope  the permission scope
+     * @param bundle the item's data bundle
+     * @param ident  the item's identifier
      */
     public static String generateId(PermissionScope scope, Bundle bundle, String ident) {
         LinkedList<String> scopeIds = Lists.newLinkedList();
         if (scope != null && !scope.equals(SystemScope.getInstance())) {
             for (PermissionScope s : scope.getPermissionScopes())
                 scopeIds.addFirst(s.getIdentifier());
-            scopeIds.add(scope.getIdentifier());            
+            scopeIds.add(scope.getIdentifier());
         }
         return generateId(scopeIds, bundle, ident);
     }
@@ -59,10 +64,10 @@ public class IdGeneratorUtils  {
      * id within a given scope.
      *
      * @param scopeIds An array of scope ids
-     * @param bundle The input bundle
+     * @param bundle   The input bundle
      * @return The complete id string
      */
-    public static String generateId(final Iterable<String> scopeIds, final Bundle bundle, String ident) {
+    public static String generateId(final Collection<String> scopeIds, final Bundle bundle, String ident) {
 
         // Validation should have ensured that ident exists...
         if (ident == null || ident.trim().isEmpty()) {
@@ -76,11 +81,12 @@ public class IdGeneratorUtils  {
 
     /**
      * Join an identifier path to form a full ID.
+     *
      * @param path A list of identifier strings.
      * @return The resultant path ID.
      */
-    public static String joinPath(Iterable<String> path) {
-        String scopedId =  Joiner.on(SEPARATOR).join(path);
+    public static String joinPath(Collection<String> path) {
+        String scopedId = Joiner.on(SEPARATOR).join(path);
         return Slugify.slugify(scopedId);
     }
 }

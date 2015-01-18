@@ -605,7 +605,7 @@ public final class Bundle {
      * @param scopes A set of parent scopes.
      * @return A new bundle
      */
-    public Bundle generateIds(final Iterable<String> scopes) {
+    public Bundle generateIds(final Collection<String> scopes) {
         boolean isTemp = id == null;
         IdGenerator idGen = getType().getIdgen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
