@@ -49,12 +49,12 @@ public class MemShoahTest extends AbstractImporterTest{
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
+       diff.printDebug(System.out);
         
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         /** 
-         * relationship: 2
+         * relationship: 1
          * events: 2
          * documentaryUnit: 1
          * documentDescription: 1
@@ -63,7 +63,7 @@ public class MemShoahTest extends AbstractImporterTest{
          * datePeriod: 1
          */ 
 
-        int newCount = origCount + 9;
+        int newCount = origCount + 8;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(

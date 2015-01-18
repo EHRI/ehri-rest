@@ -73,16 +73,16 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         diff.printDebug(System.out);
 
         /**
-         * How many new nodes will have been created? We should have 
-         * 1 more DocumentaryUnits (record) 
-         * 1 more Link
-         * 1 more DocumentDescription 
-         * 1 more DatePeriod 
-         * 4 relations (3 more subject + 1 more Place )
-         * 2 more import Event links (1 for each Unit, 1 for the User) 
-         * 1 more import Event 
+         * null: 2
+         * relationship: 4
+         * documentaryUnit: 1
+         * link: 1
+         * property: 1
+         * documentDescription: 1
+         * systemEvent: 1
+         * 
          */
-        int newCount = origCount + 11;
+        int newCount = origCount + 10;
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(getVertexByIdentifier(graph, ARCHDESC), DocumentaryUnit.class);
