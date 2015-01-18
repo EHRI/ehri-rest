@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Helpers for working with the bundle format.
- * 
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class BundleUtils {
@@ -38,22 +38,23 @@ public class BundleUtils {
         public BundleIndexError(String message) {
             super(message);
         }
-    }        
+    }
 
     /**
      * XPath-like method for getting the value of a nested relation's attribute,
      * i.e:
-     * 
+     * <p/>
      * String lang = BundleUtils.get(bundle, "describes[0]/languageCode"));
-     * 
-     * @param bundle
-     * @param path
-     * @return
+     *
+     * @param bundle the bundle
+     * @param path   a path string
+     * @param <T>    the type to fetch
+     * @return a property of type T
      */
-    public static Object get(Bundle bundle, String path) {
+    public static <T> T get(Bundle bundle, String path) {
         return fetchAttribute(bundle, BundlePath.fromString(path),
-                new GetOperation<Object>() {
-                    public Object run(final Bundle subjectNode,
+                new GetOperation<T>() {
+                    public T run(final Bundle subjectNode,
                             BundlePath subjectPath) {
                         return subjectNode.getDataValue(subjectPath
                                 .getTerminus());
@@ -62,14 +63,14 @@ public class BundleUtils {
     }
 
     /**
-     * XPath-like method for getting a node at a given path.
+     * XPath-like method for getting a bundle at a given path.
      * i.e:
-     * 
+     * <p/>
      * String lang = BundleUtils.get(bundle, "describes[0]/languageCode"));
-     * 
-     * @param bundle
-     * @param path
-     * @return
+     *
+     * @param bundle the bundle
+     * @param path   a path string
+     * @return a bundle found at the given path
      */
     public static Bundle getBundle(Bundle bundle, String path) {
         return fetchNode(bundle, BundlePath.fromString(path));
@@ -78,13 +79,13 @@ public class BundleUtils {
     /**
      * XPath-like method for deleting the value of a nested relation's
      * attribute, i.e:
-     * 
+     * <p/>
      * Bundle newBundle = BundleUtils.delete(bundle,
      * "describes[0]/languageCode"));
-     * 
-     * @param bundle
-     * @param path
-     * @return
+     *
+     * @param bundle the bundle
+     * @param path   a path string
+     * @return the bundle with the item at the given path deleted
      */
     public static Bundle delete(Bundle bundle, String path) {
         return mutateAttribute(bundle, BundlePath.fromString(path),
@@ -98,34 +99,36 @@ public class BundleUtils {
                 });
     }
 
-    
+
     /**
      * XPath-like method for deleting a node from a nested tree, i.e:
-     * 
+     * <p/>
      * Bundle newBundle = BundleUtils.delete(bundle,
      * "describes[0]/languageCode"));
-     * 
-     * @param bundle
-     * @param path
-     * @return
+     *
+     * @param bundle the bundle
+     * @param path   a path string
+     * @return the bundle with the bundle at the given path deleted
      */
     public static Bundle deleteBundle(Bundle bundle, String path) {
         return deleteNode(bundle, BundlePath.fromString(path));
     }
-    
+
     /**
      * Xpath-like method for creating a new bundle by updating a nested relation
      * of an existing bundle, i.e:
-     * 
+     * <p/>
      * Bundle newBundle = BundleUtils.set(oldBundle, "name", "Foobar"); Bundle
      * newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate",
      * "1923-10-10");
-     * 
-     * 
-     * @param bundle
-     * @return
+     *
+     * @param bundle the bundle
+     * @param path   a path string
+     * @param value  the value being set
+     * @param <T>    the type of property being set
+     * @return the bundle with the property at the given path set
      */
-    public static Bundle set(Bundle bundle, String path, final Object value) {
+    public static <T> Bundle set(Bundle bundle, String path, final T value) {
         return mutateAttribute(bundle, BundlePath.fromString(path),
                 new SetOperation() {
                     public Bundle run(final Bundle subject, final BundlePath p) {
@@ -137,14 +140,15 @@ public class BundleUtils {
     /**
      * Xpath-like method for creating a new bundle by updating a nested relation
      * of an existing bundle, i.e:
-     * 
+     * <p/>
      * Bundle newBundle = BundleUtils.set(oldBundle, "name", "Foobar"); Bundle
      * newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate",
      * "1923-10-10");
-     * 
-     * 
-     * @param bundle
-     * @return
+     *
+     * @param bundle    the bundle
+     * @param path      a path string
+     * @param newBundle the new bundle to set at the path
+     * @return a bundle with the given bundle set at the given path
      */
     public static Bundle setBundle(Bundle bundle, String path, Bundle newBundle) {
         return setNode(bundle, BundlePath.fromString(path), newBundle);
@@ -152,10 +156,10 @@ public class BundleUtils {
 
     /**
      * Xpath-like method to fetch a set of nested relations.
-     * 
-     * @param bundle
-     * @param path
-     * @return
+     *
+     * @param bundle the bundle
+     * @param path   a path string
+     * @return a list of bundles at the given relationship path
      */
     public static List<Bundle> getRelations(Bundle bundle, String path) {
         return fetchAttribute(bundle, BundlePath.fromString(path),
@@ -170,14 +174,6 @@ public class BundleUtils {
 
     // Private implementation helpers.
 
-    /**
-     * Perform 'fetch' queries on the tree, returning type T.
-     * 
-     * @param bundle
-     * @param path
-     * @param op
-     * @return
-     */
     private static <T> T fetchAttribute(Bundle bundle, BundlePath path,
             GetOperation<T> op) {
         if (path.isEmpty()) {
@@ -199,14 +195,6 @@ public class BundleUtils {
         }
     }
 
-    /**
-     * Fetch a bundle node at the given path, which must end with a valid
-     * relationship name and index.
-     * 
-     * @param bundle
-     * @param path
-     * @return
-     */
     private static Bundle fetchNode(Bundle bundle, BundlePath path) {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
@@ -231,14 +219,6 @@ public class BundleUtils {
         }
     }
 
-    /**
-     * Perform mutating operations on the tree, returning an immutable copy.
-     * 
-     * @param bundle
-     * @param path
-     * @param op
-     * @return
-     */
     private static Bundle mutateAttribute(Bundle bundle, BundlePath path,
             SetOperation op) {
         // Case one: the main path is empty, so we *only* run
@@ -269,24 +249,16 @@ public class BundleUtils {
         }
     }
 
-    /**
-     * Set a nested node in the tree, returning an immutable copy.
-     * 
-     * @param bundle
-     * @param path
-     * @param newNode
-     * @return
-     */
     private static Bundle setNode(Bundle bundle, BundlePath path, Bundle newNode) {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
         if (path.isEmpty())
             throw new IllegalArgumentException("Path must refer to a nested node.");
-            
+
         PathSection section = path.current();
         BundlePath next = path.next();
-        
+
         if (!bundle.hasRelations(section.getPath()))
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
@@ -315,24 +287,17 @@ public class BundleUtils {
                     next.current().getIndex()));
         }
     }
-    
-    /**
-     * Delete a nested node from the tree, returning an immutable copy.
-     * 
-     * @param bundle
-     * @param path
-     * @return
-     */
+
     private static Bundle deleteNode(Bundle bundle, BundlePath path) {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
         if (path.isEmpty())
             throw new IllegalArgumentException("Path must refer to a nested node.");
-            
+
         PathSection section = path.current();
         BundlePath next = path.next();
-        
+
         if (!bundle.hasRelations(section.getPath()))
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
@@ -356,5 +321,5 @@ public class BundleUtils {
                     "Relation index '%s[%s]' not found", section.getPath(),
                     section.getIndex()));
         }
-    }    
+    }
 }
