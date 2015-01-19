@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -57,13 +58,20 @@ public class YadVashemTest extends AbstractImporterTest{
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
        diff.printDebug(System.out);
-              //for now, it wrongfully deleted the previous description!
+       /**
+        * null: 4
+        * relationship: 6
+        * documentaryUnit: 2
+        * documentDescription: 3
+        * systemEvent: 1
+        * datePeriod: 1
+        */
 
-        assertEquals(count + 19, getNodeCount(graph));
+        assertEquals(count + 17, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
     }
 
-    @Test
+    @Test 
     public void testImportItemsT() throws Exception {
 
          Repository agent = manager.getFrame(TEST_REPO, Repository.class);
@@ -71,6 +79,10 @@ public class YadVashemTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         System.out.println(count);
+        DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
+        
+        assertEquals("m19", m19.getIdentifier());
+        assertEquals(1, toList(m19.getDocumentDescriptions()).size());
          // Before...
        List<VertexProxy> graphState1 = getGraphState(graph);
 
@@ -86,15 +98,15 @@ public class YadVashemTest extends AbstractImporterTest{
        /*
         * null: 4
         * relationship: 5 (2 creator, 1 place, 1 subject, 1 geog)
-        * documentaryUnit: 3
+        * documentaryUnit: 2
         * documentDescription: 3
-        * property: 3
+        * property: 1
         * systemEvent: 1
         * datePeriod: 1
         */
-        assertEquals(count + 20, getNodeCount(graph));
-
-        
+        assertEquals(count + 17, getNodeCount(graph));
+        //ENG also imported:
+assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
@@ -110,6 +122,12 @@ public class YadVashemTest extends AbstractImporterTest{
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
         log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);
+        //HEB also imported:
+        assertEquals(3, toList(m19.getDocumentDescriptions()).size());
+        logger.debug("size: "+ toList(m19.getDocumentDescriptions()).size());
+        for(DocumentDescription m19desc : m19.getDocumentDescriptions()){
+            logger.debug(m19desc.getId() + ":" + m19desc.getLanguageOfDescription() + ":" + m19desc.asVertex().getProperty(Ontology.SOURCEFILE_KEY));
+        }
         
         i = c1.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
@@ -132,9 +150,20 @@ public class YadVashemTest extends AbstractImporterTest{
         int count_heb = getNodeCount(graph);
         
         System.out.println(count + " " + count + " " + count_heb);
+        printGraph(graph);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
+                 // Before...
+       List<VertexProxy> graphState1_heb = getGraphState(graph);
+        logger.debug("reimport HEB");
         log = importManager.importFile(ios, logMessage);
+                // After...
+       List<VertexProxy> graphState2_heb = getGraphState(graph);
+       GraphDiff diff_heb = diffGraph(graphState1_heb, graphState2_heb);
+       diff_heb.printDebug(System.out);
+        logger.debug("reimport HEB");
+        //HEB re imported:
+        assertEquals(3, toList(m19.getDocumentDescriptions()).size());
         assertEquals(count_heb, getNodeCount(graph));
         
     }

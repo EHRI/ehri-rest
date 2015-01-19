@@ -1,9 +1,9 @@
 package eu.ehri.project.utils.fixtures.impl;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
@@ -176,7 +176,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     private void loadFixtureFileStream(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
-            Map<Vertex, ListMultimap<String, String>> links = Maps.newHashMap();
+            Map<Vertex, Multimap<String, String>> links = Maps.newHashMap();
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Object node : (List<?>) data) {
                     if (node instanceof Map) {
@@ -189,10 +189,10 @@ public class YamlFixtureLoader implements FixtureLoader {
             // Finally, go through and wire up all the non-dependent
             // relationships
             logger.trace("Linking data...");
-            for (Entry<Vertex, ListMultimap<String, String>> entry : links.entrySet()) {
+            for (Entry<Vertex, Multimap<String, String>> entry : links.entrySet()) {
                 logger.trace("Setting links for: {}", entry.getKey());
                 Vertex src = entry.getKey();
-                ListMultimap<String, String> rels = entry.getValue();
+                Multimap<String, String> rels = entry.getValue();
                 for (String relname : rels.keySet()) {
                     for (String target : rels.get(relname)) {
                         Vertex dst = manager.getVertex(target);
@@ -219,7 +219,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    private void importNode(Map<Vertex, ListMultimap<String, String>> links,
+    private void importNode(Map<Vertex, Multimap<String, String>> links,
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
         EntityClass isa = EntityClass.withName((String) node
@@ -244,7 +244,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         Mutation<Frame> frame = dao.createOrUpdate(entityBundle,
                 Frame.class);
 
-        ListMultimap<String, String> linkRels = getLinkedRelations(nodeRels);
+        Multimap<String, String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
             links.put(frame.getNode().asVertex(), linkRels);
         }
@@ -252,7 +252,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private Bundle createBundle(final String id, final EntityClass type,
             final Map<String, Object> nodeData,
-            final ListMultimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
+            final Multimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")
         Map<String, Object> data = new HashMap<String, Object>() {
             {
@@ -272,8 +272,8 @@ public class YamlFixtureLoader implements FixtureLoader {
         return b;
     }
 
-    private ListMultimap<String, String> getLinkedRelations(Map<String, Object> data) {
-        ListMultimap<String, String> rels = LinkedListMultimap.create();
+    private Multimap<String, String> getLinkedRelations(Map<String, Object> data) {
+        Multimap<String, String> rels = ArrayListMultimap.create();
         if (data != null) {
             for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
@@ -292,8 +292,8 @@ public class YamlFixtureLoader implements FixtureLoader {
         return rels;
     }
 
-    private ListMultimap<String, Map<?, ?>> getDependentRelations(Map<String, Object> data) {
-        ListMultimap<String, Map<?, ?>> rels = LinkedListMultimap.create();
+    private Multimap<String, Map<?, ?>> getDependentRelations(Map<String, Object> data) {
+        Multimap<String, Map<?, ?>> rels = ArrayListMultimap.create();
         if (data != null) {
             for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();

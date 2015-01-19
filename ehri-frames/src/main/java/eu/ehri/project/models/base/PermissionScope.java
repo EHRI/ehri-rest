@@ -11,6 +11,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public interface PermissionScope extends IdentifiableEntity {
     public Iterable<Frame> getAllContainedItems();
 
     @JavaHandler
-    public Iterable<String> idPath();
+    public Collection<String> idPath();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, PermissionScope {
         public Iterable<Frame> getAllContainedItems() {
@@ -48,7 +49,7 @@ public interface PermissionScope extends IdentifiableEntity {
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc));
         }
 
-        public Iterable<String> idPath() {
+        public Collection<String> idPath() {
             // Sigh - duplication...
             List<String> pIds = Lists.reverse(gremlin().as("n")
                     .out(Ontology.HAS_PERMISSION_SCOPE)

@@ -1,7 +1,7 @@
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -57,31 +57,12 @@ public final class Serializer {
     private final LruCache<String, Bundle> cache;
 
 
-    public Serializer withCache() {
-        return new Builder(graph)
-                .withIncludedProperties(includeProps)
-                .withLiteMode(liteMode)
-                .dependentOnly(dependentOnly)
-                .withDepth(maxTraversals)
-                .withCache().build();
-    }
-
     /**
      * Basic constructor.
      */
     public Serializer(FramedGraph<?> graph) {
         this(new Builder(graph));
     }
-
-    /**
-     * Fetch the included properties.
-     *
-     * @return A list of property names that will always be serialized.
-     */
-    public List<String> getIncludeProperties() {
-        return includeProps;
-    }
-
 
     /**
      * Builder for serializers with non-default options.
@@ -173,6 +154,28 @@ public final class Serializer {
     public Serializer withIncludedProperties(List<String> includeProps) {
         return new Serializer(graph, dependentOnly, maxTraversals, liteMode,
                 includeProps, cache);
+    }
+
+    /**
+     * Get the list of included properties for this serializer.
+     *
+     * @return a list of property-name strings
+     */
+    public List<String> getIncludedProperties() {
+        return includeProps;
+    }
+
+    /**
+     * Return a serializer that caches recently-serialized items.
+     * @return a new serializer
+     */
+    public Serializer withCache() {
+        return new Builder(graph)
+                .withIncludedProperties(includeProps)
+                .withLiteMode(liteMode)
+                .dependentOnly(dependentOnly)
+                .withDepth(maxTraversals)
+                .withCache().build();
     }
 
     /**
@@ -362,7 +365,7 @@ public final class Serializer {
     // annotations will make this difficult.
     private ListMultimap<String, Bundle> getRelationData(
             Vertex item, int depth, boolean lite, Class<?> cls) {
-        ListMultimap<String, Bundle> relations = LinkedListMultimap.create();
+        ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
         if (depth < maxTraversals) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             logger.trace(" - Fetch methods: {}", fetchMethods);

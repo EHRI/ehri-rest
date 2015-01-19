@@ -21,7 +21,7 @@
    </eadheader>
    <archdesc level="otherlevel">
       <did>
-          <unitid>Pamięci Narodowej</unitid>
+          <unitid label="ehri_main_identifier">Pamięci Narodowej</unitid>
          <unittitle>Collections from Oddział Instytutu Pamięci Narodowej we Wrocławiu</unittitle>
          <repository>
             <corpname>"Instytut Pamięci Narodowej – Komisja Ścigania Zbrodni przeciwko Narodowi Polskiemu</corpname>
@@ -34,7 +34,7 @@
       <dsc>
          <c01 level="collection">
             <did>
-               <unitid label="book_id">2746</unitid>
+               <unitid  label="ehri_main_identifier">2746</unitid>
                <unittitle>Cukrownia w Pszennie – August Gross i Synowie [August Gross &amp; Söhne Zuckerfabrik Weizenrodau] </unittitle>
                <origination>
                   <corpname> Cukrownia w Pszennie – August Gross i Synowie </corpname>
@@ -42,7 +42,7 @@
                <langmaterial>
                   <language>J. niemiecki</language>
                </langmaterial>
-               <unitdate>1941-1942</unitdate>
+               <unitdate label="ehri_cleaned_date">1941/1942</unitdate>
                <physdesc>
                   <dimensions>1 j.a.; 0,04 mb</dimensions>
                </physdesc>
@@ -59,7 +59,7 @@
          </c01>
          <c01 level="collection">
             <did>
-               <unitid label="book_id">2747</unitid>
+               <unitid  label="ehri_main_identifier">2747</unitid>
                <unittitle>Dokumenty Petera Krupskiego – członka 351 Hufca Hitlerjugend w Kamiennej Górze </unittitle>
                <origination>
                   <corpname> – </corpname>
@@ -67,7 +67,7 @@
                <langmaterial>
                   <language>J. niemiecki</language>
                </langmaterial>
-               <unitdate>1941–1945</unitdate>
+               <unitdate label="ehri_cleaned_date">1941/1945</unitdate>
                <physdesc>
                   <dimensions>1 j.a.; 0,01 mb</dimensions>
                </physdesc>

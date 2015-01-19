@@ -30,7 +30,7 @@
          <langmaterial>
             <language langcode="nld">Dutch</language>
          </langmaterial>
-         <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>The file was created by</origination>
+         <origination>The file was created by Joodse Raad Friesland</origination>
          <physdesc>
             <extent>Paper, 37 files</extent>
             <genreform>Certification</genreform>
@@ -40,7 +40,7 @@
                    era="ce"
                    calendar="gregorian"
                    normal="1940-01-01/1943-12-31">1940-1943</unitdate>
-         <unitid>M.19</unitid>
+         <unitid>m19</unitid>
          <unittitle>M.19 - The Friesland District Joodse Raad (Jewish Council) Collection, the Netherlands, 1940-1943</unittitle>
       </did>
       <accruals>
@@ -67,7 +67,7 @@
                   <language langcode="nld">Dutch</language>
                   <language langcode="deu">German</language>
                </langmaterial>
-               <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>
+               <origination>The file was created by Joodse Raad Friesland
                </origination>
                <physdesc>
                   <extent type="pages">416</extent>

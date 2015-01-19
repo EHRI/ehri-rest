@@ -129,8 +129,15 @@ public class TestAllPropertiesFiles {
     }
 
     @Test
-    public void testItsProperties() {
-        String propfile = "its.properties";
+    public void testItsFindingaidsProperties() {
+        String propfile = "its-findingaids.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+
+    @Test
+    public void testItsHoldingguidesProperties() {
+        String propfile = "its-holdingguides.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }

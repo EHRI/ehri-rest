@@ -7,7 +7,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -60,13 +59,13 @@ final class BundlePath {
     public BundlePath next() {
         if (sections.isEmpty())
             throw new NoSuchElementException();
-        LinkedList<PathSection> ns = Lists.newLinkedList(sections);
+        List<PathSection> ns = Lists.newArrayList(sections);
         ns.remove(0);
         return new BundlePath(ns, terminus);
     }
 
     public static BundlePath fromString(String path) {
-        List<PathSection> sections = Lists.newLinkedList();
+        List<PathSection> sections = Lists.newArrayList();
         List<String> ps = Lists.newArrayList(splitter.split(path));
         String terminus = ps.remove(ps.size() - 1);
         for (String s : ps)

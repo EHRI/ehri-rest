@@ -17,13 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Helper functions for managing EntityType classes.
+ * Helper functions for managing EntityType classes via reflection.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -34,17 +33,17 @@ public class ClassUtils {
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
 
     private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
-    private static Map<Class<?>,Iterable<String>> propertyKeysCache = Maps.newHashMap();
-    private static Map<Class<?>,Iterable<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
-    private static Map<Class<?>,Iterable<String>> uniquePropertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Collection<String>> propertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Collection<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Collection<String>> uniquePropertyKeysCache = Maps.newHashMap();
     private static Map<Class<?>,Map<String, Direction>> dependentRelationsCache = Maps.newHashMap();
     private static Map<Class<?>,EntityClass> entityClassCache = Maps.newHashMap();
 
     /**
      * Get the entity type string for a given class.
      *
-     * @param cls
-     * @return
+     * @param cls the entity type's Java class
+     * @return the entity enum
      */
     public static EntityClass getEntityType(Class<?> cls) {
         if (!entityClassCache.containsKey(cls)) {
@@ -53,6 +52,13 @@ public class ClassUtils {
         return entityClassCache.get(cls);
     }
 
+    /**
+     * Get a map of relationships keyed against their direction for
+     * a given class.
+     *
+     * @param cls the entity's Java class
+     * @return a relationship-direction map
+     */
     public static Map<String,Direction> getDependentRelations(Class<?> cls) {
         if (!dependentRelationsCache.containsKey(cls)) {
             dependentRelationsCache.put(cls, getDependentRelationsInternal(cls));
@@ -60,6 +66,13 @@ public class ClassUtils {
         return dependentRelationsCache.get(cls);
     }
 
+    /**
+     * Get a map of relationship-names keyed against the method to
+     * instantiate them.
+     *
+     * @param cls the entity's Java class
+     * @return a relationship-name-method map
+     */
     public static Map<String, Method> getFetchMethods(Class<?> cls) {
         if (!fetchMethodCache.containsKey(cls)) {
             fetchMethodCache.put(cls, getFetchMethodsInternal(cls));
@@ -67,26 +80,46 @@ public class ClassUtils {
         return fetchMethodCache.get(cls);
     }
 
-    public static Iterable<String> getPropertyKeys(Class<?> cls) {
+    /**
+     * Get a collection of names for methods marked as properties.
+     *
+     * @param cls the entity's Java class
+     * @return a collection of property names
+     */
+    public static Collection<String> getPropertyKeys(Class<?> cls) {
         if (!propertyKeysCache.containsKey(cls)) {
             propertyKeysCache.put(cls, getPropertyKeysInternal(cls));
         }
         return propertyKeysCache.get(cls);
     }
 
-    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
+    /**
+     * Get a collection of names for methods marked as mandatory properties.
+     *
+     * @param cls the entity's Java class
+     * @return a collection of property names
+     */
+    public static Collection<String> getMandatoryPropertyKeys(Class<?> cls) {
         if (!mandatoryPropertyKeysCache.containsKey(cls)) {
             mandatoryPropertyKeysCache.put(cls, getMandatoryPropertyKeysInternal(cls));
         }
         return mandatoryPropertyKeysCache.get(cls);
     }
 
-    public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
+    /**
+     * Get a collection of names for methods marked as unique properties.
+     *
+     * @param cls the entity's Java class
+     * @return a collection of property names
+     */
+
+    public static Collection<String> getUniquePropertyKeys(Class<?> cls) {
         if (!uniquePropertyKeysCache.containsKey(cls)) {
             uniquePropertyKeysCache.put(cls, getUniquePropertyKeysInternal(cls));
         }
         return uniquePropertyKeysCache.get(cls);
     }
+
 
     private static EntityClass getEntityTypeInternal(Class<?> cls) {
         EntityType ann = cls.getAnnotation(EntityType.class);
@@ -108,22 +141,17 @@ public class ClassUtils {
         return out;
     }
 
-    /**
-     * Get methods on a framed class that should be serialized by default. This
-     * means those with EITHER the @Fetch and/or the @Dependent annotation.
-     * @param cls
-     * @return
-     */
     private static Map<String, Method> getFetchMethodsInternal(Class<?> cls) {
         logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
-        Map<String, Method> out = new HashMap<String, Method>();
+        Map<String, Method> out = Maps.newHashMap();
         for (Method method : cls.getMethods()) {
             Fetch fetch = method.getAnnotation(Fetch.class);
             Dependent dep = method.getAnnotation(Dependent.class);
-            if ((fetch != null || dep != null)
+            String value = fetch != null ? fetch.value() : null;
+            if ((value != null || dep != null)
                     && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                out.put(fetch.value(), method);
-                logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
+                out.put(value, method);
+                logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), value);
             }
         }
 
@@ -133,8 +161,8 @@ public class ClassUtils {
         return out;
     }
 
-    private static Iterable<String> getPropertyKeysInternal(Class<?> cls) {
-        List<String> out = Lists.newLinkedList();
+    private static Collection<String> getPropertyKeysInternal(Class<?> cls) {
+        List<String> out = Lists.newArrayList();
         for (Method method : cls.getMethods()) {
             Property ann = method.getAnnotation(Property.class);
             if (ann != null)
@@ -148,8 +176,8 @@ public class ClassUtils {
         return ImmutableSet.copyOf(out);
     }
 
-    private static Iterable<String> getMandatoryPropertyKeysInternal(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
+    private static Collection<String> getMandatoryPropertyKeysInternal(Class<?> cls) {
+        List<String> out = Lists.newArrayList();
         for (Method method : cls.getMethods()) {
             Mandatory mandatory = method.getAnnotation(Mandatory.class);
             if (mandatory != null) {
@@ -167,8 +195,8 @@ public class ClassUtils {
         return ImmutableSet.copyOf(out);
     }
 
-    private static Iterable<String> getUniquePropertyKeysInternal(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
+    private static Collection<String> getUniquePropertyKeysInternal(Class<?> cls) {
+        List<String> out = Lists.newArrayList();
         for (Method method : cls.getMethods()) {
             Unique unique = method.getAnnotation(Unique.class);
             if (unique != null) {

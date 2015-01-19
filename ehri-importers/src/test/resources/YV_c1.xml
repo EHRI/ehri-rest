@@ -30,7 +30,7 @@
          <langmaterial>
             <language langcode="nld">Dutch</language>
          </langmaterial>
-         <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>The file was created by</origination>
+         <origination>The file was created by Joodse Raad Friesland</origination>
          <physdesc>
             <extent>Paper, 37 files</extent>
             <genreform>Certification</genreform>
@@ -67,7 +67,7 @@
                   <language langcode="nld">Dutch</language>
                   <language langcode="deu">German</language>
                </langmaterial>
-               <origination>The file was created by<name role="creator">Joodse Raad Friesland</name>
+               <origination>The file was created by Joodse Raad Friesland
                </origination>
                <physdesc>
                   <extent type="pages">416</extent>
@@ -82,7 +82,7 @@
                <unittitle>Correspondence of Rabbi A. S. Levisson with relatives of inmates in Westerbork, the Amsterdam Joodse Raad (Jewish Council) and Joodse Raad branches regarding the condition of inmates in the camp and other, exemptions from deportations and deportation lists of Jews in the Friesland district, 1942-1943</unittitle>
             </did>
             <custodhist>
-               <p>The materials were transferred to Yad Vashem by<persname>Hartog Beem</persname>
+               <p>The materials were transferred to Yad Vashem by Hartog Beem
                </p>
             </custodhist>
             <scopecontent>
@@ -108,6 +108,9 @@
                   <p>List of Jews who perished in Westerbork, 12-18/05/1943</p>
                   <p>The list/s contain approximately 20 names</p>
                </scopecontent>
+               <controlaccess>
+               <subject  authfilenumber="?tema=518" source="ehri-skos">Deportations</subject>
+               </controlaccess>
             </c02>
          </c01>
       </dsc>

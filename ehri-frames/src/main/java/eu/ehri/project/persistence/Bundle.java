@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -187,7 +186,7 @@ public final class Bundle {
      * @param type The bundle's type class
      */
     public Bundle(EntityClass type) {
-        this(null, type, Maps.<String, Object>newHashMap(), LinkedListMultimap
+        this(null, type, Maps.<String, Object>newHashMap(), ArrayListMultimap
                 .<String, Bundle>create(), Maps.<String, Object>newHashMap());
     }
 
@@ -198,7 +197,7 @@ public final class Bundle {
      * @param data An initial map of data
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
-        this(null, type, data, LinkedListMultimap.<String, Bundle>create(),
+        this(null, type, data, ArrayListMultimap.<String, Bundle>create(),
                 Maps.<String, Object>newHashMap());
     }
 
@@ -382,7 +381,7 @@ public final class Bundle {
      * @return The new bundle
      */
     public Bundle withRelations(Multimap<String, Bundle> others) {
-        Multimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
         tmp.putAll(others);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -406,7 +405,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle withRelations(String relation, List<Bundle> others) {
-        Multimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -420,7 +419,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle withRelation(String relation, Bundle other) {
-        Multimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
         tmp.put(relation, other);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -444,7 +443,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle removeRelation(String relation, Bundle item) {
-        Multimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        Multimap<String, Bundle> tmp = ArrayListMultimap.create(relations);
         tmp.remove(relation, item);
         return new Bundle(id, type, data, tmp, meta, temp);
     }
@@ -605,11 +604,11 @@ public final class Bundle {
      * @param scopes A set of parent scopes.
      * @return A new bundle
      */
-    public Bundle generateIds(final Iterable<String> scopes) {
+    public Bundle generateIds(final Collection<String> scopes) {
         boolean isTemp = id == null;
         IdGenerator idGen = getType().getIdgen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
-        Multimap<String, Bundle> idRels = LinkedListMultimap.create();
+        Multimap<String, Bundle> idRels = ArrayListMultimap.create();
         List<String> nextScopes = Lists.newArrayList(scopes);
         nextScopes.add(idGen.getIdBase(this));
         for (Map.Entry<String, Bundle> entry : relations.entries()) {

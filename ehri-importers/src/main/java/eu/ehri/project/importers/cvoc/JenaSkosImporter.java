@@ -54,19 +54,16 @@ import java.util.logging.Level;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class JenaSkosImporter implements SkosImporter {
-    private static final Logger logger = LoggerFactory.getLogger(JenaSkosImporter.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(JenaSkosImporter.class);
     private final FramedGraph<? extends TransactionalGraph> framedGraph;
     private final Actioner actioner;
     private final Vocabulary vocabulary;
     private final BundleDAO dao;
-
     private final boolean tolerant;
     private final String format;
     private final String defaultLang;
-
     public static final String DEFAULT_LANG = "eng";
-
     // Language-sensitive properties.
     public static final Map<String, URI> LANGUAGE_PROPS = ImmutableMap.<String, URI>builder()
             .put(Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI())
@@ -76,30 +73,32 @@ public final class JenaSkosImporter implements SkosImporter {
             .put(Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI())
             .put(Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI())
             .build();
-
     // Language-agnostic properties.
     public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
             .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
             .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
             .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
             .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
+            .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
+            .put("personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .build();
-
     // Properties that end up as undeterminedRelation nodes.
-        public static final Map<String, URI> RELATION_PROPS = ImmutableMap.<String, URI>builder()
-                .put("owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs"))
-                .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
-                .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
-                .build();
+    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.<String, URI>builder()
+            .put("owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs"))
+            .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
+            .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
+            .put("skos:broadMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
+            .build();
 
     /**
      * Constructor
      *
      * @param framedGraph The framed graph
-     * @param actioner    The actioner
-     * @param vocabulary  The target vocabulary
-     * @param tolerant    Whether or not to ignore single item validation errors.
-     * @param format      The RDF format
+     * @param actioner The actioner
+     * @param vocabulary The target vocabulary
+     * @param tolerant Whether or not to ignore single item validation errors.
+     * @param format The RDF format
      * @param defaultLang The language to use for elements without specified language
      */
     public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
@@ -117,8 +116,8 @@ public final class JenaSkosImporter implements SkosImporter {
      * Constructor
      *
      * @param framedGraph The framed graph
-     * @param actioner    The actioner
-     * @param vocabulary  The target vocabulary
+     * @param actioner The actioner
+     * @param vocabulary The target vocabulary
      */
     public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
@@ -148,7 +147,7 @@ public final class JenaSkosImporter implements SkosImporter {
     /**
      * Import a file by path.
      *
-     * @param filePath   The SKOS file path
+     * @param filePath The SKOS file path
      * @param logMessage A log message
      * @return A log of imported nodes
      * @throws IOException
@@ -168,7 +167,7 @@ public final class JenaSkosImporter implements SkosImporter {
     /**
      * Import an input stream.
      *
-     * @param ios        The SKOS file input stream
+     * @param ios The SKOS file input stream
      * @param logMessage A log message
      * @return A log of imported nodes
      * @throws IOException
@@ -187,7 +186,7 @@ public final class JenaSkosImporter implements SkosImporter {
             OntModel model = ModelFactory.createOntologyModel();
             model.read(ios, null, format);
             OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-            logger.debug("in import file: "+SkosRDFVocabulary.CONCEPT.getURI().toString());
+            logger.debug("in import file: " + SkosRDFVocabulary.CONCEPT.getURI().toString());
             ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
             Map<Resource, Concept> imported = Maps.newHashMap();
 
@@ -220,7 +219,6 @@ public final class JenaSkosImporter implements SkosImporter {
                     }
                 }
             }
-
 
             for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
                 hookupRelationships(pair.getKey(), pair.getValue(), imported);
@@ -262,13 +260,15 @@ public final class JenaSkosImporter implements SkosImporter {
         solveUndeterminedRelationships(mut.getNode(), linkedConcepts);
         return mut;
     }
-    
+
     private void solveUndeterminedRelationships(Concept unit, Map<Concept, String> linkedConcepts) {
         GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
         for (Concept concept : linkedConcepts.keySet()) {
             try {
+                String reltype = linkedConcepts.get(concept);
                 Bundle linkBundle = new Bundle(EntityClass.LINK)
-                        .withDataValue(Ontology.LINK_HAS_TYPE, linkedConcepts.get(concept))
+                        .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
+                        .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":")+1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
                 Link link;
@@ -295,22 +295,22 @@ public final class JenaSkosImporter implements SkosImporter {
                     undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
                             .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
                             .withDataValue(Ontology.NAME_KEY, annotation.toString()));
-                }else{
-                    if(rel.getKey().startsWith("skos:")){
+                } else {
+                    if (rel.getKey().startsWith("skos:") || rel.getKey().startsWith("sem:") ) {
+                        String prefix = rel.getKey().startsWith("skos:") ? "skos" : "sem";
                         Concept found = findRelatedConcept(annotation.toString());
-                        if(found != null){
-                            linkedConcepts.put(found, rel.getKey()) ; 
-                        }else{
+                        if (found != null) {
+                            linkedConcepts.put(found, rel.getKey());
+                        } else {
                             undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
-                                .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
-                                .withDataValue(Ontology.NAME_KEY, annotation.toString()));                        
+                                    .withDataValue(Ontology.ANNOTATION_TYPE, "associate")
+                                    .withDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":")+1))
+                                    .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                         }
                     }
                 }
-                
             }
         }
-
         return undetermined;
     }
 
@@ -338,6 +338,7 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private static interface ConnectFunc {
+
         public void connect(Concept current, Concept related);
     }
 
@@ -395,8 +396,6 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private List<Bundle> getDescriptions(Resource item) {
-
-
         List<Bundle> descriptions = Lists.newArrayList();
 
         for (RDFNode property : getObjectWithPredicate(item, SkosRDFVocabulary.PREF_LABEL.getURI())) {
@@ -417,16 +416,16 @@ public final class JenaSkosImporter implements SkosImporter {
             for (Map.Entry<String, URI> prop : GENERAL_PROPS.entrySet()) {
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                     if (target.isLiteral()) {
-                        if(prop.getKey().equals("latitude/longitude")){
+                        if (prop.getKey().equals("latitude/longitude")) {
                             String[] latlong = target.asLiteral().getString().split(",");
-                            if(latlong.length > 1){
+                            if (latlong.length > 1) {
                                 builder.addDataValue("latitude", latlong[0]);
                                 builder.addDataValue("longitude", latlong[1]);
                             }
-                        }else{
+                        } else {
                             builder.addDataValue(prop.getKey(), target.asLiteral().getString());
                         }
-                    }else{
+                    } else {
                         builder.addDataValue(prop.getKey(), target.toString());
                     }
                 }

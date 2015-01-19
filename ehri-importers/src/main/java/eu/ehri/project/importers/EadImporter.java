@@ -101,7 +101,11 @@ public class EadImporter extends EaImporter {
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
-            logger.debug("Unknown Properties found");
+            StringBuilder unknownProperties = new StringBuilder();
+            for(String u : unknowns.keySet()){
+                unknownProperties.append(u);
+            }
+            logger.debug("Unknown Properties found: " + unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
@@ -157,30 +161,44 @@ public class EadImporter extends EaImporter {
         for(String p : idPath){
             lpath.add(p);
         }
-        Bundle withIds = unit.generateIds(lpath);
+        Bundle withIds = unit.generateIds(lpath);                
         
-        
-        logger.debug("idpath: "+withIds.getId());
         if (manager.exists(withIds.getId())) {
             try {
                 //read the current item’s bundle
                 Bundle oldBundle = mergeSerializer
                         .vertexFrameToBundle(manager.getVertex(withIds.getId()));
-
                 //filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
                     @Override
                     public boolean remove(String relationLabel, Bundle bundle) {
                         String lang = bundle.getDataValue(Ontology.LANGUAGE);
-                        String sourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
+                        String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
                         return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
                                 && (lang != null
                                 && lang.equals(languageOfDesc)
-                                && (sourceFileId != null && sourceFileId.equals(thisSourceFileId))
+                                && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId))
                                 );
                     }
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
+                
+                //if this desc-id already exists, but with a different sourceFileId, 
+                //change the desc-id
+                String defaultDescIdentifier= withIds.getId()+"-"+languageOfDesc.toLowerCase();
+                String newDescIdentifier=withIds.getId()+"-"+thisSourceFileId.toLowerCase().replace("#", "-");
+                if(manager.exists(newDescIdentifier)){
+                        descBundle=descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
+                } else if(manager.exists(defaultDescIdentifier)){
+                    Bundle oldDescBundle = mergeSerializer
+                        .vertexFrameToBundle(manager.getVertex(defaultDescIdentifier));
+                    //if the previous had NO sourcefile_key OR it was different:
+                    if(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
+                            || ! thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())){
+                        descBundle=descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
+                        logger.info("other description found ("+defaultDescIdentifier+"), creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString());
+                    }
+                }
 
                 return withIds.withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
