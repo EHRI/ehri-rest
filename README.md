@@ -7,7 +7,7 @@ A business layer and JAX-RS resource classes for managing [EHRI](http://ehri-pro
 
 Integrates with the [Neo4j](http://www.neo4j.org) graph database via a server plugin.
 
-The raison d'être of having a web service backend is to make the job of the front-end easier by 
+The raison d'être of the EHRI web service backend is to make the job of the front-end easier by 
 performing the following functions:
 
 * serialising and deserialising domain-specific object graphs
