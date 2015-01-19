@@ -1,6 +1,6 @@
 package eu.ehri.project.persistence.utils;
 
-import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -231,10 +231,10 @@ public class BundleUtils {
             if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
                         "Relation path '%s' not found", section.getPath()));
-            ListMultimap<String, Bundle> allRelations = LinkedListMultimap
+            ListMultimap<String, Bundle> allRelations = ArrayListMultimap
                     .create(bundle.getRelations());
             try {
-                List<Bundle> relations = Lists.newLinkedList(allRelations
+                List<Bundle> relations = Lists.newArrayList(allRelations
                         .removeAll(section.getPath()));
                 Bundle subject = relations.get(section.getIndex());
                 relations.set(section.getIndex(),
@@ -262,10 +262,10 @@ public class BundleUtils {
         if (!bundle.hasRelations(section.getPath()))
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
-        ListMultimap<String, Bundle> allRelations = LinkedListMultimap
+        ListMultimap<String, Bundle> allRelations = ArrayListMultimap
                 .create(bundle.getRelations());
         try {
-            List<Bundle> relations = Lists.newLinkedList(allRelations
+            List<Bundle> relations = Lists.newArrayList(allRelations
                     .removeAll(section.getPath()));
             if (next.isEmpty()) {
                 // If the index is negative, add to the end...
@@ -301,10 +301,10 @@ public class BundleUtils {
         if (!bundle.hasRelations(section.getPath()))
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
-        ListMultimap<String, Bundle> allRelations = LinkedListMultimap
+        ListMultimap<String, Bundle> allRelations = ArrayListMultimap
                 .create(bundle.getRelations());
         try {
-            List<Bundle> relations = Lists.newLinkedList(allRelations
+            List<Bundle> relations = Lists.newArrayList(allRelations
                     .removeAll(section.getPath()));
             if (next.isEmpty()) {
                 relations.remove(section.getIndex());

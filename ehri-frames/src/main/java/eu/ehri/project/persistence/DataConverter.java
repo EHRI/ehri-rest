@@ -1,6 +1,6 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -201,7 +201,7 @@ class DataConverter {
      */
     private static Multimap<String, Bundle> getRelationships(Map<?, ?> data)
             throws DeserializationError {
-        Multimap<String, Bundle> relationBundles = LinkedListMultimap
+        Multimap<String, Bundle> relationBundles = ArrayListMultimap
                 .create();
 
         // It's okay to pass in a null value for relationships.

@@ -135,7 +135,7 @@ public class QueryUtils {
             return Optional.absent();
         }
 
-        List<Pair<String,Direction>> traversals = Lists.newLinkedList();
+        List<Pair<String,Direction>> traversals = Lists.newArrayListWithCapacity(parse.length / 2);
         for (int i = 0; i < parse.length; i += 2) {
             String dir = parse[i];
             String rel = parse[i+1];
