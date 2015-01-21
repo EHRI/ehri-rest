@@ -16,12 +16,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Import EAC for a given repository into the database.
+ * Import Map based representations of EAD or EAC for a given repository into the database.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  *
  */
-public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
+public abstract class EaImporter extends MapImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EaImporter.class);
     protected static final String LINK_TARGET = "target";

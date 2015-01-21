@@ -6,8 +6,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -30,13 +28,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Importer of Map based representations of documentary units, historical agents,
+ * virtual collections and other entities. Does not implement the actual
+ * import methods.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- *
  */
-public abstract class XmlImporter<T> extends AbstractImporter<T> {
+public abstract class MapImporter extends AbstractImporter<Map<String, Object>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(XmlImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(MapImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
     private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
@@ -62,7 +62,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
-    public XmlImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public MapImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
 
@@ -82,6 +82,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
      *
      * @param data
      */
+    @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = new LinkedList<Map<String, Object>>();
         Object value;

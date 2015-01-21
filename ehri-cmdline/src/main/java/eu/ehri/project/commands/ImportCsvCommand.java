@@ -5,10 +5,9 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.XmlImporter;
+import eu.ehri.project.importers.MapImporter;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
@@ -22,10 +21,10 @@ import java.util.Map;
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCsvCommand extends BaseCommand implements Command{
-    Class<? extends XmlImporter> importer;
+    Class<? extends MapImporter> importer;
 //    Class<? extends AbstractImporter> importer;
     
-    public ImportCsvCommand(Class<? extends XmlImporter> importer){
+    public ImportCsvCommand(Class<? extends MapImporter> importer){
         this.importer = importer;
     }
     

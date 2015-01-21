@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class PersonalitiesImporter extends XmlImporter<Object> {
+public class PersonalitiesImporter extends MapImporter {
 
     private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
 
@@ -155,10 +155,5 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
             l.add(items);
         }
         return l;
-    }
-
-    @Override
-    public Iterable<Map<String, Object>> extractDates(Object data) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
