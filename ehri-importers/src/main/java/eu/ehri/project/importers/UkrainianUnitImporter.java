@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class UkrainianUnitImporter extends XmlImporter<Object> {
+public class UkrainianUnitImporter extends MapImporter {
 
     public static final String MULTIVALUE_SEP = ",,";
     private XmlImportProperties p;
@@ -161,10 +161,5 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
         //replace the language from the itemData with the one specified in the param
         SaxXmlHandler.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
         return item;
-    }
-
-    @Override
-    public Iterable<Map<String, Object>> extractDates(Object data) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
