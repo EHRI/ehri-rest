@@ -34,13 +34,11 @@ public class ItsTest extends AbstractImporterTest {
     protected final String GESTAPO = "its-gestapo-preprocessed.xml";
     protected final String GESTAPO_WHOLE = "its-gestapo-whole.xml";
     protected final String IMPORTED_ITEM_ID = "DE ITS [OuS 1.1.7]";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
+    
     DocumentaryUnit archdesc, c1, c2, c7_1, c7_2;
 
     @Test
     public void testItsImportEsterwegen() throws Exception {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
@@ -51,9 +49,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        XmlImportManager sim = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-holdingguides.properties")).setTolerant(Boolean.TRUE);
-        ImportLog log_en = sim.importFile(ios, logMessage);
-        ImportLog log_de = sim.importFile(ios2, logMessage);
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-holdingguides.properties")).setTolerant(Boolean.TRUE);
+        ImportLog log_en = importManager.importFile(ios, logMessage);
+        ImportLog log_de = importManager.importFile(ios2, logMessage);
 
 // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -127,12 +125,11 @@ public class ItsTest extends AbstractImporterTest {
         assertEquals(logMessage, actions.get(0).getLogMessage());
 
         // Check scope is correct...
-        assertEquals(agent, unit.getPermissionScope());
+        assertEquals(repository, unit.getPermissionScope());
     }
 
     @Test
     public void testGestapo() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing the gestapo (provenance) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
@@ -142,9 +139,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        XmlImportManager sim = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-findingaids.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-findingaids.properties"))
                 .setTolerant(Boolean.TRUE);
-        ImportLog log_en = sim.importFile(ios, logMessage);
+        ImportLog log_en = importManager.importFile(ios, logMessage);
 
 // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -205,7 +202,6 @@ public class ItsTest extends AbstractImporterTest {
     @Test
     @Ignore
     public void testGestapoWhole() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing the gestapo (provenance) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
@@ -215,9 +211,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        XmlImportManager sim = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-findingaids.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-findingaids.properties"))
                 .setTolerant(Boolean.TRUE);
-        ImportLog log_en = sim.importFile(ios, logMessage);
+        ImportLog log_en = importManager.importFile(ios, logMessage);
 
 // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -241,7 +237,6 @@ public class ItsTest extends AbstractImporterTest {
 
     @Test
     public void testEsterwegenWhole() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing the esterwegen (pertinence) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
@@ -251,9 +246,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        XmlImportManager sim = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-findingaids.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-findingaids.properties"))
                 .setTolerant(Boolean.TRUE);
-        ImportLog log_en = sim.importFile(ios, logMessage);
+        ImportLog log_en = importManager.importFile(ios, logMessage);
 
 // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

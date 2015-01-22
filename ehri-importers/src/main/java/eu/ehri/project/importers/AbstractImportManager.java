@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -12,6 +13,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +22,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-abstract public class XmlImportManager implements ImportManager {
+/**
+ * Base ImportManager.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ */
+public abstract class AbstractImportManager implements ImportManager {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(XmlImportManager.class);
+            .getLogger(AbstractImportManager.class);
     protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
@@ -33,6 +40,7 @@ abstract public class XmlImportManager implements ImportManager {
     // and reporting errors usefully...
     private String currentFile = null;
     private Integer currentPosition = null;
+    protected Class<? extends AbstractImporter> importerClass;
 
     /**
      * Constructor.
@@ -41,12 +49,13 @@ abstract public class XmlImportManager implements ImportManager {
      * @param scope     the permission scope
      * @param actioner  the actioner
      */
-    public XmlImportManager(
+    public AbstractImportManager(
             FramedGraph<? extends TransactionalGraph> graph,
-            final PermissionScope scope, final Actioner actioner) {
+            final PermissionScope scope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
         this.framedGraph = graph;
         this.permissionScope = scope;
         this.actioner = actioner;
+        this.importerClass = importerClass;
     }
 
     /**
@@ -56,7 +65,7 @@ abstract public class XmlImportManager implements ImportManager {
      * @param tolerant
      *            true means it won't validateData the xml file
      */
-    public XmlImportManager setTolerant(boolean tolerant) {
+    public AbstractImportManager setTolerant(boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
         return this;
@@ -175,11 +184,17 @@ abstract public class XmlImportManager implements ImportManager {
         }
     }
 
-    private String formatErrorLocation() {
-        return String.format("File: %s, XML document: %d", currentFile,
-                currentPosition);
-    }
-
+    /**
+     * Import an InputStream with an event context.
+     * @param ios the InputStream to import
+     * @param eventContext the event that this import is part of
+     * @param log an import log to write to
+     * @throws IOException
+     * @throws ValidationError
+     * @throws InputParseError
+     * @throws InvalidXmlDocument if an implementing subclass encounters invalid XML
+     * @throws InvalidInputFormatError
+     */
     protected abstract void importFile(InputStream ios,
             final ActionManager.EventContext eventContext, final ImportLog log)
             throws IOException, ValidationError, InputParseError,
@@ -188,6 +203,11 @@ abstract public class XmlImportManager implements ImportManager {
     private Optional<String> getLogMessage(String msg) {
         return msg.trim().isEmpty() ? Optional.<String> absent() : Optional
                 .of(msg);
+    }
+
+    private String formatErrorLocation() {
+        return String.format("File: %s, XML document: %d", currentFile,
+                currentPosition);
     }
 
     private void commitOrRollback(boolean okay) {
