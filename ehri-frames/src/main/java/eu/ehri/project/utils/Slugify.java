@@ -17,10 +17,20 @@ public class Slugify {
             = Transliterator.getInstance("Hebrew-Latin; Cyrillic-Latin; Greek-Latin; Latin-Ascii; Any-Lower");
     private static final String DEFAULT_REPLACE = "-";
 
+    /**
+     * Slugify the input string using the default replacement string.
+     * @param input the String to slugify
+     * @return the slugified copy of the input string
+     */
     public static String slugify(String input) {
         return slugify(input, DEFAULT_REPLACE);
     }
 
+    /**
+     * Slugify the input string using the given replacement string.
+     * @param input the String to slugify
+     * @return the slugified copy of the input string
+     */
     public static String slugify(String input, String replacement) {
         return normalize(input)
                 .replaceAll("\\s+", replacement)            // whitespace

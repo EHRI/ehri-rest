@@ -5,7 +5,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -22,25 +21,23 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(Wp2JmpEadTest.class);
     protected final String SINGLE_EAD = "wp2_jmp_ead.xml";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
     // Depends on hierarchical-ead.xml
     protected final String C1 = "COLLECTION.JMP.SHOAH/T/2";
     protected final String C2 = "COLLECTION.JMP.SHOAH/T/2/A";
     protected final String C3 = "COLLECTION.JMP.SHOAH/T/2/A/1";
     protected final String C6 = "DOCUMENT.JMP.SHOAH/T/2/A/1a/028";
+    // <test-country>-<test-repo>-<__ID__>
+    protected final String C6_ID = "nl-r1-collection-jmp-shoah-t-2-a-1a-028-document-jmp-shoah-t-2-a-1a-028";
     protected final String FONDS = "COLLECTION.JMP.SHOAH/T";
 
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
-        
         final String logMessage = "Importing JMP EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
         
         importManager.setTolerant(Boolean.TRUE);
         
@@ -69,12 +66,16 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         DocumentaryUnit c3 = graph.frame(getVertexByIdentifier(graph, C3), DocumentaryUnit.class);
-        DocumentaryUnit c6 = graph.frame(getVertexByIdentifier(graph, C6), DocumentaryUnit.class);
 
         assertEquals(fonds, c1.getParent());
         assertEquals(c1, c2.getParent());
         assertEquals(c2, c3.getParent());
-        
+
+        DocumentaryUnit c6ByIdentifier = graph.frame(getVertexByIdentifier(graph, C6), DocumentaryUnit.class);
+        logger.debug(c6ByIdentifier.getId());
+        DocumentaryUnit c6ById = graph.frame(getVertexById(graph, C6_ID), DocumentaryUnit.class);
+        assertEquals(c6ByIdentifier, c6ById);
+
         // Ensure the import action has the right number of subjects.
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
@@ -105,7 +106,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
-        assertEquals(agent, fonds.getPermissionScope());
+        assertEquals(repository, fonds.getPermissionScope());
         assertEquals(fonds, c1.getPermissionScope());
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c3.getPermissionScope());

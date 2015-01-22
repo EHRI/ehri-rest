@@ -4,16 +4,19 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.utils.Slugify;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -81,12 +84,27 @@ public class IdGeneratorUtils {
 
     /**
      * Join an identifier path to form a full ID.
+     * If a path part is repeated, only the last occurrence is kept.
      *
-     * @param path A list of identifier strings.
+     * @param path A non-empty list of identifier strings.
      * @return The resultant path ID.
      */
     public static String joinPath(Collection<String> path) {
-        String scopedId = Joiner.on(SEPARATOR).join(path);
+        List<String> newPaths = Lists.newArrayList();
+        // If the current part is what the next part starts with,
+        // don't include it.
+        Iterator<String> patti = path.iterator();
+        String current = patti.next();
+        String next;
+        while (patti.hasNext()) {
+            next = patti.next();
+            if (!next.startsWith(current)) {
+                newPaths.add(current);
+            }
+            current = next;
+        }
+        newPaths.add(current);
+        String scopedId = Joiner.on(SEPARATOR).join(newPaths);
         return Slugify.slugify(scopedId);
     }
 }
