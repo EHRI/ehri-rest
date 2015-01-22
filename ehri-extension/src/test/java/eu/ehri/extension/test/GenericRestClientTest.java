@@ -12,6 +12,9 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static eu.ehri.extension.GenericResource.GID_PARAM;
+import static eu.ehri.extension.GenericResource.ID_PARAM;
+import static eu.ehri.extension.GenericResource.STRICT_PARAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -28,8 +31,8 @@ public class GenericRestClientTest extends BaseRestClientTest {
         // Create
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
                 .segment(ENDPOINT)
-                .queryParam("id", ITEM1)
-                .queryParam("id", ITEM2).build();
+                .queryParam(ID_PARAM, ITEM1)
+                .queryParam(ID_PARAM, ITEM2).build();
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
         assertStatus(OK, response);
@@ -72,15 +75,32 @@ public class GenericRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void listEntitiesByGidThrows404() throws IOException {
+    public void listEntitiesByGidThrows404WhenStrict() throws IOException {
         // Create
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
                 .segment(ENDPOINT)
                 .segment("listByGraphId")
-                .queryParam("gid", -1L).build();
+                .queryParam(GID_PARAM, -1L)
+                .queryParam(STRICT_PARAM, true).build();
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
+    }
+
+    @Test
+    public void listEntitiesByGidIsTolerant() throws IOException {
+        // Create
+        URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment(ENDPOINT)
+                .segment("listByGraphId")
+                .queryParam(GID_PARAM, -1L).build();
+
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
+        assertStatus(OK, response);
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        assertTrue(rootNode.isArray());
+        assertTrue(rootNode.path(0).isMissingNode());
     }
 
     private void testResponse(ClientResponse response, String expectedId) throws IOException {
