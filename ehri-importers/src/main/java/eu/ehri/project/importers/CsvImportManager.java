@@ -26,21 +26,19 @@ import java.util.Map;
  * 
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class CsvImportManager extends XmlImportManager {
+public class CsvImportManager extends AbstractImportManager {
 
     public static final Character VALUE_DELIMITER = ';';
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
-    private Class<? extends AbstractImporter> importerClass;
 
     public CsvImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
             final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
-        super(framedGraph, permissionScope, actioner);
-        this.importerClass = importerClass;
+        super(framedGraph, permissionScope, actioner, importerClass);
     }
 
     /**
-     * Import XML from the given InputStream, as part of the given action.
+     * Import CSV from the given InputStream, as part of the given action.
      *
      * @param ios The input stream
      * @param eventContext The event context in which the ingest is happening

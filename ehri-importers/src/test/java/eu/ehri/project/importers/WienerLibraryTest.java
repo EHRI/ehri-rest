@@ -36,7 +36,7 @@ public class WienerLibraryTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(WienerLibraryTest.class);
 
     protected final String SINGLE_EAD = "8342_ehriID_wpath_mainids.xml";
-    protected final String TEST_REPO = "r1";
+
     protected final String FONDS_LEVEL = "Ctop level fonds";
     protected final String SUBFONDS_LEVEL = "C00001";
     protected final String C2 = "C00002";
@@ -68,12 +68,12 @@ public class WienerLibraryTest extends AbstractImporterTest {
 //        logger.info("number of events on event: " + toList(ctx.getSystemEvent().getHistory()).size());
 //        logger.info("size : " + toList(validUser.getActions()).size());
 //        
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, 
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, 
                 new XmlImportProperties("wienerlib.properties"))
                 .setTolerant(Boolean.FALSE);
         ImportLog log = importManager.importFile(ios, logMessage);
@@ -143,7 +143,7 @@ public class WienerLibraryTest extends AbstractImporterTest {
         }
 
         // Check permission scopes
-        assertEquals(agent, fonds_unit.getPermissionScope());
+        assertEquals(repository, fonds_unit.getPermissionScope());
         assertEquals(fonds_unit, c1.getPermissionScope());
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c2_1.getPermissionScope());

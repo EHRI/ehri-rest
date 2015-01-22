@@ -119,7 +119,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      * Extract an Iterable of representations of maintenance events from the itemData.
      * 
      * @param itemData a Map containing raw properties of a unit
-     * @return
+     * @return a List of node representations of maintenance events (may be empty)
      */
     @Override
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
@@ -136,21 +136,22 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     }
     
     /**
-     * Extract a representations of maintenance events from the maintenanceEvent data.
+     * Convert a representation of a maintenance event from the maintenanceEvent data,
+     * using property names from MaintenanceEvent.
      * 
-     * @param event
-     * @return 
+     * @param event a Map of event properties
+     * @return a correct node representation of a single maintenance event
      */
     @Override
     public Map<String, Object> getMaintenanceEvent(Map<String, Object> event) {
         Map<String, Object> me = new HashMap<String, Object>();
-        for (String eventkey : event.keySet()) {
-            if (eventkey.equals("maintenanceEvent/type")) {
-                me.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-            } else if (eventkey.equals("maintenanceEvent/agentType")) {
-                me.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
+        for (Entry<String, Object> eventEntry : event.entrySet()) {
+            if (eventEntry.getKey().equals("maintenanceEvent/type")) {
+                me.put(MaintenanceEvent.EVENTTYPE, eventEntry.getValue());
+            } else if (eventEntry.getKey().equals("maintenanceEvent/agentType")) {
+                me.put(MaintenanceEvent.AGENTTYPE, eventEntry.getValue());
             } else {
-                me.put(eventkey, event.get(eventkey));
+                me.put(eventEntry.getKey(), eventEntry.getValue());
             }
         }
         if (!me.containsKey(MaintenanceEvent.EVENTTYPE)) {

@@ -37,7 +37,6 @@ public class YadVashemTest extends AbstractImporterTest{
 
     @Test
     public void testWithExistingDescription() throws Exception{
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
         DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
         
@@ -50,7 +49,7 @@ public class YadVashemTest extends AbstractImporterTest{
        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);
@@ -74,7 +73,6 @@ public class YadVashemTest extends AbstractImporterTest{
     @Test 
     public void testImportItemsT() throws Exception {
 
-         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
@@ -87,7 +85,7 @@ public class YadVashemTest extends AbstractImporterTest{
        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);

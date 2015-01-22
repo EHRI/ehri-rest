@@ -77,7 +77,6 @@ public abstract class AbstractImporter<T> {
      * @param graph     the framed graph
      * @param scope     the permission scope
      * @param log       the log object
-     * @param context   the document context
      */
     public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log) {
         this.permissionScope = scope;

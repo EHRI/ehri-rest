@@ -33,11 +33,10 @@ import java.util.Map;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class SaxImportManager extends XmlImportManager implements ImportManager {
+public class SaxImportManager extends AbstractImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxImportManager.class);
 
-    private final Class<? extends AbstractImporter> importerClass;
     private final Class<? extends SaxXmlHandler> handlerClass;
     private final Optional<XmlImportProperties> properties;
     private final List<ImportCallback> extraCallbacks;
@@ -54,8 +53,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             Optional<XmlImportProperties> properties,
             List<ImportCallback> callbacks) {
-        super(graph, scope, actioner);
-        this.importerClass = importerClass;
+        super(graph, scope, actioner, importerClass);
         this.handlerClass = handlerClass;
         this.properties = properties;
         this.extraCallbacks = Lists.newArrayList(callbacks);
@@ -117,6 +115,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidInputFormatError
      * @throws InvalidXmlDocument
      */
+    @Override
     protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidXmlDocument, InvalidInputFormatError {
