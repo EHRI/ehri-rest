@@ -47,10 +47,12 @@
         <did>
             <unitid label="ehri_internal_id">0</unitid>
             <unitid label="ehri_structure">0</unitid>
+             <unitid type="altsignatur">Sachsenhausen 011, fol. 021</unitid>
+             <unitid type="filereference">Folder 0143</unitid>
             <unitid>R 2</unitid>
             <unittitle>Geheime Staatspolizei (Gestapo)</unittitle>
-            <unitdate>1933-1945</unitdate>
-
+            <unitdate normal="1933/1945">1933-1945</unitdate>
+<unitdate>s.a.</unitdate>
             <unitid label="ehri_main_identifier">R 2</unitid>
         </did>
         <scopecontent encodinganalog="Einleitung">

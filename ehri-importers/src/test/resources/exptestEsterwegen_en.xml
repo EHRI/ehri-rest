@@ -53,7 +53,10 @@
             <unittitle encodinganalog="10$0$0">Concentration Camp Esterwegen </unittitle>
 
 
-            <unitdate encodinganalog="20$0$0" normal="1935-03/1935-05"/>
+            <unitdate normal="1944-11-01/1944-11-01">vermutliches Datum</unitdate>
+            <unitdate>nach dem Krieg</unitdate>
+            <unitdate normal="1930/1945"/>
+            
             <langmaterial encodinganalog="50$0$0">DE (German) / Latn </langmaterial>
             <physdesc encodinganalog="110$0$0"> Originals, Photocopies <extent encodinganalog="112$0$110">2 folders</extent>
                 <extent encodinganalog="115$0$110" type="digitised">7</extent>
