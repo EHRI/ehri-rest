@@ -3,7 +3,6 @@ package eu.ehri.project.persistence;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -67,7 +66,7 @@ public final class ErrorSet {
      * @param error The string description of the property error
      */
     public static ErrorSet fromError(String key, String error) {
-        LinkedListMultimap<String, String> tmp = LinkedListMultimap.create();
+        Multimap<String, String> tmp = ArrayListMultimap.create();
         tmp.put(key, error);
         return new ErrorSet(tmp);
     }
@@ -77,7 +76,7 @@ public final class ErrorSet {
      *
      * @param errors A map of top-level errors
      */
-    public ErrorSet(ListMultimap<String, String> errors) {
+    public ErrorSet(Multimap<String, String> errors) {
         this(errors, ArrayListMultimap.<String, ErrorSet>create());
     }
 
@@ -114,7 +113,7 @@ public final class ErrorSet {
         if (err == null) {
             return this;
         } else {
-            ListMultimap<String, String> errs = LinkedListMultimap.create(errors);
+            Multimap<String, String> errs = ArrayListMultimap.create(errors);
             errs.put(key, err);
             return withErrors(errs);
         }
@@ -176,7 +175,7 @@ public final class ErrorSet {
      * @return A new error set
      */
     public ErrorSet withRelations(String relation, List<ErrorSet> others) {
-        LinkedListMultimap<String, ErrorSet> tmp = LinkedListMultimap
+        Multimap<String, ErrorSet> tmp = ArrayListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
         return new ErrorSet(errors, tmp);
@@ -189,7 +188,7 @@ public final class ErrorSet {
      * @param other An error set relation
      */
     public ErrorSet withRelation(String relation, ErrorSet other) {
-        LinkedListMultimap<String, ErrorSet> tmp = LinkedListMultimap
+        Multimap<String, ErrorSet> tmp = ArrayListMultimap
                 .create(relations);
         tmp.put(relation, other);
         return new ErrorSet(errors, tmp);

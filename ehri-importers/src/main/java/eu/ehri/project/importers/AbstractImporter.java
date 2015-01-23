@@ -9,7 +9,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.BundleDAO;
@@ -27,10 +26,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Base class for importers that import documentary units, with their
- * constituent logical data, description(s), and date periods.
+ * Base class for importers that import documentary units, historical agents and virtual collections,
+ * with their constituent logical data, description(s), and date periods.
  *
- * @param <T>
+ * @param <T> Type of node representation that can be imported. In this version,
+ *            the only implementation is for <code>Map<String, Object></code>
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public abstract class AbstractImporter<T> {
@@ -44,11 +44,14 @@ public abstract class AbstractImporter<T> {
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
-    protected final T documentContext;
     protected List<ImportCallback> callbacks = new LinkedList<ImportCallback>();
 
     private NodeProperties pc;
 
+    /**
+     * Call all registered ImportCallbacks for the given mutation.
+     * @param mutation the Mutation to handle callbacks for
+     */
     protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation) {
         for (ImportCallback callback : callbacks) {
             callback.itemImported(mutation);
@@ -74,25 +77,12 @@ public abstract class AbstractImporter<T> {
      * @param graph     the framed graph
      * @param scope     the permission scope
      * @param log       the log object
-     * @param context   the document context
      */
-    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log,
-            T context) {
+    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log) {
         this.permissionScope = scope;
         this.framedGraph = graph;
         this.log = log;
-        this.documentContext = context;
         manager = GraphManagerFactory.getInstance(graph);
-    }
-
-    /**
-     * Constructor without a document context.
-     * @param graph the graph
-     * @param scope the permission scope
-     * @param log   the logger object
-     */
-    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log) {
-        this(graph, scope, log, null);
     }
 
     /**
@@ -111,7 +101,7 @@ public abstract class AbstractImporter<T> {
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;
+    public abstract AccessibleEntity importItem(T itemData) throws ValidationError;
 
     /**
      * Import an item representation into the graph at a certain depth, and return the Node.
@@ -122,7 +112,7 @@ public abstract class AbstractImporter<T> {
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    abstract public AccessibleEntity importItem(Map<String, Object> itemData,
+    public abstract AccessibleEntity importItem(T itemData,
             List<String> scopeIds) throws ValidationError;
 
     /**
@@ -170,9 +160,9 @@ public abstract class AbstractImporter<T> {
         }
     }
     
-    public abstract Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData);
-    public abstract Map<String, Object> getMaintenanceEvent(Map<String, Object> event);
-    public abstract MaintenanceEvent importMaintenanceEvent(Map<String, Object> event);
+    public abstract Iterable<Map<String, Object>> extractMaintenanceEvent(T itemData);
+    public abstract Map<String, Object> getMaintenanceEvent(T event);
+    public abstract MaintenanceEvent importMaintenanceEvent(T event);
 
 /**
  * all data that is stored above the first imported DocumentaryUnit will be processed here, and added to the DocumentDescriptions.

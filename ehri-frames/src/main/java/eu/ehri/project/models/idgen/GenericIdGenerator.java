@@ -5,6 +5,7 @@ import com.fasterxml.uuid.impl.TimeBasedGenerator;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public enum GenericIdGenerator implements IdGenerator {
     private static final TimeBasedGenerator timeBasedGenerator
             = Generators.timeBasedGenerator();
 
-    public ListMultimap<String, String> handleIdCollision(List<String> scopeIds, Bundle bundle) {
+    public ListMultimap<String, String> handleIdCollision(Collection<String> scopeIds, Bundle bundle) {
         throw new RuntimeException(String.format("Index collision generating identifier for item type '%s' with data: '%s'",
                 bundle.getType().getName(), bundle));
     }
@@ -34,7 +35,7 @@ public enum GenericIdGenerator implements IdGenerator {
      * @param bundle   The entity's bundle data
      * @return A generated ID string
      */
-    public String generateId(Iterable<String> scopeIds, Bundle bundle) {
+    public String generateId(Collection<String> scopeIds, Bundle bundle) {
         return getIdBase(bundle);
     }
 

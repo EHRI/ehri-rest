@@ -18,7 +18,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
        protected final String SINGLE_EAD = "EHRI-test-ead-fin.xml";
        protected final String SINGLE_EAD_ENG = "EHRI-test-ead.xml";
     // Depends on fixtures
-    protected final String TEST_REPO = "r1",
+    protected final String
             C1 = "VAKKA-326611.KA",
             C2 = "VAKKA-3058288.KA";
     
@@ -27,13 +27,12 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
     @Test
     public void testImportItemsT() throws Exception {
 
-         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
         System.out.println(count);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
                 .setTolerant(Boolean.TRUE);
         // Before...
 //       List<VertexProxy> graphState1 = getGraphState(graph);

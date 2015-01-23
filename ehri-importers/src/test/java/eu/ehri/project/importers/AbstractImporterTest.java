@@ -4,11 +4,16 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.test.AbstractFixtureTest;
+
+import org.junit.After;
+import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +24,36 @@ import java.io.PrintStream;
  */
 public class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
+
+    /**
+     * Shared import manager
+     */
+    protected AbstractImportManager importManager;
+    protected Repository repository;
+    // Depends on fixtures
+    protected final String TEST_REPO = "r1";
+
+    /**
+     * Calls setUp in superclass and initialises the repository
+     */
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        repository = manager.getFrame(TEST_REPO, Repository.class);
+    }
+
+    /**
+     * Resets the shared import manager after a Test.
+     * @throws Exception 
+     */
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        logger.debug("Cleaning up after test: reset importManager");
+        importManager = null;
+    }
 
     protected void printGraph(FramedGraph<?> graph) {
         int vcount = 0;

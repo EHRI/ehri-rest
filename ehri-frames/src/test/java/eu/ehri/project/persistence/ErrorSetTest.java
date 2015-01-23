@@ -51,7 +51,7 @@ public class ErrorSetTest {
         ErrorSet es1 = ErrorSet.fromError("foo", "bad");
         ErrorSet es2 = ErrorSet.fromError("bar", "baz");
         ImmutableMultimap<String,ErrorSet> rel
-                = ImmutableMap.<String, ErrorSet>of("rel", es2).asMultimap();
+                = ImmutableMap.of("rel", es2).asMultimap();
         ErrorSet es3 = es1.withRelations(rel);
         assertEquals(Lists.newArrayList(es2), es3.getRelations("rel"));
     }

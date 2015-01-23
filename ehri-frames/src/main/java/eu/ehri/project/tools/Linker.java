@@ -2,6 +2,7 @@ package eu.ehri.project.tools;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
@@ -26,6 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -40,11 +44,29 @@ public class Linker {
     private static final Logger logger = LoggerFactory.getLogger(Linker.class);
 
     private static final String LINK_TYPE = "associative";
+    private static final String DEFAULT_LANG = "eng";
 
     private final FramedGraph<?> graph;
+    private final boolean tolerant;
+    private final boolean excludeSingles;
+    private final Set<String> accessPointTypes;
+    private final String defaultLanguageCode;
+    private final Optional<String> logMessage;
+
+    private Linker(FramedGraph<?> graph, final Set<String> accessPointTypes,
+            final String defaultLanguageCode, final Optional<String> logMessage,
+            boolean tolerant, boolean excludeSingles) {
+        this.graph = graph;
+        this.accessPointTypes = accessPointTypes;
+        this.defaultLanguageCode = defaultLanguageCode;
+        this.tolerant = tolerant;
+        this.excludeSingles = excludeSingles;
+        this.logMessage = logMessage;
+    }
 
     public Linker(FramedGraph<?> graph) {
-        this.graph = graph;
+        this(graph, Sets.<String>newHashSet(),
+                DEFAULT_LANG, Optional.<String>absent(), false, true);
     }
 
     /**
@@ -65,14 +87,6 @@ public class Linker {
      * @param repository       the repository
      * @param vocabulary       an existing (presumably empty) vocabulary
      * @param user             the user to whom to attribute the operation
-     * @param languageCode     the language to use for the concept descriptions
-     * @param accessPointTypes the access point types to include. If an empty
-     *                         list is provided <b>all</b> access points will
-     *                         be created as concepts
-     * @param logMessage       a log message to use for the creation actions
-     * @param tolerant         proceed even if there are integrity errors caused
-     *                         by two distinct concept names slugifying to the
-     *                         same string
      * @return the number of new links created
      * @throws ItemNotFound
      * @throws ValidationError
@@ -81,16 +95,13 @@ public class Linker {
     public long createAndLinkRepositoryVocabulary(
             Repository repository,
             Vocabulary vocabulary,
-            UserProfile user,
-            String languageCode,
-            List<String> accessPointTypes,
-            Optional<String> logMessage,
-            boolean tolerant)
+            UserProfile user)
             throws ItemNotFound, ValidationError, PermissionDenied {
 
         // First, build a map of access point names to (null) concepts
         Map<String, String> conceptIdentifierNames = Maps.newHashMap();
         Map<String, Optional<Concept>> identifierConcept = Maps.newHashMap();
+        Map<String, Integer> identifierCount = Maps.newHashMap();
 
         for (DocumentaryUnit doc : repository.getAllCollections()) {
             for (DocumentDescription description : doc.getDocumentDescriptions()) {
@@ -108,6 +119,10 @@ public class Linker {
                         } else {
                             conceptIdentifierNames.put(identifier, trimmedName);
                             identifierConcept.put(identifier, Optional.<Concept>absent());
+                            int count = identifierCount.containsKey(identifier)
+                                    ? identifierCount.get(identifier)
+                                    : 0;
+                            identifierCount.put(identifier, count + 1);
                         }
                     }
                 }
@@ -116,7 +131,7 @@ public class Linker {
 
         // Abort if we've got no concepts - this avoids creating
         // an event unnecessarily...
-        if (identifierConcept.isEmpty()) {
+        if (!willCreateItems(identifierCount, excludeSingles)) {
             return 0L;
         }
 
@@ -130,11 +145,17 @@ public class Linker {
         for (Map.Entry<String, String> idName : conceptIdentifierNames.entrySet()) {
             String identifier = idName.getKey();
             String name = idName.getValue();
+
+            // if we're excluding "unique" access points, skip this...
+            if (identifierCount.get(identifier) < 2 && excludeSingles) {
+                continue;
+            }
+
             Bundle conceptBundle = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                     .addDataValue(Ontology.IDENTIFIER_KEY, identifier)
                     .addRelation(Ontology.DESCRIPTION_FOR_ENTITY, Bundle.Builder
                             .withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION)
-                            .addDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, languageCode)
+                            .addDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguageCode)
                             .addDataValue(Ontology.NAME_KEY, name)
                             .build())
                     .build();
@@ -174,8 +195,13 @@ public class Linker {
                             .contains(relationship.getRelationshipType())) {
 
                         String identifier = getIdentifier(relationship);
+                        // if we're excluding "unique" access points, skip this...
+                        if (identifierCount.get(identifier) < 2 && excludeSingles) {
+                            continue;
+                        }
+
                         Optional<Concept> conceptOpt = identifierConcept.get(identifier);
-                        if (conceptOpt.isPresent()) {
+                        if (conceptOpt != null && conceptOpt.isPresent()) {
                             Concept concept = conceptOpt.get();
                             Bundle linkBundle = Bundle.Builder.withClass(EntityClass.LINK)
                                     .addDataValue(Ontology.LINK_HAS_TYPE, LINK_TYPE)
@@ -195,7 +221,111 @@ public class Linker {
         return linkCount;
     }
 
-    private String getIdentifier(UndeterminedRelationship relationship) {
+    /**
+     * Set the linker to ignore concepts which would only connect to a single
+     * item.
+     *
+     * @param excludeSingles a boolean value
+     * @return a new linker object
+     */
+    public Linker withExcludeSingles(boolean excludeSingles) {
+        return new Linker(graph, accessPointTypes, DEFAULT_LANG,
+                logMessage, tolerant, excludeSingles);
+    }
+
+    /**
+     * Set the linker to proceed even if there are integrity errors caused
+     * by two distinct concept names slugifying to the
+     * same string.
+     *
+     * @param tolerant a boolean value
+     * @return a new linker object
+     */
+    public Linker withTolerant(boolean tolerant) {
+        return new Linker(graph, accessPointTypes, DEFAULT_LANG,
+                logMessage, tolerant, excludeSingles);
+    }
+
+    /**
+     * Set the default language code to use for concept descriptions.
+     *
+     * @param defaultLanguageCode a three-letter ISO-639-2 code
+     * @return a new linker object
+     */
+    public Linker withDefaultLanguage(String defaultLanguageCode) {
+        return new Linker(graph, accessPointTypes, checkNotNull(defaultLanguageCode),
+                logMessage, tolerant, excludeSingles);
+    }
+
+    /**
+     * Set the log message for the created items.
+     *
+     * @param logMessage    a descriptive string
+     * @return a new linker object
+     */
+    public Linker withLogMessage(String logMessage) {
+        return new Linker(graph, accessPointTypes, checkNotNull(defaultLanguageCode),
+                Optional.fromNullable(logMessage), tolerant, excludeSingles);
+    }
+
+    /**
+     * Set the log message for the created items.
+     *
+     * @param logMessage    a descriptive string
+     * @return a new linker object
+     */
+    public Linker withLogMessage(Optional<String> logMessage) {
+        return new Linker(graph, accessPointTypes, checkNotNull(defaultLanguageCode),
+                checkNotNull(logMessage), tolerant, excludeSingles);
+    }
+
+    /**
+     * Set the linker to include <b>only</b> the given access point types, discarding
+     * those already configured. If an empty list is given, all access point types
+     * will be included.
+     *
+     * @param accessPointTypes a list of access point types
+     * @return a new linker object
+     */
+    public Linker withAccessPointTypes(List<String> accessPointTypes) {
+        return new Linker(graph, Sets.newHashSet(checkNotNull(accessPointTypes)),
+                defaultLanguageCode, logMessage, tolerant, excludeSingles);
+    }
+
+    /**
+     * Set the linker to include the given access point type, in addition
+     * to those already configured.
+     *
+     * @param accessPointType an access point type string
+     * @return a new linker object
+     */
+    public Linker withAccessPointType(String accessPointType) {
+        Set<String> tmp = Sets.newHashSet(checkNotNull(accessPointTypes));
+        tmp.add(accessPointType);
+        return new Linker(graph, tmp, defaultLanguageCode,
+                logMessage, tolerant, excludeSingles);
+    }
+
+    // Helpers...
+
+    private static boolean willCreateItems(Map<String, Integer> identifierCounts, boolean excludeSingles) {
+        if (identifierCounts.size() == 0) {
+            return false;
+        } else if (excludeSingles) {
+            Integer maxCount = 0;
+            for (Integer c : identifierCounts.values()) {
+                if (c != null && c > maxCount) {
+                    maxCount = c;
+                }
+            }
+            if (maxCount < 2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String getIdentifier(UndeterminedRelationship relationship) {
         return Slugify.slugify(relationship.getName().trim())
                 .replaceAll("^-+", "")
                 .replaceAll("-+$", "");

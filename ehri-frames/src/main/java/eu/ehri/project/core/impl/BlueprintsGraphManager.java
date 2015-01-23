@@ -133,7 +133,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         // Ugh, we don't want to remove duplicate results here
         // because that's not expected behaviour - if you give
         // an array with dups you expect the dups to come out...
-        List<Vertex> verts = Lists.newLinkedList();
+        List<Vertex> verts = Lists.newArrayList();
         for (String id : ids) {
             verts.add(getVertex(id));
         }
@@ -286,7 +286,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     private Collection<String> getVertexKeys(Iterable<String> keys) {
-        List<String> vkeys = Lists.newLinkedList(keys);
+        List<String> vkeys = Lists.newArrayList(keys);
         vkeys.add(EntityType.ID_KEY);
         vkeys.add(EntityType.TYPE_KEY);
         return vkeys;

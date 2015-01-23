@@ -6,8 +6,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -30,13 +28,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Importer of Map based representations of documentary units, historical agents,
+ * virtual collections and other entities. Does not implement the actual
+ * import methods.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- *
  */
-public abstract class XmlImporter<T> extends AbstractImporter<T> {
+public abstract class MapImporter extends AbstractImporter<Map<String, Object>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(XmlImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(MapImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
     private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
@@ -62,7 +62,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
-    public XmlImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public MapImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
 
@@ -82,6 +82,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
      *
      * @param data
      */
+    @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = new LinkedList<Map<String, Object>>();
         Object value;
@@ -118,7 +119,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
      * Extract an Iterable of representations of maintenance events from the itemData.
      * 
      * @param itemData a Map containing raw properties of a unit
-     * @return
+     * @return a List of node representations of maintenance events (may be empty)
      */
     @Override
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
@@ -135,21 +136,22 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     }
     
     /**
-     * Extract a representations of maintenance events from the maintenanceEvent data.
+     * Convert a representation of a maintenance event from the maintenanceEvent data,
+     * using property names from MaintenanceEvent.
      * 
-     * @param event
-     * @return 
+     * @param event a Map of event properties
+     * @return a correct node representation of a single maintenance event
      */
     @Override
     public Map<String, Object> getMaintenanceEvent(Map<String, Object> event) {
         Map<String, Object> me = new HashMap<String, Object>();
-        for (String eventkey : event.keySet()) {
-            if (eventkey.equals("maintenanceEvent/type")) {
-                me.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-            } else if (eventkey.equals("maintenanceEvent/agentType")) {
-                me.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
+        for (Entry<String, Object> eventEntry : event.entrySet()) {
+            if (eventEntry.getKey().equals("maintenanceEvent/type")) {
+                me.put(MaintenanceEvent.EVENTTYPE, eventEntry.getValue());
+            } else if (eventEntry.getKey().equals("maintenanceEvent/agentType")) {
+                me.put(MaintenanceEvent.AGENTTYPE, eventEntry.getValue());
             } else {
-                me.put(eventkey, event.get(eventkey));
+                me.put(eventEntry.getKey(), eventEntry.getValue());
             }
         }
         if (!me.containsKey(MaintenanceEvent.EVENTTYPE)) {

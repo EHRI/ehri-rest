@@ -511,7 +511,7 @@ public final class AclManager {
         if (belongsToAdmin(accessor)) {
             return Lists.newArrayList(PermissionType.values());
         } else {
-            List<PermissionType> list = Lists.newLinkedList();
+            List<PermissionType> list = Lists.newArrayList();
             // Cache a set of permission scopes. This is the hierarchy on which
             // permissions are granted. For most items it will contain zero
             // entries and thus be pretty fast, but for deeply nested

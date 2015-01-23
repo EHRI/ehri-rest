@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public abstract class CsvAuthoritativeItemImporter extends XmlImporter<Object> {
+public abstract class CsvAuthoritativeItemImporter extends MapImporter {
 
 //    private final XmlImportProperties p = new XmlImportProperties("csvconcept.properties");
 
@@ -151,8 +151,4 @@ public abstract class CsvAuthoritativeItemImporter extends XmlImporter<Object> {
         return l;
     }
 
-    @Override
-    public Iterable<Map<String, Object>> extractDates(Object data) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

@@ -3,6 +3,7 @@ package eu.ehri.project.models.idgen;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
+import java.util.Collection;
 import java.util.List;
 
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
@@ -18,7 +19,7 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    public ListMultimap<String,String> handleIdCollision(List<String> scopeIds, Bundle bundle) {
+    public ListMultimap<String,String> handleIdCollision(Collection<String> scopeIds, Bundle bundle) {
         return IdGeneratorUtils.handleIdCollision(scopeIds, IDENTIFIER_KEY, getIdBase(bundle));
     }
 
@@ -31,7 +32,7 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
      * @param bundle The bundle
      * @return The calculated identifier
      */
-    public String generateId(Iterable<String> scopeIds, Bundle bundle) {
+    public String generateId(Collection<String> scopeIds, Bundle bundle) {
         return IdGeneratorUtils.generateId(scopeIds, bundle, getIdBase(bundle));
     }
 
