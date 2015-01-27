@@ -38,23 +38,23 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
        List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties")).importFile(ios, logMessage);
-//        printGraph(graph);
+        printGraph(graph);
         
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
+       diff.printDebug(System.out);
 
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)
        	// - 1 more DocumentDescription
-        // - 2 more DatePeriod
+        // - 1 more DatePeriod
         // - 1 more UnknownProperties
         // - 3 more Relationships
         // - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 5 more MaintenanceEvents (4 revised, 1 created)
-        int newCount = origCount + 9+2+4+1;
+        int newCount = origCount + 9+1+4+1;
 
         assertEquals(newCount, getNodeCount(graph));
         
@@ -77,7 +77,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
     //test dates
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
         	// Single date is just a string
-        	assertEquals("1906/19, 1922/45", d.asVertex().getProperty("unitDates"));
+        	assertEquals("1906/19", d.asVertex().getProperty("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1906-01-01", dp.getStartDate());
         		assertEquals("1919-12-31", dp.getEndDate());

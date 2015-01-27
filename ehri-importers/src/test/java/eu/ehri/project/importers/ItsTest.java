@@ -21,7 +21,6 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.IOException;
@@ -169,10 +168,17 @@ public class ItsTest extends AbstractImporterTest {
         
         DocumentaryUnit u = graph.frame(
                 getVertexByIdentifier(graph, "R 2"), DocumentaryUnit.class);
-        boolean foundDoc=false;
+        
+            boolean foundOtherIdentifier = false;
+            for(String s : (List<String>) u.asVertex().getProperty("otherIdentifiers")){
+                if(s.equals("Folder 0143"))
+                    foundOtherIdentifier=true;
+            }
+            assertTrue(foundOtherIdentifier);
+
+            boolean foundDoc=false;
         for(DocumentDescription d : u.getDocumentDescriptions()){
             assertEquals("R 2 Geheime Staatspolizei (Gestapo).ead#DEU", d.asVertex().getProperty("sourceFileId"));
-            assertEquals("Folder 0143", d.asVertex().getProperty("relatedUnitsOfDescription"));
             
             assertTrue(((String) d.asVertex().getProperty("processInfo")).equals("ITS employee"));
             foundDoc=true;
