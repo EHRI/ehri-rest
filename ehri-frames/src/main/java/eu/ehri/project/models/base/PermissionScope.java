@@ -33,6 +33,10 @@ public interface PermissionScope extends IdentifiableEntity {
     @JavaHandler
     public Iterable<Frame> getAllContainedItems();
 
+    /**
+     * Get the path of the permission scope as an ordered collection of strings.
+     * @return an ordered Collection of Strings that forms the 'path'.
+     */
     @JavaHandler
     public Collection<String> idPath();
 

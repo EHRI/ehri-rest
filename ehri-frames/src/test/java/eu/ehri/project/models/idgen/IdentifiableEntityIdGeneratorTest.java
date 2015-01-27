@@ -9,6 +9,7 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -50,14 +51,15 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
     }
 
     /**
-     * If a child unit's ID includes the parent's unit ID, do not
-     * duplicate. Tests {@link eu.ehri.project.models.idgen.IdGeneratorUtils.joinPath(Collection<String>)}
+     * If a child unit's ID includes the parent's unit ID as a prefix, do not
+     * duplicate. The prefix check is case sensitive.
+     * Tests {@link eu.ehri.project.models.idgen.IdGeneratorUtils.joinPath(Collection<String>)}
      *
      * @author Ben Companjen (https://github.com/bencomp)
      * @throws Exception
      */
     @Test
-    public void testGenerateIdWithDupeStringScopes() throws Exception {
+    public void testGenerateIdWithPartialDupeStringScopes() throws Exception {
         List<String> ids = Lists.newArrayList("r1", "Fonds 1",
                 "Fonds 1 / Subfonds 1", "Fonds 1 / Subfonds 1 / Item 3");
         String id = IdGeneratorUtils.joinPath(ids);
@@ -76,7 +78,38 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
                 "COLLECTION.JMP.SHOAH/T/2/A/1", "COLLECTION.JMP.SHOAH/T/2/A/1a",
                 "COLLECTION.JMP.SHOAH/T/2/A/1a/028", "DOCUMENT.JMP.SHOAH/T/2/A/1a/028");
         String id4 = IdGeneratorUtils.joinPath(ids4);
+        // special prefixes are not treated in 'smart' way
         assertEquals("cz-002279-collection-jmp-shoah-t-2-a-1a-028-document-jmp-shoah-t-2-a-1a-028", id4);
+
+        // The check is case sensitive, so prefix is repeated if case is different
+        List<String> ids5 = Lists.newArrayList("de-002409", "DE ITS 1.1.0", "de ITS 1.1.0.2", "2399000");
+        String id5 = IdGeneratorUtils.joinPath(ids5);
+        assertEquals("de-002409-de-its-1-1-0-de-its-1-1-0-2-2399000", id5);
+
+    }
+
+    /**
+     * If a child unit's ID is the parent's unit ID, duplicate it.
+     * Tests {@link eu.ehri.project.models.idgen.IdGeneratorUtils.joinPath(Collection<String>)}
+     *
+     * @author Ben Companjen (https://github.com/bencomp)
+     * @throws Exception
+     */
+    @Test
+    public void testGenerateIdWithDupeStringScopes() throws Exception {
+        List<String> ids = Lists.newArrayList("r1", "Fonds 1",
+                "Thing 1", "Thing 1", "Thing 2");
+        String id = IdGeneratorUtils.joinPath(ids);
+        assertEquals("r1-fonds-1-thing-1-thing-1-thing-2", id);
+
+        // !"MAP".equals("map")
+        List<String> ids2 = Lists.newArrayList("il-002798", "M.40", "MAP", "map");
+        String id2 = IdGeneratorUtils.joinPath(ids2);
+        assertEquals("il-002798-m-40-map-map", id2);
+
+        List<String> ids3 = Lists.newArrayList("de-002409", "DE ITS 1.1.0", "1.1.0", "1.1.0", "2399000");
+        String id3 = IdGeneratorUtils.joinPath(ids3);
+        assertEquals("de-002409-de-its-1-1-0-1-1-0-1-1-0-2399000", id3);
 
     }
 

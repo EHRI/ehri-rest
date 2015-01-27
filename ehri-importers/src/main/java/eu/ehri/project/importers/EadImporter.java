@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -19,11 +20,14 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.utils.Slugify;
 import eu.ehri.project.views.impl.CrudViews;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +70,7 @@ public class EadImporter extends EaImporter {
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
-     * @param itemData The data map
+     * @param itemData The raw data map
      * @param idPath The identifiers of parent documents,
      *               not including those of the overall permission scope
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
@@ -85,7 +89,7 @@ public class EadImporter extends EaImporter {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
         }
-        logger.debug("Imported item: " + itemData.get("name"));
+        logger.debug("Importing item: {}", itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -93,7 +97,7 @@ public class EadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
-            logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
+            logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
             for(String s : rel.keySet()){
                 logger.debug(s);
             }
@@ -105,7 +109,7 @@ public class EadImporter extends EaImporter {
             for(String u : unknowns.keySet()){
                 unknownProperties.append(u);
             }
-            logger.debug("Unknown Properties found: " + unknownProperties.toString());
+            logger.debug("Unknown Properties found: {}", unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
@@ -137,38 +141,47 @@ public class EadImporter extends EaImporter {
 
 
     }
-/**
-     * finds any bundle in the graph with the same ObjectIdentifier.
-     * if it exists it replaces the Description in the given language, else it just saves it
+
+    /**
+     * Finds any bundle in the graph with the same ObjectIdentifier.
+     * If there is no bundle with this identifier, it is created.
+     * If it exists and a Description in the given language exists from the same source file,
+     * the description is replaced. If the description is from another source, it is added to the
+     * bundle's descriptions.
      *
-     * @param unit       - the DocumentaryUnit to be saved
-     * @param descBundle - the documentsDescription to replace any previous ones with this language
+     * @param unit       the DocumentaryUnit to be saved
+     * @param descBundle the documentsDescription to replace any previous ones with this language
+     * @param idPath     the ID path of this bundle (will be relative to the ID path of the permission scope)
      * @return A bundle with description relationships merged.
      * @throws ValidationError
      */
-
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
+
+        logger.debug("merging: descBundle's language = {}, sourceFileId = {}",
+                languageOfDesc, thisSourceFileId);
         /*
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
          */
         List<String> lpath = new ArrayList<String>();
-        for(String p : getPermissionScope().idPath()){
+        for (String p : getPermissionScope().idPath()) {
             lpath.add(p);
         }
-        for(String p : idPath){
+        for (String p : idPath) {
             lpath.add(p);
         }
-        Bundle withIds = unit.generateIds(lpath);                
-        
-        if (manager.exists(withIds.getId())) {
+        Bundle unitWithIds = unit.generateIds(lpath);                
+        logger.debug("merging: docUnit's graph id = {}", unitWithIds.getId());
+        // If the bundle exists, we merge
+        if (manager.exists(unitWithIds.getId())) {
             try {
-                //read the current item’s bundle
+                // read the current item’s bundle
                 Bundle oldBundle = mergeSerializer
-                        .vertexFrameToBundle(manager.getVertex(withIds.getId()));
-                //filter out dependents that a) are descriptions, b) have the same language/code
+                        .vertexFrameToBundle(manager.getVertex(unitWithIds.getId()));
+
+                // filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
                     @Override
                     public boolean remove(String relationLabel, Bundle bundle) {
@@ -183,24 +196,36 @@ public class EadImporter extends EaImporter {
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
                 
-                //if this desc-id already exists, but with a different sourceFileId, 
-                //change the desc-id
-                String defaultDescIdentifier= withIds.getId()+"-"+languageOfDesc.toLowerCase();
-                String newDescIdentifier=withIds.getId()+"-"+thisSourceFileId.toLowerCase().replace("#", "-");
-                if(manager.exists(newDescIdentifier)){
-                        descBundle=descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                } else if(manager.exists(defaultDescIdentifier)){
+                // if this desc-id already exists, but with a different sourceFileId, 
+                // change the desc-id
+                String defaultDescIdentifier = unitWithIds.getId() + "-" + languageOfDesc.toLowerCase();
+                logger.debug("merging: defaultDescIdentifier = {}", defaultDescIdentifier);
+                String newDescIdentifier = defaultDescIdentifier + "-" + Slugify.slugify(thisSourceFileId);
+                logger.debug("merging: newDescIdentifier = {}", newDescIdentifier);
+                String generatedId = DescriptionIdGenerator.INSTANCE.generateId(lpath, filtered);
+                logger.debug("merging: generated ID = {}", generatedId);
+                // First see whether this has been done before and a desc with the new id exists
+                if (manager.exists(newDescIdentifier)) {
+                    descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
+                    String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(lpath, descBundle);
+                    logger.debug("merging: new desc ID exists, new generated ID = {}", anotherGeneratedId);
+                } else if (manager.exists(defaultDescIdentifier)) {
                     Bundle oldDescBundle = mergeSerializer
                         .vertexFrameToBundle(manager.getVertex(defaultDescIdentifier));
                     //if the previous had NO sourcefile_key OR it was different:
-                    if(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
-                            || ! thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())){
-                        descBundle=descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                        logger.info("other description found ("+defaultDescIdentifier+"), creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString());
+                    if (oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
+                            || ! thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())) {
+                        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, thisSourceFileId);
+                        logger.info("other description found ({}), creating new description id: {}",
+                                defaultDescIdentifier,
+                                descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString()
+                                );
+                        String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(lpath, descBundle);
+                        logger.debug("merging: def desc ID exists, source file differs, another generated ID = {}", anotherGeneratedId);
                     }
                 }
 
-                return withIds.withRelations(filtered.getRelations())
+                return unitWithIds.withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
             } catch (SerializationError ex) {
@@ -208,7 +233,7 @@ public class EadImporter extends EaImporter {
             } catch (ItemNotFound ex) {
                 throw new ValidationError(unit, "item not found exception", ex.getMessage());
             }
-        } else {
+        } else { // else we create a new bundle.
             return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
     }
@@ -216,13 +241,13 @@ public class EadImporter extends EaImporter {
     /**
      * subclasses can override this method to cater to their special needs for UndeterminedRelationships
      * by default, it expects something like this in the original EAD:
-     * 
+     *
      * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
-                        Leonhard (* 11.5.1886)</persname>
+     *                   Leonhard (* 11.5.1886)</persname>
      *
      * it works in unison with the extractRelations() method. 
-     * 
-                        * 
+     *
+     *
      * @param unit
      * @param descBundle - not used
      * @throws ValidationError 

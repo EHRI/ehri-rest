@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class IdGeneratorUtils {
     /**
-     * Separate or ID components.
+     * Separator for ID components.
      */
     public static final String SEPARATOR = "-";
 
@@ -68,6 +68,7 @@ public class IdGeneratorUtils {
      *
      * @param scopeIds An array of scope ids
      * @param bundle   The input bundle
+     * @param ident    the item's identifier
      * @return The complete id string
      */
     public static String generateId(final Collection<String> scopeIds, final Bundle bundle, String ident) {
@@ -84,7 +85,9 @@ public class IdGeneratorUtils {
 
     /**
      * Join an identifier path to form a full ID.
-     * If a path part is repeated, only the last occurrence is kept.
+     * If a path part is repeated, only the last occurrence is kept,
+     * except when consecutive parts are exactly the same.
+     * This check is case sensitive.
      *
      * @param path A non-empty list of identifier strings.
      * @return The resultant path ID.
@@ -92,13 +95,13 @@ public class IdGeneratorUtils {
     public static String joinPath(Collection<String> path) {
         List<String> newPaths = Lists.newArrayList();
         // If the current part is what the next part starts with,
-        // don't include it.
+        // don't include it, except when it equals the next part.
         Iterator<String> patti = path.iterator();
         String current = patti.next();
         String next;
         while (patti.hasNext()) {
             next = patti.next();
-            if (!next.startsWith(current)) {
+            if (!next.startsWith(current) || next.equals(current)) {
                 newPaths.add(current);
             }
             current = next;
