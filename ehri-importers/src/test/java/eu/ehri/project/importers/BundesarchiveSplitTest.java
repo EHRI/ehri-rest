@@ -77,7 +77,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
     //test dates
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
         	// Single date is just a string
-        	assertEquals("1906/19", d.asVertex().getProperty("unitDates"));
+        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1906-01-01", dp.getStartDate());
         		assertEquals("1919-12-31", dp.getEndDate());

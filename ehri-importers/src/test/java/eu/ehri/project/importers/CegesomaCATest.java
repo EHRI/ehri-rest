@@ -73,8 +73,7 @@ public class CegesomaCATest extends AbstractImporterTest{
         // Fonds has two dates with different types -> list
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
         	// unitDates still around?
-        	String s = d.asVertex().getProperty("unitDates");
-        	assertEquals("1940-1945", s);
+        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
         	
         	// start and end dates correctly parsed and setup
         	List<DatePeriod> dp = toList(d.getDatePeriods());
