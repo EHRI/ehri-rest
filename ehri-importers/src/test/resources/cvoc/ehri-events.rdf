@@ -30,7 +30,7 @@
 	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
 	<skos:prefLabel>"Teheran Children", 1942-1943</skos:prefLabel>
 	<rdfs:comment>Aliya (emigration to Palestine)</rdfs:comment>
-        <sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000150" ehri-id="ehri-pers-000150" type="person">Globocnik Odilo</sem:hasActor>
+        <sem:hasActor rdf:resource="http://data.ehri-project.eu/auths/a1" ehri-id="ehri-pers-000150" type="person">Globocnik Odilo</sem:hasActor>
 	<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942/1943</sem:hasTime>
 	<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-terms/866" ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</sem:eventType>
 	<skos:broadMatch rdf:resource="http://data.ehri-project.eu/cvoc1/tema=866" ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</skos:broadMatch>
