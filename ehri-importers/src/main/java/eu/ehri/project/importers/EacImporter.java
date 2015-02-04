@@ -231,7 +231,7 @@ public class EacImporter extends EaImporter {
                             try {
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                                         .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
-                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
                                 UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
                                 unit.addLink(link);
