@@ -23,23 +23,33 @@ public abstract class EaHandler extends SaxXmlHandler {
         if (names instanceof String) {
             nameValue = names.toString();
         } else if (names instanceof List) {
-           Object firstname = ((List) names).get(0);
-           if(firstname instanceof String){
-            nameValue=firstname.toString();
-        }else {
-               Map<String, Object> nameMap = (Map)firstname;
-               nameValue = nameMap.get("namePart").toString();
-           }
+            Object firstname = ((List) names).get(0);
+            if (firstname instanceof String) {
+                nameValue = firstname.toString();
+            } else {
+                Map<String, Object> nameMap = (Map) firstname;
+                if(nameMap.get("namePart") instanceof String){
+                  nameValue = nameMap.get("namePart").toString();  
+                }else if(nameMap.get("namePart") instanceof List){
+                    nameValue="";
+                    for(Object p : (List)nameMap.get("namePart")){
+                        nameValue += p.toString()+ " ";
+                    }
+                    
+                }else{
+                    nameValue = nameMap.get("namePart").toString();
+                }
+            }
 //            nameValue = ((List) names).get(0).toString();
             for (int i = 1; i < ((List) names).size(); i++) {
-                Map<String, Object> m = (Map)((List) names).get(i);
-                logger.debug("other name: "+ m.get("namePart"));
+                Map<String, Object> m = (Map) ((List) names).get(i);
+                logger.debug("other name: " + m.get("namePart"));
                 putPropertyInCurrentGraph("otherFormsOfName", m.get("namePart").toString());
             }
         } else {
             logger.warn("no " + Ontology.NAME_KEY + " found");
             nameValue = "no title";
         }
-        return nameValue;
+        return nameValue.trim();
     }
 }
