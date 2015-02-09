@@ -19,7 +19,14 @@ import java.util.List;
 
 /**
  * Util class for re-generating the IDs for a given
- * set of items.
+ * set of items. Hierarchical IDs are used to enforce uniqueness
+ * of identifiers within a particular parent-child scope. In
+ * theory, since identifiers are generally very stable this works
+ * fine, but occasionally they change, invalidating the identifiers
+ * of their child items.
+ * <p/>
+ * We also sometimes tweak the ID generation algorithm itself, which
+ * necessitates bulk ID re-generation.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -28,19 +35,32 @@ public class IdRegenerator {
     private final GraphManager manager;
     private final Serializer depSerializer;
     private final boolean dryrun;
+    private final boolean skipCollisions;
+    private final boolean collisionMode;
 
-    public IdRegenerator(FramedGraph<? extends TransactionalGraph> graph) {
-        this(graph, true);
+    public static class IdCollisionError extends Exception {
+        public IdCollisionError(String from, String to) {
+            super(String.format("Renaming %s to %s collide with existing item",
+                    from, to));
+        }
     }
 
-    private IdRegenerator(FramedGraph<? extends TransactionalGraph> graph, boolean dryrun) {
+    public IdRegenerator(FramedGraph<? extends TransactionalGraph> graph) {
+        this(graph, true, false, false);
+    }
+
+    private IdRegenerator(FramedGraph<? extends TransactionalGraph> graph, boolean dryrun, boolean skipCollisions,
+            boolean collisionMode) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.depSerializer = new Serializer.Builder(graph).dependentOnly().build();
         this.dryrun = dryrun;
+        this.skipCollisions = skipCollisions;
+        this.collisionMode = collisionMode;
     }
 
-    public List<List<String>> reGenerateIds(PermissionScope scope, Iterable<? extends Frame> items) {
+    public List<List<String>> reGenerateIds(PermissionScope scope, Iterable<? extends Frame> items) throws
+            IdCollisionError {
         List<List<String>> remaps = Lists.newArrayList();
         for (Frame item: items) {
             Optional<List<String>> optionalRemap = reGenerateId(scope, item);
@@ -51,7 +71,7 @@ public class IdRegenerator {
         return remaps;
     }
 
-    public List<List<String>> reGenerateIds(Iterable<? extends AccessibleEntity> items) {
+    public List<List<String>> reGenerateIds(Iterable<? extends AccessibleEntity> items) throws IdCollisionError {
         List<List<String>> remaps = Lists.newArrayList();
         for (AccessibleEntity item: items) {
             Optional<List<String>> optionalRemap = reGenerateId(item);
@@ -62,11 +82,12 @@ public class IdRegenerator {
         return remaps;
     }
 
-    public Optional<List<String>> reGenerateId(AccessibleEntity item) {
+    public Optional<List<String>> reGenerateId(AccessibleEntity item) throws IdCollisionError {
         return reGenerateId(item.getPermissionScope(), item);
     }
 
-    public Optional<List<String>> reGenerateId(PermissionScope permissionScope, Frame item) {
+    public Optional<List<String>> reGenerateId(PermissionScope permissionScope, Frame item)
+            throws IdCollisionError {
         String currentId = item.getId();
         Collection<String> idChain = Lists.newArrayList();
         if (permissionScope != null && !permissionScope.equals(SystemScope.getInstance())) {
@@ -76,14 +97,31 @@ public class IdRegenerator {
         EntityClass entityClass = manager.getEntityClass(item);
         try {
             String newId = entityClass.getIdgen().generateId(idChain, depSerializer.vertexFrameToBundle(item));
-            if (!newId.equals(currentId)) {
-                if (!dryrun) {
-                    manager.renameVertex(item.asVertex(), currentId, newId);
+            if (collisionMode) {
+                if (!newId.equals(currentId) && manager.exists(newId)) {
+                    List<String> collision = Lists.newArrayList(currentId, newId);
+                    return Optional.of(collision);
+                } else {
+                    return Optional.absent();
                 }
-                List<String> remap = Lists.newArrayList(currentId, newId);
-                return Optional.of(remap);
             } else {
-                return Optional.absent();
+                if (!newId.equals(currentId)) {
+                    if (manager.exists(newId)) {
+                        if (!skipCollisions) {
+                            throw new IdCollisionError(currentId, newId);
+                        } else {
+                            return Optional.absent();
+                        }
+                    } else {
+                        if (!dryrun) {
+                            manager.renameVertex(item.asVertex(), currentId, newId);
+                        }
+                        List<String> remap = Lists.newArrayList(currentId, newId);
+                        return Optional.of(remap);
+                    }
+                } else {
+                    return Optional.absent();
+                }
             }
         } catch (SerializationError e) {
             throw new RuntimeException(e);
@@ -99,6 +137,30 @@ public class IdRegenerator {
      * @return a new, more dangerous, re-generator
      */
     public IdRegenerator withActualRename(boolean doIt) {
-        return new IdRegenerator(graph, !doIt);
+        return new IdRegenerator(graph, !doIt, skipCollisions, collisionMode);
+    }
+
+    /**
+     * Obtain a re-generator that will skip items that would collide
+     * with existing items.
+     *
+     * @param skipCollisions whether or not to error on an ID collision
+     *
+     * @return a new, more tolerant, re-generator
+     */
+    public IdRegenerator skippingCollisions(boolean skipCollisions) {
+        return new IdRegenerator(graph, dryrun, skipCollisions, collisionMode);
+    }
+
+    /**
+     * Obtain a re-generator that only outputs items with IDs that if renamed
+     * would collide with another item's ID.
+     *
+     * @param collisionMode only output items that would collide if renamed
+     *
+     * @return a new, more tolerant, re-generator
+     */
+    public IdRegenerator collisionMode(boolean collisionMode) {
+        return new IdRegenerator(graph, dryrun, skipCollisions, collisionMode);
     }
 }

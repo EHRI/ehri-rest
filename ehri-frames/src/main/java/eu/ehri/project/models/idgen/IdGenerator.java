@@ -14,11 +14,6 @@ import java.util.List;
 public interface IdGenerator {
 
     /**
-     * Handle an id collision by either a validation error depending
-     * on how the id was generated, or a RuntimeError.
-     *
-     *
-     *
      * @param scopeIds  The entity's parent scope identifiers
      * @param bundle The entity's bundle data
      * @return A set of errors

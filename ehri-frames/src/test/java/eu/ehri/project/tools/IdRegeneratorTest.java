@@ -2,6 +2,7 @@ package eu.ehri.project.tools;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -38,6 +39,50 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
         assertEquals("nl-r1-c1", beforeAfter.get(1));
         // It shouldn't actually do anything by default...
         assertEquals("c1", doc.getId());
+    }
+
+    @Test(expected = IdRegenerator.IdCollisionError.class)
+    public void testReGenerateIdWithCollision() throws Exception {
+        DocumentaryUnit doc1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc2 = manager.getFrame("c4", DocumentaryUnit.class);
+        // Give c4 its "natural" ID
+        Optional<List<String>> regen = idRegenerator
+                .withActualRename(true).reGenerateId(doc2);
+        assertTrue(regen.isPresent());
+        // Sneakily change the identifier property to trigger a collision
+        manager.setProperty(doc1.asVertex(), Ontology.IDENTIFIER_KEY, "c4");
+        idRegenerator.reGenerateId(doc1);
+    }
+
+    @Test
+    public void testCollisionMode() throws Exception {
+        DocumentaryUnit doc1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc2 = manager.getFrame("c4", DocumentaryUnit.class);
+        // Give c4 its "natural" ID
+        Optional<List<String>> regen = idRegenerator
+                .withActualRename(true).reGenerateId(doc2);
+        assertTrue(regen.isPresent());
+        // Sneakily change the identifier property to trigger a collision
+        manager.setProperty(doc1.asVertex(), Ontology.IDENTIFIER_KEY, "c4");
+        Optional<List<String>> optionalCollision = idRegenerator
+                .collisionMode(true)
+                .reGenerateId(doc1);
+        assertTrue(optionalCollision.isPresent());
+    }
+
+    @Test
+    public void testReGenerateIdWSkippingCollisions() throws Exception {
+        DocumentaryUnit doc1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc2 = manager.getFrame("c4", DocumentaryUnit.class);
+        // Give c4 its "natural" ID
+        Optional<List<String>> regen = idRegenerator
+                .withActualRename(true)
+                .reGenerateId(doc2);
+        assertTrue(regen.isPresent());
+        // Sneakily change the identifier property to trigger a collision
+        manager.setProperty(doc1.asVertex(), Ontology.IDENTIFIER_KEY, "c4");
+        assertFalse(idRegenerator
+                .skippingCollisions(true).reGenerateId(doc1).isPresent());
     }
 
     @Test

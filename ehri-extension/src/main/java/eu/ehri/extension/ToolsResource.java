@@ -8,7 +8,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -215,10 +214,21 @@ public class ToolsResource extends AbstractRestResource {
      * Regenerate the hierarchical graph ID for a given item, optionally
      * renaming it.
      *
-     * @param id the item's existing ID
-     * @param commit whether or not to rename the item
+     * The default mode is to output items whose IDs would change, without
+     * actually changing them. The {@code collisions} parameter will <b>only</b>
+     * output items that would cause collisions if renamed, whereas {@code tolerant}
+     * mode will skip them altogether.
+     *
+     * The {@code commit} flag will cause renaming to take place.
+     *
+     * @param id         the item's existing ID
+     * @param collisions only output items that if renamed to the
+     *                   regenerated ID would cause collisions
+     * @param tolerant   skip items that could cause collisions rather
+     *                   then throwing an error
+     * @param commit     whether or not to rename the item
      * @return a tab old->new mapping, or an empty
-     *          body if nothing was changed
+     * body if nothing was changed
      * @throws ItemNotFound
      * @throws IOException
      */
@@ -227,12 +237,16 @@ public class ToolsResource extends AbstractRestResource {
     @Path("/_regenerateId/{id:.+}")
     public String regenerateId(
             @PathParam("id") String id,
+            @QueryParam("collisions") @DefaultValue("false") boolean collisions,
+            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
-            throws ItemNotFound, IOException {
+            throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Optional<List<String>> remap = new IdRegenerator(graph)
                     .withActualRename(commit)
+                    .collisionMode(collisions)
+                    .skippingCollisions(tolerant)
                     .reGenerateId(item);
             graph.getBaseGraph().commit();
             return makeCsv(Lists.newArrayList(remap.asSet()));
@@ -245,10 +259,21 @@ public class ToolsResource extends AbstractRestResource {
      * Regenerate the hierarchical graph ID all items of a given
      * type.
      *
-     * @param type the item type
-     * @param commit whether or not to rename the items
+     * The default mode is to output items whose IDs would change, without
+     * actually changing them. The {@code collisions} parameter will <b>only</b>
+     * output items that would cause collisions if renamed, whereas {@code tolerant}
+     * mode will skip them altogether.
+     *
+     * The {@code commit} flag will cause renaming to take place.
+     *
+     * @param type       the item type
+     * @param collisions only output items that if renamed to the
+     *                   regenerated ID would cause collisions
+     * @param tolerant   skip items that could cause collisions rather
+     *                   then throwing an error
+     * @param commit     whether or not to rename the items
      * @return a tab list old->new mappings, or an empty
-     *          body if nothing was changed
+     * body if nothing was changed
      * @throws IOException
      */
     @POST
@@ -256,8 +281,10 @@ public class ToolsResource extends AbstractRestResource {
     @Path("/_regenerateIdsForType/{type:.+}")
     public String regenerateIdsForType(
             @PathParam("type") String type,
+            @QueryParam("collisions") @DefaultValue("false") boolean collisions,
+            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
-            throws IOException {
+            throws IOException, IdRegenerator.IdCollisionError {
         try {
             EntityClass entityClass = EntityClass.withName(type);
             CloseableIterable<AccessibleEntity> frames = manager
@@ -265,6 +292,8 @@ public class ToolsResource extends AbstractRestResource {
             try {
                 List<List<String>> lists = new IdRegenerator(graph)
                         .withActualRename(commit)
+                        .collisionMode(collisions)
+                        .skippingCollisions(tolerant)
                         .reGenerateIds(frames);
                 graph.getBaseGraph().commit();
                 return makeCsv(lists);
@@ -280,10 +309,21 @@ public class ToolsResource extends AbstractRestResource {
      * Regenerate the hierarchical graph ID all items within the
      * immediate permission scope (not all items recursively.)
      *
-     * @param scopeId the scope item's ID
-     * @param commit whether or not to rename the items
+     * The default mode is to output items whose IDs would change, without
+     * actually changing them. The {@code collisions} parameter will <b>only</b>
+     * output items that would cause collisions if renamed, whereas {@code tolerant}
+     * mode will skip them altogether.
+     *
+     * The {@code commit} flag will cause renaming to take place.
+     *
+     * @param scopeId    the scope item's ID
+     * @param collisions only output items that if renamed to the
+     *                   regenerated ID would cause collisions
+     * @param tolerant   skip items that could cause collisions rather
+     *                   then throwing an error
+     * @param commit     whether or not to rename the items
      * @return a tab list old->new mappings, or an empty
-     *          body if nothing was changed
+     * body if nothing was changed
      * @throws ItemNotFound
      * @throws IOException
      */
@@ -291,13 +331,17 @@ public class ToolsResource extends AbstractRestResource {
     @Produces("text/csv")
     @Path("/_regenerateIdsForScope/{scope:.+}")
     public String regenerateIdsForScope(
-                @PathParam("scope") String scopeId,
-                @QueryParam("commit") @DefaultValue("false") boolean commit)
-            throws IOException, ItemNotFound {
+            @PathParam("scope") String scopeId,
+            @QueryParam("collisions") @DefaultValue("false") boolean collisions,
+            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
+            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         try {
             PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
             List<List<String>> lists = new IdRegenerator(graph)
                     .withActualRename(commit)
+                    .skippingCollisions(tolerant)
+                    .collisionMode(collisions)
                     .reGenerateIds(scope, scope.getContainedItems());
             graph.getBaseGraph().commit();
             return makeCsv(lists);
