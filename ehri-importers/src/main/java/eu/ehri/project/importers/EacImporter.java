@@ -190,6 +190,7 @@ public class EacImporter extends EaImporter {
                 extractBooks(itemData.get(key), description);
             }else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
                     && !key.equals("objectIdentifier")
+                    && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith("maintenanceEvent")
                     && !key.startsWith("IGNORE")

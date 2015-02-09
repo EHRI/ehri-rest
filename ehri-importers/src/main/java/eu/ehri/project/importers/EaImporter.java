@@ -66,6 +66,10 @@ public abstract class EaImporter extends MapImporter {
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
+            logger.debug("otherIdentifiers is not null");
+            unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
+        }
         return unit;
     }
      
