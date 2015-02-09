@@ -1,15 +1,23 @@
 package eu.ehri.extension;
 
+import au.com.bytecode.opencsv.CSVWriter;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.tools.FindReplace;
+import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -21,6 +29,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -199,5 +209,113 @@ public class ToolsResource extends AbstractRestResource {
         } finally {
             cleanupTransaction();
         }
+    }
+
+    /**
+     * Regenerate the hierarchical graph ID for a given item, optionally
+     * renaming it.
+     *
+     * @param id the item's existing ID
+     * @param commit whether or not to rename the item
+     * @return a tab old->new mapping, or an empty
+     *          body if nothing was changed
+     * @throws ItemNotFound
+     * @throws IOException
+     */
+    @POST
+    @Produces("text/csv")
+    @Path("/_regenerateId/{id:.+}")
+    public String regenerateId(
+            @PathParam("id") String id,
+            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            throws ItemNotFound, IOException {
+        try {
+            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
+            Optional<List<String>> remap = new IdRegenerator(graph)
+                    .withActualRename(commit)
+                    .reGenerateId(item);
+            graph.getBaseGraph().commit();
+            return makeCsv(Lists.newArrayList(remap.asSet()));
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Regenerate the hierarchical graph ID all items of a given
+     * type.
+     *
+     * @param type the item type
+     * @param commit whether or not to rename the items
+     * @return a tab list old->new mappings, or an empty
+     *          body if nothing was changed
+     * @throws IOException
+     */
+    @POST
+    @Produces("text/csv")
+    @Path("/_regenerateIdsForType/{type:.+}")
+    public String regenerateIdsForType(
+            @PathParam("type") String type,
+            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            throws IOException {
+        try {
+            EntityClass entityClass = EntityClass.withName(type);
+            CloseableIterable<AccessibleEntity> frames = manager
+                    .getFrames(entityClass, AccessibleEntity.class);
+            try {
+                List<List<String>> lists = new IdRegenerator(graph)
+                        .withActualRename(commit)
+                        .reGenerateIds(frames);
+                graph.getBaseGraph().commit();
+                return makeCsv(lists);
+            } finally {
+                frames.close();
+            }
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Regenerate the hierarchical graph ID all items within the
+     * immediate permission scope (not all items recursively.)
+     *
+     * @param scopeId the scope item's ID
+     * @param commit whether or not to rename the items
+     * @return a tab list old->new mappings, or an empty
+     *          body if nothing was changed
+     * @throws ItemNotFound
+     * @throws IOException
+     */
+    @POST
+    @Produces("text/csv")
+    @Path("/_regenerateIdsForScope/{scope:.+}")
+    public String regenerateIdsForScope(
+                @PathParam("scope") String scopeId,
+                @QueryParam("commit") @DefaultValue("false") boolean commit)
+            throws IOException, ItemNotFound {
+        try {
+            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+            List<List<String>> lists = new IdRegenerator(graph)
+                    .withActualRename(commit)
+                    .reGenerateIds(scope, scope.getContainedItems());
+            graph.getBaseGraph().commit();
+            return makeCsv(lists);
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    // Helpers
+
+    private String makeCsv(List<List<String>> rows) throws IOException {
+        StringWriter writer = new StringWriter();
+        CSVWriter csvWriter = new CSVWriter(writer, '\t', CSVWriter.NO_QUOTE_CHARACTER);
+        for (List<String> remap : rows) {
+            String[] strings = remap.toArray(new String[2]);
+            csvWriter.writeNext(strings);
+        }
+        csvWriter.close();
+        return writer.toString();
     }
 }
