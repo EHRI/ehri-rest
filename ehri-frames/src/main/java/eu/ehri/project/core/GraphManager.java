@@ -210,6 +210,15 @@ public interface GraphManager {
      */
     public void setProperty(Vertex vertex, String key, Object value);
 
+    /**
+     * Rename an existing vertex, changing its ID.
+     *
+     * @param vertex the vertex
+     * @param vertex the old ID
+     * @param newId  the new ID
+     */
+    public void renameVertex(Vertex vertex, String oldId, String newId);
+
     // CRUD functions
 
     /**

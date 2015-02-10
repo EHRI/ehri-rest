@@ -11,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static eu.ehri.extension.ToolsResource.ENDPOINT;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test admin REST functions.
  *
@@ -53,5 +55,43 @@ public class ToolsRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("2", response.getEntity(String.class));
+    }
+
+    @Test
+    public void testRegenerateId() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateId", "c1"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource.post(ClientResponse.class);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertEquals(1, out.split("\r\n|\r|\n").length);
+        assertTrue(out.contains("nl-r1-c1"));
+    }
+
+    @Test
+    public void testRegenerateIdsForScope() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateIdsForScope", "r1"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource.post(ClientResponse.class);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertEquals(2, out.split("\r\n|\r|\n").length);
+        assertTrue(out.contains("nl-r1-c1"));
+        assertTrue(out.contains("nl-r1-c4"));
+    }
+
+    @Test
+    public void testRegenerateIdsForType() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT,
+                "_regenerateIdsForType", "documentaryUnit"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource.post(ClientResponse.class);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertEquals(4, out.split("\r\n|\r|\n").length);
+        assertTrue(out.contains("nl-r1-c1"));
+        assertTrue(out.contains("nl-r1-c1-c2"));
+        assertTrue(out.contains("nl-r1-c1-c2-c3"));
+        assertTrue(out.contains("nl-r1-c4"));
     }
 }

@@ -83,7 +83,7 @@ public class ItsTest extends AbstractImporterTest {
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
 
-        assertEquals("nl-r1-de-its-ous-1-1-7-", unit.getId());
+        assertEquals("nl-r1-de-its-ous-1-1-7", unit.getId());
         // The arch has 1 c01 direct child (and 2 c02 "grandchildren", but these are not counted)
         for (DocumentaryUnit d : unit.getChildren()) {
             logger.debug("Child: " + d.getIdentifier());
