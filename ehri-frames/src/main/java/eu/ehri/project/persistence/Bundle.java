@@ -48,7 +48,7 @@ public final class Bundle {
     /**
      * Filter predicate function interface.
      */
-    public static interface Filter {
+    public interface Filter {
         /**
          * Filter (remove) items in a Bundle tree that
          * match this predicate.
@@ -56,7 +56,7 @@ public final class Bundle {
          * @param bundle The bundle
          * @return  Whether to remove the item
          */
-        public boolean remove(final String relationLabel, final Bundle bundle);
+        boolean remove(final String relationLabel, final Bundle bundle);
     }
 
     /**
