@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -38,7 +39,6 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
        List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties")).importFile(ios, logMessage);
-        printGraph(graph);
         
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
@@ -55,27 +55,29 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
         // - 1 more import Event
         // - 5 more MaintenanceEvents (4 revised, 1 created)
         int newCount = origCount + 9+1+4+1;
+        printGraph(graph);
 
         assertEquals(newCount, getNodeCount(graph));
         
-        DocumentaryUnit archdesc = graph.frame(
+        DocumentaryUnit archUnit = graph.frame(
                 getVertexByIdentifier(graph,ARCHDESC),
                 DocumentaryUnit.class);
 
         // Test ID generation and hierarchy
-        assertEquals("nl-r1-ns-1", archdesc.getId());
+        assertEquals("nl-r1-ns-1", archUnit.getId());
+        assertTrue(archUnit.asVertex().getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
 
-        assertNull(archdesc.getParent());
-        assertEquals(agent, archdesc.getRepository());
-        assertEquals(agent, archdesc.getPermissionScope());
+        assertNull(archUnit.getParent());
+        assertEquals(agent, archUnit.getRepository());
+        assertEquals(agent, archUnit.getPermissionScope());
 
 
     //test titles
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+        for(DocumentDescription d : archUnit.getDocumentDescriptions()){
             assertEquals("Reichsschatzmeister der NSDAP", d.getName());
         }
     //test dates
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+        for(DocumentDescription d : archUnit.getDocumentDescriptions()){
         	// Single date is just a string
         	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
