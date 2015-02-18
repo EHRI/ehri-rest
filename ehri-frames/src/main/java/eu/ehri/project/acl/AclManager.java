@@ -242,14 +242,14 @@ public final class AclManager {
 
         for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap.entrySet()) {
             ContentType target = centry.getValue();
-            Collection<PermissionType> pset = globalsMap.get(centry.getKey());
-            if (pset != null) {
-                for (PermissionType perm : PermissionType.values()) {
-                    if (pset.contains(perm)) {
-                        grantPermission(target, perm, accessor);
-                    } else {
-                        revokePermission(target, perm, accessor);
-                    }
+            Collection<PermissionType> pset = globalsMap.containsKey(centry.getKey())
+                    ? globalsMap.get(centry.getKey())
+                    : Sets.<PermissionType>newHashSet();
+            for (PermissionType perm : PermissionType.values()) {
+                if (pset.contains(perm)) {
+                    grantPermission(target, perm, accessor);
+                } else {
+                    revokePermission(target, perm, accessor);
                 }
             }
         }
