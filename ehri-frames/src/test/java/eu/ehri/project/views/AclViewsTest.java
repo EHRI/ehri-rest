@@ -10,6 +10,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -59,6 +60,23 @@ public class AclViewsTest extends AbstractFixtureTest {
         aclViews.setGlobalPermissionMatrix(group, set, user);
         assertTrue(aclManager
                 .hasPermission(ContentTypes.COUNTRY, PermissionType.PROMOTE, group));
+    }
+
+    @Test
+    public void testSetEmptyGlobalPermissionMatrix() throws Exception {
+        Accessor actioner = manager.getFrame("mike", Accessor.class);
+        Accessor target = manager.getFrame("linda", UserProfile.class);
+        GlobalPermissionSet oldGlobalPermissions = aclManager.getGlobalPermissions(target);
+        assertTrue(oldGlobalPermissions.has(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE));
+        GlobalPermissionSet emptySet = GlobalPermissionSet.newBuilder().build();
+        // This should revoke ALL of Linda's permissions
+        aclViews.setGlobalPermissionMatrix(target, emptySet, actioner);
+        GlobalPermissionSet newGlobalPermissions = aclManager.getGlobalPermissions(target);
+        for (ContentTypes ctype : ContentTypes.values()) {
+            for (PermissionType ptype : PermissionType.values()) {
+                assertFalse(newGlobalPermissions.has(ctype, ptype));
+            }
+        }
     }
 
     @Test
@@ -156,16 +174,17 @@ public class AclViewsTest extends AbstractFixtureTest {
         Group group = manager.getFrame("niod", Group.class);
         Accessor grantee = invalidUser;
         // Grant the user specific permissions to update the group
-        aclManager.grantPermission(graph.frame(user.asVertex(), PermissionGrantTarget.class), PermissionType.GRANT, grantee
-        );
-        aclManager.grantPermission(graph.frame(group.asVertex(), PermissionGrantTarget.class), PermissionType.UPDATE, grantee
-        );
+        aclManager.grantPermission(
+                manager.cast(user, PermissionGrantTarget.class), PermissionType.GRANT, grantee);
+        aclManager.grantPermission(
+                manager.cast(group, PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
         try {
             // This should still fail, because the user doesn't belong
             // to the group himself...
             aclViews.addAccessorToGroup(group, user, grantee);
             fail("User should NOT have had grant permissions!");
         } catch (PermissionDenied e) {
+            // expected...
         }
         // Add the user to the group, so he should then be
         // able to do the adding himself...
@@ -180,23 +199,22 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor grantee = invalidUser;
         assertFalse(aclManager.belongsToAdmin(grantee));
         // Grant the user specific permissions to update the group
-        //new AclManager(graph).grantPermission(grantee, graph.frame(user.asVertex(), PermissionGrantTarget.class),
-        //        PermissionType.GRANT);
         group.addMember(grantee);
         assertFalse(aclManager.belongsToAdmin(grantee));
         // Grant UPDATE permissions on the Group
-        aclManager.grantPermission(graph.frame(user.asVertex(), PermissionGrantTarget.class), PermissionType.GRANT, grantee
-        );
+        aclManager.grantPermission(graph.frame(user.asVertex(),
+                PermissionGrantTarget.class), PermissionType.GRANT, grantee);
         try {
             // This should still fail, because the user does not have UPDATE
             // permissions on the Group
             aclViews.addAccessorToGroup(group, user, grantee);
             fail("User should NOT have had grant permissions!");
         } catch (PermissionDenied e) {
+            // expected...
         }
         // Grant UPDATE permissions on the Group
-        aclManager.grantPermission(graph.frame(group.asVertex(), PermissionGrantTarget.class), PermissionType.UPDATE, grantee
-        );
+        aclManager.grantPermission(
+                manager.cast(group, PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
         aclViews.addAccessorToGroup(group, user, grantee);
     }
 }
