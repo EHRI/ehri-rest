@@ -18,6 +18,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -36,6 +37,22 @@ public class ItsTest extends AbstractImporterTest {
     
     DocumentaryUnit archdesc, c1, c2, c7_1, c7_2;
 
+    @Test
+    public void testUnitdate() throws Exception{
+        InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
+         final String logMessage = "Importing a single EAD by ItsTest";
+               importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
+        ImportLog log_en = importManager.importFile(ios, logMessage);
+ DocumentaryUnit unit = graph.frame(
+                getVertexByIdentifier(graph,IMPORTED_ITEM_ID),
+                DocumentaryUnit.class);
+
+       for(DocumentDescription desc : unit.getDocumentDescriptions()){
+           for(String k : desc.asVertex().getPropertyKeys()){
+               System.out.println(k + " - "+ desc.asVertex().getProperty(k));
+           }
+       }
+    }
     @Test
     public void testItsImportEsterwegen() throws Exception {
         final String logMessage = "Importing a single EAD by ItsTest";
