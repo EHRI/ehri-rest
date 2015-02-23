@@ -22,6 +22,12 @@ public class SlugifyTest {
     }
 
     @Test
+    public void removeLeadingTrailingDashes() {
+        String bad = "-foo-bad-";
+        assertEquals("foo-bad", Slugify.slugify(bad));
+    }
+
+    @Test
     public void removeMultiDashes() {
         String bad = "foo---bad";
         assertEquals("foo-bad", Slugify.slugify(bad));

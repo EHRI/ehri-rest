@@ -7,9 +7,7 @@ import java.text.Normalizer;
 
 /**
  * Class for handling slugification of strings, for use
- * in identifiers.
- *
- * This is largely adapted from <a href="https://github.com/slugify/slugify/blob/master/src/main/java/com/github/slugify/Slugify.java">Slugify on Github</a>.
+ * in global identifiers.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -24,14 +22,11 @@ public class Slugify {
     }
 
     public static String slugify(String input, String replacement) {
-        String ret = StringUtils.trim(input);
-        if (StringUtils.isBlank(input)) {
-            return "";
-        }
-
-        ret = normalize(ret);
-        ret = removeDuplicateWhiteSpaces(ret);
-        return ret.replaceAll(" ", replacement).replaceAll("-+", replacement).toLowerCase();
+        return normalize(input)
+                .replaceAll("\\s+", replacement)            // whitespace
+                .replaceAll(replacement + "+", replacement) // replacements
+                .replaceAll("^\\W|\\W$", "")                // leading/trailing non alpha
+                .toLowerCase();
     }
 
     private static String normalize(String input) {
@@ -44,15 +39,6 @@ public class Slugify {
         return Normalizer.normalize(trans, Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "")
                 .replaceAll("[^a-zA-Z0-9- ]", DEFAULT_REPLACE);
-    }
-
-    private static String removeDuplicateWhiteSpaces(String input) {
-        String ret = StringUtils.trim(input);
-        if (StringUtils.isBlank(ret)) {
-            return "";
-        }
-
-        return ret.replaceAll("\\s+", " ");
     }
 }
 
