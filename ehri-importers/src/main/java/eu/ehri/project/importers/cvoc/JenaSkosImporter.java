@@ -106,7 +106,9 @@ public final class JenaSkosImporter implements SkosImporter {
             .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
             .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
             .put("skos:broadMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
+            .put("skos:relatedMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
             .put("sem:personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("sem:placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .build();
 
     /**

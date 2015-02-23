@@ -15,7 +15,6 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import java.io.IOException;
@@ -33,6 +32,30 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     protected final String EHRI_SKOS_TERM = "cvoc/joods_raad.xml";
     final String logMessage = "Importing a single skos: " + EVENT_SKOS;
 
+    @Test
+    public void importAllEvents() throws Exception {
+        InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/allEhriEvents.rdf");
+        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        importer.setTolerant(true);
+              // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
+        ImportLog log = importer.importFile(ios, logMessage);
+//        log.printReport();
+        // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+       /*
+        * relationship: 5
+        * null: 2
+        * cvocConceptDescription: 1
+        * systemEvent: 1
+        * cvocConcept: 1 
+        */
+        printGraph(graph);
+        
+    }
   
     @Test
     public void testImportItemsT() throws Exception {
@@ -52,17 +75,17 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
        diff.printDebug(System.out);
-        printGraph(graph);
 
         /** How many new nodes will have been created? We should have
-         * relationship: 2
+         * relationship: 5
          * null: 3
          * link: 1
          * cvocConceptDescription: 2
          * systemEvent: 1
          * cvocConcept: 2
          */
-        assertEquals(count + 11, getNodeCount(graph));
+        assertEquals(count + 14, getNodeCount(graph));
+        printGraph(graph);
 
         
         Concept bloodForGoods = manager.getFrame("cvoc1-1", Concept.class);
@@ -118,13 +141,14 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
 
         /** How many new nodes will have been created? We should have
          * link: 3
+         * relationship: 1
          * null: 3
          * cvocConceptDescription: 2
          * systemEvent: 1
          * cvocConcept: 2
          */
-        assertEquals(count + 11, getNodeCount(graph));
-        printGraph(graph);   
+        assertEquals(count + 12, getNodeCount(graph));
+//        printGraph(graph);   
         
         Concept termJR = manager.getFrame("cvoc1-tema-866", Concept.class);
         
@@ -134,7 +158,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
             assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
             assertEquals("associate", desc.asVertex().getProperty("type"));
             assertTrue(desc.asVertex().getPropertyKeys().contains("skos"));
-            assertEquals("broadMatch", desc.asVertex().getProperty("skos"));
+            assertTrue(desc.asVertex().getProperty("skos").equals("broadMatch") || desc.asVertex().getProperty("skos").equals("relatedMatch"));
         }
         assertTrue(found);
 
