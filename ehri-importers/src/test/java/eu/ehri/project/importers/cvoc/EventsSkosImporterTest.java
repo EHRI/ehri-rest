@@ -77,14 +77,14 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
        diff.printDebug(System.out);
 
         /** How many new nodes will have been created? We should have
-         * relationship: 5
+         * relationship: 4
          * null: 3
          * link: 1
          * cvocConceptDescription: 2
          * systemEvent: 1
          * cvocConcept: 2
          */
-        assertEquals(count + 14, getNodeCount(graph));
+        assertEquals(count + 13, getNodeCount(graph));
         printGraph(graph);
 
         
@@ -141,13 +141,13 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
 
         /** How many new nodes will have been created? We should have
          * link: 3
-         * relationship: 1
+         * relationship: 2
          * null: 3
          * cvocConceptDescription: 2
          * systemEvent: 1
          * cvocConcept: 2
          */
-        assertEquals(count + 12, getNodeCount(graph));
+        assertEquals(count + 13, getNodeCount(graph));
 //        printGraph(graph);   
         
         Concept termJR = manager.getFrame("cvoc1-tema-866", Concept.class);

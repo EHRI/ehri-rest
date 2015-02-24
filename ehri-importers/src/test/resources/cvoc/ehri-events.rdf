@@ -36,5 +36,8 @@
 	<skos:broadMatch rdf:resource="http://data.ehri-project.eu/cvoc1/tema=866" ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</skos:broadMatch>
 	<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
         <skos:broader rdf:resource="http://data.ehri-project.eu/ehri-events/1"/>
+        <sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/455" type="corporate body" ehri-id="ehri-cb-455">
+   EAK - Evreyskiy antifashistskiy komitet
+   </sem:hasActor>
 </rdf:Description>
 </rdf:RDF>
