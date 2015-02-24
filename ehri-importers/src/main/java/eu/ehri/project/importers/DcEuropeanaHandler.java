@@ -47,16 +47,6 @@ private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
                     extractIdentifier(currentMap);
                     extractName(currentMap);
                     
-                    if (currentMap.containsKey("unitDates")) {
-                        if (currentMap.get("unitDates") instanceof List) {
-                            for (Object d : (List) currentMap.get("unitDates")) {
-                                putPropertyInGraph(currentMap, "unitDates", d.toString());
-                            }
-                        } else {
-                            putPropertyInGraph(currentMap, "unitDates", currentMap.get("unitDates").toString());
-                        }
-
-                    }
                     putPropertyInGraph(currentMap, "sourceFileId", currentMap.get("objectIdentifier").toString());
                     importer.importItem(currentMap, new Stack<String>());
 //                importer.importTopLevelExtraNodes(topLevel, current);

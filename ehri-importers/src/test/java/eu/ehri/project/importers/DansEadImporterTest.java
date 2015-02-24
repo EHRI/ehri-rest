@@ -6,6 +6,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -36,19 +37,31 @@ public class DansEadImporterTest extends AbstractImporterTest{
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("dansead.properties"))
                 .setTolerant(Boolean.TRUE);
+        
+                 // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = importManager.importFile(ios, logMessage);
+        printGraph(graph);
+        
+ // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+
+        
         printGraph(graph);
         /*
          * we should have
-         * - 4 DocUnits
-         * - 4 DocDesc
-         * - 5 more import Event links (4 for every Unit, 1 for the User)
-         * - 6 more Dates
-         * - 6 more UndeterminedRelation
-         * - 1 more import Event
-         * - 1 MaintenaceEvent
+         * 
+         * null: 5
+         * relationship: 6
+         * documentaryUnit: 4
+         * documentDescription: 4
+         * maintenanceEvent: 1
+         * systemEvent: 1
+         * datePeriod: 5  //there are 6 unitdates in the xml, however two are identical and get merged into 1
          */
-        int newCount = origCount + 14 + 6 + 6 + 1; 
+        int newCount = origCount + 14 + 6 + 5 + 1; 
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);

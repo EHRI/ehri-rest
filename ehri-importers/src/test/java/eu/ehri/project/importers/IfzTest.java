@@ -135,7 +135,7 @@ public class IfzTest extends AbstractImporterTest{
 //    //test dates
         for(DocumentDescription d : c2_1.getDocumentDescriptions()){
         	// Single date is just a string
-        	assertEquals("1991/2008", d.asVertex().getProperty("unitDates"));
+        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1991-01-01", dp.getStartDate());
         		assertEquals("2008-12-31", dp.getEndDate());

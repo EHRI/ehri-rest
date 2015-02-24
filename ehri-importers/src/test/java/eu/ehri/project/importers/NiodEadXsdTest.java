@@ -148,7 +148,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
     //test dates
         for(DocumentDescription d : c2_1.getDocumentDescriptions()){
         	// Single date is just a string
-        	assertEquals("1980", d.asVertex().getProperty("unitDates"));
+        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1980-01-01", dp.getStartDate());
         		assertEquals("1980-12-31", dp.getEndDate());

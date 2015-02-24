@@ -91,6 +91,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
             assertEquals("More refugee children arrive from Germany - in time ...", d.getName());
             assertEquals("1505", d.asVertex().getProperty("sourceFileId"));
             logger.debug("id:"+d.getId() + " - identifier:" + archdesc.asVertex().getProperty("identifier"));
+            //unitDates: [23-12-1938 (Opname), 23-12-1938 (Opname)]
+            assertEquals("23-12-1938 (Opname)", d.asVertex().getProperty("unitDates"));
         }
 
         for(Concept concept : vocabularyTest.getConcepts()){
@@ -124,5 +126,6 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
             }
         }
         assertTrue(passTest);
+        printGraph(graph);
     }
 }

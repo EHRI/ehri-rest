@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -54,7 +55,7 @@ public class CegesomaAATest extends AbstractImporterTest{
        GraphDiff diff = diffGraph(graphState1, graphState2);
 //       diff.printDebug(System.out);
         
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         /** 
          * event links: 6
@@ -133,7 +134,7 @@ public class CegesomaAATest extends AbstractImporterTest{
     //test dates
         for (DocumentDescription d : c2_1.getDocumentDescriptions()) {
             // Single date is just a string
-            assertEquals("1944-1948", d.asVertex().getProperty("unitDates"));
+            assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
             for (DatePeriod dp : d.getDatePeriods()) {
                 assertEquals("1944-01-01", dp.getStartDate());
                 assertEquals("1948-12-31", dp.getEndDate());
@@ -147,10 +148,14 @@ public class CegesomaAATest extends AbstractImporterTest{
         // Fonds has two dates with different types -> list
         for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
             // start and end dates correctly parsed and setup
+            
+            assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
             List<DatePeriod> dp = toList(d.getDatePeriods());
             assertEquals(2, dp.size());
+            System.out.println(dp.get(0).asVertex().getProperty(Ontology.DATE_HAS_DESCRIPTION));
             assertEquals("1944-01-01", dp.get(0).getStartDate());
-            assertEquals("1979-12-31", dp.get(0).getEndDate());
+            assertEquals("1948-12-31", dp.get(0).getEndDate());
+            assertEquals("1979-12-31", dp.get(1).getEndDate());
             for (MaintenanceEvent me : d.getMaintenanceEvents()) {
                 //one to each documentDescription:
                 assertEquals(5, toList(me.asVertex().getEdges(Direction.OUT)).size());

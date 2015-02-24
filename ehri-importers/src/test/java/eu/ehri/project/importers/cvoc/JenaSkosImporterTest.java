@@ -6,6 +6,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Ignore;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -17,6 +18,17 @@ public class JenaSkosImporterTest extends AbstractSkosImporterTest {
         ImportLog importLog = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         assertEquals(1, importLog.getCreated());
+    }
+    
+    @Test @Ignore
+    public void testEhriSkos() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        ImportLog importLog = importer.setDefaultLang("de")
+                .importFile(ClassLoader.getSystemResourceAsStream("cvoc/ehri-skos.rdf"), "ehri-skos");
+        assertEquals(877, importLog.getCreated());
+        AccessibleEntity concept = importLog.getAction().getFirstSubject();
+        assertEquals("deu", manager.cast(concept, Concept.class)
+                .getDescriptions().iterator().next().getLanguageOfDescription());
     }
 
     @Test

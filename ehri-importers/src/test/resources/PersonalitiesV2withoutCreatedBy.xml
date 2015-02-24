@@ -54,11 +54,12 @@
             <entityType>person</entityType>
             <nameEntry scriptCode="Latn" xml:lang="en"
                 xmlns:xml="http://www.w3.org/XML/1998/namespace">
-                <part>Boris III</part>
+                <part localType="surname">Booooris</part>
+                <part localType="forename">the third</part>
                 <authorizedForm>local</authorizedForm>
             </nameEntry>
             <nameEntry>
-                <part>Boris III, Czar of Bulgaria, 1894-1943</part>
+                <part>Bbboris III, Czar of Bulgaria, 1894-1943</part>
                 <authorizedForm>NLI</authorizedForm>
                 <authorizedForm>NLI</authorizedForm>
                 <authorizedForm>NLI</authorizedForm>
@@ -66,7 +67,7 @@
                 <alternativeForm>SELIBR</alternativeForm>
             </nameEntry>
             <nameEntry>
-                <part>Boris III, King of Bulgaria, 1894-1943</part>
+                <part>Bccoris III, King of Bulgaria, 1894-1943</part>
                 <alternativeForm>NLI</alternativeForm>
                 <alternativeForm>NLI</alternativeForm>
                 <alternativeForm>NLI</alternativeForm>
@@ -106,7 +107,7 @@
         </description>
         <relations>
             <cpfRelation cpfRelationType="associative" xlink:role="http://rdvocab.info/uri/schema/FRBRentitiesRDA/Person" xlink:type="simple">
-                <relationEntry>Boris III</relationEntry>
+                <relationEntry>Borris III</relationEntry>
             </cpfRelation>
             <cpfRelation cpfRelationType="associative" xlink:href="http://id.loc.gov/authorities/names/n50031027" xlink:role="http://rdvocab.info/uri/schema/FRBRentitiesRDA/CorporateBody" xlink:type="simple">
                 <relationEntry>Movement</relationEntry>
