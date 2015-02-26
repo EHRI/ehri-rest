@@ -7,7 +7,7 @@
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>0.9-SNAPSHOT</version>
     <name>EHRI Backend</name>
     <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
     <url>https://github.com/EHRI</url>
@@ -76,8 +76,18 @@
         <site>
             <id>ehri-rest-site</id>
             <name>Ehri Backend Site</name>
-            <url>http://github/com/EHRI/ehri-rest</url>
+            <url>http://github.com/EHRI/ehri-rest</url>
         </site>
+        <snapshotRepository>
+            <id>ehridev</id>
+            <name>libs-snapshot-local</name>
+            <url>http://ehridev.dans.knaw.nl/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+        <repository>
+            <id>ehridev</id>
+            <name>libs-release-local</name>
+            <url>http://ehridev.dans.knaw.nl/artifactory/libs-release-local</url>
+        </repository>
     </distributionManagement>
 
     <scm>
