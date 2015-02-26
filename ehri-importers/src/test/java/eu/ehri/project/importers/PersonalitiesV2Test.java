@@ -61,7 +61,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         */
         assertEquals(count+7, getNodeCount(graph));
         printGraph(graph);
-        HistoricalAgent person = manager.getFrame("ehri-pers-000051", HistoricalAgent.class);
+        HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
         for(Description d : person.getDescriptions()){
             assertEquals("deu", d.getLanguageOfDescription());
             assertTrue(d.asVertex().getProperty("otherFormsOfName") instanceof List);
@@ -97,7 +97,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         */
         assertEquals(count+7, getNodeCount(graph));
         printGraph(graph);
-        HistoricalAgent person = manager.getFrame("ehri-pers-000051", HistoricalAgent.class);
+        HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
         for(Description d : person.getDescriptions()){
             assertEquals("deu", d.getLanguageOfDescription());
             assertTrue(d.asVertex().getProperty("otherFormsOfName") instanceof List);
@@ -123,7 +123,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
         
         
-        Vocabulary vocabularyTest = manager.getFrame("fast-keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getFrame("fast_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         
@@ -152,7 +152,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         */
         assertEquals(count+8, getNodeCount(graph));
 //        printGraph(graph);
-        HistoricalAgent person = manager.getFrame("ehri-pers-000051", HistoricalAgent.class);
+        HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
         for (Description d : person.getDescriptions()) {
             for (UndeterminedRelationship rel : d.getUndeterminedRelationships()) {
                 if (rel.getRelationshipType().equals("subjectAccess")) {

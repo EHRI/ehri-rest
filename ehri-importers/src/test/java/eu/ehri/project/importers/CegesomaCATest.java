@@ -58,7 +58,7 @@ public class CegesomaCATest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
-        assertEquals("nl-r1-ca-fe-1437", archdesc.getId());
+        assertEquals("nl-r1-ca_fe_1437", archdesc.getId());
 
         /**
          * Test titles

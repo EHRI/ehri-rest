@@ -79,7 +79,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
         Repository repo = manager.getFrame("r1", Repository.class);
         BundleDAO dao = new BundleDAO(graph, repo.idPath());
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
-        assertEquals("nl-r1-someid-01", doc.getId());
+        assertEquals("nl-r1-someid_01", doc.getId());
         doc.setPermissionScope(repo);
         assertEquals(Lists.newArrayList("nl", "r1", "someid-01"), doc.idPath());
     }

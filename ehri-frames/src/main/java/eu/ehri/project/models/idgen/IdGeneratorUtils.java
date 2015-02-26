@@ -30,6 +30,7 @@ public class IdGeneratorUtils {
      * Separator for ID components.
      */
     public static final String SEPARATOR = "-";
+    public static final String REPLACE = "_";
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
@@ -107,7 +108,12 @@ public class IdGeneratorUtils {
             current = next;
         }
         newPaths.add(current);
-        String scopedId = Joiner.on(SEPARATOR).join(newPaths);
-        return Slugify.slugify(scopedId);
+
+        List<String> slugged = Lists.newArrayList();
+        for (String p : newPaths) {
+            slugged.add(Slugify.slugify(p, REPLACE));
+        }
+
+        return Joiner.on(SEPARATOR).join(slugged);
     }
 }

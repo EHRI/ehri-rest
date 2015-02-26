@@ -42,7 +42,7 @@ public class DescriptionIdGeneratorTest extends AbstractFixtureTest {
     @Test
     public void testGenerateIdWithStringScopes() throws Exception {
         String id = instance.generateId(scopes, bundle);
-        assertEquals("nl-r1-c1-eng-someid-01", id);
+        assertEquals("nl-r1-c1-eng_someid_01", id);
 
     }
 

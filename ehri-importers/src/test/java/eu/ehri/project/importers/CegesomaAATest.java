@@ -82,9 +82,9 @@ public class CegesomaAATest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
-        assertEquals("nl-r1-aa-1134-1234", c1.getId());
-        assertEquals(c1.getId() + "-aa-1134-32", c2_1.getId());
-        assertEquals(c1.getId() + "-aa-1134-34", c2_2.getId());
+        assertEquals("nl-r1-aa_1134-1234", c1.getId());
+        assertEquals(c1.getId() + "-aa_1134_32", c2_1.getId());
+        assertEquals(c1.getId() + "-aa_1134_34", c2_2.getId());
 
         /**
          * Test titles

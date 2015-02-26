@@ -55,7 +55,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
         
         
-        Vocabulary vocabularyTest = manager.getFrame("niod-trefwoorden", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getFrame("niod_trefwoorden", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         

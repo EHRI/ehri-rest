@@ -63,7 +63,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test ID generation and hierarchy
-        assertEquals("nl-r1-ns-1", archdesc.getId());
+        assertEquals("nl-r1-ns_1", archdesc.getId());
 
         assertNull(archdesc.getParent());
         assertEquals(agent, archdesc.getRepository());

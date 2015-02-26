@@ -18,6 +18,8 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +32,13 @@ public class VirtualEadTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadTest.class);
     protected final String TEST_REPO = "mike";
     protected final String XMLFILE = "wp2_virtualcollection.xml";
-    private static final String REPO1= "il-002777";
-    private static final String REPO2= "cz-002302";
-    private static final String UNIT1 ="wp2-bt";
+    private static final String REPO1= "002777";
+    private static final String REPO2= "002302";
+    private static final String UNIT1 ="wp2_bt";
     private static final String UNIT2 ="vzpomínky pro EHRI";
     
     private static final String ARCHDESC = "ehri terezin research guide";
-    private static final String C01_VirtualLevel = "vc-tm";
+    private static final String C01_VirtualLevel = "vc_tm";
     private static final String C02 = REPO2+"-"+UNIT2;
     
     Repository repository1, repository2;
@@ -60,32 +62,32 @@ public void setStageTest() throws PermissionDenied, ValidationError {
         final String logMessage = "Importing an EAD as a Virtual collection";
 
         origCount = getNodeCount(graph);
-        
+
  // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
+       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
 //	ImportLog log = 
                 new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(ios, logMessage);
          // After...
-//       List<VertexProxy> graphState2 = getGraphState(graph);
-//       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 2 more VirtualUnits (archdesc, 1 child (other 2 children are already existing DUs))
        	// - 2 more DocumentDescription
-        // - 3 more import Event links (4 for every Unit, 1 for the User)
+        // - 3 more import Event links (2 for every Unit, 1 for the User)
         // - 1 more import Event
         int newCount = origCount + 8; 
         assertEquals(newCount, getNodeCount(graph));
-        
+
         VirtualUnit toplevel = graph.frame(getVertexByIdentifier(graph, ARCHDESC), VirtualUnit.class);
         assertEquals(agent, toplevel.getAuthor());
         assertEquals("ehri terezin research guide", toplevel.getIdentifier());
         assertEquals(1, toList(toplevel.getIncludedUnits()).size());
 
-        DocumentaryUnit c1_vreferrer = graph.frame(getVertexById(graph, UNIT1), DocumentaryUnit.class);
+        DocumentaryUnit c1_vreferrer = manager.getFrame(UNIT1, DocumentaryUnit.class);
         for(AbstractUnit d : toplevel.getIncludedUnits()){
             assertEquals(c1_vreferrer, d);
         }
