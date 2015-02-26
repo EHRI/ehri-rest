@@ -86,33 +86,30 @@ public class IdGeneratorUtils {
 
     /**
      * Join an identifier path to form a full ID.
-     * If a path part is repeated, only the last occurrence is kept,
-     * except when consecutive parts are exactly the same.
+     * Duplicate parts of the part are removed.
      * This check is case sensitive.
      *
      * @param path A non-empty list of identifier strings.
      * @return The resultant path ID.
      */
     public static String joinPath(Collection<String> path) {
-
-        if (path.isEmpty()) {
-            return "";
-        }
-
+        // If the last part of the path is included in the
+        // current part, remove that chunk, providing that
+        // there is something left over.
         List<String> newPaths = Lists.newArrayList();
-        // If the current part is what the next part starts with,
-        // don't include it, except when it equals the next part.
-        Iterator<String> patti = path.iterator();
-        String current = patti.next();
-        String next;
-        while (patti.hasNext()) {
-            next = patti.next();
-            if (!next.startsWith(current) || next.equals(current)) {
-                newPaths.add(current);
+        String last = null;
+        for (String ident : path) {
+            if (last == null) {
+                newPaths.add(ident);
+            } else {
+                if (ident.startsWith(last) && !ident.equals(last)) {
+                    newPaths.add(ident.substring(last.length()));
+                } else {
+                    newPaths.add(ident);
+                }
             }
-            current = next;
+            last = ident;
         }
-        newPaths.add(current);
 
         // Slugify the path sections...
         List<String> slugged = Lists.newArrayList();

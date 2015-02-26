@@ -63,15 +63,15 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
         List<String> ids = Lists.newArrayList("r1", "Fonds 1",
                 "Fonds 1 / Subfonds 1", "Fonds 1 / Subfonds 1 / Item 3");
         String id = IdGeneratorUtils.joinPath(ids);
-        assertEquals("r1-fonds_1_subfonds_1_item_3", id);
+        assertEquals("r1-fonds_1-subfonds_1-item_3", id);
         
         List<String> ids2 = Lists.newArrayList("il-002798", "M.40", "M.40.MAP");
         String id2 = IdGeneratorUtils.joinPath(ids2);
-        assertEquals("il_002798-m_40_map", id2);
+        assertEquals("il_002798-m_40-map", id2);
         
         List<String> ids3 = Lists.newArrayList("de-002409", "DE ITS 1.1.0", "DE ITS 1.1.0.2", "2399000");
         String id3 = IdGeneratorUtils.joinPath(ids3);
-        assertEquals("de_002409-de_its_1_1_0_2-2399000", id3);
+        assertEquals("de_002409-de_its_1_1_0-2-2399000", id3);
         
         List<String> ids4 = Lists.newArrayList("cz-002279", "COLLECTION.JMP.SHOAH/T",
                 "COLLECTION.JMP.SHOAH/T/2", "COLLECTION.JMP.SHOAH/T/2/A",
@@ -79,7 +79,7 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
                 "COLLECTION.JMP.SHOAH/T/2/A/1a/028", "DOCUMENT.JMP.SHOAH/T/2/A/1a/028");
         String id4 = IdGeneratorUtils.joinPath(ids4);
         // special prefixes are not treated in 'smart' way
-        assertEquals("cz_002279-collection_jmp_shoah_t_2_a_1a_028-document_jmp_shoah_t_2_a_1a_028", id4);
+        assertEquals("cz_002279-collection_jmp_shoah_t-2-a-1-a-028-document_jmp_shoah_t_2_a_1a_028", id4);
 
         // The check is case sensitive, so prefix is repeated if case is different
         List<String> ids5 = Lists.newArrayList("de-002409", "DE ITS 1.1.0", "de ITS 1.1.0.2", "2399000");

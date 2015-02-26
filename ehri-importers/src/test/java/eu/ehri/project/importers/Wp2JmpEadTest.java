@@ -27,7 +27,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
     protected final String C3 = "COLLECTION.JMP.SHOAH/T/2/A/1";
     protected final String C6 = "DOCUMENT.JMP.SHOAH/T/2/A/1a/028";
     // <test-country>-<test-repo>-<__ID__>
-    protected final String C6_ID = "nl-r1-collection_jmp_shoah_t_2_a_1a_028-document_jmp_shoah_t_2_a_1a_028";
+    protected final String C6_ID = "nl-r1-collection_jmp_shoah_t-2-a-1-a-028-document_jmp_shoah_t_2_a_1a_028";
     protected final String FONDS = "COLLECTION.JMP.SHOAH/T";
 
     @Test
