@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>ehri-data</artifactId>
         <groupId>ehri-project</groupId>
-        <version>1.0</version>
+        <artifactId>ehri-data</artifactId>
+        <version>0.9-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -46,6 +46,12 @@
                     <generateReports>false</generateReports>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -53,27 +59,27 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>1.0</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-cmdline</artifactId>
-            <version>0.1</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-extension</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-importers</artifactId>
-            <version>1.1</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <profiles>
@@ -83,7 +89,7 @@
                 <dependency>
                     <groupId>ehri-project</groupId>
                     <artifactId>ehri-extension-sparql</artifactId>
-                    <version>0.0.1-SNAPSHOT</version>
+                    <version>0.9-SNAPSHOT</version>
                 </dependency>
             </dependencies>
             <build>
