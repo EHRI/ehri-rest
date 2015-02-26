@@ -29,8 +29,8 @@ public class IdGeneratorUtils {
     /**
      * Separator for ID components.
      */
-    public static final String SEPARATOR = "-";
-    public static final String REPLACE = "_";
+    public static final String HIERARCHY_SEPARATOR = "-";
+    public static final String SLUG_REPLACE = "_";
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
@@ -94,6 +94,11 @@ public class IdGeneratorUtils {
      * @return The resultant path ID.
      */
     public static String joinPath(Collection<String> path) {
+
+        if (path.isEmpty()) {
+            return "";
+        }
+
         List<String> newPaths = Lists.newArrayList();
         // If the current part is what the next part starts with,
         // don't include it, except when it equals the next part.
@@ -109,11 +114,12 @@ public class IdGeneratorUtils {
         }
         newPaths.add(current);
 
+        // Slugify the path sections...
         List<String> slugged = Lists.newArrayList();
         for (String p : newPaths) {
-            slugged.add(Slugify.slugify(p, REPLACE));
+            slugged.add(Slugify.slugify(p, SLUG_REPLACE));
         }
 
-        return Joiner.on(SEPARATOR).join(slugged);
+        return Joiner.on(HIERARCHY_SEPARATOR).join(slugged);
     }
 }
