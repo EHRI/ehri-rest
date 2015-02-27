@@ -69,20 +69,20 @@ many cases EAD files are structured with absolute identifiers, e.g:
 In this case, where the child identifier is _prefixed_ by it's parent identifier the prefix is removed prior to
 transliteration, so if, for example, there was a hierarchy like so:
 
- - us
- - 005578
- - DOC1
- - DOC1 / 1
- - DOC1 / 1 / 2
- - DOC1 / 1 / 2 / 3
+ - `us`
+ - `005578`
+ - `DOC-1`
+ - `DOC-1 / 1`
+ - `DOC-1 / 1 / 2`
+ - `DOC-1 / 1 / 2 / 3`
  
 ... the process of generation the final hierarchical ID would be as follows:
  
- - `"us" => "005578" => "DOC-1" => "DOC-1 / 1" => "DOC-1 / 1 / 2" => "DOC-1 / 1 / 2 / 3"` (raw strings)
- - `"us" => "005578" => "DOC-1" => " / 1" => " / 2" => " / 3"` (parent prefixes removed, note leading)
- - `"us" => "005578" => "DOC_1" => "___1" => "___2" => "___3"` (replace non-alphanumerics with underscores)
- - `"us" => "005578" => "doc_1" => "1" => "2" => "3"` (remove leading/training non-alphanumerics)
- - `"us-005578-doc_1-1-2-3"` (joining sections with hyphens)
+ - `us` => `005578` => `DOC-1` => `DOC-1 / 1` => `DOC-1 / 1 / 2` => "DOC-1 / 1 / 2 / 3"` (raw strings)
+ - `us` => `005578` => `DOC-1` => ` / 1` => ` / 2` => ` / 3` (parent prefixes removed, note leading)
+ - `us` => `005578` => `DOC_1` => `___1` => `___2` => `___3` (replace non-alphanumerics with underscores)
+ - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training non-alphanumerics)
+ - `us-005578-doc_1-1-2-3"` (joining sections with hyphens)
  
 ## Restrictions
 
