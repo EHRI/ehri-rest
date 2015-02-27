@@ -30,9 +30,9 @@
          <langmaterial>
             <language langcode="nld">Dutch</language>
          </langmaterial>
-         <origination>The file was created by Joodse Raad Friesland</origination>
+         <origination>The file was created by <name>Joodse Raad Friesland</name></origination>
          <physdesc>
-            <extent>Paper, 37 files</extent>
+            <extent type="files">37</extent>
             <genreform>Certification</genreform>
          </physdesc>
          <repository>Yad Vashem</repository>
@@ -67,7 +67,8 @@
                   <language langcode="nld">Dutch</language>
                   <language langcode="deu">German</language>
                </langmaterial>
-               <origination>The file was created by Joodse Raad Friesland
+               <origination>The file was created by 
+                   <name>Joodse Raad Friesland</name>
                </origination>
                <physdesc>
                   <extent type="pages">416</extent>

@@ -10,7 +10,6 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Concept;
@@ -62,8 +61,12 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         assertEquals(count+7, getNodeCount(graph));
         printGraph(graph);
         HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
+        assertEquals(2, ((List)person.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS)).size());
+        
         for(Description d : person.getDescriptions()){
+            assertFalse(d.asVertex().getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
             assertEquals("deu", d.getLanguageOfDescription());
+            assertEquals("Booooris the third", d.getName());
             assertTrue(d.asVertex().getProperty("otherFormsOfName") instanceof List);
             assertEquals(2, ((List)d.asVertex().getProperty("otherFormsOfName")).size());
             assertTrue(d.asVertex().getProperty("place") instanceof List);
@@ -107,11 +110,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         }
     }
     
-    @Test
+    @Test 
     public void newPersonalitiesWithReferredNodes() throws ItemNotFound, PermissionDenied, ValidationError, IOException, InputParseError{
-        final String TEST_REPO = "r1";
-
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "FAST_keywords")
                                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");

@@ -190,6 +190,7 @@ public class EacImporter extends EaImporter {
                 extractBooks(itemData.get(key), description);
             }else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
                     && !key.equals("objectIdentifier")
+                    && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith("maintenanceEvent")
                     && !key.startsWith("IGNORE")
@@ -231,7 +232,7 @@ public class EacImporter extends EaImporter {
                             try {
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                                         .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
-                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
                                 UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
                                 unit.addLink(link);

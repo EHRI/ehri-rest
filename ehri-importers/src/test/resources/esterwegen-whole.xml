@@ -51,6 +51,8 @@
             <unitid type="refcode">DE ITS [OuS 1.1.7]</unitid>
             <unittitle encodinganalog="10$0$0">Konzentrationslager Esterwegen</unittitle>
 
+            <unitdate normal="1944-11-01/1944-11-01">vermutliches Datum</unitdate>
+            <unitdate>nach dem Krieg</unitdate>
 
             <unitdate encodinganalog="20$0$0" normal="1935-03/1935-05"/>
             <langmaterial encodinganalog="50$0$0">de / Latn</langmaterial>
