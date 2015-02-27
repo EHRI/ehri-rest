@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -51,13 +52,6 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
 
     }
 
-    /**
-     * If a child unit's ID includes the parent's unit ID as a prefix, do not
-     * duplicate. The prefix check is case sensitive.
-     * Tests {@link eu.ehri.project.models.idgen.IdGeneratorUtils#joinPath(Collection)}
-     *
-     * @throws Exception
-     */
     @Test
     public void testGenerateIdWithPartialDupeStringScopes() throws Exception {
         List<String> ids = Lists.newArrayList("r1", "Fonds 1",
@@ -88,12 +82,6 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
 
     }
 
-    /**
-     * If a child unit's ID is the parent's unit ID, duplicate it.
-     * Tests {@link eu.ehri.project.models.idgen.IdGeneratorUtils#joinPath(Collection)}
-     *
-     * @throws Exception
-     */
     @Test
     public void testGenerateIdWithDupeStringScopes() throws Exception {
         List<String> ids = Lists.newArrayList("r1", "Fonds 1",
@@ -101,7 +89,6 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
         String id = IdGeneratorUtils.joinPath(ids);
         assertEquals("r1-fonds_1-thing_1-thing_1-thing_2", id);
 
-        // !"MAP".equals("map")
         List<String> ids2 = Lists.newArrayList("il-002798", "M.40", "MAP", "map");
         String id2 = IdGeneratorUtils.joinPath(ids2);
         assertEquals("il_002798-m_40-map-map", id2);
@@ -109,7 +96,14 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
         List<String> ids3 = Lists.newArrayList("de-002409", "DE ITS 1.1.0", "1.1.0", "1.1.0", "2399000");
         String id3 = IdGeneratorUtils.joinPath(ids3);
         assertEquals("de_002409-de_its_1_1_0-1_1_0-1_1_0-2399000", id3);
+    }
 
+    @Test
+    public void testHierarchyCollisions() throws Exception {
+        List<String> path1 = Lists.newArrayList("r1", "1-a", "b");
+        List<String> path2 = Lists.newArrayList("r1", "1", "a-b");
+        assertNotEquals(IdGeneratorUtils.joinPath(path1),
+                IdGeneratorUtils.joinPath(path2));
     }
 
     @Test
