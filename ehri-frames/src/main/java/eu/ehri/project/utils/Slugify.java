@@ -35,7 +35,6 @@ public class Slugify {
         return normalize(input, replacement)
                 .replaceAll("\\s+", replacement)            // whitespace
                 .replaceAll(replacement + "+", replacement) // replacements
-                .replaceAll("^\\W|\\W$", "")                // leading/trailing non alpha
                 .replaceAll("^" + replacement + "|" + replacement + "$", "") // leading/trailing replacements
                 .toLowerCase();
     }
