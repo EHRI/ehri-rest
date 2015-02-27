@@ -79,7 +79,7 @@ transliteration, so if, for example, there was a hierarchy like so:
 ... the process of generation the final hierarchical ID would be as follows:
  
  - `us` => `005578` => `DOC-1` => `DOC-1 / 1` => `DOC-1 / 1 / 2` => "DOC-1 / 1 / 2 / 3"` (raw strings)
- - `us` => `005578` => `DOC-1` => ` / 1` => ` / 2` => ` / 3` (parent prefixes removed, note leading)
+ - `us` => `005578` => `DOC-1` => ` / 1` => ` / 2` => ` / 3` (parent prefixes removed, note leading space-slash-space)
  - `us` => `005578` => `DOC_1` => `___1` => `___2` => `___3` (replace non-alphanumerics with underscores)
  - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training non-alphanumerics)
  - `us-005578-doc_1-1-2-3"` (joining sections with hyphens)
