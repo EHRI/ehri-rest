@@ -2,18 +2,13 @@ package eu.ehri.project.models.idgen;
 
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -40,7 +35,7 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
 
     @Test()
     public void testHandleIdCollision() throws Exception {
-        ListMultimap<String,String> errors = instance
+        ListMultimap<String, String> errors = instance
                 .handleIdCollision(scopes, bundle);
         assertTrue(errors.containsKey(Ontology.IDENTIFIER_KEY));
     }
@@ -58,15 +53,15 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
                 "Fonds 1 / Subfonds 1", "Fonds 1 / Subfonds 1 / Item 3");
         String id = IdGeneratorUtils.joinPath(ids);
         assertEquals("r1-fonds_1-subfonds_1-item_3", id);
-        
+
         List<String> ids2 = Lists.newArrayList("il-002798", "M.40", "M.40.MAP");
         String id2 = IdGeneratorUtils.joinPath(ids2);
         assertEquals("il_002798-m_40-map", id2);
-        
+
         List<String> ids3 = Lists.newArrayList("de-002409", "DE ITS 1.1.0", "DE ITS 1.1.0.2", "2399000");
         String id3 = IdGeneratorUtils.joinPath(ids3);
         assertEquals("de_002409-de_its_1_1_0-2-2399000", id3);
-        
+
         List<String> ids4 = Lists.newArrayList("cz-002279", "COLLECTION.JMP.SHOAH/T",
                 "COLLECTION.JMP.SHOAH/T/2", "COLLECTION.JMP.SHOAH/T/2/A",
                 "COLLECTION.JMP.SHOAH/T/2/A/1", "COLLECTION.JMP.SHOAH/T/2/A/1a",
