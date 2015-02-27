@@ -4,12 +4,12 @@
         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>ehri-data</artifactId>
         <groupId>ehri-project</groupId>
-        <version>1.0</version>
+        <artifactId>ehri-data</artifactId>
+        <version>0.9-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-importers</artifactId>
-    <version>1.1</version>
+    <version>0.9-SNAPSHOT</version>
 
     <name>Import Tools</name>
     <description>Classes for importing data.</description>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -52,7 +52,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
