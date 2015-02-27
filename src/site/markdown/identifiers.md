@@ -82,7 +82,7 @@ transliteration, so if, for example, there was a hierarchy like so:
  - `us` => `005578` => `DOC-1` => ` / 1` => ` / 2` => ` / 3` (parent prefixes removed, note leading space-slash-space)
  - `us` => `005578` => `DOC_1` => `___1` => `___2` => `___3` (replace non-alphanumerics with underscores)
  - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training non-alphanumerics)
- - `us-005578-doc_1-1-2-3"` (joining sections with hyphens)
+ - `us-005578-doc_1-1-2-3` (joining sections with hyphens)
  
 ## Restrictions
 
