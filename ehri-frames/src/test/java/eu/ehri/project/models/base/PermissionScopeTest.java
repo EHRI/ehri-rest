@@ -41,7 +41,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
     public void testContainedItems() throws Exception {
         PermissionScope c1 = manager.getFrame("c1", PermissionScope.class);
         PermissionScope c2 = manager.getFrame("c2", PermissionScope.class);
-        Iterable<Frame> containedItems = c1.getContainedItems();
+        Iterable<AccessibleEntity> containedItems = c1.getContainedItems();
         assertEquals(1L, Iterables.count(containedItems));
         assertEquals(c2, containedItems.iterator().next());
     }
@@ -53,18 +53,17 @@ public class PermissionScopeTest extends AbstractFixtureTest {
         PermissionScope c2 = manager.getFrame("c2", PermissionScope.class);
         PermissionScope c3 = manager.getFrame("c3", PermissionScope.class);
         PermissionScope c4 = manager.getFrame("c4", PermissionScope.class);
-        PermissionScope m19 = manager.getFrame("nl-r1-m19", PermissionScope.class);
-        List<Frame> r1contained = Lists.newArrayList(r1.getAllContainedItems());
+        List<AccessibleEntity> r1contained = Lists.newArrayList(r1.getAllContainedItems());
         assertEquals(5L, r1contained.size());
-        assertTrue(r1contained.contains(c1));
-        assertTrue(r1contained.contains(c2));
-        assertTrue(r1contained.contains(c3));
-        assertTrue(r1contained.contains(c4));
+        assertTrue(r1contained.contains(manager.cast(c1, AccessibleEntity.class)));
+        assertTrue(r1contained.contains(manager.cast(c2, AccessibleEntity.class)));
+        assertTrue(r1contained.contains(manager.cast(c3, AccessibleEntity.class)));
+        assertTrue(r1contained.contains(manager.cast(c4, AccessibleEntity.class)));
 
-        List<Frame> c1contained = Lists.newArrayList(c1.getAllContainedItems());
+        List<AccessibleEntity> c1contained = Lists.newArrayList(c1.getAllContainedItems());
         assertEquals(2L, c1contained.size());
-        assertTrue(c1contained.contains(c2));
-        assertTrue(c1contained.contains(c3));
+        assertTrue(c1contained.contains(manager.cast(c2, AccessibleEntity.class)));
+        assertTrue(c1contained.contains(manager.cast(c3, AccessibleEntity.class)));
     }
 
     @Test
