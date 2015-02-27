@@ -25,7 +25,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-extension</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-extension</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>compile</scope>
             <exclusions>
