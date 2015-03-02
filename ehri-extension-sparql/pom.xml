@@ -5,12 +5,12 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>1.0</version>
+        <version>0.9-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ehri-extension-sparql</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
 
     <name>Web Service SparQL Extension</name>
     <description>SparQL endpoint for web service.</description>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-extension</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -109,14 +109,14 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-extension</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>compile</scope>
             <exclusions>
