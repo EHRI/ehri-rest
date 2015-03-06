@@ -84,9 +84,9 @@ public class IfzTest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
-        assertEquals("nl-r1-ed-ed-457", c1.getId());
-        assertEquals(c1.getId() + "-ed-457-185", c2_1.getId());
-        assertEquals(c1.getId() + "-ed-457-186", c2_2.getId());
+        assertEquals("nl-r1-ed-457", c1.getId());
+        assertEquals(c1.getId() + "-185", c2_1.getId());
+        assertEquals(c1.getId() + "-186", c2_2.getId());
 
         /**
          * Test titles

@@ -75,8 +75,11 @@ public class ToolsRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);
         assertStatus(OK, response);
-        assertEquals(2, out.split("\r\n|\r|\n").length);
+        System.out.println(out);
+        assertEquals(4, out.split("\r\n|\r|\n").length);
         assertTrue(out.contains("nl-r1-c1"));
+        assertTrue(out.contains("nl-r1-c1-c2"));
+        assertTrue(out.contains("nl-r1-c1-c2-c3"));
         assertTrue(out.contains("nl-r1-c4"));
     }
 

@@ -21,23 +21,50 @@ import java.util.List;
  *
  */
 public interface PermissionScope extends IdentifiableEntity {
+
+    /**
+     * Get all permission grants that apply directly to this scope.
+     *
+     * @return an iterable of permission grant frames
+     */
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE, direction = Direction.IN)
     public Iterable<PermissionGrant> getPermissionGrants();
 
+    /**
+     * Get an iterable of the parent and all the parents higher permission
+     * scopes, recursively.
+     *
+     * @return an iterable of parent scope items
+     */
     @JavaHandler
     public Iterable<PermissionScope> getPermissionScopes();
 
+    /**
+     * Get an iterable of all items immediately within this scope.
+     *
+     * @return an iterable of lower scoped items
+     */
     @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE, direction = Direction.IN)
-    public Iterable<Frame> getContainedItems();
+    public Iterable<AccessibleEntity> getContainedItems();
 
+    /**
+     * Get an iterable of all items within this scope, recursively down
+     * to all lower levels.
+     *
+     * @return an iterable of lower scoped items to all depths
+     */
     @JavaHandler
-    public Iterable<Frame> getAllContainedItems();
+    public Iterable<AccessibleEntity> getAllContainedItems();
 
+    /**
+     * Get the path of the permission scope as an ordered collection of strings.
+     * @return an ordered Collection of Strings that forms the 'path'.
+     */
     @JavaHandler
     public Collection<String> idPath();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, PermissionScope {
-        public Iterable<Frame> getAllContainedItems() {
+        public Iterable<AccessibleEntity> getAllContainedItems() {
             return frameVertices(gremlin().as("n")
                     .in(Ontology.HAS_PERMISSION_SCOPE)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc));

@@ -22,9 +22,15 @@ public class SlugifyTest {
     }
 
     @Test
-    public void removeLeadingTrailingDashes() {
+    public void removeLeadingTrailingReplacements() {
         String bad = "-foo-bad-";
         assertEquals("foo-bad", Slugify.slugify(bad));
+    }
+
+    @Test
+    public void removeMultipleLeadingTrailingReplacements() {
+        String bad = "__foo-bad__";
+        assertEquals("foo_bad", Slugify.slugify(bad, "_"));
     }
 
     @Test

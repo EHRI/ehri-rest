@@ -84,12 +84,13 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test correct ID generation
-        assertEquals("nl-r1-NL-SAA-22626598".toLowerCase(), archdesc.getId());
-        assertEquals("nl-r1-NL-SAA-22626598-NL-SAA-22730932".toLowerCase(), c1.getId());
-        assertEquals("nl-r1-NL-SAA-22626598-NL-SAA-22730932-NL-SAA-22730310".toLowerCase(), c2.getId());
-        assertEquals("nl-r1-NL-SAA-22626598-NL-SAA-22730932-NL-SAA-22730311-NL-SAA-22752512".toLowerCase(), c3.getId());
-        assertEquals("nl-r1-NL-SAA-22626598-NL-SAA-22730932-NL-SAA-22730311".toLowerCase(), c2_1.getId());
-        assertEquals("nl-r1-NL-SAA-22626598-NL-SAA-22730932-NL-SAA-22730311-NL-SAA-22752538".toLowerCase(), c3_2.getId());
+        assertEquals("nl-r1-NL_SAA_22626598".toLowerCase(), archdesc.getId());
+        assertEquals("nl-r1-NL_SAA_22626598-NL_SAA_22730932".toLowerCase(), c1.getId());
+        assertEquals("nl-r1-NL_SAA_22626598-NL_SAA_22730932-NL_SAA_22730310".toLowerCase(), c2.getId());
+        assertEquals("nl-r1-NL_SAA_22626598-NL_SAA_22730932-NL_SAA_22730311-NL_SAA_22752512".toLowerCase(), c3.getId());
+        assertEquals("nl-r1-NL_SAA_22626598-NL_SAA_22730932-NL_SAA_22730311".toLowerCase(), c2_1.getId());
+        assertEquals("nl-r1-NL_SAA_22626598-NL_SAA_22730932-NL_SAA_22730311-NL_SAA_22752538".toLowerCase(), c3_2
+                .getId());
 
         // Check permission scope and hierarchy
         assertNull(archdesc.getParent());

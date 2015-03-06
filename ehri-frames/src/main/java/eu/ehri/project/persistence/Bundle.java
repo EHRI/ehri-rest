@@ -203,7 +203,7 @@ public final class Bundle {
 
     /**
      * Get the id of the bundle's graph vertex (or null if it does not yet
-     * exist.
+     * exist).
      *
      * @return The bundle's id
      */
@@ -232,9 +232,9 @@ public final class Bundle {
     }
 
     /**
-     * Get a data value.
+     * Get a data value by its key.
      *
-     * @return The data value
+     * @return The data value, or null if there is no data for this key
      */
     public <T> T getDataValue(String key) {
         checkNotNull(key);
@@ -242,11 +242,12 @@ public final class Bundle {
     }
 
     /**
-     * Set a value in the bundle's data.
+     * Set a value in the bundle's data. If value is null,
+     * this Bundle is returned.
      *
      * @param key   The data key
      * @param value The data value
-     * @return A new bundle
+     * @return A new bundle with value as key
      */
     public Bundle withDataValue(String key, Object value) {
         if (value == null) {
