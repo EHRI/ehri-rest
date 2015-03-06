@@ -49,7 +49,7 @@ public enum DescriptionIdGenerator implements IdGenerator {
         if (ident != null && ident.trim().isEmpty()) {
             ident = null;
         }
-        return Joiner.on(IdGeneratorUtils.SEPARATOR)
+        return Joiner.on(IdGeneratorUtils.HIERARCHY_SEPARATOR)
                 .skipNulls().join(lang, ident);
     }
 }

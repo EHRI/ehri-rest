@@ -106,9 +106,10 @@ public class EadImporter extends EaImporter {
             logger.debug("Unknown Properties found: {}", unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
+
         // extractDocumentaryUnit does not throw ValidationError on missing ID
         Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
-        
+
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,

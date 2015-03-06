@@ -35,7 +35,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
     protected final String C1 = "O.64.2-A.";
     protected final String C2 = "O.64.2-A.A.";
     protected final String C3 = "3685529";
-    protected final String C3_ID = "nl-r1-o-64-2-a-a-3685529";
+    protected final String C3_ID = "nl-r1-o_64_2-a-a-3685529";
     protected final String FONDS = "O.64.2";
 
     @Test
@@ -52,7 +52,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         Concept concept_288 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_288);
 
-        Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         final String logMessage = "Importing Yad Vashem EAD";

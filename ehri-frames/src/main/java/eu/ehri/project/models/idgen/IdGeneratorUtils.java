@@ -29,7 +29,8 @@ public class IdGeneratorUtils {
     /**
      * Separator for ID components.
      */
-    public static final String SEPARATOR = "-";
+    public static final String HIERARCHY_SEPARATOR = "-";
+    public static final String SLUG_REPLACE = "_";
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
@@ -85,29 +86,37 @@ public class IdGeneratorUtils {
 
     /**
      * Join an identifier path to form a full ID.
-     * If a path part is repeated, only the last occurrence is kept,
-     * except when consecutive parts are exactly the same.
+     * Duplicate parts of the part are removed.
      * This check is case sensitive.
      *
      * @param path A non-empty list of identifier strings.
      * @return The resultant path ID.
      */
     public static String joinPath(Collection<String> path) {
+        // If the last part of the path is included in the
+        // current part, remove that chunk, providing that
+        // there is something left over.
         List<String> newPaths = Lists.newArrayList();
-        // If the current part is what the next part starts with,
-        // don't include it, except when it equals the next part.
-        Iterator<String> patti = path.iterator();
-        String current = patti.next();
-        String next;
-        while (patti.hasNext()) {
-            next = patti.next();
-            if (!next.startsWith(current) || next.equals(current)) {
-                newPaths.add(current);
+        String last = null;
+        for (String ident : path) {
+            if (last == null) {
+                newPaths.add(ident);
+            } else {
+                if (ident.startsWith(last) && !ident.equals(last)) {
+                    newPaths.add(ident.substring(last.length()));
+                } else {
+                    newPaths.add(ident);
+                }
             }
-            current = next;
+            last = ident;
         }
-        newPaths.add(current);
-        String scopedId = Joiner.on(SEPARATOR).join(newPaths);
-        return Slugify.slugify(scopedId);
+
+        // Slugify the path sections...
+        List<String> slugged = Lists.newArrayList();
+        for (String p : newPaths) {
+            slugged.add(Slugify.slugify(p, SLUG_REPLACE));
+        }
+
+        return Joiner.on(HIERARCHY_SEPARATOR).join(slugged);
     }
 }

@@ -122,7 +122,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
 
     /**
      * Get a Vertex from the FramedGraph using its unit ID.
-     * @see {@link eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY}
+     * @see {@link eu.ehri.project.definitions.Ontology#IDENTIFIER_KEY}
      * @param graph the graph to search
      * @param identifier the Vertex's 'human readable' identifier
      * @return the first Vertex with the given identifier
@@ -135,7 +135,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
 
     /**
      * Get a Vertex from the FramedGraph using its graph ID.
-     * @see {@link eu.ehri.project.models.annotations.EntityType.ID_KEY}
+     * @see {@link eu.ehri.project.models.annotations.EntityType#ID_KEY}
      * @param graph the graph to search
      * @param id the Vertex's generated, slugified identifier
      * @return the first Vertex with the given identifier

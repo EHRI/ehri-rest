@@ -32,14 +32,14 @@ public class Slugify {
      * @return the slugified copy of the input string
      */
     public static String slugify(String input, String replacement) {
-        return normalize(input)
+        return normalize(input, replacement)
                 .replaceAll("\\s+", replacement)            // whitespace
                 .replaceAll(replacement + "+", replacement) // replacements
-                .replaceAll("^\\W|\\W$", "")                // leading/trailing non alpha
+                .replaceAll("^" + replacement + "|" + replacement + "$", "") // leading/trailing replacements
                 .toLowerCase();
     }
 
-    private static String normalize(String input) {
+    private static String normalize(String input, String replacement) {
         final String ret = StringUtils.trim(input);
         if (StringUtils.isBlank(ret)) {
             return "";
@@ -48,7 +48,7 @@ public class Slugify {
         final String trans = transliterator.transform(ret);
         return Normalizer.normalize(trans, Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "")
-                .replaceAll("[^a-zA-Z0-9- ]", DEFAULT_REPLACE);
+                .replaceAll("[^a-zA-Z0-9]", replacement);
     }
 }
 
