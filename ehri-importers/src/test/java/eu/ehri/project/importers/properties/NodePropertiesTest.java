@@ -61,9 +61,8 @@ public class NodePropertiesTest {
 
         //did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier
 
-        assertTrue(f.containsProperty("did/unitid/@ehrilabel$ehri_main_identifier"));
-        assertEquals("objectIdentifier", f.getProperty("did/unitid/@ehrilabel$ehri_main_identifier"));
-        assertEquals("ehri_main_identifier", f.getValueForAttributeProperty("did/unitid/", "@ehrilabel"));
+        assertTrue(f.containsProperty("did/unitid/@encoding$Bestandssignatur"));
+        assertEquals("objectIdentifier", f.getProperty("did/unitid/@encoding$Bestandssignatur"));
     }
     
     @Test

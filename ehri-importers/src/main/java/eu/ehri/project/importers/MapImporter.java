@@ -76,7 +76,34 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         logger.debug("nr of dates found: " + extractedDates.size());
 
     }
-    
+    /**
+     * extract datevalues from datamap
+     * @param data
+     * @return returns a List with the separated datevalues
+     */
+    protected static Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
+        Map<String, String> datesAsString = new HashMap<String, String>();
+        Object value;
+        for (Entry<String, Object> property : data.entrySet()) {
+            if (dates.containsProperty(property.getKey()) && (value = property.getValue()) != null) {
+//                logger.debug("---- extract dates -------" + property + ": " + value);
+                if (property.getValue() instanceof String) {
+                    String dateValue = (String) value;
+                    for (String d : dateValue.split(",")) {
+                        datesAsString.put(d, property.getKey());
+                    }
+                } else if (property.getValue() instanceof List) {
+                    for (String s : (List<String>) value) {
+                        datesAsString.put(s, property.getKey());
+                    }
+                } else {
+//                    logger.error("ERROR WITH DATES " + value);
+                }
+            }
+        }
+        return datesAsString;
+    }
+
     /**
      * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
@@ -85,34 +112,55 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = new LinkedList<Map<String, Object>>();
-        Object value;
-        for (Entry<String, Object> property : data.entrySet()) {
-            if (dates.containsProperty(property.getKey()) && (value = property.getValue()) != null) {
-                logger.debug("---- extract dates -------" + property + ": " + value);
-                try {
-                    if (property.getValue() instanceof String) {
-                        String dateValue = (String) value;
-                        for(String d : dateValue.split(",")){
-                            extractDateFromValue(extractedDates, d);
-                        }
-                    } else if (property.getValue() instanceof List) {
-                        for (String s : (List<String>) value) {
-                            extractDateFromValue(extractedDates, s);
-                        }
-                    } else {
-                        logger.error("ERROR WITH DATES " + value);
-                    }
-
-
-                  
-                } catch (ValidationError e) {
-                    System.out.println("ERROR WITH DATES");
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
+        Map<String, String> datevalues = returnDatesAsString(data, dates);
+        for (String s : datevalues.keySet()) {
+            try {
+                extractDateFromValue(extractedDates, s);
+            } catch (ValidationError e) {
+                System.out.println("ERROR WITH DATES");
+                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         return extractedDates;
+    }
+    
+    /**
+     * the dates that have been extracted to the extractedDates will be removed from the data map
+     * @param data
+     * @param extractedDates 
+     */
+    protected void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates){
+        Map<String, String> datevalues = returnDatesAsString(data, dates);
+        Map<String, String> datetypes = new HashMap<String, String>();
+        for(String datevalue: datevalues.keySet()){
+            datetypes.put(datevalues.get(datevalue), null);
+        }
+            
+        
+        for(Map<String, Object> datemap : extractedDates){
+            datevalues.remove(datemap.get(Ontology.DATE_HAS_DESCRIPTION));
+        }
+        //replace dates in data map
+        for(String datevalue : datevalues.keySet()){
+            String datetype = datevalues.get(datevalue);
+            logger.debug("{} -- {}", datevalue, datetype);
+            if(datetypes.containsKey(datetype) && datetypes.get(datetype) != null){
+                datetypes.put(datetype, datetypes.get(datetype)+", "+datevalue.trim());
+            }else{
+                datetypes.put(datetype, datevalue.trim());
+            }
+        }
+        for(String datetype : datetypes.keySet()){
+            logger.debug("datetype {} -- {}", datetype, datetypes.get(datetype));
+            if(datetypes.get(datetype) == null){
+                data.remove(datetype);
+            }else{
+                data.put(datetype, datetypes.get(datetype));
+            }
+            logger.debug(""+data.get(datetype));
+        }
+        
     }
     
     /**
@@ -201,6 +249,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
                 data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
                 data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
                         .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));
+                data.put(Ontology.DATE_HAS_DESCRIPTION, date);
                 break;
             }
         }

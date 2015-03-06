@@ -1,0 +1,1624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:dct="http://purl.org/dc/terms/" xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:sem="http://semanticweb.cs.vu.nl/2009/11/sem/"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+
+	<!-- Version 1.0: 01/01/2015
+	    This is the import version of the ehri-events authority file. 
+	    With in the rdf:Description elements of the events resources attributes were added, 
+	    to give the mapping to existing CVOCs within the EHRI DB.
+	    -  attributes: 
+	    	"ehri-id" attribute containing the ehri-DB ID; 
+	    	"type" attribute with CVOC category (camp, person, term, ghetto, country corporate body);
+	    	"xml:lang" attribute (only for terms) to indicate the language of the element value, since the EHRI-terms are multilingual;
+	    * country category is for mapped GeoNames resources. But we do want to use the title values of the  GN resource to present in the portal.
+	    - Added ehri-events schema Dublin Core description.
+	    
+	    Version 1.02 04/01/2015
+	    - Removed the "ehri-events/ehri-events" topConcept. all the events are now top concept, even the 3 subevents. 
+	    	This makes the voc polyhierarchical, but all events will be displayed on same level in the portal, meaning no additional "click."
+	    
+	    There is no skos:broader connection to the topConcept from all the others. only from the topConcept a skos:narrower relation is defined.
+	  -->
+
+	<!-- EHRI events Scheme DC description  -->
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/">
+		<dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-02-12</dc:date>
+		<dc:subject>Holocaust research</dc:subject>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+		<dc:title>EHRI Authority list of Events which are related to the Holocaust</dc:title>
+		<dc:description>This Authority list of Events consists of 76 events, expressed as concepts
+			and as Simple Event Model (SEM) resources. The specification of the SEM ontology can be
+			found here: "http://semanticweb.cs.vu.nl/2009/11/sem/semdoc.html"</dc:description>
+		<dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2015-01-01</dct:modified>
+		<dc:publisher>EHRI (European Holocaust Research Infrastructure)</dc:publisher>
+		<dc:creator>Yad Vashem</dc:creator>
+		<skos:hasTopConcept rdf:resource="http://data.ehri-project.eu/ehri-events/ehri-events"/>
+		<dc:contributor/>
+		<dc:language>en</dc:language>
+		<rdfs:label xml:lang="en">EHRI Authority list of Events which are related to the
+			Holocaust</rdfs:label>
+		<dc:rights>EHRI (European Holocaust Research Infrastructure)</dc:rights>
+	</rdf:Description>
+
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/1">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>"Blut für Ware", 1944</skos:prefLabel>
+		<rdfs:comment>A proposal that the Nazis would release up to one million Jews in exchange for
+			10,000 trucks and other goods from the Western Allies.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1073"
+			ehri-id="ehri-skos--tema-1073" type="term" xml:lang="en">Negotiations</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1073"
+			ehri-id="ehri-skos--tema-1073" type="term" xml:lang="en">Negotiations</skos:broadMatch>
+		<skos:altLabel xml:lang="en">"Blood for goods"</skos:altLabel>
+		<skos:altLabel xml:lang="en">Blood for goods</skos:altLabel>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/001402" type="corporate body" ehri-id="ehri-cb-001402">Budapest Rescue Committee</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country">France</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/2">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>"Teheran Children", 1942-1943</skos:prefLabel>
+		<rdfs:comment>Aliya (emigration to Palestine)</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942/1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=866"
+			ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=866"
+			ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</skos:broadMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/3">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Aktion 1005</skos:prefLabel>
+		<rdfs:comment>Code name to cover up the murder of millions of people by the
+			Nazis</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942–1944</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=574"
+			ehri-id="ehri-skos--tema-574" type="term" xml:lang="en">Cover up of traces of
+			murder</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/8354411" type="country">Soviet
+			Union</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/4">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Aktion Reinhard, 1942-1943</skos:prefLabel>
+		<rdfs:comment>Mass murder of Jews in death camps in Poland</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942/1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=536"
+			ehri-id="ehri-skos--tema-536" type="term" xml:lang="en">Murder of Jews</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:broadMatch>
+		<sem:hasSubEvent rdf:resource="http://data.ehri-project.eu/ehri-events/20"
+			ehri-id="ehri-events-20" type="events"/>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000150"
+			ehri-id="ehri-pers-000150" type="person">Globocnik Odilo</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2032"
+			ehri-id="ehri-camps-2032" type="camp">Treblinka</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2031"
+			ehri-id="ehri-camps-2031" type="camp">Sobibor</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/41"
+			ehri-id="ehri-camps-41" type="camp">Belzec</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/5">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Aktion T4</skos:prefLabel>
+		<rdfs:comment>A code name to the Nazi euthanasia program to eliminate mentally sick and
+			disabled people</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+			>1939-09/1941-08</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=377"
+			ehri-id="ehri-skos--tema-377" type="term" xml:lang="en">Euthanasia</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=377"
+			ehri-id="ehri-skos--tema-377" type="term" xml:lang="en">Euthanasia</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000058"
+			ehri-id="ehri-pers-000058" type="person">Brack Victor</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000056"
+			ehri-id="ehri-pers-000056" type="person">Bouhler Philipp</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000462"
+			ehri-id="ehri-pers-000462" type="person">ehri-id="ehri-pers-000056"
+			type="person"</sem:hasActor>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=320"
+			ehri-id="ehri-skos--tema-320" type="term" xml:lang="en">Mentally
+			disabled</skos:relatedMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=532"
+			ehri-id="ehri-skos--tema-532" type="term" xml:lang="en">Murder</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/6">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Aliya Bet</skos:prefLabel>
+		<rdfs:comment>Illegal Jewish immigration to Eretz Israel during the British
+			Mandate</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1934/1948</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=866"
+			ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=230"
+			ehri-id="ehri-skos--tema-230" type="term" xml:lang="en">Illegal
+			emigration</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=214"
+			ehri-id="ehri-skos--tema-214" type="term" xml:lang="en">Rescue</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/6254930" type="country"
+			>Palestine</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/7">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Annexation of the Sudetenland region to Germany, 1938</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1938</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1041"
+			ehri-id="ehri-skos--tema-1041" type="term" xml:lang="en">Territorial
+			annexations</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1041"
+			ehri-id="ehri-skos--tema-1041" type="term" xml:lang="en">Territorial
+			annexations</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3077311" type="country">Czech
+			Republic</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/8">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Anschluss [annexation], 1938</skos:prefLabel>
+		<rdfs:comment>Annexation of Austria into Nazi Germany in 1938</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1938</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1041"
+			ehri-id="ehri-skos--tema-1041" type="term" xml:lang="en">Territorial
+			annexations</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1041"
+			ehri-id="ehri-skos--tema-1041" type="term" xml:lang="en">Territorial
+			annexations</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2782113" type="country"
+			>Austria</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/9">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Auschwitz protocols, 1944</skos:prefLabel>
+		<rdfs:comment>Two reports about the mass murders taking place at Auschwitz based on
+			information provided by four escapees from the camp in 1944.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=268"
+			ehri-id="ehri-skos--tema-268" type="term" xml:lang="en">Information concerning
+			extermination</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/0" ehri-id="ehri-camps-0"
+			type="camp">Auschwitz</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/10">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Auschwitz Trial in Frankfurt, 1963-1967</skos:prefLabel>
+		<rdfs:comment>series of trials running from December 20, 1963 to August 19, 1965, charging
+			22 defendants under German penal law for their roles in the Holocaust as officials in
+			the Auschwitz-Birkenau. (Dbpedia)</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1963/1967</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/0" ehri-id="ehri-camps-0"
+			type="camp">Auschwitz</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1218"
+			ehri-id="ehri-skos--tema-1218" type="term" xml:lang="en">War
+			criminals</skos:relatedMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:relatedMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=477"
+			ehri-id="ehri-skos--tema-477" type="term" xml:lang="en">Camp and ghetto
+			personnel</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/11">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Babi Yar Masacre, October 1941</skos:prefLabel>
+		<rdfs:comment>site of a series of massacres carried out by the Nazis during their campaign
+			against the Soviet Union (Dbpedia)</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-10</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=540"
+			ehri-id="ehri-skos--tema-540" type="term" xml:lang="en">Mass murder</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=540"
+			ehri-id="ehri-skos--tema-540" type="term" xml:lang="en">Mass murder</skos:broadMatch>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/555" type="corporate body" ehri-id="ehri-cb-555">Einsatzkommando 4a</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/690791" type="country"
+			>Ukraine</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=539"
+			ehri-id="ehri-skos--tema-539" type="term" xml:lang="en">Mass graves</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/12">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Berlin Olympics, August 1936</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1936-08</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=709"
+			ehri-id="ehri-skos--tema-709" type="term" xml:lang="en">Sports</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=709"
+			ehri-id="ehri-skos--tema-709" type="term" xml:lang="en">Sports</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/13">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Bermuda Conference, 1943</skos:prefLabel>
+		<rdfs:comment>Conference convened by the United States and Great Britain in Bermuda
+			regarding the fate of refugees</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/6252001" type="country">United
+			States</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2635167" type="country">United
+			Kingdom</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=304"
+			ehri-id="ehri-skos--tema-304" type="term" xml:lang="en">Refugees</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/14">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Boycott of 1 April 1933</skos:prefLabel>
+		<rdfs:comment>Nazi boycott of Jewish businesses in Germany</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1933-04-01</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=331"
+			ehri-id="ehri-skos--tema-331" type="term" xml:lang="en">Anti-Jewish
+			boycotts</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=331"
+			ehri-id="ehri-skos--tema-331" type="term" xml:lang="en">Anti-Jewish
+			boycotts</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/15">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Bricha</skos:prefLabel>
+		<rdfs:comment>Organised escape of Jewish survivors from Europe after the war</rdfs:comment>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=203"
+			ehri-id="ehri-skos--tema-203" type="term" xml:lang="en">Emigration</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=203"
+			ehri-id="ehri-skos--tema-203" type="term" xml:lang="en">Emigration</skos:broadMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=278"
+			ehri-id="ehri-skos--tema-278" type="term" xml:lang="en">Displaced persons
+			camps</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/16">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Bulgarian invasion of Trakia and Macedonia, 1941</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1933-04-01</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1037"
+			ehri-id="ehri-skos--tema-1037" type="term" xml:lang="en">Bulgarian
+			occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/732800" type="country"
+			>Bulgaria</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/390903" type="country"
+			>Greece</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/17">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Casablanca conference, 1943</skos:prefLabel>
+		<rdfs:comment>Conference held by the Allies in order to plan their European strategy during
+			World War II.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</skos:broadMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1029"
+			ehri-id="ehri-skos--tema-1029" type="term" xml:lang="en">Allies</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/18">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Compilation of the "Black Book" of Soviet Jewry</skos:prefLabel>
+		<rdfs:comment>Collection of testimonies and reports about the actions of Nazis against Jews
+			in Eastern Europe during the Holocaust by the Jewish Antifascist
+			Committee</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943/1948</sem:hasTime>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/455" type="corporate body" ehri-id="ehri-cb-455">EAK - Evreyskiy antifashistskiy komitet</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/8354411" type="country">Soviet
+			Union</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000105"
+			ehri-id="ehri-pers-000105" type="person">Ehrenburg Ilya Grigoryevich</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/19">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Demjanjuk Trial in Jerusalem, 1987-1993</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1987/1993</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/294640" type="country"
+			>Israel</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000460"
+			ehri-id="ehri-pers-000460" type="person">Demjanjuk John Iwan</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2032"
+			ehri-id="ehri-camps-2032" type="camp">Treblinka</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1218"
+			ehri-id="ehri-skos--tema-1218" type="term" xml:lang="en">War
+			criminals</skos:relatedMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/20">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Eichmann Trial, 1961-1962</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1961/1962</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/294640" type="country"
+			>Israel</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000107"
+			ehri-id="ehri-pers-000107" type="person">Eichmann Adolf Otto</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2032"
+			ehri-id="ehri-camps-2032" type="camp">Treblinka</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1218"
+			ehri-id="ehri-skos--tema-1218" type="term" xml:lang="en">War
+			criminals</skos:relatedMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/21">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Erntefest, 1943</skos:prefLabel>
+		<rdfs:comment>Code name for the operation to exterminate the last surviving Jews of the
+			Trawniki, Poniatowa and Majdanek camps.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:broadMatch>
+		<skos:broader rdf:resource="http://data.ehri-project.eu/ehri-events/4"/>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2032"
+			ehri-id="ehri-camps-2032" type="camp">Treblinka</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/566"
+			ehri-id="ehri-camps-566" type="camp">Poniatowa</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/560"
+			ehri-id="ehri-camps-560" type="camp">Majdanek</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/22">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Europa Plan, 1942-1944</skos:prefLabel>
+		<rdfs:comment>Plan devised by the Slovakian working group "Pracovna Skupina" to rescue
+			European Jewry from extermination by paying ransom</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942/1944</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=259"
+			ehri-id="ehri-skos--tema-259" type="term" xml:lang="en">Rescue attempts</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=259"
+			ehri-id="ehri-skos--tema-259" type="term" xml:lang="en">Rescue
+			attempts</skos:broadMatch>
+		<skos:related rdf:resource="http://data.ehri-project.eu/ehri-events/1"/>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/493" type="corporate body" ehri-id="ehri-cb-493">Pracovna Skupina</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/719819" type="country"
+			>Hungary</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/23">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Evian Conference, 1938</skos:prefLabel>
+		<rdfs:comment>International Conference on acceptance possibilities for Jewish
+			Refugees</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1938</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=304"
+			ehri-id="ehri-skos--tema-304" type="term" xml:lang="en">Refugees</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=203"
+			ehri-id="ehri-skos--tema-203" type="term" xml:lang="en">Emigration</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country"
+			>France</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/24">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>First World War, 1914-1918</skos:prefLabel>
+		<rdfs:comment>Wars</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1914/1918</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1080"
+			ehri-id="ehri-skos--tema-1080" type="term" xml:lang="en">Wars</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1080"
+			ehri-id="ehri-skos--tema-1080" type="term" xml:lang="en">Wars</skos:broadMatch>
+		<skos:related rdf:resource="http://data.ehri-project.eu/ehri-events/69"/>
+		<skos:altLabel xml:lang="en">World War I</skos:altLabel>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/25">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of France, Belgium and the Netherlands,
+			1940</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1940</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country"
+			>France</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2802361" type="country"
+			>Belgium</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2750405" type="country"
+			>Netherlands</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/26">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of Greece, 1941</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/390903" type="country"
+			>Greece</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/27">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of Italy, 1943</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3175395" type="country"
+			>Italy</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/28">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of Norway and Denmark, April 1940</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1940-04</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3144096" type="country"
+			>Norway</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2623032" type="country"
+			>Denmark</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/29">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of Poland, September 1939</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1939-09</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<skos:broader rdf:resource="http://data.ehri-project.eu/ehri-events/60"/>
+		<skos:altLabel xml:lang="en">Polenfeldzug</skos:altLabel>
+		<skos:altLabel xml:lang="en">Operation Fall Weiss</skos:altLabel>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/695" type="corporate body" ehri-id="ehri-cb-695">Oberkommando der Wehrmacht</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/30">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of Serbia, April 1941</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-04</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/6290252" type="country"
+			>Serbia</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/31">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of the USSR, June 1941</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-06</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<skos:related rdf:resource="http://data.ehri-project.eu/ehri-events/46"/>
+		<skos:altLabel xml:lang="en">Operation Barbarossa</skos:altLabel>
+		<skos:altLabel xml:lang="en">Barbarossa</skos:altLabel>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/8354411" type="country">Soviet
+			Union</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/32">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German invasion of Vichy France, November 1942</skos:prefLabel>
+		<rdfs:comment>German Occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942-11</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country"
+			>France</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/33">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>German occupation of Hungary, March 1944</skos:prefLabel>
+		<rdfs:comment>German occupation</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944-03</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Operation Margarete</skos:altLabel>
+		<skos:altLabel xml:lang="en">Margarete</skos:altLabel>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/719819" type="country"
+			>Hungary</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/34">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Gold train</skos:prefLabel>
+		<rdfs:comment>Train with confiscated property, mostly of Hungarian Jews looted by allied
+			forces in Austria in May 1945.</rdfs:comment>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=940"/>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/719819" type="country"
+			>Hungary</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2782113" type="country"
+			>Austria</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=887"
+			ehri-id="ehri-skos--tema-887" type="term" xml:lang="en">Jewish
+			property</skos:relatedMatch>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=655"
+			ehri-id="ehri-skos--tema-655" type="term" xml:lang="en">Looting</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/35">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Haavarah-Transfer Agreement</skos:prefLabel>
+		<rdfs:comment>An agreement concluded by Nazi Germany and the Jewish Agency allowing Jews
+			immigrating to Palestine to receive property or money in Palestine in exchange for
+			assets left in Germany</rdfs:comment>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=866"
+			ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=866"
+			ehri-id="ehri-skos--tema-866" type="term" xml:lang="en">Aliya</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/6254930" type="country"
+			>Palestine</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=887"
+			ehri-id="ehri-skos--tema-887" type="term" xml:lang="en">Jewish
+			property</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/36">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Heydrich Assassination, 1942</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=230"
+			ehri-id="ehri-skos--tema-230" type="term" xml:lang="en">Illegal
+			emigration</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=212"
+			ehri-id="ehri-skos--tema-212" type="term" xml:lang="en">Resistance</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3339576" type="country"
+			>Reichsportektorat in Böhmen und Mähren</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000180"
+			ehri-id="ehri-pers-000180" type="person">Heydrich, Reinhard (1904-1942)</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/37">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Iasi Pogrom, June-July 1941</skos:prefLabel>
+		<rdfs:comment>Pogrom launched by governmental forces in the Romanian city of Iaşi against
+			its Jewish population</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+			>1941-06-28/1941-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</skos:broadMatch>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/454" type="corporate body" ehri-id="ehri-cb-454">Garda de Fier</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798549" type="country"
+			>Romania</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/38">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Italian invasion of France</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1940-06</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1035"
+			ehri-id="ehri-skos--tema-1035" type="term" xml:lang="en">Italian
+			occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3175395" type="country"
+			>Italy</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country"
+			>France</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/39">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Italian invasion of Greece</skos:prefLabel>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/390903" type="country"
+			>Greece</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3175395" type="country"
+			>Italy</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/40">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Italian invasion of Yugoslavia</skos:prefLabel>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1035"
+			ehri-id="ehri-skos--tema-1035" type="term" xml:lang="en">Italian
+			occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3175395" type="country"
+			>Italy</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/6290252" type="country"
+			>Serbia</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/41">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Jedwabne Pogrom, July 1941</skos:prefLabel>
+		<rdfs:comment>Murder of local Jews by their neighbours</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/42">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>July 20 Plot, July 1944</skos:prefLabel>
+		<rdfs:comment>Attempt to assassinate Hitler (July 20, 1944)</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=184"
+			ehri-id="ehri-skos--tema-184" type="term" xml:lang="en">Assassination
+			attempts</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=184"
+			ehri-id="ehri-skos--tema-184" type="term" xml:lang="en">Assassination
+			attempts</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Operation Valkyrie</skos:altLabel>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=539"
+			ehri-id="ehri-skos--tema-539" type="term" xml:lang="en">Mass graves</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/43">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Katyn affair</skos:prefLabel>
+		<rdfs:comment>Mass execution of Polish POW officers and citizens by the Soviet authorities
+			in 1940</rdfs:comment>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=540"
+			ehri-id="ehri-skos--tema-540" type="term" xml:lang="en">Mass murder</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1036"
+			ehri-id="ehri-skos--tema-1036" type="term" xml:lang="en">Soviet
+			occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/8354411" type="country">Soviet
+			Union</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/44">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Katzmann report, June 1943</skos:prefLabel>
+		<rdfs:comment>Report on the extermination of Jews in Galicia</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943-06</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/562153" type="region">Galicia,
+			Ukraine</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000210"
+			ehri-id="ehri-pers-000210" type="person">Katzmann Friedrich Fritz</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/45">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Kielce pogrom, July 1946</skos:prefLabel>
+		<rdfs:comment>Massacre of Jews in Kielce on July 4, 1946 by locals.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1946-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1225"
+			ehri-id="ehri-skos--tema-1225" type="term" xml:lang="en">Murder of Jews after the
+			War</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=642"
+			ehri-id="ehri-skos--tema-642" type="term" xml:lang="en">Persecution of
+			Jews</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/46">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Kommissarbefehl, June 1941</skos:prefLabel>
+		<rdfs:comment>Order given by Adolf Hitler on 6 June 1941, prior to Operation Barbarossa to
+			kill Soviet political commissars </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-06</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/8354411" type="country">Soviet
+			Union</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=532"
+			ehri-id="ehri-skos--tema-532" type="term" xml:lang="en">Murder</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/47">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Kristallnacht Riots, November 1938</skos:prefLabel>
+		<rdfs:comment>Riots against the Jewish population all over the Third Reich, sponsored by the
+			authorities</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+			>1938-11-09/1938-11-10</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=645"
+			ehri-id="ehri-skos--tema-645" type="term" xml:lang="en">Synagogues
+			desecration</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=642"
+			ehri-id="ehri-skos--tema-642" type="term" xml:lang="en">Persecution of
+			Jews</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Night of the Broken Glass</skos:altLabel>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2782113" type="country"
+			>Austria</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/48">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Legionnaires (Iron Guard) revolt, January 1941</skos:prefLabel>
+		<rdfs:comment>Revolt of the Iron Guard in Romania during which the guardists killed Jews and
+			soldiers </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-01</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</skos:broadMatch>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/454" type="corporate body" ehri-id="ehri-cb-454">Garda de Fier</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798549" type="country"
+			>Romania</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/49">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Munich Conference</skos:prefLabel>
+		<rdfs:comment>Conference held in Munich on September 28-29, 1938, during which the leaders
+			of Great Britain, France, and Italy agreed to allow Germany to annex certain areas of
+			Czechoslovakia. </rdfs:comment>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1041"
+			ehri-id="ehri-skos--tema-1041" type="term" xml:lang="en">Territorial
+			annexations</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Munich agreement</skos:altLabel>
+		<skos:altLabel xml:lang="en">Munich pact</skos:altLabel>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000078"
+			ehri-id="ehri-pers-000078" type="person">Chamberlain Arthur Neville</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000461"
+			ehri-id="ehri-pers-000461" type="person">Daladier Eduard</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000287"
+			ehri-id="ehri-pers-000287" type="person">Mussolini Benito</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000185"
+			ehri-id="ehri-pers-000185" type="person">Hitler Adolf</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/50">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Nacht und Nebel Erlass, December 1941</skos:prefLabel>
+		<rdfs:comment>A German order that any underground resistance activities against the Reich
+			carried out in Western Europe would be punished in the most severe ways. </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-12</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=649"
+			ehri-id="ehri-skos--tema-649" type="term" xml:lang="en">Political
+			discrimination</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Night and Fog decree</skos:altLabel>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000185"
+			ehri-id="ehri-pers-000185" type="person">Hitler Adolf</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/51">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Nuremberg laws, 1935</skos:prefLabel>
+		<rdfs:comment>German laws that became the basis for the further legal exclusion of Jews from
+			German life and the ensuing antiJewish policy. </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1935</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=335"
+			ehri-id="ehri-skos--tema-335" type="term" xml:lang="en">Anti-Jewish
+			legislation</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=335"
+			ehri-id="ehri-skos--tema-335" type="term" xml:lang="en">Anti-Jewish
+			legislation</skos:broadMatch>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=952"
+			ehri-id="ehri-skos--tema-952" type="term" xml:lang="en">Nazi
+			legislation</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Nuernberger Gesetze</skos:altLabel>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/52">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Nuremberg Trials, 1945-1949</skos:prefLabel>
+		<rdfs:comment>A series of military tribunals, held by the Allied forces of World War II, for
+			the prosecution of prominent members of the political, military, and economic leadership
+			of the defeated Nazi Germany.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1945/1949</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1130"
+			ehri-id="ehri-skos--tema-1130" type="term" xml:lang="en">Trials</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1218"
+			ehri-id="ehri-skos--tema-1218" type="term" xml:lang="en">War
+			criminals</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/53">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Petliura Days, July 1941</skos:prefLabel>
+		<rdfs:comment>Riots against the Jews of Lwow, organized by nationalist Ukrainian
+			groups</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=346"
+			ehri-id="ehri-skos--tema-346" type="term" xml:lang="en">Pogroms and
+			riots</skos:broadMatch>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/001403" type="corporate body" ehri-id="ehri-cb-001403">OUN - Organizatsiya ukrainskikh natsionalistov</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/690791" type="country"
+			>Ukraine</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-ghettos/501"
+			ehri-id="ehri-ghettos-501" type="ghetto">Lwow</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/54">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Potsdam Conference, July-August 1945</skos:prefLabel>
+		<rdfs:comment> Conference of Allied leaders to discuss post-war arrangements in Europe </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+			>1945-07/1945-08</sem:hasTime>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000081"
+			ehri-id="ehri-pers-000081" type="person">Churchill Winston Leonard
+			Spencer</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000463"
+			ehri-id="ehri-pers-000463" type="person">Stalin Iosif Vissarionovich</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/55">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Rafle du Vel d'Hiv, July 1942</skos:prefLabel>
+		<rdfs:comment>Mass arrests of foreign Jews at the winter sport stadium in
+			Paris</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=550"
+			ehri-id="ehri-skos--tema-550" type="term" xml:lang="en">Round ups (razzias,
+			Aktionen)</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=550"
+			ehri-id="ehri-skos--tema-550" type="term" xml:lang="en">Round ups (razzias,
+			Aktionen)</skos:broadMatch>
+		<skos:altLabel xml:lang="en">Winter sport palace round-up</skos:altLabel>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/393" type="corporate body" ehri-id="ehri-id-393">Police Nationale</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country"
+			>France</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1149"/>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/56">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Rescue Operation of Danish Jews, 1943</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=214"
+			ehri-id="ehri-skos--tema-214" type="term" xml:lang="en">Rescue</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=214"
+			ehri-id="ehri-skos--tema-214" type="term" xml:lang="en">Rescue</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2623032" type="country"
+			>Denmark</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2661886" type-="country"
+			>Sweden</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/57">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Ribbentrop-Molotov Pact, 1939</skos:prefLabel>
+		<rdfs:comment>Mutual non-aggression agreement between Nazi Germany and the Soviet Union.
+			That enabled them to divide Poland between themselves.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1939</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=633"
+			ehri-id="ehri-skos--tema-633" type="term" xml:lang="en">German
+			Occupation</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/8354411" type="country">Soviet
+			Union</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000328"
+			ehri-id="ehri-pers-000328" type="person">Ribbentrop Joachim von</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000282"
+			ehri-id="ehri-pers-000282" type="person">Molotov Vyacheslav Mikhaylovich</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/58">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Riegner Cable</skos:prefLabel>
+		<rdfs:comment>Transmission of information to the West regarding the annihilation of the Jews
+			by Gerhard Riegner, Head of the Jewish World Congress office in Geneva</rdfs:comment>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=202"
+			ehri-id="ehri-skos--tema-202" type="term" xml:lang="en">Dispersersal of knowledge
+			regarding the Holocaust</skos:broadMatch>
+		<sem:hasActor rdf:resource="http://portal.ehri-project.eu/authorities/ehri-cb/1051" type="corporate body" ehri-id="ehri-cb-1051">World Jewish Congress</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000330" ehri-id="ehri-pers-000330" type="person">Riegner Gerhard</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/59">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Saar region annexed to Germany, 1935</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1935</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1101"
+			ehri-id="ehri-skos--tema-1101" type="term" xml:lang="en">Invasion</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1041"
+			ehri-id="ehri-skos--tema-1041" type="term" xml:lang="en">Territorial
+			annexations</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/60">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Second World War, 1939-1945</skos:prefLabel>
+		<rdfs:comment>Wars</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1939/1945</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1080"
+			ehri-id="ehri-skos--tema-1080" type="term" xml:lang="en">Wars</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1080"
+			ehri-id="ehri-skos--tema-1080" type="term" xml:lang="en">Wars</skos:broadMatch>
+		<sem:hasSubEvent rdf:resource="http://data.ehri-project.eu/ehri-events/71"/>
+		<skos:altLabel xml:lang="en">World War II</skos:altLabel>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/61">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Sending of parachutists from Eretz Israel, 1943-1945</skos:prefLabel>
+		<rdfs:comment>Sending a group of Jewish volunteers from Eretz Israel on missions to
+			countries in Nazi-occupied Europe in order to organize Jewish resistance </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943/1945</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=259"
+			ehri-id="ehri-skos--tema-259" type="term" xml:lang="en">Rescue attempts</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=259"
+			ehri-id="ehri-skos--tema-259" type="term" xml:lang="en">Rescue
+			attempts</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3057568" type="country"
+			>Slovakia</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/719819" type="country"
+			>Hungary</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/6254930" type="country"
+			>Palestine</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000400"
+			ehri-id="ehri-pers-000400" type="person">Szenes Hanna (Anikó)</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/62">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Slovak National Uprising, 1944</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+			>1944-08-29/1944-10-28</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</sem:eventType>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3057568" type="country"
+			>Slovakia</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/63">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Sobibor Uprising, 1943</skos:prefLabel>
+		<rdfs:comment>Uprisal of camp inmates in the Sobibor camp</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943-10-14</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</sem:eventType>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2031"
+			ehri-id="ehri-camps-2031" type="camp">Sobibor</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/64">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Sonderkommando Uprising in Auschwitz, 7 October 1944</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944-10-07</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</sem:eventType>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/0" ehri-id="ehri-camps-0"
+			type="camp">Auschwitz</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1391"
+			ehri-id="ehri-skos--tema-1391" type="term" xml:lang="en"
+			>Sonderkommandos</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/65">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Sperre, September 1942</skos:prefLabel>
+		<rdfs:comment>Round up of the old and sick people and the children of the Lodz Ghetto in
+			order to deport them to the Chelmno camp</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942-09</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=550"
+			ehri-id="ehri-skos--tema-550" type="term" xml:lang="en">Round ups (razzias,
+			Aktionen)</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=550"
+			ehri-id="ehri-skos--tema-550" type="term" xml:lang="en">Round ups (razzias,
+			Aktionen)</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2029"
+			ehri-id="ehri-camps-2029" type="camp">Chelmno</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-ghettos/513" ehri-id="ehri-ghettos-513"
+			type="ghetto">Lodz</sem:hasPlace>
+		<skos:relatedMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=518"
+			ehri-id="ehri-skos--tema-518" type="term" xml:lang="en">Deportations</skos:relatedMatch>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/66">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Strike of February 1941 in Amsterdam</skos:prefLabel>
+		<rdfs:comment>Protest against the persecution of Duch Jews</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1941-02</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=984"
+			ehri-id="ehri-skos--tema-984" type="term" xml:lang="en">Protests</sem:eventType>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2750405" type="country"
+			>Netherlands</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/67">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Stroop report</skos:prefLabel>
+		<rdfs:comment>Report on the oppression of the Warsaw Ghetto Uprising</rdfs:comment>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:broadMatch>
+		<skos:related rdf:resource="http://data.ehri-project.eu/ehri-events/73"/>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000390"
+			ehri-id="ehri-pers-000390" type="person">Stroop Juergen</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/68">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>The Budapest Rescue Committee train, June 1944</skos:prefLabel>
+		<rdfs:comment>Train of almost 1,700 Jews who escaped from Hungary to
+			Switzerland</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944-06</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=214"
+			ehri-id="ehri-skos--tema-214" type="term" xml:lang="en">Rescue</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=214"
+			ehri-id="ehri-skos--tema-214" type="term" xml:lang="en">Rescue</skos:broadMatch>
+		<skos:altLabel xml:lang="en">The Kasztner train</skos:altLabel>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/719819" type="country"
+			>Hungary</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2658434" type="country"
+			>Switzerland</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000208"
+			ehri-id="ehri-pers-000208" type="person">Kasztner Rezső (Yisrael)</sem:hasActor>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/42"
+			ehri-id="ehri-camps-42" type="camp">Bergen Belsen</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/69">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Treaty of Versailles, June 1919</skos:prefLabel>
+		<rdfs:comment>One of the treaties that ended World War I</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1919-06</sem:hasTime>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/3017382" type="country"
+			>France</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/70">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Treblinka Uprising, 1943</skos:prefLabel>
+		<rdfs:comment>Uprisal of camp inmates in the Treblinka camp</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943-08-02</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-camps/2032"
+			ehri-id="ehri-camps-2032" type="camp">Treblinka</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/71">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>V-E Day, Victory in Europe Day, 1945</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1945-05-08</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1029"
+			ehri-id="ehri-skos--tema-1029" type="term" xml:lang="en">Allies</skos:broadMatch>
+		<skos:broader rdf:resource="http://data.ehri-project.eu/ehri-events/60"/>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/72">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Vierjahresplan</skos:prefLabel>
+		<rdfs:comment>Economic program written in August 1936 for the revitalization of the German
+			army and economy within four years in anticipation of war.</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1936-08</sem:hasTime>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=918"
+			ehri-id="ehri-skos--tema-918" type="term" xml:lang="en">Economics</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/73">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Wannsee Konferenz, 1942</skos:prefLabel>
+		<rdfs:comment>Meeting held in Berlin to discuss and coordinate the implementation of the
+			Final Solution of the Jewish Question</rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1942</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=349"
+			ehri-id="ehri-skos--tema-349" type="term" xml:lang="en">Final Solution of the Jewish
+			Question</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/2921044" type="country"
+			>Germany</sem:hasPlace>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000153"
+			ehri-id="ehri-pers-000153" type="person">Goering Hermann</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/74">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Warsaw Ghetto Uprising, 1943</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1943</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-ghettos/1106"
+			ehri-id="ehri-ghettos-1106" type="ghetto">Warsaw</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/75">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Warsaw Polish Uprising, 1944</skos:prefLabel>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</sem:eventType>
+		<skos:broadMatch rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=254"
+			ehri-id="ehri-skos--tema-254" type="term" xml:lang="en">Uprisings</skos:broadMatch>
+		<sem:hasPlace rdf:resource="http://sws.geonames.org/798544" type="country"
+			>Poland</sem:hasPlace>
+		<sem:hasPlace rdf:resource="http://data.ehri-project.eu/ehri-ghettos/1106"
+			ehri-id="ehri-ghettos-1106" type="ghetto">Warsaw</sem:hasPlace>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/76">
+		<rdf:type rdf:resource="http://semanticweb.cs.vu.nl/2009/11/sem/Event"/>
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:prefLabel>Yalta Conference, 1945</skos:prefLabel>
+		<rdfs:comment>Conference, held by the three chief Allied leaders, Franklin D. Roosevelt ,
+			Winston Churchill Joseph Stalin for the purpose of discussing Europe's post-war
+			reorganization. </rdfs:comment>
+		<sem:hasTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1945</sem:hasTime>
+		<sem:eventType rdf:resource="http://data.ehri-project.eu/ehri-skos/?tema=1074"
+			ehri-id="ehri-skos--tema-1074" type="term" xml:lang="en">Conferences</sem:eventType>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000081"
+			ehri-id="ehri-pers-000081" type="person">Churchill Winston Leonard Spencer</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000463"
+			ehri-id="ehri-pers-000463" type="person">Stalin Iosif Vissarionovich</sem:hasActor>
+		<sem:hasActor rdf:resource="http://data.ehri-project.eu/ehri-pers/000335"
+			ehri-id="ehri-pers-000335" type="person">Roosevelt Franklin Delano</sem:hasActor>
+		<skos:inScheme rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+	</rdf:Description>
+
+
+	<!-- top concept in ehri-events scheme -->
+	<!-- 
+	<rdf:Description rdf:about="http://data.ehri-project.eu/ehri-events/ehri-events/ehri-events">
+		<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+		<skos:topConceptOf rdf:resource="http://data.ehri-project.eu/ehri-events/"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/1"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/2"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/3"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/4"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/5"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/6"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/7"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/8"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/9"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/10"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/11"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/12"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/13"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/14"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/15"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/16"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/17"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/18"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/19"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/20"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/22"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/23"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/24"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/25"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/26"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/27"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/28"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/30"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/31"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/32"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/33"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/34"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/35"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/36"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/37"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/38"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/39"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/40"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/41"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/42"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/43"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/44"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/45"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/46"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/47"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/48"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/49"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/50"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/51"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/52"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/53"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/54"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/55"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/56"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/57"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/58"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/59"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/60"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/61"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/62"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/63"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/64"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/65"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/66"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/67"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/68"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/69"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/70"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/72"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/73"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/74"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/75"/>
+		<skos:narrower rdf:resource="http://data.ehri-project.eu/ehri-events/76"/>
+	</rdf:Description>
+	 -->
+
+</rdf:RDF>

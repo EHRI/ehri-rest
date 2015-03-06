@@ -48,7 +48,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     @Override
-    public <T extends Frame> T cast(Frame frame, Class<T> cls) {
+    public <E extends Frame> E cast(Frame frame, Class<E> cls) {
         return graph.frame(frame.asVertex(), cls);
     }
 
@@ -82,21 +82,21 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     @Override
-    public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound {
+    public <E> E getFrame(String id, Class<E> cls) throws ItemNotFound {
         return graph.frame(getVertex(id), cls);
     }
 
     @Override
-    public <T> T getFrame(String id, EntityClass type, Class<T> cls)
+    public <E> E getFrame(String id, EntityClass type, Class<E> cls)
             throws ItemNotFound {
         return graph.frame(getVertex(id, type), cls);
     }
 
     @Override
-    public <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls) {
+    public <E> CloseableIterable<E> getFrames(EntityClass type, Class<E> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
-            return new WrappingCloseableIterable<T>(
+            return new WrappingCloseableIterable<E>(
                     graph.frameVertices(getVertices(type), cls));
         } finally {
             vertices.close();
@@ -272,7 +272,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         }
     }
 
-    private <T extends Element> void replaceProperties(Index<T> index, T item,
+    private <E extends Element> void replaceProperties(Index<E> index, E item,
             Map<String, ?> data, Collection<String> keys) {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
@@ -289,7 +289,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         addProperties(index, item, data, keys);
     }
 
-    private <T extends Element> void addProperties(Index<T> index, T item,
+    private <E extends Element> void addProperties(Index<E> index, E item,
             Map<String, ?> data, Collection<String> keys) {
         Preconditions.checkNotNull(data, "Data map cannot be null");
         for (Map.Entry<String, ?> entry : data.entrySet()) {

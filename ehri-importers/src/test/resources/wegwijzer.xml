@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:dans="zeurNiet" xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" audience="external">
+    <eadheader>
+        <eadid countrycode="NL">519333140</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper/>
+                <author encodinganalog="dc:source with value containing attribute (Archiefinstelling)">Regionaal Archief Zutphen</author>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation> This EAD file has been created by EHRI based on DC files from the online service Wegwijzer Archieven WO2 at www.archievenwo2.nl
+                    <date>2015-02-26T07:31:00.051+01:00</date></creation>
+            <langusage><language langcode="dut" scriptcode="Latn">Dutch</language></langusage>
+        </profiledesc>
+    </eadheader>
+    <archdesc level="fonds">
+        <did>
+            <unitid label="ehri_main_identifier" encodinganalog="dc:source with value containing attribute (Identificatiecode archief-blok)"
+                >4.002</unitid>
+            <unittitle encodinganalog="dc:title">Gemeente Vorden, 1931-1988</unittitle>
+            <unitdate encodinganalog="dc:date">1931-1988</unitdate>
+            <origination encodinganalog="dc:creator">Gemeentebestuur Vorden</origination>
+            <physdesc encodinganalog="dc:format">94 meter</physdesc>
+            <repository encodinganalog="dc:source with the value containing attribute (Archiefinstelling)">Regionaal Archief Zutphen</repository>
+        </did>
+        <dao xlink:type="simple" xlink:href="http://archievenwo2.nl/archieven/archief-blok/519333140"/>
+        <scopecontent encodinganalog="dc:description">
+            <p>Het archief bevat de neerslag van de taken en activiteiten van de gemeente. In rubriek -2.07.51/52 zijn de notulen van vergaderingen
+                van de gemeenteraad en het College B&amp;W te vinden. In rubriek -2.08. vindt u stukken betreffende personeelsaangelegenheden. In
+                rubriek -1.755 vindt u stukken betreffende de bevolkingsregistratie (zie ook het Bevolkingsregister Vorden 1806-1962, toegangsnummer
+                4.016). Hier kunt u in de gedeeltes over de oorlogsjaren mogelijk relevante informatie vinden.</p>
+        </scopecontent>
+        <accessrestrict encodinganalog="dc:rights">
+            <p>beperkt openbaar</p>
+        </accessrestrict>
+        <processinfo>
+            <p>This fonds has been selected by EHRI from the online service Wegwijzer Archieven WO2 at www.archievenwo2.nl based on the Dutch subject
+                heading 'Jodenvervolging' attributed to file descriptions within the collection. Only file descriptions with subject heading
+                'Jodenvervolging' provided by the Wegwijzer Archieven WO2 have been included.</p>
+        </processinfo>
+        <controlaccess>
+            <subject source="niod-trefwoorden" authfilenumber="Nederlands bestuur tijdens WOII" encodinganalog="dc:subject">Nederlands bestuur tijdens
+                WOII</subject>
+            <subject source="niod-trefwoorden" authfilenumber="Nederlands bestuur in Nederland" encodinganalog="dc:subject">Nederlands bestuur in
+                Nederland</subject>
+            <geogname encodinganalog="dc:coverage">Gelderland</geogname>
+        </controlaccess>
+        <dsc>
+            <c01 level="file">
+                <did>
+                    <unitid label="ehri_main_identifier" encodinganalog="dc:source with the value containing the attribute (Inventarisnummer)"
+                        >4-11</unitid>
+                    <unitid encodinganalog="dc:identifier" audience="internal" type="handle"
+                        >http://archievenwo2.nl/archieven/inventarisnummer/-1885234542</unitid>
+                    <unittitle encodinganalog="dc:description">Aangelegenheden betreffende het geleidelijk uitschakelen der Joden uit de samenleving
+                        als: optreden van Joden in het openbaar; inleveren van radiotoestellen, fietsen e.d., 1941-1944</unittitle>
+                    <unitdate encodinganalog="dc:date">1941-1944</unitdate>
+                </did>
+                <controlaccess>
+                    <subject source="niod-trefwoorden" authfilenumber="Media en communicatie" encodinganalog="dc:subject">Media en
+                        communicatie</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Vervolging" encodinganalog="dc:subject">Vervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Economisch leven" encodinganalog="dc:subject">Economisch leven</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Jodenvervolging" encodinganalog="dc:subject">Jodenvervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Vervoer" encodinganalog="dc:subject">Vervoer</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Vordering en Inname" encodinganalog="dc:subject">Vordering en Inname</subject>
+                </controlaccess>
+            </c01>
+            <c01 level="file">
+                <did>
+                    <unitid label="ehri_multiple_identifier" encodinganalog="dc:source with the value containing the attribute (Inventarisnummer)"
+                        >5-6</unitid>
+                    <unitid label="ehri_main_identifier">inventarisnummer/-1161341013</unitid>
+                    <unitid encodinganalog="dc:identifier" audience="internal" type="handle"
+                        >http://archievenwo2.nl/archieven/inventarisnummer/-1161341013</unitid>
+                    <unittitle encodinganalog="dc:description">Registratie van joden, 1940-1946</unittitle>
+                    <unitdate encodinganalog="dc:date">1940-1946</unitdate>
+                </did>
+                <controlaccess>
+                    <subject source="niod-trefwoorden" authfilenumber="Vervolging" encodinganalog="dc:subject">Vervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Nasleep" encodinganalog="dc:subject">Nasleep</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Jodenvervolging" encodinganalog="dc:subject">Jodenvervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Nasleep - overig" encodinganalog="dc:subject">Nasleep - overig</subject>
+                </controlaccess>
+            </c01>
+            <c01 level="file">
+                <did>
+                    <unitid label="ehri_multiple_identifier" encodinganalog="dc:source with the value containing the attribute (Inventarisnummer)"
+                        >5-6</unitid>
+                    <unitid label="ehri_main_identifier">inventarisnummer/-1047655664</unitid>
+                    <unitid encodinganalog="dc:identifier" audience="internal" type="handle"
+                        >http://archievenwo2.nl/archieven/inventarisnummer/-1047655664</unitid>
+                    <unittitle encodinganalog="dc:description">Registratie van joodse vluchtelingen, 1938-1940</unittitle>
+                    <unitdate encodinganalog="dc:date">1938-1940</unitdate>
+                </did>
+                <controlaccess>
+                    <subject source="niod-trefwoorden" authfilenumber="Vervolging" encodinganalog="dc:subject">Vervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Steun en opvang" encodinganalog="dc:subject">Steun en opvang</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Evacuatie en vluchtelingen" encodinganalog="dc:subject">Evacuatie en
+                        vluchtelingen</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Jodenvervolging" encodinganalog="dc:subject">Jodenvervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Steun en opvang - Overig" encodinganalog="dc:subject">Steun en opvang -
+                        Overig</subject>
+                </controlaccess>
+            </c01>
+            <c01 level="file">
+                <did>
+                    <unitid label="ehri_main_identifier" encodinganalog="dc:source with the value containing the attribute (Inventarisnummer)"
+                        >4-10</unitid>
+                    <unitid encodinganalog="dc:identifier" audience="internal" type="handle"
+                        >http://archievenwo2.nl/archieven/inventarisnummer/1313015925</unitid>
+                    <unittitle encodinganalog="dc:description">Uitvoering verordening 6/1941 (betreft aanmeldingsplicht van personen van joods bloed),
+                        1941-1944</unittitle>
+                    <unitdate encodinganalog="dc:date">1941-1944</unitdate>
+                </did>
+                <controlaccess>
+                    <subject source="niod-trefwoorden" authfilenumber="Duitse overheid en instellingen" encodinganalog="dc:subject">Duitse overheid en
+                        instellingen</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Vervolging" encodinganalog="dc:subject">Vervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Jodenvervolging" encodinganalog="dc:subject">Jodenvervolging</subject>
+                </controlaccess>
+            </c01>
+            <c01 level="file">
+                <did>
+                    <unitid label="ehri_main_identifier" encodinganalog="dc:source with the value containing the attribute (Inventarisnummer)"
+                        >12-4</unitid>
+                    <unitid encodinganalog="dc:identifier" audience="internal" type="handle"
+                        >http://archievenwo2.nl/archieven/inventarisnummer/1598212383</unitid>
+                    <unittitle encodinganalog="dc:description">Stukken betreffende de joodse begraafplaats in de Wildenborch, 1947-1969</unittitle>
+                    <unitdate encodinganalog="dc:date">1947-1969</unitdate>
+                </did>
+                <controlaccess>
+                    <subject source="niod-trefwoorden" authfilenumber="Vervolging" encodinganalog="dc:subject">Vervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Nasleep" encodinganalog="dc:subject">Nasleep</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Oorlogsslachtoffers en gesneuvelden" encodinganalog="dc:subject"
+                        >Oorlogsslachtoffers en gesneuvelden</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Jodenvervolging" encodinganalog="dc:subject">Jodenvervolging</subject>
+                    <subject source="niod-trefwoorden" authfilenumber="Nasleep - overig" encodinganalog="dc:subject">Nasleep - overig</subject>
+                </controlaccess>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>

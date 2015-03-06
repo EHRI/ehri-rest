@@ -65,14 +65,14 @@ public class YadVashemTest extends AbstractImporterTest{
        diff.printDebug(System.out);
        /**
         * null: 4
-        * relationship: 6
+        * relationship: 4
         * documentaryUnit: 2
         * documentDescription: 3
         * systemEvent: 1
         * datePeriod: 1
         */
 
-        assertEquals(count + 17, getNodeCount(graph));
+        assertEquals(count + 15, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         for (DocumentDescription desc : m19.getDocumentDescriptions()) {
             logger.debug("Document description graph ID: {}", desc.getId());
