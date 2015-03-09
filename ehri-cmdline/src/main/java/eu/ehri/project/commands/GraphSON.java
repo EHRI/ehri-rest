@@ -13,8 +13,10 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Dump the complete graph as graphSON file, or import such a dump
@@ -92,7 +94,7 @@ public class GraphSON extends BaseCommand implements Command {
     }
 
     public void saveDump(final FramedGraph<? extends TransactionalGraph> graph,
-            CommandLine cmdLine) throws Exception {
+            CommandLine cmdLine) throws IOException {
 
         String filepath = (String) cmdLine.getArgList().get(0);
 
@@ -109,12 +111,16 @@ public class GraphSON extends BaseCommand implements Command {
     }
 
     public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
-            CommandLine cmdLine) throws Exception {
+            CommandLine cmdLine) throws IOException {
         GraphSONReader reader = new GraphSONReader(graph);
         String filepath = (String) cmdLine.getArgList().get(0);
+
         InputStream inputStream = new FileInputStream(filepath);
+        InputStream readStream = filepath.toLowerCase().endsWith(".gz")
+                ? new GZIPInputStream(inputStream)
+                : inputStream;
         try {
-            reader.inputGraph(inputStream);
+            reader.inputGraph(readStream, 1000);
             new GraphReindexer(graph).reindex();
         } finally {
             inputStream.close();
