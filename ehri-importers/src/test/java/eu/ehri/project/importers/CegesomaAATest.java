@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
@@ -12,11 +13,15 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.PermissionScope;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -27,7 +32,7 @@ import static org.junit.Assert.*;
  * @author Ben Companjen (http://github.com/bencomp)
  */
 public class CegesomaAATest extends AbstractImporterTest{
-    
+    private static final Logger logger = LoggerFactory.getLogger(CegesomaAATest.class);
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "CegesomaAA.pxml";
     protected final String ARCHDESC = "AA 1134",
@@ -150,12 +155,20 @@ public class CegesomaAATest extends AbstractImporterTest{
             // start and end dates correctly parsed and setup
             
             assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
-            List<DatePeriod> dp = toList(d.getDatePeriods());
-            assertEquals(2, dp.size());
-            System.out.println(dp.get(0).asVertex().getProperty(Ontology.DATE_HAS_DESCRIPTION));
-            assertEquals("1944-01-01", dp.get(0).getStartDate());
-            assertEquals("1948-12-31", dp.get(0).getEndDate());
-            assertEquals("1979-12-31", dp.get(1).getEndDate());
+            List<DatePeriod> dps = toList(d.getDatePeriods());
+            assertEquals(2, dps.size());
+            for (DatePeriod dp : dps) {
+                String dateDesc = dp.asVertex().getProperty(Ontology.DATE_HAS_DESCRIPTION);
+                logger.info("Date object: {}", dateDesc);
+                if (dateDesc.equals("1944-1948")) {
+                    assertEquals("1944-01-01", dp.getStartDate());
+                    assertEquals("1948-12-31", dp.getEndDate());
+                }
+                else if (dateDesc.equals("1944-1979")) {
+                    assertEquals("1979-12-31", dp.getEndDate());
+                }
+            }
+
             for (MaintenanceEvent me : d.getMaintenanceEvents()) {
                 //one to each documentDescription:
                 assertEquals(5, toList(me.asVertex().getEdges(Direction.OUT)).size());
