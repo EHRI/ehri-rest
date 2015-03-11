@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public abstract class CsvAuthoritativeItemImporter extends MapImporter {
+public class CsvAuthoritativeItemImporter extends MapImporter {
 
 //    private final XmlImportProperties p = new XmlImportProperties("csvconcept.properties");
 
@@ -46,9 +46,9 @@ public abstract class CsvAuthoritativeItemImporter extends MapImporter {
 
         BundleDAO persister = getPersister();
 
-        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT, extractUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.CVOC_CONCEPT_DESCRIPTION));
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
