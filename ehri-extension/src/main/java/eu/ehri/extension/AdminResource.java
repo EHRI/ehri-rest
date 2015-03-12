@@ -124,6 +124,28 @@ public class AdminResource extends AbstractRestResource {
     }
 
     /**
+     * Re-build the graph's internal lucene index.
+     * <p/>
+     * NB: This takes a lot of memory for large graphs. Do
+     * not use willy-nilly and increase the heap size as
+     * necessary. TODO: Add incremental buffered commit.
+     *
+     * @throws java.lang.Exception
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_reindexInternal")
+    public Response reindexInternal() throws Exception {
+        try {
+            manager.rebuildIndex();
+            graph.getBaseGraph().commit();
+            return Response.ok().build();
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
      * Create a new user with a default name and identifier.
      *
      * @param jsonData Additional key/value data for the created object
