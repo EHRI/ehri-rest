@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" audience="external">
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"
+    audience="external" xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
     <eadheader>
-        <eadid countrycode="DE">ED 457</eadid>
+        <eadid countrycode="DE">G</eadid>
         <filedesc>
             <titlestmt>
                 <titleproper/>
@@ -9,20 +10,50 @@
             </titlestmt>
         </filedesc>
         <profiledesc>
-            <creation>
-                <date>2014-08-19 17:50:23</date>
-                EHRI created this EAD based on the Faust-output and selection from the IfZ Muenchen.
-            </creation>
+            <creation>EHRI created this EAD based on the Faust-output and selection from the IfZ München
+                <date>2015-03-04T09:17:24.331+02:00</date></creation>
             <langusage>
-                <language langcode="ger" scriptcode="Latn">German</language>
+                <language scriptcode="Latn" langcode="ger">German</language>
             </langusage>
         </profiledesc>
+        <revisiondesc>
+            <change>
+                <date>2015-03-04 19:03:22</date>
+                <item>EHRI has choosen the ehri_internal_id to be the unitid with label ehri_main_identifier if none were given. If multiple
+                    ehri_main_identifier were given, their label was renamed to ehri_multiple_identifier</item>
+            </change>
+            <change>
+                <date>2015/03/04 19:03:17</date>
+                <item>EHRI added a unitid with label "ehri_internal_identifier" to give every node a unique id.</item>
+            </change>
+            <change>
+                <date>2015-03-04 19:03:11</date>
+                <item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make
+                    comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+            </change>
+
+            <change>
+                <date>2015-03-04 19:03:07</date>
+                <item>EHRI added a unitid with label "ehri_main_identifier" to indicate the identifier provided by the institution that EHRI will use
+                    as the identifier of the unit.</item>
+            </change>
+            <change>
+                <date>the date</date>
+                <item>preprocessing transformation</item>
+                <item>another transformation</item>
+            </change>
+        </revisiondesc>
     </eadheader>
     <frontmatter/>
     <archdesc level="recordgrp">
         <did>
-            <unitid>ED</unitid>
-            <unittitle>TO BE FILLED</unittitle>
+            <unitid label="ehri_internal_id">0</unitid>
+            <unitid label="ehri_structure">0</unitid>
+            <unittitle encodinganalog="collection_Titel">TO BE FILLED</unittitle>
+
+
+
+            <unitid label="ehri_main_identifier">G</unitid>
         </did>
         <scopecontent>
             <p>TO BE FILLED</p>
@@ -33,139 +64,80 @@
         <dsc>
             <c01 level="series">
                 <did>
-                    <unitid encodinganalog="Signatur from the gesamt.xml"
-                                                                    identifier="the internal db nr from the bestandsang.xml">ED 457
-                    </unitid>
-                    <unittitle encodinganalog="Bestand from the gesamt.xml">Lohmeier, Cornelia</unittitle>
+                    <unitid label="ehri_internal_id">1</unitid>
+                    <unitid label="ehri_structure">0.0</unitid>
+                    <unittitle encodinganalog="collection_Titel">Internationale u. ausländische Gerichtsorte</unittitle>
+
+                    <unitid label="ehri_main_identifier">G_1</unitid>
                 </did>
-                <bioghist encodinganalog="Vita">
-                    <p/>
+                                <bioghist encodinganalog="Vita">
+                    <p>Dietrich Eckart1868-1923Dramatiker, Chefredakteur des Völkischen Beobachters ab 1920 Vgl. die Biographie Eckarts auf der Seite
+                        des Deutschen Historischen Museums:</p>
                 </bioghist>
                 <scopecontent encodinganalog="Zum_Bestand">
-                    <p/>
+                    <p>Durch einen Zufallsfund in einer anderen Abgabe liegt dem Archiv des Instituts für Zeitgeschichte eine handschriftliche Version
+                        des Gedichts "Sturm, Sturm, Sturm ... Deutschland erwache" von D. Eckart vor, daneben ein Flugblatt Eckarts, welches er noch
+                        als Herausgeber der (antisemitischen) Wochenschrift "Auf gut deutsch" verfasste. Weitere Autographen Eckarts finden sich im
+                        Portal Kalliope (http://kalliope.staatsbibliothek-berlin.de/), in der Zentralennachlassdatenbank des Bundesarchivs wird ebd.
+                        auf einen Nachlass Eckarts verwiesen.</p>
                 </scopecontent>
                 <userestrict encodinganalog="Bestandsnutzung">
-                    <p/>
+                    <p>Benutzung gemäß aktuell gültiger Benutzungsordnung des Archivs des Instituts für Zeitgeschichte.</p>
                 </userestrict>
-                <c02 level="file">
+
+                <c02 level="series">
                     <did>
-                        <unitid encodinganalog="Bandnummer" identifier="the internal db nr">ED 457 / 185</unitid>
-                        <unittitle encodinganalog="Titel">Dachau, III</unittitle>
-                        <unitdate encodinganalog="Laufzeit">1991/2008</unitdate>
-                        <physdesc encodinganalog="Art">Band</physdesc>
-                        <origination encodinganalog="Autor"/>
+                        <unitid label="ehri_internal_id">2</unitid>
+                        <unitid label="ehri_structure">0.0.0</unitid>
+                        <unittitle encodinganalog="collection_Titel">US-Militärgericht Dachau</unittitle>
+
+                        <unitid label="ehri_main_identifier">G_2</unitid>
                     </did>
-                    <bioghist encodinganalog="Bestandskurzbeschreibung">
-                        <p>Cornelia Lohmeier // Diplompsychologin // Korrespondenz, Protokolle,
-                            programmatische Schriften Deutsche Jungdemokraten Bayern und Bund, FDP
-                            Bayern und Bund, Sammlung 7. Jugendbericht der Bundesregierung,
-                            Internationale Jugendbegegnungsstätte Dachau, Materialsammlung
-                            Gleichstellungspolitik und Stadtplanung München, Rechtsextremismus und
-                            Antifaschismus, Bürgerrechte, Bayerisches Polizeiaufgabengesetz, 1969-2008.
-                            - Originale, 209 Bände.
-                        </p>
-                    </bioghist>
-                    <scopecontent encodinganalog="Enthält">
-                        <p>Protokolle, Konzepte und Broschüren, 1991-2008, von und über die Arbeit des
-                            Förderverein Internationale Jugendbegegnungsstätte Dachau.
-                        </p>
-                    </scopecontent>
-                    <scopecontent encodinganalog="Darin_auch">
-                        <p/>
-                    </scopecontent>
-                    <controlaccess>
-                        <head>Thesaurus</head>
-                        <subject encodinganalog="Thesaurus">5(reg.; Orte in der BRD,
-                            alphabet.)
-                        </subject>
-                        <subject encodinganalog="Thesaurus">politische Bildung</subject>
-                        <subject encodinganalog="Thesaurus">Pädagogik [u. Didaktik]</subject>
-                        <subject encodinganalog="Thesaurus">Konzentrationslager/Folgeprobleme
-                            [KZs/Folge]
-                        </subject>
-                        <subject encodinganalog="Thesaurus">Kultur[arbeit]</subject>
-                    </controlaccess>
-                    <controlaccess>
-                        <head>Sachregister</head>
-                        <subject encodinganalog="Sachregister">Förderverein für Internationale
-                            Jugendbegegnung und Gedenkstättenarbeit in Dachau e.V.
-                        </subject>
-                        <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
-                            Dachau
-                        </subject>
-                        <subject encodinganalog="Sachregister"> 
-                        </subject>
-                    </controlaccess>
-                    <controlaccess>
-                        <head>Personen</head>
-                        <persname encodinganalog="Personenregister">Lohmeier, Cornelia</persname>
-                    </controlaccess>
-                    <controlaccess>
-                        <head>Beruf</head>
-                        <subject encodinganalog="Beruf"/>
-                    </controlaccess>
-                </c02>
-                <c02 level="file">
-                    <did>
-                        <unitid encodinganalog="Bandnummer" identifier="the internal db nr">ED 457 / 186</unitid>
-                        <unittitle encodinganalog="Titel" />
-                        <unitdate encodinganalog="Laufzeit">1987/2004</unitdate>
-                        <physdesc encodinganalog="Art">Band</physdesc>
-                                                                        
-                    </did>
-                    <bioghist encodinganalog="Bestandskurzbeschreibung">
-                        <p>Cornelia Lohmeier // Diplompsychologin // Korrespondenz, Protokolle,
-                            programmatische Schriften Deutsche Jungdemokraten Bayern und Bund, FDP
-                            Bayern und Bund, Sammlung 7. Jugendbericht der Bundesregierung,
-                            Internationale Jugendbegegnungsstätte Dachau, Materialsammlung
-                            Gleichstellungspolitik und Stadtplanung München, Rechtsextremismus und
-                            Antifaschismus, Bürgerrechte, Bayerisches Polizeiaufgabengesetz, 1969-2008.
-                            - Originale, 209 Bände.
-                        </p>
-                    </bioghist>
-                    <scopecontent encodinganalog="Enthält">
-                        <p>Presse Förderverein Internationale Jugendbegegnungsstätte Dachau und
-                            Informationsmaterial andere Konzentrationslager-Gedenkstätten,
-                            1987-2004.
-                        </p>
-                    </scopecontent>
-                    <scopecontent encodinganalog="Darin_auch">
-                        <p/>
-                    </scopecontent>
-                    <controlaccess>
-                        <head>Thesaurus</head>
-                        <subject encodinganalog="Thesaurus">5(reg.; Orte in der BRD,
-                            alphabet.)
-                        </subject>
-                        <subject encodinganalog="Thesaurus">politische Bildung</subject>
-                        <subject encodinganalog="Thesaurus">Pädagogik [u. Didaktik]</subject>
-                        <subject encodinganalog="Thesaurus">Konzentrationslager/Folgeprobleme
-                            [KZs/Folge]
-                        </subject>
-                        <subject encodinganalog="Thesaurus">Kultur[arbeit]</subject>
-                    </controlaccess>
-                    <controlaccess>
-                        <head>Sachregister</head>
-                        <subject encodinganalog="Sachregister">Förderverein für Internationale
-                            Jugendbegegnung und Gedenkstättenarbeit in Dachau e.V.
-                        </subject>
-                        <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
-                            Dachau
-                        </subject>
-                        <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
-                            Auschwitz
-                        </subject>
-                        <subject encodinganalog="Sachregister"> KZ-Gedenkstätte
-                            Bergen-Belsen
-                        </subject>
-                        <subject encodinganalog="Sachregister"> Arbeitsgemeinschaft Bergen-Belsen
-                            e.V.
-                        </subject>
-                        <subject encodinganalog="Sachregister"> Gesellschaft für Politische
-                            Aufklärung, Sekretariat Innsbruck
-                        </subject>
-                    </controlaccess>
-                    <dao xlink:type="simple" xlink:href="www.ifz-muenchen.de/archiv/ED_0066_0001_0000.pdf"/>
+                    <c03 level="file">
+                        <did>
+                            <unitid label="ehri_internal_id">3</unitid>
+                            <unitid label="ehri_structure">0.0.0.0</unitid>
+                            <unitid encodinganalog="Signatur" identifier="82026">G 35 / 1</unitid>
+                            <unitdate encodinganalog="Datierungsangaben">Tatzeit: Dezember 1944</unitdate>
+                        <unittitle encodinganalog="Titel">Bilanz des SS-Konzern</unittitle>
+                        <unittitle encodinganalog="Untertitel">Ein dokumentarischer Tatsachenbericht</unittitle>
+
+
+
+                            <unitid label="ehri_main_identifier">G 35 / 1</unitid>
+                        </did>
+                        <controlaccess>
+                            <subject encodinganalog="Thesaurus">2(Belgien u. Nordfrankreich)</subject>
+                            <subject encodinganalog="Thesaurus">2(Albanien [ab 8.9.1943])</subject>
+                            <subject encodinganalog="Thesaurus">1. Leibstandarte Adolf Hitler [LSSAH]</subject>
+                            <subject encodinganalog="Thesaurus">USA</subject>
+                            <subject encodinganalog="Thesaurus">9(Ardennenoffensive, 16.12.1944-5.1.1945)</subject>
+                            <subject encodinganalog="Thesaurus">Anklage</subject>
+                            <subject encodinganalog="Thesaurus">Verfahren</subject>
+                            <subject encodinganalog="Thesaurus">Schwäbisch Hall</subject>
+                            <subject encodinganalog="Thesaurus">Zeugen</subject>
+                            <subject encodinganalog="Thesaurus">Malmedy</subject>
+                        </controlaccess>
+                        <odd>
+                            <p altrender="ZustSTA">Zuständige Staatsanwaltschaft: General Military Government Co</p>
+                        </odd>
+                    </c03>
+                    <c03 level="file">
+                        <did>
+                            <unitid label="ehri_internal_id">4</unitid>
+                            <unitid label="ehri_structure">0.0.0.1</unitid>
+                            <unitid encodinganalog="Signatur" identifier="64130">MB 35 / 10</unitid>
+                            <unittitle encodinganalog="Titel">Dachauer Flossenbürg-Hauptprozess</unittitle>
+<unitdate encodinganalog="Laufzeit">1945/1957</unitdate>
+
+
+                            <unitid label="ehri_main_identifier">MB 35 / 10</unitid>
+                        </did>
+                        <controlaccess>
+                            <subject encodinganalog="Thesaurus">Dachau</subject>
+                        </controlaccess>
+
+                    </c03>                
                 </c02>
             </c01>
         </dsc>

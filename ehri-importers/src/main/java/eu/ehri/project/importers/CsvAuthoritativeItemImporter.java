@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public abstract class CsvAuthoritativeItemImporter extends MapImporter {
+public class CsvAuthoritativeItemImporter extends MapImporter {
 
 //    private final XmlImportProperties p = new XmlImportProperties("csvconcept.properties");
 
@@ -46,9 +46,9 @@ public abstract class CsvAuthoritativeItemImporter extends MapImporter {
 
         BundleDAO persister = getPersister();
 
-        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT, extractUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.CVOC_CONCEPT_DESCRIPTION));
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
@@ -83,22 +83,7 @@ public abstract class CsvAuthoritativeItemImporter extends MapImporter {
         return item;
     }
 
-    private String getName(Map<String, Object> itemData) {
-        // FIXME: This all sucks
-        String firstName = (String) itemData.get("Firstname");
-        String lastName = (String) itemData.get("Lastname");
-        if (firstName == null && lastName == null) {
-            return null;
-        }
-        String name = "";
-        if (lastName != null) {
-            name = lastName;
-        }
-        if (firstName != null) {
-            name = firstName + " " + name;
-        }
-        return name;
-    }
+  
 
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = new HashMap<String, Object>();

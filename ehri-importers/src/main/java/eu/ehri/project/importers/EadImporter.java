@@ -99,7 +99,7 @@ public class EadImporter extends EaImporter {
             for(String u : unknowns.keySet()){
                 unknownProperties.append(u);
             }
-            logger.debug("Unknown Properties found: " + unknownProperties.toString());
+            logger.info("Unknown Properties found: " + unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
         // extractDocumentaryUnit does not throw ValidationError on missing ID
@@ -253,7 +253,7 @@ public class EadImporter extends EaImporter {
                         vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
                         logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
-                        if (concept.getIdentifier().equals(concept_id)) {
+                        if (concept.getIdentifier().equalsIgnoreCase(concept_id)) {
                             try {
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                                         .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
@@ -263,6 +263,7 @@ public class EadImporter extends EaImporter {
                                 unit.addLink(link);
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
+                                logger.debug("link created between {} and {}", concept_id, concept.getId());
                             } catch (PermissionDenied ex) {
                                 logger.error(ex.getMessage());
                             }
