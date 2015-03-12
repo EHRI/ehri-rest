@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" audience="external">
+    <eadheader>
+        <eadid countrycode="BE">BE / ADVN / AC559</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper/>
+                <author> Gertjan Desmet </author>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>EHRI created this EAD based on the text file of the book "P. FALEK ALHADEFF &amp; G. DESMET, P.-A. TALLIER (dir.), Mekorot
+                Hayeda. Bronnen voor de geschiedenis van de Joden in België (19de-20ste eeuw) - Sources pour l’histoire des Juifs en Belgique
+                (19-20ème siècles), Brussel, Algemeen Rijksarchief – Archives Générales du Royaume, 2014." <date>2015-02-12 11:29:20</date>
+            </creation>
+            <langusage>
+                <language langcode="dut" scriptcode="Latn">Dutch</language>
+            </langusage>
+        </profiledesc>
+    </eadheader>
+    <frontmatter/>
+    <archdesc level="fonds">
+        <did>
+            <unitid label="ehri_main_identifier">BE / ADVN / AC559</unitid>
+            <unitid label="institution_identifier">AC559</unitid>
+            <unittitle>Archief Vrij Historisch Onderzoek.</unittitle>
+            <unitdate>ca. jaren 1980-1990</unitdate>
+            <physdesc>
+                <extent>1,5 s.m.</extent>
+            </physdesc>
+            <origination> Vrij Historisch Onderzoek </origination>
+            <repository label="ehri_repository_vc" altrender="ADVN">be-002093</repository>
+        </did>
+        <scopecontent>
+            <p> Dit bestand zou voornamelijk stukken bevatten die typisch zijn voor verenigingsarchief. In het bijzonder zou het vooral gaan om
+                stukken inzake de redactie van de verschillende publicaties van VHO, en om correspondentie met betrekking tot de gerechtelijke
+                vervolgingen van VHO-verantwoordelijken. </p>
+        </scopecontent>
+        <controlaccess>
+            <subject authfilenumber="?tema=329" source="ehri-skos">antisemitisme</subject>
+            <subject>extreemrechts</subject>
+            <subject authfilenumber="?tema=1223" source="ehri-skos">negationisme</subject>
+        </controlaccess>
+        <otherfindaid>
+            <p> Geen. </p>
+        </otherfindaid>
+        <processinfo>
+            <p>EHRI has made a selection of relevant fonds based on subject and content, excluding non-holocaust relevant material.</p>
+        </processinfo>
+        <dsc/>
+    </archdesc>
+</ead>
