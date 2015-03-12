@@ -83,22 +83,7 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         return item;
     }
 
-    private String getName(Map<String, Object> itemData) {
-        // FIXME: This all sucks
-        String firstName = (String) itemData.get("Firstname");
-        String lastName = (String) itemData.get("Lastname");
-        if (firstName == null && lastName == null) {
-            return null;
-        }
-        String name = "";
-        if (lastName != null) {
-            name = lastName;
-        }
-        if (firstName != null) {
-            name = firstName + " " + name;
-        }
-        return name;
-    }
+  
 
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = new HashMap<String, Object>();

@@ -8,7 +8,7 @@
     </encoder>
   </appender>
 
-  <logger name="eu.ehri.project.importers" level="${ehri.test.log.level:-info}" />
+  <logger name="eu.ehri.project.importers" level="${ehri.test.log.level:-debug}" />
   <logger name="eu.ehri" level="${ehri.log.level:-info}" />
 
   <root level="DEBUG">
