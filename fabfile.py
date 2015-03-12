@@ -256,7 +256,7 @@ def online_clone_db(local_dir):
     """
     timestamp = get_timestamp()
     with settings(tmpdst = "/tmp/" + timestamp):
-        online_backup(env.tmpdst)
+        online_backup(env.tmpdst, tar = False)
         run("tar --create --gzip --file %(tmpdst)s.tgz -C %(tmpdst)s ." % env)
         get(env.tmpdst + ".tgz", env.tmpdst + ".tgz")
         run("rm -rf %(tmpdst)s %(tmpdst)s.tgz" % env)
