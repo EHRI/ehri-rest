@@ -7,7 +7,6 @@
     <module name="JavadocPackage" />
     <module name="Header">
         <property name="headerFile" value="java.header" />
-        <property name="ignoreLines" value="2" />
         <property name="fileExtensions" value="java" />
     </module>
     <module name="TreeWalker">

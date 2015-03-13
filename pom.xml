@@ -68,7 +68,7 @@
     </developers>
 
     <issueManagement>
-        <system>GitHub</system>
+        <system>GitHub Issues</system>
         <url>https://github.com/EHRI/ehri-rest/issues</url>
     </issueManagement>
 
@@ -94,6 +94,13 @@
         <connection>scm:git:git://github.com/EHRI/ehri-rest</connection>
         <url>https://github.com/EHRI/ehri-rest</url>
     </scm>
+    
+    <licenses>
+        <license>
+            <name>European Union Public Licence (EUPL) version 1.1</name>
+            <url>https://joinup.ec.europa.eu/software/page/eupl/licence-eupl</url>
+        </license>
+    </licenses>
 
     <modules>
         <module>ehri-frames</module>
