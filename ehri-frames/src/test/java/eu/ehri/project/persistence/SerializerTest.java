@@ -2,6 +2,7 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -39,8 +40,8 @@ public class SerializerTest extends AbstractFixtureTest {
             BundleUtils.get(serialized, "heldBy[0]/describes[0]/hasAddress[0]/streetAddress");
             fail("Default serializer should not serialize addresses in repository descriptions");
         } catch (BundleUtils.BundlePathError e) {
+            // okay
         }
-
     }
 
     @Test
@@ -82,6 +83,23 @@ public class SerializerTest extends AbstractFixtureTest {
         assertEquals("vcd1",
                 BundleUtils.get(serializedVc1, "describes[0]/identifier"));
         
+    }
+
+    @Test
+    public void testMaxFetchDepth() throws Exception {
+        Link link1 = manager.getFrame("link3", Link.class);
+        Serializer serializer = new Serializer.Builder(graph).build();
+        Bundle serialized = serializer.vertexFrameToBundle(link1);
+        Bundle target0 = BundleUtils.getBundle(serialized, "hasLinkTarget[0]");
+        assertEquals(1, target0.depth());
+        assertEquals("c3",
+                BundleUtils.get(serialized, "hasLinkTarget[0]/identifier"));
+        try {
+            BundleUtils.getBundle(serialized, "hasLinkTarget[0]/childOf[0]/describes[0]");
+            fail("Max ifBelowLevel serialization should ignore childOf relation for item c3");
+        } catch (BundleUtils.BundlePathError e) {
+            // okay
+        }
     }
 
     @Test

@@ -126,7 +126,7 @@ public final class Serializer {
 
     /**
      * Constructor which allows specifying whether to serialize non-dependent relations
-     * and the depth of traversal.
+     * and the level of traversal.
      *
      * @param graph         The framed graph
      * @param dependentOnly Only serialize dependent nodes
@@ -212,7 +212,7 @@ public final class Serializer {
      */
     public <T extends Frame> Bundle vertexFrameToBundle(T item)
             throws SerializationError {
-        return vertexToBundle(item.asVertex(), 0, false);
+        return vertexToBundle(item.asVertex(), 0, maxTraversals, false);
     }
 
     /**
@@ -225,7 +225,7 @@ public final class Serializer {
      */
     public Bundle vertexFrameToBundle(Vertex item)
             throws SerializationError {
-        return vertexToBundle(item, 0, false);
+        return vertexToBundle(item, 0, maxTraversals, false);
     }
 
     /**
@@ -321,7 +321,7 @@ public final class Serializer {
      * @return A data bundle
      * @throws SerializationError
      */
-    private Bundle vertexToBundle(Vertex item, int depth, boolean lite)
+    private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite)
             throws SerializationError {
         try {
             EntityClass type = EntityClass.withName((String) item
@@ -333,7 +333,7 @@ public final class Serializer {
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
                     .addRelations(getRelationData(item,
-                            depth, lite, type.getEntityClass()))
+                            depth, maxDepth, lite, type.getEntityClass()))
                     .addMetaData(getVertexMeta(item));
             if (!lite) {
                 builder.addMetaData(getVertexMeta(item))
@@ -346,16 +346,16 @@ public final class Serializer {
         }
     }
 
-    private Bundle fetch(Frame frame, int depth, boolean isLite) throws SerializationError {
+    private Bundle fetch(Frame frame, int depth, int maxDepth, boolean isLite) throws SerializationError {
         if (cache != null) {
             String key = frame.getId() + depth + isLite;
             if (cache.containsKey(key))
                 return cache.get(key);
-            Bundle bundle = vertexToBundle(frame.asVertex(), depth, isLite);
+            Bundle bundle = vertexToBundle(frame.asVertex(), depth, maxDepth, isLite);
             cache.put(key, bundle);
             return bundle;
         }
-        return vertexToBundle(frame.asVertex(), depth, isLite);
+        return vertexToBundle(frame.asVertex(), depth, maxDepth, isLite);
     }
 
     // TODO: Profiling shows that (unsurprisingly) this method is a
@@ -364,9 +364,9 @@ public final class Serializer {
     // whereever possible. Unfortunately the use of @JavaHandler Frame
     // annotations will make this difficult.
     private ListMultimap<String, Bundle> getRelationData(
-            Vertex item, int depth, boolean lite, Class<?> cls) {
+            Vertex item, int depth, int maxDepth, boolean lite, Class<?> cls) {
         ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
-        if (depth < maxTraversals) {
+        if (depth < maxDepth) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             logger.trace(" - Fetch methods: {}", fetchMethods);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
@@ -377,6 +377,8 @@ public final class Serializer {
                         || shouldSerializeLite(method);
 
                 if (shouldTraverse(relationName, method, depth, isLite)) {
+                    int nextDepth = depth + 1;
+                    int nextMaxDepth = getNewMaxDepth(method, nextDepth, maxDepth);
                     logger.trace("Fetching relation: {}, depth {}, {}",
                             relationName, depth, method.getName());
                     try {
@@ -386,13 +388,13 @@ public final class Serializer {
                         // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
-                                relations.put(relationName, fetch((Frame) d, depth + 1, isLite));
+                                relations.put(relationName, fetch((Frame) d, nextDepth, nextMaxDepth, isLite));
                             }
                         } else {
                             // This relationship could be NULL if, e.g. a
                             // collection has no holder.
                             if (result != null) {
-                                relations.put(relationName, fetch((Frame) result, depth + 1, isLite));
+                                relations.put(relationName, fetch((Frame) result, nextDepth, nextMaxDepth, isLite));
                             }
                         }
                     } catch (Exception e) {
@@ -409,55 +411,63 @@ public final class Serializer {
         return relations;
     }
 
-    /**
-     * Determine how to serialize the properties of an item. We use lite serialization if:
-     *  - it's not a dependent relation
-     *  - it doesn't have the full property set on the fetch annotation
-     */
+    private int getNewMaxDepth(Method fetchMethod, int currentDepth, int currentMaxDepth) {
+        Fetch fetchProps = fetchMethod.getAnnotation(Fetch.class);
+        int max = fetchProps.numLevels();
+        int newMax = max == -1
+                ? currentMaxDepth
+                : Math.min(currentDepth + max, currentMaxDepth);
+        logger.trace("Current depth {}, fetch levels: {}, current max: {}, new max: {}, {}", currentDepth, max,
+                currentMaxDepth, newMax, fetchMethod.getName());
+        return newMax;
+    }
+
     private boolean shouldSerializeLite(Method method) {
         Dependent dep = method.getAnnotation(Dependent.class);
         Fetch fetch = method.getAnnotation(Fetch.class);
         return dep == null && (fetch == null || !fetch.full());
     }
 
-    private boolean shouldTraverse(String relationName, Method method, int depth, boolean lite) {
+    private boolean shouldTraverse(String relationName, Method method, int level, boolean lite) {
         // In order to avoid @Fetching the whole graph we track the
         // depth parameter and increase it for every traversal.
         // However the @Fetch annotation can also specify a maximum
-        // depth of traversal beyong which we don't serialize.
+        // level of traversal beyond which we don't serialize.
         Fetch fetchProps = method.getAnnotation(Fetch.class);
         Dependent dep = method.getAnnotation(Dependent.class);
 
-        if (fetchProps == null)
+        if (fetchProps == null) {
             return false;
+        }
 
         if (dependentOnly && dep == null) {
             logger.trace(
-                    "Terminating fetch dependent only is specified: {}, depth {}, limit {}, {}",
-                    relationName, depth, fetchProps.depth());
+                    "Terminating fetch dependent only is specified: {}, ifBelowLevel {}, limit {}, {}",
+                    relationName, level, fetchProps.ifBelowLevel());
             return false;
         }
 
         if (lite && fetchProps.whenNotLite()) {
             logger.trace(
-                    "Terminating fetch because it specifies whenNotLite: {}, depth {}, limit {}, {}",
-                    relationName, depth, fetchProps.depth());
+                    "Terminating fetch because it specifies whenNotLite: {}, ifBelowLevel {}, limit {}, {}",
+                    relationName, level, fetchProps.ifBelowLevel());
             return false;
         }
 
-        if (depth >= fetchProps.depth()) {
+        if (level >= fetchProps.ifBelowLevel()) {
             logger.trace(
-                    "Terminating fetch because depth exceeded depth on fetch clause: {}, depth {}, limit {}, {}",
-                    relationName, depth, fetchProps.depth());
+                    "Terminating fetch because level exceeded ifBelowLevel on fetch clause: {}, ifBelowLevel {}, " +
+                            "limit {}, {}",
+                    relationName, level, fetchProps.ifBelowLevel());
             return false;
         }
 
-        // If the fetch should only be serialized at a certain depth and
+        // If the fetch should only be serialized at a certain ifBelowLevel and
         // we've exceeded that, don't serialize.
-        if (fetchProps.ifDepth() != -1 && depth > fetchProps.ifDepth()) {
+        if (fetchProps.ifLevel() != -1 && level > fetchProps.ifLevel()) {
             logger.trace(
-                    "Terminating fetch because ifDepth clause found on {}, depth {}, {}",
-                    relationName, depth);
+                    "Terminating fetch because ifLevel clause found on {}, ifBelowLevel {}, {}",
+                    relationName, level);
             return false;
         }
         return true;

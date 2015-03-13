@@ -113,7 +113,6 @@ public class BundleTest {
                 .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
                 .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
         Bundle currentDp = BundleUtils.getBundle(bundle1, "describes[0]/hasDate[0]");
-        System.out.println("CURRENT: " + currentDp);
         Bundle b1_2 = BundleUtils
                 .setBundle(bundle1, "describes[0]/hasDate[-1]", currentDp);
         Bundle b1_3 = BundleUtils.setBundle(b1_2, "describes[0]/hasDate[0]", dp);
@@ -230,6 +229,16 @@ public class BundleTest {
         Bundle bundle2 = bundle.removeRelation(
                 Ontology.DESCRIPTION_FOR_ENTITY, relations.get(0));
         assertFalse(bundle2.hasRelations(Ontology.DESCRIPTION_FOR_ENTITY));
+    }
+
+    @Test
+    public void testBundleDepth() throws Exception {
+        assertEquals(1, bundle.depth());
+        Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
+                .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
+                .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
+        Bundle deeperBundle = BundleUtils.setBundle(bundle, "describes[0]/hasDate[-1]", dp);
+        assertEquals(2, deeperBundle.depth());
     }
 
     @Test

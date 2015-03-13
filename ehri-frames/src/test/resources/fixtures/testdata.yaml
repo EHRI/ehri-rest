@@ -524,6 +524,19 @@
      hasLinkBody: ur1
      hasLinker: mike
 
+ - id: link3
+   type: link
+   data:
+     type: associative
+     body: Test access point link
+   relationships:
+     hasLinkTarget:
+      - c3
+      - a1
+     hasLinkBody: ur1
+     hasLinker: mike
+
+
 --- # Permission grants
 
 # Allow user Reto to create doc units within r1 scope

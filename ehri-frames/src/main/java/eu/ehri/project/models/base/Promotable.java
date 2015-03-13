@@ -18,11 +18,11 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 public interface Promotable extends AccessibleEntity {
     public static final String PROMOTION_SCORE = "_promotionScore";
 
-    @Fetch(Ontology.PROMOTED_BY)
+    @Fetch(value = Ontology.PROMOTED_BY, numLevels = 1)
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
     public Iterable<UserProfile> getPromoters();
 
-    @Fetch(Ontology.DEMOTED_BY)
+    @Fetch(value = Ontology.DEMOTED_BY, numLevels = 1)
     @Adjacency(label = Ontology.DEMOTED_BY, direction = Direction.OUT)
     public Iterable<UserProfile> getDemoters();
 
