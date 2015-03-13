@@ -417,7 +417,7 @@ public final class Serializer {
         int newMax = max == -1
                 ? currentMaxDepth
                 : Math.min(currentDepth + max, currentMaxDepth);
-        logger.info("Current depth {}, fetch levels: {}, current max: {}, new max: {}, {}", currentDepth, max,
+        logger.trace("Current depth {}, fetch levels: {}, current max: {}, new max: {}, {}", currentDepth, max,
                 currentMaxDepth, newMax, fetchMethod.getName());
         return newMax;
     }
