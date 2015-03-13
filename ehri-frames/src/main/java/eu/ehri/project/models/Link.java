@@ -22,14 +22,14 @@ import eu.ehri.project.models.base.TemporalEntity;
 @EntityType(EntityClass.LINK)
 public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable, TemporalEntity {
 
-    @Fetch(Ontology.LINK_HAS_LINKER)
+    @Fetch(value = Ontology.LINK_HAS_LINKER, numLevels = 0)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
     public UserProfile getLinker();
 
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
     public void setLinker(final Accessor accessor);
 
-    @Fetch(ifDepth = 0, value = Ontology.LINK_HAS_TARGET)
+    @Fetch(value = Ontology.LINK_HAS_TARGET, ifLevel = 0, numLevels = 1)
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
     public Iterable<LinkableEntity> getLinkTargets();
 

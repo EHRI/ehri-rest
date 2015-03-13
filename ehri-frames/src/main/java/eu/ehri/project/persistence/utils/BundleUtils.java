@@ -208,7 +208,7 @@ public class BundleUtils {
                         path.next(), op);
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
-                        "Relation index '%s[%s]' not found", section.getPath(),
+                        "Relation index '%s[%s]' not found", path.next(),
                         section.getIndex()));
             }
         }
@@ -278,9 +278,10 @@ public class BundleUtils {
         PathSection section = path.current();
         BundlePath next = path.next();
 
-        if (!bundle.hasRelations(section.getPath()))
+        if (section.getIndex() != -1 && !bundle.hasRelations(section.getPath())) {
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
+        }
         ListMultimap<String, Bundle> allRelations = ArrayListMultimap
                 .create(bundle.getRelations());
         try {

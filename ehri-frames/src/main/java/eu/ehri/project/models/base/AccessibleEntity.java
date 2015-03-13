@@ -17,7 +17,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
 
 public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity, AnnotatableEntity {
 
-    @Fetch(value = Ontology.IS_ACCESSIBLE_TO, depth = 1)
+    @Fetch(value = Ontology.IS_ACCESSIBLE_TO, ifBelowLevel = 1)
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
     public Iterable<Accessor> getAccessors();
 
@@ -49,7 +49,7 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
     @JavaHandler
     public Iterable<SystemEvent> getHistory();
 
-    @Fetch(value = Ontology.ENTITY_HAS_LIFECYCLE_EVENT, ifDepth = 0)
+    @Fetch(value = Ontology.ENTITY_HAS_LIFECYCLE_EVENT, ifLevel = 0)
     @JavaHandler
     public SystemEvent getLatestEvent();
 

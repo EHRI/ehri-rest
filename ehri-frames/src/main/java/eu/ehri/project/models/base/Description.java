@@ -36,7 +36,7 @@ public interface Description extends NamedEntity, AccessibleEntity {
      * method if @Fetch serialized only if the description
      * is at the top level of the requested subtree.
      */
-    @Fetch(value = Ontology.DESCRIPTION_FOR_ENTITY, ifDepth=0)
+    @Fetch(value = Ontology.DESCRIPTION_FOR_ENTITY, ifLevel =0)
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
     public DescribedEntity getDescribedEntity();    
 
@@ -63,7 +63,7 @@ public interface Description extends NamedEntity, AccessibleEntity {
     public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 
     @Dependent
-    @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifDepth = 1, whenNotLite = true)
+    @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifLevel = 1, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_UNKNOWN_PROPERTY)
     public Iterable<UnknownProperty> getUnknownProperties();
 }
