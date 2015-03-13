@@ -34,7 +34,7 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity, Promota
      *
      * @return an annotator frame
      */
-    @Fetch(value = Ontology.ANNOTATOR_HAS_ANNOTATION, depth = 1)
+    @Fetch(value = Ontology.ANNOTATOR_HAS_ANNOTATION, numLevels = 0)
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
     public Annotator getAnnotator();
 
@@ -42,7 +42,6 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity, Promota
      * Set the annotator of this annotation.
      *
      * @param annotator an annotator frame
-     * @return
      */
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
     public void setAnnotator(final Annotator annotator);
@@ -53,7 +52,7 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity, Promota
      *
      * @return an iterable of annotatable items
      */
-    @Fetch(Ontology.ANNOTATES_PART)
+    @Fetch(value = Ontology.ANNOTATES_PART, numLevels = 1)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART)
     public Iterable<AnnotatableEntity> getTargetParts();
 
@@ -62,7 +61,7 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity, Promota
      *
      * @return an iterable of annotatable items
      */
-    @Fetch(Ontology.ANNOTATES)
+    @Fetch(value = Ontology.ANNOTATES, numLevels = 1)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
 

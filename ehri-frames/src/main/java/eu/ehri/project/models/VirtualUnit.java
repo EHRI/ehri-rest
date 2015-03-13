@@ -130,7 +130,7 @@ public interface VirtualUnit extends AbstractUnit {
      *
      * @return a user or group frame
      */
-    @Fetch(Ontology.VC_HAS_AUTHOR)
+    @Fetch(value = Ontology.VC_HAS_AUTHOR, numLevels = 0)
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
 
@@ -139,7 +139,6 @@ public interface VirtualUnit extends AbstractUnit {
      *
      * @param accessor a user or group frame
      */
-    @Fetch(Ontology.VC_HAS_AUTHOR)
     @JavaHandler
     public void setAuthor(final Accessor accessor);
 

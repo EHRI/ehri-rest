@@ -614,7 +614,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     /**
      * Create a filter that limits the selected nodes to with a particular depth
      * of a relationship chain. For example, if a set of nodes form a
-     * hierachical relationship such as:
+     * hierarchical relationship such as:
      * <p/>
      * child -[childOf]-> parent -[childOf]-> grandparent
      * <p/>

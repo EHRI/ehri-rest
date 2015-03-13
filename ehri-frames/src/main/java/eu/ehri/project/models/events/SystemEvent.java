@@ -60,7 +60,7 @@ public interface SystemEvent extends AccessibleEntity {
      *
      * @return A user profile instance
      */
-    @Fetch(Ontology.EVENT_HAS_ACTIONER)
+    @Fetch(value = Ontology.EVENT_HAS_ACTIONER, numLevels = 1)
     @JavaHandler
     public Actioner getActioner();
 
@@ -78,7 +78,7 @@ public interface SystemEvent extends AccessibleEntity {
      *
      * @return an iterable of version nodes
      */
-    @Fetch(value = Ontology.VERSION_HAS_EVENT, ifDepth = 0)
+    @Fetch(value = Ontology.VERSION_HAS_EVENT, ifLevel = 0)
     @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.IN)
     public Iterable<Version> getPriorVersions();
 
@@ -88,7 +88,7 @@ public interface SystemEvent extends AccessibleEntity {
      *
      * @return an item frame
      */
-    @Fetch(value = Ontology.EVENT_HAS_FIRST_SUBJECT, ifDepth = 0)
+    @Fetch(value = Ontology.EVENT_HAS_FIRST_SUBJECT, ifLevel = 0)
     @JavaHandler
     public AccessibleEntity getFirstSubject();
 
@@ -98,7 +98,7 @@ public interface SystemEvent extends AccessibleEntity {
      *
      * @return the event scope
      */
-    @Fetch(value = Ontology.EVENT_HAS_SCOPE, ifDepth = 0)
+    @Fetch(value = Ontology.EVENT_HAS_SCOPE, ifLevel = 0)
     @Adjacency(label = Ontology.EVENT_HAS_SCOPE, direction = Direction.OUT)
     public Frame getEventScope();
 
