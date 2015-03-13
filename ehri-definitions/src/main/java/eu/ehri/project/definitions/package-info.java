@@ -17,30 +17,8 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.definitions;
-
 /**
- * Event types are used to log actions performed in the system. These
- * are the types of actions supported by the system.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- *
+ * Definitions of entity and property types.
  */
-public enum EventTypes {
-    creation,
-    createDependent,
-    modification,
-    modifyDependent,
-    deletion,
-    deleteDependent,
-    link,
-    annotation,
-    setGlobalPermissions,
-    setItemPermissions,
-    setVisibility,
-    addGroup,
-    removeGroup,
-    ingest,
-    promotion,
-    demotion
-}
+package eu.ehri.project.definitions;
+ 
