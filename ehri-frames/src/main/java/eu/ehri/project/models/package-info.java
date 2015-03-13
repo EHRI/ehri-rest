@@ -16,16 +16,9 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package eu.ehri.project.models;
-
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
- * Frame class representing a type of permission. These
- * have the same names as the values in the {@link eu.ehri.project.acl.PermissionType}
- * enum.
+ * The interfaces in this package specify the classes of entities that map to graph
+ * frame classes. 
  */
-@EntityType(EntityClass.PERMISSION)
-public interface Permission extends AccessibleEntity {
-}
+package eu.ehri.project.models;
