@@ -43,65 +43,67 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         return graph;
     }
 
-    public <T extends Frame> T cast(Frame frame, Class<T> cls) {
-        return graph.frame(frame.asVertex(), cls);
-    }
-
     public BlueprintsGraphManager(FramedGraph<T> graph) {
         this.graph = graph;
     }
 
+    @Override
+    public <E extends Frame> E cast(Frame frame, Class<E> cls) {
+        return graph.frame(frame.asVertex(), cls);
+    }
+
+    @Override
     public String getId(Vertex vertex) {
         return vertex.getProperty(EntityType.ID_KEY);
     }
 
-    public String getId(Frame frame) {
-        return getId(frame.asVertex());
-    }
-
+    @Override
     public String getType(Vertex vertex) {
         return vertex.getProperty(EntityType.TYPE_KEY);
     }
 
-    public String getType(Frame frame) {
-        return frame.getType();
-    }
-
+    @Override
     public EntityClass getEntityClass(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
         return EntityClass.withName(getType(vertex));
     }
 
+    @Override
     public EntityClass getEntityClass(Frame frame) {
         Preconditions.checkNotNull(frame);
         return EntityClass.withName(frame.getType());
     }
 
+    @Override
     public boolean exists(String id) {
         Preconditions.checkNotNull(id,
                 "attempt determine existence of a vertex with a null id");
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
     }
 
-    public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound {
+    @Override
+    public <E> E getFrame(String id, Class<E> cls) throws ItemNotFound {
         return graph.frame(getVertex(id), cls);
     }
 
-    public <T> T getFrame(String id, EntityClass type, Class<T> cls)
+    @Override
+    public <E> E getFrame(String id, EntityClass type, Class<E> cls)
             throws ItemNotFound {
         return graph.frame(getVertex(id, type), cls);
     }
 
-    public <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls) {
+    @Override
+    public <E> CloseableIterable<E> getFrames(EntityClass type, Class<E> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
-            return new WrappingCloseableIterable<T>(
+            return new WrappingCloseableIterable<E>(
                     graph.frameVertices(getVertices(type), cls));
         } finally {
             vertices.close();
         }
     }
 
+    @Override
     public Vertex getVertex(String id) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
@@ -115,6 +117,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         }
     }
 
+    @Override
     public Vertex getVertex(String id, EntityClass type) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
@@ -125,10 +128,12 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         throw new ItemNotFound(id);
     }
 
+    @Override
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 
+    @Override
     public CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound {
         // Ugh, we don't want to remove duplicate results here
         // because that's not expected behaviour - if you give
@@ -140,6 +145,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         return new WrappingCloseableIterable<Vertex>(verts);
     }
 
+    @Override
     public CloseableIterable<Vertex> getVertices(String key, Object value, final EntityClass type) {
         // NB: This is rather annoying.
         CloseableIterable<Vertex> query = getIndex().get(key, value);
@@ -156,11 +162,13 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         return new WrappingCloseableIterable<Vertex>(elems);
     }
 
+    @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data) throws IntegrityError {
         return createVertex(id, type, data, data.keySet());
     }
 
+    @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
         Preconditions
@@ -182,11 +190,13 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         return node;
     }
 
+    @Override
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data) throws ItemNotFound {
         return updateVertex(id, type, data, data.keySet());
     }
 
+    @Override
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
         Preconditions.checkNotNull(id, "null vertex ID given for item update");
@@ -228,10 +238,22 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         }
     }
 
+    @Override
+    public void renameVertex(Vertex vertex, String oldId, String newId) {
+        Preconditions.checkNotNull(vertex);
+        Preconditions.checkNotNull(newId);
+        Index<Vertex> index = getIndex();
+        index.remove(EntityType.ID_KEY, oldId, vertex);
+        vertex.setProperty(EntityType.ID_KEY, newId);
+        index.put(EntityType.ID_KEY, newId, vertex);
+    }
+
+    @Override
     public void deleteVertex(String id) throws ItemNotFound {
         deleteVertex(getVertex(id));
     }
 
+    @Override
     public void deleteVertex(Vertex vertex) {
         Index<Vertex> index = getIndex();
         for (String key : vertex.getPropertyKeys()) {
@@ -240,7 +262,17 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         vertex.remove();
     }
 
-    private <T extends Element> void replaceProperties(Index<T> index, T item,
+    @Override
+    public void rebuildIndex() {
+        graph.getBaseGraph().dropIndex(INDEX_NAME);
+        Index<Vertex> index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
+        // index vertices
+        for (Vertex vertex : graph.getVertices()) {
+            reindex(index, vertex);
+        }
+    }
+
+    private <E extends Element> void replaceProperties(Index<E> index, E item,
             Map<String, ?> data, Collection<String> keys) {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
@@ -257,7 +289,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         addProperties(index, item, data, keys);
     }
 
-    private <T extends Element> void addProperties(Index<T> index, T item,
+    private <E extends Element> void addProperties(Index<E> index, E item,
             Map<String, ?> data, Collection<String> keys) {
         Preconditions.checkNotNull(data, "Data map cannot be null");
         for (Map.Entry<String, ?> entry : data.entrySet()) {
@@ -301,17 +333,11 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         return index;
     }
 
-    public void rebuildIndex() {
-        graph.getBaseGraph().dropIndex(INDEX_NAME);
-        Index<Vertex> index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
-
-        // index vertices
-        for (Vertex vertex : graph.getVertices()) {
-            for (String key : propertyKeysToIndex(vertex)) {
-                Object val = vertex.getProperty(key);
-                if (val != null) {
-                    index.put(key, val, vertex);
-                }
+    private void reindex(Index<Vertex> index, Vertex vertex) {
+        for (String key : propertyKeysToIndex(vertex)) {
+            Object val = vertex.getProperty(key);
+            if (val != null) {
+                index.put(key, val, vertex);
             }
         }
     }

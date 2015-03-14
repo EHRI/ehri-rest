@@ -5,6 +5,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
+import eu.ehri.project.views.ViewFactory;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -21,7 +22,16 @@ public class CountryTest extends AbstractFixtureTest {
                 .create(Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         country.addRepository(repo);
         // 2 nl repositories in the fixtures, plus the one we just made...
-        assertEquals(3L, (long) country.getChildCount());
+        assertEquals(3L, country.getChildCount());
+    }
+
+    @Test
+    public void testGetChildCountOnDeletion() throws Exception {
+        Country country = manager.getFrame("nl", Country.class);
+        Repository repo = manager.getFrame("r1", Repository.class);
+        assertEquals(2L, country.getChildCount());
+        ViewFactory.getCrudNoLogging(graph, Repository.class).delete("r1", validUser);
+        assertEquals(1L, country.getChildCount());
     }
 
     @Test

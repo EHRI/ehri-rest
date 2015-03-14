@@ -77,19 +77,13 @@ public class EadImporter extends EaImporter {
 
         BundleDAO persister = getPersister(idPath);
 
-        // extractDocumentaryUnit does not throw ValidationError on missing ID
-        Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
-        
-        // Check for missing identifier, throw an exception when there is no ID.
-        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
-            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
-                    "Missing identifier " + Ontology.IDENTIFIER_KEY);
-        }
-        logger.debug("Imported item: " + itemData.get("name"));
+        List<Map<String, Object>> extractedDates = extractDates(itemData);
+        replaceDates(itemData, extractedDates);
+
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
+        for (Map<String, Object> dpb : extractedDates) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
@@ -105,9 +99,18 @@ public class EadImporter extends EaImporter {
             for(String u : unknowns.keySet()){
                 unknownProperties.append(u);
             }
-            logger.debug("Unknown Properties found: " + unknownProperties.toString());
+            logger.info("Unknown Properties found: " + unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
+        // extractDocumentaryUnit does not throw ValidationError on missing ID
+        Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
+        
+        // Check for missing identifier, throw an exception when there is no ID.
+        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
+                    "Missing identifier " + Ontology.IDENTIFIER_KEY);
+        }
+        logger.debug("Imported item: " + itemData.get("name"));
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
@@ -250,7 +253,7 @@ public class EadImporter extends EaImporter {
                         vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
                         logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
-                        if (concept.getIdentifier().equals(concept_id)) {
+                        if (concept.getIdentifier().equalsIgnoreCase(concept_id)) {
                             try {
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                                         .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
@@ -260,6 +263,7 @@ public class EadImporter extends EaImporter {
                                 unit.addLink(link);
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
+                                logger.debug("link created between {} and {}", concept_id, concept.getId());
                             } catch (PermissionDenied ex) {
                                 logger.error(ex.getMessage());
                             }

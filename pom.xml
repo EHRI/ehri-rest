@@ -7,7 +7,7 @@
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>0.9.1-SNAPSHOT</version>
     <name>EHRI Backend</name>
     <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
     <url>https://github.com/EHRI</url>
@@ -68,7 +68,7 @@
     </developers>
 
     <issueManagement>
-        <system>GitHub</system>
+        <system>GitHub Issues</system>
         <url>https://github.com/EHRI/ehri-rest/issues</url>
     </issueManagement>
 
@@ -76,14 +76,31 @@
         <site>
             <id>ehri-rest-site</id>
             <name>Ehri Backend Site</name>
-            <url>http://github/com/EHRI/ehri-rest</url>
+            <url>http://github.com/EHRI/ehri-rest</url>
         </site>
+        <snapshotRepository>
+            <id>ehridev</id>
+            <name>libs-snapshot-local</name>
+            <url>http://ehridev.dans.knaw.nl/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+        <repository>
+            <id>ehridev</id>
+            <name>libs-release-local</name>
+            <url>http://ehridev.dans.knaw.nl/artifactory/libs-release-local</url>
+        </repository>
     </distributionManagement>
 
     <scm>
         <connection>scm:git:git://github.com/EHRI/ehri-rest</connection>
         <url>https://github.com/EHRI/ehri-rest</url>
     </scm>
+    
+    <licenses>
+        <license>
+            <name>European Union Public Licence (EUPL) version 1.1</name>
+            <url>https://joinup.ec.europa.eu/software/page/eupl/licence-eupl</url>
+        </license>
+    </licenses>
 
     <modules>
         <module>ehri-frames</module>

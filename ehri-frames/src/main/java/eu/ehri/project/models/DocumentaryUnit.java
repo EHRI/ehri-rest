@@ -12,6 +12,7 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import org.slf4j.Logger;
@@ -76,6 +77,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      *
      * @return the number of immediate child items
      */
+    @Meta(CHILD_COUNT)
     @JavaHandler
     public long getChildCount();
 
@@ -97,12 +99,6 @@ public interface DocumentaryUnit extends AbstractUnit {
     public Iterable<DocumentaryUnit> getAllChildren();
 
     /**
-     * Update/reset the cache of child items at the lower level.
-     */
-    @JavaHandler
-    public void updateChildCountCache();
-
-    /**
      * Get the description items for this documentary unit.
      *
      * @return a iterable of document descriptions
@@ -115,16 +111,8 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
-        }
-
         public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                count = gremlin().in(Ontology.DOC_IS_CHILD_OF).count();
-            }
-            return count;
+            return gremlin().inE(Ontology.DOC_IS_CHILD_OF).count();
         }
 
         public Iterable<DocumentaryUnit> getChildren() {
@@ -132,10 +120,8 @@ public interface DocumentaryUnit extends AbstractUnit {
         }
 
         public void addChild(final DocumentaryUnit child) {
-            if (JavaHandlerUtils
-                    .addSingleRelationship(child.asVertex(), it(), Ontology.DOC_IS_CHILD_OF)) {
-                updateChildCountCache();
-            }
+            JavaHandlerUtils
+                    .addSingleRelationship(child.asVertex(), it(), Ontology.DOC_IS_CHILD_OF);
         }
 
         public Iterable<DocumentaryUnit> getAllChildren() {

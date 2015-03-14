@@ -83,6 +83,17 @@ public class BundleUtilsTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testSetNestedNodeAtNewPath() throws Exception {
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        Bundle dateBundle = BundleUtils.getBundle(bundle,
+                "describes[0]/hasDate[0]").withDataValue("testattr", "testval");
+        Bundle newBundle = BundleUtils.setBundle(bundle,
+                "describes[0]/hasDate[0]/newPath[-1]", dateBundle);
+        Assert.assertEquals("testval", BundleUtils.get(newBundle,
+                "describes[0]/hasDate[0]/newPath[0]/testattr"));
+    }
+
+    @Test
     public void testInsertNestedNode() throws Exception {
         // Using -1 for insert means to append at the end of
         // the current relationship set...

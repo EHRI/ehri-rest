@@ -11,6 +11,7 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.annotations.Unique;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class ClassUtils {
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
 
     private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
+    private static Map<Class<?>,Map<String,Method>> metaMethodCache = Maps.newHashMap();
     private static Map<Class<?>,Collection<String>> propertyKeysCache = Maps.newHashMap();
     private static Map<Class<?>,Collection<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
     private static Map<Class<?>,Collection<String>> uniquePropertyKeysCache = Maps.newHashMap();
@@ -78,6 +80,20 @@ public class ClassUtils {
             fetchMethodCache.put(cls, getFetchMethodsInternal(cls));
         }
         return fetchMethodCache.get(cls);
+    }
+
+    /**
+     * Get a map of relationship-names keyed against the method to
+     * instantiate them.
+     *
+     * @param cls the entity's Java class
+     * @return a relationship-name-method map
+     */
+    public static Map<String, Method> getMetaMethods(Class<?> cls) {
+        if (!metaMethodCache.containsKey(cls)) {
+            metaMethodCache.put(cls, getMetaMethodsInternal(cls));
+        }
+        return metaMethodCache.get(cls);
     }
 
     /**
@@ -157,6 +173,24 @@ public class ClassUtils {
 
         for (Class<?> s : cls.getInterfaces()) {
             out.putAll(getFetchMethodsInternal(s));
+        }
+        return out;
+    }
+
+    private static Map<String, Method> getMetaMethodsInternal(Class<?> cls) {
+        logger.trace(" - checking for @Meta methods: {}", cls.getCanonicalName());
+        Map<String, Method> out = Maps.newHashMap();
+        for (Method method : cls.getMethods()) {
+            Meta meta = method.getAnnotation(Meta.class);
+            String value = meta != null ? meta.value() : null;
+            if (value != null) {
+                out.put(value, method);
+                logger.trace(" --- found @Meta annotation: {}: {}", method.getName(), value);
+            }
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.putAll(getMetaMethodsInternal(s));
         }
         return out;
     }

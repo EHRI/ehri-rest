@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd" audience="external">
+    <eadheader>
+        <eadid countrycode="BE">ARA#BE</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper/>
+                <author>ARA</author>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>EHRI created this EAD based on the text file of the Jewish archival sources Belgium guide "Bronnen voor de geschiedenis van de Joden in België (19de-20ste eeuw) - Sources pour l’histoire des Juifs en Belgique (19-20ème siècles)"
+                    <date>2015-02-18T00:26:03.01+02:00</date></creation>
+            <langusage>Multilingual finding aid written in <language langcode="dut" scriptcode="Latn">Dutch</language></langusage>
+        </profiledesc>
+    </eadheader>
+    <frontmatter/>
+    <archdesc level="recordgrp">
+        <did>
+            <unitid label="ehri_main_identifier">ARA</unitid>
+            <unittitle encodinganalog="title">ARA</unittitle>
+        </did>
+        <dsc>
+            <c01 level="recordgrp">
+                <did>
+                    <unitid label="ehri_main_identifier">B.</unitid>
+                    <unittitle encodinganalog="title">Privaatrechtelijke archiefvormers - Producteurs d’archives privées</unittitle>
+                </did>
+                <c02 level="recordgrp">
+                    <did>
+                        <unitid label="ehri_main_identifier">B.1</unitid>
+                        <unittitle encodinganalog="title">Particuliere organisaties met een ideologisch en politiek doel - Organisations particulières
+                            à but idéologique et politique</unittitle>
+                    </did>
+                    <c03 level="recordgrp">
+                        <did>
+                            <unitid label="ehri_main_identifier">Vrij Historisch Onderzoek</unitid>
+                            <unittitle encodinganalog="authorized_form_of_name"> Vrij Historisch Onderzoek </unittitle>
+                            <unittitle encodinganalog="parallel_form_of_name"/>
+                        </did>
+                        <bioghist encodinganalog="history">
+                            <p> Vrij Historisch Onderzoek (VHO) werd in 1985 opgericht door Siegfried Verbeke. De organisatie pretendeert
+                                wetenschappelijk onderzoek te doen naar de Shoah en fungeert als een van de grootste uitgeverijen van zgn.
+                                ‘revisionistische’ literatuur. In werkelijkheid wordt in de pseudowetenschappelijke uitgaven van het VHO de Holocaust
+                                geminimaliseerd of ontkend. In België werden de verantwoordelijken van VHO in 2004 en 2008 tot zware straffen
+                                veroordeeld wegens inbreuken op de negationismewet en de antiracismewet. Ook in Nederland en Duitsland werd Siegfried
+                                Verbeke vervolgd en veroordeeld voor gelijkaardige feiten. </p>
+                        </bioghist>
+                        <bibliography>
+                            <bibref/>
+                        </bibliography>
+                        <c04 level="fonds">
+                            <did>
+                                <unitid label="ehri_main_identifier">BE / ADVN / AC559</unitid>
+                                <repository label="ehri_repository_vc" altrender="ADVN">r1</repository>
+                            </did>
+                        </c04>
+                    </c03>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>

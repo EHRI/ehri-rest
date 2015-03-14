@@ -147,7 +147,11 @@ public class IpnTest extends AbstractImporterTest{
             assertTrue(hasProvenance);
         }
         for(DocumentDescription desc : c1_1.getDocumentDescriptions()){
+            for(String p : desc.asVertex().getPropertyKeys()){
+                System.out.println(p + " --> "+ desc.asVertex().getProperty(p));
+            }
                 assertEquals("Cukrownia w Pszennie – August Gross i Synowie [August Gross & Söhne Zuckerfabrik Weizenrodau]", desc.getName());
+                assertFalse(desc.asVertex().getPropertyKeys().contains("unitDates"));
         }
     //test hierarchy
         assertEquals(2L, archdesc.getChildCount());

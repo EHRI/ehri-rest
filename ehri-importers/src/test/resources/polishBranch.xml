@@ -42,7 +42,11 @@
                <langmaterial>
                   <language>J. niemiecki</language>
                </langmaterial>
-               <unitdate label="ehri_cleaned_date">1941/1942</unitdate>
+         <unitdate calendar="gregorian" era="ce">1972-1987</unitdate>
+         <unitdate label="ehri_cleaned_date"
+                   normal="1972/1987"
+                   calendar="gregorian"
+                   era="ce">1972-1987</unitdate>
                <physdesc>
                   <dimensions>1 j.a.; 0,04 mb</dimensions>
                </physdesc>

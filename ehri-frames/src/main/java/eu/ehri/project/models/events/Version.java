@@ -58,7 +58,7 @@ public interface Version extends AccessibleEntity {
      *
      * @return a system event instance
      */
-    @Fetch(value = Ontology.VERSION_HAS_EVENT, ifDepth = 0)
+    @Fetch(value = Ontology.VERSION_HAS_EVENT, ifLevel = 0)
     @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.OUT)
     public SystemEvent getTriggeringEvent();
 

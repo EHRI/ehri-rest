@@ -23,14 +23,6 @@ import static eu.ehri.extension.AdminResource.ENDPOINT;
 public class AdminRestClientTest extends BaseRestClientTest {
 
     @Test
-    public void testHouseKeeping() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_rebuildChildCache"));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
-        assertStatus(OK, response);
-    }
-
-    @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
         WebResource resource = client.resource(ehriUri(ENDPOINT, "createDefaultUserProfile"));

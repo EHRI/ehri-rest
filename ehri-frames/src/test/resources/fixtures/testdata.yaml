@@ -229,7 +229,6 @@
   type: documentaryUnit
   data:
     identifier: c1
-    name: Collection 1
   relationships:
     describes:
       - id: cd1
@@ -284,7 +283,6 @@
   type: documentaryUnit
   data:
     identifier: c2
-    name: Collection 2
   relationships:
     describes:
       - id: cd2
@@ -312,7 +310,6 @@
   type: documentaryUnit
   data:
     identifier: c3
-    name: Collection 3
   relationships:
     describes:
       - id: cd3
@@ -339,7 +336,6 @@
   type: documentaryUnit
   data:
     identifier: c4
-    name: Collection 4
   relationships:
     describes:
       - id: cd4
@@ -374,7 +370,6 @@
   type: documentaryUnit
   data:
     identifier: m19
-    name: m.19
   relationships:
     describes:
       - id: nl-r1-m19-eng
@@ -528,6 +523,19 @@
       - a1
      hasLinkBody: ur1
      hasLinker: mike
+
+ - id: link3
+   type: link
+   data:
+     type: associative
+     body: Test access point link
+   relationships:
+     hasLinkTarget:
+      - c3
+      - a1
+     hasLinkBody: ur1
+     hasLinker: mike
+
 
 --- # Permission grants
 

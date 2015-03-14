@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -29,11 +30,13 @@ final class BundlePath {
 
     private final List<PathSection> sections;
     private final Optional<String> terminus;
+    private final BundlePath prev;
 
-    private BundlePath(List<PathSection> sections, Optional<String> terminus) {
+    private BundlePath(List<PathSection> sections, Optional<String> terminus, BundlePath prev) {
         Preconditions.checkNotNull(terminus);
         this.sections = ImmutableList.copyOf(sections);
         this.terminus = terminus;
+        this.prev = prev;
     }
 
     public String getTerminus() {
@@ -61,7 +64,7 @@ final class BundlePath {
             throw new NoSuchElementException();
         List<PathSection> ns = Lists.newArrayList(sections);
         ns.remove(0);
-        return new BundlePath(ns, terminus);
+        return new BundlePath(ns, terminus, this);
     }
 
     public static BundlePath fromString(String path) {
@@ -74,9 +77,9 @@ final class BundlePath {
         // the pattern something[1]
         try {
             sections.add(PathSection.fromString(terminus));
-            return new BundlePath(sections, Optional.<String>absent());
+            return new BundlePath(sections, Optional.<String>absent(), null);
         } catch (Exception e) {
-            return new BundlePath(sections, Optional.of(terminus));
+            return new BundlePath(sections, Optional.of(terminus), null);
         }
     }
     

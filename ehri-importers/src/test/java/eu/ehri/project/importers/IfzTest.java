@@ -30,11 +30,12 @@ public class IfzTest extends AbstractImporterTest{
     
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "ifz_ED.xml";
-    protected final String ARCHDESC = "ED",
-            C01 = "ED 457",
-            C02_01 = "ED 457 / 185",
-            C02_02 = "ED 457 / 186";
-    DocumentaryUnit archdesc, c1, c2_1, c2_2;
+    protected final String ARCHDESC = "G",
+            C01 = "G_1",
+            C02 = "G_2",
+            C03_01 = "G 35 / 1",
+            C03_02 = "MB 35 / 10";
+    DocumentaryUnit archdesc, c1, c2, c3_1, c3_2;
     int origCount=0;
             
     @Test
@@ -55,19 +56,18 @@ public class IfzTest extends AbstractImporterTest{
        GraphDiff diff = diffGraph(graphState1, graphState2);
        diff.printDebug(System.out);
         
-//        printGraph(graph);
+        printGraph(graph);
         // How many new nodes will have been created? We should have
         /** 
-         * event links: 5
-         * relationship: 19
-         * documentaryUnit: 4
-         * documentDescription: 4
-         * unknown property: 2
+         * null: 6
+         * relationship: 11
+         * documentaryUnit: 5
+         * documentDescription: 5
+         * maintenanceEvent: 6
          * systemEvent: 1
-         * maintenanceEvent: 1
-         * datePeriod: 2
+         * 1 date
          */
-        int newCount = origCount + 38;
+        int newCount = origCount + 35;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -76,17 +76,17 @@ public class IfzTest extends AbstractImporterTest{
         c1 = graph.frame(
                 getVertexByIdentifier(graph,C01),
                 DocumentaryUnit.class);
-        c2_1 = graph.frame(
-                getVertexByIdentifier(graph,C02_01),
+        c2 = graph.frame(
+                getVertexByIdentifier(graph,C02),
                 DocumentaryUnit.class);
-        c2_2 = graph.frame(
-                getVertexByIdentifier(graph,C02_02),
+        c3_2 = graph.frame(
+                getVertexByIdentifier(graph,C03_02),
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
-        assertEquals("nl-r1-ed-ed-457", c1.getId());
-        assertEquals(c1.getId() + "-ed-457-185", c2_1.getId());
-        assertEquals(c1.getId() + "-ed-457-186", c2_2.getId());
+        assertEquals("nl-r1-g-g-1", c1.getId());
+        assertEquals(c1.getId() + "-g-2", c2.getId());
+        assertEquals(c2.getId() + "-mb-35-10", c3_2.getId());
 
         /**
          * Test titles
@@ -105,25 +105,11 @@ public class IfzTest extends AbstractImporterTest{
         
         // There should be one DocumentDescription for the (only) <c01>
         for(DocumentDescription dd : c1.getDocumentDescriptions()){
-            assertEquals("Lohmeier, Cornelia", dd.getName());
+            assertEquals("Internationale u. ausländische Gerichtsorte", dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
             assertEquals("series", dd.asVertex().getProperty("levelOfDescription"));
         }
 
-        // There should be one DocumentDescription for the (second) <c02>
-        for(DocumentDescription dd : c2_2.getDocumentDescriptions()){
-            assertEquals(C02_02, dd.getName());
-            assertEquals("deu", dd.getLanguageOfDescription());
-            assertEquals("file", dd.asVertex().getProperty("levelOfDescription"));
-            assertEquals("www.ifz-muenchen.de/archiv/ED_0066_0001_0000.pdf", dd.asVertex().getProperty("ref"));
-        }
-    //Band
-        for(DocumentDescription dd : c2_1.getDocumentDescriptions()){
-            assertEquals("Dachau, III", dd.getName());
-            assertEquals("deu", dd.getLanguageOfDescription());
-            assertEquals("file", dd.asVertex().getProperty("levelOfDescription"));
-            assertEquals("Band", dd.asVertex().getProperty("extentAndMedium"));
-        }
 
         /**
          * Test hierarchy
@@ -133,12 +119,12 @@ public class IfzTest extends AbstractImporterTest{
             assertEquals(C01, du.getIdentifier());
         }
 //    //test dates
-        for(DocumentDescription d : c2_1.getDocumentDescriptions()){
-        	// Single date is just a string
-        	assertEquals("1991/2008", d.asVertex().getProperty("unitDates"));
+        for(DocumentDescription d : c3_2.getDocumentDescriptions()){
+        	// Single date is just a string 1945/1957
+        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
-        		assertEquals("1991-01-01", dp.getStartDate());
-        		assertEquals("2008-12-31", dp.getEndDate());
+        		assertEquals("1945-01-01", dp.getStartDate());
+        		assertEquals("1957-12-31", dp.getEndDate());
         	}
         }
         

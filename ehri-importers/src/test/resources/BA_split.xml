@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ead xmlns="urn:isbn:1-931666-22-9">
   <eadheader>
-      <eadid countrycode="DE"></eadid>
+      <eadid countrycode="DE">NS 1</eadid>
     <filedesc>
       <titlestmt>
         <titleproper/>
@@ -39,8 +39,9 @@
       <unitid label="ehri_internal_id">0</unitid>
       <unitid label="ehri_structure">0</unitid>
       <unitid encodinganalog="Bestandssignatur">NS 1</unitid>
+      <unitid encodinganalog="Alte_Bestandssignatur">NS alt 1</unitid>
       <unittitle encodinganalog="Bestandsbezeichnung">Reichsschatzmeister der NSDAP</unittitle>
-      <unitdate encodinganalog="Bestandslaufzeit">1906/19, 1922/45</unitdate>
+      <unitdate encodinganalog="Bestandslaufzeit">1906/19</unitdate>
       <unittitle encodinganalog="Langbezeichnung">Reichsschatzmeister der NSDAP</unittitle>
       <unittitle encodinganalog="Kurzbezeichnung"/>
       <unitdate encodinganalog="Provenienzlaufzeit">1935/45</unitdate>
@@ -48,12 +49,12 @@
         <extent>3567 AE</extent>
         <genreform>Schriftgut</genreform>
       </physdesc>
-      <unitid label="ehri_main_identifier">NS 1</unitid>
       <physloc encodinganalog="Benutzungsort">Berlin-Lichterfelde</physloc>
     </did>
     <descgrp encodinganalog="Bestandsbeschreibung">
       <p>Bestandsgeschichte</p>
-      <p>Im September/ Oktober 1962 gelangte aus den Sammlungen des ehemaligen Berlin Document Center Berlin u. a. ein großer Bestand an Schriftgut des Reichsschatzmeisters der NSDAP in das Bundesarchiv. Weitere Abgaben durch das Berlin Document Center folgten in den Jahren1978, 1980 und 1988.</p>
+      <p>Im September/ Oktober 1962</p>
+      <p>gelangte aus den Sammlungen des ehemaligen Berlin Document Center Berlin u. a. ein großer Bestand an Schriftgut des Reichsschatzmeisters der NSDAP in das Bundesarchiv. Weitere Abgaben durch das Berlin Document Center folgten in den Jahren1978, 1980 und 1988.</p>
     </descgrp>
     <processinfo encodinganalog="Erschließungszustand">
       <p>Online-Findbuch (2011)</p>

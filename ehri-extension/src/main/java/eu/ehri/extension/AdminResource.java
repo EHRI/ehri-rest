@@ -9,17 +9,10 @@ import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.Country;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
@@ -62,50 +55,6 @@ public class AdminResource extends AbstractRestResource {
     }
 
     /**
-     * Update the childCount property on hierarchical items with the number of
-     * children they contain.
-     *
-     * @throws Exception
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/_rebuildChildCache")
-    public Response rebuildChildCache() throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
-        try {
-            for (DocumentaryUnit unit : manager.getFrames(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)) {
-                unit.updateChildCountCache();
-            }
-            for (Repository repository : manager.getFrames(EntityClass.REPOSITORY, Repository.class)) {
-                repository.updateChildCountCache();
-            }
-            for (Country country : manager.getFrames(EntityClass.COUNTRY, Country.class)) {
-                country.updateChildCountCache();
-            }
-            for (Group group : manager.getFrames(EntityClass.GROUP, Group.class)) {
-                group.updateChildCountCache();
-            }
-            for (Concept concept : manager.getFrames(EntityClass.CVOC_CONCEPT, Concept.class)) {
-                concept.updateChildCountCache();
-            }
-            for (Vocabulary vocabulary : manager.getFrames(EntityClass.CVOC_VOCABULARY, Vocabulary.class)) {
-                vocabulary.updateChildCountCache();
-            }
-            for (AuthoritativeSet set : manager.getFrames(EntityClass.AUTHORITATIVE_SET, AuthoritativeSet.class)) {
-                set.updateChildCountCache();
-            }
-            for (VirtualUnit vu : manager.getFrames(EntityClass.VIRTUAL_UNIT, VirtualUnit.class)) {
-                vu.updateChildCountCache();
-            }
-
-            graph.getBaseGraph().commit();
-            return Response.status(Status.OK).build();
-        } finally {
-            cleanupTransaction();
-        }
-    }
-
-    /**
      * Export the DB as a stream of JSON in
      * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
      * <p/>
@@ -121,6 +70,28 @@ public class AdminResource extends AbstractRestResource {
                 GraphSONWriter.outputGraph(graph, stream, GraphSONMode.EXTENDED);
             }
         }).build();
+    }
+
+    /**
+     * Re-build the graph's internal lucene index.
+     * <p/>
+     * NB: This takes a lot of memory for large graphs. Do
+     * not use willy-nilly and increase the heap size as
+     * necessary. TODO: Add incremental buffered commit.
+     *
+     * @throws java.lang.Exception
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_reindexInternal")
+    public Response reindexInternal() throws Exception {
+        try {
+            manager.rebuildIndex();
+            graph.getBaseGraph().commit();
+            return Response.ok().build();
+        } finally {
+            cleanupTransaction();
+        }
     }
 
     /**

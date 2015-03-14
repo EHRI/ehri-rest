@@ -48,7 +48,7 @@ public final class Bundle {
     /**
      * Filter predicate function interface.
      */
-    public static interface Filter {
+    public interface Filter {
         /**
          * Filter (remove) items in a Bundle tree that
          * match this predicate.
@@ -56,7 +56,7 @@ public final class Bundle {
          * @param bundle The bundle
          * @return  Whether to remove the item
          */
-        public boolean remove(final String relationLabel, final Bundle bundle);
+        boolean remove(final String relationLabel, final Bundle bundle);
     }
 
     /**
@@ -498,7 +498,7 @@ public final class Bundle {
      *
      * @return A list of property keys for the bundle's type
      */
-    public Iterable<String> getPropertyKeys() {
+    public Collection<String> getPropertyKeys() {
         return ClassUtils.getPropertyKeys(type.getEntityClass());
     }
 
@@ -507,7 +507,7 @@ public final class Bundle {
      *
      * @return A list of unique property keys for the bundle's type
      */
-    public Iterable<String> getUniquePropertyKeys() {
+    public Collection<String> getUniquePropertyKeys() {
         return ClassUtils.getUniquePropertyKeys(type.getEntityClass());
     }
 
@@ -596,6 +596,20 @@ public final class Bundle {
      */
     public boolean hasGeneratedId() {
         return temp;
+    }
+
+    /**
+     * The depth of this bundle tree, i.e. the number
+     * of levels of relationships beneath this one.
+     *
+     * @return the number of levels
+     */
+    public int depth() {
+        int depth = 0;
+        for (Bundle rel : relations.values()) {
+            depth = Math.max(depth, 1 + rel.depth());
+        }
+        return depth;
     }
 
     /**

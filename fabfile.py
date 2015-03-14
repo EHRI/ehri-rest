@@ -108,7 +108,7 @@ def latest():
             restart()
 
 @task
-def online_backup(remote_dir):
+def online_backup(remote_dir, tar = True):
     """
     Do an online backup to a particular directory on the server.
 
@@ -116,8 +116,12 @@ def online_backup(remote_dir):
     """
     if files.exists(remote_dir):
         abort("Remote directory '%s' already exists!" % remote_dir)
+    tar_name = remote_dir + ".tgz"
     with settings(dst=remote_dir):
         run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
+        if tar:
+            run("tar --create --gzip --file %s -C %s ." % (tar_name, remote_dir))
+            run("rm -rf " + remote_dir)
 
 @task
 def update_properties():
@@ -252,7 +256,7 @@ def online_clone_db(local_dir):
     """
     timestamp = get_timestamp()
     with settings(tmpdst = "/tmp/" + timestamp):
-        online_backup(env.tmpdst)
+        online_backup(env.tmpdst, tar = False)
         run("tar --create --gzip --file %(tmpdst)s.tgz -C %(tmpdst)s ." % env)
         get(env.tmpdst + ".tgz", env.tmpdst + ".tgz")
         run("rm -rf %(tmpdst)s %(tmpdst)s.tgz" % env)

@@ -28,14 +28,14 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(Iterables.isEmpty(validUser.getFollowing()));
         validUser.addFollowing(follower);
         // Get count caching
-        assertEquals(1L, validUser.asVertex().getProperty(UserProfile.FOLLOWING_COUNT));
-        assertEquals(1L, follower.asVertex().getProperty(UserProfile.FOLLOWER_COUNT));
+        assertEquals(1L, validUser.getFollowingCount());
+        assertEquals(1L, follower.getFollowerCount());
         assertFalse(Iterables.isEmpty(validUser.getFollowing()));
         assertTrue(Iterables.contains(validUser.getFollowing(), follower));
         validUser.removeFollowing(follower);
         assertTrue(Iterables.isEmpty(validUser.getFollowing()));
-        assertEquals(0L, validUser.asVertex().getProperty(UserProfile.FOLLOWING_COUNT));
-        assertEquals(0L, follower.asVertex().getProperty(UserProfile.FOLLOWER_COUNT));
+        assertEquals(0L, validUser.getFollowingCount());
+        assertEquals(0L, follower.getFollowerCount());
     }
 
     @Test
@@ -64,13 +64,14 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertFalse(validUser.isWatching(watched));
         validUser.addWatching(watched);
         assertTrue(validUser.isWatching(watched));
-        assertEquals(1L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));
-        assertEquals(1L, watched.asVertex().getProperty(UserProfile.WATCHED_COUNT));
+        assertEquals(1L, validUser.getWatchingCount());
+        assertTrue(Iterables.contains(watched.getWatchers(), validUser));
+        assertEquals(1L, watched.getWatchedCount());
         assertTrue(Iterables.contains(validUser.getWatching(), watched));
         validUser.removeWatching(watched);
         assertFalse(validUser.isWatching(watched));
-        assertEquals(0L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));
-        assertEquals(0L, watched.asVertex().getProperty(UserProfile.WATCHED_COUNT));
+        assertEquals(0L, validUser.getWatchingCount());
+        assertEquals(0L, watched.getWatchedCount());
     }
 
     @Test

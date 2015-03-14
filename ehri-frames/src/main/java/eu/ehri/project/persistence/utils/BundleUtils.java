@@ -10,41 +10,40 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helpers for working with the bundle format.
+ * Helpers for working with the {@link Bundle} format.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class BundleUtils {
 
-    private static interface SetOperation {
-        public Bundle run(final Bundle bundle, final BundlePath path);
+    private interface SetOperation {
+        Bundle run(final Bundle bundle, final BundlePath path);
     }
 
-    private static interface GetOperation<T> {
-        public T run(final Bundle bundle, final BundlePath path);
+    private interface GetOperation<T> {
+        T run(final Bundle bundle, final BundlePath path);
     }
 
     public static class BundlePathError extends NullPointerException {
-        private static final long serialVersionUID = -8933938027614207655L;
-
         public BundlePathError(String message) {
             super(message);
         }
     }
 
     public static class BundleIndexError extends IndexOutOfBoundsException {
-        private static final long serialVersionUID = -7959054156406534135L;
-
         public BundleIndexError(String message) {
             super(message);
         }
     }
 
     /**
-     * XPath-like method for getting the value of a nested relation's attribute,
-     * i.e:
+     * XPath-like method for getting the value of a nested relation's attribute.
      * <p/>
+     * <pre>
+     * {@code
      * String lang = BundleUtils.get(bundle, "describes[0]/languageCode"));
+     * }
+     * </pre>
      *
      * @param bundle the bundle
      * @param path   a path string
@@ -64,9 +63,12 @@ public class BundleUtils {
 
     /**
      * XPath-like method for getting a bundle at a given path.
-     * i.e:
      * <p/>
-     * String lang = BundleUtils.get(bundle, "describes[0]/languageCode"));
+     * <pre>
+     * {@code
+     * Bundle description = BundleUtils.getBundle(bundle, "describes[0]"));
+     * }
+     * </pre>
      *
      * @param bundle the bundle
      * @param path   a path string
@@ -78,10 +80,13 @@ public class BundleUtils {
 
     /**
      * XPath-like method for deleting the value of a nested relation's
-     * attribute, i.e:
+     * attribute.
      * <p/>
-     * Bundle newBundle = BundleUtils.delete(bundle,
-     * "describes[0]/languageCode"));
+     * <pre>
+     * {@code
+     * Bundle newBundle = BundleUtils.delete(bundle, "describes[0]/languageCode"));
+     * }
+     * </pre>
      *
      * @param bundle the bundle
      * @param path   a path string
@@ -103,8 +108,11 @@ public class BundleUtils {
     /**
      * XPath-like method for deleting a node from a nested tree, i.e:
      * <p/>
-     * Bundle newBundle = BundleUtils.delete(bundle,
-     * "describes[0]/languageCode"));
+     * <pre>
+     * {@code
+     * Bundle newBundle = BundleUtils.deleteBundle(bundle, "describes[0]"));
+     * }
+     * </pre>
      *
      * @param bundle the bundle
      * @param path   a path string
@@ -116,11 +124,13 @@ public class BundleUtils {
 
     /**
      * Xpath-like method for creating a new bundle by updating a nested relation
-     * of an existing bundle, i.e:
+     * of an existing bundle.
      * <p/>
-     * Bundle newBundle = BundleUtils.set(oldBundle, "name", "Foobar"); Bundle
-     * newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate",
-     * "1923-10-10");
+     * <pre>
+     * {@code
+     * Bundle newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate", "1923-10-10");
+     * }
+     * </pre>
      *
      * @param bundle the bundle
      * @param path   a path string
@@ -139,11 +149,14 @@ public class BundleUtils {
 
     /**
      * Xpath-like method for creating a new bundle by updating a nested relation
-     * of an existing bundle, i.e:
+     * of an existing bundle.
      * <p/>
-     * Bundle newBundle = BundleUtils.set(oldBundle, "name", "Foobar"); Bundle
-     * newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate",
-     * "1923-10-10");
+     * <pre>
+     * {@code
+     * Bundle dateBundle = ...
+     * Bundle newBundle = BundleUtils.setBundle(oldBundle, "hasDate[0]", dateBundle);
+     * }
+     * </pre>
      *
      * @param bundle    the bundle
      * @param path      a path string
@@ -156,6 +169,12 @@ public class BundleUtils {
 
     /**
      * Xpath-like method to fetch a set of nested relations.
+     * <p/>
+     * <pre>
+     * {@code
+     * List<Bundle> dates = BundleUtils.getRelations(bundle, "hasDate");
+     * }
+     * </pre>
      *
      * @param bundle the bundle
      * @param path   a path string
@@ -189,7 +208,7 @@ public class BundleUtils {
                         path.next(), op);
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
-                        "Relation index '%s[%s]' not found", section.getPath(),
+                        "Relation index '%s[%s]' not found", path.next(),
                         section.getIndex()));
             }
         }
@@ -259,9 +278,10 @@ public class BundleUtils {
         PathSection section = path.current();
         BundlePath next = path.next();
 
-        if (!bundle.hasRelations(section.getPath()))
+        if (section.getIndex() != -1 && !bundle.hasRelations(section.getPath())) {
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
+        }
         ListMultimap<String, Bundle> allRelations = ArrayListMultimap
                 .create(bundle.getRelations());
         try {
