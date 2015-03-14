@@ -11,6 +11,7 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
@@ -35,6 +36,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.removeAllRelationshi
 @EntityType(EntityClass.VIRTUAL_UNIT)
 public interface VirtualUnit extends AbstractUnit {
 
+    @Meta(CHILD_COUNT)
     @JavaHandler
     public long getChildCount();
 
@@ -59,13 +61,6 @@ public interface VirtualUnit extends AbstractUnit {
      */
     @JavaHandler
     public boolean removeChild(final VirtualUnit child);
-
-    /**
-     * Update/reset the cache counting the number of
-     * items both included in the VU, or subordinate to it.
-     */
-    @JavaHandler
-    public void updateChildCountCache();
 
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
@@ -159,23 +154,8 @@ public interface VirtualUnit extends AbstractUnit {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, childCount(it()));
-        }
-
         public void removeIncludedUnit(final DocumentaryUnit unit) {
-            boolean done = removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
-            if (done) {
-                decrementChildCount(it());
-            }
-        }
-
-        public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                return childCount(it());
-            }
-            return count;
+            removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
         public Iterable<VirtualUnit> getChildren() {
@@ -194,19 +174,11 @@ public interface VirtualUnit extends AbstractUnit {
                 }
             }
 
-            boolean done = addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
-            if (done) {
-                incrementChildCount(it());
-            }
-            return done;
+            return addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
         }
 
         public boolean removeChild(final VirtualUnit child) {
-            boolean done = removeAllRelationships(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
-            if (done) {
-                decrementChildCount(it());
-            }
-            return done;
+            return removeAllRelationships(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
         }
 
         private GremlinPipeline<Vertex, Vertex> traverseAncestors() {
@@ -228,35 +200,13 @@ public interface VirtualUnit extends AbstractUnit {
         }
 
         public boolean addIncludedUnit(final DocumentaryUnit unit) {
-            boolean done = addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
-            if (done) {
-                incrementChildCount(it());
-            }
-            return done;
+            return addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
-        private static long childCount(Vertex self) {
-            int incCount = Iterables.size(self.getVertices(Direction.OUT, Ontology.VC_INCLUDES_UNIT));
-            int vcCount = Iterables.size(self.getVertices(Direction.IN, Ontology.VC_IS_PART_OF));
+        public long getChildCount() {
+            long incCount = gremlin().outE(Ontology.VC_INCLUDES_UNIT).count();
+            long vcCount = gremlin().inE(Ontology.VC_IS_PART_OF).count();
             return incCount + vcCount;
-        }
-
-        private static void incrementChildCount(Vertex self) {
-            Long count = self.getProperty(CHILD_COUNT);
-            if (count == null) {
-                self.setProperty(CHILD_COUNT, childCount(self));
-            } else {
-                self.setProperty(CHILD_COUNT, count + 1);
-            }
-        }
-
-        private static void decrementChildCount(Vertex self) {
-            Long count = self.getProperty(CHILD_COUNT);
-            if (count == null) {
-                self.setProperty(CHILD_COUNT, childCount(self));
-            } else {
-                self.setProperty(CHILD_COUNT, Math.max(0, count - 1));
-            }
         }
     }
 }

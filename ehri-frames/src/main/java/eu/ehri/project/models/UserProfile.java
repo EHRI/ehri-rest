@@ -1,7 +1,6 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
@@ -11,6 +10,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
@@ -33,10 +33,21 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity, 
         Annotator, Actioner, NamedEntity {
 
-    public static String FOLLOWER_COUNT = "_followers";
-    public static String FOLLOWING_COUNT = "_following";
-    public static String WATCHING_COUNT = "_watching";
-    public static String WATCHED_COUNT = "_watchedBy";
+    public static final String FOLLOWER_COUNT = "followers";
+    public static final String FOLLOWING_COUNT = "following";
+    public static final String WATCHING_COUNT = "watching";
+
+    @Meta(FOLLOWER_COUNT)
+    @JavaHandler
+    public long getFollowerCount();
+
+    @Meta(FOLLOWING_COUNT)
+    @JavaHandler
+    public long getFollowingCount();
+
+    @Meta(WATCHING_COUNT)
+    @JavaHandler
+    public long getWatchingCount();
 
     /**
      * Get the groups to which this user belongs.
@@ -198,86 +209,54 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
 
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
 
-        private void updateFollowCounts(Vertex user, Vertex other) {
-            cacheCount(
-                    user, gremlin().out(USER_FOLLOWS_USER), FOLLOWING_COUNT);
-            cacheCount(
-                    other,
-                    gremlin().start(other).in(USER_FOLLOWS_USER), FOLLOWER_COUNT);
+        @Override
+        public long getFollowerCount() {
+            return gremlin().inE(USER_FOLLOWS_USER).count();
         }
 
-        private void updateWatchCount(Vertex user, Vertex item) {
-            cacheCount(
-                    user, gremlin().out(USER_WATCHING_ITEM), WATCHING_COUNT);
-            cacheCount(
-                    item,
-                    gremlin().start(item).in(USER_WATCHING_ITEM), WATCHED_COUNT);
+        @Override
+        public long getFollowingCount() {
+            return gremlin().outE(USER_FOLLOWS_USER).count();
+        }
+
+        @Override
+        public long getWatchingCount() {
+            return gremlin().outE(USER_WATCHING_ITEM).count();
         }
 
         @Override
         public void addFollowing(final UserProfile user) {
-            if (!isFollowing(user)) {
-                it().addEdge(USER_FOLLOWS_USER, user.asVertex());
-                updateFollowCounts(it(), user.asVertex());
-            }
+            addSingleRelationship(it(), user.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
         public void removeFollowing(final UserProfile user) {
-            for (Edge e : it().getEdges(Direction.OUT, USER_FOLLOWS_USER)) {
-                if (e.getVertex(Direction.IN).equals(user.asVertex())) {
-                    e.remove();
-                }
-            }
-            updateFollowCounts(it(), user.asVertex());
+            removeAllRelationships(it(), user.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
         public boolean isFollowing(final UserProfile otherUser) {
-            return gremlin().out(USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
-                @Override
-                public Boolean compute(Vertex vertex) {
-                    return vertex.equals(otherUser.asVertex());
-                }
-            }).hasNext();
+            return hasRelationship(it(), otherUser.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
         public boolean isFollower(final UserProfile otherUser) {
-            return gremlin().in(USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
-                @Override
-                public Boolean compute(Vertex vertex) {
-                    return vertex.equals(otherUser.asVertex());
-                }
-            }).hasNext();
+            return hasRelationship(otherUser.asVertex(), it(), USER_FOLLOWS_USER);
         }
 
         @Override
         public void addWatching(final Watchable item) {
-            if (!isWatching(item)) {
-                it().addEdge(USER_WATCHING_ITEM, item.asVertex());
-                updateWatchCount(it(), item.asVertex());
-            }
+            addSingleRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
         @Override
         public void removeWatching(final Watchable item) {
-            for (Edge e : it().getEdges(Direction.OUT, USER_WATCHING_ITEM)) {
-                if (e.getVertex(Direction.IN).equals(item.asVertex())) {
-                    e.remove();
-                }
-            }
-            updateWatchCount(it(), item.asVertex());
+            removeAllRelationships(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
         @Override
         public boolean isWatching(final Watchable item) {
-            return gremlin().out(USER_WATCHING_ITEM).filter(new PipeFunction<Vertex, Boolean>() {
-                @Override
-                public Boolean compute(Vertex vertex) {
-                    return vertex.equals(item.asVertex());
-                }
-            }).hasNext();
+            return hasRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
         @Override

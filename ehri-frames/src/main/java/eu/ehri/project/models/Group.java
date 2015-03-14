@@ -1,7 +1,6 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
@@ -13,6 +12,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.IdentifiableEntity;
@@ -33,7 +33,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
-    String ADMIN_GROUP_NAME = "Administrators";
+    public static final String ADMIN_GROUP_NAME = "Administrators";
 
     /**
      * Fetch the groups to which this group belongs.
@@ -63,16 +63,9 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      *
      * @return a count of group members
      */
+    @Meta(CHILD_COUNT)
     @JavaHandler
     public long getChildCount();
-
-    /**
-     * Update/reset the cache of the number of items
-     * in this group.
-     */
-    @JavaHandler
-    public void updateChildCountCache();
-
 
     /**
      * Adds a Accessor as a member to this Group, so it has the permissions of the Group.
@@ -104,33 +97,18 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Group {
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.ACCESSOR_BELONGS_TO_GROUP).count());
-        }
-
         public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                count = gremlin().in(Ontology.ACCESSOR_BELONGS_TO_GROUP).count();
-            }
-            return count;
+            return gremlin().inE(Ontology.ACCESSOR_BELONGS_TO_GROUP).count();
         }
 
         public void addMember(final Accessor accessor) {
-            if (JavaHandlerUtils.addUniqueRelationship(accessor.asVertex(), it(),
-                    Ontology.ACCESSOR_BELONGS_TO_GROUP)) {
-                updateChildCountCache();
-            }
+            JavaHandlerUtils.addUniqueRelationship(accessor.asVertex(), it(),
+                    Ontology.ACCESSOR_BELONGS_TO_GROUP);
         }
 
         public void removeMember(final Accessor accessor) {
-            for (Edge e : it().getEdges(Direction.IN, Ontology.ACCESSOR_BELONGS_TO_GROUP)) {
-                if (e.getVertex(Direction.OUT).equals(accessor.asVertex())) {
-                    e.remove();
-                    break;
-                }
-            }
-            updateChildCountCache();
+            JavaHandlerUtils.removeAllRelationships(accessor.asVertex(),
+                    it(), Ontology.ACCESSOR_BELONGS_TO_GROUP);
         }
 
         public Iterable<AccessibleEntity> getAllUserProfileMembers() {

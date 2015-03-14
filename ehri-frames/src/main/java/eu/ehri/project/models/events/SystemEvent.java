@@ -60,7 +60,7 @@ public interface SystemEvent extends AccessibleEntity {
      *
      * @return A user profile instance
      */
-    @Fetch(value = Ontology.EVENT_HAS_ACTIONER, numLevels = 1)
+    @Fetch(value = Ontology.EVENT_HAS_ACTIONER, numLevels = 0)
     @JavaHandler
     public Actioner getActioner();
 

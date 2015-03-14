@@ -329,14 +329,15 @@ public final class Serializer {
             String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
 
+            Class<? extends Frame> cls = type.getEntityClass();
             Bundle.Builder builder = Bundle.Builder.withClass(type)
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
                     .addRelations(getRelationData(item,
-                            depth, maxDepth, lite, type.getEntityClass()))
-                    .addMetaData(getVertexMeta(item));
+                            depth, maxDepth, lite, cls))
+                    .addMetaData(getVertexMeta(item, cls));
             if (!lite) {
-                builder.addMetaData(getVertexMeta(item))
+                builder.addMetaData(getVertexMeta(item, cls))
                         .addMetaDataValue("gid", item.getId());
             }
             return builder.build();
@@ -509,11 +510,25 @@ public final class Serializer {
      * This is anything that begins with an underscore (but now
      * two underscores)
      */
-    private Map<String, Object> getVertexMeta(Vertex item) {
+    private Map<String, Object> getVertexMeta(Vertex item, Class<?> cls) {
         Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
             if (!key.startsWith("__") && key.startsWith("_")) {
                 data.put(key.substring(1), item.getProperty(key));
+            }
+        }
+        Map<String, Method> metaMethods = ClassUtils.getMetaMethods(cls);
+        if (!metaMethods.isEmpty()) {
+            try {
+                Object frame = graph.frame(item, cls);
+                for (Map.Entry<String, Method> metaEntry : metaMethods.entrySet()) {
+                    Object value = metaEntry.getValue().invoke(frame);
+                    if (value != null) {
+                        data.put(metaEntry.getKey(), value);
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error fetching metadata", e);
             }
         }
         return data;

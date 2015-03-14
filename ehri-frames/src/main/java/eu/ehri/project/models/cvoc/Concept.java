@@ -1,7 +1,6 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
@@ -78,24 +77,13 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED, direction=Direction.IN)
     public Iterable<Concept> getRelatedByConcepts();
 
-    @JavaHandler
-    public void updateChildCountCache();
-
     /**
      * Implementation of complex methods.
      */
     abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
-        }
-
         public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                count = gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count();
-            }
-            return count;
+            return gremlin().outE(Ontology.CONCEPT_HAS_NARROWER).count();
         }
 
         public void addRelatedConcept(final Concept related) {
@@ -104,21 +92,15 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
         }
 
         public void addNarrowerConcept(final Concept concept) {
-            if (!concept.asVertex().equals(it())
-                    && JavaHandlerUtils.addUniqueRelationship(it(),
-                    concept.asVertex(), Ontology.CONCEPT_HAS_NARROWER)) {
-                updateChildCountCache();
+            if (!concept.asVertex().equals(it())) {
+                JavaHandlerUtils.addUniqueRelationship(it(),
+                        concept.asVertex(), Ontology.CONCEPT_HAS_NARROWER);
             }
         }
 
         public void removeNarrowerConcept(final Concept concept) {
-            for (Edge e : it().getEdges(Direction.OUT, Ontology.CONCEPT_HAS_NARROWER)) {
-                if (e.getVertex(Direction.IN).equals(concept.asVertex())) {
-                    e.remove();
-                    break;
-                }
-            }
-            updateChildCountCache();
+            JavaHandlerUtils.removeAllRelationships(it(), concept.asVertex(),
+                    Ontology.CONCEPT_HAS_NARROWER);
         }
     }
 }
