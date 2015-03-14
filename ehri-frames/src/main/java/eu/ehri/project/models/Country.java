@@ -9,6 +9,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.ItemHolder;
@@ -41,6 +42,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
      *
      * @return the repository count
      */
+    @Meta(CHILD_COUNT)
     @JavaHandler
     public long getChildCount();
 
@@ -61,34 +63,17 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
     public void addRepository(final Repository repository);
 
     /**
-     * Update/reset the cache of the number of repositories
-     * in this country.
-     */
-    @JavaHandler
-    public void updateChildCountCache();
-
-    /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Country {
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.REPOSITORY_HAS_COUNTRY).count());
-        }
-
         public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                count = gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count();
-            }
-            return count;
+            return gremlin().inE(Ontology.REPOSITORY_HAS_COUNTRY).count();
         }
 
         public void addRepository(final Repository repository) {
-            if (JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
-                    Ontology.REPOSITORY_HAS_COUNTRY)) {
-                updateChildCountCache();
-            }
+            JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
+                    Ontology.REPOSITORY_HAS_COUNTRY);
         }
     }
 }

@@ -43,35 +43,17 @@ public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
     public void addItem(final AuthoritativeItem item);
 
     /**
-     * Update the cache for the number of items within
-     * this set.
-     */
-    @JavaHandler
-    public void updateChildCountCache();
-
-    /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, AuthoritativeSet {
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.ITEM_IN_AUTHORITATIVE_SET).count());
-        }
-
         public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                count = gremlin().in(Ontology.ITEM_IN_AUTHORITATIVE_SET).count();
-            }
-            return count;
+            return gremlin().inE(Ontology.ITEM_IN_AUTHORITATIVE_SET).count();
         }
 
         public void addItem(final AuthoritativeItem item) {
-            if (JavaHandlerUtils.addSingleRelationship(item.asVertex(), it(),
-                    Ontology.ITEM_IN_AUTHORITATIVE_SET)) {
-                updateChildCountCache();
-            }
+            JavaHandlerUtils.addSingleRelationship(item.asVertex(), it(),
+                    Ontology.ITEM_IN_AUTHORITATIVE_SET);
         }
     }
-    
 }
