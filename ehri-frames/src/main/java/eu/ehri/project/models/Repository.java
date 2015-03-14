@@ -9,6 +9,7 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.DescribedEntity;
@@ -34,6 +35,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      *
      * @return the number of top-level items
      */
+    @Meta(CHILD_COUNT)
     @JavaHandler
     public long getChildCount();
 
@@ -82,34 +84,17 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     public void setCountry(final Country country);
 
     /**
-     * Update/reset the cache for the number of documentary unit
-     * items within this repository.
-     */
-    @JavaHandler
-    public void updateChildCountCache();
-
-    /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Repository {
 
-        public void updateChildCountCache() {
-            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
-        }
-
         public long getChildCount() {
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                count = gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count();
-            }
-            return count;
+            return gremlin().inE(Ontology.DOC_HELD_BY_REPOSITORY).count();
         }
 
         public void addCollection(final DocumentaryUnit unit) {
-            if (JavaHandlerUtils.addSingleRelationship(unit.asVertex(), it(),
-                    Ontology.DOC_HELD_BY_REPOSITORY)) {
-                updateChildCountCache();
-            }
+            JavaHandlerUtils.addSingleRelationship(unit.asVertex(), it(),
+                    Ontology.DOC_HELD_BY_REPOSITORY);
         }
 
         public void setCountry(final Country country) {
@@ -120,7 +105,8 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").in(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
-            return frameVertices(gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).cast(Vertex.class).copySplit(gremlin(), otherPipe)
+            return frameVertices(gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY)
+                    .cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
         }
     }
