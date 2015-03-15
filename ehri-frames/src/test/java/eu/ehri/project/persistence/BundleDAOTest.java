@@ -21,6 +21,7 @@ import eu.ehri.project.test.TestData;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.print.Doc;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -157,6 +158,7 @@ public class BundleDAOTest extends ModelTestBase {
             manager.getFrame(dpid, DatePeriod.class);
             fail("Date period '" + dpid + "' found in index AFTER delete test.");
         } catch (ItemNotFound e) {
+            // No problem
         }
 
         // It should also not exist as a node...
@@ -164,6 +166,7 @@ public class BundleDAOTest extends ModelTestBase {
             graph.getVertices(EntityType.ID_KEY, dpid).iterator().next();
             fail("Date period '" + dpid + "' found in index AFTER delete test.");
         } catch (NoSuchElementException e) {
+            // No problem
         }
     }
 
@@ -211,5 +214,13 @@ public class BundleDAOTest extends ModelTestBase {
         BundleDAO persister = new BundleDAO(graph);
         persister.update(b1, Repository.class);
         fail("Attempting to update a non-existent bundle did not throw an error");
+    }
+
+    @Test
+    public void testCreationWithUnicodeIdentifier() throws Exception {
+        Bundle b1 = Bundle.fromData(TestData.getTestDocBundle())
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foo /?&% ארכיו bar");
+        DocumentaryUnit doc = new BundleDAO(graph).create(b1, DocumentaryUnit.class);
+        assertEquals("foo_ארכיו_bar", doc.getId());
     }
 }
