@@ -34,9 +34,15 @@ public class YadVashemTest extends AbstractImporterTest{
     
     protected final String SOURCE_FILE_ID="10660245#ENG";
     
-
+    /**
+     * The test repository contains a unit (loaded from the fixtures) that matches 
+     * the unit described in the test file that is imported here.
+     * This test checks that the existing description (which has a different source)
+     * is untouched and the description from the test file is added.
+     * @throws Exception
+     */
     @Test
-    public void testWithExistingDescription() throws Exception{
+    public void testWithExistingDescription() throws Exception {
         final String logMessage = "Importing a single EAD";
         DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
         

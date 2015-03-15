@@ -26,7 +26,7 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
 
     @Override
     @Before
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         super.setUp();
         instance = IdentifiableEntityIdGenerator.INSTANCE;
         scopes = Lists.newArrayList("r1");
@@ -35,7 +35,7 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
 
     @Test()
     public void testHandleIdCollision() throws Exception {
-        ListMultimap<String,String> errors = instance
+        ListMultimap<String, String> errors = instance
                 .handleIdCollision(scopes, bundle);
         assertTrue(errors.containsKey(Ontology.IDENTIFIER_KEY));
     }

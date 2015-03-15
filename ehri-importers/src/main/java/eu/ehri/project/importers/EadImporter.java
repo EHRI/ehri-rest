@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -69,7 +70,7 @@ public class EadImporter extends EaImporter {
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
-     * @param itemData The data map
+     * @param itemData The raw data map
      * @param idPath The identifiers of parent documents,
      *               not including those of the overall permission scope
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
@@ -90,7 +91,7 @@ public class EadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
-            logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
+            logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
             for(String s : rel.keySet()){
                 logger.debug(s);
             }
@@ -102,12 +103,13 @@ public class EadImporter extends EaImporter {
             for(String u : unknowns.keySet()){
                 unknownProperties.append(u);
             }
-            logger.info("Unknown Properties found: " + unknownProperties.toString());
+            logger.debug("Unknown Properties found: {}", unknownProperties.toString());
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
+
         // extractDocumentaryUnit does not throw ValidationError on missing ID
         Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
-        
+
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
@@ -235,7 +237,7 @@ public class EadImporter extends EaImporter {
             } catch (ItemNotFound ex) {
                 throw new ValidationError(unit, "item not found exception", ex.getMessage());
             }
-        } else {
+        } else { // else we create a new bundle.
             return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
     }
@@ -243,13 +245,13 @@ public class EadImporter extends EaImporter {
     /**
      * subclasses can override this method to cater to their special needs for UndeterminedRelationships
      * by default, it expects something like this in the original EAD:
-     * 
+     *
      * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
-                        Leonhard (* 11.5.1886)</persname>
+     *                   Leonhard (* 11.5.1886)</persname>
      *
      * it works in unison with the extractRelations() method. 
-     * 
-                        * 
+     *
+     *
      * @param unit
      * @param descBundle - not used
      * @throws ValidationError 

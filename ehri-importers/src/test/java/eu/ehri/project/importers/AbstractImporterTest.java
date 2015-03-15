@@ -30,8 +30,14 @@ public class AbstractImporterTest extends AbstractFixtureTest {
      * Shared import manager
      */
     protected AbstractImportManager importManager;
+
+    /**
+     * Test repository, initialised in test setup using TEST_REPO identifier.
+     */
     protected Repository repository;
-    // Depends on fixtures
+    /**
+     * Test repository identifier. Depends on fixtures
+     */
     protected final String TEST_REPO = "r1";
 
     /**
@@ -114,11 +120,27 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         }
     }
 
+    /**
+     * Get a Vertex from the FramedGraph using its unit ID.
+     * @see {@link eu.ehri.project.definitions.Ontology#IDENTIFIER_KEY}
+     * @param graph the graph to search
+     * @param identifier the Vertex's 'human readable' identifier
+     * @return the first Vertex with the given identifier
+     * @throws NoSuchElementException when there are no vertices with this identifier
+     */
     protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String identifier) {
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, identifier);
         return docs.iterator().next();
     }
 
+    /**
+     * Get a Vertex from the FramedGraph using its graph ID.
+     * @see {@link eu.ehri.project.models.annotations.EntityType#ID_KEY}
+     * @param graph the graph to search
+     * @param id the Vertex's generated, slugified identifier
+     * @return the first Vertex with the given identifier
+     * @throws NoSuchElementException when there are no vertices with this identifier
+     */
     protected Vertex getVertexById(FramedGraph<?> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(EntityType.ID_KEY, id);
         return docs.iterator().next();

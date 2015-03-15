@@ -21,7 +21,9 @@ public class Slugify {
 
     /**
      * Slugify the input string using the given replacement string.
+     *
      * @param input the String to slugify
+     * @param replacement the replacement string
      * @return the slugified copy of the input string
      */
     public static String slugify(String input, String replacement) {

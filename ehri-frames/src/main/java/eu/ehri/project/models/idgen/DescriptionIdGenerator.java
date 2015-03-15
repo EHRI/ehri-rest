@@ -38,8 +38,10 @@ public enum DescriptionIdGenerator implements IdGenerator {
 
     /**
      * Return the base data for the id, sans scoping.
+     * If the bundle contains a language of description, it comes first.
+     * If the bundle has a non-empty identifier, it is used too.
      * @param bundle The entity's bundle.
-     * @return The base id string.
+     * @return The base id string, consisting of language code and/or identifier.
      */
     public String getIdBase(Bundle bundle) {
         String lang = bundle.getDataValue(LANGUAGE_OF_DESCRIPTION);

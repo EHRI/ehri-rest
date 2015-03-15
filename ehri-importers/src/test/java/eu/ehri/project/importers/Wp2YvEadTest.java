@@ -80,7 +80,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         // - 11 UndeterminedRelationship, 0 0 0 11
         // - 5 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-       
+
         // - 1 Link as resolved relationship 
 
 //printGraph(graph);
