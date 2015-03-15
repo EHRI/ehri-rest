@@ -5,14 +5,12 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.Collection;
-import java.util.List;
-
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 
 /**
  * Generates an ID for nodes which represent Descriptions, where
- * The graph id is a combination of the parent scopes, plus the description
+ * the graph id is a combination of the parent scopes, plus the description
  * language code, plus an optional description identifier (say, 'alt').
  * 
  * @author Mike Bryant (http://github.com/mikesname)
@@ -49,7 +47,7 @@ public enum DescriptionIdGenerator implements IdGenerator {
         if (ident != null && ident.trim().isEmpty()) {
             ident = null;
         }
-        return Joiner.on(IdGeneratorUtils.SEPARATOR)
+        return Joiner.on(IdGeneratorUtils.HIERARCHY_SEPARATOR)
                 .skipNulls().join(lang, ident);
     }
 }

@@ -150,7 +150,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         assertEquals(count + 13, getNodeCount(graph));
 //        printGraph(graph);   
         
-        Concept termJR = manager.getFrame("cvoc1-tema-866", Concept.class);
+        Concept termJR = manager.getFrame("cvoc1-tema_866", Concept.class);
         
         boolean found=false;
         for(Link desc : termJR.getLinks()){

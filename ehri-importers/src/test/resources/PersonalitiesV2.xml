@@ -93,7 +93,7 @@
                 <placeEntry>Munich, Germany</placeEntry>
             </place>
             <localDescription localType="subject">
-                <term vocabularySource="fast-keywords" xml:id="fst894382"
+                <term vocabularySource="fast_keywords" xml:id="fst894382"
                     xmlns:xml="http://www.w3.org/XML/1998/namespace">Diplomatic documents
                 </term>
             </localDescription>

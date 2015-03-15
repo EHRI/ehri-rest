@@ -306,8 +306,8 @@ public class ToolsResource extends AbstractRestResource {
     }
 
     /**
-     * Regenerate the hierarchical graph ID all items within the
-     * immediate permission scope (not all items recursively.)
+     * Regenerate the hierarchical graph ID for all items within the
+     * permission scope and lower levels.
      *
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
@@ -342,7 +342,7 @@ public class ToolsResource extends AbstractRestResource {
                     .withActualRename(commit)
                     .skippingCollisions(tolerant)
                     .collisionMode(collisions)
-                    .reGenerateIds(scope, scope.getContainedItems());
+                    .reGenerateIds(scope.getAllContainedItems());
             graph.getBaseGraph().commit();
             return makeCsv(lists);
         } finally {

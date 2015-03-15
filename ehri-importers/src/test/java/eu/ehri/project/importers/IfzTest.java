@@ -84,9 +84,9 @@ public class IfzTest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
-        assertEquals("nl-r1-g-g-1", c1.getId());
-        assertEquals(c1.getId() + "-g-2", c2.getId());
-        assertEquals(c2.getId() + "-mb-35-10", c3_2.getId());
+        assertEquals("nl-r1-g-1", c1.getId());
+        assertEquals(c1.getId() + "-g_2", c2.getId());
+        assertEquals(c2.getId() + "-mb_35_10", c3_2.getId());
 
         /**
          * Test titles
@@ -98,7 +98,7 @@ public class IfzTest extends AbstractImporterTest{
             List<String> s = new ArrayList<String>();
             s.add("TO BE FILLED with selection");
             s.add("IfZ");
-            assertEquals(s, dd.asVertex().getProperty("processInfo"));
+            assertEquals(s, dd.asVertex().<List<String>>getProperty("processInfo"));
             assertEquals("recordgrp", dd.asVertex().getProperty("levelOfDescription"));
             
         }

@@ -17,19 +17,29 @@ public class Slugify {
             = Transliterator.getInstance("Hebrew-Latin; Cyrillic-Latin; Greek-Latin; Latin-Ascii; Any-Lower");
     private static final String DEFAULT_REPLACE = "-";
 
+    /**
+     * Slugify the input string using the default replacement string.
+     * @param input the String to slugify
+     * @return the slugified copy of the input string
+     */
     public static String slugify(String input) {
         return slugify(input, DEFAULT_REPLACE);
     }
 
+    /**
+     * Slugify the input string using the given replacement string.
+     * @param input the String to slugify
+     * @return the slugified copy of the input string
+     */
     public static String slugify(String input, String replacement) {
-        return normalize(input)
+        return normalize(input, replacement)
                 .replaceAll("\\s+", replacement)            // whitespace
                 .replaceAll(replacement + "+", replacement) // replacements
-                .replaceAll("^\\W|\\W$", "")                // leading/trailing non alpha
+                .replaceAll("^" + replacement + "|" + replacement + "$", "") // leading/trailing replacements
                 .toLowerCase();
     }
 
-    private static String normalize(String input) {
+    private static String normalize(String input, String replacement) {
         final String ret = StringUtils.trim(input);
         if (StringUtils.isBlank(ret)) {
             return "";
@@ -38,7 +48,7 @@ public class Slugify {
         final String trans = transliterator.transform(ret);
         return Normalizer.normalize(trans, Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "")
-                .replaceAll("[^a-zA-Z0-9- ]", DEFAULT_REPLACE);
+                .replaceAll("[^a-zA-Z0-9]", replacement);
     }
 }
 

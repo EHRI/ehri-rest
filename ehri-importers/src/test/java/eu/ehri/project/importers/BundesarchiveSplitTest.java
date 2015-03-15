@@ -63,8 +63,8 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
                 getVertexByIdentifier(graph,ARCHDESC),
                 DocumentaryUnit.class);
 
-        // Test ID generation and hierarchy
-        assertEquals("nl-r1-ns-1", archUnit.getId());
+        // Test ID generation andhierarchy
+        assertEquals("nl-r1-ns_1", archUnit.getId());
         assertTrue(archUnit.asVertex().getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
 
         assertNull(archUnit.getParent());

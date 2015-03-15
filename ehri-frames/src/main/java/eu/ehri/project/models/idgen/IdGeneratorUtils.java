@@ -4,16 +4,19 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.utils.Slugify;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,9 +27,10 @@ import java.util.List;
  */
 public class IdGeneratorUtils {
     /**
-     * Separate or ID components.
+     * Separator for ID components.
      */
-    public static final String SEPARATOR = "-";
+    public static final String HIERARCHY_SEPARATOR = "-";
+    public static final String SLUG_REPLACE = "_";
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
@@ -65,6 +69,7 @@ public class IdGeneratorUtils {
      *
      * @param scopeIds An array of scope ids
      * @param bundle   The input bundle
+     * @param ident    the item's identifier
      * @return The complete id string
      */
     public static String generateId(final Collection<String> scopeIds, final Bundle bundle, String ident) {
@@ -81,12 +86,37 @@ public class IdGeneratorUtils {
 
     /**
      * Join an identifier path to form a full ID.
+     * Duplicate parts of the part are removed.
+     * This check is case sensitive.
      *
-     * @param path A list of identifier strings.
+     * @param path A non-empty list of identifier strings.
      * @return The resultant path ID.
      */
     public static String joinPath(Collection<String> path) {
-        String scopedId = Joiner.on(SEPARATOR).join(path);
-        return Slugify.slugify(scopedId);
+        // If the last part of the path is included in the
+        // current part, remove that chunk, providing that
+        // there is something left over.
+        List<String> newPaths = Lists.newArrayList();
+        String last = null;
+        for (String ident : path) {
+            if (last == null) {
+                newPaths.add(ident);
+            } else {
+                if (ident.startsWith(last) && !ident.equals(last)) {
+                    newPaths.add(ident.substring(last.length()));
+                } else {
+                    newPaths.add(ident);
+                }
+            }
+            last = ident;
+        }
+
+        // Slugify the path sections...
+        List<String> slugged = Lists.newArrayList();
+        for (String p : newPaths) {
+            slugged.add(Slugify.slugify(p, SLUG_REPLACE));
+        }
+
+        return Joiner.on(HIERARCHY_SEPARATOR).join(slugged);
     }
 }
