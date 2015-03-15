@@ -76,17 +76,16 @@ transliteration, so if, for example, there was a hierarchy like so:
  
  - `us` => `005578` => `DOC-1` => `DOC-1 / 1` => `DOC-1 / 1 / 2` => "DOC-1 / 1 / 2 / 3"` (raw strings)
  - `us` => `005578` => `DOC-1` => ` / 1` => ` / 2` => ` / 3` (parent prefixes removed, note leading space-slash-space)
- - `us` => `005578` => `DOC_1` => `___1` => `___2` => `___3` (replace non-alphanumerics with underscores)
- - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training non-alphanumerics)
+ - `us` => `005578` => `DOC_1` => `___1` => `___2` => `___3` (replace non-characters with underscores)
+ - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training replacements)
  - `us-005578-doc_1-1-2-3` (joining sections with hyphens)
  
 ## Restrictions
 
 This scheme places some restrictions on what can be used as an identifier in an EHRI item:
 
- - it must contain some ASCII characters, or characters we can transliterate to ASCII via ICU
- - the sequence of transliterated ASCII characters, with non-alphanumerics replaced by underscores
-   and leading and trailing non-alphanumerics removed, *must be unique within the parent scope*
+ - it must contain some non-punctuation characters
+ - the sequence of characters with punctuation removed *must be unique within the parent scope*
 
 ## Trade-offs
 
