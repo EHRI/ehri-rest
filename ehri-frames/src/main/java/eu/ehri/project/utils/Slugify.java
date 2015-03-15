@@ -1,10 +1,5 @@
 package eu.ehri.project.utils;
 
-import com.ibm.icu.text.Transliterator;
-import org.apache.commons.lang.StringUtils;
-
-import java.text.Normalizer;
-
 /**
  * Class for handling slugification of strings, for use
  * in global identifiers.
@@ -13,8 +8,6 @@ import java.text.Normalizer;
  */
 public class Slugify {
 
-    private static final Transliterator transliterator
-            = Transliterator.getInstance("Hebrew-Latin; Cyrillic-Latin; Greek-Latin; Latin-Ascii; Any-Lower");
     private static final String DEFAULT_REPLACE = "-";
 
     /**
@@ -32,23 +25,12 @@ public class Slugify {
      * @return the slugified copy of the input string
      */
     public static String slugify(String input, String replacement) {
-        return normalize(input, replacement)
+        return input
+                .replaceAll("[\\p{P}=+<>~\\|]", replacement)
                 .replaceAll("\\s+", replacement)            // whitespace
                 .replaceAll(replacement + "+", replacement) // replacements
                 .replaceAll("^" + replacement + "|" + replacement + "$", "") // leading/trailing replacements
                 .toLowerCase();
-    }
-
-    private static String normalize(String input, String replacement) {
-        final String ret = StringUtils.trim(input);
-        if (StringUtils.isBlank(ret)) {
-            return "";
-        }
-
-        final String trans = transliterator.transform(ret);
-        return Normalizer.normalize(trans, Normalizer.Form.NFD)
-                .replaceAll("[^\\p{ASCII}]", "")
-                .replaceAll("[^a-zA-Z0-9]", replacement);
     }
 }
 

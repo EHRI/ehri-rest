@@ -181,11 +181,6 @@
             <artifactId>ehri-definitions</artifactId>
             <version>0.9.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.ibm.icu</groupId>
-            <artifactId>icu4j</artifactId>
-            <version>52.1</version>
-        </dependency>
     </dependencies>
     <repositories>
         <repository>

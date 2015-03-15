@@ -40,13 +40,9 @@ For example, if we import an EAD file from repository `001500` in country `us` w
 
 ### Transliteration
  
-Prior to creating the hierarchical ID the local identifier is also transliterated in the following ways:
- 
- - Hebrew, Cyrillic, and Greek characters are replaced by their ASCII "equivalents" (as provided by the [ICU project]
-  (http://site.icu-project.org/)
- - remaining sequences of one or more non-ASCII characters are replaced with __underscore__ characters
- - leading and trailing non-alphanumerics are removed
- - alphabetic characters are lower-cased
+Prior to creating the hierarchical ID the local identifier is also transformed by removing all punctuation and certain
+other URI reserved characters and replacing them with at most one underscore per sequence. Leading and trailing underscores
+are then removed. Finally, the result is lower cased.
  
 The final hierarchical ID is then formed by joining each transliterated local identifier with a __hyphen__ character.
 
