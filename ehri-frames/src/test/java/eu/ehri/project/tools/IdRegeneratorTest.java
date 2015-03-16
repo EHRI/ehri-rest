@@ -1,12 +1,17 @@
 package eu.ehri.project.tools;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.utils.Slugify;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -102,6 +107,16 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
         assertTrue(manager.exists("nl-r1-c1"));
         // It shouldn't actually do anything by default...
         assertEquals(remap.get().get(1), doc.getId());
+        // The descriptions should also be renamed...
+        DocumentDescription desc = Iterables.getFirst(doc.getDocumentDescriptions(), null);
+        assertNotNull(desc);
+        String newDescId = String.format("%s%s%s%s%s",
+                doc.getId(),
+                IdGeneratorUtils.HIERARCHY_SEPARATOR,
+                desc.getLanguageOfDescription(),
+                IdGeneratorUtils.SLUG_REPLACE,
+                Slugify.slugify(desc.getDescriptionCode(), IdGeneratorUtils.SLUG_REPLACE));
+        assertEquals(newDescId, desc.getId());
         // Doing it again should do nothing...
         assertFalse(idRegenerator.withActualRename(true)
                 .reGenerateId(doc).isPresent());
