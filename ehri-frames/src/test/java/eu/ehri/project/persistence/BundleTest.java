@@ -286,11 +286,11 @@ public class BundleTest {
         assertNull(bundle.getId());
         assertNull(bundle.getRelations(
                 Ontology.DESCRIPTION_FOR_ENTITY).get(0).getId());
-        Bundle test = bundle.generateIds(Lists.<String>newArrayList("test"));
+        Bundle test = bundle.generateIds(Lists.newArrayList("test"));
         assertTrue(test.hasGeneratedId());
         assertEquals("test-foobar", test.getId());
         Bundle desc = test.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
         assertNotNull(desc.getId());
-        assertEquals("test-foobar-en", desc.getId());
+        assertEquals("test-foobar.en", desc.getId());
     }
 }

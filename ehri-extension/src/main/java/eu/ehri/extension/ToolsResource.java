@@ -8,13 +8,18 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
@@ -345,6 +350,58 @@ public class ToolsResource extends AbstractRestResource {
                     .reGenerateIds(scope.getAllContainedItems());
             graph.getBaseGraph().commit();
             return makeCsv(lists);
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Regenerate description IDs.
+     *
+     * @throws ItemNotFound
+     * @throws IOException
+     */
+    @POST
+    @Produces("text/plain")
+    @Path("/_regenerateDescriptionIds")
+    public String regenerateDescriptionIds(
+            @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
+            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        EntityClass[] types = {EntityClass.DOCUMENT_DESCRIPTION, EntityClass
+                .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
+                .REPOSITORY_DESCRIPTION};
+        Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
+        int done = 0;
+        try {
+            for (EntityClass entityClass : types) {
+                for (Description desc : manager.getFrames(entityClass, Description.class)) {
+                    DescribedEntity entity = desc.getEntity();
+                    if (entity != null) {
+                        PermissionScope scope = entity.getPermissionScope();
+                        List<String> idPath = scope != null
+                                ? Lists.newArrayList(scope.idPath())
+                                : Lists.<String>newArrayList();
+                        idPath.add(entity.getIdentifier());
+                        Bundle descBundle = depSerializer.vertexFrameToBundle(desc);
+                        String newId = entityClass.getIdgen().generateId(idPath, descBundle);
+                        if (!newId.equals(desc.getId()) && commit) {
+                            manager.renameVertex(desc.asVertex(), desc.getId(), newId);
+                            done++;
+
+                            if (bufferSize > 0 && done % bufferSize == 0) {
+                                graph.getBaseGraph().commit();
+                            }
+                        }
+                    }
+                }
+            }
+            if (commit && done > 0) {
+                graph.getBaseGraph().commit();
+            }
+            return String.valueOf(done);
+        } catch (SerializationError e) {
+            throw new RuntimeException(e);
         } finally {
             cleanupTransaction();
         }

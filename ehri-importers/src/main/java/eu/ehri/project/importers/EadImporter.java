@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -21,6 +22,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
+import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
@@ -36,6 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
+import static eu.ehri.project.models.idgen.IdGeneratorUtils.HIERARCHY_SEPARATOR;
+import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
@@ -169,14 +174,11 @@ public class EadImporter extends EaImporter {
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
          */
-        List<String> lpath = new ArrayList<String>();
-        for (String p : getPermissionScope().idPath()) {
-            lpath.add(p);
-        }
+        List<String> itemIdPath = Lists.newArrayList(getPermissionScope().idPath());
         for (String p : idPath) {
-            lpath.add(p);
+            itemIdPath.add(p);
         }
-        Bundle unitWithIds = unit.generateIds(lpath);                
+        Bundle unitWithIds = unit.generateIds(itemIdPath);
         logger.debug("merging: docUnit's graph id = {}", unitWithIds.getId());
         // If the bundle exists, we merge
         if (manager.exists(unitWithIds.getId())) {
@@ -202,16 +204,18 @@ public class EadImporter extends EaImporter {
                 
                 // if this desc-id already exists, but with a different sourceFileId, 
                 // change the desc-id
-                String defaultDescIdentifier = unitWithIds.getId() + "-" + languageOfDesc.toLowerCase();
+                String defaultDescIdentifier = DescriptionIdGenerator.descriptionJoiner.join(
+                        unitWithIds.getId(), languageOfDesc.toLowerCase());
                 logger.debug("merging: defaultDescIdentifier = {}", defaultDescIdentifier);
-                String newDescIdentifier = defaultDescIdentifier + "-" + Slugify.slugify(thisSourceFileId);
+                String newDescIdentifier = defaultDescIdentifier + HIERARCHY_SEPARATOR + Slugify.slugify(thisSourceFileId,
+                        SLUG_REPLACE);
                 logger.debug("merging: newDescIdentifier = {}", newDescIdentifier);
-                String generatedId = DescriptionIdGenerator.INSTANCE.generateId(lpath, filtered);
+                String generatedId = DescriptionIdGenerator.INSTANCE.generateId(itemIdPath, filtered);
                 logger.debug("merging: generated ID = {}", generatedId);
                 // First see whether this has been done before and a desc with the new id exists
                 if (manager.exists(newDescIdentifier)) {
                     descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                    String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(lpath, descBundle);
+                    String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(itemIdPath, descBundle);
                     logger.debug("merging: new desc ID exists, new generated ID = {}", anotherGeneratedId);
                 } else if (manager.exists(defaultDescIdentifier)) {
                     Bundle oldDescBundle = mergeSerializer
@@ -224,7 +228,7 @@ public class EadImporter extends EaImporter {
                                 defaultDescIdentifier,
                                 descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString()
                                 );
-                        String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(lpath, descBundle);
+                        String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(itemIdPath, descBundle);
                         logger.debug("merging: def desc ID exists, source file differs, another generated ID = {}", anotherGeneratedId);
                     }
                 }

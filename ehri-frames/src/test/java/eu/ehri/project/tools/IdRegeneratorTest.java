@@ -2,13 +2,13 @@ package eu.ehri.project.tools;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.utils.Slugify;
@@ -112,9 +112,9 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
         assertNotNull(desc);
         String newDescId = String.format("%s%s%s%s%s",
                 doc.getId(),
-                IdGeneratorUtils.HIERARCHY_SEPARATOR,
+                DescriptionIdGenerator.DESCRIPTION_SEPARATOR,
                 desc.getLanguageOfDescription(),
-                IdGeneratorUtils.SLUG_REPLACE,
+                IdGeneratorUtils.HIERARCHY_SEPARATOR,
                 Slugify.slugify(desc.getDescriptionCode(), IdGeneratorUtils.SLUG_REPLACE));
         assertEquals(newDescId, desc.getId());
         // Doing it again should do nothing...

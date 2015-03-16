@@ -76,7 +76,7 @@ public class YadVashemTest extends AbstractImporterTest{
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         for (DocumentDescription desc : m19.getDocumentDescriptions()) {
             logger.debug("Document description graph ID: {}", desc.getId());
-            assertTrue(desc.getId().equals("nl-r1-m19-eng") || desc.getId().equals("nl-r1-m19-eng_c1_eng"));
+            assertTrue(desc.getId().equals("nl-r1-m19.eng") || desc.getId().equals("nl-r1-m19.eng-c1_eng"));
         }
     }
 

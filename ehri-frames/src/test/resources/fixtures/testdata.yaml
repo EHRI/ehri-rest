@@ -372,10 +372,9 @@
     identifier: m19
   relationships:
     describes:
-      - id: nl-r1-m19-eng
+      - id: nl-r1-m19.eng
         type: documentDescription
         data:
-          identifier: m19-desc
           name: Documentary Unit m19
           languageCode: eng
           scopeAndContent: Some description text for m19
