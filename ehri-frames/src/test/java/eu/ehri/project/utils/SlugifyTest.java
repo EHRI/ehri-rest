@@ -59,7 +59,7 @@ public class SlugifyTest {
 
     @Test
     public void removeUnsafeOrReservedChars() {
-        String unsafe = "hello |:/?#[]@*+,;=%<>{}~-() world";
+        String unsafe = "hello \"\'|:/?#[]@*+,;=%<>{}~-() world";
         assertEquals("hello-world", Slugify.slugify(unsafe));
     }
 }
