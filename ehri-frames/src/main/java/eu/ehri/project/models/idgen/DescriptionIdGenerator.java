@@ -19,6 +19,9 @@ public enum DescriptionIdGenerator implements IdGenerator {
 
     INSTANCE;
 
+    private static final Joiner idJoiner = Joiner
+            .on(IdGeneratorUtils.HIERARCHY_SEPARATOR).skipNulls();
+
     public ListMultimap<String,String> handleIdCollision(Collection<String> scopeIds, Bundle bundle) {
         return IdGeneratorUtils.handleIdCollision(scopeIds, LANGUAGE_OF_DESCRIPTION,
                 getIdBase(bundle));
@@ -49,7 +52,6 @@ public enum DescriptionIdGenerator implements IdGenerator {
         if (ident != null && ident.trim().isEmpty()) {
             ident = null;
         }
-        return Joiner.on(IdGeneratorUtils.HIERARCHY_SEPARATOR)
-                .skipNulls().join(lang, ident);
+        return idJoiner.join(lang, ident);
     }
 }

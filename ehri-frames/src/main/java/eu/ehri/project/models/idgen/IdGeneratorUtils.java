@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +30,8 @@ public class IdGeneratorUtils {
      */
     public static final String HIERARCHY_SEPARATOR = "-";
     public static final String SLUG_REPLACE = "_";
+
+    private static final Joiner hierarchyJoiner = Joiner.on(HIERARCHY_SEPARATOR);
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
@@ -117,6 +118,6 @@ public class IdGeneratorUtils {
             slugged.add(Slugify.slugify(p, SLUG_REPLACE));
         }
 
-        return Joiner.on(HIERARCHY_SEPARATOR).join(slugged);
+        return hierarchyJoiner.join(slugged);
     }
 }
