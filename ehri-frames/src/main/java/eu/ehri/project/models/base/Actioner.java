@@ -26,13 +26,13 @@ public interface Actioner extends NamedEntity {
         public Iterable<SystemEvent> getLatestAction() {
             return frameVertices(gremlin()
                     .out(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
-                    .out(Ontology.ENTITY_HAS_EVENT));
+                    .out(Ontology.ACTION_HAS_EVENT));
         }
 
         public Iterable<SystemEvent> getActions() {
             return frameVertices(gremlin().as("n").out(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc)
-                    .out(Ontology.ENTITY_HAS_EVENT));
+                    .out(Ontology.ACTION_HAS_EVENT));
         }
     }
 }
