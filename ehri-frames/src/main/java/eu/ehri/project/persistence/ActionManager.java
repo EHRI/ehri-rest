@@ -69,6 +69,7 @@ public final class ActionManager {
     public static final String DEBUG_TYPE = "_debugType";
     public static final String EVENT_LINK = "eventLink";
     public static final String LINK_TYPE = "_linkType";
+    public static final String SUBJECT_COUNT = "_childCount";
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
@@ -408,12 +409,12 @@ public final class ActionManager {
      * @param subjectLinkNode The subjectLinkNode node
      */
     private void addSubjectAndIncrementCount(Vertex event, Vertex subjectLinkNode) {
-        Long count = event.getProperty(ItemHolder.CHILD_COUNT);
+        Long count = event.getProperty(SUBJECT_COUNT);
         graph.addEdge(null, subjectLinkNode, event, Ontology.ENTITY_HAS_EVENT);
         if (count == null) {
-            event.setProperty(ItemHolder.CHILD_COUNT, 1L);
+            event.setProperty(SUBJECT_COUNT, 1L);
         } else {
-            event.setProperty(ItemHolder.CHILD_COUNT, count + 1L);
+            event.setProperty(SUBJECT_COUNT, count + 1L);
         }
     }
 
