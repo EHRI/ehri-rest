@@ -15,9 +15,11 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
@@ -28,6 +30,10 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  */
 @EntityType(EntityClass.SYSTEM_EVENT)
 public interface SystemEvent extends AccessibleEntity {
+
+    @Meta(ItemHolder.CHILD_COUNT)
+    @JavaHandler
+    public long subjectCount();
 
     /**
      * Fetch the time stamp of this event.
@@ -114,6 +120,13 @@ public interface SystemEvent extends AccessibleEntity {
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, SystemEvent {
+
+        @Override
+        public long subjectCount() {
+            return gremlin().inE(Ontology.ENTITY_HAS_EVENT).count();
+        }
+
+        @Override
         public Iterable<AccessibleEntity> getSubjects() {
             return frameVertices(gremlin().in(Ontology.ENTITY_HAS_EVENT)
                     .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
@@ -125,6 +138,7 @@ public interface SystemEvent extends AccessibleEntity {
                     }));
         }
 
+        @Override
         public AccessibleEntity getFirstSubject() {
             // Ugh: horrible code duplication is horrible - unfortunately
             // just calling getSubjects() fails for an obscure reason to do
@@ -142,8 +156,9 @@ public interface SystemEvent extends AccessibleEntity {
                 : null);
         }
 
+        @Override
         public Actioner getActioner() {
-            GremlinPipeline<Vertex, Vertex> actioners = gremlin().in(Ontology.ENTITY_HAS_EVENT)
+            GremlinPipeline<Vertex, Vertex> actioners = gremlin().in(Ontology.ACTION_HAS_EVENT)
                     .as("n").in(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
