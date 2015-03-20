@@ -2,7 +2,6 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.ToolsResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
@@ -75,8 +74,10 @@ public class ToolsRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);
         assertStatus(OK, response);
-        assertEquals(2, out.split("\r\n|\r|\n").length);
+        assertEquals(4, out.split("\r\n|\r|\n").length);
         assertTrue(out.contains("nl-r1-c1"));
+        assertTrue(out.contains("nl-r1-c1-c2"));
+        assertTrue(out.contains("nl-r1-c1-c2-c3"));
         assertTrue(out.contains("nl-r1-c4"));
     }
 
@@ -93,5 +94,18 @@ public class ToolsRestClientTest extends BaseRestClientTest {
         assertTrue(out.contains("nl-r1-c1-c2"));
         assertTrue(out.contains("nl-r1-c1-c2-c3"));
         assertTrue(out.contains("nl-r1-c4"));
+    }
+
+    @Test
+    public void testRegenerateDescriptionIds() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateDescriptionIds"))
+                .queryParam("commit", "true");
+        ClientResponse response = resource.post(ClientResponse.class);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        // 2 Historical agent descriptions
+        // 4 Repository descriptions
+        // 6 Doc Unit descriptions (total 7, 1 is okay in fixtures)
+        assertEquals("12", out);
     }
 }

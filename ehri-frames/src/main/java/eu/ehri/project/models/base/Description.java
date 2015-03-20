@@ -28,6 +28,9 @@ public interface Description extends NamedEntity, AccessibleEntity {
     @Property(Ontology.LANGUAGE_OF_DESCRIPTION)
     public String getLanguageOfDescription();
 
+    @Property(Ontology.IDENTIFIER_KEY)
+    public String getDescriptionCode();
+
     @Property(Ontology.CREATION_PROCESS)
     public CreationProcess getCreationProcess();
 

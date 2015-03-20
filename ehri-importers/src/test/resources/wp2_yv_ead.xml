@@ -69,20 +69,20 @@
                             <subject>Judenrat of Ghetto Theresienstadt</subject>
                             <subject>Jewish leadership</subject>
                             <subject>Aeltestenrat --> Tagesbefehle</subject>
-                            <subject source="wp2-keywords" authfilenumber="KEYWORD.JMP.288">Daily
+                            <subject source="wp2_keywords" authfilenumber="KEYWORD.JMP.288">Daily
                                 orders</subject>
-                            <subject source="wp2-keywords" authfilenumber="KEYWORD.JMP.2"
+                            <subject source="wp2_keywords" authfilenumber="KEYWORD.JMP.2"
                                 >Judenrat</subject>
                             <geogname>Theresienstadt,Ghetto,Czechoslovakia</geogname>
-                            <geogname source="wp2-places" authfilenumber="PLACE.ČSÚ.565717"
+                            <geogname source="wp2_places" authfilenumber="PLACE.ČSÚ.565717"
                                 >Terezín</geogname>
-                            <geogname source="wp2-places" authfilenumber="PLACE.ČSÚ.586676"
+                            <geogname source="wp2_places" authfilenumber="PLACE.ČSÚ.586676"
                                 >Terezín</geogname>
-                            <geogname source="wp2-places" authfilenumber="PLACE.JMP.15">Magdeburger
+                            <geogname source="wp2_places" authfilenumber="PLACE.JMP.15">Magdeburger
                                 Kaserne/B V</geogname>
-                            <persname source="wp2-people" authfilenumber="PERSON.ITI.2009255"
+                            <persname source="wp2_people" authfilenumber="PERSON.ITI.2009255"
                                 >Zucker, Ota (* 3.10.1892)</persname>
-                            <persname source="wp2-people" authfilenumber="PERSON.ITI.1296855"
+                            <persname source="wp2_people" authfilenumber="PERSON.ITI.1296855"
                                 >Edelstein, Jacob (* 25.7.1903)</persname>
                         </controlaccess>
                     </c03>

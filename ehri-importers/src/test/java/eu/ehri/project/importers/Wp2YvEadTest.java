@@ -35,12 +35,12 @@ public class Wp2YvEadTest extends AbstractImporterTest {
     protected final String C1 = "O.64.2-A.";
     protected final String C2 = "O.64.2-A.A.";
     protected final String C3 = "3685529";
+    protected final String C3_ID = "nl-r1-o_64_2-a-a-3685529";
     protected final String FONDS = "O.64.2";
 
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
                                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
@@ -51,22 +51,21 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         logger.debug(vocabulary.getId());
         Concept concept_288 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_288);
-        
-        
-        Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);
+
+        Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
-        
+
         final String logMessage = "Importing Yad Vashem EAD";
 
         int count = getNodeCount(graph);
 // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-        
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
+
         importManager.setTolerant(Boolean.TRUE);
-        
+
         ImportLog log = importManager.importFile(ios, logMessage);
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
@@ -81,7 +80,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         // - 11 UndeterminedRelationship, 0 0 0 11
         // - 5 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-       
+
         // - 1 Link as resolved relationship 
 
 //printGraph(graph);
@@ -100,7 +99,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(fonds, c1.getParent());
         assertEquals(c1, c2.getParent());
         assertEquals(c2, c3.getParent());
-        
+        // Expect no duplication of ID parts
+        assertEquals(C3_ID, c3.getId());
+
         // Ensure the import action has the right number of subjects.
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
@@ -133,7 +134,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
-        assertEquals(agent, fonds.getPermissionScope());
+        assertEquals(repository, fonds.getPermissionScope());
         assertEquals(fonds, c1.getPermissionScope());
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c3.getPermissionScope());

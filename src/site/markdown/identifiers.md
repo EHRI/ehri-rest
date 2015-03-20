@@ -4,7 +4,8 @@ There are two kinds of identifier concepts in the EHRI DB: local, and global. Un
 thorough about disambiguating the two things, so it's quite confusing in places. If we use the word 'identifier' it
 typically means the local identifier, whereas the word ID means the global one. Here's what they mean in practice:
 
-Local identifiers exist within a namespace defined by their parent scope. Item types at the top level of a hierarchy - for example, countries - have an identifier that consists of their ISO 3166 two-letter country code. Since they have
+Local identifiers exist within a namespace defined by their parent scope. Item types at the top level of a hierarchy
+- for example, countries - have an identifier that consists of their ISO 3166 two-letter country code. Since they have
 no higher scope, their local identifier is the same as their global one: for example, the Netherlands has local
 identifier `nl` and also global identifier `nl`.
 
@@ -37,6 +38,14 @@ For example, if we import an EAD file from repository `001500` in country `us` w
 
 ... the resultant global ID of the first unitid would be `us-001500-100` and that of it's child item `us-001500-100-1`.
 
+### Transliteration
+ 
+Prior to creating the hierarchical ID the local identifier is also transformed by removing all punctuation and certain
+other URI reserved characters and replacing them with at most one underscore per sequence. Leading and trailing underscores
+are then removed. Finally, the result is lower cased.
+
+The final hierarchical ID is then formed by joining each transliterated local identifier with a __hyphen__ character.
+
 Relative identifiers are therefore preferred in EHRI since they provide the neatest global identifiers. However in
 many cases EAD files are structured with absolute identifiers, e.g:
 
@@ -53,9 +62,30 @@ many cases EAD files are structured with absolute identifiers, e.g:
 </archdesc>
 ```
 
-In this case, the resultant global ID of the first unitid would be `us-001500-100` and that of it's child item
-`us-001500-100-100-1`. There is nothing we can realistically do in EHRI to prevent this redundancy in the global
-identifiers if that is how the source institution has chosen to represent their material.
+In this case, where the child identifier is _prefixed_ by it's parent identifier the prefix is removed prior to
+transliteration, so if, for example, there was a hierarchy like so:
+
+ - `us`
+ - `005578`
+ - `DOC-1`
+ - `DOC-1 / 1`
+ - `DOC-1 / 1 / 2`
+ - `DOC-1 / 1 / 2 / 3`
+ 
+... the process of generation the final hierarchical ID would be as follows:
+ 
+ - `us` => `005578` => `DOC-1` => `DOC-1 / 1` => `DOC-1 / 1 / 2` => "DOC-1 / 1 / 2 / 3"` (raw strings)
+ - `us` => `005578` => `DOC-1` => ` / 1` => ` / 2` => ` / 3` (parent prefixes removed, note leading space-slash-space)
+ - `us` => `005578` => `DOC_1` => `___1` => `___2` => `___3` (replace non-characters with underscores)
+ - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training replacements)
+ - `us-005578-doc_1-1-2-3` (joining sections with hyphens)
+ 
+## Restrictions
+
+This scheme places some restrictions on what can be used as an identifier in an EHRI item:
+
+ - it must contain some non-punctuation characters
+ - the sequence of characters with punctuation removed *must be unique within the parent scope*
 
 ## Trade-offs
 

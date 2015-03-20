@@ -66,7 +66,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
 
         // Check unit ID
-        String targetUnitId = "nl-r1-hr-r000382hr-hr-hda-1551";
+        String targetUnitId = "nl-r1-hr_r000382hr_hr_hda_1551";
         assertEquals(targetUnitId, unit.getId());
 
         for(Description d : unit.getDocumentDescriptions())
@@ -83,8 +83,8 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         assertEquals(unit, child2.getPermissionScope());
 
         // Check child IDs
-        assertEquals(targetUnitId + "-hr-hda-145", child1.getId());
-        assertEquals(targetUnitId + "-hr-hda-223", child2.getId());
+        assertEquals(targetUnitId + "-hr_hda_145", child1.getId());
+        assertEquals(targetUnitId + "-hr_hda_223", child2.getId());
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action

@@ -56,7 +56,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
         
         
-        Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
         
         final String logMessage = "Importing Beit Terezin EAD";
@@ -123,7 +123,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
         assertEquals(6, logVC.getCreated());
-        assertTrue(logVC.getAction() instanceof SystemEvent);
+        assertTrue(logVC.getAction() != null);
         assertEquals(logMessage, logVC.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs

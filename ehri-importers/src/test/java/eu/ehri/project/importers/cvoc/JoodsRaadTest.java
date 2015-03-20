@@ -135,7 +135,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         }
         assertTrue(found);
 
-        Concept termJR = manager.getFrame("cvoc2-joodse-raad", Concept.class);
+        Concept termJR = manager.getFrame("cvoc2-joodse_raad", Concept.class);
         
         for(Link desc : termJR.getLinks()){
             assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
