@@ -226,7 +226,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
 
         @Override
         public void addFollowing(final UserProfile user) {
-            addSingleRelationship(it(), user.asVertex(), USER_FOLLOWS_USER);
+            addUniqueRelationship(it(), user.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
@@ -246,7 +246,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
 
         @Override
         public void addWatching(final Watchable item) {
-            addSingleRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
+            addUniqueRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
         @Override
