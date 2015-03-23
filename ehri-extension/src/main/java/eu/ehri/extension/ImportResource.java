@@ -40,8 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Resource class for import endpoints.
@@ -204,6 +202,82 @@ public class ImportResource extends AbstractRestResource {
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Import a single EAD file. The body of the POST
+     * request should be an EAD file.
+     * <p/>
+     * The way you would run with would typically be:
+     * <p/>
+     * <pre>
+     * <code>curl -X POST \
+     *      -H "Authorization: mike" \
+     *      --data-binary @ead-file.xml \
+     *      "http://localhost:7474/ehri/import/single_ead?scope=my-repo-id&log=testing&tolerant=true"
+     *
+     * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
+     * # it needs url encoding.
+     * </code>
+     * </pre>
+     * <p/>
+     *
+     * @param scopeId       The id of the import scope (i.e. repository)
+     * @param tolerant      Whether or not to die on the first validation error
+     * @param logMessage    Log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param handlerClass  The fully-qualified handler class name
+     *                      (defaults to EadHandler)
+     * @param importerClass The fully-qualified import class name
+     *                      (defaults to EadImporter)
+     * @param propertyFile  A local file path pointing to an import properties
+     *                      configuration file.
+     * @param input         An XML document that is a valid EAD document.
+     * @return A JSON object showing how many records were created,
+     *         updated, or unchanged.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/single_ead")
+    public Response importSingleEad(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            InputStream input)
+            throws BadRequester, ItemNotFound, ValidationError,
+            IOException, DeserializationError {
+
+        try {
+            checkPropertyFile(propertyFile);
+            Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
+            Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
+
+            // Get the current user from the Authorization header and the scope
+            // from the query params...
+            UserProfile user = getCurrentUser();
+            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+
+            // Run the import!
+            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
+                    .withProperties(propertyFile)
+                    .setTolerant(tolerant)
+                    .importFile(input, getLogMessage(logMessage).orNull());
+
+            graph.getBaseGraph().commit();
+            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+        } catch (ClassNotFoundException e) {
+            throw new DeserializationError("Class not found: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
+        } catch (InputParseError e) {
             throw new DeserializationError(e.getMessage());
         } finally {
             cleanupTransaction();
