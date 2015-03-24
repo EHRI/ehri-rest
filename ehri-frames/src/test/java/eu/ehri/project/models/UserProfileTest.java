@@ -3,9 +3,10 @@ package eu.ehri.project.models;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.test.AbstractFixtureTest;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,63 +16,24 @@ import static org.junit.Assert.assertTrue;
  * User: mikebryant
  */
 public class UserProfileTest extends AbstractFixtureTest {
+
+    private UserProfile mike;
+    private UserProfile reto;
+    private UserProfile linda;
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        reto = manager.getFrame("reto", UserProfile.class);
+        mike = manager.getFrame("mike", UserProfile.class);
+        linda = manager.getFrame("linda", UserProfile.class);
+    }
+
     @Test
     public void testGetGroups() throws Exception {
-        assertTrue(validUser.getGroups().iterator().hasNext());
+        assertTrue(mike.getGroups().iterator().hasNext());
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        assertTrue(Iterables.contains(validUser.getGroups(), admin));
-    }
-
-    @Test
-    public void testFollowing() throws Exception {
-        UserProfile follower = manager.getFrame("reto", UserProfile.class);
-        assertTrue(Iterables.isEmpty(validUser.getFollowing()));
-        validUser.addFollowing(follower);
-        // Get count caching
-        assertEquals(1L, validUser.getFollowingCount());
-        assertEquals(1L, follower.getFollowerCount());
-        assertFalse(Iterables.isEmpty(validUser.getFollowing()));
-        assertTrue(Iterables.contains(validUser.getFollowing(), follower));
-        validUser.removeFollowing(follower);
-        assertTrue(Iterables.isEmpty(validUser.getFollowing()));
-        assertEquals(0L, validUser.getFollowingCount());
-        assertEquals(0L, follower.getFollowerCount());
-    }
-
-    @Test
-    public void testIsFollowing() throws Exception {
-        UserProfile follower = manager.getFrame("reto", UserProfile.class);
-        assertFalse(follower.isFollowing(validUser));
-        follower.addFollowing(validUser);
-        assertTrue(follower.isFollowing(validUser));
-        assertTrue(validUser.isFollower(follower));
-        assertFalse(validUser.isFollowing(follower));
-    }
-
-    @Test
-    public void testDuplicateWatches() throws Exception {
-        UserProfile follower = manager.getFrame("reto", UserProfile.class);
-        assertFalse(follower.isFollowing(validUser));
-        // Do this twice and ensure the follower count isn't altered...
-        follower.addFollowing(validUser);
-        follower.addFollowing(validUser);
-        assertEquals(1L, Iterables.size(follower.getFollowing()));
-    }
-
-    @Test
-    public void testWatching() throws Exception {
-        DocumentaryUnit watched = manager.getFrame("c1", DocumentaryUnit.class);
-        assertFalse(validUser.isWatching(watched));
-        validUser.addWatching(watched);
-        assertTrue(validUser.isWatching(watched));
-        assertEquals(1L, validUser.getWatchingCount());
-        assertTrue(Iterables.contains(watched.getWatchers(), validUser));
-        assertEquals(1L, watched.getWatchedCount());
-        assertTrue(Iterables.contains(validUser.getWatching(), watched));
-        validUser.removeWatching(watched);
-        assertFalse(validUser.isWatching(watched));
-        assertEquals(0L, validUser.getWatchingCount());
-        assertEquals(0L, watched.getWatchedCount());
+        assertTrue(Iterables.contains(mike.getGroups(), admin));
     }
 
     @Test
@@ -79,27 +41,96 @@ public class UserProfileTest extends AbstractFixtureTest {
         // mike is in groups kcl and admin. reto is in
         // group kcl and veerle in admin. Therefore mike's
         // co-group members are reto and veerle...
-        UserProfile mike = manager.getFrame("mike", UserProfile.class);
-        UserProfile reto = manager.getFrame("reto", UserProfile.class);
         UserProfile veerle = manager.getFrame("veerle", UserProfile.class);
-        ArrayList<UserProfile> profiles = Lists.newArrayList(mike.coGroupMembers());
+        List<UserProfile> profiles = Lists.newArrayList(mike.coGroupMembers());
         assertEquals(2, profiles.size());
         assertTrue(profiles.contains(reto));
         assertTrue(profiles.contains(veerle));
     }
 
     @Test
+    public void testFollowing() throws Exception {
+        assertTrue(Iterables.isEmpty(mike.getFollowers()));
+        assertTrue(Iterables.isEmpty(linda.getFollowers()));
+        assertTrue(Iterables.isEmpty(reto.getFollowing()));
+
+        reto.addFollowing(mike);
+        assertEquals(1L, Iterables.size(mike.getFollowers()));
+        assertEquals(1L, Iterables.size(reto.getFollowing()));
+
+        reto.addFollowing(linda);
+        assertEquals(1L, Iterables.size(mike.getFollowers()));
+        assertEquals(2L, Iterables.size(reto.getFollowing()));
+
+        // Get count caching
+        assertEquals(2L, reto.getFollowingCount());
+        assertEquals(1L, mike.getFollowerCount());
+        assertEquals(1L, linda.getFollowerCount());
+
+        assertFalse(Iterables.isEmpty(reto.getFollowing()));
+        assertTrue(Iterables.contains(reto.getFollowing(), mike));
+        assertTrue(Iterables.contains(reto.getFollowing(), linda));
+        reto.removeFollowing(mike);
+        assertTrue(Iterables.isEmpty(mike.getFollowers()));
+        assertFalse(Iterables.isEmpty(reto.getFollowing()));
+
+        assertEquals(1L, reto.getFollowingCount());
+        assertEquals(0L, mike.getFollowerCount());
+    }
+
+    @Test
+    public void testIsFollowing() throws Exception {
+        assertFalse(reto.isFollowing(mike));
+        reto.addFollowing(mike);
+        assertTrue(reto.isFollowing(mike));
+        assertTrue(mike.isFollower(reto));
+        assertFalse(mike.isFollowing(reto));
+    }
+
+    @Test
+    public void testDuplicateWatches() throws Exception {
+        assertFalse(reto.isFollowing(mike));
+        // Do this twice and ensure the follower count isn't altered...
+        reto.addFollowing(mike);
+        reto.addFollowing(mike);
+        assertEquals(1L, Iterables.size(reto.getFollowing()));
+        reto.addFollowing(linda);
+        assertEquals(2L, Iterables.size(reto.getFollowing()));
+    }
+
+    @Test
+    public void testWatching() throws Exception {
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
+        assertFalse(mike.isWatching(c1));
+        mike.addWatching(c1);
+        assertTrue(mike.isWatching(c1));
+        assertEquals(1L, mike.getWatchingCount());
+        assertTrue(Iterables.contains(c1.getWatchers(), mike));
+        assertEquals(1L, c1.getWatchedCount());
+        assertTrue(Iterables.contains(mike.getWatching(), c1));
+
+        mike.addWatching(c2);
+        assertEquals(2L, mike.getWatchingCount());
+        mike.removeWatching(c2);
+        assertEquals(1L, mike.getWatchingCount());
+
+        mike.removeWatching(c1);
+        assertFalse(mike.isWatching(c1));
+        assertEquals(0L, mike.getWatchingCount());
+        assertEquals(0L, c1.getWatchedCount());
+    }
+
+    @Test
     public void testBlocking() throws Exception {
-        UserProfile mike = manager.getFrame("mike", UserProfile.class);
-        UserProfile reto = manager.getFrame("reto", UserProfile.class);
-        UserProfile linda = manager.getFrame("linda", UserProfile.class);
         mike.addBlocked(reto);
         mike.addBlocked(linda);
         assertTrue(mike.isBlocking(reto));
         assertTrue(mike.isBlocking(linda));
-        assertTrue(Lists.newArrayList(mike.getBlocked()).contains(reto));
-        assertTrue(Lists.newArrayList(mike.getBlocked()).contains(linda));
+        assertTrue(Iterables.contains(mike.getBlocked(), reto));
+        assertTrue(Iterables.contains(mike.getBlocked(), linda));
         mike.removeBlocked(reto);
-        assertFalse(Lists.newArrayList(mike.getBlocked()).contains(reto));
+        assertFalse(Iterables.contains(mike.getBlocked(), reto));
+        assertTrue(Iterables.contains(mike.getBlocked(), linda));
     }
 }
