@@ -7,11 +7,19 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.VersionedEntity;
+import eu.ehri.project.models.events.Version;
+import eu.ehri.project.models.idgen.DescriptionIdGenerator;
+import eu.ehri.project.models.idgen.IdGenerator;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 
 import java.util.Collection;
@@ -96,7 +104,9 @@ public class IdRegenerator {
 
         EntityClass entityClass = manager.getEntityClass(item);
         try {
-            String newId = entityClass.getIdgen().generateId(idChain, depSerializer.vertexFrameToBundle(item));
+            IdGenerator idgen = entityClass.getIdgen();
+            Bundle itemBundle = depSerializer.vertexFrameToBundle(item);
+            String newId = idgen.generateId(idChain, itemBundle);
             if (collisionMode) {
                 if (!newId.equals(currentId) && manager.exists(newId)) {
                     List<String> collision = Lists.newArrayList(currentId, newId);
@@ -115,6 +125,21 @@ public class IdRegenerator {
                     } else {
                         if (!dryrun) {
                             manager.renameVertex(item.asVertex(), currentId, newId);
+
+                            // Rename all the descriptions
+                            String idBase = idgen.getIdBase(itemBundle);
+                            Collection<String> descIdChain = Lists.newArrayList(idChain);
+                            descIdChain.add(idBase);
+                            for (Description d : manager.cast(item, DescribedEntity.class).getDescriptions()) {
+                                Bundle desc = depSerializer.vertexFrameToBundle(d);
+                                String newDescriptionId = desc.getType().getIdgen().generateId(descIdChain, desc);
+                                manager.renameVertex(d.asVertex(), d.getId(), newDescriptionId);
+                            }
+
+                            // Change the ID on any versions...
+                            for (Version v : manager.cast(item, VersionedEntity.class).getAllPriorVersions()) {
+                                manager.setProperty(v.asVertex(), Ontology.VERSION_ENTITY_ID, newId);
+                            }
                         }
                         List<String> remap = Lists.newArrayList(currentId, newId);
                         return Optional.of(remap);

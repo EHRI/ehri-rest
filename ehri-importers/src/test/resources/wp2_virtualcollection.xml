@@ -82,13 +82,13 @@
 		<dsc>
 			<c01 level="collection">
 				<did>
-					<unitid label="ehri_main_identifier">wp2-bt</unitid>
-					<repository label="ehri_repository_vc">il-002777</repository>
+					<unitid label="ehri_main_identifier">wp2_bt</unitid>
+					<repository label="ehri_repository_vc">002777</repository>
 				</did>
 			</c01>
 			<c01 level="fonds">
 				<did>
-					<unitid label="ehri_main_identifier">vc-tm</unitid>
+					<unitid label="ehri_main_identifier">vc_tm</unitid>
 					<unittitle>Terezin Research Guide files from Terezin Memorial</unittitle>
 					<repository>Terezin Memorial</repository>
 				</did>
@@ -96,7 +96,7 @@
 				<c02 level="collection">
 					<did>
 						<unitid label="ehri_main_identifier">vzpomínky pro EHRI</unitid>
-						<repository label="ehri_repository_vc">cz-002302</repository>
+						<repository label="ehri_repository_vc">002302</repository>
 					</did>
 				</c02>
 			</c01>

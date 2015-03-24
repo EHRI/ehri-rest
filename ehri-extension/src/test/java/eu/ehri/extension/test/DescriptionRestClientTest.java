@@ -45,7 +45,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         JsonNode idValue = rootNode
                 .path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
-        assertEquals("nl-r1-c1-c2-en-another-description", idValue.getTextValue());
+        assertEquals("nl-r1-c1-c2.en-another_description", idValue.getTextValue());
 
         // Check the identifier is present and correct...
         JsonNode identValue = rootNode

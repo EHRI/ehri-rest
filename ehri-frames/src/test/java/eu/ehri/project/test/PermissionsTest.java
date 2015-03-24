@@ -100,7 +100,8 @@ public class PermissionsTest extends AbstractFixtureTest {
                 Bundle.fromData(TestData.getTestDocBundle()), user);
         // We should be able to create another item with c1 as the scope,
         // and inherit the perms from r1
-        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
+        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
+                .withDataValue(Ontology.IDENTIFIER_KEY, "some-other-id");
         DocumentaryUnit c2 = views.setScope(c1).create(bundle, user);
         assertNotNull(c2);
     }

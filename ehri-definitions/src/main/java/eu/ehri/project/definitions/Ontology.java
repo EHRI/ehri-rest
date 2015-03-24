@@ -88,6 +88,7 @@ public class Ontology {
 
     // System events
     public static final String ENTITY_HAS_EVENT = "hasEvent";
+    public static final String ACTION_HAS_EVENT = "actionHasEvent";
     public static final String EVENT_HAS_ACTIONER = "hasActioner";
     public static final String EVENT_HAS_SCOPE = "hasEventScope";
     public static final String EVENT_TIMESTAMP = "timestamp";

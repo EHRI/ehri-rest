@@ -18,7 +18,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
@@ -43,19 +42,19 @@ import java.util.Set;
  * <p/>
  * <pre>
  * <code>
- * Actioner            SystemEventQueue             Subject
- * \/                      \/                      \/
- * [lifecycleAction]   [lifecycleActionStream]     [lifecycleEvent]
- * |                       |                       |
- * e3--[hasActioner]-<-- Event 3 ---[hasEvent]--<--e3
- * \/                      \/                      \/
- * [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
- * |                       |                       |
- * e2--[hasActioner]-<-- Event 2 ---[hasEvent]--<--e2
- * \/                      \/                      \/
- * [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
- * |                       |                       |
- * e1--[hasActioner]-<-- Event 1 ---[hasEvent]--<--e1
+ * Actioner              SystemEventQueue             Subject
+ * \/                        \/                      \/
+ * [lifecycleAction]     [lifecycleActionStream]     [lifecycleEvent]
+ * |                         |                       |
+ * e3--[actionHasEvent]->-- Event 3 ---[hasEvent]--<--e3
+ * \/                        \/                      \/
+ * [lifecycleAction]         [lifecycleAction]       [lifecycleEvent]
+ * |                         |                       |
+ * e2--[actionHasEvent]->-- Event 2 ---[hasEvent]--<--e2
+ * \/                        \/                      \/
+ * [lifecycleAction]         [lifecycleAction]       [lifecycleEvent]
+ * |                         |                       |
+ * e1--[actionHasEvent]->-- Event 1 ---[hasEvent]--<--e1
  * </code>
  * </pre>
  *
@@ -69,7 +68,6 @@ public final class ActionManager {
     public static final String DEBUG_TYPE = "_debugType";
     public static final String EVENT_LINK = "eventLink";
     public static final String LINK_TYPE = "_linkType";
-    public static final String SUBJECT_COUNT = "_childCount";
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
@@ -211,7 +209,7 @@ public final class ActionManager {
                     actionManager.replaceAtHead(entity.asVertex(), vertex,
                             Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
                             Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
-                    actionManager.addSubjectAndIncrementCount(systemEvent.asVertex(), vertex);
+                    actionManager.addSubjectLink(systemEvent.asVertex(), vertex);
                     subjects.add(entity);
                 }
             }
@@ -403,23 +401,17 @@ public final class ActionManager {
     }
 
     /**
-     * Add a subjectLinkNode node to an event and increment the subjectLinkNode count cache.
+     * Add a subjectLinkNode node to an event.
      *
      * @param event           The event node
      * @param subjectLinkNode The subjectLinkNode node
      */
-    private void addSubjectAndIncrementCount(Vertex event, Vertex subjectLinkNode) {
-        Long count = event.getProperty(SUBJECT_COUNT);
+    private void addSubjectLink(Vertex event, Vertex subjectLinkNode) {
         graph.addEdge(null, subjectLinkNode, event, Ontology.ENTITY_HAS_EVENT);
-        if (count == null) {
-            event.setProperty(SUBJECT_COUNT, 1L);
-        } else {
-            event.setProperty(SUBJECT_COUNT, count + 1L);
-        }
     }
 
     private void addActionerLink(Vertex event, Vertex actionerLinkNode) {
-        graph.addEdge(null, actionerLinkNode, event, Ontology.ENTITY_HAS_EVENT);
+        graph.addEdge(null, actionerLinkNode, event, Ontology.ACTION_HAS_EVENT);
     }
 
     /**

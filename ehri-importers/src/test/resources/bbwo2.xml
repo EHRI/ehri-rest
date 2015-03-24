@@ -4,7 +4,8 @@
   <dc:description xmlns="http://www.openarchives.org/OAI/2.0/">More refugee children arrive from Germany - in time for Christmas. Small refugees with their packs and bundles on arrival at Liverpool Street.</dc:description>
   <dc:date xmlns="http://www.openarchives.org/OAI/2.0/">23-12-1938 (Opname)</dc:date>
   <dc:subject xmlns="http://www.openarchives.org/OAI/2.0/">Joden - Zie ook: Gemengd gehuwden, Halfjoden, Kwartjoden</dc:subject>
-  <dc:subject xmlns="http://www.openarchives.org/OAI/2.0/" id="joodse-raad" source="niod-trefwoorden" type="subjectAccess" term="kinderen">Kinderen</dc:subject>
+  <dc:subject xmlns="http://www.openarchives.org/OAI/2.0/" id="joodse-raad" source="niod_trefwoorden"
+              type="subjectAccess" term="kinderen">Kinderen</dc:subject>
   <dc:subject xmlns="http://www.openarchives.org/OAI/2.0/">Vluchtelingen</dc:subject>
   <dc:coverage xmlns="http://www.openarchives.org/OAI/2.0/">Groot-Brittannië</dc:coverage>
   <dc:type xmlns="http://www.openarchives.org/OAI/2.0/">IMAGE</dc:type>

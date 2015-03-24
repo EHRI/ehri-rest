@@ -193,21 +193,33 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     @Test
     @Ignore
     public void testFollowAndUnfollow() throws Exception {
-        String user1 = getRegularUserProfileId();
-        String user2 = getAdminUserProfileId();
+        String user1 = "reto";
+        String user2 = "mike";
+        String user3 = "linda";
+
         String followingUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + FOLLOWING;
         List<Map<String, Object>> followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
 
-        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+        URI followUrl1 = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
                 .segment(user1)
                 .segment(FOLLOWING)
                 .queryParam(ID_PARAM, user2).build();
-        ClientResponse response = jsonCallAs(user1, followUrl).post(ClientResponse.class);
+        ClientResponse response = jsonCallAs(user1, followUrl1).post(ClientResponse.class);
         assertStatus(OK, response);
         followers = getItemList(followingUrl, user1);
-        assertFalse(followers.isEmpty());
+        assertEquals(1, followers.size());
+
+        URI followUrl2 = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user1)
+                .segment(FOLLOWING)
+                .queryParam(ID_PARAM, user3).build();
+        response = jsonCallAs(user1, followUrl2).post(ClientResponse.class);
+        assertStatus(OK, response);
+        followers = getItemList(followingUrl, user1);
+        assertEquals(2, followers.size());
 
         // Hitting the same URL as a GET should give us a boolean...
         URI isFollowingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_FOLLOWING, user2);
@@ -220,10 +232,10 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        response = jsonCallAs(user1, followUrl).delete(ClientResponse.class);
+        response = jsonCallAs(user1, followUrl1).delete(ClientResponse.class);
         assertStatus(OK, response);
         followers = getItemList(followingUrl, user1);
-        assertTrue(followers.isEmpty());
+        assertEquals(1, followers.size());
     }
 
     @Test
@@ -260,30 +272,41 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     @Test
     public void testWatchingAndUnwatching() throws Exception {
         String user1 = getAdminUserProfileId();
-        String item = "c1";
+        String item1 = "c1";
+        String item2 = "c2";
         String watchersUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + WATCHING;
         List<Map<String, Object>> watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
 
-        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+        URI watchUrl1 = UriBuilder.fromPath(getExtensionEntryPointUri())
             .segment(Entities.USER_PROFILE)
             .segment(user1)
             .segment(WATCHING)
-            .queryParam(ID_PARAM, item).build();
-        ClientResponse response = jsonCallAs(user1, watchUrl).post(ClientResponse.class);
+            .queryParam(ID_PARAM, item1).build();
+        ClientResponse response = jsonCallAs(user1, watchUrl1).post(ClientResponse.class);
         assertStatus(OK, response);
         watching = getItemList(watchersUrl, user1);
-        assertFalse(watching.isEmpty());
+        assertEquals(1, watching.size());
+
+        URI watchUrl2 = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user1)
+                .segment(WATCHING)
+                .queryParam(ID_PARAM, item2).build();
+        response = jsonCallAs(user1, watchUrl2).post(ClientResponse.class);
+        assertStatus(OK, response);
+        watching = getItemList(watchersUrl, user1);
+        assertEquals(2, watching.size());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isWatchingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_WATCHING, item);
+        URI isWatchingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_WATCHING, item1);
         response = jsonCallAs(user1, isWatchingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        response = jsonCallAs(user1, watchUrl).delete(ClientResponse.class);
+        response = jsonCallAs(user1, watchUrl1).delete(ClientResponse.class);
         assertStatus(OK, response);
         watching = getItemList(watchersUrl, user1);
-        assertTrue(watching.isEmpty());
+        assertEquals(1, watching.size());
     }
 }

@@ -57,7 +57,7 @@
                 <controlaccess>
                     <subject>personal document</subject>
                     <subject>correspondence</subject>
-                    <subject source="wp2-keywords" authfilenumber="KEYWORD.JMP.716"
+                    <subject source="wp2_keywords" authfilenumber="KEYWORD.JMP.716"
                         >Correspondence</subject>
                     <persname>Auerbach Sara</persname>
                     <persname> Auerbach Yossi</persname>
