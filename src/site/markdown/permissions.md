@@ -11,11 +11,23 @@ A large amount of the functionality of the EHRI backend concerns setting, enforc
 
 Use Cases
 ---------
-TODO
+Examples of high-level use cases are:
+
+* Users of the portal can create annotations for items in the database and links between pairs of items, and only the creator of the annotations and links are allowed to edit them. Making annotations and links public is not by default available to normal users.
+* Employees of a particular archive are the only people allowed to make annotations and links involving the descriptions of their fonds public. This ensures only people with direct access to the original description can allow these annotations.
+* A specific controlled vocabulary is set to only be edited by a group of domain specialists, and only during their involvement in the project.
 
 Different Grant Types
 ---------------------
-TODO
+There are five grant types, i.e. types of actions that a user can perform within the permission scope when the user was granted a particular permission granted.
+
+* **create**: the privilege of creating new items of a type within a permission scope
+* **update**: the privilege of altering existing items of a type within a permission scope
+* **delete**: the privilege of removing existing items of a type within a permission scope
+* **annotate**: the privilege of using an existing item as a target in an annotation
+* **owner**: a meta-grant that includes *create*, *update*, *delete* and *annotate*
+* **grant**: the privilege to manage permissions of users and groups within a certain permission scope
+* **promote**: the privilege of promoting and demoting annotations and links within a certain permission scope
 
 Permission Scopes
 -----------------
@@ -26,7 +38,7 @@ There are type-specific behaviours that concern the permission scope, correspond
 
 When a user wants to do something to a particular item, the permission system traverses "up" the hasPermissionScope hierarchy looking for a permission grant which allows them to do that thing.
 
-For doc units, which form a directed graph, the permission scope is always the parent item or (if top level) the repository. For, e.g. concepts in a vocabulary, the permission scope is always the vocabulary, because they can have multiple "parent" (broader term) items, or none at all.
+For doc units, which form a directed graph, the permission scope is always the parent item or (if top level) the repository. For concepts in a vocabulary, the permission scope is always the vocabulary, because they can have multiple "parent" (broader term) items, or none at all.
 
 The permission scope is a generic structure for everything where we want to apply hierarchical permissions. So basically:
 
