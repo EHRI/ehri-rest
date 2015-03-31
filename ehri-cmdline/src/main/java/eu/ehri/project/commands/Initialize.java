@@ -26,8 +26,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 /**
- * Import EAD from the command line...
- * 
+ * Initialise the graph database with minimal nodes.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Initialize extends BaseCommand implements Command {
     

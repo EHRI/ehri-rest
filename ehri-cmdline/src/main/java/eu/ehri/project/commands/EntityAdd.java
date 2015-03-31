@@ -43,6 +43,9 @@ import java.util.Properties;
 
 /**
  * Add a user.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EntityAdd extends BaseCommand implements Command {
 

@@ -22,6 +22,9 @@ package eu.ehri.project.commands;
 import eu.ehri.project.importers.PersonalitiesImporter;
 
 /**
+ * Specialisation of {@link ImportCsvCommand} for importing personalities
+ * from CSV files.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PersonalitiesImport extends ImportCsvCommand implements Command {

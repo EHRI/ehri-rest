@@ -60,7 +60,10 @@ import java.io.OutputStream;
  *   ./scripts/cmd graphml -d in graph.xml 
  * - start server
  *   $NEO4J_HOME/bin/neo4j start
- * 
+ *
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class GraphML extends BaseCommand implements Command {
 

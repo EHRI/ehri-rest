@@ -26,7 +26,10 @@ import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
- * Import EAD from the command line...
+ * Import command for importing Dublin Core files.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DcImport extends ImportCommand implements Command {
 

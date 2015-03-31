@@ -32,8 +32,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 /**
- * List items as a given user, respecting access controls.
- * 
+ * List items of a specific type as a given user, respecting access controls.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class UserListEntities extends BaseCommand implements Command {
 

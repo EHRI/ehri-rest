@@ -45,7 +45,10 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 /**
- * List database items.
+ * Command for listing entities of a given type.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class ListEntities extends BaseCommand implements Command {
 

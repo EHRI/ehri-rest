@@ -32,7 +32,9 @@ import org.apache.commons.cli.Options;
 
 /**
  * Add an arbitrary edge between two nodes.
- * 
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class RelationAdd extends BaseCommand implements Command {
 

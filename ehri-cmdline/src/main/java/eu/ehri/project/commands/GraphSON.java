@@ -55,6 +55,9 @@ import java.util.zip.GZIPInputStream;
  * ./scripts/cmd graphson -d in graph.json
  * - start server
  * $NEO4J_HOME/bin/neo4j start
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class GraphSON extends BaseCommand implements Command {
 

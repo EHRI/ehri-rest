@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Superclass of all import command-line tools.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCommand extends BaseCommand implements Command{

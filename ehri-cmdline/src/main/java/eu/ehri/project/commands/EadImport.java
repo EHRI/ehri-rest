@@ -25,7 +25,10 @@ import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
- * Import EAD from the command line...
+ * Import EAD from the command line.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EadImport extends ImportCommand implements Command {
 

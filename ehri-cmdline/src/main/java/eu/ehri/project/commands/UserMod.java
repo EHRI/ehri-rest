@@ -40,6 +40,9 @@ import org.apache.commons.cli.Options;
 
 /**
  * Modify an existing user.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class UserMod extends BaseCommand implements Command {
 
@@ -51,7 +54,7 @@ public class UserMod extends BaseCommand implements Command {
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(new Option("group", true,
-           "A group to add the new user to"));
+                "A group to add the user to"));
         options.addOption(new Option("c", "comment", false,
                 "Log message for create action action."));
     }
@@ -63,7 +66,7 @@ public class UserMod extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        return "Create a new user, and optionally add them to a group";
+        return "Add an existing user to a group";
     }
 
     @Override

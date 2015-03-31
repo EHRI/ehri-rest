@@ -39,7 +39,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 /**
- * Delete an entire class of stuff via the command line.
+ * Delete an entire class of entities via the command line.
+ * 
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DeleteEntities extends BaseCommand implements Command {
 
