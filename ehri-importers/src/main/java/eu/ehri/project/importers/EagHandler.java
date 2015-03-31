@@ -35,7 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * to be used in conjunction with EagImporter
+ * Handler that reads EAG files. The resulting {@link Map}s should be imported by
+ * {@link EagImporter}.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */

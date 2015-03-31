@@ -47,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Importer of authoritative items such as historical agents and concepts, loaded
+ * from a CSV file.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */

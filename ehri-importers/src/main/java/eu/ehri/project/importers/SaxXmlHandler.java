@@ -40,8 +40,8 @@ import java.util.Stack;
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 
 /**
- *
- * makes use of properties file with format: 
+ * Reader of XML files, creator of {@link Map}-based representations of EA* files.
+ * Makes use of properties file with format: 
  * 
  * path/within/xml/=node/property
  *
@@ -50,8 +50,8 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * if there is a <node> given, it will translate to another graph node, like Address.
  *
  * lines starting with '@' give the attributes:
- * @attribute=tmpname
- * path/within/xml/@tmpname=node/property
+ * <code>@attribute=tmpname
+ * path/within/xml/@tmpname=node/property</code>
  *
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node, 
  * with an edge to the unit-description.

@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Importer of historical agents described in WP2.
  * before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  *

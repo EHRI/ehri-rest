@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Base handler for EAD, EAC and EAG files, based on a SAX reader.
+ * This only contains a utility method.
+ * 
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class EaHandler extends SaxXmlHandler {
