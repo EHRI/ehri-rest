@@ -20,15 +20,24 @@
 package eu.ehri.extension.errors.mappers;
 
 import eu.ehri.project.exceptions.PermissionDenied;
+
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Maps the {@link PermissionDenied} exception to the Unauthorized response.
+ *
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 @Provider
 public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied> {
 
