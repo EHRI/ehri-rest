@@ -37,6 +37,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,17 +60,17 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     }
     
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("scope", true,
-                "Identifier of scope to import into, i.e. repository"));
+           "Identifier of scope to import into, i.e. repository"));
         options.addOption(new Option("F", "files-from", true,
-                "Read list of input files from another file (or standard input, if given '-')"));
+           "Read list of input files from another file (or standard input, if given '-')"));
         options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
+           "Identifier of user to import as"));
         options.addOption(new Option("tolerant", false,
-                "Don't error if a file is not valid."));
+           "Don't error if a file is not valid."));
         options.addOption(new Option("log", true,
-                "Log message for action."));
+           "Log message for action."));
         options.addOption(new Option("properties", true,
                 "Provide another property file (default depends on HandlerClass)"));
     }

@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.EadImporter;
-import eu.ehri.project.importers.PersonalitiesImporter;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
@@ -29,9 +28,6 @@ public class CsvDocDescImport extends ImportCsvCommand implements Command {
 
     final static String NAME = "csv-doc-import";
 
-    /**
-     * Constructor.
-     */
     public CsvDocDescImport() {
         super(EadImporter.class);
     }
@@ -48,7 +44,4 @@ public class CsvDocDescImport extends ImportCsvCommand implements Command {
         return "Import a CSV file as Personalities into the graph database, using the specified"
                 + sep + "scope and user.";
     }
-
-   
-   
 }

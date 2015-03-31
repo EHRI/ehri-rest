@@ -28,9 +28,6 @@ public class CsvConceptImport extends ImportCsvCommand implements Command {
 
     final static String NAME = "csv-concept-import";
 
-    /**
-     * Constructor.
-     */
     public CsvConceptImport() {
         super(CsvConceptImporter.class);
     }
@@ -47,7 +44,4 @@ public class CsvConceptImport extends ImportCsvCommand implements Command {
         return "Import a CSV file as concepts into the graph database, using the specified"
                 + sep + "scope and user.";
     }
-
-   
-   
 }

@@ -27,29 +27,26 @@ import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
  * Import EAD from the command line...
- * 
  */
 public class DcImport extends ImportCommand implements Command {
 
     final static String NAME = "dc-import";
 
-    /**
-     * Constructor.
-     */
     public DcImport() {
         this(DcEuropeanaHandler.class, EadImporter.class);
     }
-    
+
     /**
      * Generic EAD import command, designed for extending classes that use specific Handlers.
-     * @param handler The Handler class to be used for import
+     *
+     * @param handler  The Handler class to be used for import
      * @param importer The Importer class to be used. If null, IcaAtomEadImporter is used.
      */
     public DcImport(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
-    	super(handler, importer);
+        super(handler, importer);
     }
 
-        @Override
+    @Override
     public String getHelp() {
         return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
     }

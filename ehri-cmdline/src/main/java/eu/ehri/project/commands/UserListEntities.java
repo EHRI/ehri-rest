@@ -29,19 +29,16 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.views.Query;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
- * Import EAD from the command line...
+ * List items as a given user, respecting access controls.
  * 
  */
 public class UserListEntities extends BaseCommand implements Command {
 
     final static String NAME = "user-list";
 
-    /**
-     * Constructor.
-     * 
-     */
     public UserListEntities() {
     }
 
@@ -56,7 +53,7 @@ public class UserListEntities extends BaseCommand implements Command {
     }
     
     @Override
-    public void setCustomOptions() {
+    public void setCustomOptions(Options options) {
         options.addOption(new Option("user", true,
                 "Identifier of user to list items as"));
     }

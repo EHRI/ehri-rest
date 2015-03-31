@@ -29,9 +29,6 @@ public class EacImport extends ImportCommand implements Command {
 
     final static String NAME = "eac-import";
 
-    /**
-     * Constructor.
-     */
     public EacImport() {
         super(EacHandler.class, EacImporter.class);
     }
@@ -47,7 +44,4 @@ public class EacImport extends ImportCommand implements Command {
         return "Import an EAC file into the graph database, using the specified"
                 + sep + "Repository and User.";
     }
-
-   
-   
 }

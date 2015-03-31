@@ -30,6 +30,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.util.Map.Entry;
 
@@ -40,20 +41,14 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
 
     final static String NAME = "skos-import";
 
-    /**
-     * Constructor.
-     */
     public SkosVocabularyImport() {
     }
 
     @Override
-    protected void setCustomOptions() {
-        options.addOption(new Option("scope", true,
-                "Identifier of scope to import into, i.e. the Vocabulary"));
-        options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
-        options.addOption(new Option("tolerant", false,
-                "Don't error if a file is not valid."));
+    protected void setCustomOptions(Options options) {
+        options.addOption(new Option("scope", true, "Identifier of scope to import into, i.e. the Vocabulary"));
+        options.addOption(new Option("user", true, "Identifier of user to import as"));
+        options.addOption(new Option("tolerant", false, "Don't error if a file is not valid."));
         options.addOption(new Option("log", true,
                 "Log message for import action."));
     }
@@ -70,11 +65,6 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
                 + sep + "Vocabulary and User.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     *
-     * @throws Exception
-     */
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
                                CommandLine cmdLine) throws Exception {
 

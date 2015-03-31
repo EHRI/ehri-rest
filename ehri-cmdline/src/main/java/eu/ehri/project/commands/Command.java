@@ -34,17 +34,28 @@ public interface Command {
     /**
      * Get information about the usage of the command, including
      * required and/or optional parameters.
+     *
      * @return a usage text
      */
     public String getUsage();
 
     /**
      * Execute this command with the given command line options.
-     * @param graph
-     * @param cmdLine
+     *
+     * @param graph   the graph database
+     * @param cmdLine the command line options
      * @return a status code (0 = success)
      * @throws Exception
      */
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception;
+
+    /**
+     * Execute this command with the given arguments.
+     *
+     * @param graph the graph database
+     * @param args  the raw argument strings
+     * @return a status code (0 = success)
+     * @throws Exception
+     */
     public int exec(FramedGraph<? extends TransactionalGraph> graph, String[] args) throws Exception;
 }

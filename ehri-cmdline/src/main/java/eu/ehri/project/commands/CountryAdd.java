@@ -38,24 +38,20 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
  * Add a country.
- * 
  */
 public class CountryAdd extends BaseCommand implements Command {
 
     final static String NAME = "countryadd";
 
-    /**
-     * Constructor.
-     * 
-     */
     public CountryAdd() {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("n", "name", true, "Country's full name"));
         options.addOption(new Option("c", "comment", false,
                 "Log message for create action action."));
@@ -71,14 +67,6 @@ public class CountryAdd extends BaseCommand implements Command {
         return "Create a new country";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @throws ItemNotFound
-     * @throws DeserializationError 
-     * @throws PermissionDenied 
-     * @throws ValidationError 
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
@@ -96,13 +84,9 @@ public class CountryAdd extends BaseCommand implements Command {
 
         String countryId = (String) cmdLine.getArgList().get(0);
         String countryName = cmdLine.getOptionValue("n", countryId);
-//        String[] groups = {};
-//        if (cmdLine.hasOption("group")) {
-//            groups = cmdLine.getOptionValues("group");
-//        }
 
         Bundle bundle = new Bundle(EntityClass.COUNTRY,
-                Maps.<String, Object> newHashMap())
+                Maps.<String, Object>newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, countryId)
                 .withDataValue(Ontology.NAME_KEY, countryName);
 

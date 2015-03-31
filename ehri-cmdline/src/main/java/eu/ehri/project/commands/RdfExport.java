@@ -26,6 +26,7 @@ import com.tinkerpop.frames.FramedGraph;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -67,7 +68,7 @@ public class RdfExport extends BaseCommand implements Command {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("format", "f", true, "RDF format"));
     }
 

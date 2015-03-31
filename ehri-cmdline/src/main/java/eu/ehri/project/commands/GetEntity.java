@@ -29,16 +29,12 @@ import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
 
 /**
- * Import EAD from the command line...
- * 
+ * Fetch an item's serialized representation via the command line.
  */
 public class GetEntity extends BaseCommand implements Command {
 
     final static String NAME = "get";
 
-    /**
-     * Constructor.
-     */
     public GetEntity() {
     }
 
@@ -52,11 +48,6 @@ public class GetEntity extends BaseCommand implements Command {
         return "Get an entity by its identifier.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @throws Exception
-     */
     @Override
     @SuppressWarnings("unchecked")
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,

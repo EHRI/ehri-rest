@@ -37,6 +37,7 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
 
 import java.util.Properties;
 
@@ -47,26 +48,23 @@ public class EntityAdd extends BaseCommand implements Command {
 
     final static String NAME = "add";
 
-    /**
-     * Constructor.
-     */
     public EntityAdd() {
     }
 
     @Override
     @SuppressWarnings("static-access")
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(OptionBuilder.withArgName("property=value")
-                .hasArgs(2)
-                .withValueSeparator()
-                .withDescription("Add a property with the given value")
-                .create("P"));
+           .hasArgs(2)
+           .withValueSeparator()
+           .withDescription("Add a property with the given value")
+           .create("P"));
         options.addOption(new Option("scope", true,
-                "Identifier of scope to create item in, i.e. a repository"));
+           "Identifier of scope to create item in, i.e. a repository"));
         options.addOption(new Option("u", "update", false,
-                "Update item if it already exists"));
+           "Update item if it already exists"));
         options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
+           "Identifier of user to import as"));
         options.addOption(new Option("log", true,
                 "Log message for create action."));
     }

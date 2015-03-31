@@ -32,9 +32,6 @@ public class IcaAtomEadImport extends ImportCommand implements Command {
 
     final static String NAME = "ica-atom-ead-import";
 
-    /**
-     * Constructor.
-     */
     public IcaAtomEadImport() {
         this(EadHandler.class, IcaAtomEadImporter.class);
     }

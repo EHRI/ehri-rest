@@ -31,6 +31,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -39,16 +40,15 @@ import java.util.Map;
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public abstract class ImportCsvCommand extends BaseCommand implements Command{
+public abstract class ImportCsvCommand extends BaseCommand implements Command {
     Class<? extends MapImporter> importer;
-//    Class<? extends AbstractImporter> importer;
-    
-    public ImportCsvCommand(Class<? extends MapImporter> importer){
+
+    public ImportCsvCommand(Class<? extends MapImporter> importer) {
         this.importer = importer;
     }
-    
+
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("scope", true,
                 "Identifier of scope to import into, i.e. AuthoritativeSet"));
         options.addOption(new Option("user", true,
@@ -58,8 +58,8 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
         options.addOption(new Option("log", true,
                 "Log message for import action."));
     }
-    
-     @Override
+
+    @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -92,7 +92,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
 
             ImportLog log = new CsvImportManager(graph, scope, user, importer)
                     .setTolerant(tolerant).importFiles(filePaths, logMessage);
-            
+
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());
             if (log.getErrored() > 0) {
