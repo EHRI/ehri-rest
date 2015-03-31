@@ -22,6 +22,8 @@ package eu.ehri.project.definitions;
 /**
  * Collection of constants to denote the entity type of graph vertices.
  *
+ * @author Mike Bryant (http://github.com/mikesname)
+ * @author Linda Reijnhoudt (http://github.com/lindareijnhoudt)
  */
 public class Entities {
     public static final String SYSTEM_EVENT = "systemEvent";

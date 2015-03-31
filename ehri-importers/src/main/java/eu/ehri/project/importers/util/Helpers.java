@@ -26,7 +26,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Created by michaelb on 07/06/13.
+ * Utility class for converting language codes.
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Ben Companjen (https://github.com/bencomp)
  */
 public class Helpers {
 

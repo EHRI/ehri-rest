@@ -26,6 +26,13 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+/**
+ * An entity whose actions are recorded.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface Actioner extends NamedEntity {
     /**
      * Fetch a list of Actions for this user in newest-first order.

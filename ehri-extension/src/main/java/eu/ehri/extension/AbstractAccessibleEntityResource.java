@@ -53,6 +53,8 @@ import java.util.Set;
  * entities can extend this class.
  *
  * @param <E> The specific AccessibleEntity derived class
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (https://github.com/mikesname)
  */
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
@@ -73,6 +75,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         public void process(E frame) throws PermissionDenied;
     }
 
+    /**
+     * Implementation of a Handler that does nothing.
+     *
+     * @param <E> The specific AccessibleEntity derived class
+     */
     public static class NoOpHandler<E extends AccessibleEntity> implements Handler<E> {
         @Override
         public void process(E frame) {

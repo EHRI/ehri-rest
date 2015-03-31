@@ -26,7 +26,10 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
 /**
+ * An entity that can have {@link Address}es.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ *
  */
 public interface AddressableEntity {
 

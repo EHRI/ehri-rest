@@ -25,8 +25,10 @@ import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
- * Import EAD from the command line...
- * 
+ * Import EAD from the command line using the {@link IcaAtomEadImporter}.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadImport extends ImportCommand implements Command {
 

@@ -30,7 +30,10 @@ import eu.ehri.project.models.annotations.Meta;
 import static eu.ehri.project.definitions.Ontology.USER_WATCHING_ITEM;
 
 /**
+ * An entity that can be watched by users.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
+ *
  */
 public interface Watchable extends AccessibleEntity {
     String WATCHED_COUNT = "watchedBy";

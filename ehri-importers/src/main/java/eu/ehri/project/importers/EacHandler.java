@@ -39,7 +39,9 @@ import java.util.Map;
 //import org.xml.sax.Attributes;
 
 /**
- * makes use of eac.properties with format: part/of/path/=attribute
+ * Handler of EAC-CPF files. Creates a {@link Map} for the {@link EacImporter} to
+ * import.
+ * Makes use of eac.properties with format: part/of/path/=attribute
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */

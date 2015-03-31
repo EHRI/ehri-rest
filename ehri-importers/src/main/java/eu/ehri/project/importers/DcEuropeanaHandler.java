@@ -36,8 +36,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * dc files are imported directly beneath the scope provided
- * there is NO structure beneath that
+ * Dublin Core files are imported directly beneath the scope provided.
+ * There is NO structure beneath that.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DcEuropeanaHandler extends SaxXmlHandler {

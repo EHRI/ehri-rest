@@ -20,6 +20,7 @@
 package eu.ehri.extension.errors.mappers;
 
 import com.google.common.base.Charsets;
+
 import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.DeserializationError;
 
@@ -27,9 +28,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * Maps the {@link DeserializationError} exception to the Bad Request response.
+ *
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 @Provider
 public class DeserializationErrorMapper implements
         ExceptionMapper<DeserializationError> {

@@ -59,6 +59,8 @@ import java.util.Set;
 
 /**
  * Provides a RESTful interface for the UserProfile.
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (https://github.com/mikesname)
  */
 @Path(Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile>

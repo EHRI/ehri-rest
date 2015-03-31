@@ -25,6 +25,13 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
+/**
+ * An entity that can have descriptions.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface DescribedEntity extends PermissionScope, AnnotatableEntity, LinkableEntity {
 
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)

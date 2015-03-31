@@ -26,8 +26,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 /**
- * Import EAD from the command line...
- * 
+ * Command for recreating the internal graph index.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Reindex extends BaseCommand implements Command {
 

@@ -17,33 +17,8 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.commands;
-
-import eu.ehri.project.importers.EacHandler;
-import eu.ehri.project.importers.EacImporter;
-
 /**
- * Import EAC-CPF files.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * Definitions of entity and property types.
  */
-public class EacImport extends ImportCommand implements Command {
-
-    final static String NAME = "eac-import";
-
-    public EacImport() {
-        super(EacHandler.class, EacImporter.class);
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -repo <agent-id> <eac1.xml> <eac2.xml> ... <eacN.xml>";
-    }
-
-    @Override
-    public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import an EAC file into the graph database, using the specified"
-                + sep + "Repository and User.";
-    }
-}
+package eu.ehri.project.definitions;
+ 

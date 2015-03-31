@@ -35,7 +35,7 @@ import java.util.List;
 
 /**
  * The scope of permissions granted to users. A permission scope always has an identifier.
- * 
+ *
  * @author Mike Bryant (https://github.com/mikesname)
  *
  */

@@ -38,6 +38,9 @@ import java.util.Set;
 
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.
+ *
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (https://github.com/mikesname)
  */
 @Path(AccessResource.ENDPOINT)
 public class AccessResource extends

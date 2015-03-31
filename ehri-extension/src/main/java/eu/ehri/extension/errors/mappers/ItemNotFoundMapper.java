@@ -20,16 +20,26 @@
 package eu.ehri.extension.errors.mappers;
 
 import com.google.common.base.Charsets;
+
 import eu.ehri.project.exceptions.ItemNotFound;
+
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Maps the {@link ItemNotFound} exception to the Not Found response.
+ *
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 @Provider
 public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
 

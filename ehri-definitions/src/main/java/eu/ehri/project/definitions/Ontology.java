@@ -20,6 +20,10 @@
 package eu.ehri.project.definitions;
 
 /**
+ * The Ontology contains String constants for properties of graph nodes,
+ * some of which will be stored inside nodes as properties and other
+ * properties that will be used as labels for links between nodes.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Ontology {

@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Importer of Ukrainian units, which are encoded in a slightly different way
+ * than other documentary units.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class UkrainianUnitImporter extends MapImporter {

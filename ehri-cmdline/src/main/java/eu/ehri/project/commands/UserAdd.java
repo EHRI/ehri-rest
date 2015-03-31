@@ -41,8 +41,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 /**
- * Add a user.
- * 
+ * Add a user with optional group membership.
+ *
+ * @author Mike Bryant (https://github.com/mikesname)
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class UserAdd extends BaseCommand implements Command {
 

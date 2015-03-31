@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 
 /**
- * Import EAD from the command line...
+ * Command for loading a fixtures file into the graph.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */

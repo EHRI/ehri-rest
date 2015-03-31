@@ -23,10 +23,10 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistence.Mutation;
 
 /**
- * Functor class
- * 
+ * Implementing classes do things after an item was imported and created
+ * a mutation ('created', 'updated', 'unchanged').
+ *
  * @author Mike Bryant (http://github.com/mikesname)
- * 
  */
 public interface ImportCallback {
     public void itemImported(final Mutation<? extends AccessibleEntity> mutation);

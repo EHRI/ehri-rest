@@ -23,6 +23,8 @@ import eu.ehri.project.importers.EagHandler;
 import eu.ehri.project.importers.EagImporter;
 
 /**
+ * Import EAG files.
+ *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagImport  extends ImportCommand implements Command {

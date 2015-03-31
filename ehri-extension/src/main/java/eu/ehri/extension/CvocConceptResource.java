@@ -59,7 +59,7 @@ import java.util.List;
  * creation endpoint is part of the VocabularyResource and creation without a
  * Vocabulary is not possible via this API.
  *
- * @author Paul Bool (http://github.com/PaulBoon)
+ * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CVOC_CONCEPT)
