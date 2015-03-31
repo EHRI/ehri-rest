@@ -38,6 +38,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.util.List;
 
@@ -55,9 +56,6 @@ public class Check extends BaseCommand implements Command {
 
     final static String NAME = "check";
 
-    /**
-     * Constructor.
-     */
     public Check() {
     }
     
@@ -73,15 +71,10 @@ public class Check extends BaseCommand implements Command {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("q", "quick", false, "Quick checks only"));
     }
     
-    /**
-     * Command-line entry-point (for testing.)
-     *
-     * @throws Exception
-     */
     @Override
     @SuppressWarnings("unchecked")
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,

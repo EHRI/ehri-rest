@@ -36,26 +36,22 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.ActionManager.EventContext;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
- * Add a user.
- * 
+ * Modify an existing user.
  */
 public class UserMod extends BaseCommand implements Command {
 
     final static String NAME = "usermod";
 
-    /**
-     * Constructor.
-     * 
-     */
     public UserMod() {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("group", true,
-                "A group to add the new user to"));
+           "A group to add the new user to"));
         options.addOption(new Option("c", "comment", false,
                 "Log message for create action action."));
     }

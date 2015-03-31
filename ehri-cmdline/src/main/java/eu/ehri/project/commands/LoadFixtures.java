@@ -25,6 +25,7 @@ import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,15 +39,11 @@ public class LoadFixtures extends BaseCommand implements Command {
 
     final static String NAME = "load-fixtures";
 
-    /**
-     * Constructor.
-     * 
-     */
     public LoadFixtures() {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("init",
                 "Initialize graph before loading fixtures"));
     }
@@ -61,11 +58,6 @@ public class LoadFixtures extends BaseCommand implements Command {
         return "Load the fixtures into the database.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @throws Exception
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {

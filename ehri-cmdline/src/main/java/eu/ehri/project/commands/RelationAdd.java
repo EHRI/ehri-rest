@@ -28,6 +28,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
  * Add an arbitrary edge between two nodes.
@@ -37,17 +38,13 @@ public class RelationAdd extends BaseCommand implements Command {
 
     final static String NAME = "add-rel";
 
-    /**
-     * Constructor.
-     *
-     */
     public RelationAdd() {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("s", "single", false,
-                "Ensure the out entity only has one relationship of this type by removing any others"));
+           "Ensure the out entity only has one relationship of this type by removing any others"));
         options.addOption(new Option("d", "allow-duplicates", false,
                 "Allow creating multiple edges with the same label between the same two nodes"));
     }
@@ -62,11 +59,6 @@ public class RelationAdd extends BaseCommand implements Command {
         return "Create a relationship between a source and a target";
     }
 
-    /**
-     * Add a relationship between two nodes.
-     *
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound {

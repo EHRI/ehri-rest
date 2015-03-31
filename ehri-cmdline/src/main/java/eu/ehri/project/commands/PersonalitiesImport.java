@@ -28,9 +28,6 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
 
     final static String NAME = "csv-pers-import";
 
-    /**
-     * Constructor.
-     */
     public PersonalitiesImport() {
         super(PersonalitiesImporter.class);
     }
@@ -47,7 +44,4 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
         return "Import a CSV file as Personalities into the graph database, using the specified"
                 + sep + "scope and user.";
     }
-
-   
-   
 }

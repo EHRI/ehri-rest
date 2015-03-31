@@ -29,9 +29,6 @@ public class EagImport  extends ImportCommand implements Command {
 
     final static String NAME = "eag-import";
 
-    /**
-     * Constructor.
-     */
     public EagImport() {
         super(EagHandler.class, EagImporter.class);
     }
@@ -44,11 +41,7 @@ public class EagImport  extends ImportCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an EAG file into the graph database, using the specified"
+        return "Import an EAG file into the graph database, using the specified"
                 + sep + "Repository and User.";
-        return help;
     }
-
-   
-   
 }

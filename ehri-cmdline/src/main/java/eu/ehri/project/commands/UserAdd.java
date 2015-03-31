@@ -38,6 +38,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
  * Add a user.
@@ -47,17 +48,13 @@ public class UserAdd extends BaseCommand implements Command {
 
     final static String NAME = "useradd";
 
-    /**
-     * Constructor.
-     * 
-     */
     public UserAdd() {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("group", true,
-                "A group to add the new user to"));
+           "A group to add the new user to"));
         options.addOption(new Option("n", "name", true, "User's full name"));
         options.addOption(new Option("c", "comment", false,
                 "Log message for create action action."));
@@ -73,14 +70,6 @@ public class UserAdd extends BaseCommand implements Command {
         return "Create a new user, and optionally add them to a group";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     * 
-     * @throws ItemNotFound
-     * @throws DeserializationError 
-     * @throws PermissionDenied 
-     * @throws ValidationError 
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {

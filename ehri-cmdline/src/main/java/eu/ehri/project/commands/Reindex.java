@@ -23,6 +23,7 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphReindexer;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 
 /**
  * Import EAD from the command line...
@@ -37,7 +38,7 @@ public class Reindex extends BaseCommand implements Command {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
     }
 
     @Override

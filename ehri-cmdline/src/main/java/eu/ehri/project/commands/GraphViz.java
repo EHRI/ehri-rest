@@ -27,6 +27,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -44,9 +45,6 @@ public class GraphViz extends BaseCommand implements Command {
 
     final static String NAME = "graphviz";
 
-    /**
-     * Constructor.
-     */
     public GraphViz() {
     }
 
@@ -56,7 +54,7 @@ public class GraphViz extends BaseCommand implements Command {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("r", "relationship", true,
                 "A relationship to include in the graph"));
     }
@@ -66,11 +64,6 @@ public class GraphViz extends BaseCommand implements Command {
         return "Dump a dot file.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     *
-     * @throws Exception
-     */
     @Override
     @SuppressWarnings("unchecked")
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,

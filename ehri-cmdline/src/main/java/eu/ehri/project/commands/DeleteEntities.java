@@ -36,6 +36,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.views.impl.CrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
  * Delete an entire class of stuff via the command line.
@@ -44,16 +45,13 @@ public class DeleteEntities extends BaseCommand implements Command {
 
     final static String NAME = "delete-all";
 
-    /**
-     * Constructor.
-     */
     public DeleteEntities() {
     }
 
     @Override
-    protected void setCustomOptions() {
+    protected void setCustomOptions(Options options) {
         options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
+           "Identifier of user to import as"));
         options.addOption(new Option("log", true,
                 "Log message for import action."));
     }
@@ -68,11 +66,6 @@ public class DeleteEntities extends BaseCommand implements Command {
         return "Delete ALL entities of a given type.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     *
-     * @throws Exception
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {

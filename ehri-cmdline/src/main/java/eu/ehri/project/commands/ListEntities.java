@@ -30,6 +30,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -44,26 +45,21 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Import EAD from the command line...
+ * List database items.
  */
 public class ListEntities extends BaseCommand implements Command {
 
     final static String NAME = "list";
 
-    /**
-     * Constructor.
-     */
-    public ListEntities() {
-    }
-
     @Override
-    protected void setCustomOptions() {
+    @SuppressWarnings("static-access")
+    protected void setCustomOptions(Options options) {
         options.addOption(OptionBuilder
-                .withType(String.class)
-                .withLongOpt("format").isRequired(false)
-                .hasArg(true).withArgName("f")
-                .withDescription("Format for output data, which defaults to just the id. " +
-                        "If provided can be one of: xml, json").create("f"));
+           .withType(String.class)
+           .withLongOpt("format").isRequired(false)
+           .hasArg(true).withArgName("f")
+           .withDescription("Format for output data, which defaults to just the id. " +
+                   "If provided can be one of: xml, json").create("f"));
         options.addOption(OptionBuilder
                 .withType(String.class)
                 .withLongOpt("root-node").isRequired(false)
@@ -81,11 +77,6 @@ public class ListEntities extends BaseCommand implements Command {
         return "List entities of a given type.";
     }
 
-    /**
-     * Command-line entry-point (for testing.)
-     *
-     * @throws Exception
-     */
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
 
