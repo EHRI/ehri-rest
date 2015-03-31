@@ -31,7 +31,6 @@ import org.junit.Test;
 
 
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

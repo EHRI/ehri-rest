@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)

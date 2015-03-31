@@ -27,7 +27,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Repository;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;

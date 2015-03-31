@@ -36,7 +36,6 @@ import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.VersionedEntity;
 import eu.ehri.project.models.events.Version;
-import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
