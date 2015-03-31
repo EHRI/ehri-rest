@@ -25,8 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import eu.ehri.project.persistence.Bundle;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 

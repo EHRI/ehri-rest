@@ -23,7 +23,6 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Generate an ID given an entity type, a set of scopes, and some data.

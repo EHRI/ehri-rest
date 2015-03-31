@@ -23,8 +23,6 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.Collection;
-import java.util.List;
-
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 
 /**

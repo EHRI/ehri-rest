@@ -25,7 +25,6 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 /**

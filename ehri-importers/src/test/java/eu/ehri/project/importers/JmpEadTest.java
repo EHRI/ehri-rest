@@ -26,7 +26,6 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;

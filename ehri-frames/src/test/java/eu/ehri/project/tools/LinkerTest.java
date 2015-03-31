@@ -19,7 +19,6 @@
 
 package eu.ehri.project.tools;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.cvoc.Vocabulary;
