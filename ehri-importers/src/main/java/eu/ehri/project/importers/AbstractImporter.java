@@ -154,12 +154,13 @@ public abstract class AbstractImporter<T> {
     protected Object changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
         if (pc == null) {
             pc = new NodeProperties();
+            BufferedReader br = null;
             try {
                 InputStream fis = getClass().getClassLoader().getResourceAsStream(NODE_PROPERTIES);
                 if (fis == null) {
                     throw new RuntimeException("Missing properties file: " + NODE_PROPERTIES);
                 }
-                BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+                br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
                 String firstline = br.readLine();
                 pc.setTitles(firstline);
 
@@ -169,6 +170,14 @@ public abstract class AbstractImporter<T> {
                 }
             } catch (IOException ex) {
                 logger.error(ex.getMessage());
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        logger.error("Failed to close the buffered reader: {}", e.getMessage());
+                    }
+                }
             }
         }
         if (value instanceof List

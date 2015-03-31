@@ -142,8 +142,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
             start = start.substring(0, 4);
         }
         if ( start != null) {
-            if (start != null)
-                items.put(Ontology.DATE_PERIOD_START_DATE, start);
+            items.put(Ontology.DATE_PERIOD_START_DATE, start);
             l.add(items);
         }
         return l;
