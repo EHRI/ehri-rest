@@ -44,6 +44,13 @@ import java.util.Map;
  */
 public class CmdEntryPoint extends BaseCommand {
 
+    /**
+     * Default return codes for shell tools.
+     * 
+     * 0 means 'OK', 1 'bad arguments', 2 'bad data',
+     * 3 'bad permissions'
+     *
+     */
     public static enum RetCode {
 
         OK(0),
