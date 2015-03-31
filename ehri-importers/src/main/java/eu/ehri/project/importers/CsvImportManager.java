@@ -70,6 +70,7 @@ public class CsvImportManager extends AbstractImportManager {
     protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError, InvalidInputFormatError {
 
+        CSVReader reader = null;
         try {
             AbstractImporter importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
@@ -94,7 +95,7 @@ public class CsvImportManager extends AbstractImportManager {
                 }
             });
 
-            CSVReader reader = new CSVReader(new InputStreamReader(ios, "UTF-8"), VALUE_DELIMITER);
+            reader = new CSVReader(new InputStreamReader(ios, "UTF-8"), VALUE_DELIMITER);
             String[] headers = reader.readNext();
             if (headers == null) {
                 throw new InvalidInputFormatError("no content found");
@@ -139,6 +140,11 @@ public class CsvImportManager extends AbstractImportManager {
         } catch (IllegalAccessException e) {
             framedGraph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        }
+        finally {
+            if (reader != null) {
+                reader.close();
+            }
         }
     }
 }

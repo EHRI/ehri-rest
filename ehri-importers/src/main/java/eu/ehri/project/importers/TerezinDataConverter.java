@@ -76,6 +76,7 @@ public class TerezinDataConverter {
             }
 
         }
+        scanner.close();
     }
 
     public static List<Calendar> parseDate(String datevalue) {
