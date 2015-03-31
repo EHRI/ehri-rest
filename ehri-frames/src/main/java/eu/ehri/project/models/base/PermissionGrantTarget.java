@@ -24,6 +24,13 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.PermissionGrant;
 
+/**
+ * An entity that can be the target of a permission grant.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface PermissionGrantTarget extends Frame {
     @Adjacency(label= Ontology.PERMISSION_GRANT_HAS_TARGET, direction=Direction.IN)
     public Iterable<PermissionGrant> getPermissionGrants();

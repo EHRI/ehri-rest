@@ -25,6 +25,13 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
+/**
+ * An entity that can have one or more date periods attached.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface TemporalEntity extends Frame {
 
     @Dependent

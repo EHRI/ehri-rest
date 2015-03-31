@@ -24,6 +24,13 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Annotation;
 
+/**
+ * An entity that can be annotated.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface AnnotatableEntity extends Frame {
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
     public Iterable<Annotation> getAnnotations();

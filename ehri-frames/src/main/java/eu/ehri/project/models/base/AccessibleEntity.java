@@ -25,15 +25,23 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
+
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
-
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addSingleRelationship;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
 
+/**
+ * An entity that can be accessed by specific {@link Accessor}s.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity, AnnotatableEntity {
 
     @Fetch(value = Ontology.IS_ACCESSIBLE_TO, ifBelowLevel = 1)

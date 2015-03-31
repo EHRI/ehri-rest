@@ -29,6 +29,13 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+/**
+ * An entity that can access items and be granted permissions.
+ *
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
+ *
+ */
 public interface Accessor extends IdentifiableEntity {
 
     @JavaHandler
