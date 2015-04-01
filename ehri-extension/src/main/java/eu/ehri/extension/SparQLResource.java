@@ -48,7 +48,7 @@ import java.util.Map;
  * Resource for executing SparQL queries on the graph
  * database.
  * <p/>
- * * Insecure and SHOULD NOT be a public endpoint.
+ * <b>Insecure and SHOULD NOT be a public endpoint.</b>
  * <p/>
  * Example query:
  * <p/>
@@ -62,9 +62,9 @@ import java.util.Map;
  *
  * # Select all the userProfile nodes and their name properties...
  * SELECT ?n ?u WHERE {
- *    ?u a pgm:Vertex ;
- *       prop:__ISA__  "userProfile" ;
- *       prop:name     ?n .
+ *      ?u a pgm:Vertex ;
+ *      prop:__ISA__  "userProfile" ;
+ *      prop:name     ?n .
  * }
  *
  * LIMIT 100
@@ -93,7 +93,7 @@ public class SparQLResource extends AbstractRestResource {
     }
 
     /**
-     * Run a sparql query.
+     * Run a SparQL query.
      *
      * @param q A valid SparQL query string
      * @return A JSON-formatted response
@@ -101,9 +101,8 @@ public class SparQLResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/")
-    public Response sparqlQuery(
-            @DefaultValue("") @QueryParam(QUERY_PARAM) String q) throws Exception {
+    public Response sparqlQuery(@DefaultValue("") @QueryParam(QUERY_PARAM) String q)
+            throws Exception {
 
         initSail();
         ParsedQuery query = parser.parseQuery(q, HTTP_EHRI_PROJECT_EU);
