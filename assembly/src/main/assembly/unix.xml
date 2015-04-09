@@ -60,11 +60,6 @@
                 <include>xerces:xercesImpl</include>
                 <include>xml-apis:xml-apis</include>
                 <include>org.apache.commons:commons-lang3</include>
-
-                <!-- Sparql/OpenRDF stuff -->
-                <include>org.openrdf.sesame:sesame-queryalgebra-evaluation</include>
-                <include>org.openrdf.*</include>
-                <include>net.fortytwo.sesametools:*</include>
             </includes>
         </dependencySet>
     </dependencySets>
