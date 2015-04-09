@@ -58,7 +58,7 @@ def deploy():
 @task
 def clean_deploy():
     """Build a clean version and deploy."""
-    local('mvn clean package -P sparql  -DskipTests')
+    local('mvn clean package -DskipTests')
     deploy()
 
 @task
