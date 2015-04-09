@@ -19,6 +19,7 @@
 
 package eu.ehri.project.commands;
 
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -110,9 +111,14 @@ public class DeleteEntities extends BaseCommand implements Command {
     private void deleteIds(FramedGraph<? extends TransactionalGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
         CrudViews<AccessibleEntity> views = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class);
-        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            System.out.println(acc.getId());
-            views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
+        CloseableIterable<AccessibleEntity> items = manager.getFrames(type, AccessibleEntity.class);
+        try {
+            for (AccessibleEntity acc : items) {
+                System.out.println(acc.getId());
+                views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
+            }
+        } finally {
+            items.close();
         }
     }
 }

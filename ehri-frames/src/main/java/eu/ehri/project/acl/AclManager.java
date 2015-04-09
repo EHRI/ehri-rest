@@ -25,6 +25,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -689,20 +690,27 @@ public final class AclManager {
     private void populateEnumNodeLookups() {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
-        for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
-                ContentType.class)) {
-            ContentTypes ct = ContentTypes.withName(c.getId());
-            enumContentTypeMap.put(ct, c);
-            contentTypeEnumMap.put(c, ct);
-        }
-        for (Permission p : manager.getFrames(EntityClass.PERMISSION,
-                Permission.class)) {
-            PermissionType pt = PermissionType.withName(p.getId());
-            enumPermissionMap.put(pt, p);
-            permissionEnumMap.put(p, pt);
-        }
-        for (ContentTypes t : ContentTypes.values()) {
-            typeStrings.add(t.getName());
+        CloseableIterable<ContentType> ctypes = manager
+                .getFrames(EntityClass.CONTENT_TYPE, ContentType.class);
+        CloseableIterable<Permission> perms = manager
+                .getFrames(EntityClass.PERMISSION, Permission.class);
+        try {
+            for (ContentType c : ctypes) {
+                ContentTypes ct = ContentTypes.withName(c.getId());
+                enumContentTypeMap.put(ct, c);
+                contentTypeEnumMap.put(c, ct);
+            }
+            for (Permission p : perms) {
+                PermissionType pt = PermissionType.withName(p.getId());
+                enumPermissionMap.put(pt, p);
+                permissionEnumMap.put(p, pt);
+            }
+            for (ContentTypes t : ContentTypes.values()) {
+                typeStrings.add(t.getName());
+            }
+        } finally {
+            ctypes.close();
+            perms.close();
         }
     }
 

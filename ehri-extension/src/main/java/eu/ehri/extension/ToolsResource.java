@@ -394,25 +394,30 @@ public class ToolsResource extends AbstractRestResource {
         int done = 0;
         try {
             for (EntityClass entityClass : types) {
-                for (Description desc : manager.getFrames(entityClass, Description.class)) {
-                    DescribedEntity entity = desc.getEntity();
-                    if (entity != null) {
-                        PermissionScope scope = entity.getPermissionScope();
-                        List<String> idPath = scope != null
-                                ? Lists.newArrayList(scope.idPath())
-                                : Lists.<String>newArrayList();
-                        idPath.add(entity.getIdentifier());
-                        Bundle descBundle = depSerializer.vertexFrameToBundle(desc);
-                        String newId = entityClass.getIdgen().generateId(idPath, descBundle);
-                        if (!newId.equals(desc.getId()) && commit) {
-                            manager.renameVertex(desc.asVertex(), desc.getId(), newId);
-                            done++;
+                CloseableIterable<Description> descriptions = manager.getFrames(entityClass, Description.class);
+                try {
+                    for (Description desc : descriptions) {
+                        DescribedEntity entity = desc.getEntity();
+                        if (entity != null) {
+                            PermissionScope scope = entity.getPermissionScope();
+                            List<String> idPath = scope != null
+                                    ? Lists.newArrayList(scope.idPath())
+                                    : Lists.<String>newArrayList();
+                            idPath.add(entity.getIdentifier());
+                            Bundle descBundle = depSerializer.vertexFrameToBundle(desc);
+                            String newId = entityClass.getIdgen().generateId(idPath, descBundle);
+                            if (!newId.equals(desc.getId()) && commit) {
+                                manager.renameVertex(desc.asVertex(), desc.getId(), newId);
+                                done++;
 
-                            if (bufferSize > 0 && done % bufferSize == 0) {
-                                graph.getBaseGraph().commit();
+                                if (bufferSize > 0 && done % bufferSize == 0) {
+                                    graph.getBaseGraph().commit();
+                                }
                             }
                         }
                     }
+                } finally {
+                    descriptions.close();
                 }
             }
             if (commit && done > 0) {
