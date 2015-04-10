@@ -81,7 +81,7 @@ public final class AclManager {
                 public ContentType load(ContentTypes contentTypes) throws Exception {
                     return manager.getFrame(contentTypes.getName(), ContentType.class);
                 }
-            });;
+            });
     private final LoadingCache<Permission, PermissionType> permissionEnumMap = CacheBuilder.newBuilder()
             .build(new CacheLoader<Permission, PermissionType>() {
                 @Override
@@ -97,8 +97,6 @@ public final class AclManager {
                 }
             });
 
-    private boolean populated = false;
-
     /**
      * Scoped constructor.
      *
@@ -108,7 +106,7 @@ public final class AclManager {
     public AclManager(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = Optional.<PermissionScope>fromNullable(scope).or(
+        this.scope = Optional.fromNullable(scope).or(
                 SystemScope.getInstance());
         this.scopes = getAllScopes();
     }
