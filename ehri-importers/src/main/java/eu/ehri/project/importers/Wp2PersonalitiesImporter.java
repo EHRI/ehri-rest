@@ -21,7 +21,7 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
@@ -55,7 +55,8 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Wp2PersonalitiesImporter.class);
 
-    public Wp2PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public Wp2PersonalitiesImporter(FramedGraph<? extends TransactionalGraph> framedGraph, PermissionScope permissionScope,
+            ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
 
