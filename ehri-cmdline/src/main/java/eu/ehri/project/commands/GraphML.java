@@ -23,7 +23,8 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphReindexer;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
@@ -50,14 +51,14 @@ import java.io.OutputStream;
  * - stop the server
  *   $NEO4J_HOME/bin/neo4j stop
  * - save a dump
- *   ./scripts/cmd graphml -d out graph.xml 
- *   or 
- *   ./scripts/cmd graphml -d out - > graph.xml 
+ *   ./scripts/cmd graphml -d out graph.xml
+ *   or
+ *   ./scripts/cmd graphml -d out - > graph.xml
  * - edit it
  * - remove the graph
  *   rm -rf $NEO4J_HOME/data/graph.db
  * - load edited graph
- *   ./scripts/cmd graphml -d in graph.xml 
+ *   ./scripts/cmd graphml -d in graph.xml
  * - start server
  *   $NEO4J_HOME/bin/neo4j start
  *
@@ -71,13 +72,13 @@ public class GraphML extends BaseCommand implements Command {
 
     public GraphML() {
     }
-    
+
 	@Override
 	public String getHelp() {
         return "export or import a GraphML file." +
         		"\n" + getUsage();
 	}
-	
+
     @Override
     public String getUsage() {
 		return "Usage: graphml -d [out|in] <filename>";
@@ -88,7 +89,7 @@ public class GraphML extends BaseCommand implements Command {
         options.addOption(new Option("d", true,
                 "Output or input a dump"));
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
@@ -97,33 +98,33 @@ public class GraphML extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 1) {
             throw new MissingArgumentException("Graph file path missing");
         }
-        
+
         String dumpMode = "out"; //defaults might also be handled by the parser?
-        
+
         if (cmdLine.hasOption("d")) {
         	dumpMode = cmdLine.getOptionValue("d");
         }
-        
+
         // check if option is useful, otherwise print the help and bail out
         if (dumpMode.contentEquals("out")) {
         	saveDump(graph, cmdLine);
         } else if (dumpMode.contentEquals("in")) {
-        	loadDump(graph, cmdLine);
+            loadDump(graph, GraphManagerFactory.getInstance(graph), cmdLine);
         } else {
             throw new UnrecognizedOptionException("Unrecognised dump mode: '" + dumpMode + "'");
         }
-        
+
         return 0;
     }
 
-    public void saveDump(final FramedGraph<? extends TransactionalGraph> graph,
+    public void saveDump(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphMLWriter writer = new GraphMLWriter(graph);
         writer.setNormalize(true);
 
         String filepath = (String)cmdLine.getArgList().get(0);
-        
+
         // if the file is '-' that means we do standard out
         if (filepath.contentEquals("-")) {
             // to stdout
@@ -137,16 +138,16 @@ public class GraphML extends BaseCommand implements Command {
                 out.close();
             }
         }
-    } 
-    
-   public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
+    }
+
+   public void loadDump(final FramedGraph<?> graph, GraphManager manager,
            CommandLine cmdLine) throws Exception {
        GraphMLReader reader = new GraphMLReader(graph);
        String filepath = (String)cmdLine.getArgList().get(0);
 	   InputStream inputStream = new FileInputStream(filepath);
        try {
            reader.inputGraph(inputStream);
-           new GraphReindexer(graph).reindex();
+           GraphManagerFactory.getInstance(graph).rebuildIndex();
        } finally {
            inputStream.close();
        }

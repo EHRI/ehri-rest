@@ -24,7 +24,7 @@ import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphReindexer;
+import eu.ehri.project.core.GraphManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
@@ -108,7 +108,7 @@ public class GraphSON extends BaseCommand implements Command {
         return 0;
     }
 
-    public void saveDump(final FramedGraph<? extends TransactionalGraph> graph,
+    public void saveDump(final FramedGraph<?> graph,
             CommandLine cmdLine) throws IOException {
 
         String filepath = (String) cmdLine.getArgList().get(0);
@@ -125,7 +125,7 @@ public class GraphSON extends BaseCommand implements Command {
         }
     }
 
-    public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
+    public void loadDump(final FramedGraph<?> graph,
             CommandLine cmdLine) throws IOException {
         GraphSONReader reader = new GraphSONReader(graph);
         String filepath = (String) cmdLine.getArgList().get(0);
@@ -136,7 +136,7 @@ public class GraphSON extends BaseCommand implements Command {
                 : inputStream;
         try {
             reader.inputGraph(readStream, 1000);
-            new GraphReindexer(graph).reindex();
+            GraphManagerFactory.getInstance(graph).rebuildIndex();
         } finally {
             inputStream.close();
         }
