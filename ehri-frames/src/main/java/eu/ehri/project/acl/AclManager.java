@@ -208,9 +208,9 @@ public final class AclManager {
             AccessibleEntity entity, Accessor accessor) {
         InheritedItemPermissionSet.Builder builder
                 = new InheritedItemPermissionSet
-                .Builder(accessor, getItemPermissions(accessor, entity));
+                .Builder(accessor.getId(), getItemPermissions(accessor, entity));
         for (Accessor parent : accessor.getAllParents()) {
-            builder.withInheritedPermissions(parent, getItemPermissions(parent, entity));
+            builder.withInheritedPermissions(parent.getId(), getItemPermissions(parent, entity));
         }
         return builder.build();
     }
@@ -246,9 +246,9 @@ public final class AclManager {
             Accessor accessor) {
         InheritedGlobalPermissionSet.Builder builder
                 = new InheritedGlobalPermissionSet
-                .Builder(accessor, getGlobalPermissions(accessor));
+                .Builder(accessor.getId(), getGlobalPermissions(accessor));
         for (Accessor parent : accessor.getParents()) {
-            builder.withInheritedPermissions(parent, getGlobalPermissions(parent));
+            builder.withInheritedPermissions(parent.getId(), getGlobalPermissions(parent));
         }
         return builder.build();
     }

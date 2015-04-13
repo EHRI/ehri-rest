@@ -20,7 +20,6 @@
 package eu.ehri.project.acl;
 
 import com.google.common.collect.Lists;
-import eu.ehri.project.models.base.Accessor;
 import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.List;
@@ -43,24 +42,24 @@ public class InheritedItemPermissionSet {
         /**
          * Create a new builder with the primary (subject) accessor.
          *
-         * @param accessor      The primary accessor
+         * @param accessorId    The primary accessor's ID
          * @param permissionSet The primary accessor's own global permissions
          */
-        public Builder(Accessor accessor, List<PermissionType> permissionSet) {
+        public Builder(String accessorId, List<PermissionType> permissionSet) {
             AccessorPermissions<List<PermissionType>> permissions
-                    = new AccessorPermissions<List<PermissionType>>(accessor, permissionSet);
+                    = new AccessorPermissions<List<PermissionType>>(accessorId, permissionSet);
             perms.add(permissions);
         }
 
         /**
          * Add an accessor from whom the user inherits permissions.
          *
-         * @param accessor      The accessor
+         * @param accessorId    The accessor's ID
          * @param permissionSet The accessor's permissions
          * @return The builder
          */
-        public Builder withInheritedPermissions(Accessor accessor, List<PermissionType> permissionSet) {
-            perms.add(new AccessorPermissions<List<PermissionType>>(accessor, permissionSet));
+        public Builder withInheritedPermissions(String accessorId, List<PermissionType> permissionSet) {
+            perms.add(new AccessorPermissions<List<PermissionType>>(accessorId, permissionSet));
             return this;
         }
 
