@@ -21,11 +21,13 @@ package eu.ehri.project.acl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -49,7 +51,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -67,15 +68,34 @@ public final class AclManager {
 
     // Lookups to convert between the enum and node representations
     // of content and permission types.
-    private final Map<PermissionType, Permission> enumPermissionMap = Maps
-            .newEnumMap(PermissionType.class);
-    private final Map<ContentTypes, ContentType> enumContentTypeMap = Maps
-            .newEnumMap(ContentTypes.class);
-    private final Map<Permission, PermissionType> permissionEnumMap = Maps
-            .newHashMap();
-    private final Map<ContentType, ContentTypes> contentTypeEnumMap = Maps
-            .newHashMap();
-    private final Set<String> typeStrings = Sets.newHashSet();
+    private final LoadingCache<PermissionType, Permission> enumPermissionMap = CacheBuilder.newBuilder()
+            .build(new CacheLoader<PermissionType, Permission>() {
+                @Override
+                public Permission load(PermissionType permissionType) throws Exception {
+                    return manager.getFrame(permissionType.getName(), Permission.class);
+                }
+            });
+    private final LoadingCache<ContentTypes, ContentType> enumContentTypeMap = CacheBuilder.newBuilder()
+            .build(new CacheLoader<ContentTypes, ContentType>() {
+                @Override
+                public ContentType load(ContentTypes contentTypes) throws Exception {
+                    return manager.getFrame(contentTypes.getName(), ContentType.class);
+                }
+            });
+    private final LoadingCache<Permission, PermissionType> permissionEnumMap = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Permission, PermissionType>() {
+                @Override
+                public PermissionType load(Permission permission) throws Exception {
+                    return PermissionType.withName(permission.getId());
+                }
+            });
+    private final LoadingCache<ContentType, ContentTypes> contentTypeEnumMap = CacheBuilder.newBuilder()
+            .build(new CacheLoader<ContentType, ContentTypes>() {
+                @Override
+                public ContentTypes load(ContentType contentType) throws Exception {
+                    return ContentTypes.withName(contentType.getId());
+                }
+            });
 
     /**
      * Scoped constructor.
@@ -86,10 +106,9 @@ public final class AclManager {
     public AclManager(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = Optional.<PermissionScope>fromNullable(scope).or(
+        this.scope = Optional.fromNullable(scope).or(
                 SystemScope.getInstance());
         this.scopes = getAllScopes();
-        populateEnumNodeLookups();
     }
 
     /**
@@ -189,9 +208,9 @@ public final class AclManager {
             AccessibleEntity entity, Accessor accessor) {
         InheritedItemPermissionSet.Builder builder
                 = new InheritedItemPermissionSet
-                .Builder(accessor, getItemPermissions(accessor, entity));
+                .Builder(accessor.getId(), getItemPermissions(accessor, entity));
         for (Accessor parent : accessor.getAllParents()) {
-            builder.withInheritedPermissions(parent, getItemPermissions(parent, entity));
+            builder.withInheritedPermissions(parent.getId(), getItemPermissions(parent, entity));
         }
         return builder.build();
     }
@@ -227,9 +246,9 @@ public final class AclManager {
             Accessor accessor) {
         InheritedGlobalPermissionSet.Builder builder
                 = new InheritedGlobalPermissionSet
-                .Builder(accessor, getGlobalPermissions(accessor));
+                .Builder(accessor.getId(), getGlobalPermissions(accessor));
         for (Accessor parent : accessor.getParents()) {
-            builder.withInheritedPermissions(parent, getGlobalPermissions(parent));
+            builder.withInheritedPermissions(parent.getId(), getGlobalPermissions(parent));
         }
         return builder.build();
     }
@@ -256,14 +275,14 @@ public final class AclManager {
      */
     public void setPermissionMatrix(Accessor accessor, GlobalPermissionSet globals)
             throws PermissionDenied {
-
         checkNoGrantOnAdminOrAnon(accessor);
         Map<ContentTypes, Collection<PermissionType>> globalsMap = globals.asMap();
 
-        for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap.entrySet()) {
-            ContentType target = centry.getValue();
-            Collection<PermissionType> pset = globalsMap.containsKey(centry.getKey())
-                    ? globalsMap.get(centry.getKey())
+        //for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap.entrySet()) {
+        for (ContentTypes ct : ContentTypes.values()) {
+            ContentType target = enumContentTypeMap.getUnchecked(ct);
+            Collection<PermissionType> pset = globalsMap.containsKey(ct)
+                    ? globalsMap.get(ct)
                     : Sets.<PermissionType>newHashSet();
             for (PermissionType perm : PermissionType.values()) {
                 if (pset.contains(perm)) {
@@ -333,6 +352,10 @@ public final class AclManager {
      * @return A PipeFunction for filtering vertices that are content types.
      */
     public PipeFunction<Vertex, Boolean> getContentTypeFilterFunction() {
+        final Set<String> typeStrings = Sets.newHashSet();
+        for (ContentTypes ct : ContentTypes.values()) {
+            typeStrings.add(ct.getName());
+        }
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 return v != null && typeStrings.contains(manager.getType(v));
@@ -399,7 +422,6 @@ public final class AclManager {
      * @return If the user has the permission on the given item
      */
     public boolean hasPermission(AccessibleEntity entity, PermissionType permissionType, Accessor accessor) {
-
         // Get a list of our current context scopes, plus
         // the parent scopes of the item.
         Set<PermissionScope> allScopes = Sets.newHashSet(scopes);
@@ -451,7 +473,7 @@ public final class AclManager {
     private boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor,
             Collection<PermissionScope> scopes) {
 
-        ContentType contentTypeNode = enumContentTypeMap.get(contentType);
+        ContentType contentTypeNode = enumContentTypeMap.getUnchecked(contentType);
         // Check the user themselves...
         return belongsToAdmin(accessor)
                 || hasScopedPermission(contentTypeNode, permissionType, accessor, scopes);
@@ -507,14 +529,14 @@ public final class AclManager {
      * Get the permission type enum for a given node.
      */
     private Permission vertexForPermission(PermissionType perm) {
-        return enumPermissionMap.get(perm);
+        return enumPermissionMap.getUnchecked(perm);
     }
 
     /**
      * Get the permission type enum for a given node.
      */
     private PermissionType enumForPermission(Permission perm) {
-        return permissionEnumMap.get(perm);
+        return permissionEnumMap.getUnchecked(perm);
     }
 
     /**
@@ -564,7 +586,7 @@ public final class AclManager {
         PermissionGrantTarget target = manager.cast(entity,
                 PermissionGrantTarget.class);
 
-        Permission perm = enumPermissionMap.get(permType);
+        Permission perm = enumPermissionMap.getUnchecked(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (isInScope(grant)
                     && Iterables.contains(grant.getTargets(), target)
@@ -649,8 +671,8 @@ public final class AclManager {
                         Permission permission = grant.getPermission();
                         if (permission != null) {
                             builder.set(
-                                    contentTypeEnumMap.get(contentType),
-                                    permissionEnumMap.get(permission));
+                                    contentTypeEnumMap.getUnchecked(contentType),
+                                    permissionEnumMap.getUnchecked(permission));
                         }
                     }
                 }
@@ -685,33 +707,6 @@ public final class AclManager {
                 return true;
             }
         };
-    }
-
-    private void populateEnumNodeLookups() {
-        // Build a lookup of content types and permissions keyed by their
-        // identifier.
-        CloseableIterable<ContentType> ctypes = manager
-                .getFrames(EntityClass.CONTENT_TYPE, ContentType.class);
-        CloseableIterable<Permission> perms = manager
-                .getFrames(EntityClass.PERMISSION, Permission.class);
-        try {
-            for (ContentType c : ctypes) {
-                ContentTypes ct = ContentTypes.withName(c.getId());
-                enumContentTypeMap.put(ct, c);
-                contentTypeEnumMap.put(c, ct);
-            }
-            for (Permission p : perms) {
-                PermissionType pt = PermissionType.withName(p.getId());
-                enumPermissionMap.put(pt, p);
-                permissionEnumMap.put(p, pt);
-            }
-            for (ContentTypes t : ContentTypes.values()) {
-                typeStrings.add(t.getName());
-            }
-        } finally {
-            ctypes.close();
-            perms.close();
-        }
     }
 
     // Get a list of the current scope and its parents

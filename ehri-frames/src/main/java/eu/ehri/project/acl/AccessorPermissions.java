@@ -31,17 +31,17 @@ import java.util.Map;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 class AccessorPermissions<T> {
-    final Accessor accessor;
+    final String accessorId;
     final T permissionSet;
 
-    public AccessorPermissions(Accessor accessor, T permissionSet) {
-        this.accessor = accessor;
+    public AccessorPermissions(String accessorId, T permissionSet) {
+        this.accessorId = accessorId;
         this.permissionSet = permissionSet;
     }
 
     @JsonValue
     public Map<String, T> asMap() {
-        return ImmutableMap.of(accessor.getId(), permissionSet);
+        return ImmutableMap.of(accessorId, permissionSet);
     }
 
     @Override
@@ -51,20 +51,20 @@ class AccessorPermissions<T> {
 
         AccessorPermissions that = (AccessorPermissions) o;
 
-        return accessor.equals(that.accessor)
+        return accessorId.equals(that.accessorId)
                 && permissionSet.equals(that.permissionSet);
 
     }
 
     @Override
     public int hashCode() {
-        int result = accessor.hashCode();
+        int result = accessorId.hashCode();
         result = 31 * result + permissionSet.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
-        return "<" + accessor.getId() + " " + permissionSet + ">";
+        return "<" + accessorId + " " + permissionSet + ">";
     }
 }

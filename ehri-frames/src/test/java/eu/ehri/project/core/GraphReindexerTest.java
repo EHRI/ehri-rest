@@ -53,7 +53,7 @@ public class GraphReindexerTest extends ModelTestBase {
             fail("Graph is not indexable: " + graph.getBaseGraph());
         }
 
-    	new GraphReindexer(graph).reindex();
+        GraphManagerFactory.getInstance(graph).rebuildIndex();
     	
     	// If the counts are the same, it is likely that we have all nodes indexed
     	assertTrue(countTypes().equals(countBefore));

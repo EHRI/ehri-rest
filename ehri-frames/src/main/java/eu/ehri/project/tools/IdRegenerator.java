@@ -21,7 +21,6 @@ package eu.ehri.project.tools;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -57,7 +56,7 @@ import java.util.List;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class IdRegenerator {
-    private final FramedGraph<? extends TransactionalGraph> graph;
+    private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final Serializer depSerializer;
     private final boolean dryrun;
@@ -71,11 +70,11 @@ public class IdRegenerator {
         }
     }
 
-    public IdRegenerator(FramedGraph<? extends TransactionalGraph> graph) {
+    public IdRegenerator(FramedGraph<?> graph) {
         this(graph, true, false, false);
     }
 
-    private IdRegenerator(FramedGraph<? extends TransactionalGraph> graph, boolean dryrun, boolean skipCollisions,
+    private IdRegenerator(FramedGraph<?> graph, boolean dryrun, boolean skipCollisions,
             boolean collisionMode) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);

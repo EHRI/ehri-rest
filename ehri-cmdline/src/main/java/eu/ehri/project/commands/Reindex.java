@@ -21,7 +21,7 @@ package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphReindexer;
+import eu.ehri.project.core.GraphManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -56,8 +56,7 @@ public class Reindex extends BaseCommand implements Command {
 
     @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
-        GraphReindexer reIndexer = new GraphReindexer(graph);
-        reIndexer.reindex();
+        GraphManagerFactory.getInstance(graph).rebuildIndex();
         return 0;
     }
 }
