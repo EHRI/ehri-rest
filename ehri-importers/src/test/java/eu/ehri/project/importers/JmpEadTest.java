@@ -89,7 +89,7 @@ public class JmpEadTest extends AbstractImporterTest {
             assertTrue(d.asVertex().getProperty("languageOfMaterial").toString().startsWith("[deu"));
         }
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }

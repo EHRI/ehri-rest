@@ -74,9 +74,10 @@ public class DescriptionViews <E extends DescribedEntity> {
             throw new PermissionDenied("Given description does not belong to its parent item");
         }
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        actionManager.logEvent(parent, manager.cast(user, Actioner.class),
-                        EventTypes.deleteDependent, logMessage)
-                .createVersion(dependentItem);
+        actionManager.newEventContext(parent, manager.cast(user, Actioner.class),
+                EventTypes.deleteDependent, logMessage)
+                .createVersion(dependentItem)
+                .commit();
         return getPersister(parent)
                 .delete(serializer.vertexFrameToBundle(dependentItem));
     }
@@ -87,8 +88,9 @@ public class DescriptionViews <E extends DescribedEntity> {
         E parent = crud.detail(parentId, user);
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
         T out = getPersister(parent).create(data, descriptionClass);
-        actionManager.logEvent(parent, manager.cast(user, Actioner.class),
-                    EventTypes.createDependent, logMessage);
+        actionManager.newEventContext(parent, manager.cast(user, Actioner.class),
+                EventTypes.createDependent, logMessage)
+                .commit();
         return out;
     }
 
@@ -100,9 +102,10 @@ public class DescriptionViews <E extends DescribedEntity> {
         Mutation<T> out = getPersister(parent).update(data, descriptionClass);
         if (!out.unchanged()) {
             actionManager
-                    .logEvent(parent, manager.cast(user, Actioner.class),
+                    .newEventContext(parent, manager.cast(user, Actioner.class),
                             EventTypes.modifyDependent, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get());
+                    .createVersion(out.getNode(), out.getPrior().get())
+                    .commit();
         }
         return out;
     }

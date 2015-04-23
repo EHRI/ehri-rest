@@ -27,6 +27,8 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import java.io.InputStream;
 import java.util.List;
+
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,8 +100,8 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
         assertEquals(7, log.getCreated());
-        assertTrue(log.getAction() != null);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
 
 //        //assert keywords are matched to cvocs
 //        assertTrue(toList(c6.getLinks()).size() > 0);
@@ -115,7 +117,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
             assertEquals("deu", d.asVertex().getProperty("languageOfMaterial").toString());
         }
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(ev.getSubjects());
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }

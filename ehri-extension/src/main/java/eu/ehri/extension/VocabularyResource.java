@@ -180,7 +180,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             Iterable<Concept> concepts = vocabulary.getConcepts();
             if (concepts.iterator().hasNext()) {
                 ActionManager.EventContext context = actionManager
-                        .logEvent(user, EventTypes.deletion, getLogMessage());
+                        .newEventContext(user, EventTypes.deletion, getLogMessage());
                 for (Concept concept : concepts) {
                     context.addSubjects(concept);
                     conceptViews.delete(concept.getId(), user);

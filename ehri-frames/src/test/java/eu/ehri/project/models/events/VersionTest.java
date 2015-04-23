@@ -52,24 +52,23 @@ public class VersionTest extends AbstractFixtureTest {
         Bundle userBundle3 = userBundle.withDataValue("foo", "bar2");
         UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
 
-        SystemEvent first = actionManager.logEvent(user,
+        ActionManager.EventContext ctx1 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation).getSystemEvent();
+                EventTypes.creation);
+        SystemEvent first = ctx1.commit();
         assertEquals(1, Iterables.count(first.getSubjects()));
 
         // Change the user twice...
-        SystemEvent second = actionManager.logEvent(user,
+        ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.modification)
-                    .createVersion(user).getSystemEvent();
+                .createVersion(user);
+        SystemEvent second = ctx2.commit();
         Mutation<UserProfile> update1 = bundleDAO
                 .update(userBundle2, UserProfile.class);
         assertEquals(MutationState.UPDATED, update1.getState());
 
-        SystemEvent third = actionManager.logEvent(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.modification)
-                    .createVersion(user).getSystemEvent();
+        SystemEvent third = ctx2.createVersion(user).commit();
         bundleDAO.update(userBundle3, UserProfile.class);
         assertEquals(MutationState.UPDATED, update1.getState());
 

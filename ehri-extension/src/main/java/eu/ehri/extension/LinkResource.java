@@ -224,7 +224,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
             Actioner actioner = manager.cast(getRequesterUserProfile(), Actioner.class);
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
-            actionManager.logEvent(link, actioner, EventTypes.deletion);
+            actionManager.newEventContext(link, actioner, EventTypes.deletion).commit();
             manager.deleteVertex(link.asVertex());
             graph.getBaseGraph().commit();
             return Response.ok().build();

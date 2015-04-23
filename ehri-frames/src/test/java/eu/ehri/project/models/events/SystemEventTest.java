@@ -60,15 +60,17 @@ public class SystemEventTest extends AbstractFixtureTest {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
 
-        SystemEvent first = actionManager.logEvent(user,
+        ActionManager.EventContext ctx = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation).getSystemEvent();
+                EventTypes.creation);
+        SystemEvent first = ctx.commit();
         assertEquals(1, Iterables.count(first.getSubjects()));
 
         // Delete the user and log it
-        actionManager.logEvent(user,
+        ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.deletion).getSystemEvent();
+                EventTypes.deletion);
+        ctx2.commit();
         bundleDAO.delete(serializer.vertexFrameToBundle(user));
 
         // First event should now have 0 subjects, since it's
@@ -83,25 +85,26 @@ public class SystemEventTest extends AbstractFixtureTest {
         Bundle userBundle3 = userBundle.withDataValue("foo", "bar2");
         UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
 
-        SystemEvent first = actionManager.logEvent(user,
+        ActionManager.EventContext ctx = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation).getSystemEvent();
+                EventTypes.creation);
+        SystemEvent first = ctx.commit();
         assertEquals(1, Iterables.count(first.getSubjects()));
 
         // Delete the user and log it
-        SystemEvent second = actionManager.logEvent(user,
+        ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.modification).getSystemEvent();
+                EventTypes.modification);
+        SystemEvent second = ctx2.commit();
         bundleDAO.update(userBundle2, UserProfile.class);
 
-        SystemEvent third = actionManager.logEvent(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.modification).getSystemEvent();
+        SystemEvent third = ctx2.commit();
         bundleDAO.update(userBundle3, UserProfile.class);
 
-        SystemEvent forth = actionManager.logEvent(user,
+        ActionManager.EventContext ctx3 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.deletion).getSystemEvent();
+                EventTypes.deletion);
+        SystemEvent forth = ctx3.commit();
 
         // creation and modification are different
         assertFalse(sameAs(first, second));
@@ -116,9 +119,10 @@ public class SystemEventTest extends AbstractFixtureTest {
         Repository repository = bundleDAO.create(repoBundle, Repository.class);
 
         // Delete the user and log it
-        SystemEvent repoEvent = actionManager.logEvent(repository,
+        ActionManager.EventContext ctx4 = actionManager.newEventContext(repository,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.modification).getSystemEvent();
+                EventTypes.modification);
+        SystemEvent repoEvent = ctx4.commit();
 
         assertFalse(sameAs(second, repoEvent));
     }

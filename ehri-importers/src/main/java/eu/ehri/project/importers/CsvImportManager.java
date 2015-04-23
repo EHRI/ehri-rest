@@ -21,7 +21,6 @@ package eu.ehri.project.importers;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
@@ -51,7 +50,7 @@ public class CsvImportManager extends AbstractImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
-    public CsvImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
+    public CsvImportManager(FramedGraph<?> framedGraph,
             final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
         super(framedGraph, permissionScope, actioner, importerClass);
     }
@@ -124,24 +123,15 @@ public class CsvImportManager extends AbstractImportManager {
                     }
                 }
             }
-            framedGraph.getBaseGraph().commit();
-        } catch (ValidationError e) {
-            framedGraph.getBaseGraph().rollback();
-            throw e;
-        } catch (InstantiationException e) {
-            framedGraph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            framedGraph.getBaseGraph().rollback();
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
-            framedGraph.getBaseGraph().rollback();
             throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            framedGraph.getBaseGraph().rollback();
+        } catch (InstantiationException e) {
             throw new RuntimeException(e);
-        }
-        finally {
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } finally {
             if (reader != null) {
                 reader.close();
             }

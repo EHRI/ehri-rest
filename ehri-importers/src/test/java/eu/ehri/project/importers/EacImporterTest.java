@@ -188,11 +188,11 @@ public class EacImporterTest extends AbstractImporterTest {
 //            assertEquals(1, toList(actions).size());
         // Check we've only got one action
         assertEquals(1, log.getCreated());
-        assertTrue(log.getAction() instanceof SystemEvent);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
 
         // Ensure the import action has the right number of subjects.
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(ev.getSubjects());
         assertEquals(1, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
 

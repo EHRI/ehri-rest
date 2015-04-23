@@ -94,6 +94,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
        List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog logv2 = importer.importFile(iosV2, logMessage);
         // After...
+
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
        diff.printDebug(System.out);

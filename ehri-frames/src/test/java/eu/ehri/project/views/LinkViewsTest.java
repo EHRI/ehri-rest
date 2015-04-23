@@ -31,6 +31,7 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
@@ -47,11 +48,13 @@ import static org.junit.Assert.assertTrue;
 public class LinkViewsTest extends AbstractFixtureTest {
 
     private LinkViews linkViews;
+    private ActionManager actionManager;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         linkViews = new LinkViews(graph);
+        actionManager = new ActionManager(graph);
     }
 
     @Test
@@ -78,6 +81,8 @@ public class LinkViewsTest extends AbstractFixtureTest {
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
         assertEquals(1L, Iterables.size(link.getLinkBodies()));
         assertTrue(Iterables.contains(link.getLinkBodies(), rel));
+        assertTrue(Lists.newArrayList(actionManager
+                .getLatestGlobalEvent().getSubjects()).contains(link));
     }
 
 
@@ -108,6 +113,8 @@ public class LinkViewsTest extends AbstractFixtureTest {
         assertEquals(rel.getRelationshipType(), linkType);
         Description d = rel.getDescription();
         assertEquals(desc, d);
+        assertTrue(Lists.newArrayList(actionManager
+                .getLatestGlobalEvent().getSubjects()).contains(link));
     }
 
     private Bundle getLinkBundle(String linkDesc, String linkType) {

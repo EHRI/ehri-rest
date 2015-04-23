@@ -110,7 +110,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         assertEquals(0, log2.getUpdated());
 
         // Check permission scopes
-        for (AccessibleEntity e : log.getAction().getSubjects()) {
+        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(agent, e.getPermissionScope());
         }
     }

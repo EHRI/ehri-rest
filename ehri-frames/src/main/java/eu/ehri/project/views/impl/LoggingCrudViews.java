@@ -109,8 +109,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError {
         E out = views.create(bundle, user);
-        actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.creation, logMessage);
+        actionManager
+                .newEventContext(out, graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.creation, logMessage)
+                .commit();
         return out;
     }
 
@@ -147,9 +149,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Mutation<E> out = views.createOrUpdate(bundle, user);
         if (out.updated()) {
             actionManager
-                    .logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                    .newEventContext(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
                             EventTypes.modification, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get());
+                    .createVersion(out.getNode(), out.getPrior().get())
+                    .commit();
         }
         return out;
     }
@@ -187,10 +190,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
             Mutation<E> out = views.update(bundle, user);
             if (!out.unchanged()) {
-                actionManager.logEvent(
+                actionManager.newEventContext(
                         out.getNode(), graph.frame(user.asVertex(), Actioner.class),
                         EventTypes.modification, logMessage)
-                        .createVersion(out.getNode(), out.getPrior().get());
+                        .createVersion(out.getNode(), out.getPrior().get())
+                    .commit();
             }
             return out;
         } catch (ItemNotFound ex) {
@@ -232,9 +236,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError, ItemNotFound {
         E item = detail(id, user);
         actionManager
-                .logEvent(graph.frame(user.asVertex(), Actioner.class),
+                .newEventContext(item, graph.frame(user.asVertex(), Actioner.class),
                         EventTypes.deletion, logMessage)
-                .createVersion(item);
+                .createVersion(item)
+                .commit();
         return views.delete(id, user);
     }
 

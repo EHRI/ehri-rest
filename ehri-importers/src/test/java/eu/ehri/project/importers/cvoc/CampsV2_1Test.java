@@ -82,7 +82,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
         // Check permission scopes
-        for (AccessibleEntity e : log.getAction().getSubjects()) {
+        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
     }
@@ -121,7 +121,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
         // Check permission scopes
-        for (AccessibleEntity e : log.getAction().getSubjects()) {
+        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
         

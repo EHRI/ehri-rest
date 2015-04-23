@@ -93,7 +93,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
         // Check permission scopes
-        for (AccessibleEntity e : log.getAction().getSubjects()) {
+        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
         Concept term698 = manager.getFrame("cvoc1-698", Concept.class);

@@ -30,6 +30,7 @@ import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,11 +110,11 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 4 items
         assertEquals(5, log.getCreated());
-        assertTrue(log.getAction() instanceof SystemEvent);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
 
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(ev.getSubjects());
         for(AccessibleEntity subject  : subjects)
             logger.info("identifier: " + subject.getId());
         

@@ -70,7 +70,7 @@ public class WienerLibraryTest extends AbstractImporterTest {
 //        int nodeCount = getNodeCount(graph);
 //        ActionManager am = new ActionManager(graph);
 //        logger.info("size : " + toList(validUser.getActions()).size());
-//        ActionManager.EventContext ctx = am.logEvent(validUser,
+//        ActionManager.EventContext ctx = am.newEventContext(validUser,
 //                EventTypes.creation,
 //                Optional.of("Doing something to lots of nodes"));
 //        assertEquals(nodeCount + 2, getNodeCount(graph));
@@ -138,11 +138,11 @@ public class WienerLibraryTest extends AbstractImporterTest {
 //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 4 items
         assertEquals(5, log.getCreated());
-        assertTrue(log.getAction() instanceof SystemEvent);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
 
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(ev.getSubjects());
         for(AccessibleEntity subject  : subjects)
             logger.info("identifier: " + subject.getId());
         

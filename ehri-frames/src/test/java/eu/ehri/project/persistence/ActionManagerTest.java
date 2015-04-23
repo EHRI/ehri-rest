@@ -53,20 +53,20 @@ public class ActionManagerTest extends AbstractFixtureTest {
         // Create a user and log it
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = new BundleDAO(graph).create(userBundle, UserProfile.class);
-        SystemEvent first = am.logEvent(user,
+        ActionManager.EventContext ctx1 = am.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation).getSystemEvent();
+                EventTypes.creation);
+        SystemEvent first = ctx1.commit();
 
         // Create a repository and log that too...
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
         Repository repository = new BundleDAO(graph).create(repoBundle, Repository.class);
 
-        ActionManager.EventContext eventContext = am.logEvent(repository,
+        ActionManager.EventContext ctx2 = am.newEventContext(repository,
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation);
-        assertEquals(EventTypes.creation, eventContext.getEventType());
-        SystemEvent second = eventContext
-                .getSystemEvent();
+        assertEquals(EventTypes.creation, ctx2.getEventType());
+        SystemEvent second = ctx2.commit();
 
         // Check exactly one Event was created
         assertEquals(1, Iterables.count(second.getSubjects()));
@@ -98,11 +98,34 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit doc = new BundleDAO(graph).create(docBundle, DocumentaryUnit.class);
-        SystemEvent log = am.logEvent(doc,
+        ActionManager.EventContext ctx = am.newEventContext(doc,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation).getSystemEvent();
+                EventTypes.creation);
+        SystemEvent log = ctx.commit();
         assertNotNull(log.getEventScope());
         assertEquals(r1.asVertex(), log.getEventScope().asVertex());
+    }
+
+    @Test
+    public void testCreatingNewEventDoesNotTouchGraph() throws Exception {
+        ActionManager am = new ActionManager(graph);
+        Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
+        BundleDAO dao = new BundleDAO(graph);
+        DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
+        int nodesBefore = getNodeCount(graph);
+        int edgesBefore = getEdgeCount(graph);
+        ActionManager.EventContext ctx1 = am.newEventContext(doc,
+                graph.frame(validUser.asVertex(), Actioner.class),
+                EventTypes.creation);
+        assertEquals(nodesBefore, getNodeCount(graph));
+        assertEquals(edgesBefore, getEdgeCount(graph));
+        ctx1.commit();
+        // Should have created:
+        //  - 1 more event
+        //  - 2 more event links
+        //  - 5 more edges
+        assertEquals(nodesBefore + 3, getNodeCount(graph));
+        assertEquals(edgesBefore + 5, getEdgeCount(graph));
     }
 
     @Test
@@ -113,17 +136,18 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
         BundleDAO dao = new BundleDAO(graph);
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
-        am.logEvent(doc,
+        ActionManager.EventContext ctx1 = am.newEventContext(doc,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation).getSystemEvent();
+                EventTypes.creation);
+        ctx1.commit();
         assertNull(doc.getPriorVersion());
         Mutation<DocumentaryUnit> update = dao.update(docBundle
                 .withId(doc.getId())
                 .withDataValue("identifier", "changed"), DocumentaryUnit.class);
-        SystemEvent event = am.logEvent(doc,
+        ActionManager.EventContext ctx2 = am.newEventContext(doc,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.modification).createVersion(doc, docBundle)
-                .getSystemEvent();
+                EventTypes.modification).createVersion(doc, docBundle);
+        SystemEvent event = ctx2.commit();
         assertTrue(update.updated());
         assertTrue(event.getPriorVersions().iterator().hasNext());
         assertEquals(1, Iterables.count(event.getPriorVersions()));
@@ -135,10 +159,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         dao.update(docBundle
                 .withId(doc.getId())
                 .withDataValue("identifier", "changed-again"), DocumentaryUnit.class);
-        SystemEvent event2 = am.logEvent(doc,
-                graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.modification).createVersion(doc, docBundle)
-                .getSystemEvent();
+        SystemEvent event2 = ctx2.commit();
         assertEquals(1, Iterables.count(event2.getPriorVersions()));
         assertEquals(2, Iterables.count(doc.getAllPriorVersions()));
     }

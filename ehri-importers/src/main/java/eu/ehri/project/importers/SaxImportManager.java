@@ -21,7 +21,6 @@ package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -67,7 +66,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param scope     the permission scope
      * @param actioner  the actioner
      */
-    public SaxImportManager(FramedGraph<? extends TransactionalGraph> graph,
+    public SaxImportManager(FramedGraph<?> graph,
             final PermissionScope scope, final Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             Optional<XmlImportProperties> properties,
@@ -87,7 +86,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param scope     a permission scope
      * @param actioner  the actioner
      */
-    public SaxImportManager(FramedGraph<? extends TransactionalGraph> graph,
+    public SaxImportManager(FramedGraph<?> graph,
             final PermissionScope scope, final Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             List<ImportCallback> callbacks) {
@@ -101,7 +100,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param scope     a permission scope
      * @param actioner  the actioner
      */
-    public SaxImportManager(FramedGraph<? extends TransactionalGraph> graph,
+    public SaxImportManager(FramedGraph<?> graph,
             final PermissionScope scope, final Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             XmlImportProperties properties) {
@@ -116,7 +115,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param scope     a permission scope
      * @param actioner  the actioner
      */
-    public SaxImportManager(FramedGraph<? extends TransactionalGraph> graph,
+    public SaxImportManager(FramedGraph<?> graph,
             final PermissionScope scope, final Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this(graph, scope, actioner, importerClass, handlerClass, Lists.<ImportCallback>newArrayList());

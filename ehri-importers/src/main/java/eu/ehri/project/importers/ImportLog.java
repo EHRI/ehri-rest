@@ -21,7 +21,6 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Maps;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager.EventContext;
 import org.codehaus.jackson.annotate.JsonValue;
 
@@ -119,13 +118,6 @@ public class ImportLog {
     public void setErrored(String item, String error) {
         errors.put(item, error);
         errored++;
-    }
-
-    /**
-     * @return returns the SystemEvent associated with this import
-     */
-    public SystemEvent getAction() {
-        return eventContext.getSystemEvent();
     }
 
     /**

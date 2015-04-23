@@ -21,6 +21,7 @@ package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -40,14 +41,15 @@ private static final Logger logger = LoggerFactory.getLogger(JustASimpleTest.cla
         int nodeCount = getNodeCount(graph);
         ActionManager am = new ActionManager(graph);
         logger.info("size : " + toList(validUser.getActions()).size());
-        ActionManager.EventContext ctx = am.logEvent(validUser,
+        ActionManager.EventContext ctx = am.newEventContext(validUser,
                 EventTypes.creation,
                 Optional.of("Doing something to lots of nodes"));
+        SystemEvent ev = ctx.commit();
         assertEquals(nodeCount + 2, getNodeCount(graph));
 
         assertEquals(validUser, ctx.getActioner());
         assertEquals(userActions + 1, toList(validUser.getActions()).size());
-        logger.info("number of events on event: " + toList(ctx.getSystemEvent().getHistory()).size());
+        logger.info("number of events on event: " + toList(ev.getHistory()).size());
         logger.info("size : " + toList(validUser.getActions()).size());
 
     }

@@ -23,7 +23,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
@@ -69,7 +68,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
             .getLogger(OwlApiSkosImporter.class);
 
-    private final FramedGraph<? extends TransactionalGraph> framedGraph;
+    private final FramedGraph<?> framedGraph;
     private final Actioner actioner;
     private final Vocabulary vocabulary;
     private final BundleDAO dao;
@@ -82,7 +81,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
     public static final String DEFAULT_LANG = "eng";
 
-    public OwlApiSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+    public OwlApiSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary, boolean tolerant, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
@@ -93,7 +92,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
         this.dao = new BundleDAO(framedGraph, vocabulary.idPath());
     }
 
-    public OwlApiSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+    public OwlApiSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
         this(framedGraph, actioner, vocabulary, false, null, DEFAULT_LANG);
     }
@@ -126,74 +125,68 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
+
+        // Create a new action for this import
+        final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
+                actioner, EventTypes.ingest, getLogMessage(logMessage));
+        // Create a manifest to store the results of the import.
+        final ImportLog log = new ImportLog(eventContext);
+
+        OWLOntology ontology;
         try {
-            // Create a new action for this import
-            final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
-                    actioner, EventTypes.ingest, getLogMessage(logMessage));
-            // Create a manifest to store the results of the import.
-            final ImportLog log = new ImportLog(eventContext);
+            ontology = owlManager.loadOntologyFromOntologyDocument(ios);
+        } catch (OWLOntologyCreationException e) {
+            throw new InputParseError(e);
+        }
 
-            OWLOntology ontology;
+        OWLClass conceptClass = factory.getOWLClass(IRI.create(SkosRDFVocabulary.CONCEPT.getURI()));
+
+        Map<IRI, Concept> imported = Maps.newHashMap();
+
+        for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
+            OWLNamedIndividual item = ax.getIndividual().asOWLNamedIndividual();
             try {
-                ontology = owlManager.loadOntologyFromOntologyDocument(ios);
-            } catch (OWLOntologyCreationException e) {
-                throw new InputParseError(e);
-            }
+                Mutation<Concept> graphConcept = importConcept(item, ontology);
+                imported.put(item.getIRI(), graphConcept.getNode());
 
-            OWLClass conceptClass = factory.getOWLClass(IRI.create(SkosRDFVocabulary.CONCEPT.getURI()));
-
-            Map<IRI, Concept> imported = Maps.newHashMap();
-
-            for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
-                OWLNamedIndividual item = ax.getIndividual().asOWLNamedIndividual();
-                try {
-                    Mutation<Concept> graphConcept = importConcept(item, ontology);
-                    imported.put(item.getIRI(), graphConcept.getNode());
-
-                    switch (graphConcept.getState()) {
-                        case UNCHANGED:
-                            log.addUnchanged();
-                            break;
-                        case CREATED:
-                            log.addCreated();
-                            eventContext.addSubjects(graphConcept.getNode());
-                            break;
-                        case UPDATED:
-                            log.addUpdated();
-                            eventContext.addSubjects(graphConcept.getNode());
-                            break;
-                    }
-                } catch (ValidationError validationError) {
-                    if (tolerant) {
-                        logger.error(validationError.getMessage());
-                        log.setErrored(item.toString(), validationError.getMessage());
-                    } else {
-                        throw validationError;
-                    }
+                switch (graphConcept.getState()) {
+                    case UNCHANGED:
+                        log.addUnchanged();
+                        break;
+                    case CREATED:
+                        log.addCreated();
+                        eventContext.addSubjects(graphConcept.getNode());
+                        break;
+                    case UPDATED:
+                        log.addUpdated();
+                        eventContext.addSubjects(graphConcept.getNode());
+                        break;
+                }
+            } catch (ValidationError validationError) {
+                if (tolerant) {
+                    logger.error(validationError.getMessage());
+                    log.setErrored(item.toString(), validationError.getMessage());
+                } else {
+                    throw validationError;
                 }
             }
-
-            for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
-                hookupRelationships(ax.getIndividual().asOWLNamedIndividual(),
-                        ontology, imported);
-            }
-
-            for (Concept concept : imported.values()) {
-                vocabulary.addItem(concept);
-                concept.setPermissionScope(vocabulary);
-            }
-
-            if (log.hasDoneWork()) {
-                framedGraph.getBaseGraph().commit();
-            } else {
-                framedGraph.getBaseGraph().rollback();
-            }
-
-            return log;
-        } catch (ValidationError error) {
-            framedGraph.getBaseGraph().rollback();
-            throw error;
         }
+
+        for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
+            hookupRelationships(ax.getIndividual().asOWLNamedIndividual(),
+                    ontology, imported);
+        }
+
+        for (Concept concept : imported.values()) {
+            vocabulary.addItem(concept);
+            concept.setPermissionScope(vocabulary);
+        }
+
+        if (log.hasDoneWork()) {
+            eventContext.commit();
+        }
+
+        return log;
     }
 
     private Mutation<Concept> importConcept(OWLNamedIndividual item, OWLOntology dataset) throws ValidationError {
@@ -218,15 +211,15 @@ public final class OwlApiSkosImporter implements SkosImporter {
                 "owl:sameAs", IRI.create("http://www.w3.org/2002/07/owl#sameAs")
         );
 
-        for (Map.Entry<String,IRI> rel : rels.entrySet()) {
+        for (Map.Entry<String, IRI> rel : rels.entrySet()) {
             OWLAnnotationProperty propName = factory.getOWLAnnotationProperty(
                     rel.getValue());
             Set<OWLAnnotation> annotations = item.getAnnotations(dataset, propName);
             for (OWLAnnotation annotation : annotations) {
                 if (annotation.getValue() instanceof OWLLiteral) {
                     undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
-                    .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
-                    .withDataValue(Ontology.NAME_KEY, rel.getValue().toString()));
+                            .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                            .withDataValue(Ontology.NAME_KEY, rel.getValue().toString()));
                 }
             }
         }
@@ -246,7 +239,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
         for (OWLAnnotation rel : item.getAnnotations(ontology, property)) {
             // If it's not an IRI we can't do much here.
             if (rel.getValue() instanceof IRI) {
-                IRI value = (IRI)rel.getValue();
+                IRI value = (IRI) rel.getValue();
                 Concept related = others.get(value);
                 if (related != null) {
                     connectFunc.connect(current, related);
@@ -283,19 +276,19 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
     private List<Bundle> getDescriptions(OWLNamedIndividual item, OWLOntology ontology) {
 
-        Map<String, URI> props = ImmutableMap.<String,URI>builder()
-               .put(Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI())
-               .put(Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI())
-               .put(Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI())
-               .put(Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI())
-               .put(Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI())
-               .put(Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI())
+        Map<String, URI> props = ImmutableMap.<String, URI>builder()
+                .put(Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI())
+                .put(Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI())
+                .put(Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI())
+                .put(Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI())
+                .put(Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI())
+                .put(Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI())
                 .build();
         // Language-agnostic properties.
-        Map<String,URI> addProps = ImmutableMap.<String,URI>builder()
-               .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
-               .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
-               .build();
+        Map<String, URI> addProps = ImmutableMap.<String, URI>builder()
+                .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
+                .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
+                .build();
 
         List<Bundle> descriptions = Lists.newArrayList();
 
@@ -307,7 +300,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
         for (OWLAnnotation property : item.getAnnotations(ontology, prelLabelProp)) {
             Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
-            OWLLiteral literalPrefName = (OWLLiteral)property.getValue();
+            OWLLiteral literalPrefName = (OWLLiteral) property.getValue();
             String languageCode = literalPrefName.hasLang()
                     ? Helpers.iso639DashTwoCode(literalPrefName.getLang())
                     : defaultLang;
@@ -315,11 +308,11 @@ public final class OwlApiSkosImporter implements SkosImporter {
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getLiteral())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
 
-            for (Map.Entry<String, URI> prop: addProps.entrySet()) {
+            for (Map.Entry<String, URI> prop : addProps.entrySet()) {
                 OWLAnnotationProperty annotationProperty = factory
                         .getOWLAnnotationProperty(IRI.create(prop.getValue()));
                 for (OWLAnnotation annotation : item.getAnnotations(ontology, annotationProperty)) {
-                    OWLLiteral literalProp = (OWLLiteral)annotation.getValue();
+                    OWLLiteral literalProp = (OWLLiteral) annotation.getValue();
                     builder.addDataValue(prop.getKey(), literalProp.getLiteral());
                 }
             }
@@ -332,7 +325,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
                 for (OWLAnnotation propVal : annotations) {
                     if (propVal.getProperty().equals(annotationProperty)) {
-                        OWLLiteral literalProp = (OWLLiteral)propVal.getValue();
+                        OWLLiteral literalProp = (OWLLiteral) propVal.getValue();
                         String propLanguageCode = literalProp.hasLang()
                                 ? Helpers.iso639DashTwoCode(literalProp.getLang())
                                 : defaultLang;
