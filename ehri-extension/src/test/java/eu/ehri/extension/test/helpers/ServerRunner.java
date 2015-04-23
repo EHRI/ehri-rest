@@ -85,8 +85,10 @@ public class ServerRunner {
                 .build();
         neoServer.start();
 
+        Neo4jGraph graph = new Neo4jGraph(neoServer.getDatabase().getGraph());
+        graph.setCheckElementsInTransaction(true);
         FramedGraph<? extends TransactionalGraph> framedGraph
-                = graphFactory.create(new Neo4jGraph(neoServer.getDatabase().getGraph()));
+                = graphFactory.create(graph);
         fixtureLoader = FixtureLoaderFactory.getInstance(framedGraph);
         graphCleaner = new GraphCleaner(framedGraph);
     }
