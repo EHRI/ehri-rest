@@ -25,6 +25,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.test.utils.GraphCleaner;
+import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.neo4j.server.CommunityNeoServer;
@@ -85,7 +86,7 @@ public class ServerRunner {
                 .build();
         neoServer.start();
 
-        Neo4jGraph graph = new Neo4jGraph(neoServer.getDatabase().getGraph());
+        Neo4jGraph graph = new TxCheckedNeo4jGraph(neoServer.getDatabase().getGraph());
         graph.setCheckElementsInTransaction(true);
         FramedGraph<? extends TransactionalGraph> framedGraph
                 = graphFactory.create(graph);
