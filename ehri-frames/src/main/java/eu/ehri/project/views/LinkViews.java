@@ -104,15 +104,17 @@ public final class LinkViews implements Scoped<LinkViews> {
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
         link.setLinker(user);
-        ActionManager.EventContext eventContext = new ActionManager(graph, t1).logEvent(
+        ActionManager.EventContext eventContext = new ActionManager(graph, t1).newEventContext(
                 graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.link, Optional.<String>absent());
-        eventContext.addSubjects(link).addSubjects(t2);
+                EventTypes.link, Optional.<String>absent())
+                .addSubjects(link)
+                .addSubjects(t2);
         for (String body : bodies) {
             AccessibleEntity item = manager.getFrame(body, AccessibleEntity.class);
             link.addLinkBody(item);
             eventContext.addSubjects(item);
         }
+        eventContext.commit();
         return link;
     }
 
@@ -148,9 +150,10 @@ public final class LinkViews implements Scoped<LinkViews> {
         link.addLinkTarget(t2);
         link.setLinker(user);
         link.addLinkBody(rel);
-        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(
+        ActionManager.EventContext eventContext = new ActionManager(graph).newEventContext(
                 t1, graph.frame(user.asVertex(), Actioner.class), EventTypes.link);
         eventContext.addSubjects(link).addSubjects(t2).addSubjects(rel);
+        eventContext.commit();
         return link;
     }
 

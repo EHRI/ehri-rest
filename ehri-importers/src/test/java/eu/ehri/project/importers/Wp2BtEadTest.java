@@ -30,6 +30,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
@@ -140,8 +141,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
         assertEquals(6, logVC.getCreated());
-        assertTrue(logVC.getAction() != null);
-        assertEquals(logMessage, logVC.getAction().getLogMessage());
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
 
         //assert keywords are matched to cvocs
         assertTrue(toList(c1_b.getLinks()).size() > 0);
@@ -149,7 +150,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             logger.debug(a.getLinkType());
         }
 
-        List<AccessibleEntity> subjects = toList(logVC.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(ev.getSubjects());
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }

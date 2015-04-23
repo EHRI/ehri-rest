@@ -34,7 +34,6 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.Filter;
 import com.hp.hpl.jena.util.iterator.Map1;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -78,7 +77,7 @@ import java.util.Set;
 public final class JenaSkosImporter implements SkosImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(JenaSkosImporter.class);
-    private final FramedGraph<? extends TransactionalGraph> framedGraph;
+    private final FramedGraph<?> framedGraph;
     private final Actioner actioner;
     private final Vocabulary vocabulary;
     private final BundleDAO dao;
@@ -86,26 +85,29 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String format;
     private final String defaultLang;
     public static final String DEFAULT_LANG = "eng";
+
     // Language-sensitive properties.
-    private static void addToMap(Map<String, Set<URI>> map, String key, URI value){
-        if(map.containsKey(key)){
+    private static void addToMap(Map<String, Set<URI>> map, String key, URI value) {
+        if (map.containsKey(key)) {
             map.get(key).add(value);
-        }else{
+        } else {
             Set<URI> uris = new HashSet<URI>();
             uris.add(value);
             map.put(key, uris);
         }
     }
+
     public static final Map<String, Set<URI>> LANGUAGE_PROPS = new HashMap<String, Set<URI>>();
-//    = ImmutableMap.<String, Set<URI>>builder()
+
+    //    = ImmutableMap.<String, Set<URI>>builder()
     static {
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI());
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI());
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI());
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI());
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_SCOPENOTE, URI.create("http://www.w3.org/2000/01/rdf-schema#comment"));
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI());
-            addToMap(LANGUAGE_PROPS,Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI());
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI());
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI());
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI());
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI());
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_SCOPENOTE, URI.create("http://www.w3.org/2000/01/rdf-schema#comment"));
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI());
+        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI());
     }
 
     // Language-agnostic properties.
@@ -133,13 +135,13 @@ public final class JenaSkosImporter implements SkosImporter {
      * Constructor
      *
      * @param framedGraph The framed graph
-     * @param actioner The actioner
-     * @param vocabulary The target vocabulary
-     * @param tolerant Whether or not to ignore single item validation errors.
-     * @param format The RDF format
+     * @param actioner    The actioner
+     * @param vocabulary  The target vocabulary
+     * @param tolerant    Whether or not to ignore single item validation errors.
+     * @param format      The RDF format
      * @param defaultLang The language to use for elements without specified language
      */
-    public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+    public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary, boolean tolerant, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
@@ -154,10 +156,10 @@ public final class JenaSkosImporter implements SkosImporter {
      * Constructor
      *
      * @param framedGraph The framed graph
-     * @param actioner The actioner
-     * @param vocabulary The target vocabulary
+     * @param actioner    The actioner
+     * @param vocabulary  The target vocabulary
      */
-    public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+    public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
         this(framedGraph, actioner, vocabulary, false, null, DEFAULT_LANG);
     }
@@ -185,7 +187,7 @@ public final class JenaSkosImporter implements SkosImporter {
     /**
      * Import a file by path.
      *
-     * @param filePath The SKOS file path
+     * @param filePath   The SKOS file path
      * @param logMessage A log message
      * @return A log of imported nodes
      * @throws IOException
@@ -205,7 +207,7 @@ public final class JenaSkosImporter implements SkosImporter {
     /**
      * Import an input stream.
      *
-     * @param ios The SKOS file input stream
+     * @param ios        The SKOS file input stream
      * @param logMessage A log message
      * @return A log of imported nodes
      * @throws IOException
@@ -214,70 +216,64 @@ public final class JenaSkosImporter implements SkosImporter {
     @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError {
-        try {
-            // Create a new action for this import
-            final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
-                    actioner, EventTypes.ingest, getLogMessage(logMessage));
-            // Create a manifest to store the results of the import.
-            final ImportLog log = new ImportLog(eventContext);
 
-            OntModel model = ModelFactory.createOntologyModel();
-            model.read(ios, null, format);
-            OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-            logger.debug("in import file: " + SkosRDFVocabulary.CONCEPT.getURI().toString());
-            ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
-            Map<Resource, Concept> imported = Maps.newHashMap();
+        // Create a new action for this import
+        final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
+                actioner, EventTypes.ingest, getLogMessage(logMessage));
+        // Create a manifest to store the results of the import.
+        final ImportLog log = new ImportLog(eventContext);
 
-            while (extendedIterator.hasNext()) {
-                Resource item = extendedIterator.next();
+        OntModel model = ModelFactory.createOntologyModel();
+        model.read(ios, null, format);
+        OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
+        logger.debug("in import file: " + SkosRDFVocabulary.CONCEPT.getURI().toString());
+        ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
+        Map<Resource, Concept> imported = Maps.newHashMap();
 
-                try {
-                    Mutation<Concept> graphConcept = importConcept(item);
-                    imported.put(item, graphConcept.getNode());
+        while (extendedIterator.hasNext()) {
+            Resource item = extendedIterator.next();
 
-                    switch (graphConcept.getState()) {
-                        case UNCHANGED:
-                            log.addUnchanged();
-                            break;
-                        case CREATED:
-                            log.addCreated();
-                            eventContext.addSubjects(graphConcept.getNode());
-                            break;
-                        case UPDATED:
-                            log.addUpdated();
-                            eventContext.addSubjects(graphConcept.getNode());
-                            break;
-                    }
-                } catch (ValidationError validationError) {
-                    if (tolerant) {
-                        logger.error(validationError.getMessage());
-                        log.setErrored(item.toString(), validationError.getMessage());
-                    } else {
-                        throw validationError;
-                    }
+            try {
+                Mutation<Concept> graphConcept = importConcept(item);
+                imported.put(item, graphConcept.getNode());
+
+                switch (graphConcept.getState()) {
+                    case UNCHANGED:
+                        log.addUnchanged();
+                        break;
+                    case CREATED:
+                        log.addCreated();
+                        eventContext.addSubjects(graphConcept.getNode());
+                        break;
+                    case UPDATED:
+                        log.addUpdated();
+                        eventContext.addSubjects(graphConcept.getNode());
+                        break;
+                }
+            } catch (ValidationError validationError) {
+                if (tolerant) {
+                    logger.error(validationError.getMessage());
+                    log.setErrored(item.toString(), validationError.getMessage());
+                } else {
+                    throw validationError;
                 }
             }
-
-            for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
-                hookupRelationships(pair.getKey(), pair.getValue(), imported);
-            }
-
-            for (Concept concept : imported.values()) {
-                vocabulary.addItem(concept);
-                concept.setPermissionScope(vocabulary);
-            }
-
-            if (log.hasDoneWork()) {
-                framedGraph.getBaseGraph().commit();
-            } else {
-                framedGraph.getBaseGraph().rollback();
-            }
-
-            return log;
-        } catch (ValidationError error) {
-            framedGraph.getBaseGraph().rollback();
-            throw error;
         }
+
+        for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
+            hookupRelationships(pair.getKey(), pair.getValue(), imported);
+        }
+
+        for (Concept concept : imported.values()) {
+            vocabulary.addItem(concept);
+            concept.setPermissionScope(vocabulary);
+        }
+
+        if (log.hasDoneWork()) {
+            eventContext.commit();
+        }
+
+        return log;
     }
 
     private Mutation<Concept> importConcept(Resource item) throws ValidationError {
@@ -306,7 +302,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 String reltype = linkedConcepts.get(concept);
                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
-                        .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":")+1))
+                        .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
                 Link link;
@@ -334,7 +330,7 @@ public final class JenaSkosImporter implements SkosImporter {
                             .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
                             .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                 } else {
-                    if (rel.getKey().startsWith("skos:") || rel.getKey().startsWith("sem:") ) {
+                    if (rel.getKey().startsWith("skos:") || rel.getKey().startsWith("sem:")) {
                         String prefix = rel.getKey().startsWith("skos:") ? "skos" : "sem";
                         AuthoritativeItem found = findRelatedConcept(annotation.toString());
                         if (found != null) {
@@ -342,7 +338,7 @@ public final class JenaSkosImporter implements SkosImporter {
                         } else {
                             undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
                                     .withDataValue(Ontology.ANNOTATION_TYPE, "associate")
-                                    .withDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":")+1))
+                                    .withDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":") + 1))
                                     .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                         }
                     }

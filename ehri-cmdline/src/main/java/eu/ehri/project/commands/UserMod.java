@@ -96,7 +96,7 @@ public class UserMod extends BaseCommand implements Command {
             UserProfile user = manager.getFrame(userId,
                     EntityClass.USER_PROFILE, UserProfile.class);
 
-            EventContext actionCtx = new ActionManager(graph).logEvent(
+            EventContext actionCtx = new ActionManager(graph).newEventContext(
                     user, admin, EventTypes.modification,
                     getLogMessage(logMessage));
 
@@ -106,6 +106,7 @@ public class UserMod extends BaseCommand implements Command {
                 group.addMember(user);
                 actionCtx.addSubjects(group);
             }
+            actionCtx.commit();
             graph.getBaseGraph().commit();
         } catch (Exception e) {
             graph.getBaseGraph().rollback();

@@ -6,13 +6,13 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.9.2-SNAPSHOT</version>
+        <version>0.9.3-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-frames</artifactId>
     <packaging>jar</packaging>
 
 
-    <version>0.9.2-SNAPSHOT</version>
+    <version>0.9.3-SNAPSHOT</version>
 
     <name>EHRI Core API</name>
     <description>Java API for data access and permissions.</description>
@@ -102,13 +102,13 @@
         <dependency>
             <groupId>com.tinkerpop</groupId>
             <artifactId>frames</artifactId>
-            <version>2.4.0</version>
+            <version>2.6.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-neo4j-graph</artifactId>
-            <version>2.4.0</version>
+            <version>2.6.0</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -141,7 +141,7 @@
         <dependency>
             <groupId>com.tinkerpop.gremlin</groupId>
             <artifactId>gremlin-java</artifactId>
-            <version>2.4.0</version>
+            <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -179,7 +179,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>0.9.2-SNAPSHOT</version>
+            <version>0.9.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <repositories>

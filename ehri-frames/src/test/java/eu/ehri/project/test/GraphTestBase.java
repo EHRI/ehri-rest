@@ -60,7 +60,15 @@ public abstract class GraphTestBase {
     protected static List<VertexProxy> getGraphState(FramedGraph<?> graph) {
         List<VertexProxy> list = Lists.newArrayList();
         for (Vertex v : graph.getVertices()) {
-            list.add(new VertexProxy(v));
+            // Ignore vertices that have been deleting in this TX
+            // Neo4j will throw an illegal state exception here.
+            try {
+                list.add(new VertexProxy(v));
+            } catch (IllegalStateException e) {
+                if (!e.getMessage().contains("deleted in this tx")) {
+                    throw e;
+                }
+            }
         }
         return list;
     }
@@ -87,7 +95,16 @@ public abstract class GraphTestBase {
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() {
         GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                 .newGraphDatabase();
-        return graphFactory.create(new Neo4jGraph(rawGraph));
+        Neo4jGraph baseGraph = new Neo4jGraph(rawGraph);
+        // Setting check elements in transaction to ON here, which is
+        // slower but prevents vertices that have been deleted in the
+        // current transaction from being returned in global index
+        // searches. When disabled, index searches are considerably
+        // faster but allow vertices to be returned that have been deleted
+        // in the current transaction. These then throw an IllegalStateException
+        // when their properties are accessed.
+        baseGraph.setCheckElementsInTransaction(true);
+        return graphFactory.create(baseGraph);
     }
 
     @After

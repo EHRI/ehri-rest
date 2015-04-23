@@ -119,9 +119,11 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
         acl.withScope(SystemScope.INSTANCE)
                 .grantPermission(annotation, PermissionType.OWNER, user);
 
-        new ActionManager(graph, entity).logEvent(annotation,
-                graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.annotation, Optional.<String>absent());
+        new ActionManager(graph, entity)
+                .newEventContext(annotation,
+                        graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.annotation, Optional.<String>absent())
+                .commit();
         return annotation;
     }
 

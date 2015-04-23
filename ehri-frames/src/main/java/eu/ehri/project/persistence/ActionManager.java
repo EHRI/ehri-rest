@@ -42,6 +42,8 @@ import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -66,6 +68,7 @@ import java.util.Set;
  * [lifecycleAction]     [lifecycleActionStream]     [lifecycleEvent]
  * |                         |                       |
  * e3--[actionHasEvent]->-- Event 3 ---[hasEvent]--<--e3
+ * e3--[actionHasEvent]->-- Event 3 ---[hasEvent]--<--e3
  * \/                        \/                      \/
  * [lifecycleAction]         [lifecycleAction]       [lifecycleEvent]
  * |                         |                       |
@@ -83,6 +86,8 @@ public final class ActionManager {
 
     // Name of the global event root node, from whence event
     // streams propagate.
+    private static final Logger logger = LoggerFactory.getLogger(ActionManager.class);
+
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
     public static final String DEBUG_TYPE = "_debugType";
     public static final String EVENT_LINK = "eventLink";
@@ -92,6 +97,7 @@ public final class ActionManager {
     private final GraphManager manager;
     private final Frame scope;
     private final Serializer versionSerializer;
+    private final BundleDAO dao;
 
     /**
      * Constructor with scope.
@@ -103,6 +109,7 @@ public final class ActionManager {
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
         this.versionSerializer = new Serializer.Builder(graph).dependentOnly().build();
+        this.dao = new BundleDAO(graph);
     }
 
     /**
@@ -120,35 +127,37 @@ public final class ActionManager {
      *
      * @author Mike Bryant (http://github.com/mikesname)
      */
-    public static class EventContext {
+    public class EventContext {
         private final ActionManager actionManager;
-        private final SystemEvent systemEvent;
         private final Actioner actioner;
         private final EventTypes actionType;
         private final Optional<String> logMessage;
-        private final Set<Frame> subjects;
+        private final Optional<Frame> versionFrame;
+        private final Optional<Bundle> versionBundle;
+        private final Set<AccessibleEntity> subjects;
+        private final String timestamp;
 
         /**
          * Create a new event context.
-         *
-         * @param actionManager The action manager instance
-         * @param systemEvent   The current event
+         *  @param actionManager The action manager instance
          * @param actioner      The actioner
          * @param type          The event type
          * @param logMessage    An optional log message
          */
-        public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                            Actioner actioner, EventTypes type, Optional<String> logMessage) {
+        EventContext(ActionManager actionManager,
+                Actioner actioner,
+                EventTypes type,
+                String timestamp, Optional<String> logMessage,
+                Optional<Frame> versionFrame,
+                Optional<Bundle> versionBundle) {
             this.actionManager = actionManager;
             this.actionType = type;
-            this.systemEvent = systemEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
+            this.versionFrame = versionFrame;
+            this.versionBundle = versionBundle;
             this.subjects = Sets.newHashSet();
-        }
-
-        public SystemEvent getSystemEvent() {
-            return this.systemEvent;
+            this.timestamp = timestamp;
         }
 
         /**
@@ -170,6 +179,15 @@ public final class ActionManager {
         }
 
         /**
+         * Return the subjects of this event.
+         *
+         * @return a set of subjects
+         */
+        public Set<AccessibleEntity> getSubjects() {
+            return subjects;
+        }
+
+        /**
          * Create a snapshot of the given node's data.
          *
          * @param frame The subject node
@@ -177,7 +195,7 @@ public final class ActionManager {
          */
         public EventContext createVersion(Frame frame) {
             try {
-                Bundle bundle = actionManager.versionSerializer.vertexFrameToBundle(frame);
+                Bundle bundle = versionSerializer.vertexFrameToBundle(frame);
                 return createVersion(frame, bundle);
             } catch (SerializationError serializationError) {
                 throw new RuntimeException(serializationError);
@@ -194,24 +212,18 @@ public final class ActionManager {
          * @return This event context
          */
         public EventContext createVersion(Frame frame, Bundle bundle) {
-            try {
-                Bundle version = Bundle.Builder.withClass(EntityClass.VERSION)
-                        .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
-                        .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
-                        .addDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson())
-                        .build();
-                Version ev = new BundleDAO(actionManager.graph)
-                        .create(version, Version.class);
-                actionManager.replaceAtHead(frame.asVertex(), ev.asVertex(),
-                        Ontology.ENTITY_HAS_PRIOR_VERSION,
-                        Ontology.ENTITY_HAS_PRIOR_VERSION, Direction.OUT);
-                actionManager.graph.addEdge(null, ev.asVertex(),
-                        systemEvent.asVertex(), Ontology.VERSION_HAS_EVENT);
-
-                return this;
-            } catch (ValidationError validationError) {
-                throw new RuntimeException(validationError);
+            Bundle version = Bundle.Builder.withClass(EntityClass.VERSION)
+                    .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
+                    .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
+                    .addDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson())
+                    .build();
+            EventContext ctx = new EventContext(actionManager, actioner,
+                    actionType, timestamp, logMessage,
+                    Optional.of(frame), Optional.of(version));
+            for (AccessibleEntity subject : subjects) {
+                ctx.addSubjects(subject);
             }
+            return ctx;
         }
 
         /**
@@ -223,12 +235,6 @@ public final class ActionManager {
         public EventContext addSubjects(AccessibleEntity... entities) {
             for (AccessibleEntity entity : entities) {
                 if (!subjects.contains(entity)) {
-                    Vertex vertex = actionManager.getLinkNode(
-                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
-                    actionManager.replaceAtHead(entity.asVertex(), vertex,
-                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
-                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
-                    actionManager.addSubjectLink(systemEvent.asVertex(), vertex);
                     subjects.add(entity);
                 }
             }
@@ -242,6 +248,45 @@ public final class ActionManager {
          */
         public EventTypes getEventType() {
             return actionType;
+        }
+
+        /**
+         * Flush this event log to the graph.
+         */
+        public SystemEvent commit() {
+            Vertex vertex = getLinkNode(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
+            replaceAtHead(actioner.asVertex(), vertex,
+                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION,
+                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
+            SystemEvent systemEvent = createGlobalEvent(timestamp, actionType, logMessage);
+            addActionerLink(systemEvent.asVertex(), vertex);
+
+            for (Frame entity : subjects) {
+                Vertex subjectVertex = getLinkNode(
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
+                replaceAtHead(entity.asVertex(), subjectVertex,
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
+                addSubjectLink(systemEvent.asVertex(), subjectVertex);
+            }
+
+            // Create the version.
+            if (versionBundle.isPresent() && versionFrame.isPresent()) {
+                try {
+                    Frame subject = versionFrame.get();
+                    Bundle version = versionBundle.get();
+                    Version ev = dao.create(version, Version.class);
+                    replaceAtHead(subject.asVertex(), ev.asVertex(),
+                            Ontology.ENTITY_HAS_PRIOR_VERSION,
+                            Ontology.ENTITY_HAS_PRIOR_VERSION, Direction.OUT);
+                    graph.addEdge(null, ev.asVertex(),
+                            systemEvent.asVertex(), Ontology.VERSION_HAS_EVENT);
+                } catch (ValidationError validationError) {
+                    throw new RuntimeException(validationError);
+                }
+            }
+
+            return systemEvent;
         }
     }
 
@@ -277,63 +322,6 @@ public final class ActionManager {
     }
 
     /**
-     * Create a global event and insert it at the head of the system queue. The
-     * relationship from the <em>system</em> node to the new latest action is
-     * <em>type</em><strong>Stream</strong>.
-     *
-     * @param type       The event type
-     * @param logMessage An optional log message
-     * @return A new SystemEvent node
-     */
-    private SystemEvent createGlobalEvent(EventTypes type, Optional<String> logMessage) {
-        try {
-            Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
-            Bundle ge = Bundle.Builder.withClass(EntityClass.SYSTEM_EVENT)
-                    .addDataValue(Ontology.EVENT_TYPE, type.toString())
-                    .addDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
-                    .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))
-                    .build();
-            SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
-            if (!scope.equals(SystemScope.getInstance())) {
-                ev.setEventScope(scope);
-            }
-            replaceAtHead(system, ev.asVertex(), Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream", Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
-            return ev;
-        } catch (ItemNotFound e) {
-            e.printStackTrace();
-            throw new RuntimeException("Fatal error: system node (id: 'system') was not found. " +
-                    "Perhaps the graph was incorrectly initialised?");
-        } catch (ValidationError e) {
-            e.printStackTrace();
-            throw new RuntimeException(
-                    "Unexpected validation error creating action", e);
-        }
-    }
-
-    /**
-     * Create an action with the given type.
-     *
-     * @param user The actioner
-     * @param type The event type
-     * @return A new event context
-     */
-    public EventContext logEvent(Actioner user, EventTypes type) {
-        return logEvent(user, type, Optional.<String>absent());
-    }
-
-    /**
-     * Create an action with the given type and a log message.
-     *
-     * @param user       The actioner
-     * @param type       The event type
-     * @param logMessage A log message
-     * @return An EventContext object
-     */
-    public EventContext logEvent(Actioner user, EventTypes type, String logMessage) {
-        return logEvent(user, type, Optional.of(logMessage));
-    }
-
-    /**
      * Create an action node describing something that user U has done.
      *
      * @param user       The actioner
@@ -341,14 +329,9 @@ public final class ActionManager {
      * @param logMessage An optional log message
      * @return An EventContext object
      */
-    public EventContext logEvent(Actioner user, EventTypes type, Optional<String> logMessage) {
-        Vertex vertex = getLinkNode(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
-        replaceAtHead(user.asVertex(), vertex,
-                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION,
-                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
-        SystemEvent globalEvent = createGlobalEvent(type, logMessage);
-        addActionerLink(globalEvent.asVertex(), vertex);
-        return new EventContext(this, globalEvent, user, type, logMessage);
+    public EventContext newEventContext(Actioner user, EventTypes type, Optional<String> logMessage) {
+        return new EventContext(this, user, type, getTimestamp(), logMessage,
+                Optional.<Frame>absent(), Optional.<Bundle>absent());
     }
 
     /**
@@ -359,23 +342,9 @@ public final class ActionManager {
      * @param type    The event type
      * @return An EventContext object
      */
-    public EventContext logEvent(AccessibleEntity subject, Actioner user,
-                                 EventTypes type) {
-        return logEvent(subject, user, type, Optional.<String>absent());
-    }
-
-    /**
-     * Create an action for the given subject, user, and type and a log message.
-     *
-     * @param subject    The subjject node
-     * @param user       The actioner
-     * @param type       The event type
-     * @param logMessage A log message
-     * @return An EventContext object
-     */
-    public EventContext logEvent(AccessibleEntity subject, Actioner user,
-                                 EventTypes type, String logMessage) {
-        return logEvent(subject, user, type, Optional.of(logMessage));
+    public EventContext newEventContext(AccessibleEntity subject, Actioner user,
+            EventTypes type) {
+        return newEventContext(subject, user, type, Optional.<String>absent());
     }
 
     /**
@@ -387,9 +356,9 @@ public final class ActionManager {
      * @param logMessage A log message
      * @return An EventContext object
      */
-    public EventContext logEvent(AccessibleEntity subject, Actioner user,
-                                 EventTypes type, Optional<String> logMessage) {
-        EventContext context = logEvent(user, type, logMessage);
+    public EventContext newEventContext(AccessibleEntity subject, Actioner user,
+            EventTypes type, Optional<String> logMessage) {
+        EventContext context = newEventContext(user, type, logMessage);
         context.addSubjects(subject);
         return context;
     }
@@ -406,7 +375,93 @@ public final class ActionManager {
     }
 
 
+    /**
+     * Determine if two events are the same according to the following
+     * definition:
+     * <p/>
+     * <ol>
+     *     <li>They have the same scope and subject</li>
+     *     <li>They have the same actioner</li>
+     *     <li>They are both of the same type</li>
+     *     <li>They have the same log message, if any</li>
+     * </ol>
+     * <p/>
+     * This function allows filtering an event stream for duplicates,
+     * like someone repeatedly updating the same item.
+     *
+     * @param event1 the first event
+     * @param event2 the second event
+     *
+     * @return whether or not the events are effectively the same.
+     */
+    public static boolean sameAs(SystemEvent event1, SystemEvent event2) {
+        // NB: Fetching all these props and relations is potentially quite
+        // costly, so we want to short-circuit and return early is possible,
+        // starting with the least-costly to fetch attributes.
+        EventTypes eventType1 = event1.getEventType();
+        EventTypes eventType2 = event2.getEventType();
+        if (eventType1 != null && eventType2 != null && !eventType1.equals(eventType2)) {
+            return false;
+        }
+
+        String logMessage1 = event1.getLogMessage();
+        String logMessage2 = event2.getLogMessage();
+        if (logMessage1 != null && logMessage2 != null && !logMessage1.equals(logMessage2)) {
+            return false;
+        }
+
+        Frame eventScope1 = event1.getEventScope();
+        Frame eventScope2 = event2.getEventScope();
+        if (eventScope1 != null && eventScope2 != null && !eventScope1.equals(eventScope2)) {
+            return false;
+        }
+
+        AccessibleEntity entity1 = event1.getFirstSubject();
+        AccessibleEntity entity2 = event2.getFirstSubject();
+        if (entity1 != null && entity2 != null && !entity1.equals(entity2)) {
+            return false;
+        }
+
+        Actioner actioner1 = event1.getActioner();
+        Actioner actioner2 = event2.getActioner();
+        if (actioner1 != null && actioner2 != null && !actioner1.equals(actioner2)) {
+            return false;
+        }
+
+        // Okay, fall through...
+        return true;
+    }
+
     // Helpers.
+
+    private SystemEvent createGlobalEvent(String timestamp, EventTypes type, Optional<String> logMessage) {
+        // Create a global event and insert it at the head of the system queue. The
+        // relationship from the *system* node to the new latest action is
+        // *type* Stream.
+        try {
+            logger.trace("Creating global event root");
+            Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
+            Bundle ge = Bundle.Builder.withClass(EntityClass.SYSTEM_EVENT)
+                    .addDataValue(Ontology.EVENT_TYPE, type.toString())
+                    .addDataValue(Ontology.EVENT_TIMESTAMP, timestamp)
+                    .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))
+                    .build();
+            SystemEvent ev = dao.create(ge, SystemEvent.class);
+            if (!scope.equals(SystemScope.getInstance())) {
+                ev.setEventScope(scope);
+            }
+            replaceAtHead(system, ev.asVertex(), Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream", Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
+            return ev;
+        } catch (ItemNotFound e) {
+            e.printStackTrace();
+            throw new RuntimeException("Fatal error: system node (id: 'system') was not found. " +
+                    "Perhaps the graph was incorrectly initialised?");
+        } catch (ValidationError e) {
+            e.printStackTrace();
+            throw new RuntimeException(
+                    "Unexpected validation error creating action", e);
+        }
+    }
 
     /**
      * Create a link vertex. This we stamp with a descriptive
@@ -463,45 +518,6 @@ public final class ActionManager {
      * @return The current time in ISO DateTime format.
      */
     public static String getTimestamp() {
-        DateTime dt = DateTime.now();
-        return ISODateTimeFormat.dateTime().print(dt);
-    }
-
-    public static boolean sameAs(SystemEvent event1, SystemEvent event2) {
-        // NB: Fetching all these props and relations is potentially quite
-        // costly, so we want to short-circuit and return early is possible,
-        // starting with the least-costly to fetch attributes.
-        EventTypes eventType1 = event1.getEventType();
-        EventTypes eventType2 = event2.getEventType();
-        if (eventType1 != null && eventType2 != null && !eventType1.equals(eventType2)) {
-            return false;
-        }
-
-        String logMessage1 = event1.getLogMessage();
-        String logMessage2 = event2.getLogMessage();
-        if (logMessage1 != null && logMessage2 != null && !logMessage1.equals(logMessage2)) {
-            return false;
-        }
-
-        Frame eventScope1 = event1.getEventScope();
-        Frame eventScope2 = event2.getEventScope();
-        if (eventScope1 != null && eventScope2 != null && !eventScope1.equals(eventScope2)) {
-            return false;
-        }
-
-        AccessibleEntity entity1 = event1.getFirstSubject();
-        AccessibleEntity entity2 = event2.getFirstSubject();
-        if (entity1 != null && entity2 != null && !entity1.equals(entity2)) {
-            return false;
-        }
-
-        Actioner actioner1 = event1.getActioner();
-        Actioner actioner2 = event2.getActioner();
-        if (actioner1 != null && actioner2 != null && !actioner1.equals(actioner2)) {
-            return false;
-        }
-
-        // Okay, fall through...
-        return true;
+        return ISODateTimeFormat.dateTime().print(DateTime.now());
     }
 }

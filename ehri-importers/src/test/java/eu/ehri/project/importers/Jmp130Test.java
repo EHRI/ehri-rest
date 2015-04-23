@@ -96,7 +96,7 @@ public class Jmp130Test extends AbstractImporterTest {
             assertTrue(d.asVertex().getProperty("languageOfMaterial").toString().startsWith("[ces"));
         }
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }

@@ -69,7 +69,7 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest{
         assertEquals(voccount + 16, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
-        for (AccessibleEntity subject : log.getAction().getSubjects()) {
+        for (AccessibleEntity subject : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(authoritativeSet, subject.getPermissionScope());
         }
     }

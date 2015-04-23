@@ -95,9 +95,9 @@ public class DeleteEntities extends BaseCommand implements Command {
                 UserProfile.class);
 
         try {
-            new ActionManager(graph).logEvent(user,
-                    EventTypes.deletion,
-                    getLogMessage(logMessage));
+            new ActionManager(graph)
+                    .newEventContext(user, EventTypes.deletion, getLogMessage(logMessage))
+                    .commit();
             deleteIds(graph, manager, type, user);
             graph.getBaseGraph().commit();
         } catch (Exception e) {

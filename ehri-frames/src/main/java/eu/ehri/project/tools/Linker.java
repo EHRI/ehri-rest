@@ -158,7 +158,7 @@ public class Linker {
         ActionManager actionManager = new ActionManager(graph);
         ActionManager.EventContext conceptEvent = actionManager
                 .setScope(vocabulary)
-                .logEvent(user, EventTypes.creation, logMessage);
+                .newEventContext(user, EventTypes.creation, logMessage);
         CrudViews<Concept> conceptMaker = new CrudViews<Concept>(graph, Concept.class, vocabulary);
 
         for (Map.Entry<String, String> idName : conceptIdentifierNames.entrySet()) {
@@ -200,10 +200,12 @@ public class Linker {
             }
         }
 
+        conceptEvent.commit();
+
         // Now link the concepts with elements having the access point from
         // which the concept originally derived.
         ActionManager.EventContext linkEvent = actionManager
-                .logEvent(user, EventTypes.creation, logMessage);
+                .newEventContext(user, EventTypes.creation, logMessage);
         CrudViews<Link> linkMaker = new CrudViews<Link>(graph, Link.class);
 
         long linkCount = 0L;
@@ -236,6 +238,8 @@ public class Linker {
                 }
             }
         }
+
+        linkEvent.commit();
 
         return linkCount;
     }

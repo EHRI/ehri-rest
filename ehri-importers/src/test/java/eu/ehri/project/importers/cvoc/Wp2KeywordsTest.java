@@ -84,7 +84,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         assertTrue(found847);
         
         // Check permission scopes
-        for (AccessibleEntity e : log.getAction().getSubjects()) {
+        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
     }

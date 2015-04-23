@@ -124,8 +124,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
         assertEquals(4, log.getCreated());
-        assertTrue(log.getAction() instanceof SystemEvent);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
 
         //assert keywords are matched to cvocs
         assertTrue(toList(c3.getLinks()).size() > 0);
@@ -140,7 +140,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
             assertEquals(1, hasBody);
         }
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(ev.getSubjects());
         int countSubject=0;
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());

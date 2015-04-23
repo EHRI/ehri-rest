@@ -20,7 +20,6 @@
 package eu.ehri.project.importers.cvoc;
 
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
@@ -40,7 +39,6 @@ import eu.ehri.project.persistence.ActionManager.EventContext;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -79,7 +77,7 @@ public final class XmlSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
             .getLogger(XmlSkosImporter.class);
 
-    private final FramedGraph<? extends TransactionalGraph> framedGraph;
+    private final FramedGraph<?> framedGraph;
     private final Actioner actioner;
     private final Boolean tolerant;
     private final Vocabulary vocabulary;
@@ -103,7 +101,7 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param tolerant    Whether or not to allow single item validation errors
      * @param format      The RDF format
      */
-    public XmlSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph,
+    public XmlSkosImporter(FramedGraph<?> framedGraph,
             final Actioner actioner, Vocabulary vocabulary, boolean tolerant, String format) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
@@ -119,7 +117,7 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param actioner    The actioner
      * @param vocabulary  The vocabulary
      */
-    public XmlSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph,
+    public XmlSkosImporter(FramedGraph<?> framedGraph,
             final Actioner actioner, Vocabulary vocabulary) {
         this(framedGraph, actioner, vocabulary, false, null);
     }
@@ -156,7 +154,7 @@ public final class XmlSkosImporter implements SkosImporter {
             throws IOException, ValidationError, InputParseError {
         try {
             // Create a new action for this import
-            final EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
+            final EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
                     actioner, EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
@@ -164,13 +162,12 @@ public final class XmlSkosImporter implements SkosImporter {
             // Do the import...
             importFile(ios, eventContext, log);
             // If nothing was imported, remove the action...
-            commitOrRollback(log.hasDoneWork());
+            if (log.hasDoneWork()) {
+                eventContext.commit();
+            }
+
             return log;
-        } catch (ValidationError e) {
-            commitOrRollback(false);
-            throw e;
         } catch (Exception e) {
-            commitOrRollback(false);
             throw new RuntimeException(e);
         }
     }
@@ -768,21 +765,6 @@ public final class XmlSkosImporter implements SkosImporter {
             case UNCHANGED:
                 manifest.addUnchanged();
                 break;
-        }
-    }
-
-    private void commitOrRollback(boolean okay) {
-        TransactionalGraph baseGraph = framedGraph.getBaseGraph();
-        if (baseGraph instanceof TxCheckedNeo4jGraph) {
-            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph) baseGraph;
-            if (!okay && graph.isInTransaction()) {
-                graph.rollback();
-            }
-        } else {
-            if (okay)
-                baseGraph.commit();
-            else
-                baseGraph.rollback();
         }
     }
 }

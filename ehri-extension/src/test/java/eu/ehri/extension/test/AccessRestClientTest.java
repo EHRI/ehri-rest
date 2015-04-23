@@ -40,7 +40,7 @@ public class AccessRestClientTest extends BaseRestClientTest {
     static final String PRIVILEGED_USER_NAME = "mike";
     static final String LIMITED_USER_NAME = "reto";
 
-    @Test @Ignore
+    @Test
     public void testUserCannotRead() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,

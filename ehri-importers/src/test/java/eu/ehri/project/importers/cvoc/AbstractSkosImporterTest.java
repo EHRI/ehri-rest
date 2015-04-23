@@ -25,6 +25,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ public abstract class AbstractSkosImporterTest extends AbstractFixtureTest {
     public static String FILE5 = "cvoc/ghettos.rdf";
 
     protected Actioner actioner;
+    protected ActionManager actionManager;
     protected Vocabulary vocabulary;
 
     @Before
@@ -49,6 +51,7 @@ public abstract class AbstractSkosImporterTest extends AbstractFixtureTest {
         super.setUp();
         actioner = manager.cast(validUser, Actioner.class);
         vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
+        actionManager = new ActionManager(graph);
     }
     
      protected void printGraph(FramedGraph<?> graph) {

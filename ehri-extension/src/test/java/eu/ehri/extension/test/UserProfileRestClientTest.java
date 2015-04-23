@@ -210,7 +210,6 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    @Ignore
     public void testFollowAndUnfollow() throws Exception {
         String user1 = "reto";
         String user2 = "mike";

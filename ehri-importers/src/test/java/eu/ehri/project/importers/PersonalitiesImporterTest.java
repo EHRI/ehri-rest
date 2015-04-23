@@ -24,6 +24,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import java.io.InputStream;
 
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -56,6 +57,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
+        SystemEvent ev = actionManager.getLatestGlobalEvent();
         System.out.println(Iterables.toList(authoritativeSet.getAuthoritativeItems()));
         /*
          * 8 HistAgent
@@ -68,7 +70,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
         assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
-        for (AccessibleEntity subject : log.getAction().getSubjects()) {
+        for (AccessibleEntity subject : ev.getSubjects()) {
             assertEquals(authoritativeSet, subject.getPermissionScope());
         }
     }

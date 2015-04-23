@@ -74,7 +74,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest{
         assertEquals(voccount + 18, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
-        for (AccessibleEntity subject : log.getAction().getSubjects()) {
+        for (AccessibleEntity subject : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(authoritativeSet, subject.getPermissionScope());
         }
         Concept antisemitism = manager.getFrame("auths-fst810769", Concept.class);

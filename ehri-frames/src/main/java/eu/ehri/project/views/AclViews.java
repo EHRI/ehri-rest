@@ -100,13 +100,14 @@ public final class AclViews implements Scoped<AclViews> {
         acl.setPermissionMatrix(accessor, permissionSet);
         boolean scoped = !scope.equals(SystemScope.INSTANCE);
         // Log the action...
-        ActionManager.EventContext context = actionManager.logEvent(
+        ActionManager.EventContext context = actionManager.newEventContext(
                 manager.cast(accessor, AccessibleEntity.class),
                 manager.cast(grantee, Actioner.class),
                 EventTypes.setGlobalPermissions);
         if (scoped) {
             context.addSubjects(manager.cast(scope, AccessibleEntity.class));
         }
+        context.commit();
         return acl.getInheritedGlobalPermissions(accessor);
     }
 
@@ -123,8 +124,9 @@ public final class AclViews implements Scoped<AclViews> {
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         acl.setAccessors(entity, accessors);
         // Log the action...
-        actionManager.logEvent(
-                entity, manager.cast(user, Actioner.class), EventTypes.setVisibility);
+        actionManager.newEventContext(
+                entity, manager.cast(user, Actioner.class), EventTypes.setVisibility)
+                .commit();
     }
 
     /**
@@ -176,9 +178,10 @@ public final class AclViews implements Scoped<AclViews> {
         helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
         acl.setItemPermissions(item, accessor, permissionList);
         // Log the action...
-        actionManager.logEvent(item,
+        actionManager.newEventContext(item,
                 manager.cast(grantee, Actioner.class), EventTypes.setItemPermissions)
-                .addSubjects(manager.cast(accessor, AccessibleEntity.class));
+                .addSubjects(manager.cast(accessor, AccessibleEntity.class))
+                .commit();
     }
 
     public void revokePermissionGrant(PermissionGrant grant, Accessor user)
@@ -214,9 +217,10 @@ public final class AclViews implements Scoped<AclViews> {
         ensureCanModifyGroupMembership(group, user, grantee);
         group.addMember(user);
         // Log the action...
-        actionManager.logEvent(group,
+        actionManager.newEventContext(group,
                 manager.cast(grantee, Actioner.class), EventTypes.addGroup)
-                .addSubjects(manager.cast(user, AccessibleEntity.class));
+                .addSubjects(manager.cast(user, AccessibleEntity.class))
+                .commit();
     }
 
     /**
@@ -233,9 +237,10 @@ public final class AclViews implements Scoped<AclViews> {
         ensureCanModifyGroupMembership(group, user, grantee);
         group.removeMember(user);
         // Log the action...
-        actionManager.logEvent(group,
-                    manager.cast(grantee, Actioner.class), EventTypes.removeGroup)
-                .addSubjects(manager.cast(user, AccessibleEntity.class));
+        actionManager.newEventContext(group,
+                manager.cast(grantee, Actioner.class), EventTypes.removeGroup)
+                .addSubjects(manager.cast(user, AccessibleEntity.class))
+                .commit();
     }
 
     private void ensureCanModifyGroupMembership(Group group, Accessor user, Accessor grantee)

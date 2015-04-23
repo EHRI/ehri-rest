@@ -20,7 +20,6 @@
 package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.definitions.EventTypes;
@@ -31,7 +30,6 @@ import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +48,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     private static final Logger logger = LoggerFactory
             .getLogger(AbstractImportManager.class);
-    protected final FramedGraph<? extends TransactionalGraph> framedGraph;
+    protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
     private boolean tolerant = false;
@@ -69,7 +67,7 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param actioner  the actioner
      */
     public AbstractImportManager(
-            FramedGraph<? extends TransactionalGraph> graph,
+            FramedGraph<?> graph,
             final PermissionScope scope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
         this.framedGraph = graph;
         this.permissionScope = scope;
@@ -131,7 +129,7 @@ public abstract class AbstractImportManager implements ImportManager {
         try {
             // Create a new action for this import
             final ActionManager.EventContext action = new ActionManager(
-                    framedGraph, permissionScope).logEvent(actioner,
+                    framedGraph, permissionScope).newEventContext(actioner,
                     EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
@@ -139,14 +137,12 @@ public abstract class AbstractImportManager implements ImportManager {
             // Do the import...
             importFile(ios, action, log);
             // If nothing was imported, remove the action...
-            commitOrRollback(log.hasDoneWork());
+            if (log.hasDoneWork()) {
+                action.commit();
+            }
 
             return log;
-        } catch (ValidationError e) {
-            commitOrRollback(false);
-            throw e;
         } catch (Exception e) {
-            commitOrRollback(false);
             throw new RuntimeException(e);
         }
     }
@@ -167,7 +163,7 @@ public abstract class AbstractImportManager implements ImportManager {
         try {
 
             final ActionManager.EventContext action = new ActionManager(
-                    framedGraph, permissionScope).logEvent(actioner,
+                    framedGraph, permissionScope).newEventContext(actioner,
                     EventTypes.ingest, getLogMessage(logMessage));
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
@@ -190,15 +186,13 @@ public abstract class AbstractImportManager implements ImportManager {
 
             // Only mark the transaction successful if we're
             // actually accomplished something.
-            commitOrRollback(log.hasDoneWork());
+            if (log.hasDoneWork()) {
+                action.commit();
+            }
 
             return log;
-        } catch (ValidationError e) {
-            commitOrRollback(false);
-            throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            commitOrRollback(false);
             throw new RuntimeException(e);
         }
     }
@@ -227,20 +221,5 @@ public abstract class AbstractImportManager implements ImportManager {
     private String formatErrorLocation() {
         return String.format("File: %s, XML document: %d", currentFile,
                 currentPosition);
-    }
-
-    private void commitOrRollback(boolean okay) {
-        TransactionalGraph baseGraph = framedGraph.getBaseGraph();
-        if (baseGraph instanceof TxCheckedNeo4jGraph) {
-            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph) baseGraph;
-            if (!okay && graph.isInTransaction()) {
-                graph.rollback();
-            }
-        } else {
-            if (okay)
-                baseGraph.commit();
-            else
-                baseGraph.rollback();
-        }
     }
 }

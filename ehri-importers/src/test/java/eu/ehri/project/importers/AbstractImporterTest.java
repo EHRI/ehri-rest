@@ -29,6 +29,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 
 import org.junit.After;
@@ -51,6 +52,11 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     protected AbstractImportManager importManager;
 
     /**
+     * Action Manager
+     */
+    protected ActionManager actionManager;
+
+    /**
      * Test repository, initialised in test setup using TEST_REPO identifier.
      */
     protected Repository repository;
@@ -66,6 +72,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        actionManager = new ActionManager(graph);
         repository = manager.getFrame(TEST_REPO, Repository.class);
     }
 
