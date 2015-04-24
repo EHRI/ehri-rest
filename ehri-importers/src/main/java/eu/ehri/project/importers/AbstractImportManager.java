@@ -104,11 +104,8 @@ public abstract class AbstractImportManager implements ImportManager {
     @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
-        FileInputStream ios = new FileInputStream(filePath);
-        try {
+        try (FileInputStream ios = new FileInputStream(filePath)) {
             return importFile(ios, logMessage);
-        } finally {
-            ios.close();
         }
     }
 
@@ -169,12 +166,9 @@ public abstract class AbstractImportManager implements ImportManager {
             for (String path : paths) {
                 try {
                     currentFile = path;
-                    FileInputStream ios = new FileInputStream(path);
-                    try {
+                    try (FileInputStream ios = new FileInputStream(path)) {
                         logger.info("Importing file: " + path);
                         importFile(ios, action, log);
-                    } finally {
-                        ios.close();
                     }
                 } catch (InvalidXmlDocument e) {
                     log.setErrored(formatErrorLocation(), e.getMessage());

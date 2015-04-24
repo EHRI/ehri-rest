@@ -159,7 +159,7 @@ public class Linker {
         ActionManager.EventContext conceptEvent = actionManager
                 .setScope(vocabulary)
                 .newEventContext(user, EventTypes.creation, logMessage);
-        CrudViews<Concept> conceptMaker = new CrudViews<Concept>(graph, Concept.class, vocabulary);
+        CrudViews<Concept> conceptMaker = new CrudViews<>(graph, Concept.class, vocabulary);
 
         for (Map.Entry<String, String> idName : conceptIdentifierNames.entrySet()) {
             String identifier = idName.getKey();
@@ -206,7 +206,7 @@ public class Linker {
         // which the concept originally derived.
         ActionManager.EventContext linkEvent = actionManager
                 .newEventContext(user, EventTypes.creation, logMessage);
-        CrudViews<Link> linkMaker = new CrudViews<Link>(graph, Link.class);
+        CrudViews<Link> linkMaker = new CrudViews<>(graph, Link.class);
 
         long linkCount = 0L;
         for (DocumentaryUnit doc : repository.getAllCollections()) {

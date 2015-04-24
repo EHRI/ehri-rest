@@ -151,7 +151,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * Copy constructor.
      */
     public Query<E> copy(Query<E> other) {
-        return new Query<E>(other.graph, other.cls, other.scope, other.offset,
+        return new Query<>(other.graph, other.cls, other.scope, other.offset,
                 other.limit, other.sort, other.traversalSort, other.defaultSort, other.filters,
                 other.depthFilters, other.traversalFilters, other.stream);
     }
@@ -269,11 +269,11 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
                 .getAclFilterFunction(user);
 
         GremlinPipeline<E, Vertex> pipeline = new GremlinPipeline<E, Vertex>(
-                new FramedVertexIterableAdaptor<T>(vertices))
+                new FramedVertexIterableAdaptor<>(vertices))
                 .filter(aclFilterFunction);
 
         if (stream) {
-            return new Page<T>(graph.frameVertices(
+            return new Page<>(graph.frameVertices(
                     setPipelineRange(setOrder(applyFilters(pipeline))), cls), offset, limit, NO_COUNT);
         } else {
             // FIXME: We have to read the vertices into memory here since we
@@ -282,7 +282,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
             Iterable<T> iterable = graph.frameVertices(
                     setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
                             userVerts))), cls);
-            return new Page<T>(iterable, offset, limit, userVerts.size());
+            return new Page<>(iterable, offset, limit, userVerts.size());
         }
     }
 
@@ -291,9 +291,8 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * for the given page/count.
      */
     public Page<E> page(String key, String query, Accessor user) {
-        CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
-                ClassUtils.getEntityType(cls));
-        try {
+        try (CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
+                ClassUtils.getEntityType(cls))) {
             CloseableIterable<Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls));
             try {
@@ -302,9 +301,9 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
                 long numItems = stream
                         ? NO_COUNT
                         : applyFilters(new GremlinPipeline<Vertex, Vertex>(countQ)
-                            .filter(aclFilterFunction)).count();
+                        .filter(aclFilterFunction)).count();
 
-                return new Page<E>(
+                return new Page<>(
                         graph.frameVertices(
                                 setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
                                         indexQ).filter(aclFilterFunction)))),
@@ -312,8 +311,6 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
             } finally {
                 indexQ.close();
             }
-        } finally {
-            countQ.close();
         }
     }
 
@@ -339,7 +336,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * NB: Count doesn't 'account' for ACL privileges!
      */
     public <T> long count(Iterable<T> vertices) {
-        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(vertices);
+        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<>(vertices);
 
         return applyFilters(filter).count();
     }
@@ -359,7 +356,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * @param offset An integer page to the stream.
      */
     public Query<E> setOffset(int offset) {
-        return new Query<E>(graph, cls, scope, offset,
+        return new Query<>(graph, cls, scope, offset,
                 limit, sort, traversalSort, defaultSort, filters, depthFilters, traversalFilters, stream);
     }
 
@@ -369,7 +366,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * @param limit An integer total, or -1 for an unbounded stream.
      */
     public Query<E> setLimit(int limit) {
-        return new Query<E>(graph, cls, scope, offset,
+        return new Query<>(graph, cls, scope, offset,
                 limit, sort, traversalSort, defaultSort, filters,
                 depthFilters, traversalFilters, stream);
     }
@@ -382,7 +379,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * @param stream Whether to stream results lazily.
      */
     public Query<E> setStream(boolean stream) {
-        return new Query<E>(graph, cls, scope, offset,
+        return new Query<>(graph, cls, scope, offset,
                 limit, sort, traversalSort, defaultSort, filters,
                 depthFilters, traversalFilters, stream);
     }
@@ -392,8 +389,8 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      */
     public Query<E> defaultOrderBy(String field, Sort order) {
 
-        return new Query<E>(graph, cls, scope, offset, limit, sort, traversalSort,
-                Optional.of(new Pair<String, Sort>(field, order)), filters,
+        return new Query<>(graph, cls, scope, offset, limit, sort, traversalSort,
+                Optional.of(new Pair<>(field, order)), filters,
                 depthFilters, traversalFilters, stream);
     }
 
@@ -403,7 +400,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     public Query<E> orderBy(String field, Sort order) {
         SortedMap<String, Sort> tmp = new ImmutableSortedMap.Builder<String, Sort>(
                 Ordering.natural()).putAll(sort).put(field, order).build();
-        return new Query<E>(graph, cls, scope, offset, limit, tmp, traversalSort, defaultSort,
+        return new Query<>(graph, cls, scope, offset, limit, tmp, traversalSort, defaultSort,
                 filters, depthFilters, traversalFilters, stream);
     }
 
@@ -411,7 +408,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
         ImmutableSortedMap.Builder<QueryUtils.TraversalPath, Sort> tmp = new ImmutableSortedMap.Builder<QueryUtils.TraversalPath, Sort>(
                 Ordering.arbitrary()).putAll(traversalSort);
         tmp.put(tp, order);
-        return new Query<E>(graph, cls, scope, offset, limit, sort, tmp.build(), defaultSort,
+        return new Query<>(graph, cls, scope, offset, limit, sort, tmp.build(), defaultSort,
                 filters, depthFilters, traversalFilters, stream);
     }
 
@@ -443,7 +440,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * Clear the filter clauses from this query.
      */
     public Query<E> clearFilters() {
-        return new Query<E>(
+        return new Query<>(
                 graph,
                 cls,
                 scope,
@@ -461,7 +458,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * Clear the filter clauses from this query.
      */
     public Query<E> clearOrdering() {
-        return new Query<E>(
+        return new Query<>(
                 graph,
                 cls,
                 scope,
@@ -481,8 +478,8 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      */
     public Query<E> depthFilter(String label, Direction direction, Integer depth) {
         Map<Pair<String, Direction>, Integer> tmp = Maps.newHashMap(depthFilters);
-        tmp.put(new Pair<String, Direction>(label, direction), depth);
-        return new Query<E>(graph, cls, scope, offset, limit, sort,
+        tmp.put(new Pair<>(label, direction), depth);
+        return new Query<>(graph, cls, scope, offset, limit, sort,
                 traversalSort, defaultSort, filters, tmp, traversalFilters, stream);
     }
 
@@ -492,16 +489,16 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     public Query<E> filter(String property, FilterPredicate predicate,
             String value) {
         ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>> builder
-                = new ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>>(
+                = new ImmutableSortedMap.Builder<>(
                 Ordering.natural());
         for (Entry<String, Pair<FilterPredicate, String>> filter : filters.entrySet()) {
             if (!filter.getKey().equals(property)) {
                 builder.put(filter.getKey(), filter.getValue());
             }
         }
-        builder.put(property, new Pair<FilterPredicate, String>(predicate, value));
+        builder.put(property, new Pair<>(predicate, value));
 
-        return new Query<E>(graph, cls, scope, offset, limit, sort,
+        return new Query<>(graph, cls, scope, offset, limit, sort,
                 traversalSort, defaultSort, builder.build(), depthFilters, traversalFilters, stream);
     }
 
@@ -511,8 +508,8 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     public Query<E> filterTraversal(QueryUtils.TraversalPath path, FilterPredicate predicate,
             String value) {
         ArrayList<GremlinPipeline<Vertex, Vertex>> tmp = Lists.newArrayList(traversalFilters);
-        tmp.add(getFilterTraversalPipeline(path, new Pair<FilterPredicate, String>(predicate, value)));
-        return new Query<E>(graph, cls, scope, offset, limit, sort,
+        tmp.add(getFilterTraversalPipeline(path, new Pair<>(predicate, value)));
+        return new Query<>(graph, cls, scope, offset, limit, sort,
                 traversalSort, defaultSort, filters, depthFilters, tmp, stream);
     }
 
@@ -556,7 +553,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
             // we have more than 2147483647 items to traverse...
             return filter.range(low, Integer.MAX_VALUE); // No filtering
         } else if (limit == 0) {
-            return new GremlinPipeline<EE, Vertex>(Lists.newArrayList());
+            return new GremlinPipeline<>(Lists.newArrayList());
         } else {
             // NB: The high range is inclusive, oddly.
             return filter.range(low, low + (limit - 1));
@@ -814,7 +811,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     @Override
     public Query withScope(PermissionScope scope) {
-        return new Query<E>(
+        return new Query<>(
                 graph,
                 cls,
                 scope,

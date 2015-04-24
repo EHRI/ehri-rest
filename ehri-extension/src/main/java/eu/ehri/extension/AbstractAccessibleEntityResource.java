@@ -86,7 +86,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         }
     }
 
-    private final Handler<E> noOpHandler = new NoOpHandler<E>();
+    private final Handler<E> noOpHandler = new NoOpHandler<>();
 
     /**
      * Constructor
@@ -98,11 +98,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             @Context GraphDatabaseService database, Class<E> cls) {
         super(database);
         this.cls = cls;
-        views = new LoggingCrudViews<E>(graph, cls);
+        views = new LoggingCrudViews<>(graph, cls);
         aclManager = new AclManager(graph);
         actionManager = new ActionManager(graph);
         aclViews = new AclViews(graph);
-        querier = new Query<E>(graph, cls);
+        querier = new Query<>(graph, cls);
         helper = new ViewHelper(graph);
     }
 

@@ -64,7 +64,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     public DescriptionResource(@Context GraphDatabaseService database) {
         super(database, DescribedEntity.class);
-            descriptionViews = new DescriptionViews<DescribedEntity>(graph, DescribedEntity.class);
+            descriptionViews = new DescriptionViews<>(graph, DescribedEntity.class);
     }
 
     @POST

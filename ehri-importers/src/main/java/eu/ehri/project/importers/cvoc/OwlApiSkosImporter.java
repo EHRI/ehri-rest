@@ -115,11 +115,8 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
-        FileInputStream ios = new FileInputStream(filePath);
-        try {
+        try (FileInputStream ios = new FileInputStream(filePath)) {
             return importFile(ios, logMessage);
-        } finally {
-            ios.close();
         }
     }
 
@@ -190,7 +187,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
     }
 
     private Mutation<Concept> importConcept(OWLNamedIndividual item, OWLOntology dataset) throws ValidationError {
-        logger.debug("Importing: {}", item.toString());
+        logger.debug("Importing: {}", item);
         Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(item.getIRI().toURI()));
 

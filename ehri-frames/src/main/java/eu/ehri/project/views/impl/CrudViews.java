@@ -186,7 +186,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return A new view
      */
     public Crud<E> setScope(PermissionScope scope) {
-        return new CrudViews<E>(graph, cls,
+        return new CrudViews<>(graph, cls,
                 Optional.fromNullable(scope).or(SystemScope.INSTANCE));
     }
 

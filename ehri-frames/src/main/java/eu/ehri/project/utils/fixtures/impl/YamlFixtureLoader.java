@@ -20,6 +20,7 @@
 package eu.ehri.project.utils.fixtures.impl;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -46,10 +47,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -156,8 +155,6 @@ public class YamlFixtureLoader implements FixtureLoader {
                     stream.close();
                 }
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -250,7 +247,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         Map<String, Object> nodeData = (Map<String, Object>) node
                 .get(Bundle.DATA_KEY);
         if (nodeData == null)
-            nodeData = new HashMap<String, Object>();
+            nodeData = Maps.newHashMap();
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeRels = (Map<String, Object>) node
                 .get(Bundle.REL_KEY);
@@ -273,14 +270,12 @@ public class YamlFixtureLoader implements FixtureLoader {
             final Map<String, Object> nodeData,
             final Multimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")
-        Map<String, Object> data = new HashMap<String, Object>() {
-            {
-                put(Bundle.ID_KEY, id);
-                put(Bundle.TYPE_KEY, type.getName());
-                put(Bundle.DATA_KEY, nodeData);
-                put(Bundle.REL_KEY, dependentRelations.asMap());
-            }
-        };
+        Map<String, Object> data = ImmutableMap.of(
+                Bundle.ID_KEY, id,
+                Bundle.TYPE_KEY, type.getName(),
+                Bundle.DATA_KEY, nodeData,
+                Bundle.REL_KEY, dependentRelations.asMap()
+        );
         Bundle b = Bundle.fromData(data);
 
         // If the given id is a placeholder, generate it according to type rules

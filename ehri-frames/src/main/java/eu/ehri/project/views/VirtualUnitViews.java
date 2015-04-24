@@ -119,7 +119,7 @@ public class VirtualUnitViews {
         // item, in which case our loop traversal will miss it, so we have to combine
         // the result
 
-        GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<Vertex, Vertex>();
+        GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<>();
         Pipeline<Vertex, Vertex> otherPipe = pipe.start(item.asVertex())
                 .in(Ontology.DESCRIPTION_FOR_ENTITY)
                 .in(Ontology.VC_DESCRIBED_BY)
@@ -158,7 +158,7 @@ public class VirtualUnitViews {
      * @return A set of top-level virtual units
      */
     public Iterable<VirtualUnit> getVirtualCollectionsForUser(Frame user, Accessor accessor) {
-        GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<Vertex, Vertex>();
+        GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<>();
         Pipeline<Vertex, Vertex> filtered = pipe.start(user.asVertex())
                 .in(Ontology.VC_HAS_AUTHOR)
                 .filter(aclManager.getAclFilterFunction(accessor));

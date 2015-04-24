@@ -106,7 +106,7 @@ public class EventViews {
 
     public Iterable<SystemEvent> list(Query<SystemEvent> query, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
+        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
                 actionManager.getLatestGlobalEvents());
 
         // Add additional generic filters
@@ -131,7 +131,7 @@ public class EventViews {
         }
 
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
+        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
                 actionManager.getLatestGlobalEvents());
 
         // Add additional generic filters
@@ -166,7 +166,7 @@ public class EventViews {
 
     public Iterable<SystemEvent> listByUser(Query<SystemEvent> query, UserProfile byUser, Accessor user) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
+        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
                 manager.cast(byUser, Actioner.class).getActions());
 
         // Add additional generic filters

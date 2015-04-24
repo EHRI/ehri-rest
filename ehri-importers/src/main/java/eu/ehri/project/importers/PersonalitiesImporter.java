@@ -38,13 +38,12 @@ import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Importer of historical agents encoded in {@link Map}s.
- *
+ * <p/>
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  *
@@ -96,7 +95,7 @@ public class PersonalitiesImporter extends MapImporter {
 
     private Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         if (itemData.containsKey("id")) {
             item.put(Ontology.IDENTIFIER_KEY, itemData.get("id"));
         } else {
@@ -123,7 +122,7 @@ public class PersonalitiesImporter extends MapImporter {
     }
 
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
 
@@ -150,7 +149,7 @@ public class PersonalitiesImporter extends MapImporter {
 
 
     /**
-     * @param itemData
+     * @param itemData the item data map
      * @return returns a List with Maps with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
     @Override

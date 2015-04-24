@@ -233,14 +233,11 @@ public final class BundleValidator {
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
-                CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
-                try {
+                try (CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType())) {
                     if (vertices.iterator().hasNext()) {
                         builder.addError(ukey, MessageFormat.format(Messages
                                 .getString("BundleValidator.uniquenessError"), uval));
                     }
-                } finally {
-                    vertices.close();
                 }
             }
         }
@@ -254,8 +251,7 @@ public final class BundleValidator {
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
-                CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
-                try {
+                try (CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType())) {
                     if (vertices.iterator().hasNext()) {
                         Vertex v = vertices.iterator().next();
                         // If it's the same vertex, we don't have a problem...
@@ -265,8 +261,6 @@ public final class BundleValidator {
 
                         }
                     }
-                } finally {
-                    vertices.close();
                 }
             }
         }

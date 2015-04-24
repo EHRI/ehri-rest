@@ -19,6 +19,7 @@
 
 package eu.ehri.project.commands;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -33,7 +34,6 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,10 +46,9 @@ public class CmdEntryPoint extends BaseCommand {
 
     /**
      * Default return codes for shell tools.
-     * 
+     * <p/>
      * 0 means 'OK', 1 'bad arguments', 2 'bad data',
      * 3 'bad permissions'
-     *
      */
     public static enum RetCode {
 
@@ -79,7 +78,7 @@ public class CmdEntryPoint extends BaseCommand {
     private static final Map<String, Class<? extends Command>> COMMANDS;
 
     static {
-        Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
+        Map<String, Class<? extends Command>> mmap = Maps.newHashMap();
         mmap.put(EadImport.NAME, EadImport.class);
         mmap.put(DcImport.NAME, DcImport.class);
         mmap.put(CsvDocDescImport.NAME, CsvDocDescImport.class);

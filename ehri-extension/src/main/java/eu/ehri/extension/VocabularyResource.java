@@ -174,7 +174,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         try {
             UserProfile user = getCurrentUser();
             Vocabulary vocabulary = views.detail(id, user);
-            CrudViews<Concept> conceptViews = new CrudViews<Concept>(
+            CrudViews<Concept> conceptViews = new CrudViews<>(
                     graph, Concept.class, vocabulary);
             ActionManager actionManager = new ActionManager(graph, vocabulary);
             Iterable<Concept> concepts = vocabulary.getConcepts();
@@ -188,10 +188,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        } catch (ValidationError e) {
+        } catch (SerializationError | ValidationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } finally {

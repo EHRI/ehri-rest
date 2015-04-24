@@ -21,6 +21,7 @@ package eu.ehri.project.importers;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -40,7 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +63,7 @@ public abstract class AbstractImporter<T> {
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
-    protected List<ImportCallback> callbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> callbacks = Lists.newLinkedList();
 
     private NodeProperties pc;
 

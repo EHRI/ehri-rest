@@ -19,10 +19,11 @@
 
 package eu.ehri.project.importers.properties;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,11 +42,11 @@ public class NodeProperties {
     public static final String SEP = ",";
     private Map<String, List<PropertiesRow>> p;
     private Set<String> allKnownNodes;
-    
+
     public NodeProperties() {
-        titles = new ArrayList<String>();
-        p = new HashMap<String, List<PropertiesRow>>();
-        allKnownNodes  = new HashSet<String>();
+        titles = Lists.newArrayList();
+        p = Maps.newHashMap();
+        allKnownNodes = Sets.newHashSet();
     }
 
     public void setTitles(String titles) {
@@ -71,7 +72,7 @@ public class NodeProperties {
         String nodetype = row.split(SEP)[0];
         allKnownNodes.add(nodetype);
         if (!p.containsKey(nodetype)) {
-            p.put(nodetype, new ArrayList<PropertiesRow>());
+            p.put(nodetype, Lists.<PropertiesRow>newArrayList());
         }
         p.get(nodetype).add(createPropertiesCheck(row));
     }
@@ -116,15 +117,15 @@ public class NodeProperties {
 
     protected Set<String> getRequiredProperties(String nodetype) {
         List<PropertiesRow> parentrows = getReferencedProperties(nodetype);
-        if(parentrows == null || p.get(nodetype) == null)
+        if (parentrows == null || p.get(nodetype) == null)
             return null;
         parentrows.addAll(p.get(nodetype));
 
-        Set<String> required = new HashSet<String>();
+        Set<String> required = Sets.newHashSet();
         for (PropertiesRow r : parentrows) {
             if ("1".equals(r.get(REQUIRED))) {
-                
-                if ( r.get(HANDLERNAME) == null) {
+
+                if (r.get(HANDLERNAME) == null) {
                     required.add(r.get(PROPERTY));
                 } else {
                     required.add(r.get(HANDLERNAME));
@@ -133,23 +134,23 @@ public class NodeProperties {
         }
         return required;
     }
+
     /**
-     * 
-     * @param nodetype
+     * @param nodetype the type of node
      * @return returns a list of properties that were referenced from this node-type, like
      * address or description
      */
-    private List<PropertiesRow> getReferencedProperties(String nodetype){
-        List<PropertiesRow> referencedrows = new ArrayList<PropertiesRow>();
-        for(PropertiesRow prop : p.get(nodetype)){
-            if(allKnownNodes.contains(prop.get(PROPERTY))){
-                for(PropertiesRow pr : p.get(prop.get(PROPERTY))){
-                    referencedrows.add(pr.clone().add(PROPERTY, prop.get(PROPERTY)+"/"+pr.get(PROPERTY)));
+    private List<PropertiesRow> getReferencedProperties(String nodetype) {
+        List<PropertiesRow> referencedrows = Lists.newArrayList();
+        for (PropertiesRow prop : p.get(nodetype)) {
+            if (allKnownNodes.contains(prop.get(PROPERTY))) {
+                for (PropertiesRow pr : p.get(prop.get(PROPERTY))) {
+                    referencedrows.add(pr.clone().add(PROPERTY, prop.get(PROPERTY) + "/" + pr.get(PROPERTY)));
                 }
                 referencedrows.addAll(p.get(prop.get(PROPERTY)));
             }
         }
-        if(nodetype.endsWith("Description")){
+        if (nodetype.endsWith("Description")) {
             referencedrows.addAll(p.get("unit"));
             referencedrows.addAll(p.get("description"));
         }
@@ -158,13 +159,13 @@ public class NodeProperties {
 
     protected Set<String> getHandlerProperties(String node) {
         List<PropertiesRow> parentrows = getReferencedProperties(node);
-        if(parentrows == null || p.get(node) == null)
+        if (parentrows == null || p.get(node) == null)
             return null;
         parentrows.addAll(p.get(node));
 
-        Set<String> required = new HashSet<String>();
+        Set<String> required = Sets.newHashSet();
         for (PropertiesRow r : parentrows) {
-            if ( r.get(HANDLERNAME) == null) {
+            if (r.get(HANDLERNAME) == null) {
                 required.add(r.get(PROPERTY));
             } else {
                 required.add(r.get(HANDLERNAME));

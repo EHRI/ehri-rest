@@ -113,12 +113,9 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
 
     @Override
     public <E> CloseableIterable<E> getFrames(EntityClass type, Class<E> cls) {
-        CloseableIterable<Vertex> vertices = getVertices(type);
-        try {
-            return new WrappingCloseableIterable<E>(
+        try (CloseableIterable<Vertex> vertices = getVertices(type)) {
+            return new WrappingCloseableIterable<>(
                     graph.frameVertices(getVertices(type), cls));
-        } finally {
-            vertices.close();
         }
     }
 
@@ -126,13 +123,10 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     public Vertex getVertex(String id) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
-        CloseableIterable<Vertex> query = getIndex().get(EntityType.ID_KEY, id);
-        try {
+        try (CloseableIterable<Vertex> query = getIndex().get(EntityType.ID_KEY, id)) {
             return query.iterator().next();
         } catch (NoSuchElementException e) {
             throw new ItemNotFound(id);
-        } finally {
-            query.close();
         }
     }
 
@@ -161,24 +155,21 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         for (String id : ids) {
             verts.add(getVertex(id));
         }
-        return new WrappingCloseableIterable<Vertex>(verts);
+        return new WrappingCloseableIterable<>(verts);
     }
 
     @Override
     public CloseableIterable<Vertex> getVertices(String key, Object value, final EntityClass type) {
         // NB: This is rather annoying.
-        CloseableIterable<Vertex> query = getIndex().get(key, value);
         List<Vertex> elems = Lists.newArrayList();
-        try {
+        try (CloseableIterable<Vertex> query = getIndex().get(key, value)) {
             for (Vertex v : query) {
                 if (getEntityClass(v).equals(type)) {
                     elems.add(v);
                 }
             }
-        } finally {
-            query.close();
         }
-        return new WrappingCloseableIterable<Vertex>(elems);
+        return new WrappingCloseableIterable<>(elems);
     }
 
     @Override
@@ -222,8 +213,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         Index<Vertex> index = getIndex();
         Map<String, ?> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
-        CloseableIterable<Vertex> get = getIndex().get(EntityType.ID_KEY, id);
-        try {
+        try (CloseableIterable<Vertex> get = getIndex().get(EntityType.ID_KEY, id)) {
             try {
                 Vertex node = get.iterator().next();
                 replaceProperties(index, node, indexData, indexKeys);
@@ -231,8 +221,6 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
             } catch (NoSuchElementException e) {
                 throw new ItemNotFound(id);
             }
-        } finally {
-            get.close();
         }
     }
 
@@ -367,7 +355,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
             EntityClass entityClass = EntityClass.withName(typeName);
             return ClassUtils.getPropertyKeys(entityClass.getEntityClass());
         } catch (Exception e) {
-            return new EmptyIterable<String>();
+            return new EmptyIterable<>();
         }
     }
 }

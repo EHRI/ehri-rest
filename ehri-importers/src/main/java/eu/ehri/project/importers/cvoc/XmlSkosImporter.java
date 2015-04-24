@@ -20,6 +20,8 @@
 package eu.ehri.project.importers.cvoc;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
@@ -56,8 +58,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +87,7 @@ public final class XmlSkosImporter implements SkosImporter {
     private static final String CONCEPT_URL = "url";
 
     // map from the internal Skos identifier to the placeholder
-    private Map<String, ConceptPlaceholder> conceptLookup = new HashMap<String, ConceptPlaceholder>();
+    private final Map<String, ConceptPlaceholder> conceptLookup = Maps.newHashMap();
 
     private Optional<String> getLogMessage(String msg) {
         return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
@@ -142,11 +143,8 @@ public final class XmlSkosImporter implements SkosImporter {
 
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
-        FileInputStream ios = new FileInputStream(filePath);
-        try {
+        try (FileInputStream ios = new FileInputStream(filePath)) {
             return importFile(ios, logMessage);
-        } finally {
-            ios.close();
         }
     }
 
@@ -269,13 +267,13 @@ public final class XmlSkosImporter implements SkosImporter {
                             // for making the vocabulary (relation) structure in the next step
                             List<String> broaderIds = getBroaderConceptIds(element);
                             logger.debug("Concept has " + broaderIds.size()
-                                    + " broader ids: " + broaderIds.toString());
+                                    + " broader ids: " + broaderIds);
                             List<String> relatedIds = getRelatedConceptIds(element);
                             logger.debug("Concept has " + relatedIds.size()
-                                    + " related ids: " + relatedIds.toString());
+                                    + " related ids: " + relatedIds);
 
                             String storeId = unit.getId();//id;
-                            String skosId = (String) unit.getDataValue(CONCEPT_URL);
+                            String skosId = unit.getDataValue(CONCEPT_URL);
                             // referal
                             logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
                             conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
@@ -329,8 +327,7 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param element
      */
     private List<String> getBroaderConceptIds(Element element) {
-        List<String> ids = new ArrayList<String>();
-
+        List<String> ids = Lists.newArrayList();
         NodeList nodeList = element.getElementsByTagName("skos:broader");
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node typeNode = nodeList.item(i);
@@ -347,8 +344,7 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param element
      */
     private List<String> getRelatedConceptIds(Element element) {
-        List<String> ids = new ArrayList<String>();
-
+        List<String> ids = Lists.newArrayList();
         NodeList nodeList = element.getElementsByTagName("skos:related");
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node typeNode = nodeList.item(i);
@@ -505,7 +501,7 @@ public final class XmlSkosImporter implements SkosImporter {
         boolean result = false;
         for (Concept relatedBy : from.concept.getRelatedByConcepts()) {
             //logger.debug("Related By: " + relatedBy.asVertex().getProperty(EntityType.ID_KEY));
-            String relatedByStoreId = (String) relatedBy.asVertex().getProperty(EntityType.ID_KEY);
+            String relatedByStoreId = relatedBy.asVertex().getProperty(EntityType.ID_KEY);
             if (relatedByStoreId == to.storeId) {
                 result = true;
                 break; // found
@@ -548,7 +544,7 @@ public final class XmlSkosImporter implements SkosImporter {
      */
     Map<String, Object> extractCvocConcept(Node conceptNode)
             throws ValidationError {
-        Map<String, Object> dataMap = new HashMap<String, Object>();
+        Map<String, Object> dataMap = Maps.newHashMap();
 
         // are we using the rdf:about attribute as 'identifier'
         Node namedItem = conceptNode.getAttributes().getNamedItem("rdf:about");
@@ -564,7 +560,7 @@ public final class XmlSkosImporter implements SkosImporter {
     }
 
     private Map<String, Object> extractRelations(Element element, String skosName) {
-        Map<String, Object> relationNode = new HashMap<String, Object>();
+        Map<String, Object> relationNode = Maps.newHashMap();
 
         NodeList textNodeList = element.getElementsByTagName(skosName);
         for (int i = 0; i < textNodeList.getLength(); i++) {
@@ -588,7 +584,7 @@ public final class XmlSkosImporter implements SkosImporter {
     Map<String, Object> extractCvocConceptDescriptions(Element conceptElement) {
         // extract and process the textual items (with a language)
         // one description for each language, so the languageCode serve as a key into the map
-        Map<String, Object> descriptionData = new HashMap<String, Object>();
+        Map<String, Object> descriptionData = Maps.newHashMap();
 
         // one and only one
         extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Ontology.NAME_KEY, "skos:prefLabel", conceptElement);
@@ -690,7 +686,7 @@ public final class XmlSkosImporter implements SkosImporter {
                 ((List<String>) d.get(textName)).add(text);
             } else {
                 // create a list first
-                List<String> textList = new ArrayList<String>();
+                List<String> textList = Lists.newArrayList();
                 textList.add(text);
                 d.put(textName, textList);
             }
@@ -709,7 +705,7 @@ public final class XmlSkosImporter implements SkosImporter {
             d = (Map<String, Object>) descriptionData.get(lang);
         } else {
             // create one
-            d = new HashMap<String, Object>();
+            d = Maps.newHashMap();
             d.put("languageCode", lang); // initialize
             descriptionData.put(lang, d);
         }

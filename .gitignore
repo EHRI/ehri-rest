@@ -26,6 +26,9 @@ local.properties
 .settings/
 .loadpath
 
+# Intelli inspections
+*/true
+
 # External tool builders
 .externalToolBuilders/
 

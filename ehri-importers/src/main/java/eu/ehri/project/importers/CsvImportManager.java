@@ -123,13 +123,7 @@ public class CsvImportManager extends AbstractImportManager {
                     }
                 }
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         } finally {
             if (reader != null) {

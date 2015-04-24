@@ -20,6 +20,7 @@
 package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
@@ -31,8 +32,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -76,10 +75,10 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * Key in the node that denotes the object's identifier. 
      */
     public static final String OBJECT_IDENTIFIER = "objectIdentifier";
-    protected final Stack<Map<String, Object>> currentGraphPath = new Stack<Map<String, Object>>();
+    protected final Stack<Map<String, Object>> currentGraphPath = new Stack<>();
     protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
-    protected final Stack<String> currentPath = new Stack<String>();
-    protected final Stack<StringBuilder> currentText = new Stack<StringBuilder>();
+    protected final Stack<String> currentPath = new Stack<>();
+    protected final Stack<StringBuilder> currentText = new Stack<>();
 
     protected String currentEntity = null;
 
@@ -104,7 +103,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         super();
         this.importer = importer;
         this.properties = properties;
-        currentGraphPath.push(new HashMap<String, Object>());
+        currentGraphPath.push(Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -152,7 +151,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 if (languageMap.isEmpty()) {
                     currentGraphPath.peek().put(LANGUAGE_OF_DESCRIPTION, languageMap);
                 }
-                Map<String, Object> m = new HashMap<String, Object>();
+                Map<String, Object> m = Maps.newHashMap();
                 m.put(LANGUAGE_OF_DESCRIPTION, languagePrefix);
                 languageMap.put(languagePrefix, m);
             }
@@ -163,7 +162,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
             logger.debug("Pushing depth... " + depth + " -> " + qName);
-            currentGraphPath.push(new HashMap<String, Object>());
+            currentGraphPath.push(Maps.<String, Object>newHashMap());
         }
 
         // Store attributes that are listed in the .properties file
@@ -221,7 +220,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         if (c.containsKey(key)) {
             ((List<Map<String, Object>>) c.get(key)).add(subgraph);
         } else {
-            List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> l = Lists.newArrayList();
             l.add(subgraph);
             c.put(key, l);
         }
@@ -280,8 +279,8 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * Stores this property value pair in the current DocumentNode.
      * If the property already exists, it is added to the value list.
      *
-     * @param property
-     * @param value
+     * @param property  the property name
+     * @param value     the property value
      */
     protected void putPropertyInCurrentGraph(String property, String value) {
         putPropertyInGraph(currentGraphPath.peek(), property, value);
@@ -320,7 +319,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
             if (propertyList instanceof List) {
                 ((List<Object>) propertyList).add(valuetrimmed);
             } else {
-                List<Object> o = new ArrayList<Object>();
+                List<Object> o = Lists.newArrayList();
                 o.add(c.get(property));
                 o.add(valuetrimmed);
                 c.put(property, o);
@@ -336,11 +335,11 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param property name of the property to overwrite
      * @param value new value for the property.
      */
-    protected void overwritePropertyInCurrentGraph(String property, Object value){
+    protected void overwritePropertyInCurrentGraph(String property, String value){
         overwritePropertyInCurrentGraph(currentGraphPath.peek(), property, value);
     }
     
-    private void overwritePropertyInCurrentGraph(Map<String, Object> c,String property, Object value){
+    private void overwritePropertyInCurrentGraph(Map<String, Object> c,String property, String value){
         logger.debug("overwriteProp: " + property + " " + value);
         c.put(property, value);
     }

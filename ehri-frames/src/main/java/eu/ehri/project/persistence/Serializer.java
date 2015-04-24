@@ -123,7 +123,7 @@ public final class Serializer {
         }
 
         public Builder withCache(int size) {
-            this.cache = new LruCache<String, Bundle>(size);
+            this.cache = new LruCache<>(size);
             return this;
         }
 

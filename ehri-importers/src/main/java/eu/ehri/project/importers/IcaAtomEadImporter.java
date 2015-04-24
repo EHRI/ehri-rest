@@ -19,6 +19,8 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -36,8 +38,6 @@ import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,63 +54,56 @@ import java.util.Map;
 public class IcaAtomEadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
-    /**
-     * Depth of top-level items. For reasons as-yet-undetermined in the bowels of the SamXmlHandler, top level items are
-     * at depth 1 (rather than 0)
-     */
-    private final int TOP_LEVEL_DEPTH = 1;
-    private Serializer mergeSerializer;
+    private final Serializer mergeSerializer;
 
     /**
      * Construct an EadImporter object.
      *
-     * @param framedGraph
-     * @param permissionScope
-     * @param log
+     * @param graph           the framed graph
+     * @param permissionScope the permission scope
+     * @param log             the import log
      */
-    public IcaAtomEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
-        mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
-
+    public IcaAtomEadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
+        super(graph, permissionScope, log);
+        mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
-     * @param itemData
-     * @throws ValidationError when the itemData does not contain an identifier for the unit.
+     * @param data the data map
+     * @throws ValidationError when the data does not contain an identifier for the unit.
      */
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
+    public DocumentaryUnit importItem(Map<String, Object> data, List<String> idPath) throws ValidationError {
 
 
         BundleDAO persister = getPersister(idPath);
-
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(data));
 
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
         }
-        logger.debug("Imported item: " + itemData.get("name"));
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+        logger.debug("Imported item: " + data.get("name"));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(data, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
+        for (Map<String, Object> dpb : extractDates(data)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
+        for (Map<String, Object> rel : extractRelations(data)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
             logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
-        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        Map<String, Object> unknowns = extractUnknownProperties(data);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : extractMaintenanceEvent(data)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -118,7 +111,6 @@ public class IcaAtomEadImporter extends EaImporter {
 
         Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath),
                 DocumentaryUnit.class);
-//                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
@@ -163,17 +155,17 @@ public class IcaAtomEadImporter extends EaImporter {
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
          */
-        List<String> lpath = new ArrayList<String>();
-        for(String p : getPermissionScope().idPath()){
+        List<String> lpath = Lists.newArrayList();
+        for (String p : getPermissionScope().idPath()) {
             lpath.add(p);
         }
-        for(String p : idPath){
+        for (String p : idPath) {
             lpath.add(p);
         }
         Bundle withIds = unit.generateIds(lpath);
-        
-        
-        logger.debug("idpath: "+withIds.getId());
+
+
+        logger.debug("idpath: " + withIds.getId());
         if (manager.exists(withIds.getId())) {
             try {
                 //read the current item’s bundle
@@ -209,12 +201,12 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "AccessPoint";
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
-                    Map<String, Object> relationNode = new HashMap<String, Object>();
+                    Map<String, Object> relationNode = Maps.newHashMap();
                     for (String eventkey : origRelation.keySet()) {
                         logger.debug(eventkey);
                         if (eventkey.endsWith(REL)) {
@@ -234,7 +226,6 @@ public class IcaAtomEadImporter extends EaImporter {
         return list;
     }
 
-   
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {

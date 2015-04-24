@@ -237,6 +237,17 @@ public class BundleTest {
     }
 
     @Test
+    public void testWithMetaData() throws Exception {
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Bundle bundle2 = newDesc.withMetaDataValue("key", "val");
+        Map<String, Object> meta = bundle2.getMetaData();
+        assertTrue(meta.containsKey("key"));
+        assertEquals("val", meta.get("key"));
+    }
+
+    @Test
     public void testHasRelations() throws Exception {
         assertTrue(bundle.hasRelations(Ontology.DESCRIPTION_FOR_ENTITY));
     }

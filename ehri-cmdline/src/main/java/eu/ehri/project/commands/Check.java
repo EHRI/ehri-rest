@@ -105,9 +105,7 @@ public class Check extends BaseCommand implements Command {
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
         for (EntityClass entityClass : types) {
-            CloseableIterable<? extends Frame> items
-                    = manager.getFrames(entityClass, entityClass.getEntityClass());
-            try {
+            try (CloseableIterable<? extends Frame> items = manager.getFrames(entityClass, entityClass.getEntityClass())) {
                 for (Frame item : items) {
                     AccessibleEntity entity = graph.frame(item.asVertex(), AccessibleEntity.class);
                     PermissionScope scope = entity.getPermissionScope();
@@ -125,8 +123,6 @@ public class Check extends BaseCommand implements Command {
                         }
                     }
                 }
-            } finally {
-                items.close();
             }
         }
     }
@@ -144,9 +140,7 @@ public class Check extends BaseCommand implements Command {
     }
 
     private void checkOwnerPermGrantsHaveNoScope(final GraphManager manager) throws Exception {
-        CloseableIterable<PermissionGrant> items
-                = manager.getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class);
-        try {
+        try (CloseableIterable<PermissionGrant> items = manager.getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
             for (PermissionGrant grant : items) {
                 Frame scope = grant.getScope();
                 Frame perm = grant.getPermission();
@@ -155,8 +149,6 @@ public class Check extends BaseCommand implements Command {
                             String.format("Owner permission grant with scope: " + grant.asVertex().getId()));
                 }
             }
-        } finally {
-            items.close();
         }
 
     }

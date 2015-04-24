@@ -83,7 +83,7 @@ public class EntityDelete extends BaseCommand implements Command {
                 UserProfile.class);
 
         try {
-            LoggingCrudViews<AccessibleEntity> api = new LoggingCrudViews<AccessibleEntity>(
+            LoggingCrudViews<AccessibleEntity> api = new LoggingCrudViews<>(
                     graph, AccessibleEntity.class);
             api.delete(id, user, Optional.of(logMessage));
             graph.getBaseGraph().commit();

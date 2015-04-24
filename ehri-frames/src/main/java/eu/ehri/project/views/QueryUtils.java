@@ -53,7 +53,7 @@ public class QueryUtils {
      */
     static SortedMap<String, Pair<Query.FilterPredicate, String>> parseFilters(
             Iterable<String> filterList) {
-        ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>> builder = new ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>>(
+        ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>> builder = new ImmutableSortedMap.Builder<>(
                 Ordering.natural());
         Splitter psplit = Splitter.on("__");
         Splitter vsplit = Splitter.on(":");
@@ -64,10 +64,10 @@ public class QueryUtils {
                 String value = kv.get(1);
                 List<String> pp = Iterables.toList(psplit.split(ppred));
                 if (pp.size() == 1) {
-                    builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
+                    builder.put(pp.get(0), new Pair<>(
                             Query.FilterPredicate.EQUALS, value));
                 } else if (pp.size() > 1) {
-                    builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
+                    builder.put(pp.get(0), new Pair<>(
                             Query.FilterPredicate.valueOf(pp.get(1)), value));
                 }
             }
@@ -82,7 +82,7 @@ public class QueryUtils {
      * @return A map of order specs
      */
     static SortedMap<String, Query.Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
-        ImmutableSortedMap.Builder<String, Query.Sort> builder = new ImmutableSortedMap.Builder<String, Query.Sort>(
+        ImmutableSortedMap.Builder<String, Query.Sort> builder = new ImmutableSortedMap.Builder<>(
                 Ordering.natural());
         Splitter psplit = Splitter.on("__");
         for (String spec : orderSpecs) {
@@ -163,9 +163,9 @@ public class QueryUtils {
                 return Optional.absent();
             }
             if (dir.equals("->")) {
-                traversals.add(new Pair<String,Direction>(rel, Direction.OUT));
+                traversals.add(new Pair<>(rel, Direction.OUT));
             } else {
-                traversals.add(new Pair<String,Direction>(rel, Direction.IN));
+                traversals.add(new Pair<>(rel, Direction.IN));
             }
         }
         return Optional.of(new TraversalPath(property, traversals));

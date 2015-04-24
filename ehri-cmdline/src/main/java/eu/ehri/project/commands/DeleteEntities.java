@@ -80,7 +80,7 @@ public class DeleteEntities extends BaseCommand implements Command {
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         Class<?> cls = type.getEntityClass();
 
-        String logMessage = "Deleting items of type " + type.toString() + " via the command-line";
+        String logMessage = "Deleting items of type " + type + " via the command-line";
         if (cmdLine.hasOption("log")) {
             logMessage = cmdLine.getOptionValue("log");
         }
@@ -110,15 +110,12 @@ public class DeleteEntities extends BaseCommand implements Command {
 
     private void deleteIds(FramedGraph<? extends TransactionalGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
-        CrudViews<AccessibleEntity> views = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class);
-        CloseableIterable<AccessibleEntity> items = manager.getFrames(type, AccessibleEntity.class);
-        try {
+        CrudViews<AccessibleEntity> views = new CrudViews<>(graph, AccessibleEntity.class);
+        try (CloseableIterable<AccessibleEntity> items = manager.getFrames(type, AccessibleEntity.class)) {
             for (AccessibleEntity acc : items) {
                 System.out.println(acc.getId());
                 views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
             }
-        } finally {
-            items.close();
         }
     }
 }

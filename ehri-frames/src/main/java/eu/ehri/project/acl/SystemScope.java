@@ -69,21 +69,21 @@ public enum SystemScope implements PermissionScope {
     }
 
     public Iterable<PermissionGrant> getPermissionGrants() {
-        return new EmptyIterable<PermissionGrant>();
+        return new EmptyIterable<>();
     }
 
     public Iterable<PermissionScope> getPermissionScopes() {
-        return new EmptyIterable<PermissionScope>();
+        return new EmptyIterable<>();
     }
 
     @Override
     public Iterable<AccessibleEntity> getContainedItems() {
-        return new EmptyIterable<AccessibleEntity>();
+        return new EmptyIterable<>();
     }
 
     @Override
     public Iterable<AccessibleEntity> getAllContainedItems() {
-        return new EmptyIterable<AccessibleEntity>();
+        return new EmptyIterable<>();
     }
 
     @Override

@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
@@ -65,8 +66,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,13 +91,13 @@ public final class JenaSkosImporter implements SkosImporter {
         if (map.containsKey(key)) {
             map.get(key).add(value);
         } else {
-            Set<URI> uris = new HashSet<URI>();
+            Set<URI> uris = Sets.newHashSet();
             uris.add(value);
             map.put(key, uris);
         }
     }
 
-    public static final Map<String, Set<URI>> LANGUAGE_PROPS = new HashMap<String, Set<URI>>();
+    public static final Map<String, Set<URI>> LANGUAGE_PROPS = Maps.newHashMap();
 
     //    = ImmutableMap.<String, Set<URI>>builder()
     static {
@@ -196,11 +196,8 @@ public final class JenaSkosImporter implements SkosImporter {
     @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, ValidationError {
-        FileInputStream ios = new FileInputStream(filePath);
-        try {
+        try (FileInputStream ios = new FileInputStream(filePath)) {
             return importFile(ios, logMessage);
-        } finally {
-            ios.close();
         }
     }
 
@@ -226,7 +223,7 @@ public final class JenaSkosImporter implements SkosImporter {
         OntModel model = ModelFactory.createOntologyModel();
         model.read(ios, null, format);
         OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-        logger.debug("in import file: " + SkosRDFVocabulary.CONCEPT.getURI().toString());
+        logger.debug("in import file: " + SkosRDFVocabulary.CONCEPT.getURI());
         ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
         Map<Resource, Concept> imported = Maps.newHashMap();
 
@@ -277,11 +274,11 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private Mutation<Concept> importConcept(Resource item) throws ValidationError {
-        logger.debug("Importing: {}", item.toString());
+        logger.debug("Importing: {}", item);
         Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())));
 
-        Map<AuthoritativeItem, String> linkedConcepts = new HashMap<AuthoritativeItem, String>();
+        Map<AuthoritativeItem, String> linkedConcepts = Maps.newHashMap();
 
         List<Bundle> undetermined = getUndeterminedRelations(item, linkedConcepts);
         for (Bundle description : getDescriptions(item)) {
@@ -306,14 +303,10 @@ public final class JenaSkosImporter implements SkosImporter {
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
                 Link link;
-                link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
+                link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
                 unit.addLink(link);
                 concept.addLink(link);
-            } catch (ItemNotFound ex) {
-                logger.error(ex.getMessage());
-            } catch (PermissionDenied ex) {
-                logger.error(ex.getMessage());
-            } catch (ValidationError ex) {
+            } catch (ItemNotFound | ValidationError | PermissionDenied ex) {
                 logger.error(ex.getMessage());
             }
 

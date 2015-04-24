@@ -151,14 +151,11 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         InputStream stream = listFile.contentEquals("-")
                 ? System.in
                 : new FileInputStream(new File(listFile));
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
-        try {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8))) {
             String file;
             while ((file = br.readLine()) != null) {
                 filePaths.add(file);
             }
-        } finally {
-            br.close();
         }
     }
 }

@@ -32,11 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//import org.xml.sax.Attributes;
 
 /**
  * Handler of EAC-CPF files. Creates a {@link Map} for the {@link EacImporter} to
@@ -110,8 +108,6 @@ public class EacHandler extends EaHandler {
 
     @Override
     protected List<String> getSchemas() {
-        List<String> schemas = new ArrayList<String>();
-        schemas.add("eac.xsd");
-        return schemas;
+        return Lists.newArrayList("eac.xsd");
     }
 }

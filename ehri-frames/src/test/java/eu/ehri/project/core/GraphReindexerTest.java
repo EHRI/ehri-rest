@@ -19,6 +19,7 @@
 
 package eu.ehri.project.core;
 
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
@@ -30,7 +31,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,7 +49,7 @@ public class GraphReindexerTest extends ModelTestBase {
 
     @Test
     public void reindex() {
-    	HashMap<EntityClass, Long> countBefore = countTypes();
+    	Map<EntityClass, Long> countBefore = countTypes();
         if (graph.getBaseGraph().getClass().isAssignableFrom(IndexableGraph.class)) {
             fail("Graph is not indexable: " + graph.getBaseGraph());
         }
@@ -66,9 +67,9 @@ public class GraphReindexerTest extends ModelTestBase {
 	 *
      * @return the counts
      */
-    private HashMap<EntityClass, Long> countTypes() {
-    	HashMap<EntityClass, Long> counts = new HashMap<EntityClass, Long>();
-    	Index<Vertex> index = ((IndexableGraph)graph.getBaseGraph()).getIndex(INDEX_NAME,
+    private Map<EntityClass, Long> countTypes() {
+    	Map<EntityClass, Long> counts = Maps.newHashMap();
+        Index<Vertex> index = ((IndexableGraph)graph.getBaseGraph()).getIndex(INDEX_NAME,
                 Vertex.class);
     	EntityClass[] entityClasses = EntityClass.values();
         for (EntityClass entityClass : entityClasses) {

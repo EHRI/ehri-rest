@@ -79,6 +79,6 @@ public final class ItemPermissionSet {
 
     @Override
     public String toString() {
-        return "<ItemPermissions: " + set.toString() + ">";
+        return "<ItemPermissions: " + set + ">";
     }
 }
