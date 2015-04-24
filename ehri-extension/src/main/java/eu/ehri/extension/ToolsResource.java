@@ -311,9 +311,8 @@ public class ToolsResource extends AbstractRestResource {
             throws IOException, IdRegenerator.IdCollisionError {
         try {
             EntityClass entityClass = EntityClass.withName(type);
-            CloseableIterable<AccessibleEntity> frames = manager
-                    .getFrames(entityClass, AccessibleEntity.class);
-            try {
+            try (CloseableIterable<AccessibleEntity> frames = manager
+                    .getFrames(entityClass, AccessibleEntity.class)) {
                 List<List<String>> lists = new IdRegenerator(graph)
                         .withActualRename(commit)
                         .collisionMode(collisions)
@@ -321,8 +320,6 @@ public class ToolsResource extends AbstractRestResource {
                         .reGenerateIds(frames);
                 graph.getBaseGraph().commit();
                 return makeCsv(lists);
-            } finally {
-                frames.close();
             }
         } finally {
             cleanupTransaction();
@@ -394,8 +391,7 @@ public class ToolsResource extends AbstractRestResource {
         int done = 0;
         try {
             for (EntityClass entityClass : types) {
-                CloseableIterable<Description> descriptions = manager.getFrames(entityClass, Description.class);
-                try {
+                try (CloseableIterable<Description> descriptions = manager.getFrames(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
                         DescribedEntity entity = desc.getEntity();
                         if (entity != null) {
@@ -416,8 +412,6 @@ public class ToolsResource extends AbstractRestResource {
                             }
                         }
                     }
-                } finally {
-                    descriptions.close();
                 }
             }
             if (commit && done > 0) {

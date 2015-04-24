@@ -19,7 +19,8 @@
 
 package eu.ehri.project.importers.properties;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 
 /**
@@ -30,19 +31,21 @@ public class PropertiesRow {
     Map<String, String> properties;
 
     protected PropertiesRow() {
-        properties = new HashMap<String, String>();
+        properties = Maps.newHashMap();
     }
 
     @Override
-    protected PropertiesRow clone(){
+    protected PropertiesRow clone() {
         PropertiesRow p = new PropertiesRow();
         p.properties.putAll(properties);
         return p;
     }
+
     /**
      * only add key value pair if value is no empty String
+     *
      * @param key
-     * @param value 
+     * @param value
      */
     protected PropertiesRow add(String key, String value) {
         if (!value.equals("")) {
@@ -52,9 +55,8 @@ public class PropertiesRow {
     }
 
     /**
-     * 
      * @param key
-     * @return return value if exists, null otherwise 
+     * @return return value if exists, null otherwise
      */
     protected String get(String key) {
         return properties.get(key);

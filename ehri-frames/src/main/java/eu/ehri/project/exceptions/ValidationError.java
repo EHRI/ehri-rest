@@ -51,9 +51,8 @@ public class ValidationError extends Exception {
     }
 
     private static String formatErrors(String clsName, ErrorSet errorSet) {
-        StringBuilder buf = new StringBuilder(String.format(
-                "A validation error occurred building %s: %s%n", clsName, errorSet.toJson()));
-        return buf.toString();
+        return String.format(
+                "A validation error occurred building %s: %s%n", clsName, errorSet.toJson());
     }
     
     public String getMessage() {

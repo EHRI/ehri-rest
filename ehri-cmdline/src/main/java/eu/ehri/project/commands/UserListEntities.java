@@ -78,7 +78,7 @@ public class UserListEntities extends BaseCommand implements Command {
                 cmdLine.getOptionValue("user"), UserProfile.class);
 
         @SuppressWarnings("unchecked")
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+        Query<AccessibleEntity> query = new Query<>(graph,
                 (Class<AccessibleEntity>) cls);
         for (AccessibleEntity acc : query.page(user)) {
             System.out.println(acc.getId());

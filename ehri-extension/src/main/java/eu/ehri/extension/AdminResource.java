@@ -161,14 +161,11 @@ public class AdminResource extends AbstractRestResource {
     // Helpers...
 
     private String getNextDefaultUserId() {
-        CloseableIterable<Vertex> query = manager.getVertices(EntityClass.USER_PROFILE);
-        try {
+        try (CloseableIterable<Vertex> query = manager.getVertices(EntityClass.USER_PROFILE)) {
             long start = Iterables.size(query) + 1;
             while (manager.exists(String.format(DEFAULT_USER_ID_FORMAT,
                     DEFAULT_USER_ID_PREFIX, start))) start++;
             return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start);
-        } finally {
-            query.close();
         }
     }
 

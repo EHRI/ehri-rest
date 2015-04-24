@@ -61,14 +61,13 @@ import java.util.List;
  * Provides a web service interface for the AuthoritativeSet items. model.
  * Authoritative Sets are containers for Historical Agents
  * (authority files.)
- * 
+ *
  * @author Mike Bryant (http://github.com/mikesname)
- * 
  */
 @Path(Entities.AUTHORITATIVE_SET)
 public class AuthoritativeSetResource extends
         AbstractAccessibleEntityResource<AuthoritativeSet>
-            implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
+        implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
     public AuthoritativeSetResource(@Context GraphDatabaseService database) {
         super(database, AuthoritativeSet.class);
@@ -131,7 +130,7 @@ public class AuthoritativeSetResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
     public Response create(Bundle bundle,
-                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return createItem(bundle, accessors);
@@ -175,18 +174,15 @@ public class AuthoritativeSetResource extends
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
         try {
-        	LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<AuthoritativeItem>(graph,
+            LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<>(graph,
                     AuthoritativeItem.class, set);
-        	Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
-        	for (AuthoritativeItem agent : agents) {
-        		agentViews.delete(agent.getId(), user);
-        	}
+            Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
+            for (AuthoritativeItem agent : agents) {
+                agentViews.delete(agent.getId(), user);
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        } catch (SerializationError e) {
+        } catch (ValidationError | SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -200,7 +196,7 @@ public class AuthoritativeSetResource extends
     @Path("/{id:.+}/" + Entities.HISTORICAL_AGENT)
     @Override
     public Response createChild(@PathParam("id") String id,
-                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try {

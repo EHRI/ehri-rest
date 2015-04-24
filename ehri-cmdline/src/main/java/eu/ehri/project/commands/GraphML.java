@@ -131,11 +131,8 @@ public class GraphML extends BaseCommand implements Command {
             writer.outputGraph(System.out);
         } else {
             // try to open or create the file for writing
-            OutputStream out = new FileOutputStream(filepath);
-            try {
+            try (OutputStream out = new FileOutputStream(filepath)) {
                 writer.outputGraph(out);
-            } finally {
-                out.close();
             }
         }
     }
@@ -144,12 +141,9 @@ public class GraphML extends BaseCommand implements Command {
            CommandLine cmdLine) throws Exception {
        GraphMLReader reader = new GraphMLReader(graph);
        String filepath = (String)cmdLine.getArgList().get(0);
-	   InputStream inputStream = new FileInputStream(filepath);
-       try {
+       try (InputStream inputStream = new FileInputStream(filepath)) {
            reader.inputGraph(inputStream);
            GraphManagerFactory.getInstance(graph).rebuildIndex();
-       } finally {
-           inputStream.close();
        }
    }
 }

@@ -47,7 +47,7 @@ public class InheritedItemPermissionSet {
          */
         public Builder(String accessorId, List<PermissionType> permissionSet) {
             AccessorPermissions<List<PermissionType>> permissions
-                    = new AccessorPermissions<List<PermissionType>>(accessorId, permissionSet);
+                    = new AccessorPermissions<>(accessorId, permissionSet);
             perms.add(permissions);
         }
 
@@ -59,7 +59,7 @@ public class InheritedItemPermissionSet {
          * @return The builder
          */
         public Builder withInheritedPermissions(String accessorId, List<PermissionType> permissionSet) {
-            perms.add(new AccessorPermissions<List<PermissionType>>(accessorId, permissionSet));
+            perms.add(new AccessorPermissions<>(accessorId, permissionSet));
             return this;
         }
 

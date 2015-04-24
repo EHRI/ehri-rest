@@ -47,7 +47,7 @@ public class InheritedGlobalPermissionSet {
          */
         public Builder(String accessorId, GlobalPermissionSet permissionSet) {
             AccessorPermissions<GlobalPermissionSet> permissions
-                    = new AccessorPermissions<GlobalPermissionSet>(accessorId, permissionSet);
+                    = new AccessorPermissions<>(accessorId, permissionSet);
             perms.add(permissions);
         }
 
@@ -59,7 +59,7 @@ public class InheritedGlobalPermissionSet {
          * @return The builder
          */
         public Builder withInheritedPermissions(String accessorId, GlobalPermissionSet permissionSet) {
-            perms.add(new AccessorPermissions<GlobalPermissionSet>(accessorId, permissionSet));
+            perms.add(new AccessorPermissions<>(accessorId, permissionSet));
             return this;
         }
 

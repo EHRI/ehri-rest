@@ -79,7 +79,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
         linkViews = new LinkViews(graph);
-        descriptionViews = new DescriptionViews<DescribedEntity>(graph, DescribedEntity.class);
+        descriptionViews = new DescriptionViews<>(graph, DescribedEntity.class);
     }
 
     @GET
@@ -202,7 +202,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @Path("/for/{id:.+}")
     public Response listRelatedItems(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        Query<Link> linkQuery = new Query<Link>(graph, Link.class)
+        Query<Link> linkQuery = new Query<>(graph, Link.class)
                 .setStream(isStreaming());
         return streamingPage(linkQuery.setStream(isStreaming()).page(
                 manager.getFrame(id, LinkableEntity.class).getLinks(),

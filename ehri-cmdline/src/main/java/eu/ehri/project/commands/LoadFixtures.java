@@ -71,11 +71,8 @@ public class LoadFixtures extends BaseCommand implements Command {
                         "Fixture file: '%s does not exist or is not a file", path));
             }
             System.err.println("Loading fixture file: " + path);
-            FileInputStream inputStream = new FileInputStream(file);
-            try {
+            try (FileInputStream inputStream = new FileInputStream(file)) {
                 loader.loadTestData(inputStream);
-            } finally {
-                inputStream.close();
             }
         } else {
             // Load default fixtures...

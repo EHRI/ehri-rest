@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,7 +118,8 @@ public abstract class GraphTestBase {
         final String id;
         final String type;
         final Object gid;
-        final Map<String,Object> data;
+        final Map<String, Object> data;
+
         public VertexProxy(Vertex v) {
             this.id = v.getProperty(EntityType.ID_KEY);
             this.type = v.getProperty(EntityType.TYPE_KEY);
@@ -131,6 +131,7 @@ public abstract class GraphTestBase {
                 }
             }
         }
+
         public String toString() {
             return "<" + id + " (" + type + ") [" + gid + "]>";
         }
@@ -138,7 +139,7 @@ public abstract class GraphTestBase {
         public String toStringVerbose() {
             StringBuilder builder = new StringBuilder(toString());
             builder.append("\n");
-            for (Map.Entry<String,Object> entry : data.entrySet()) {
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
                 builder.append(String.format("  %-15s : %s\n", entry.getKey(), entry.getValue()));
             }
             return builder.toString();
@@ -177,10 +178,11 @@ public abstract class GraphTestBase {
         public void printDebug(PrintStream printStream) {
             printDebug(printStream, false);
         }
-        private Map<String, Integer> countDistinctTypes(Set<VertexProxy> vs){
-            Map<String, Integer> counts = new HashMap<String, Integer>();
-            for(VertexProxy v : vs){
-                if(counts.containsKey(v.type))
+
+        private Map<String, Integer> countDistinctTypes(Set<VertexProxy> vs) {
+            Map<String, Integer> counts = Maps.newHashMap();
+            for (VertexProxy v : vs) {
+                if (counts.containsKey(v.type))
                     counts.put(v.type, counts.get(v.type) + 1);
                 else
                     counts.put(v.type, 1);
@@ -197,7 +199,7 @@ public abstract class GraphTestBase {
                     printStream.println(verbose ? proxy.toStringVerbose() : proxy.toString());
                 }
                 Map<String, Integer> counts = countDistinctTypes(added);
-                for(String key: counts.keySet()){
+                for (String key : counts.keySet()) {
                     printStream.println(key + ": " + counts.get(key));
                 }
                 printStream.println("GraphDiff - Nodes removed: " + removed.size());
@@ -205,7 +207,7 @@ public abstract class GraphTestBase {
                     printStream.println(verbose ? proxy.toStringVerbose() : proxy.toString());
                 }
                 counts = countDistinctTypes(removed);
-                for(String key: counts.keySet()){
+                for (String key : counts.keySet()) {
                     printStream.println(key + ": " + counts.get(key));
                 }
             }
@@ -216,13 +218,13 @@ public abstract class GraphTestBase {
         long l = Iterables.count(graph.getVertices());
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
             throw new RuntimeException("Too many vertex items in graph to fit into an integer!");
-        return (int)l;
+        return (int) l;
     }
 
     protected int getEdgeCount(FramedGraph<?> graph) {
         long l = Iterables.count(graph.getEdges());
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
             throw new RuntimeException("Too many edge items in graph to fit into an integer!");
-        return (int)l;
+        return (int) l;
     }
 }

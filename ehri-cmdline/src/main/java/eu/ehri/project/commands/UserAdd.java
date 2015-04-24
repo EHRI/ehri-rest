@@ -103,7 +103,7 @@ public class UserAdd extends BaseCommand implements Command {
         bundle = bundle.withId(nodeId);
 
         try {
-            LoggingCrudViews<UserProfile> view = new LoggingCrudViews<UserProfile>(
+            LoggingCrudViews<UserProfile> view = new LoggingCrudViews<>(
                     graph, UserProfile.class);
             UserProfile newUser = view.create(bundle, admin, getLogMessage(logMessage));
             for (String groupId : groups) {

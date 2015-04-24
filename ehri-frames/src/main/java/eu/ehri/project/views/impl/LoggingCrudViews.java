@@ -65,7 +65,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.cls = cls;
         this.scope = scope;
         actionManager = new ActionManager(graph, scope);
-        views = new CrudViews<E>(graph, cls, scope);
+        views = new CrudViews<>(graph, cls, scope);
     }
 
     /**
@@ -262,7 +262,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return A new view
      */
     public LoggingCrudViews<E> setScope(PermissionScope scope) {
-        return new LoggingCrudViews<E>(graph, cls,
+        return new LoggingCrudViews<>(graph, cls,
                 Optional.fromNullable(scope).or(SystemScope.INSTANCE));
     }
 
@@ -274,6 +274,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @return A new view object
      */
     public <T extends AccessibleEntity> LoggingCrudViews<T> setClass(Class<T> cls) {
-        return new LoggingCrudViews<T>(graph, cls, scope);
+        return new LoggingCrudViews<>(graph, cls, scope);
     }
 }

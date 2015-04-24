@@ -67,7 +67,7 @@ public class XmlImportProperties implements ImportProperties {
      * @return a set of key names that have the given value
      */
     public Set<String> getPropertiesWithValue(String value) {
-        Set<String> ps = new HashSet<String>();
+        Set<String> ps = new HashSet<>();
         Properties p = getProperties();
         for (Entry<Object, Object> property : p.entrySet()) {
             if (value.equals(property.getValue().toString()))
@@ -86,7 +86,7 @@ public class XmlImportProperties implements ImportProperties {
     }
 
     public Set<String> getAllNonAttributeProperties() {
-        Set<String> ps = new HashSet<String>();
+        Set<String> ps = new HashSet<>();
         Properties p = getProperties();
         for (Object key : p.keySet()) {
             if (!key.toString().startsWith("@"))
@@ -116,7 +116,7 @@ public class XmlImportProperties implements ImportProperties {
 
     @Override
     public Set<String> getAllNonAttributeValues() {
-        Set<String> values = new HashSet<String>();
+        Set<String> values = new HashSet<>();
         Properties p = getProperties();
         for (Object key : p.keySet()) {
             if (!key.toString().startsWith("@"))

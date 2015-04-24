@@ -132,6 +132,6 @@ public final class GlobalPermissionSet {
 
     @Override
     public String toString() {
-        return "<GlobalPermissions: " + matrix.toString() + ">";
+        return "<GlobalPermissions: " + matrix + ">";
     }
 }

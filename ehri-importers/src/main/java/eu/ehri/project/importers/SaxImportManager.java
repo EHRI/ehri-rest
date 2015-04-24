@@ -206,7 +206,7 @@ public class SaxImportManager extends AbstractImportManager {
 
     public SaxImportManager withProperties(XmlImportProperties properties) {
         return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass, handlerClass,
-                Optional.<XmlImportProperties>of(properties), extraCallbacks);
+                Optional.of(properties), extraCallbacks);
     }
 
     public SaxImportManager withProperties(String properties) {
@@ -215,7 +215,7 @@ public class SaxImportManager extends AbstractImportManager {
         } else {
             XmlImportProperties xmlImportProperties = new XmlImportProperties(properties);
             return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass, handlerClass,
-                    Optional.<XmlImportProperties>of(xmlImportProperties), extraCallbacks);
+                    Optional.of(xmlImportProperties), extraCallbacks);
         }
     }
 }

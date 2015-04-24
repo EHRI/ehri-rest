@@ -19,6 +19,8 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -37,30 +39,26 @@ import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:
- *
+ * <p/>
  * the archdesc should describe the purpose of this vc. it can not in itself refer to a DU.
- *
+ * <p/>
  * every c level is either 1) a virtual level (=VirtualLevel), or 2) it points to an existing DocumentaryUnit
  * (=VirtualReferrer) (and consequently to the entire subtree beneath it) 1) there is no repository-tag with a
  * ehri-label
- *
+ * <p/>
  * 2) there is exactly one repository-tag with an ehri-label <repository
  * label="ehri_repository_vc">il-002777</repository> (this will not be shown in the portal) and exactly one unitid with
  * a ehri-main-identifier label, that is identical to the existing unitid within the graph for this repository
- *
+ * <p/>
  * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
  * should not be any c-levels beneath such a c-level
  *
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- *
  */
 public class VirtualEadImporter extends EaImporter {
 
@@ -73,12 +71,12 @@ public class VirtualEadImporter extends EaImporter {
     /**
      * Construct an EadImporter object.
      *
-     * @param framedGraph
-     * @param permissionScope
-     * @param log
+     * @param graph           the framed graph
+     * @param permissionScope the permission scope
+     * @param log             the import log
      */
-    public VirtualEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
+        super(graph, permissionScope, log);
 
     }
 
@@ -88,7 +86,7 @@ public class VirtualEadImporter extends EaImporter {
      * existing DocDesc from an existing DocumentaryUnit (VirtualReferrer).
      *
      * @param itemData The data map
-     * @param idPath The identifiers of parent documents, not including those of the overall permission scope
+     * @param idPath   The identifiers of parent documents, not including those of the overall permission scope
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
@@ -138,47 +136,33 @@ public class VirtualEadImporter extends EaImporter {
                     VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
                     parent.addChild(frame);
                     frame.setPermissionScope(parent);
-                } else if (unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
-                    // no scope needed for top VirtualUnit
                 } else {
                     logger.error("Unknown scope type for virtual unit: {}", scopeType);
                 }
             }
             handleCallbacks(mutation);
-//        if (mutation.created()) {
-//            solveUndeterminedRelationships(frame, descBundle);
-//        }
             return frame;
-        } //find the referred Documentary Unit and RETURN it
-        //if (!isVirtualLevel) {//VirtualReferrer
-        else {
+        } else { //find the referred Documentary Unit and RETURN it
             try {
                 //find the DocumentaryUnit using the repository_id/unit_id combo
-                DocumentaryUnit d = findReferredToDocumentaryUnit(itemData);
-//                for (DocumentDescription desc : d.getDocumentDescriptions()) {
-//                    frame.addReferencedDescription(desc);
-//                }
-                return d;
+                return findReferredToDocumentaryUnit(itemData);
             } catch (ItemNotFound ex) {
                 throw new ValidationError(unit, ex.getKey(), ex.getMessage());
             }
         }
-
-
-
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "AccessPoint";
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
                 logger.debug(key + " found in data");
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
-                    Map<String, Object> relationNode = new HashMap<String, Object>();
+                    Map<String, Object> relationNode = Maps.newHashMap();
                     for (String eventkey : origRelation.keySet()) {
                         logger.debug(eventkey);
                         if (eventkey.endsWith(REL)) {
@@ -200,7 +184,7 @@ public class VirtualEadImporter extends EaImporter {
 
     /**
      * Creates a Map containing properties of a Virtual Unit.
-     *
+     * <p/>
      * These properties are the unit's identifiers.
      *
      * @param itemData Map of all extracted information
@@ -208,8 +192,7 @@ public class VirtualEadImporter extends EaImporter {
      * @throws ValidationError
      */
     protected Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
-
-        Map<String, Object> unit = new HashMap<String, Object>();
+        Map<String, Object> unit = Maps.newHashMap();
         if (itemData.get(OBJECT_ID) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
@@ -230,13 +213,13 @@ public class VirtualEadImporter extends EaImporter {
      * description's properties: all except the doc unit identifiers and unknown properties.
      *
      * @param itemData Map of all extracted information
-     * @param depth depth of node in the tree
+     * @param depth    depth of node in the tree
      * @return a Map representing a Documentary Unit Description node
      * @throws ValidationError
      */
     protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
 
-        Map<String, Object> unit = new HashMap<String, Object>();
+        Map<String, Object> unit = Maps.newHashMap();
         for (String key : itemData.keySet()) {
             if (!(key.equals(OBJECT_ID)
                     || key.equals(Ontology.OTHER_IDENTIFIERS)
@@ -256,12 +239,6 @@ public class VirtualEadImporter extends EaImporter {
         unitEntity = EntityClass.VIRTUAL_UNIT;
     }
 
-    /**
-     * if the itemData contains a known repository_id/unit_id pair, this will return false, true otherwise
-     *
-     * @param itemData
-     * @return
-     */
     private boolean isVirtualLevel(Map<String, Object> itemData) {
         return !(itemData.containsKey(REPOID) && itemData.containsKey(UNITID));
     }

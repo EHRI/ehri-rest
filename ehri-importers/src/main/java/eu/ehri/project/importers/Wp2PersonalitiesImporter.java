@@ -37,7 +37,6 @@ import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +68,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-        
+
         BundleDAO persister = getPersister();
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
@@ -91,7 +90,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
 
     private Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         if (itemData.containsKey("id")) {
             item.put(Ontology.IDENTIFIER_KEY, itemData.get("id"));
         } else {
@@ -102,9 +101,8 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
 
 
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
 
-//        SaxXmlHandler.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
@@ -127,7 +125,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
 
 
     /**
-     * @param itemData
+     * @param itemData the item data map
      * @return returns a List with Maps with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
     @Override
@@ -141,7 +139,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
         if (start != null && start.endsWith("00-00")) {
             start = start.substring(0, 4);
         }
-        if ( start != null) {
+        if (start != null) {
             items.put(Ontology.DATE_PERIOD_START_DATE, start);
             l.add(items);
         }

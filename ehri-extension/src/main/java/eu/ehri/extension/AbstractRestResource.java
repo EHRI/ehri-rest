@@ -217,7 +217,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return a query object
      */
     protected <T extends AccessibleEntity> Query<T> getQuery(Class<T> cls) {
-        return new Query<T>(graph, cls)
+        return new Query<>(graph, cls)
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
                 .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
                 .filter(getStringListQueryParam(FILTER_PARAM))

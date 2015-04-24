@@ -294,9 +294,7 @@ public class ImportResource extends AbstractRestResource {
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new DeserializationError(e.getMessage());
-        } catch (InputParseError e) {
+        } catch (IllegalArgumentException | InputParseError e) {
             throw new DeserializationError(e.getMessage());
         } finally {
             cleanupTransaction();

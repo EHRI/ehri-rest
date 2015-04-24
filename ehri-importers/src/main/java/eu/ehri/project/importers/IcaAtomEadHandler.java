@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -38,14 +39,13 @@ import java.util.Map;
  */
 public class IcaAtomEadHandler extends EadHandler {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(IcaAtomEadHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadHandler.class);
     private final List<DocumentaryUnit>[] children = new ArrayList[12];
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
-     * @param publicId
-     * @param systemId
+     * @param publicId the public component of the EAD DTD
+     * @param systemId the system component of the EAD DTD
      * @return returns essentially an empty dtd file
      * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
@@ -57,7 +57,7 @@ public class IcaAtomEadHandler extends EadHandler {
     }
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super(importer, properties);
-        children[depth] = new ArrayList<DocumentaryUnit>();
+        children[depth] = Lists.newArrayList();
     }
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         this(importer, new XmlImportProperties("icaatom.properties"));

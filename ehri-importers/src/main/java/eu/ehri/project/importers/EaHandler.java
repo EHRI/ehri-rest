@@ -55,7 +55,7 @@ public abstract class EaHandler extends SaxXmlHandler {
                 }else if(nameMap.get("namePart") instanceof List){
                     nameValue="";
                     for(Object p : (List)nameMap.get("namePart")){
-                        nameValue += p.toString()+ " ";
+                        nameValue += p+ " ";
                     }
                     
                 }else{

@@ -97,7 +97,7 @@ public class CountryAdd extends BaseCommand implements Command {
         bundle = bundle.withId(nodeId);
 
         try {
-            LoggingCrudViews<Country> view = new LoggingCrudViews<Country>(
+            LoggingCrudViews<Country> view = new LoggingCrudViews<>(
                     graph, Country.class);
             view.create(bundle, admin, getLogMessage(logMessage));
             graph.getBaseGraph().commit();

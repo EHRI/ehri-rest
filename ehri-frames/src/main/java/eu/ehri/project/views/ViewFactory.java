@@ -34,11 +34,11 @@ public class ViewFactory {
 
     public static <E extends AccessibleEntity> Crud<E> getCrudNoLogging(FramedGraph<?> graph,
             Class<E> cls) {
-        return new CrudViews<E>(graph, cls);
+        return new CrudViews<>(graph, cls);
     }
 
     public static <E extends AccessibleEntity> Crud<E> getCrudWithLogging(FramedGraph<?> graph,
             Class<E> cls) {
-        return new LoggingCrudViews<E>(graph, cls);
+        return new LoggingCrudViews<>(graph, cls);
     }
 }

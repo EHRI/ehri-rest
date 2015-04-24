@@ -70,15 +70,15 @@ public enum AnonymousAccessor implements Accessor {
     }
 
     public Iterable<Accessor> getParents() {
-        return new EmptyIterable<Accessor>();
+        return new EmptyIterable<>();
     }
 
     public Iterable<Accessor> getAllParents() {
-        return new EmptyIterable<Accessor>();
+        return new EmptyIterable<>();
     }
 
     public Iterable<PermissionGrant> getPermissionGrants() {
-        return new EmptyIterable<PermissionGrant>();
+        return new EmptyIterable<>();
     }
 
     public void addPermissionGrant(PermissionGrant grant) {

@@ -220,7 +220,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     public Response pageEventsForItem(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
+        AccessibleEntity item = new LoggingCrudViews<>(graph,
                 AccessibleEntity.class).detail(id, user);
         return streamingPage(getQuery(cls).setStream(true)
                 .page(item.getHistory(), user));
@@ -240,7 +240,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     public Response pageVersionsForItem(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
+        AccessibleEntity item = new LoggingCrudViews<>(graph,
                 AccessibleEntity.class).detail(id, user);
         return streamingPage(getQuery(Version.class).setStream(true)
                 .page(item.getAllPriorVersions(), user));

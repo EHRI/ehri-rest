@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +69,7 @@ public class EagHandler extends SaxXmlHandler {
 //            currentGraphPath.pop();
             depth--;
         }
-        
+
         currentPath.pop();
         //an EAG file consists of only 1 element, so if we're back at the root, we're done
         if (currentPath.isEmpty()) {
@@ -103,10 +102,9 @@ public class EagHandler extends SaxXmlHandler {
             }
         }
     }
-        @Override
+
+    @Override
     protected List<String> getSchemas() {
-        List<String> schemas = new ArrayList<String>();
-        schemas.add("eag.xsd");
-        return schemas;
+        return Lists.newArrayList("eag.xsd");
     }
 }

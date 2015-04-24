@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
@@ -35,7 +36,6 @@ import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +101,7 @@ public class UkrainianUnitImporter extends MapImporter {
     }
 
     private Map<String, Object> extractUnknownProperties(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> unknowns = new HashMap<String, Object>();
+        Map<String, Object> unknowns = Maps.newHashMap();
         for (String key : itemData.keySet()) {
             if (p.getProperty(key).equals("UNKNOWN")) {
                 unknowns.put(key, itemData.get(key));
@@ -119,7 +119,7 @@ public class UkrainianUnitImporter extends MapImporter {
 
     private Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         putIfNotNull(item, "scope", itemData.get(p.getFirstPropertyWithValue("scope")));
         putIfNotNull(item, "priority", itemData.get(p.getFirstPropertyWithValue("priority")));
         putIfNotNull(item, "copyrightStatus", itemData.get(p.getFirstPropertyWithValue("copyrightStatus")));
@@ -131,13 +131,14 @@ public class UkrainianUnitImporter extends MapImporter {
         return item;
     }
 
-    private void putIfNotNull(Map<String, Object> item, String key, Object value){
-        if(value != null && !value.toString().isEmpty()){
+    private void putIfNotNull(Map<String, Object> item, String key, Object value) {
+        if (value != null && !value.toString().isEmpty()) {
             item.put(key, value);
         }
     }
+
     public Map<String, Object> constructDateMap(Map<String, Object> itemData) {
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         String origDate = itemData.get("dates").toString();
         if (origDate.indexOf(MULTIVALUE_SEP) > 0) {
             String[] dates = itemData.get("dates").toString().split(MULTIVALUE_SEP);
@@ -151,14 +152,13 @@ public class UkrainianUnitImporter extends MapImporter {
     }
 
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, String language) {
-        Map<String, Object> item = new HashMap<String, Object>();
-
+        Map<String, Object> item = Maps.newHashMap();
 
         for (String key : itemData.keySet()) {
-            if ((!key.equals("identifier")) && 
-                    !(p.getProperty(key).equals("IGNORE")) && 
-                    !(p.getProperty(key).equals("UNKNOWN")) && 
-                    (!key.equals("dates")) && 
+            if ((!key.equals("identifier")) &&
+                    !(p.getProperty(key).equals("IGNORE")) &&
+                    !(p.getProperty(key).equals("UNKNOWN")) &&
+                    (!key.equals("dates")) &&
                     (!p.getProperty(key).equals("scope")) && //on the unit
                     (!p.getProperty(key).equals("copyrightStatus")) && // on the unit
                     (!p.getProperty(key).equals("priority")) && // on the unit

@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -36,7 +37,6 @@ import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,41 +45,40 @@ import java.util.Map;
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
  * a hierarchical structure describing their child items. This means that we need to recursively descend through the
  * archdesc and c,c01-12 levels.
- * 
+ * <p/>
  * will preserve existing 'otherIdentifiers' on the DocumentaryUnit.
- *
+ * <p/>
  * Furthermore, it will always try to resolve the UndeterminedRelationships, not just on creation.
  * This is not standard behaviour, so use with caution.
- *
+ * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- *
  */
 public class AraEadImporter extends EadImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(AraEadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
-    private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
-    private Serializer mergeSerializer;
+    private final EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
+    private final Serializer mergeSerializer;
 
     /**
      * Construct an EadImporter object.
      *
-     * @param framedGraph
-     * @param permissionScope
-     * @param log
+     * @param graph           the framed graph
+     * @param permissionScope the permission scope
+     * @param log             the import log
      */
-    public AraEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
-        mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
+    public AraEadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
+        super(graph, permissionScope, log);
+        mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
      * @param itemData The data map
-     * @param idPath The identifiers of parent documents, not including those of the overall permission scope
+     * @param idPath   The identifiers of parent documents, not including those of the overall permission scope
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
@@ -110,7 +109,7 @@ public class AraEadImporter extends EadImporter {
             for (String u : unknowns.keySet()) {
                 unknownProperties.append(u);
             }
-            logger.info("Unknown Properties found: " + unknownProperties.toString());
+            logger.info("Unknown Properties found: " + unknownProperties);
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
         // extractDocumentaryUnit does not throw ValidationError on missing ID
@@ -145,10 +144,10 @@ public class AraEadImporter extends EadImporter {
         }
         handleCallbacks(mutation);
         logger.debug("============== " + frame.getIdentifier() + " created:" + mutation.created());
-        
+
         //BEWARE: it will always try to solve the UndeterminedRelationships, not only on creation!
 //        if (mutation.created()) {
-            solveUndeterminedRelationships(frame, descBundle);
+        solveUndeterminedRelationships(frame, descBundle);
 //        }
         return frame;
 
@@ -159,7 +158,7 @@ public class AraEadImporter extends EadImporter {
      * finds any bundle in the graph with the same ObjectIdentifier. if it exists it replaces the Description in the
      * given language, else it just saves it
      *
-     * @param unit - the DocumentaryUnit to be saved
+     * @param unit       - the DocumentaryUnit to be saved
      * @param descBundle - the documentsDescription to replace any previous ones with this language
      * @return A bundle with description relationships merged.
      * @throws ValidationError
@@ -171,7 +170,7 @@ public class AraEadImporter extends EadImporter {
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
          */
-        List<String> lpath = new ArrayList<String>();
+        List<String> lpath = Lists.newArrayList();
         for (String p : getPermissionScope().idPath()) {
             lpath.add(p);
         }
@@ -189,11 +188,11 @@ public class AraEadImporter extends EadImporter {
                 //determine if previous existing DocUnit had 'otherIdentifiers', if so, add to existing withIds
                 if (oldBundle.getData().keySet().contains(Ontology.OTHER_IDENTIFIERS)) {
                     Object otherIdentifiers = oldBundle.getData().get(Ontology.OTHER_IDENTIFIERS);
-                    if(unit.getData().keySet().contains(Ontology.OTHER_IDENTIFIERS)){
-                        if(otherIdentifiers instanceof List){
-                            ((List<String>)otherIdentifiers).add(unit.getDataValue(Ontology.OTHER_IDENTIFIERS).toString());
-                        }else if (otherIdentifiers instanceof String){
-                            List<String> allOtherIdentifiers = new ArrayList<String>();
+                    if (unit.getData().keySet().contains(Ontology.OTHER_IDENTIFIERS)) {
+                        if (otherIdentifiers instanceof List) {
+                            ((List<String>) otherIdentifiers).add(unit.getDataValue(Ontology.OTHER_IDENTIFIERS).toString());
+                        } else if (otherIdentifiers instanceof String) {
+                            List<String> allOtherIdentifiers = Lists.newArrayList();
                             allOtherIdentifiers.add(otherIdentifiers.toString());
                             allOtherIdentifiers.add(unit.getDataValue(Ontology.OTHER_IDENTIFIERS).toString());
                             otherIdentifiers = allOtherIdentifiers;
@@ -202,7 +201,6 @@ public class AraEadImporter extends EadImporter {
                     withIds = withIds.withDataValue(Ontology.OTHER_IDENTIFIERS, otherIdentifiers);
                 }
 
-                
 
                 //if the unit exists, with a desc with the same sourcefileid, overwrite, else create new desc
                 //filter out dependents that a) are descriptions, b) have the same language/code
@@ -232,7 +230,7 @@ public class AraEadImporter extends EadImporter {
                     if (oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
                             || !thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())) {
                         descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                        logger.info("other description found (" + defaultDescIdentifier + "), creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY).toString());
+                        logger.info("other description found (" + defaultDescIdentifier + "), creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY));
                     }
                 }
 
@@ -248,6 +246,4 @@ public class AraEadImporter extends EadImporter {
             return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
     }
-
-    
 }

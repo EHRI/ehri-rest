@@ -19,13 +19,13 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +61,6 @@ public class TerezinDataConverter {
                 values[1] = quotes[1];
             }
             if (values.length == 2) {
-//            logger.info(values[0] + " -> " + values[1]);
                 String[] datevalues = values[1].split(";");
                 for (String datevalue : datevalues) {
                     List<Calendar> list = parseDate(datevalue);
@@ -81,8 +80,7 @@ public class TerezinDataConverter {
 
     public static List<Calendar> parseDate(String datevalue) {
         String trimmedDate = datevalue.trim();
-//        logger.debug("date to parse: " + trimmedDate);
-        List<Calendar> dates = new ArrayList<Calendar>();
+        List<Calendar> dates = Lists.newArrayList();
         dates.add(Calendar.getInstance());
 
         if(trimmedDate.startsWith("before ")){
@@ -104,6 +102,7 @@ public class TerezinDataConverter {
             dates.add(1, Calendar.getInstance());
             return dates;
         }
+
         // April 1942
         //July 1946
         ParsePosition p = new ParsePosition(0);
@@ -125,7 +124,7 @@ public class TerezinDataConverter {
         Matcher m;
         //1941 - June 1943
         if ((m = parseDate(trimmedDate, "(\\d{4})\\s*-\\s*(\\D+\\s+\\d{4})")) != null) {
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)).intValue());
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)));
             dates.get(0).set(Calendar.MONTH, Calendar.JANUARY);
             dates.get(0).set(Calendar.DATE, 1);
 
@@ -164,51 +163,51 @@ public class TerezinDataConverter {
 
         //1.11.1943-10.11.1943
         if ((m = parseDate(trimmedDate, "(\\d+)\\.(\\d+)\\.(\\d{4}).*?-.*?(\\d+)\\.(\\d+)\\.(\\d{4})")) != null) {
-            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)).intValue());
-            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)).intValue() - 1); //Calendar.month counts from 0 ... 11 
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(3)).intValue());
+            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)));
+            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)) - 1); //Calendar.month counts from 0 ... 11
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(3)));
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.DATE, new Integer(m.group(4)).intValue());
-            dates.get(1).set(Calendar.MONTH, new Integer(m.group(5)).intValue() - 1);
-            dates.get(1).set(Calendar.YEAR, new Integer(m.group(6)).intValue());
+            dates.get(1).set(Calendar.DATE, new Integer(m.group(4)));
+            dates.get(1).set(Calendar.MONTH, new Integer(m.group(5)) - 1);
+            dates.get(1).set(Calendar.YEAR, new Integer(m.group(6)));
 
             return dates;
         }
         //1.12. - 24.12.1942
         if ((m = parseDate(trimmedDate, "(\\d+)\\.(\\d+)\\..*?-.*?(\\d*)\\.(\\d*)\\.(\\d{4})")) != null) {
-            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)).intValue());
-            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)).intValue() - 1); //Calendar.month counts from 0 ... 11 
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(5)).intValue());
+            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)));
+            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)) - 1); //Calendar.month counts from 0 ... 11
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(5)));
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.DATE, new Integer(m.group(3)).intValue());
-            dates.get(1).set(Calendar.MONTH, new Integer(m.group(4)).intValue() - 1);
-            dates.get(1).set(Calendar.YEAR, new Integer(m.group(5)).intValue());
+            dates.get(1).set(Calendar.DATE, new Integer(m.group(3)));
+            dates.get(1).set(Calendar.MONTH, new Integer(m.group(4)) - 1);
+            dates.get(1).set(Calendar.YEAR, new Integer(m.group(5)));
 
             return dates;
         }
         // 1. - 30.11.1942
         if ((m = parseDate(trimmedDate, "(\\d+)\\.\\s*?-\\s*?(\\d*)\\.(\\d*)\\.(\\d{4})")) != null) {
-            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)).intValue());
-            dates.get(0).set(Calendar.MONTH, new Integer(m.group(3)).intValue() - 1); //Calendar.month counts from 0 ... 11 
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(4)).intValue());
+            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)));
+            dates.get(0).set(Calendar.MONTH, new Integer(m.group(3)) - 1); //Calendar.month counts from 0 ... 11
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(4)));
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.DATE, new Integer(m.group(2)).intValue());
-            dates.get(1).set(Calendar.MONTH, new Integer(m.group(3)).intValue() - 1);
-            dates.get(1).set(Calendar.YEAR, new Integer(m.group(4)).intValue());
+            dates.get(1).set(Calendar.DATE, new Integer(m.group(2)));
+            dates.get(1).set(Calendar.MONTH, new Integer(m.group(3)) - 1);
+            dates.get(1).set(Calendar.YEAR, new Integer(m.group(4)));
 
             return dates;
         }
         // 1940 - 1942
         if ((m = parseDate(trimmedDate, "(\\d{4})\\s*-\\s*(\\d{4})")) != null) {
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)).intValue());
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)));
             dates.get(0).set(Calendar.MONTH, Calendar.JANUARY);
             dates.get(0).set(Calendar.DATE, 1);
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.YEAR, new Integer(m.group(2)).intValue());
+            dates.get(1).set(Calendar.YEAR, new Integer(m.group(2)));
             dates.get(1).set(Calendar.MONTH, Calendar.DECEMBER);
             dates.get(1).set(Calendar.DATE, 31);
 
@@ -216,12 +215,12 @@ public class TerezinDataConverter {
         }
         // 1940 - 42
         if ((m = parseDate(trimmedDate, "(\\d{4})\\s*-\\s*(\\d{2})")) != null) {
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)).intValue());
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)));
             dates.get(0).set(Calendar.MONTH, Calendar.JANUARY);
             dates.get(0).set(Calendar.DATE, 1);
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.YEAR, 1900+new Integer(m.group(2)).intValue());
+            dates.get(1).set(Calendar.YEAR, 1900+ new Integer(m.group(2)));
             dates.get(1).set(Calendar.MONTH, Calendar.DECEMBER);
             dates.get(1).set(Calendar.DATE, 31);
 
@@ -229,26 +228,26 @@ public class TerezinDataConverter {
         }
         //20.3.1942
         if ((m = parseDate(trimmedDate, "(\\d*)\\.(\\d*)\\.(\\d{4})")) != null) {
-            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)).intValue());
-            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)).intValue() - 1);
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(3)).intValue());
+            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)));
+            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)) - 1);
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(3)));
             return dates;
         }
         //05.03.43
         if ((m = parseDate(trimmedDate, "(\\d*)\\.(\\d*)\\.(\\d{2})")) != null) {
-            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)).intValue());
-            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)).intValue() - 1);
-            dates.get(0).set(Calendar.YEAR, 1900+new Integer(m.group(3)).intValue());
+            dates.get(0).set(Calendar.DATE, new Integer(m.group(1)));
+            dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)) - 1);
+            dates.get(0).set(Calendar.YEAR, 1900+ new Integer(m.group(3)));
             return dates;
         }
         //1942
         if ((m = parseDate(trimmedDate, "(\\d{4})")) != null) {
-            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)).intValue());
+            dates.get(0).set(Calendar.YEAR, new Integer(m.group(1)));
             dates.get(0).set(Calendar.MONTH, Calendar.JANUARY);
             dates.get(0).set(Calendar.DATE, 1);
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.YEAR, new Integer(m.group(1)).intValue());
+            dates.get(1).set(Calendar.YEAR, new Integer(m.group(1)));
             dates.get(1).set(Calendar.MONTH, Calendar.DECEMBER);
             dates.get(1).set(Calendar.DATE, 31);
 
@@ -262,10 +261,7 @@ public class TerezinDataConverter {
         Matcher matcher = yearPattern.matcher(datevalue);
         if (matcher.matches()) {
             return matcher;
-//        } else {
-//            logger.debug("no match found with " + pattern);
         }
         return null;
-
     }
 }

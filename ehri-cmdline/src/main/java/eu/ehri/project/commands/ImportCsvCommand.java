@@ -19,6 +19,7 @@
 
 package eu.ehri.project.commands;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -33,7 +34,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +77,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
 
-        List<String> filePaths = new LinkedList<String>();
+        List<String> filePaths = Lists.newLinkedList();
         for (int i = 0; i < cmdLine.getArgList().size(); i++) {
             filePaths.add((String) cmdLine.getArgList().get(i));
         }

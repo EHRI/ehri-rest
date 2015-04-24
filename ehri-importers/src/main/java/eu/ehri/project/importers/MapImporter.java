@@ -19,6 +19,8 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -37,9 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,6 +58,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
     private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
+
     // Various date patterns
     private final Pattern[] datePatterns = {
         // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
@@ -71,12 +71,10 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
         Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
         Pattern.compile("^(\\d{2})th century$"),
-//        Pattern.compile("^(\\d{1,2}-\\d{1,2}-\\d{4}) - (\\d{1,2}-\\d{1,2}-\\d{4})$"),
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
         //bundesarchive: 1906/19
         Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
         Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})"),
-//       1935-03/1935-05
         Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
         Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
@@ -95,17 +93,18 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         logger.debug("nr of dates found: " + extractedDates.size());
 
     }
+
     /**
-     * extract datevalues from datamap
-     * @param data
+     * Extract datevalues from datamap
+     *
+     * @param data the data map
      * @return returns a List with the separated datevalues
      */
     protected static Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
-        Map<String, String> datesAsString = new HashMap<String, String>();
+        Map<String, String> datesAsString = Maps.newHashMap();
         Object value;
         for (Entry<String, Object> property : data.entrySet()) {
             if (dates.containsProperty(property.getKey()) && (value = property.getValue()) != null) {
-//                logger.debug("---- extract dates -------" + property + ": " + value);
                 if (property.getValue() instanceof String) {
                     String dateValue = (String) value;
                     for (String d : dateValue.split(",")) {
@@ -115,8 +114,6 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
                     for (String s : (List<String>) value) {
                         datesAsString.put(s, property.getKey());
                     }
-                } else {
-//                    logger.error("ERROR WITH DATES " + value);
                 }
             }
         }
@@ -126,11 +123,11 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     /**
      * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
-     * @param data
+     * @param data the data map
      */
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
-        List<Map<String, Object>> extractedDates = new LinkedList<Map<String, Object>>();
+        List<Map<String, Object>> extractedDates = Lists.newLinkedList();
         Map<String, String> datevalues = returnDatesAsString(data, dates);
         for (String s : datevalues.keySet()) {
             try {
@@ -145,13 +142,14 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     }
     
     /**
-     * the dates that have been extracted to the extractedDates will be removed from the data map
-     * @param data
-     * @param extractedDates 
+     * The dates that have been extracted to the extractedDates will be removed from the data map
+     *
+     * @param data the data map
+     * @param extractedDates the set of extracted dates
      */
     protected void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates){
         Map<String, String> datevalues = returnDatesAsString(data, dates);
-        Map<String, String> datetypes = new HashMap<String, String>();
+        Map<String, String> datetypes = Maps.newHashMap();
         for(String datevalue: datevalues.keySet()){
             datetypes.put(datevalues.get(datevalue), null);
         }
@@ -190,7 +188,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      */
     @Override
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
             if (key.equals("maintenanceEvent")) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
@@ -211,7 +209,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      */
     @Override
     public Map<String, Object> getMaintenanceEvent(Map<String, Object> event) {
-        Map<String, Object> me = new HashMap<String, Object>();
+        Map<String, Object> me = Maps.newHashMap();
         for (Entry<String, Object> eventEntry : event.entrySet()) {
             if (eventEntry.getKey().equals("maintenanceEvent/type")) {
                 me.put(MaintenanceEvent.EVENTTYPE, eventEntry.getValue());
@@ -250,7 +248,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     /**
      * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
-     * @param date
+     * @param date the data map
      * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
     private Map<String, Object> extractDate(Object date) /*throws ValidationError*/ {
@@ -260,7 +258,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     }
 
     private Map<String, Object> matchDate(String date) {
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = Maps.newHashMap();
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
@@ -291,10 +289,8 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         DateTimeFormatter fmt = ISODateTimeFormat.date();
         String returndate = fmt.print(DateTime.parse(date));
         if (returndate.startsWith("00")) {
-//            logger.debug("strange date: " + returndate);
             returndate = "19" + returndate.substring(2);
             date = "19" + date;
-//            logger.debug("strange date: " + returndate);
         }
         if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
             if (!date.equals(returndate)) {
@@ -318,12 +314,12 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     /**
      * extract data nodes from the data, that are not covered by their respectable properties file.
      *
-     * @param data
+     * @param data the data map
      * @return returns 1 Map of all the tags that were not handled by the property file of this Importer
      */
     protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data) {
-        List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
-        Map<String, Object> unit = new HashMap<String, Object>();
+        List<Map<String, Object>> l = Lists.newArrayList();
+        Map<String, Object> unit = Maps.newHashMap();
         for (Entry<String, Object> property : data.entrySet()) {
             if (property.getKey().startsWith(SaxXmlHandler.UNKNOWN)) {
                 unit.put(property.getKey().replace(SaxXmlHandler.UNKNOWN, ""), property.getValue());

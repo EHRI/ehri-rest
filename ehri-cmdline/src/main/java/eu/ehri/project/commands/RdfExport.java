@@ -82,11 +82,8 @@ public class RdfExport extends BaseCommand implements Command {
 
         PropertyGraphSail propertyGraphSail = new PropertyGraphSail(graph.getBaseGraph(), false);
         SailGraph sailGraph = new SailGraph(propertyGraphSail);
-        OutputStream outputStream = new FileOutputStream((String)cmdLine.getArgList().get(0));
-        try {
+        try (OutputStream outputStream = new FileOutputStream((String) cmdLine.getArgList().get(0))) {
             sailGraph.saveRDF(outputStream, fmt);
-        } finally {
-            outputStream.close();
         }
 
         return 0;

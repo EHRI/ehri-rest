@@ -63,8 +63,7 @@ public class FindReplace {
     public long propertyValue(EntityClass entityClass, String propertyName,
             String existingValue, String newValue) {
         checkLegalPropertyName(propertyName);
-        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
-        try {
+        try (CloseableIterable<Vertex> vertices = manager.getVertices(entityClass)) {
             long changes = 0L;
             for (Vertex v : vertices) {
                 Object current = v.getProperty(propertyName);
@@ -83,8 +82,6 @@ public class FindReplace {
                 }
             }
             return changes;
-        } finally {
-            vertices.close();
         }
     }
 
@@ -102,8 +99,7 @@ public class FindReplace {
     public long propertyValueRE(EntityClass entityClass, String propertyName,
             Pattern pattern, String replacement) {
         checkLegalPropertyName(propertyName);
-        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
-        try {
+        try (CloseableIterable<Vertex> vertices = manager.getVertices(entityClass)) {
             long changes = 0L;
             for (Vertex v : vertices) {
                 Object current = v.getProperty(propertyName);
@@ -123,8 +119,6 @@ public class FindReplace {
                 }
             }
             return changes;
-        } finally {
-            vertices.close();
         }
     }
 
@@ -138,8 +132,7 @@ public class FindReplace {
      */
     public long propertyName(EntityClass entityClass, String propertyName, String newPropertyName) {
         checkLegalPropertyName(propertyName);
-        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
-        try {
+        try (CloseableIterable<Vertex> vertices = manager.getVertices(entityClass)) {
             long changes = 0L;
             for (Vertex v : vertices) {
                 Set<String> propertyKeys = v.getPropertyKeys();
@@ -151,8 +144,6 @@ public class FindReplace {
                 }
             }
             return changes;
-        } finally {
-            vertices.close();
         }
     }
 

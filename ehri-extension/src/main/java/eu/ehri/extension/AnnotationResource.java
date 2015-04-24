@@ -184,7 +184,7 @@ public class AnnotationResource
     public Response listAnnotationsForSubtree(
             @PathParam("id") String id)
             throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
-        AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
+        AccessibleEntity item = new CrudViews<>(graph, AccessibleEntity.class)
                 .detail(id, getRequesterUserProfile());
         Query<Annotation> query = getQuery(Annotation.class)
                 .setStream(isStreaming());

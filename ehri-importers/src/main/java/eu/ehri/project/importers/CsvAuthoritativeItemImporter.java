@@ -37,7 +37,6 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +94,7 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
 
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         if (itemData.containsKey("id")) {
             item.put(Ontology.IDENTIFIER_KEY, itemData.get("id"));
         } else {
@@ -107,7 +106,7 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
   
 
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = Maps.newHashMap();
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
 

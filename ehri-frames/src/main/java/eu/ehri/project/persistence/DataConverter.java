@@ -310,9 +310,7 @@ class DataConverter {
         try {
             printDocument(doc, baos);
             return baos.toString("UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (TransformerException e) {
+        } catch (IOException | TransformerException e) {
             throw new RuntimeException(e);
         }
     }

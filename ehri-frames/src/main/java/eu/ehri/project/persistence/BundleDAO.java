@@ -90,7 +90,7 @@ public final class BundleDAO {
             throws ValidationError, ItemNotFound {
         Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> mutation = updateInner(bundleWithIds);
-        return new Mutation<T>(graph.frame(mutation.getNode(), cls),
+        return new Mutation<>(graph.frame(mutation.getNode(), cls),
                 mutation.getState(), mutation.getPrior());
     }
 
@@ -120,7 +120,7 @@ public final class BundleDAO {
             throws ValidationError {
         Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
-        return new Mutation<T>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
+        return new Mutation<>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
                 vertexMutation.getPrior());
     }
 
@@ -162,7 +162,7 @@ public final class BundleDAO {
             if (manager.exists(bundle.getId())) {
                 return updateInner(bundle);
             } else {
-                return new Mutation<Vertex>(createInner(bundle), MutationState.CREATED);
+                return new Mutation<>(createInner(bundle), MutationState.CREATED);
             }
         } catch (ItemNotFound e) {
             throw new RuntimeException(
@@ -208,10 +208,10 @@ public final class BundleDAO {
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData(), bundle.getPropertyKeys());
                 updateDependents(node, bundle.getBundleClass(), bundle.getRelations());
-                return new Mutation<Vertex>(node, MutationState.UPDATED, nodeBundle);
+                return new Mutation<>(node, MutationState.UPDATED, nodeBundle);
             } else {
                 logger.debug("Not updating equivalent bundle {}", bundle.getId());
-                return new Mutation<Vertex>(node, MutationState.UNCHANGED);
+                return new Mutation<>(node, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {
             throw new RuntimeException("Unexpected serialization error " +
@@ -295,7 +295,7 @@ public final class BundleDAO {
     }
 
     private Set<String> getUpdateSet(Multimap<String, Bundle> relations) {
-        Set<String> updating = new HashSet<String>();
+        Set<String> updating = new HashSet<>();
         for (String relation : relations.keySet()) {
             for (Bundle child : relations.get(relation)) {
                 updating.add(child.getId());
