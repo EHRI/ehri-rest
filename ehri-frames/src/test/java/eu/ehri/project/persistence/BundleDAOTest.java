@@ -137,14 +137,16 @@ public class BundleDAOTest extends ModelTestBase {
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        Bundle bundle = new Serializer(graph).vertexFrameToBundle(c1);
+        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
+        Bundle bundle = new Serializer(graph).vertexFrameToBundle(cd1);
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
-        assertEquals(2, Iterables.size(c1.getDocumentDescriptions()
-                .iterator().next().getDatePeriods()));
+        assertEquals(2, Iterables.size(cd1.getDatePeriods()));
 
         System.out.println("Orig bundle: " + bundle);
 
-        String dpid = "c1-dp2";
+        String deletePath = "hasDate[0]";
+        String dpid = BundleUtils
+                .getBundle(bundle, deletePath).getId();
         try {
             manager.getFrame(dpid, DatePeriod.class);
         } catch (ItemNotFound e) {
@@ -154,7 +156,7 @@ public class BundleDAOTest extends ModelTestBase {
 
         // Delete the *second* date period from the first description...
         Bundle newBundle = BundleUtils.deleteBundle(
-                bundle, "describes[0]/hasDate[1]");
+                bundle, deletePath);
         System.out.println("Delete bundle: " + newBundle);
         BundleDAO persister = new BundleDAO(graph);
         Mutation<DocumentaryUnit> mutation
@@ -192,9 +194,9 @@ public class BundleDAOTest extends ModelTestBase {
     public void testDeletingWholeBundle() throws SerializationError,
             ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
+        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
-        assertEquals(2, toList(c1.getDocumentDescriptions()
-                .iterator().next().getDatePeriods()).size());
+        assertEquals(2, toList(cd1.getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(
                 EntityClass.DATE_PERIOD, DatePeriod.class));
 

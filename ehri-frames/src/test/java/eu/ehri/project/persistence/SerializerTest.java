@@ -27,10 +27,7 @@ import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -111,8 +108,11 @@ public class SerializerTest extends AbstractFixtureTest {
         Bundle serialized = serializer.vertexFrameToBundle(link1);
         Bundle target0 = BundleUtils.getBundle(serialized, "hasLinkTarget[0]");
         assertEquals(1, target0.depth());
-        assertEquals("c3",
-                BundleUtils.get(serialized, "hasLinkTarget[0]/identifier"));
+        String t1 = BundleUtils.get(serialized, "hasLinkTarget[0]/identifier");
+        String t2 = BundleUtils.get(serialized, "hasLinkTarget[1]/identifier");
+        assertNotEquals(t1, t2);
+        assertTrue(Lists.newArrayList("c3", "a1").contains(t1));
+        assertTrue(Lists.newArrayList("c3", "a1").contains(t2));
         try {
             BundleUtils.getBundle(serialized, "hasLinkTarget[0]/childOf[0]/describes[0]");
             fail("Max ifBelowLevel serialization should ignore childOf relation for item c3");
