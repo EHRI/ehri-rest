@@ -37,22 +37,13 @@ unchanged: #{log.get_unchanged}"
       end
 
       def import
-        begin
 
-          # lookup USHMM
-          user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
+        # lookup USHMM
+        user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
 
-          # We basically need recursive behaviour here
-          Dir.glob("#{@data_dir}/??-??????").sort.each do |dir|
-            import_repo_data(dir, user)
-          end
-
-          Graph.get_base_graph.commit
-          puts "Committed"
-        rescue
-          # Oops!
-          Graph.get_base_graph.rollback
-          raise
+        # We basically need recursive behaviour here
+        Dir.glob("#{@data_dir}/??-??????").sort.each do |dir|
+          import_repo_data(dir, user)
         end
       end
     end

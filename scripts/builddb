@@ -104,7 +104,7 @@ class DbBuilder
     Commands::EntityAdd.new.exec(Graph, [
       "authoritativeSet",
       "--update",
-      "-Pidentifier=ehri-cb",
+      "-Pidentifier=ehri_cb",
       '-Pname=Ehri Corporate Bodies',
       "--user", USER_ID,
       "--log", "Adding authoritative set for EHRI corporate bodies"].to_java(:string))
@@ -113,7 +113,7 @@ class DbBuilder
     auth_xml = Dir.glob("#{DROPBOX}/eac-dump-150413/*xml")
     Commands::EacImport.new.exec(Graph, ([
       "--user", USER_ID,
-      "--scope", "ehri-cb",
+      "--scope", "ehri_cb",
       "--tolerant",
       "--log", "Importing EHRI corporate bodies",
     ] + auth_xml).to_java(:string))
@@ -164,14 +164,14 @@ class DbBuilder
     Commands::EntityAdd.new.exec(Graph, [
       "cvocVocabulary",
       "--update",
-      "-Pidentifier=ehri-skos",
+      "-Pidentifier=ehri_skos",
       '-Pname=EHRI Skos',
       "--user", USER_ID,
       "--log", "Creating thesaurus vocabulary"].to_java(:string))
 
     puts "Importing thesaurus..."
     Commands::SkosVocabularyImport.new.exec(Graph, [
-      "--scope", "ehri-skos",
+      "--scope", "ehri_skos",
       "--user", USER_ID,
       "--log", "Importing EHRI SKOS Concepts",
       "--tolerant",
@@ -183,14 +183,14 @@ class DbBuilder
     Commands::EntityAdd.new.exec(Graph, [
       "cvocVocabulary",
       "--update",
-      "-Pidentifier=ehri-camps",
+      "-Pidentifier=ehri_camps",
       '-Pname=EHRI Camps',
       "--user", USER_ID,
       "--log", "Creating camps vocabulary"].to_java(:string))
 
     puts "Importing thesaurus..."
     Commands::SkosVocabularyImport.new.exec(Graph, [
-      "--scope", "ehri-camps",
+      "--scope", "ehri_camps",
       "--user", USER_ID,
       "--log", "Importing EHRI Camps SKOS",
       "--tolerant",
@@ -202,14 +202,14 @@ class DbBuilder
     Commands::EntityAdd.new.exec(Graph, [
       "cvocVocabulary",
       "--update",
-      "-Pidentifier=ehri-ghettos",
+      "-Pidentifier=ehri_ghettos",
       '-Pname=EHRI Ghettos',
       "--user", USER_ID,
       "--log", "Creating ghettos vocabulary"].to_java(:string))
 
     puts "Importing thesaurus..."
     Commands::SkosVocabularyImport.new.exec(Graph, [
-      "--scope", "ehri-ghettos",
+      "--scope", "ehri_ghettos",
       "--user", USER_ID,
       "--log", "Importing EHRI Ghettos SKOS",
       "--tolerant",
@@ -219,7 +219,6 @@ end
 
 start = Time.now
 builder = DbBuilder.new
-Graph.get_base_graph.check_transaction
 if not opts[:update] then
   builder.init_db
   builder.create_users
