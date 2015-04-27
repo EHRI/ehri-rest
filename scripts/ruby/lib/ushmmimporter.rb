@@ -79,7 +79,8 @@ module Ehri
 
           # Start an action!
           ctx = Persistence::ActionManager.new(
-            Graph, ushmm).log_event(user, EventTypes::ingest, "Importing USHMM data")
+            Graph, ushmm).new_event_context(user, EventTypes::ingest, 
+                            Java::ComGoogleCommonBase::Optional.of("Importing USHMM data"))
           log = Importers::ImportLog.new(ctx)
 
           # We basically need recursive behaviour here
@@ -90,15 +91,11 @@ module Ehri
           log.print_report
 
           if log.has_done_work
-            Graph.get_base_graph.commit
+            ctx.commit
             puts "Committed"
-          else
-            puts "No changes"
-            Graph.get_base_graph.rollback
           end
         rescue
           # Oops!
-          Graph.get_base_graph.rollback
           raise
         end
       end

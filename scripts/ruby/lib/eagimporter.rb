@@ -53,27 +53,19 @@ module Ehri
       end
 
       def import
-        begin
-          # lookup USHMM
-          user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
+        # lookup USHMM
+        user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
 
-          changed = 0
-          # We basically need recursive behaviour here
-          Dir.glob("#{@data_dir}/??").sort.each do |dir|
-            changed += import_country(dir, user)
-          end
+        changed = 0
+        # We basically need recursive behaviour here
+        Dir.glob("#{@data_dir}/??").sort.each do |dir|
+          changed += import_country(dir, user)
+        end
 
-          if changed > 0
-            Graph.get_base_graph.commit
-            puts "Changed #{changed}, Committed"
-          else
-            Graph.get_base_graph.rollback
-            puts "No changes"
-          end
-        rescue
-          # Oops!
-          Graph.get_base_graph.rollback
-          raise
+        if changed > 0
+          puts "Changed #{changed}, Committed"
+        else
+          puts "No changes"
         end
       end
     end

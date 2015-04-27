@@ -29,8 +29,8 @@ module Ehri
 
         headers = csv.read_next().to_a
 
-        ctx = Persistence::ActionManager.new(Graph).log_event(user, EventTypes::ingest,
-                          "Importing spreadsheet data for Ukrainian repositories")
+        ctx = Persistence::ActionManager.new(Graph).new_event_context(user, EventTypes::ingest,
+                          Java::ComGoogleCommonBase::Optional.of("Importing spreadsheet data for Ukrainian repositories"))
         log = Importers::ImportLog.new(ctx)
 
         while (row = csv.read_next) != nil
@@ -73,6 +73,11 @@ module Ehri
             puts e.get_message
           end
         end
+
+        if log.has_done_work
+          ctx.commit()
+        end
+
         log
       end
 
@@ -83,16 +88,8 @@ module Ehri
           user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
           log = import_csv(user)
           log.print_report
-
-          if log.has_done_work
-            Graph.get_base_graph.commit
-            puts "Committed"
-          else
-            Graph.get_base_graph.rollback
-          end
         rescue Java::JavaLang::Exception => e
           e.print_stack_trace
-          Graph.get_base_graph.rollback
           raise
         end
       end
