@@ -23,7 +23,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -41,7 +40,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-
+import eu.ehri.project.core.Tx;
 import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -54,7 +53,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,7 +120,7 @@ public class ImportResource extends AbstractRestResource {
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             // Get the current user from the Authorization header and the scope
             // from the query params...
             UserProfile user = getCurrentUser();
@@ -134,14 +132,12 @@ public class ImportResource extends AbstractRestResource {
                     .setTolerant(tolerant)
                     .importFile(stream, getLogMessage(logMessage).orNull());
 
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (InputParseError e) {
             throw new DeserializationError("Unable to parse input: " + e.getMessage());
         } catch (NoReaderForLangException e) {
             throw new DeserializationError("Unable to read language: " + format);
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -197,7 +193,7 @@ public class ImportResource extends AbstractRestResource {
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
             Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
@@ -216,14 +212,12 @@ public class ImportResource extends AbstractRestResource {
                     .setTolerant(tolerant)
                     .importFiles(paths, getLogMessage(logMessage).orNull());
 
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new DeserializationError(e.getMessage());
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -274,7 +268,7 @@ public class ImportResource extends AbstractRestResource {
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
             Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
@@ -290,14 +284,12 @@ public class ImportResource extends AbstractRestResource {
                     .setTolerant(tolerant)
                     .importFile(input, getLogMessage(logMessage).orNull());
 
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException | InputParseError e) {
             throw new DeserializationError(e.getMessage());
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -327,9 +319,8 @@ public class ImportResource extends AbstractRestResource {
      * @param logMessage    Log message for import. If this refers to a local file
      *                      its contents will be used.
      * @param importerClass The fully-qualified import class name
-     * @param pathList      A string containing a list of local file paths
-     *                      to import.
-     * 
+     * @param stream        A stream of CSV data
+     *
      * There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
      * @return A JSON object showing how many records were created,
      *         updated, or unchanged.
@@ -346,7 +337,7 @@ public class ImportResource extends AbstractRestResource {
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
 
             // Get the current user from the Authorization header and the scope
@@ -358,7 +349,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = new CsvImportManager(graph, scope, user, importer)
                     .importFile(stream, getLogMessage(logMessage).orNull());
 
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (InputParseError ex) {
             throw new DeserializationError("ParseError: " + ex.getMessage());
@@ -366,8 +357,6 @@ public class ImportResource extends AbstractRestResource {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new DeserializationError(e.getMessage());
-        } finally {
-            cleanupTransaction();
         }
     }
 

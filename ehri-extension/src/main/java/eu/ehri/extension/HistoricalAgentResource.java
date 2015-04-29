@@ -33,6 +33,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -69,6 +70,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
         return getItem(id);
+
     }
 
     @GET
@@ -95,7 +97,11 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return createItem(bundle, accessors);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = createItem(bundle, accessors);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -105,7 +111,11 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     public Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @PUT
@@ -116,7 +126,11 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(id, bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @DELETE
@@ -125,6 +139,10 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return deleteItem(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = deleteItem(id);
+            tx.success();
+            return response;
+        }
     }
 }

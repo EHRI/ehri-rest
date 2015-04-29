@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.sail.SailGraph;
 import com.tinkerpop.blueprints.oupls.sail.pg.PropertyGraphSail;
 import com.tinkerpop.frames.FramedGraph;
@@ -73,7 +72,7 @@ public class RdfExport extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1) {
             throw new MissingArgumentException("Output file path missing");

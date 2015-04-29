@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -61,7 +60,7 @@ public class UserListEntities extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1)

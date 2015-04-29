@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -83,7 +82,7 @@ public class EntityAdd extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -119,17 +118,13 @@ public class EntityAdd extends BaseCommand implements Command {
 
         try {
             createItem(graph, cmdLine, id, bundle, scope, user, logMessage);
-            graph.getBaseGraph().commit();
         } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
             System.err.printf("A user a id: '%s' already exists%n", id);
             return CmdEntryPoint.RetCode.BAD_DATA.getCode();
         } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
             System.err.printf("User %s does not have permission to perform that action.%n", user.getId());
             return CmdEntryPoint.RetCode.BAD_PERMS.getCode();
         } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
             System.err.println(e.getMessage());
             return CmdEntryPoint.RetCode.BAD_DATA.getCode();
         }
@@ -140,7 +135,7 @@ public class EntityAdd extends BaseCommand implements Command {
     // Suppressing warnings here because we throw a RuntimeException if the
     // item class is not of an acceptable type.
     @SuppressWarnings("unchecked")
-    public void createItem(final FramedGraph<? extends TransactionalGraph> graph,
+    public void createItem(final FramedGraph<?> graph,
             CommandLine cmdLine, String id, Bundle bundle,
             PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
             ValidationError, PermissionDenied {

@@ -64,6 +64,6 @@ public class InheritedItemPermissionSetProvider implements MessageBodyWriter<Inh
             OutputStream outputStream) throws IOException, WebApplicationException {
         headers.putSingle(HttpHeaders.CACHE_CONTROL,
                 PermissionsResource.getCacheControl().toString());
-        mapper.writeValue(outputStream, itemPermissionSet);
+        mapper.writeValue(outputStream, itemPermissionSet.serialize());
     }
 }

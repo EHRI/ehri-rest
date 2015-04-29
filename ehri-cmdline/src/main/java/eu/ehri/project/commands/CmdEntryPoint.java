@@ -21,11 +21,12 @@ package eu.ehri.project.commands;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.project.utils.TxCheckedNeo4jGraph;
+import eu.ehri.project.core.Tx;
+import eu.ehri.project.core.TxGraph;
+import eu.ehri.project.core.impl.TxNeo4jGraph;
 import org.apache.commons.cli.AlreadySelectedException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -133,7 +134,7 @@ public class CmdEntryPoint extends BaseCommand {
     }
 
     @Override
-    public int execWithOptions(FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         System.err.println(getHelp());
         return 1;
     }
@@ -153,25 +154,18 @@ public class CmdEntryPoint extends BaseCommand {
         } else {
             if (CmdEntryPoint.COMMANDS.containsKey(args[1])) {
                 Command cmd = CmdEntryPoint.COMMANDS.get(args[1]).getConstructor().newInstance();
-                FramedGraph<? extends TransactionalGraph> graph
+                FramedGraph<? extends TxGraph> graph
                         = new FramedGraphFactory(new JavaHandlerModule()).create(
-                        new TxCheckedNeo4jGraph(args[0]));
-                try {
-                    cmd.exec(graph, Arrays.copyOfRange(args, 2, args.length));
-                } catch (MissingArgumentException e) {
-                    // options or parameters where not correct, so print the correct usage
-                    System.err.println(e.getMessage());
-                    System.err.println(cmd.getUsage());
-                    return RetCode.BAD_ARGS.getCode();
-                } catch (MissingOptionException e) {
-                    System.err.println(e.getMessage());
-                    System.err.println(cmd.getUsage());
-                    return RetCode.BAD_ARGS.getCode();
-                } catch (AlreadySelectedException e) {
-                    System.err.println(e.getMessage());
-                    System.err.println(cmd.getUsage());
-                    return RetCode.BAD_ARGS.getCode();
-                } catch (UnrecognizedOptionException e) {
+                        new TxNeo4jGraph(args[0]));
+                try (Tx tx = graph.getBaseGraph().beginTx()) {
+                    int res = cmd.exec(graph, Arrays.copyOfRange(args, 2, args.length));
+                    if (res == RetCode.OK.getCode()) {
+                        tx.success();
+                    } else {
+                        tx.failure();
+                    }
+                } catch (MissingArgumentException |MissingOptionException|AlreadySelectedException|
+                        UnrecognizedOptionException e) {
                     // options or parameters where not correct, so print the correct usage
                     System.err.println(e.getMessage());
                     System.err.println(cmd.getUsage());

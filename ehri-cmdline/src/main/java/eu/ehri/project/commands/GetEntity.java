@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -53,7 +52,7 @@ public class GetEntity extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

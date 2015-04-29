@@ -22,7 +22,6 @@ package eu.ehri.project.commands;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
@@ -77,7 +76,7 @@ public class Check extends BaseCommand implements Command {
     
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -99,7 +98,7 @@ public class Check extends BaseCommand implements Command {
      * @param manager The graph manager
      * @throws Exception
      */
-    public void checkPermissionScopes(final FramedGraph<? extends TransactionalGraph> graph,
+    public void checkPermissionScopes(final FramedGraph<?> graph,
             final GraphManager manager) throws Exception {
 
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
@@ -140,7 +139,8 @@ public class Check extends BaseCommand implements Command {
     }
 
     private void checkOwnerPermGrantsHaveNoScope(final GraphManager manager) throws Exception {
-        try (CloseableIterable<PermissionGrant> items = manager.getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
+        try (CloseableIterable<PermissionGrant> items = manager
+                .getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
             for (PermissionGrant grant : items) {
                 Frame scope = grant.getScope();
                 Frame perm = grant.getPermission();

@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -88,7 +87,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(YamlFixtureLoader.class);
 
-    private final FramedGraph<? extends TransactionalGraph> graph;
+    private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final BundleDAO dao;
     private final boolean initialize;
@@ -99,7 +98,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param graph      The graph
      * @param initialize Whether or not to initialize the graph
      */
-    public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph, boolean initialize) {
+    public YamlFixtureLoader(FramedGraph<?> graph, boolean initialize) {
         this.graph = graph;
         this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
@@ -111,7 +110,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      *
      * @param graph The graph
      */
-    public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph) {
+    public YamlFixtureLoader(FramedGraph<?> graph) {
         this(graph, DEFAULT_INIT);
     }
 
@@ -166,24 +165,14 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param stream A input stream of valid YAML data.
      */
     public void loadTestData(InputStream stream) {
-
-        // Ensure we're not currently in a transaction!
-        //graph.getBaseGraph().rollback();
-
         // Initialize the DB
         try {
             if (initialize) {
                 new GraphInitializer(graph).initialize();
             }
-            try {
-                loadFixtureFileStream(stream);
-                stream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            graph.getBaseGraph().commit();
+            loadFixtureFileStream(stream);
+            stream.close();
         } catch (Exception e) {
-            graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         }
     }
@@ -246,8 +235,9 @@ public class YamlFixtureLoader implements FixtureLoader {
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeData = (Map<String, Object>) node
                 .get(Bundle.DATA_KEY);
-        if (nodeData == null)
+        if (nodeData == null) {
             nodeData = Maps.newHashMap();
+        }
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeRels = (Map<String, Object>) node
                 .get(Bundle.REL_KEY);
@@ -257,8 +247,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         Bundle entityBundle = createBundle(id, isa, nodeData,
                 getDependentRelations(nodeRels));
         logger.trace("Creating node with id: {}", id);
-        Mutation<Frame> frame = dao.createOrUpdate(entityBundle,
-                Frame.class);
+        Mutation<Frame> frame = dao.createOrUpdate(entityBundle, Frame.class);
 
         Multimap<String, String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
@@ -269,12 +258,11 @@ public class YamlFixtureLoader implements FixtureLoader {
     private Bundle createBundle(final String id, final EntityClass type,
             final Map<String, Object> nodeData,
             final Multimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
-        @SuppressWarnings("serial")
         Map<String, Object> data = ImmutableMap.of(
-                Bundle.ID_KEY, id,
-                Bundle.TYPE_KEY, type.getName(),
-                Bundle.DATA_KEY, nodeData,
-                Bundle.REL_KEY, dependentRelations.asMap()
+            Bundle.ID_KEY, id,
+            Bundle.TYPE_KEY, type.getName(),
+            Bundle.DATA_KEY, nodeData,
+            Bundle.REL_KEY, dependentRelations.asMap()
         );
         Bundle b = Bundle.fromData(data);
 

@@ -20,7 +20,6 @@
 package eu.ehri.project.acl;
 
 import com.google.common.collect.ImmutableMap;
-import eu.ehri.project.models.base.Accessor;
 import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.Map;

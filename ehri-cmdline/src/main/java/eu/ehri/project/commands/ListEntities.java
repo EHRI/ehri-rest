@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -81,7 +80,7 @@ public class ListEntities extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(final FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
 
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)

@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -73,7 +72,7 @@ public abstract class BaseCommand implements Command {
      * @return a command return code
      * @throws Exception
      */
-    public final int exec(final FramedGraph<? extends TransactionalGraph> graph, String[] args) throws Exception {
+    public final int exec(final FramedGraph<?> graph, String[] args) throws Exception {
         setCustomOptions(options);
         return execWithOptions(graph, parser.parse(options, args));
     }
@@ -87,7 +86,7 @@ public abstract class BaseCommand implements Command {
      * @return a command return code
      * @throws Exception
      */
-    public abstract int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public abstract int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception;
 
     /**

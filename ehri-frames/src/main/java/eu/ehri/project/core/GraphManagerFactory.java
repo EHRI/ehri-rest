@@ -21,10 +21,10 @@ package eu.ehri.project.core;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.IndexableGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.impl.BlueprintsGraphManager;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 
 /**
  * A factory class for obtaining a {@link GraphManager} instance.
@@ -50,7 +50,7 @@ public class GraphManagerFactory {
             throw new RuntimeException("Graph instance must be transactional and indexable");
         }
 
-        if (Neo4jGraph.class.isAssignableFrom(baseGraph.getClass())) {
+        if (Neo4j2Graph.class.isAssignableFrom(baseGraph.getClass())) {
             return new Neo4jGraphManager(graph);
         } else {
             return new BlueprintsGraphManager(graph);

@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -62,7 +61,7 @@ public class RelationAdd extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -77,22 +76,16 @@ public class RelationAdd extends BaseCommand implements Command {
         Vertex source = manager.getVertex(src);
         Vertex target = manager.getVertex(dst);
 
-        try {
-            if (cmdLine.hasOption("allow-duplicates")) {
-                source.addEdge(label, target);
-            } else if (cmdLine.hasOption("unique")) {
-                if (!JavaHandlerUtils.addUniqueRelationship(source, target, label)) {
-                    System.err.println("Relationship already exists");
-                }
-            } else  {
-                if (!JavaHandlerUtils.addSingleRelationship(source, target, label)) {
-                    System.err.println("Relationship already exists");
-                }
+        if (cmdLine.hasOption("allow-duplicates")) {
+            source.addEdge(label, target);
+        } else if (cmdLine.hasOption("unique")) {
+            if (!JavaHandlerUtils.addUniqueRelationship(source, target, label)) {
+                System.err.println("Relationship already exists");
             }
-            graph.getBaseGraph().commit();
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+        } else  {
+            if (!JavaHandlerUtils.addSingleRelationship(source, target, label)) {
+                System.err.println("Relationship already exists");
+            }
         }
 
         return 0;

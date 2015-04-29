@@ -35,6 +35,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -98,13 +99,18 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(id, user);
-        Iterable<DocumentaryUnit> units = all
-                ? repository.getAllCollections()
-                : repository.getCollections();
-        return streamingPage(getQuery(DocumentaryUnit.class)
-                .page(units, user));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Repository repository = views.detail(id, user);
+            Iterable<DocumentaryUnit> units = all
+                    ? repository.getAllCollections()
+                    : repository.getCollections();
+            return streamingPage(getQuery(DocumentaryUnit.class).page(units, user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @GET
@@ -115,12 +121,16 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(id, user);
-        Iterable<DocumentaryUnit> units = all
-                ? repository.getAllCollections()
-                : repository.getCollections();
-        return getQuery(DocumentaryUnit.class).count(units);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor user = getRequesterUserProfile();
+            Repository repository = views.detail(id, user);
+            Iterable<DocumentaryUnit> units = all
+                    ? repository.getAllCollections()
+                    : repository.getCollections();
+            long count = getQuery(DocumentaryUnit.class).count(units);
+            tx.success();
+            return count;
+        }
     }
 
     @PUT
@@ -130,7 +140,11 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     public Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @PUT
@@ -141,7 +155,11 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(id, bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @DELETE
@@ -150,7 +168,11 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return deleteItem(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = deleteItem(id);
+            tx.success();
+            return response;
+        }
     }
 
     /**
@@ -172,19 +194,19 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor user = getRequesterUserProfile();
             final Repository repository = views.detail(id, user);
-            return createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
+            Response response = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
                 @Override
                 public void process(DocumentaryUnit doc) throws PermissionDenied {
                     repository.addCollection(doc);
                 }
             }, views.setScope(repository).setClass(DocumentaryUnit.class));
-        } finally {
-            cleanupTransaction();
+            tx.success();
+            return response;
         }
     }
 }

@@ -12,11 +12,11 @@ module Ehri
   require "java"
 
   # Import Java classes like so...
-  java_import "com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph"
   java_import "com.tinkerpop.frames.FramedGraphFactory"
   java_import "com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule"
   java_import "com.tinkerpop.frames.modules.javahandler.JavaHandlerModule"
   java_import "eu.ehri.project.core.GraphManagerFactory"
+  java_import "eu.ehri.project.core.impl.TxNeo4jGraph"
   java_import "eu.ehri.project.models.EntityClass"
   java_import "eu.ehri.project.models.base.Frame"
   java_import "eu.ehri.project.definitions.EventTypes"
@@ -61,15 +61,7 @@ module Ehri
   # Note: the graph must not be being used elsewhere (i.e. by the server)
   #
   
-  class CheckTransactionGraph < Neo4jGraph
-    def check_transaction
-      if not @tx.nil? and not @tx.get.nil?
-        raise "Graph is already in a transaction!"
-      end
-    end
-  end
-
-  Graph = FramedGraphFactory.new(JavaHandlerModule.new, GremlinGroovyModule.new).create(CheckTransactionGraph.new DB_PATH)
+  Graph = FramedGraphFactory.new(JavaHandlerModule.new).create(TxNeo4jGraph.new DB_PATH)
   Manager = GraphManagerFactory.get_instance Graph
 
 end

@@ -22,11 +22,11 @@ package eu.ehri.project.core.impl;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
+import eu.ehri.project.core.impl.neo4j.Neo4j2VertexIterable;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -43,7 +43,7 @@ import java.util.NoSuchElementException;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public final class Neo4jGraphManager<T extends Neo4jGraph> extends BlueprintsGraphManager<T> implements GraphManager {
+public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> implements GraphManager {
 
     public Neo4jGraphManager(FramedGraph<T> graph) {
         super(graph);
@@ -54,28 +54,25 @@ public final class Neo4jGraphManager<T extends Neo4jGraph> extends BlueprintsGra
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
-        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         // NB: Not using rawQuery.getSingle here so we throw NoSuchElement
         // other than return null.
-        try {
-            return new Neo4jVertex(rawQuery.iterator().next(),
+        try (IndexHits<Node> rawQuery = getRawIndex().query(queryStr)) {
+            return new Neo4j2Vertex(rawQuery.iterator().next(),
                     graph.getBaseGraph());
         } catch (NoSuchElementException e) {
             throw new ItemNotFound(id);
-        } finally {
-            rawQuery.close();
         }
     }
 
     // NB: It's safe to do an unsafe cast here because we know that
-    // Neo4jVertex extends Vertex.
+    // Neo4j2Vertex extends Vertex.
     @Override
     @SuppressWarnings("unchecked")
     public CloseableIterable<Vertex> getVertices(String key, Object value,
             EntityClass type) {
         String queryStr = getLuceneQuery(key, value, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return (CloseableIterable<Vertex>) new Neo4jVertexIterable(rawQuery,
+        return (CloseableIterable<Vertex>) new Neo4j2VertexIterable(rawQuery,
                 graph.getBaseGraph(), false);
     }
 

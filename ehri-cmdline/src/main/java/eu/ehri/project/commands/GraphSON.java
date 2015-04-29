@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
@@ -83,7 +82,7 @@ public class GraphSON extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1) {

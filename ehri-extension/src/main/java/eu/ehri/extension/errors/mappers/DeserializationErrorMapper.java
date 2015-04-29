@@ -20,7 +20,6 @@
 package eu.ehri.extension.errors.mappers;
 
 import com.google.common.base.Charsets;
-
 import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.DeserializationError;
 
@@ -28,7 +27,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 

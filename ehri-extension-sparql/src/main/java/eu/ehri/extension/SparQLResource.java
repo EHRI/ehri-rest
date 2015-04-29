@@ -22,6 +22,7 @@ package eu.ehri.extension;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.oupls.sail.pg.PropertyGraphSail;
+import eu.ehri.project.core.Tx;
 import info.aduna.iteration.CloseableIteration;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -103,13 +104,12 @@ public class SparQLResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response sparqlQuery(@DefaultValue("") @QueryParam(QUERY_PARAM) String q)
             throws Exception {
-
-        initSail();
-        ParsedQuery query = parser.parseQuery(q, HTTP_EHRI_PROJECT_EU);
-        CloseableIteration<? extends BindingSet, QueryEvaluationException> results
-                = sail.getConnection().evaluate(
-                query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
-        try {
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            initSail();
+            ParsedQuery query = parser.parseQuery(q, HTTP_EHRI_PROJECT_EU);
+            CloseableIteration<? extends BindingSet, QueryEvaluationException> results
+                    = sail.getConnection().evaluate(
+                    query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
             List<Map<String, String>> out = Lists.newArrayList();
             while (results.hasNext()) {
                 BindingSet next = results.next();
@@ -119,9 +119,8 @@ public class SparQLResource extends AbstractRestResource {
                 }
                 out.add(set);
             }
+            tx.success();
             return Response.ok(mapper.writeValueAsBytes(out)).build();
-        } finally {
-            results.close();
         }
     }
 

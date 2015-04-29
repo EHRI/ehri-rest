@@ -20,11 +20,10 @@
 package eu.ehri.project.commands;
 
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -69,11 +68,11 @@ public class GraphViz extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
-        GraphDatabaseService neo4jGraph = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph();
+        GraphDatabaseService neo4jGraph = ((Neo4j2Graph)graph.getBaseGraph()).getRawGraph();
 
         // Cmdline arguments should be a node and a list of relationship types
         // to traverse.

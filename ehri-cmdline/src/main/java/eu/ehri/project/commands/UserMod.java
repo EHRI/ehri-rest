@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -70,7 +69,7 @@ public class UserMod extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError,
             PermissionDenied, DeserializationError {
 
@@ -92,26 +91,20 @@ public class UserMod extends BaseCommand implements Command {
             groups = cmdLine.getOptionValues("group");
         }
 
-        try {
-            UserProfile user = manager.getFrame(userId,
-                    EntityClass.USER_PROFILE, UserProfile.class);
+        UserProfile user = manager.getFrame(userId,
+                EntityClass.USER_PROFILE, UserProfile.class);
 
-            EventContext actionCtx = new ActionManager(graph).newEventContext(
-                    user, admin, EventTypes.modification,
-                    getLogMessage(logMessage));
+        EventContext actionCtx = new ActionManager(graph).newEventContext(
+                user, admin, EventTypes.modification,
+                getLogMessage(logMessage));
 
-            for (String groupId : groups) {
-                Group group = manager.getFrame(groupId, EntityClass.GROUP,
-                        Group.class);
-                group.addMember(user);
-                actionCtx.addSubjects(group);
-            }
-            actionCtx.commit();
-            graph.getBaseGraph().commit();
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+        for (String groupId : groups) {
+            Group group = manager.getFrame(groupId, EntityClass.GROUP,
+                    Group.class);
+            group.addMember(user);
+            actionCtx.addSubjects(group);
         }
+        actionCtx.commit();
 
         return 0;
     }

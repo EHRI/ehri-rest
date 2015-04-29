@@ -19,7 +19,7 @@ end
 require "java"
 
 # Import Java classes like so...
-java_import "com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph"
+java_import "eu.ehri.project.core.impl.neo4j.Neo4j2Graph"
 java_import "com.tinkerpop.frames.FramedGraph"
 java_import "eu.ehri.project.core.GraphManagerFactory"
 java_import "eu.ehri.project.models.EntityClass"
@@ -41,7 +41,7 @@ DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
 
 # Initialise a graph and the manager.
 # Note: the graph must not be being used elsewhere (i.e. by the server)
-graph = FramedGraph.new(Neo4jGraph.new DB_PATH)
+graph = FramedGraph.new(Neo4j2Graph.new DB_PATH)
 manager = GraphManagerFactory.get_instance graph
 
 # Test the serializer. Note that the CamelCase Java methods

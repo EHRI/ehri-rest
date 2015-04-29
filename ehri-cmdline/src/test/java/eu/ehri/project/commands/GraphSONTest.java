@@ -49,9 +49,10 @@ public class GraphSONTest extends GraphTestBase {
         //     nothing's changed.
 
         // Setup will create the database but not load the fixtures...
-        FramedGraph<? extends TransactionalGraph> graph1 = getTestGraph();
+        FramedGraph<? extends TransactionalGraph> graph1 = getFramedGraph();
         helper = FixtureLoaderFactory.getInstance(graph1);
         helper.loadTestData();
+        graph1.getBaseGraph().commit();
 
         List<VertexProxy> graphState1 = getGraphState(graph1);
 
@@ -71,7 +72,7 @@ public class GraphSONTest extends GraphTestBase {
         assertTrue(temp.exists());
         assertTrue(temp.length() > 0L);
 
-        FramedGraph<? extends TransactionalGraph> graph2 = getTestGraph();
+        FramedGraph<? extends TransactionalGraph> graph2 = getFramedGraph();
 
         String[] inArgs = new String[]{"-d", "in", filePath};
         CommandLine inCmdLine = graphSON.getCmdLine(inArgs);
@@ -82,14 +83,5 @@ public class GraphSONTest extends GraphTestBase {
         GraphDiff graphDiff = diffGraph(graphState1, graphState2);
         assertEquals(0, graphDiff.added.size());
         assertEquals(0, graphDiff.removed.size());
-    }
-
-    private FramedGraph<? extends TransactionalGraph> getTestGraph() {
-        FramedGraph<? extends TransactionalGraph> graph1 = getFramedGraph();
-        // This is a bit gnarly, but Neo4j 1.9 graphs have a 0 node which
-        // we don't need - when loading and dumping into a new graph it
-        // will throw off the counts, so delete it...
-        graph1.getBaseGraph().removeVertex(graph1.getVertex(0));
-        return graph1;
     }
 }

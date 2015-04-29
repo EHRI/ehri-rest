@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.core.Tx;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -71,21 +72,25 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @param ids A list of string IDs
      * @return A serialized list of items
      * @throws ItemNotFound
-     * @throws PermissionDenied
      * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound,
-            PermissionDenied, BadRequester {
-        // Object a lazily-computed view of the ids->vertices...
-        Iterable<Vertex> vertices = manager.getVertices(ids);
-        PipeFunction<Vertex, Boolean> filter = aclManager
-                .getAclFilterFunction(getRequesterUserProfile());
-        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
-                vertices)
-                .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-        return streamingVertexList(filtered, getSerializer());
+    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound, BadRequester {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            // Object a lazily-computed view of the ids->vertices...
+            Iterable<Vertex> vertices = manager.getVertices(ids);
+            PipeFunction<Vertex, Boolean> filter = aclManager
+                    .getAclFilterFunction(getRequesterUserProfile());
+            GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
+                    vertices)
+                    .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
+            return streamingVertexList(filtered, getSerializer(), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**
@@ -102,7 +107,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listFromJson(String json)
             throws ItemNotFound, PermissionDenied, BadRequester, DeserializationError, IOException {
-        return list(parseIds(json));
+        return this.list(parseIds(json));
     }
 
     /**
@@ -112,36 +117,40 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @param ids A list of graph IDs
      * @return A serialized list of items
      * @throws ItemNotFound
-     * @throws PermissionDenied
      * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/listByGraphId")
-    public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+    public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound, BadRequester {
         // This is ugly, but to return 404 on a bad item we have to
         // iterate the list first otherwise the streaming response will be
         // broken.
-        for (Long id : ids) {
-            if (graph.getVertex(id) == null) {
-                throw new ItemNotFound(String.valueOf(id));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            for (Long id : ids) {
+                if (graph.getVertex(id) == null) {
+                    throw new ItemNotFound(String.valueOf(id));
+                }
             }
+
+            FluentIterable<Vertex> vertices = FluentIterable.from(ids)
+                    .transform(new Function<Long, Vertex>() {
+                        public Vertex apply(Long id) {
+                            return graph.getVertex(id);
+                        }
+                    });
+
+            PipeFunction<Vertex, Boolean> filter = aclManager
+                    .getAclFilterFunction(getRequesterUserProfile());
+            GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
+                    vertices)
+                    .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
+            return streamingVertexList(filtered, getSerializer(), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
         }
-
-        FluentIterable<Vertex> vertices = FluentIterable.from(ids)
-                .transform(new Function<Long, Vertex>() {
-                    public Vertex apply(Long id) {
-                        return graph.getVertex(id);
-                    }
-                });
-
-        PipeFunction<Vertex, Boolean> filter = aclManager
-                .getAclFilterFunction(getRequesterUserProfile());
-        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
-                vertices)
-                .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-        return streamingVertexList(filtered, getSerializer());
     }
 
     /**
@@ -160,7 +169,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     public Response listByGidFromJson(String json) throws ItemNotFound,
             PermissionDenied, DeserializationError, BadRequester, IOException {
 
-        return listByGid(parseGraphIds(json));
+        return this.listByGid(parseGraphIds(json));
     }
 
     /**
@@ -175,17 +184,21 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/{id:.+}")
     public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied, BadRequester {
-        Vertex item = manager.getVertex(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Vertex item = manager.getVertex(id);
 
-        // If the item doesn't exist or isn't a content type throw 404
-        Accessor currentUser = getRequesterUserProfile();
-        if (item == null || !aclManager.getContentTypeFilterFunction().compute(item)) {
-            throw new ItemNotFound(id);
-        } else if (!aclManager.getAclFilterFunction(currentUser).compute(item)) {
-            throw new AccessDenied(currentUser.getId(), id);
+            // If the item doesn't exist or isn't a content type throw 404
+            Accessor currentUser = getRequesterUserProfile();
+            if (item == null || !aclManager.getContentTypeFilterFunction().compute(item)) {
+                throw new ItemNotFound(id);
+            } else if (!aclManager.getAclFilterFunction(currentUser).compute(item)) {
+                throw new AccessDenied(currentUser.getId(), id);
+            }
+
+            Response response = single(item);
+            tx.success();
+            return response;
         }
-
-        return single(item);
     }
 
     private List<Long> parseGraphIds(String json) throws IOException, DeserializationError {
