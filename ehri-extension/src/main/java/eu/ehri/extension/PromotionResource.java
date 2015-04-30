@@ -25,6 +25,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Promotable;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.PromotionViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -64,17 +65,15 @@ public class PromotionResource extends AbstractRestResource {
     @Path("/{id:.+}/up")
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.upVote(item, currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return single(item);
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -91,14 +90,12 @@ public class PromotionResource extends AbstractRestResource {
     @Path("/{id:.+}/up")
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeUpVote(item, currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return single(item);
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -115,17 +112,15 @@ public class PromotionResource extends AbstractRestResource {
     @Path("/{id:.+}/down")
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.downVote(item, currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return single(item);
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -142,14 +137,12 @@ public class PromotionResource extends AbstractRestResource {
     @Path("/{id:.+}/down")
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeDownVote(item, currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return single(item);
-        } finally {
-            cleanupTransaction();
         }
     }
 }

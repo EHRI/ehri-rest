@@ -64,6 +64,6 @@ public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<I
             OutputStream outputStream) throws IOException, WebApplicationException {
         headers.putSingle(HttpHeaders.CACHE_CONTROL,
                 PermissionsResource.getCacheControl().toString());
-        mapper.writeValue(outputStream, globalPermissionSet);
+        mapper.writeValue(outputStream, globalPermissionSet.serialize());
     }
 }

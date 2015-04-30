@@ -22,7 +22,6 @@ package eu.ehri.project.commands;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -78,7 +77,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     }
     
      @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -119,7 +118,12 @@ public abstract class ImportCommand extends BaseCommand implements Command{
                 optionalProperties = Optional.of(properties);
             }
 
-            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler, optionalProperties,
+            // FIXME: Casting the graph shouldn't be necessary here, but it is
+            // because the import managers do transactional stuff that they
+            // probably should not do.
+            ImportLog log = new SaxImportManager(graph, scope, user,
+                    importer, handler,
+                    optionalProperties,
                     Lists.<ImportCallback>newArrayList())
                     .setTolerant(cmdLine.hasOption("tolerant"))
                     .importFiles(filePaths, logMessage);

@@ -7,8 +7,8 @@
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.3-SNAPSHOT</version>
-    <name>EHRI Backend</name>
+    <version>0.10.0-SNAPSHOT</version>
+   <name>EHRI Backend</name>
     <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
     <url>https://github.com/EHRI</url>
     <organization>
@@ -113,9 +113,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <neo4j.version>1.9.9</neo4j.version>
-        <tinkerpop.version>2.4.0</tinkerpop.version>
-        <frames.version>2.4.0</frames.version>
 
         <!-- Overridden by child poms we don't want to create a site for -->
         <maven-site-plugin.skip>false</maven-site-plugin.skip>

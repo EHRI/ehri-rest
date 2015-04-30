@@ -19,6 +19,7 @@
 
 package eu.ehri.project.core;
 
+import com.google.common.collect.Iterables;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,10 +27,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -50,34 +51,39 @@ public class Neo4jBasicTest {
         graphDb.shutdown();
     }
 
+    @Test(expected = org.neo4j.graphdb.NotInTransactionException.class)
+    public void notAllowCountingNodesOutsideOfATx() {
+        GlobalGraphOperations.at(graphDb).getAllNodes();
+    }
+
+    @Test
+    public void shouldAllowCountingNodes() {
+        try (Transaction tx = graphDb.beginTx()) {
+            Iterable<Node> nodes = GlobalGraphOperations.at(graphDb).getAllNodes();
+            assertEquals(0, Iterables.size(nodes));
+        }
+    }
+
     @Test
     public void shouldCreateNode() {
-        Transaction tx = graphDb.beginTx();
-
-        Node n = null;
-        try {
-            n = graphDb.createNode();
+        try (Transaction tx = graphDb.beginTx()) {
+            Node n = graphDb.createNode();
             n.setProperty("name", "Nancy");
+
+            // The node should have an id of 0, being the first node
+            // in the graph.
+            assertNotNull(n.getId());
+            assertEquals(0, n.getId());
+
+            // Retrieve a node by using the id of the created node. The id's and
+            // property should match.
+            Node foundNode = graphDb.getNodeById(n.getId());
+            assertEquals(foundNode.getId(), n.getId());
+            assertEquals(foundNode.getProperty("name"), "Nancy");
+
+            assertEquals(1, Iterables.size(
+                    GlobalGraphOperations.at(graphDb).getAllNodes()));
             tx.success();
-        } catch (Exception e) {
-            tx.failure();
-        } finally {
-            tx.finish();
         }
-
-        // The node should have an id greater than 0, which is the id of the
-        // reference node.
-        // assertThat( n.getId(), is( greaterThan( 0l ) ) );
-        assertNotNull(n.getId());
-        assertTrue(n.getId() > 0);
-
-        // Retrieve a node by using the id of the created node. The id's and
-        // property should match.
-        Node foundNode = graphDb.getNodeById(n.getId());
-        // assertThat( foundNode.getId(), is( n.getId() ) );
-        // assertThat( (String) foundNode.getProperty( "name" ), is( "Nancy" )
-        // );
-        assertEquals(foundNode.getId(), n.getId());
-        assertEquals(foundNode.getProperty("name"), "Nancy");
     }
 }

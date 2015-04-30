@@ -40,6 +40,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -107,9 +108,13 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(id, user);
-        return getQuery(cls).count(vocabulary.getConcepts());
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor user = getRequesterUserProfile();
+            Vocabulary vocabulary = views.detail(id, user);
+            long count = getQuery(cls).count(vocabulary.getConcepts());
+            tx.success();
+            return count;
+        }
     }
 
     @GET
@@ -120,10 +125,16 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false")  boolean all)
             throws ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(id, user);
-        return streamingPage(getQuery(Concept.class)
-                .page(vocabulary.getConcepts(), user));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Vocabulary vocabulary = views.detail(id, user);
+            return streamingPage(getQuery(Concept.class)
+                    .page(vocabulary.getConcepts(), user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @POST
@@ -134,7 +145,11 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, BadRequester {
-        return createItem(bundle, accessors);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = createItem(bundle, accessors);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -144,7 +159,11 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     public Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -155,7 +174,11 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(id, bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @DELETE
@@ -164,14 +187,18 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return deleteItem(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = deleteItem(id);
+            tx.success();
+            return item;
+        }
     }
 
     @DELETE
     @Path("/{id:.+}/all")
     public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
             Vocabulary vocabulary = views.detail(id, user);
             CrudViews<Concept> conceptViews = new CrudViews<>(
@@ -186,13 +213,10 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
                     conceptViews.delete(concept.getId(), user);
                 }
             }
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.status(Status.OK).build();
         } catch (SerializationError | ValidationError e) {
-            graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -205,17 +229,17 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor user = getRequesterUserProfile();
             final Vocabulary vocabulary = views.detail(id, user);
-            return createItem(bundle, accessors, new Handler<Concept>() {
+            Response item = createItem(bundle, accessors, new Handler<Concept>() {
                 @Override
                 public void process(Concept concept) throws PermissionDenied {
                     concept.setVocabulary(vocabulary);
                 }
             }, views.setScope(vocabulary).setClass(Concept.class));
-        } finally {
-            cleanupTransaction();
+            tx.success();
+            return item;
         }
     }
 }

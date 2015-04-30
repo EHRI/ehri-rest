@@ -20,7 +20,7 @@
 package eu.ehri.extension.base;
 
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.utils.TxCheckedNeo4jGraph;
+import eu.ehri.project.core.TxGraph;
 
 /**
  * A resource which handles a transactional graph.
@@ -33,5 +33,5 @@ public interface TxCheckedResource {
      *
      * @return a transactional graph database.
      */
-    public FramedGraph<TxCheckedNeo4jGraph> getGraph();
+    public FramedGraph<? extends TxGraph> getGraph();
 }

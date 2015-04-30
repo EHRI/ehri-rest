@@ -33,6 +33,7 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.codehaus.jackson.type.TypeReference;
@@ -48,7 +49,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -86,7 +86,10 @@ public class AdminResource extends AbstractRestResource {
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream stream) throws IOException, WebApplicationException {
-                GraphSONWriter.outputGraph(graph, stream, GraphSONMode.EXTENDED);
+                try (final Tx tx = graph.getBaseGraph().beginTx()) {
+                    GraphSONWriter.outputGraph(graph, stream, GraphSONMode.EXTENDED);
+                    tx.success();
+                }
             }
         }).build();
     }
@@ -104,12 +107,10 @@ public class AdminResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/_reindexInternal")
     public Response reindexInternal() throws Exception {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             manager.rebuildIndex();
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.ok().build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -126,9 +127,8 @@ public class AdminResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile(String jsonData,
-                                             @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
-        try {
+            @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             String ident = getNextDefaultUserId();
             Bundle bundle = Bundle.Builder.withClass(EntityClass.USER_PROFILE)
                     .addDataValue(Ontology.IDENTIFIER_KEY, ident)
@@ -151,10 +151,9 @@ public class AdminResource extends AbstractRestResource {
             // Grant them owner permissions on their own account.
             new AclManager(graph).grantPermission(user, PermissionType.OWNER, user
             );
-            graph.getBaseGraph().commit();
-            return creationResponse(user);
-        } finally {
-            cleanupTransaction();
+            Response response = creationResponse(user);
+            tx.success();
+            return response;
         }
     }
 

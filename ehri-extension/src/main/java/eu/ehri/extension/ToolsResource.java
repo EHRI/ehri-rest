@@ -42,6 +42,7 @@ import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
+import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DefaultValue;
@@ -113,9 +114,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
             throws ItemNotFound, BadRequester, ValidationError,
             PermissionDenied, DeserializationError {
-        graph.getBaseGraph().checkNotInTransaction();
-
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
             Repository repository = manager.getFrame(repositoryId, Repository.class);
             Vocabulary vocabulary = manager.getFrame(vocabularyId, Vocabulary.class);
@@ -128,10 +127,8 @@ public class ToolsResource extends AbstractRestResource {
                     .withLogMessage(getLogMessage())
                     .createAndLinkRepositoryVocabulary(repository, vocabulary, user);
 
-            graph.getBaseGraph().commit();
+            tx.success();
             return linkCount;
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -158,16 +155,13 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("name") String propName,
             @QueryParam("pattern") String regex,
             @QueryParam("replace") String replace) throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
-        EntityClass entityClass = EntityClass.withName(entityType);
-        Pattern pattern = Pattern.compile(regex);
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            EntityClass entityClass = EntityClass.withName(entityType);
+            Pattern pattern = Pattern.compile(regex);
             long changes = findReplace
                     .propertyValueRE(entityClass, propName, pattern, replace);
-            graph.getBaseGraph().commit();
+            tx.success();
             return changes;
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -189,15 +183,12 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("type") String entityType,
             @QueryParam("from") String oldKeyName,
             @QueryParam("to") String newKeyName) throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
-        EntityClass entityClass = EntityClass.withName(entityType);
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            EntityClass entityClass = EntityClass.withName(entityType);
             long changes = findReplace
                     .propertyName(entityClass, oldKeyName, newKeyName);
-            graph.getBaseGraph().commit();
+            tx.success();
             return changes;
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -222,15 +213,12 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("name") String propName,
             @QueryParam("from") String oldValue,
             @QueryParam("to") String newValue) throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
-        EntityClass entityClass = EntityClass.withName(entityType);
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            EntityClass entityClass = EntityClass.withName(entityType);
             long changes = findReplace
                     .propertyValue(entityClass, propName, oldValue, newValue);
-            graph.getBaseGraph().commit();
+            tx.success();
             return changes;
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -265,17 +253,15 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Optional<List<String>> remap = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .collisionMode(collisions)
                     .skippingCollisions(tolerant)
                     .reGenerateId(item);
-            graph.getBaseGraph().commit();
+            tx.success();
             return makeCsv(Lists.newArrayList(remap.asSet()));
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -309,7 +295,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, IdRegenerator.IdCollisionError {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             EntityClass entityClass = EntityClass.withName(type);
             try (CloseableIterable<AccessibleEntity> frames = manager
                     .getFrames(entityClass, AccessibleEntity.class)) {
@@ -318,11 +304,9 @@ public class ToolsResource extends AbstractRestResource {
                         .collisionMode(collisions)
                         .skippingCollisions(tolerant)
                         .reGenerateIds(frames);
-                graph.getBaseGraph().commit();
+                tx.success();
                 return makeCsv(lists);
             }
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -357,17 +341,15 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
             List<List<String>> lists = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .skippingCollisions(tolerant)
                     .collisionMode(collisions)
                     .reGenerateIds(scope.getAllContainedItems());
-            graph.getBaseGraph().commit();
+            tx.success();
             return makeCsv(lists);
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -389,7 +371,7 @@ public class ToolsResource extends AbstractRestResource {
                 .REPOSITORY_DESCRIPTION};
         Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
         int done = 0;
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             for (EntityClass entityClass : types) {
                 try (CloseableIterable<Description> descriptions = manager.getFrames(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
@@ -407,7 +389,7 @@ public class ToolsResource extends AbstractRestResource {
                                 done++;
 
                                 if (bufferSize > 0 && done % bufferSize == 0) {
-                                    graph.getBaseGraph().commit();
+                                    tx.success();
                                 }
                             }
                         }
@@ -415,13 +397,11 @@ public class ToolsResource extends AbstractRestResource {
                 }
             }
             if (commit && done > 0) {
-                graph.getBaseGraph().commit();
+                tx.success();
             }
             return String.valueOf(done);
         } catch (SerializationError e) {
             throw new RuntimeException(e);
-        } finally {
-            cleanupTransaction();
         }
     }
 

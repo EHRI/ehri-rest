@@ -51,7 +51,7 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
     public void testWithInitializationError() throws Exception {
         try {
             // NB: An initialized Neo4j 1.9 graph has a root node
-            assertEquals(1, getNodeCount(testGraph));
+            assertEquals(0, getNodeCount(testGraph));
             new GraphInitializer(testGraph).initialize();
             FixtureLoader loader = new YamlFixtureLoader(testGraph);
             loader.loadTestData();
@@ -65,7 +65,7 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
     @Test
     public void testWithInitialization() throws Exception {
         // NB: An initialized Neo4j 1.9 graph has a root node
-        assertEquals(1, getNodeCount(testGraph));
+        assertEquals(0, getNodeCount(testGraph));
         new GraphInitializer(testGraph).initialize();
         FixtureLoader loader = new YamlFixtureLoader(testGraph)
             .setInitializing(false);
@@ -75,7 +75,7 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
 
     @Test
     public void testLoadTestDataFile() throws Exception {
-        assertEquals(1, getNodeCount(testGraph));
+        assertEquals(0, getNodeCount(testGraph));
         FixtureLoader loader = new YamlFixtureLoader(testGraph);
         loader.loadTestData(getFixtureFilePath("testdata.yaml"));
         assertTrue(getNodeCount(testGraph) > 1);
@@ -83,7 +83,7 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
 
     @Test
     public void testLoadTestDataResource() throws Exception {
-        assertEquals(1, getNodeCount(testGraph));
+        assertEquals(0, getNodeCount(testGraph));
         FixtureLoader loader = new YamlFixtureLoader(testGraph);
         loader.loadTestData("testdata.yaml");
         assertTrue(getNodeCount(testGraph) > 1);
@@ -95,7 +95,7 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
                 .getResourceAsStream("testdata.yaml");
         assertNotNull(inputStream);
 
-        assertEquals(1, getNodeCount(testGraph));
+        assertEquals(0, getNodeCount(testGraph));
         FixtureLoader loader = new YamlFixtureLoader(testGraph);
         loader.loadTestData(inputStream);
         assertTrue(getNodeCount(testGraph) > 1);

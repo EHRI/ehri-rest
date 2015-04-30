@@ -31,6 +31,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.EventViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -107,16 +108,21 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
             final @QueryParam(TO_PARAM) String to)
             throws BadRequester {
 
-        Accessor user = getRequesterUserProfile();
-        EventViews eventViews = new EventViews(graph)
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            EventViews eventViews = new EventViews(graph)
                 .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
                 .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
                 .withIds(itemIds.toArray(new String[itemIds.size()]))
                 .withUsers(users.toArray(new String[users.size()]))
                 .from(from)
                 .to(to);
-
-        return streamingList(eventViews.list(getQuery(cls), user));
+            return streamingList(eventViews.list(getQuery(cls), user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @GET
@@ -132,17 +138,22 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
             final @QueryParam(TO_PARAM) String to)
             throws ItemNotFound, BadRequester {
 
-        Accessor user = getRequesterUserProfile();
-        UserProfile byUser = manager.getFrame(userId, UserProfile.class);
-        EventViews eventViews = new EventViews(graph)
-                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
-                .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
-                .withIds(itemIds.toArray(new String[itemIds.size()]))
-                .withUsers(users.toArray(new String[users.size()]))
-                .from(from)
-                .to(to);
-
-        return streamingList(eventViews.listByUser(getQuery(cls), byUser, user));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            UserProfile byUser = manager.getFrame(userId, UserProfile.class);
+            EventViews eventViews = new EventViews(graph)
+                    .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
+                    .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
+                    .withIds(itemIds.toArray(new String[itemIds.size()]))
+                    .withUsers(users.toArray(new String[users.size()]))
+                    .from(from)
+                    .to(to);
+            return streamingList(eventViews.listByUser(getQuery(cls), byUser, user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**
@@ -172,10 +183,11 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
             final @QueryParam(TO_PARAM) String to,
             final @QueryParam(SHOW) List<EventViews.ShowType> show)
             throws ItemNotFound, BadRequester {
-
-        Accessor user = getRequesterUserProfile();
-        UserProfile asUser = manager.getFrame(userId, UserProfile.class);
-        EventViews eventViews = new EventViews(graph)
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            UserProfile asUser = manager.getFrame(userId, UserProfile.class);
+            EventViews eventViews = new EventViews(graph)
                 .withShowType(show.toArray(new EventViews.ShowType[show.size()]))
                 .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
                 .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
@@ -184,7 +196,11 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
                 .from(from)
                 .to(to);
 
-        return streamingList(eventViews.listAsUser(getQuery(cls), asUser, user));
+            return streamingList(eventViews.listAsUser(getQuery(cls), asUser, user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**
@@ -200,10 +216,16 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Path("/{id:.+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        SystemEvent event = views.detail(id, user);
-        return streamingPage(getQuery(AccessibleEntity.class)
-                .page(event.getSubjects(), user), subjectSerializer.withCache());
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            SystemEvent event = views.detail(id, user);
+            return streamingPage(getQuery(AccessibleEntity.class)
+                    .page(event.getSubjects(), user), subjectSerializer.withCache(), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**
@@ -219,11 +241,17 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Path("/for/{id:.+}")
     public Response pageEventsForItem(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        AccessibleEntity item = new LoggingCrudViews<>(graph,
-                AccessibleEntity.class).detail(id, user);
-        return streamingPage(getQuery(cls).setStream(true)
-                .page(item.getHistory(), user));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            AccessibleEntity item = new LoggingCrudViews<>(graph,
+                    AccessibleEntity.class).detail(id, user);
+            return streamingPage(getQuery(cls).setStream(true)
+                    .page(item.getHistory(), user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**
@@ -239,10 +267,16 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Path("/versions/{id:.+}")
     public Response pageVersionsForItem(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        AccessibleEntity item = new LoggingCrudViews<>(graph,
-                AccessibleEntity.class).detail(id, user);
-        return streamingPage(getQuery(Version.class).setStream(true)
-                .page(item.getAllPriorVersions(), user));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            AccessibleEntity item = new LoggingCrudViews<>(graph,
+                    AccessibleEntity.class).detail(id, user);
+            return streamingPage(getQuery(Version.class).setStream(true)
+                    .page(item.getAllPriorVersions(), user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 }

@@ -20,16 +20,13 @@
 package eu.ehri.extension.errors.mappers;
 
 import com.google.common.base.Charsets;
-
 import eu.ehri.project.exceptions.ItemNotFound;
-
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
 import java.util.HashMap;
 import java.util.Map;
 

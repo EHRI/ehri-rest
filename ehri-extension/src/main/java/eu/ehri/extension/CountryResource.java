@@ -36,6 +36,7 @@ import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -101,10 +102,16 @@ public class CountryResource
     public Response listChildren(@PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Country country = views.detail(id, user);
-        return streamingPage(getQuery(Repository.class)
-                .page(country.getRepositories(), user));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Country country = views.detail(id, user);
+            return streamingPage(getQuery(Repository.class)
+                    .page(country.getRepositories(), user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @GET
@@ -115,10 +122,14 @@ public class CountryResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Country country = views.detail(id, user);
-        return getQuery(Repository.class)
-                .count(country.getRepositories());
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor user = getRequesterUserProfile();
+            Country country = views.detail(id, user);
+            long count = getQuery(Repository.class)
+                    .count(country.getRepositories());
+            tx.success();
+            return count;
+        }
     }
 
     @POST
@@ -129,7 +140,11 @@ public class CountryResource
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return createItem(bundle, accessors);
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = createItem(bundle, accessors);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -139,7 +154,11 @@ public class CountryResource
     public Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return updateItem(bundle);
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -150,7 +169,11 @@ public class CountryResource
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return updateItem(id, bundle);
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(id, bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @DELETE
@@ -159,7 +182,11 @@ public class CountryResource
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return deleteItem(id);
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = deleteItem(id);
+            tx.success();
+            return response;
+        }
     }
 
     /**
@@ -183,17 +210,17 @@ public class CountryResource
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        try {
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor user = getRequesterUserProfile();
             final Country country = views.detail(id, user);
-            return createItem(bundle, accessors, new Handler<Repository>() {
+            Response item = createItem(bundle, accessors, new Handler<Repository>() {
                 @Override
                 public void process(Repository repository) throws PermissionDenied {
                     repository.setCountry(country);
                 }
             }, views.setScope(country).setClass(Repository.class));
-        } finally {
-            cleanupTransaction();
+            tx.success();
+            return item;
         }
     }
 }

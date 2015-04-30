@@ -113,10 +113,8 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
 
     @Override
     public <E> CloseableIterable<E> getFrames(EntityClass type, Class<E> cls) {
-        try (CloseableIterable<Vertex> vertices = getVertices(type)) {
-            return new WrappingCloseableIterable<>(
-                    graph.frameVertices(getVertices(type), cls));
-        }
+        return new WrappingCloseableIterable<>(
+                graph.frameVertices(getVertices(type), cls));
     }
 
     @Override

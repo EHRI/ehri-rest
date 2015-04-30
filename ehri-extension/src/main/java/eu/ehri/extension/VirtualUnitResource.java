@@ -41,6 +41,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -61,6 +62,7 @@ import java.util.List;
 
 /**
  * Provides a RESTful interface for the VirtualUnit type
+ *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (https://github.com/mikesname)
  */
@@ -109,12 +111,18 @@ public final class VirtualUnitResource extends
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-        Iterable<VirtualUnit> units = all
-                ? parent.getAllChildren()
-                : parent.getChildren();
-        return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
+            throws ItemNotFound, BadRequester {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            Iterable<VirtualUnit> units = all
+                    ? parent.getAllChildren()
+                    : parent.getChildren();
+            return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @GET
@@ -122,10 +130,16 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/" + INCLUDED)
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-        return streamingPage(getQuery(DocumentaryUnit.class)
-                .page(parent.getIncludedUnits(), getRequesterUserProfile()));
+            throws ItemNotFound, BadRequester {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            return streamingPage(getQuery(DocumentaryUnit.class)
+                    .page(parent.getIncludedUnits(), getRequesterUserProfile()), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @POST
@@ -133,15 +147,13 @@ public final class VirtualUnitResource extends
     public Response addIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit parent = views.detail(id, currentUser);
             vuViews.addIncludedUnits(parent,
                     getIncludedUnits(includedIds, currentUser), currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.status(Response.Status.OK).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -150,15 +162,13 @@ public final class VirtualUnitResource extends
     public Response removeIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit parent = views.detail(id, currentUser);
             vuViews.removeIncludedUnits(parent,
                     getIncludedUnits(includedIds, currentUser), currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.status(Response.Status.OK).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -168,16 +178,14 @@ public final class VirtualUnitResource extends
             @PathParam("from") String fromId, @PathParam("to") String toId,
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit fromVu = views.detail(fromId, currentUser);
             VirtualUnit toVu = views.detail(toId, currentUser);
             Iterable<DocumentaryUnit> units = getIncludedUnits(includedIds, currentUser);
             vuViews.moveIncludedUnits(fromVu, toVu, units, currentUser);
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.status(Response.Status.OK).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -188,11 +196,15 @@ public final class VirtualUnitResource extends
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-        Iterable<VirtualUnit> units = all
-                ? parent.getAllChildren()
-                : parent.getChildren();
-        return getQuery(cls).count(units);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            Iterable<VirtualUnit> units = all
+                    ? parent.getAllChildren()
+                    : parent.getChildren();
+            long count = getQuery(cls).count(units);
+            tx.success();
+            return count;
+        }
     }
 
     @POST
@@ -203,19 +215,23 @@ public final class VirtualUnitResource extends
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        final Accessor currentUser = getCurrentUser();
-        final Iterable<DocumentaryUnit> includedUnits
-                = getIncludedUnits(includedIds, currentUser);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            final Accessor currentUser = getCurrentUser();
+            final Iterable<DocumentaryUnit> includedUnits
+                    = getIncludedUnits(includedIds, currentUser);
 
-        return createItem(bundle, accessors, new Handler<VirtualUnit>() {
-            @Override
-            public void process(VirtualUnit virtualUnit) {
-                virtualUnit.setAuthor(currentUser);
-                for (DocumentaryUnit include : includedUnits) {
-                    virtualUnit.addIncludedUnit(include);
+            Response item = createItem(bundle, accessors, new Handler<VirtualUnit>() {
+                @Override
+                public void process(VirtualUnit virtualUnit) {
+                    virtualUnit.setAuthor(currentUser);
+                    for (DocumentaryUnit include : includedUnits) {
+                        virtualUnit.addIncludedUnit(include);
+                    }
                 }
-            }
-        });
+            });
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -225,7 +241,11 @@ public final class VirtualUnitResource extends
     public Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -234,9 +254,13 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}")
     @Override
     public Response update(@PathParam("id") String id,
-                           Bundle bundle) throws AccessDenied, PermissionDenied,
+            Bundle bundle) throws AccessDenied, PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(id, bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @DELETE
@@ -245,7 +269,11 @@ public final class VirtualUnitResource extends
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
-        return deleteItem(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = deleteItem(id);
+            tx.success();
+            return item;
+        }
     }
 
     @POST
@@ -257,23 +285,27 @@ public final class VirtualUnitResource extends
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        final Accessor currentUser = getRequesterUserProfile();
-        final Iterable<DocumentaryUnit> includedUnits
-                = getIncludedUnits(includedIds, currentUser);
-        final VirtualUnit parent = views.detail(id, currentUser);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            final Accessor currentUser = getRequesterUserProfile();
+            final Iterable<DocumentaryUnit> includedUnits
+                    = getIncludedUnits(includedIds, currentUser);
+            final VirtualUnit parent = views.detail(id, currentUser);
 
-        // NB: Unlike most other items created in another context, virtual
-        // units do not inherit the permission scope of their 'parent',
-        // because they make have many parents.
-        return createItem(bundle, accessors, new Handler<VirtualUnit>() {
-            @Override
-            public void process(VirtualUnit virtualUnit) {
-                parent.addChild(virtualUnit);
-                for (DocumentaryUnit included : includedUnits) {
-                    virtualUnit.addIncludedUnit(included);
+            // NB: Unlike most other items created in another context, virtual
+            // units do not inherit the permission scope of their 'parent',
+            // because they make have many parents.
+            Response item = createItem(bundle, accessors, new Handler<VirtualUnit>() {
+                @Override
+                public void process(VirtualUnit virtualUnit) {
+                    parent.addChild(virtualUnit);
+                    for (DocumentaryUnit included : includedUnits) {
+                        virtualUnit.addIncludedUnit(included);
+                    }
                 }
-            }
-        });
+            });
+            tx.success();
+            return item;
+        }
     }
 
     @GET
@@ -281,10 +313,16 @@ public final class VirtualUnitResource extends
     @Path("/forUser/{userId:.+}")
     public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
             throws AccessDenied, ItemNotFound, BadRequester {
-        Accessor accessor = manager.getFrame(userId, Accessor.class);
-        Accessor currentUser = getRequesterUserProfile();
-        Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
-        return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            Accessor currentUser = getRequesterUserProfile();
+            Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
+            return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**

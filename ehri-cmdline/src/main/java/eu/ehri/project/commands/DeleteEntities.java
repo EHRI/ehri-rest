@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -71,7 +70,7 @@ public class DeleteEntities extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         // the first argument is the entity type, and that must be specified
@@ -94,21 +93,16 @@ public class DeleteEntities extends BaseCommand implements Command {
         UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                 UserProfile.class);
 
-        try {
-            new ActionManager(graph)
-                    .newEventContext(user, EventTypes.deletion, getLogMessage(logMessage))
-                    .commit();
-            deleteIds(graph, manager, type, user);
-            graph.getBaseGraph().commit();
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        }
+        new ActionManager(graph).newEventContext(user,
+                EventTypes.deletion,
+                getLogMessage(logMessage))
+                .commit();
+        deleteIds(graph, manager, type, user);
 
         return 0;
     }
 
-    private void deleteIds(FramedGraph<? extends TransactionalGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
+    private void deleteIds(FramedGraph<?> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
         CrudViews<AccessibleEntity> views = new CrudViews<>(graph, AccessibleEntity.class);
         try (CloseableIterable<AccessibleEntity> items = manager.getFrames(type, AccessibleEntity.class)) {

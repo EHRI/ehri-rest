@@ -26,6 +26,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -69,9 +70,13 @@ public class PermissionGrantResource extends AbstractRestResource {
     @Path("/{id:.+}")
     public Response getPermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester, SerializationError {
-        PermissionGrant grant = manager.getFrame(id,
-                EntityClass.PERMISSION_GRANT, PermissionGrant.class);
-        return single(grant);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            PermissionGrant grant = manager.getFrame(id,
+                    EntityClass.PERMISSION_GRANT, PermissionGrant.class);
+            Response response = single(grant);
+            tx.success();
+            return response;
+        }
     }
     /**
      * Revoke a particular permission grant.
@@ -85,14 +90,12 @@ public class PermissionGrantResource extends AbstractRestResource {
     @Path("/{id:.+}")
     public Response revokePermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class),
                     getRequesterUserProfile());
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.status(Status.OK).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 }

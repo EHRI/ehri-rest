@@ -72,9 +72,10 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
+        String data = response.getEntity(String.class);
+        System.out.println("DATA: " + data);
 
-        List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(response
-                .getEntity(String.class));
+        List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(data);
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME)
                 .get(ContentTypes.DOCUMENTARY_UNIT.getName()));
@@ -94,9 +95,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
-
-        List<Map<String, Map<String, List<String>>>> newMatrix = getInheritedMatrix(response
-                .getEntity(String.class));
+        data = response.getEntity(String.class);
+        List<Map<String, Map<String, List<String>>>> newMatrix = getInheritedMatrix(data);
 
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
         assertTrue(newMatrix.get(0).get(LIMITED_USER_NAME)

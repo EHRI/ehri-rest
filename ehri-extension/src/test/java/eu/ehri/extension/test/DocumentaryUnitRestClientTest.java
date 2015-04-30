@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.INTERNAL_SERVER_ERROR;
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -229,6 +230,25 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
                 "data");
         assertEquals(FIRST_DOC_ID, c1data.get(Ontology.IDENTIFIER_KEY));
+    }
+
+    @Test
+    public void testListDocumentaryUnitWithNotFound() throws Exception {
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.DOCUMENTARY_UNIT, "BAD_ID", "list"))
+                .get(ClientResponse.class);
+        String s = response.getEntity(String.class);
+        assertStatus(NOT_FOUND, response);
+        System.out.println("Return: " + s);
+    }
+
+    @Test
+    public void testListDocumentaryUnitWithBadRequester() throws Exception {
+        ClientResponse response = jsonCallAs("invalidId",
+                ehriUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER, "list"))
+                .get(ClientResponse.class);
+        String s = response.getEntity(String.class);
+        assertStatus(INTERNAL_SERVER_ERROR, response);
     }
 
     @Test

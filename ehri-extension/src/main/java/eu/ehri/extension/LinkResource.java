@@ -42,6 +42,7 @@ import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.DescriptionViews;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
@@ -111,7 +112,11 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(id, bundle);
+            tx.success();
+            return item;
+        }
     }
 
     @PUT
@@ -119,7 +124,11 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public Response update(Bundle bundle)
             throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = updateItem(bundle);
+            tx.success();
+            return item;
+        }
     }
 
     /**
@@ -149,21 +158,19 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        Accessor user = getRequesterUserProfile();
-        try {
+
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor user = getRequesterUserProfile();
             Link link = linkViews.createLink(targetId,
                     sourceId, bodies, bundle, user);
             aclManager.setAccessors(link,
                     getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(link);
+            Response response = creationResponse(link);
+            tx.success();
+            return response;
         } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
-        } finally {
-            cleanupTransaction();
         }
-
     }
 
     /**
@@ -174,8 +181,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public Response deleteAccessPoint(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor userProfile = getRequesterUserProfile();
             UndeterminedRelationship rel = manager.getFrame(id, UndeterminedRelationship.class);
             Description description = rel.getDescription();
@@ -187,10 +193,8 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
                 throw new ItemNotFound(id);
             }
             descriptionViews.delete(item.getId(), id, userProfile, getLogMessage());
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.status(Status.OK).build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -202,11 +206,17 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @Path("/for/{id:.+}")
     public Response listRelatedItems(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        Query<Link> linkQuery = new Query<>(graph, Link.class)
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Query<Link> linkQuery = new Query<>(graph, Link.class)
                 .setStream(isStreaming());
-        return streamingPage(linkQuery.setStream(isStreaming()).page(
-                manager.getFrame(id, LinkableEntity.class).getLinks(),
-                getRequesterUserProfile()));
+            return streamingPage(linkQuery.setStream(isStreaming()).page(
+                    manager.getFrame(id, LinkableEntity.class).getLinks(),
+                    getRequesterUserProfile()), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     /**
@@ -218,18 +228,15 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public Response deleteLinkForItem(@PathParam("id") String id, @PathParam("linkId") String linkId)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             helper.checkEntityPermission(manager.getFrame(id, AccessibleEntity.class),
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
             Actioner actioner = manager.cast(getRequesterUserProfile(), Actioner.class);
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
             actionManager.newEventContext(link, actioner, EventTypes.deletion).commit();
             manager.deleteVertex(link.asVertex());
-            graph.getBaseGraph().commit();
+            tx.success();
             return Response.ok().build();
-        } finally {
-            cleanupTransaction();
         }
     }
 
@@ -242,6 +249,10 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return deleteItem(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response item = deleteItem(id);
+            tx.success();
+            return item;
+        }
     }
 }

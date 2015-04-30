@@ -30,11 +30,11 @@ import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -98,12 +98,18 @@ public class DocumentaryUnitResource
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
-        Iterable<DocumentaryUnit> units = all
-                ? parent.getAllChildren()
-                : parent.getChildren();
-        return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
+            throws ItemNotFound, BadRequester {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+            Iterable<DocumentaryUnit> units = all
+                    ? parent.getAllChildren()
+                    : parent.getChildren();
+            return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @GET
@@ -114,11 +120,15 @@ public class DocumentaryUnitResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
-        Iterable<DocumentaryUnit> units = all
-                ? parent.getAllChildren()
-                : parent.getChildren();
-        return getQuery(cls).count(units);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+            Iterable<DocumentaryUnit> units = all
+                    ? parent.getAllChildren()
+                    : parent.getChildren();
+            long count = getQuery(cls).count(units);
+            tx.success();
+            return count;
+        }
     }
 
     @PUT
@@ -128,7 +138,11 @@ public class DocumentaryUnitResource
     public Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @PUT
@@ -139,7 +153,11 @@ public class DocumentaryUnitResource
     public Response update(@PathParam("id") String id,
                            Bundle bundle) throws AccessDenied, PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(id, bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @DELETE
@@ -147,8 +165,12 @@ public class DocumentaryUnitResource
     @Override
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, SerializationError {
-        return deleteItem(id);
+            BadRequester {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = deleteItem(id);
+            tx.success();
+            return response;
+        }
     }
 
     @POST
@@ -158,20 +180,20 @@ public class DocumentaryUnitResource
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor user = getRequesterUserProfile();
             final DocumentaryUnit parent = views.detail(id, user);
-            return createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
-                @Override
-                public void process(DocumentaryUnit doc) throws PermissionDenied {
-                    parent.addChild(doc);
-                }
-            },
+            Response resource = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
+                        @Override
+                        public void process(DocumentaryUnit doc) throws PermissionDenied {
+                            parent.addChild(doc);
+                        }
+                    },
                     views.setScope(parent));
-        } finally {
-            cleanupTransaction();
+            tx.success();
+            return resource;
         }
     }
 }

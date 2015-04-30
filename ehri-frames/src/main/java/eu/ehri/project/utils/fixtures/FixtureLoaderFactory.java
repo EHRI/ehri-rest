@@ -19,7 +19,6 @@
 
 package eu.ehri.project.utils.fixtures;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.utils.fixtures.impl.YamlFixtureLoader;
 
@@ -34,10 +33,10 @@ public class FixtureLoaderFactory {
     /**
      * Get an instance of a fixture loader for the given class.
      * 
-     * @param graph
-     * @return
+     * @param graph the framed graph
+     * @return a new fixture loader
      */
-    public static FixtureLoader getInstance(FramedGraph<? extends TransactionalGraph> graph) {
+    public static FixtureLoader getInstance(FramedGraph<?> graph) {
         return new YamlFixtureLoader(graph);
     }
 
@@ -45,11 +44,11 @@ public class FixtureLoaderFactory {
      * Get an instance of a fixture loader for the given class, specifying
      * whether or not to initialize the graph before loading.
      *
-     * @param graph
-     * @param initialize
-     * @return
+     * @param graph the new graph
+     * @param initialize whether or not to initialize the graph
+     * @return a new fixture loader
      */
-    public static FixtureLoader getInstance(FramedGraph<? extends TransactionalGraph> graph, boolean initialize) {
+    public static FixtureLoader getInstance(FramedGraph<?> graph, boolean initialize) {
         return new YamlFixtureLoader(graph, initialize);
     }
 }

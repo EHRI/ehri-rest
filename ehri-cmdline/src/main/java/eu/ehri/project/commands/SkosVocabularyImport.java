@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -68,7 +67,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
                 + sep + "Vocabulary and User.";
     }
 
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
                                CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -95,6 +94,9 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
+            // FIXME: Casting the graph shouldn't be necessary here, but it is
+            // because the import managers do transactional stuff that they
+            // probably should not do.
             SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, vocabulary);
             ImportLog log = importer
                     .setTolerant(cmdLine.hasOption("tolerant"))

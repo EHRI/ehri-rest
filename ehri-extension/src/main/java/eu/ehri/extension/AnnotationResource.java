@@ -35,6 +35,7 @@ import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AnnotationViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.CrudViews;
@@ -119,15 +120,13 @@ public class AnnotationResource
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             Annotation ann = annotationViews.createFor(id, id,
                     bundle, user, getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(ann);
-        } finally {
-            cleanupTransaction();
+            Response response = creationResponse(ann);
+            tx.success();
+            return response;
         }
     }
 
@@ -156,15 +155,13 @@ public class AnnotationResource
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
-        try {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             Annotation ann = annotationViews.createFor(id, did,
                     bundle, user, getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(ann);
-        } finally {
-            cleanupTransaction();
+            Response response = creationResponse(ann);
+            tx.success();
+            return response;
         }
     }
 
@@ -176,20 +173,24 @@ public class AnnotationResource
      * @return A list of annotations on the item and it's dependent children.
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public Response listAnnotationsForSubtree(
             @PathParam("id") String id)
-            throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
-        AccessibleEntity item = new CrudViews<>(graph, AccessibleEntity.class)
-                .detail(id, getRequesterUserProfile());
-        Query<Annotation> query = getQuery(Annotation.class)
-                .setStream(isStreaming());
-        return streamingPage(query.page(item.getAnnotations(), getRequesterUserProfile()));
-
+            throws ItemNotFound, BadRequester {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            AccessibleEntity item = new CrudViews<>(graph, AccessibleEntity.class)
+                    .detail(id, getRequesterUserProfile());
+            Query<Annotation> query = getQuery(Annotation.class)
+                    .setStream(isStreaming());
+            return streamingPage(query.page(item.getAnnotations(), getRequesterUserProfile()), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
     }
 
     @PUT
@@ -198,7 +199,11 @@ public class AnnotationResource
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError {
-        return updateItem(id, bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(id, bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @PUT
@@ -206,7 +211,11 @@ public class AnnotationResource
     public Response update(Bundle bundle)
             throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError {
-        return updateItem(bundle);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = updateItem(bundle);
+            tx.success();
+            return response;
+        }
     }
 
     @DELETE
@@ -215,6 +224,10 @@ public class AnnotationResource
     public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return deleteItem(id);
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Response response = deleteItem(id);
+            tx.success();
+            return response;
+        }
     }
 }

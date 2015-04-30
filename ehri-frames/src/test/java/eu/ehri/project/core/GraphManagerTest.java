@@ -25,11 +25,11 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import eu.ehri.project.core.impl.BlueprintsGraphManager;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
@@ -109,7 +109,7 @@ public class GraphManagerTest {
         @Before
         public void setUp() throws Exception {
             // NB: Not loading modules to allow use of frames methods, like GremlinGroovy
-            graph = new FramedGraphFactory().create(new Neo4jGraph(
+            graph = new FramedGraphFactory().create(new Neo4j2Graph(
                     new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                             .newGraphDatabase()));
             manager = cls.getConstructor(FramedGraph.class).newInstance(graph);

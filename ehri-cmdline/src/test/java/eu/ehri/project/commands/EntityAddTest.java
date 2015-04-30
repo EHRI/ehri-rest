@@ -23,6 +23,7 @@ import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.apache.commons.cli.CommandLine;
+import org.junit.Before;
 import org.junit.Test;
 
 import static eu.ehri.project.commands.CmdEntryPoint.RetCode.BAD_DATA;
@@ -33,7 +34,6 @@ import static org.junit.Assert.assertEquals;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class EntityAddTest extends AbstractFixtureTest {
-
     @Test
     public void testEntityAdd() throws Exception {
         String[] args = new String[]{EntityClass.COUNTRY.getName(),

@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -63,7 +62,7 @@ public class EntityDelete extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         // the first argument is the item ID, and that must be specified
@@ -82,15 +81,9 @@ public class EntityDelete extends BaseCommand implements Command {
         UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                 UserProfile.class);
 
-        try {
-            LoggingCrudViews<AccessibleEntity> api = new LoggingCrudViews<>(
-                    graph, AccessibleEntity.class);
-            api.delete(id, user, Optional.of(logMessage));
-            graph.getBaseGraph().commit();
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        }
+        LoggingCrudViews<AccessibleEntity> api = new LoggingCrudViews<>(
+                graph, AccessibleEntity.class);
+        api.delete(id, user, Optional.of(logMessage));
 
         return 0;
     }

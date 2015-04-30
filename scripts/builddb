@@ -217,6 +217,7 @@ class DbBuilder
   end
 end
 
+tx = Graph.get_base_graph.begin_tx
 start = Time.now
 builder = DbBuilder.new
 if not opts[:update] then
@@ -234,6 +235,9 @@ builder.import_wl
 builder.import_ukraine
 builder.import_icaatom
 builder.import_ushmm
+
+tx.success
+tx.close
 
 Graph.get_base_graph.shutdown
 

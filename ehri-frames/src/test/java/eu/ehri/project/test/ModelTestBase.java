@@ -45,6 +45,7 @@ public abstract class ModelTestBase extends GraphTestBase {
         super.setUp();
         helper = FixtureLoaderFactory.getInstance(graph);
         helper.loadTestData();
+        graph.getBaseGraph().commit();
     }
 
     @Override

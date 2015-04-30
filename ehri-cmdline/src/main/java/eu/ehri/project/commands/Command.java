@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import org.apache.commons.cli.CommandLine;
 
@@ -55,7 +54,7 @@ public interface Command {
      * @return a status code (0 = success)
      * @throws Exception
      */
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception;
+    public int execWithOptions(final FramedGraph<?> graph, CommandLine cmdLine) throws Exception;
 
     /**
      * Execute this command with the given arguments.
@@ -65,5 +64,5 @@ public interface Command {
      * @return a status code (0 = success)
      * @throws Exception
      */
-    public int exec(FramedGraph<? extends TransactionalGraph> graph, String[] args) throws Exception;
+    public int exec(FramedGraph<?> graph, String[] args) throws Exception;
 }

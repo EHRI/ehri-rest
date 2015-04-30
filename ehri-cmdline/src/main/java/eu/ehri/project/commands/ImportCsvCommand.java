@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -63,7 +62,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -96,8 +95,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command {
             ImportLog log = new CsvImportManager(graph, scope, user, importer)
                     .setTolerant(tolerant).importFiles(filePaths, logMessage);
 
-            System.out.println("Import completed. Created: " + log.getCreated()
-                    + ", Updated: " + log.getUpdated());
+            log.printReport();
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {

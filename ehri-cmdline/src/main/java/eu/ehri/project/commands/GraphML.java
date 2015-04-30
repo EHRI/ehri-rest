@@ -19,11 +19,9 @@
 
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -92,7 +90,7 @@ public class GraphML extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1) {
@@ -109,7 +107,7 @@ public class GraphML extends BaseCommand implements Command {
         if (dumpMode.contentEquals("out")) {
         	saveDump(graph, cmdLine);
         } else if (dumpMode.contentEquals("in")) {
-            loadDump(graph, GraphManagerFactory.getInstance(graph), cmdLine);
+            loadDump(graph, cmdLine);
         } else {
             throw new UnrecognizedOptionException("Unrecognised dump mode: '" + dumpMode + "'");
         }
@@ -137,7 +135,7 @@ public class GraphML extends BaseCommand implements Command {
         }
     }
 
-   public void loadDump(final FramedGraph<?> graph, GraphManager manager,
+   public void loadDump(final FramedGraph<?> graph,
            CommandLine cmdLine) throws Exception {
        GraphMLReader reader = new GraphMLReader(graph);
        String filepath = (String)cmdLine.getArgList().get(0);

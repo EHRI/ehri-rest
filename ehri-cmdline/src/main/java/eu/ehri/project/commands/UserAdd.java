@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -73,7 +72,7 @@ public class UserAdd extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+    public int execWithOptions(final FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -102,22 +101,12 @@ public class UserAdd extends BaseCommand implements Command {
                 .generateId(SystemScope.getInstance().idPath(), bundle);
         bundle = bundle.withId(nodeId);
 
-        try {
-            LoggingCrudViews<UserProfile> view = new LoggingCrudViews<>(
-                    graph, UserProfile.class);
-            UserProfile newUser = view.create(bundle, admin, getLogMessage(logMessage));
-            for (String groupId : groups) {
-                Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
-                group.addMember(newUser);
-            }
-            graph.getBaseGraph().commit();
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            System.err.printf("A user a id: '%s' already exists%n", nodeId);
-            return 9;
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+        LoggingCrudViews<UserProfile> view = new LoggingCrudViews<>(
+                graph, UserProfile.class);
+        UserProfile newUser = view.create(bundle, admin, getLogMessage(logMessage));
+        for (String groupId : groups) {
+            Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+            group.addMember(newUser);
         }
 
         return 0;

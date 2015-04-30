@@ -25,12 +25,12 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import org.junit.After;
 import org.junit.Before;
@@ -94,16 +94,7 @@ public abstract class GraphTestBase {
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() {
         GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                 .newGraphDatabase();
-        Neo4jGraph baseGraph = new Neo4jGraph(rawGraph);
-        // Setting check elements in transaction to ON here, which is
-        // slower but prevents vertices that have been deleted in the
-        // current transaction from being returned in global index
-        // searches. When disabled, index searches are considerably
-        // faster but allow vertices to be returned that have been deleted
-        // in the current transaction. These then throw an IllegalStateException
-        // when their properties are accessed.
-        baseGraph.setCheckElementsInTransaction(true);
-        return graphFactory.create(baseGraph);
+        return graphFactory.create(new Neo4j2Graph(rawGraph));
     }
 
     @After

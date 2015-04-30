@@ -293,9 +293,8 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     public Page<E> page(String key, String query, Accessor user) {
         try (CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
                 ClassUtils.getEntityType(cls))) {
-            CloseableIterable<Vertex> indexQ = manager.getVertices(key,
-                    query, ClassUtils.getEntityType(cls));
-            try {
+            try (CloseableIterable<Vertex> indexQ = manager.getVertices(key,
+                    query, ClassUtils.getEntityType(cls))) {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
                 long numItems = stream
@@ -308,8 +307,6 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
                                 setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
                                         indexQ).filter(aclFilterFunction)))),
                                 cls), offset, limit, numItems);
-            } finally {
-                indexQ.close();
             }
         }
     }
