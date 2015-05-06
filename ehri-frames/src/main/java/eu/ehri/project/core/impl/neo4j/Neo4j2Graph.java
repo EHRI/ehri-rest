@@ -6,7 +6,6 @@ import com.tinkerpop.blueprints.Features;
 import com.tinkerpop.blueprints.GraphQuery;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
-import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.MetaGraph;
 import com.tinkerpop.blueprints.Parameter;
 import com.tinkerpop.blueprints.TransactionalGraph;
