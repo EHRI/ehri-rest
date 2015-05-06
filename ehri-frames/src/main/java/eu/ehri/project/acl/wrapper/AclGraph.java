@@ -11,7 +11,7 @@ import eu.ehri.project.models.base.Accessor;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class AclGraph<T extends IndexableGraph> implements WrapperGraph<T>, IndexableGraph {
+public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
 
     protected final T baseGraph;
     private final Accessor accessor;
@@ -112,25 +112,5 @@ public class AclGraph<T extends IndexableGraph> implements WrapperGraph<T>, Inde
 
     public Accessor getAccessor() {
         return accessor;
-    }
-
-    @Override
-    public <E extends Element> Index<E> createIndex(String s, Class<E> tClass, Parameter... parameters) {
-        return baseGraph.createIndex(s, tClass, parameters);
-    }
-
-    @Override
-    public <E extends Element> Index<E> getIndex(String s, Class<E> tClass) {
-        return baseGraph.getIndex(s, tClass);
-    }
-
-    @Override
-    public Iterable<Index<? extends Element>> getIndices() {
-        return baseGraph.getIndices();
-    }
-
-    @Override
-    public void dropIndex(String s) {
-        baseGraph.dropIndex(s);
     }
 }
