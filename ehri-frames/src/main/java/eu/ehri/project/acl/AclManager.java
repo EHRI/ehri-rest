@@ -126,7 +126,7 @@ public final class AclManager {
      * @param accessor The user/group
      * @return User belongs to the admin group
      */
-    public boolean belongsToAdmin(Accessor accessor) {
+    public static boolean belongsToAdmin(Accessor accessor) {
         if (accessor.isAdmin()) {
             return true;
         }
@@ -144,7 +144,7 @@ public final class AclManager {
      * @param accessor The user/group
      * @return User is an anonymous accessor
      */
-    public boolean isAnonymous(Accessor accessor) {
+    public static boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
                 || accessor.getId().equals(
@@ -370,7 +370,7 @@ public final class AclManager {
      * @param accessor The user/group
      * @return A PipeFunction for filtering a set of vertices as the given user
      */
-    public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
+    public static PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "Accessor is null");
         if (belongsToAdmin(accessor)) {
             return noopFilterFunction();
@@ -641,7 +641,7 @@ public final class AclManager {
      * @param accessor The user/group
      * @return A lookup of accessor vertices
      */
-    private HashSet<Vertex> getAllAccessors(Accessor accessor) {
+    private static HashSet<Vertex> getAllAccessors(Accessor accessor) {
 
         final HashSet<Vertex> all = Sets.newHashSet();
         if (!isAnonymous(accessor)) {
@@ -701,7 +701,7 @@ public final class AclManager {
      * @return A no-op PipeFunction for filtering a list of vertices as an admin
      *         user
      */
-    private PipeFunction<Vertex, Boolean> noopFilterFunction() {
+    private static PipeFunction<Vertex, Boolean> noopFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 return true;

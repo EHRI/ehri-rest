@@ -31,7 +31,10 @@ import javax.ws.rs.core.MediaType;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
+import static eu.ehri.extension.AbstractRestResource.AUTH_HEADER_NAME;
 import static eu.ehri.extension.AdminResource.ENDPOINT;
 
 /**
@@ -40,6 +43,28 @@ import static eu.ehri.extension.AdminResource.ENDPOINT;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class AdminRestClientTest extends BaseRestClientTest {
+
+    @Test
+    public void testExportGraphSONAsAnon() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_exportGraphSON"));
+        ClientResponse response = resource.get(ClientResponse.class);
+        String data = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertTrue("Anon export must contain publicly-visible item ann1", data.contains("ann1"));
+        assertFalse("Anon export must not contain restricted item ann3", data.contains("ann3"));
+        assertTrue("Anon export must contain promoted item ann4", data.contains("ann4"));
+    }
+
+    @Test
+    public void testExportGraphSONAsAdmin() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_exportGraphSON"));
+        ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
+                .get(ClientResponse.class);
+        String data = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertTrue("Admin export must contain publicly-visible item ann1", data.contains("ann1"));
+        assertTrue("Admin export must contain restricted item ann3", data.contains("ann3"));
+    }
 
     @Test
     public void testReindexInternal() throws Exception {

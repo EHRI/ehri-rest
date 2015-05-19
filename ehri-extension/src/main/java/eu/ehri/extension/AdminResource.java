@@ -22,11 +22,14 @@ package eu.ehri.extension;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.wrapper.AclGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
@@ -87,8 +90,12 @@ public class AdminResource extends AbstractRestResource {
             @Override
             public void write(OutputStream stream) throws IOException, WebApplicationException {
                 try (final Tx tx = graph.getBaseGraph().beginTx()) {
-                    GraphSONWriter.outputGraph(graph, stream, GraphSONMode.EXTENDED);
+                    Accessor accessor = getRequesterUserProfile();
+                    AclGraph<?> aclGraph = new AclGraph<IndexableGraph>(graph.getBaseGraph(), accessor);
+                    GraphSONWriter.outputGraph(aclGraph, stream, GraphSONMode.EXTENDED);
                     tx.success();
+                } catch (BadRequester e) {
+                    throw new RuntimeException(e);
                 }
             }
         }).build();
