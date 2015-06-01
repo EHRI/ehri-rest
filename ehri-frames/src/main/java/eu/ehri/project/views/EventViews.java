@@ -254,7 +254,7 @@ public class EventViews {
                 @Override
                 public Boolean compute(SystemEvent event) {
                     String timestamp = event.getTimestamp();
-                    return from.get().compareTo(timestamp) <= 0;
+                    return from.get().compareTo(timestamp) >= 0;
                 }
             });
         }
@@ -264,7 +264,7 @@ public class EventViews {
                 @Override
                 public Boolean compute(SystemEvent event) {
                     String timestamp = event.getTimestamp();
-                    return to.get().compareTo(timestamp) >= 0;
+                    return to.get().compareTo(timestamp) <= 0;
                 }
             });
         }
