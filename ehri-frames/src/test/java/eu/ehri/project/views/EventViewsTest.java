@@ -82,13 +82,13 @@ public class EventViewsTest extends AbstractFixtureTest {
                 .to(timestamp)
                 .list(query, user1));
         assertEquals(1, Iterables.size(toList));
-        assertEquals(doc1, toList.get(0).getFirstSubject());
+        assertEquals(doc2, toList.get(0).getFirstSubject());
 
         List<SystemEvent> fromList = Lists.newArrayList(eventViews
                 .from(timestamp)
                 .list(query, user1));
         assertEquals(1, Iterables.size(fromList));
-        assertEquals(doc2, fromList.get(0).getFirstSubject());
+        assertEquals(doc1, fromList.get(0).getFirstSubject());
 
         // Test ID filter
         List<SystemEvent> idList = Lists.newArrayList(eventViews
