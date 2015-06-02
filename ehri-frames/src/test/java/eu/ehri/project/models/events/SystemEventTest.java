@@ -126,4 +126,46 @@ public class SystemEventTest extends AbstractFixtureTest {
 
         assertFalse(sameAs(second, repoEvent));
     }
+
+    @Test
+    public void testSameAsWithTimeDiff() throws Exception {
+        Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
+        UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
+
+        ActionManager.EventContext ctx = actionManager.newEventContext(user,
+                validUser,
+                EventTypes.creation);
+        SystemEvent first = ctx.commit();
+        assertEquals(1, Iterables.count(first.getSubjects()));
+
+        // Do the same thing again after 1/2 second
+        Thread.sleep(500);
+        ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
+                validUser,
+                EventTypes.creation);
+        SystemEvent second = ctx2.commit();
+
+        // And again after 1 full second
+        Thread.sleep(500);
+        ActionManager.EventContext ctx3 = actionManager.newEventContext(user,
+                validUser,
+                EventTypes.creation);
+        SystemEvent third = ctx3.commit();
+
+        // Without considering time difference, first and second events
+        // are "the same"
+        assertTrue(sameAs(first, second));
+        // ... as are first and third
+        assertTrue(sameAs(first, third));
+        // And they're also the same, with a cutoff time
+        // below a second, since they happen in quick
+        // succession.
+        assertTrue(ActionManager.canAggregate(first, second, 1));
+        // ... but with a time diff of less than a second,
+        // they are not the same
+        assertFalse(ActionManager.canAggregate(first, second, 0));
+        // And nor are the first and third events, which
+        // are separated by more than 1 second.
+        assertFalse(ActionManager.canAggregate(first, third, 1));
+    }
 }

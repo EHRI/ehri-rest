@@ -101,16 +101,24 @@ public class BaseRestClientTest extends RunningServerTest {
      */
     protected List<Map<String, Object>> getItemList(String url, String userId,
             MultivaluedMap<String, String> params) throws Exception {
-        WebResource resource = client.resource(getExtensionEntryPointUri() + url).queryParams(params);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
-                .get(ClientResponse.class);
-        String json = response.getEntity(String.class);
-        ObjectMapper mapper = new ObjectMapper();
         TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
         };
-        return mapper.readValue(json, typeRef);
+        return jsonMapper.readValue(getJson(url, userId, params), typeRef);
+    }
+
+    protected List<List<Map<String, Object>>> getItemListOfLists(String relativeUrl, String userId) throws Exception {
+        return getItemListOfLists(relativeUrl, userId, new MultivaluedMapImpl());
+    }
+
+    /**
+     * Get a list of items at some relativeUrl, as the given user.
+     */
+    protected List<List<Map<String, Object>>> getItemListOfLists(String relativeUrl, String userId,
+            MultivaluedMap<String, String> params) throws Exception {
+        TypeReference<LinkedList<LinkedList<HashMap<String, Object>>>> typeRef = new
+                TypeReference<LinkedList<LinkedList<HashMap<String, Object>>>>() {
+        };
+        return jsonMapper.readValue(getJson(relativeUrl, userId, params), typeRef);
     }
 
     /**
@@ -135,8 +143,7 @@ public class BaseRestClientTest extends RunningServerTest {
         String range = headers.getFirst("Content-Range");
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
-            matcher.find();
-            return Integer.valueOf(matcher.group(1));
+            return matcher.find() ? Integer.valueOf(matcher.group(1)) : null;
         }
         return null;
     }
@@ -146,8 +153,7 @@ public class BaseRestClientTest extends RunningServerTest {
         String range = headers.getFirst("Content-Range");
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
-            matcher.find();
-            return Integer.valueOf(matcher.group(3));
+            return matcher.find() ? Integer.valueOf(matcher.group(3)) : null;
         }
         return null;
     }
@@ -216,5 +222,14 @@ public class BaseRestClientTest extends RunningServerTest {
             throws java.io.IOException {
         URL url = Resources.getResource(resourceName);
         return Resources.toString(url, Charsets.UTF_8);
+    }
+
+    private String getJson(String url, String userId, MultivaluedMap<String, String> params) {
+        WebResource resource = client.resource(getExtensionEntryPointUri() + url).queryParams(params);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .get(ClientResponse.class);
+        return response.getEntity(String.class);
     }
 }

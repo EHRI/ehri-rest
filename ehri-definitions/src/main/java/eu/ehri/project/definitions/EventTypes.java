@@ -42,5 +42,11 @@ public enum EventTypes {
     removeGroup,
     ingest,
     promotion,
-    demotion
+    demotion,
+    watch,
+    unwatch,
+    follow,
+    unfollow,
+    block,
+    unblock
 }

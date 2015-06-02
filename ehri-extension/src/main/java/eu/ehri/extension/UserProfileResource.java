@@ -25,6 +25,7 @@ import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -39,7 +40,6 @@ import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -251,12 +251,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.addFollowing(manager.getFrame(id, UserProfile.class));
+            if (!otherIds.isEmpty()) {
+                Accessor accessor = getRequesterUserProfile();
+                UserProfile user = views.detail(userId, accessor);
+                for (String id : otherIds) {
+                    user.addFollowing(manager.getFrame(id, UserProfile.class));
+                }
+                tx.success();
             }
-            tx.success();
             return Response.status(Status.OK).build();
         }
     }

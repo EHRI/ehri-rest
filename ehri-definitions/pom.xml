@@ -3,7 +3,7 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.10.0-SNAPSHOT</version>
+        <version>0.10.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>ehri-definitions</artifactId>

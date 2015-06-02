@@ -41,6 +41,7 @@ import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
 import org.joda.time.DateTime;
+import org.joda.time.Seconds;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,6 @@ import java.util.Set;
  * \/                        \/                      \/
  * [lifecycleAction]     [lifecycleActionStream]     [lifecycleEvent]
  * |                         |                       |
- * e3--[actionHasEvent]->-- Event 3 ---[hasEvent]--<--e3
  * e3--[actionHasEvent]->-- Event 3 ---[hasEvent]--<--e3
  * \/                        \/                      \/
  * [lifecycleAction]         [lifecycleAction]       [lifecycleEvent]
@@ -335,6 +335,18 @@ public final class ActionManager {
     }
 
     /**
+     * Create an action node describing something that user U has done.
+     *
+     * @param user       The actioner
+     * @param type       The event type
+     * @return An EventContext object
+     */
+    public EventContext newEventContext(Actioner user, EventTypes type) {
+        return new EventContext(this, user, type, getTimestamp(), Optional.<String>absent(),
+                Optional.<Frame>absent(), Optional.<Bundle>absent());
+    }
+
+    /**
      * Create an action for the given subject, user, and type.
      *
      * @param subject The subject node
@@ -391,10 +403,11 @@ public final class ActionManager {
      *
      * @param event1 the first event
      * @param event2 the second event
+     * @param timeDiffInSeconds the elapsed time between the events
      *
      * @return whether or not the events are effectively the same.
      */
-    public static boolean sameAs(SystemEvent event1, SystemEvent event2) {
+    public static boolean canAggregate(SystemEvent event1, SystemEvent event2, int timeDiffInSeconds) {
         // NB: Fetching all these props and relations is potentially quite
         // costly, so we want to short-circuit and return early is possible,
         // starting with the least-costly to fetch attributes.
@@ -408,6 +421,15 @@ public final class ActionManager {
         String logMessage2 = event2.getLogMessage();
         if (logMessage1 != null && logMessage2 != null && !logMessage1.equals(logMessage2)) {
             return false;
+        }
+
+        if (timeDiffInSeconds > -1) {
+            DateTime event1Time = DateTime.parse(event1.getTimestamp());
+            DateTime event2Time = DateTime.parse(event2.getTimestamp());
+            int timeDiff = Seconds.secondsBetween(event1Time, event2Time).getSeconds();
+            if (timeDiff >= timeDiffInSeconds) {
+                return false;
+            }
         }
 
         Frame eventScope1 = event1.getEventScope();
@@ -430,6 +452,32 @@ public final class ActionManager {
 
         // Okay, fall through...
         return true;
+    }
+
+    /**
+     * Test if two events are sequential with the same actioner. This is used
+     * for aggregating repeated events.
+     *
+     * @param first the first temporal event
+     * @param second the second temporal event
+     * @return whether events can be aggregated by user
+     */
+    public static boolean sequentialWithSameAccessor(SystemEvent first, SystemEvent second) {
+        Vertex firstVertex = first.asVertex();
+        Vertex secondVertex = second.asVertex();
+
+        for (Vertex flink : firstVertex.getVertices(Direction.IN, Ontology.ACTION_HAS_EVENT)) {
+            for (Vertex slink : secondVertex.getVertices(Direction.IN, Ontology.ACTION_HAS_EVENT)) {
+                for (Edge chain : slink.getEdges(Direction.OUT, Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)) {
+                    return chain.getVertex(Direction.IN).equals(flink);
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean sameAs(SystemEvent event1, SystemEvent event2) {
+        return canAggregate(event1, event2, -1);
     }
 
     // Helpers.

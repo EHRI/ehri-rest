@@ -7,7 +7,7 @@
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.1-SNAPSHOT</version>
    <name>EHRI Backend</name>
     <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
     <url>https://github.com/EHRI</url>
