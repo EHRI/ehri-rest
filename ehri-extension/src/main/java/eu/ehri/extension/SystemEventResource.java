@@ -23,10 +23,8 @@ import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -374,22 +372,22 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     // Helpers
 
     private EventViews.Builder getEventViewsBuilder() {
-        List<EventTypes> eventTypes = getEnumListQueryParam(EVENT_TYPE_PARAM, EventTypes.class);
-        List<EntityClass> entityClasses = getEnumListQueryParam(ITEM_TYPE_PARAM, EntityClass.class);
-        List<EventViews.ShowType> showTypes = getEnumListQueryParam(SHOW_PARAM, EventViews.ShowType.class);
+        List<String> eventTypes = getStringListQueryParam(EVENT_TYPE_PARAM);
+        List<String> entityClasses = getStringListQueryParam(ITEM_TYPE_PARAM);
+        List<String> showTypes = getStringListQueryParam(SHOW_PARAM);
         List<String> fromStrings = getStringListQueryParam(FROM_PARAM);
         List<String> toStrings = getStringListQueryParam(TO_PARAM);
         List<String> users = getStringListQueryParam(USER_PARAM);
         List<String> ids = getStringListQueryParam(ITEM_ID_PARAM);
         return new EventViews.Builder(graph)
                 .withRange(getOffset(), getLimit())
-                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
-                .withEntityTypes(entityClasses.toArray(new EntityClass[entityClasses.size()]))
+                .withEventTypes(eventTypes.toArray(new String[eventTypes.size()]))
+                .withEntityTypes(entityClasses.toArray(new String[entityClasses.size()]))
                 .from(fromStrings.isEmpty() ? null : fromStrings.get(0))
                 .to(toStrings.isEmpty() ? null : toStrings.get(0))
                 .withUsers(users.toArray(new String[users.size()]))
                 .withIds(ids.toArray(new String[ids.size()]))
-                .withShowType(showTypes.toArray(new EventViews.ShowType[showTypes.size()]));
+                .withShowType(showTypes.toArray(new String[showTypes.size()]));
     }
 
     private int getOffset() {
