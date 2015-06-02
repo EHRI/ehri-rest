@@ -265,7 +265,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      */
     public <T extends Frame> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
-        PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
+        PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
                 .getAclFilterFunction(user);
 
         GremlinPipeline<E, Vertex> pipeline = new GremlinPipeline<E, Vertex>(
@@ -295,8 +295,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
                 ClassUtils.getEntityType(cls))) {
             try (CloseableIterable<Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls))) {
-                PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
-                        graph).getAclFilterFunction(user);
+                PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager.getAclFilterFunction(user);
                 long numItems = stream
                         ? NO_COUNT
                         : applyFilters(new GremlinPipeline<Vertex, Vertex>(countQ)

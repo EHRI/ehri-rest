@@ -63,7 +63,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -189,9 +191,34 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param key the parameter name
      * @return a list of string values
      */
+    protected Optional<String> getStringQueryParam(String key) {
+        List<String> value = uriInfo.getQueryParameters().get(key);
+        return value.size() == 0
+                ? Optional.<String>absent()
+                : Optional.of(value.get(0));
+    }
+
+    /**
+     * Get a list of values for a given query parameter key.
+     *
+     * @param key the parameter name
+     * @return a list of string values
+     */
     protected List<String> getStringListQueryParam(String key) {
         List<String> value = uriInfo.getQueryParameters().get(key);
         return value == null ? Lists.<String>newArrayList() : value;
+    }
+
+    protected <T extends Enum<T>> List<T> getEnumListQueryParam(String key, Class<T> cls) {
+        List<T> out = Lists.newArrayList();
+        for (String t : getStringListQueryParam(key)) {
+            try {
+                out.add(Enum.valueOf(cls, t));
+            } catch (NoSuchElementException e) {
+                // ignore that value...
+            }
+        }
+        return out;
     }
 
     /**
@@ -482,6 +509,18 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
+     * Return a streaming response from an iterable of item lists.
+     *
+     * @param lists an iterable of item groups
+     * @param tx the transaction
+     * @return a streaming response
+     */
+    protected <T extends Frame> Response streamingListOfLists(
+            final Iterable<? extends Collection<T>> lists, final Tx tx) {
+        return getStreamingJsonGroupOutput(lists, getSerializer(), tx);
+    }
+
+    /**
      * Return a streaming response from an iterable, using the given
      * entity converter.
      *
@@ -534,6 +573,37 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                     for (T item : list) {
                         g.writeRaw('\n');
                         jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                    }
+                    tx.success();
+                } catch (SerializationError e) {
+                    e.printStackTrace();
+                    tx.failure();
+                    throw new RuntimeException(e);
+                } finally {
+                    tx.close();
+                }
+                g.writeEndArray();
+                g.close();
+            }
+        }).build();
+    }
+
+    private <T extends Frame> Response getStreamingJsonGroupOutput(
+            final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
+        final Serializer cacheSerializer = serializer.withCache();
+        return Response.ok(new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException {
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
+                g.writeStartArray();
+                try {
+                    for (Collection<T> collect : list) {
+                        g.writeRaw('\n');
+                        g.writeStartArray();
+                        for (T item: collect) {
+                            jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                        }
+                        g.writeEndArray();
                     }
                     tx.success();
                 } catch (SerializationError e) {

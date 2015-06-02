@@ -29,6 +29,8 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -47,7 +49,6 @@ import static org.junit.Assert.assertTrue;
 public class EventViewsTest extends AbstractFixtureTest {
 
     private EventViews eventViews;
-    private Query<SystemEvent> query;
     private UserProfile user1;
     private UserProfile user2;
 
@@ -55,7 +56,6 @@ public class EventViewsTest extends AbstractFixtureTest {
     public void setUp() throws Exception {
         super.setUp();
         eventViews = new EventViews(graph);
-        query = new Query<SystemEvent>(graph, SystemEvent.class);
         user1 = manager.getFrame("mike", UserProfile.class);
         user2 = manager.getFrame("tim", UserProfile.class);
     }
@@ -68,50 +68,49 @@ public class EventViewsTest extends AbstractFixtureTest {
         Thread.sleep(10);
         DocumentaryUnit doc2 = createItemWithIdentifier("bar", user1);
 
-        Iterable<SystemEvent> fullList = eventViews.list(query, user1);
+        Iterable<SystemEvent> fullList = eventViews.list(user1);
         assertEquals(2, Iterables.size(fullList));
 
         // Test user filter
         Iterable<SystemEvent> userList = eventViews
                 .withUsers(user2.getId())
-                .list(query, user1);
+                .list(user1);
         assertEquals(0, Iterables.size(userList));
 
         // Test time filter
         List<SystemEvent> toList = Lists.newArrayList(eventViews
                 .to(timestamp)
-                .list(query, user1));
+                .list(user1));
         assertEquals(1, Iterables.size(toList));
         assertEquals(doc2, toList.get(0).getFirstSubject());
 
         List<SystemEvent> fromList = Lists.newArrayList(eventViews
                 .from(timestamp)
-                .list(query, user1));
+                .list(user1));
         assertEquals(1, Iterables.size(fromList));
         assertEquals(doc1, fromList.get(0).getFirstSubject());
 
         // Test ID filter
         List<SystemEvent> idList = Lists.newArrayList(eventViews
                 .withIds(doc1.getId())
-                .list(query, user1));
+                .list(user1));
         assertEquals(1, Iterables.size(idList));
         assertEquals(doc1, idList.get(0).getFirstSubject());
 
         // Test event type filter
         List<SystemEvent> evList = Lists.newArrayList(eventViews
                 .withEventTypes(EventTypes.deletion)
-                .list(query, user1));
+                .list(user1));
         assertEquals(0, Iterables.size(evList));
 
         // Test entity type filter
         List<SystemEvent> etList = Lists.newArrayList(eventViews
                 .withEntityClasses(EntityClass.HISTORICAL_AGENT)
-                .list(query, user1));
+                .list(user1));
         assertEquals(0, Iterables.size(etList));
 
         // Test paging...
-        List<SystemEvent> eventPage = Lists.newArrayList(eventViews.list(query
-                .setLimit(1).setOffset(1), user1));
+        List<SystemEvent> eventPage = Lists.newArrayList(eventViews.withRange(1, 1).list(user1));
         assertEquals(1, eventPage.size());
         // events are temporally ordered, so the second item
         // in the queue will be the first thing created.
@@ -122,21 +121,42 @@ public class EventViewsTest extends AbstractFixtureTest {
     public void testListAsUserFollowing() throws Exception {
         createItemWithIdentifier("foo", user1);
         Thread.sleep(10);
-        String timestamp = ActionManager.getTimestamp();
         Thread.sleep(10);
         createItemWithIdentifier("bar", user1);
 
         EventViews followEvents = eventViews.withShowType(EventViews.ShowType.followed);
         List<SystemEvent> events = Lists
                 .newArrayList(followEvents
-                        .listAsUser(query, user2, user2));
+                        .listAsUser(user2, user2));
         // Initially the list should
         // be empty because user2 does not follow user1
         assertTrue(events.isEmpty());
         user2.addFollowing(user1);
         List<SystemEvent> events2 = Lists
                 .newArrayList(followEvents
-                        .listAsUser(query, user2, user2));
+                        .listAsUser(user2, user2));
+        assertFalse(events2.isEmpty());
+        assertEquals(2, events2.size());
+    }
+
+    @Test
+    public void testAggregateAsUserFollowing() throws Exception {
+        createItemWithIdentifier("foo", user1);
+        Thread.sleep(10);
+        Thread.sleep(10);
+        createItemWithIdentifier("bar", user1);
+
+        EventViews followEvents = eventViews.withShowType(EventViews.ShowType.followed);
+        List<List<SystemEvent>> events = Lists
+                .newArrayList(followEvents
+                        .aggregateAsUser(user2, user2));
+        // Initially the list should
+        // be empty because user2 does not follow user1
+        assertTrue(events.isEmpty());
+        user2.addFollowing(user1);
+        List<List<SystemEvent>> events2 = Lists
+                .newArrayList(followEvents
+                        .aggregateAsUser(user2, user2));
         assertFalse(events2.isEmpty());
         assertEquals(2, events2.size());
     }
@@ -145,7 +165,7 @@ public class EventViewsTest extends AbstractFixtureTest {
     public void testListByUser() throws Exception {
         List<SystemEvent> events = Lists
                 .newArrayList(eventViews
-                        .listByUser(query, user1, user2));
+                        .listByUser(user1, user2));
         assertEquals(0, events.size());
 
         createItemWithIdentifier("foo", user1);
@@ -153,39 +173,118 @@ public class EventViewsTest extends AbstractFixtureTest {
 
         List<SystemEvent> events2 = Lists
                 .newArrayList(eventViews
-                        .listByUser(query, user1, user2));
+                        .listByUser(user1, user2));
         assertEquals(2, events2.size());
+    }
+
+    @Test
+    public void testEventAggregation() throws Exception {
+        createItemWithIdentifier("foo", user1);
+        DocumentaryUnit item = createItemWithIdentifier("bar", user1);
+        updateItem(item, "test", "test1", user1);
+        updateItem(item, "test", "test2", user1);
+
+        Iterable<List<SystemEvent>> aggregate = eventViews
+                .aggregate(user1);
+        List<List<SystemEvent>> events = Lists.newArrayList(aggregate);
+        // NB: The list is in most-recent order, so it should
+        // be two aggregated update events, followed by two
+        // non-aggregated creation events.
+        assertEquals(3, events.size());
+        assertEquals(2, events.get(0).size());
+        assertEquals(1, events.get(1).size());
+        assertEquals(1, events.get(2).size());
+    }
+
+    @Test
+    public void testEventAggregationWithPagination() throws Exception {
+        createItemWithIdentifier("foo", user1);
+        DocumentaryUnit item = createItemWithIdentifier("bar", user1);
+        updateItem(item, "test", "test1", user1);
+        updateItem(item, "test", "test2", user1);
+
+        Iterable<List<SystemEvent>> aggregate1 = eventViews.withRange(0, 2).aggregate(user1);
+        Iterable<List<SystemEvent>> aggregate2 = eventViews.withRange(2, 2).aggregate(user1);
+        List<List<SystemEvent>> events1 = Lists.newArrayList(aggregate1);
+        List<List<SystemEvent>> events2 = Lists.newArrayList(aggregate2);
+        assertEquals(2, events1.size());
+        assertEquals(1, events2.size());
+    }
+
+    @Test
+    public void testEventAggregationByUser() throws Exception {
+        createItemWithIdentifier("foo", user1);
+        DocumentaryUnit item = createItemWithIdentifier("bar", user1);
+        updateItem(item, "test", "test1", user1);
+        updateItem(item, "test", "test2", user2);
+
+        Iterable<List<SystemEvent>> aggregate = eventViews
+                .withAggregation(EventViews.Aggregation.user)
+                .aggregate(user1);
+        List<List<SystemEvent>> events = Lists.newArrayList(aggregate);
+        assertEquals(2, events.size());
+        assertEquals(1, events.get(0).size());
+        assertEquals(3, events.get(1).size());
     }
 
     @Test
     public void testListAsUserWatching() throws Exception {
         DocumentaryUnit doc1 = createItemWithIdentifier("foo", user1);
         Thread.sleep(10);
-        String timestamp = ActionManager.getTimestamp();
         Thread.sleep(10);
-        DocumentaryUnit doc2 = createItemWithIdentifier("bar", user1);
+        createItemWithIdentifier("bar", user1);
 
         EventViews watchEvents = eventViews.withShowType(EventViews.ShowType.watched);
         List<SystemEvent> events = Lists
                 .newArrayList(watchEvents
-                        .listAsUser(query, user2, user2));
+                        .listAsUser(user2, user2));
         // Initially the list should
         // be empty because user2 does not watch any items
         assertTrue(events.isEmpty());
         user2.addWatching(doc1);
         List<SystemEvent> events2 = Lists
                 .newArrayList(watchEvents
-                        .listAsUser(query, user2, user2));
+                        .listAsUser(user2, user2));
         assertFalse(events2.isEmpty());
         assertEquals(1, events2.size());
         assertEquals(doc1, events2.get(0).getFirstSubject());
     }
 
-    public DocumentaryUnit createItemWithIdentifier(String id, UserProfile userProfile) throws Exception {
-        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
+    @Test
+    public void testListForItem() throws Exception {
+        DocumentaryUnit doc1 = createItemWithIdentifier("foo", user1);
+        List<SystemEvent> events = Lists.newArrayList(eventViews.listForItem(doc1, user1));
+        assertEquals(1, events.size());
+        assertEquals(doc1, events.get(0).getFirstSubject());
+    }
+
+    @Test
+    public void testAggregateForItem() throws Exception {
+        DocumentaryUnit doc1 = createItemWithIdentifier("foo", user1);
+        updateItem(doc1, "foo", "bar", user2);
+        List<List<SystemEvent>> events = Lists
+                .newArrayList(eventViews.aggregateForItem(doc1, user1));
+        assertEquals(2, events.size());
+        assertEquals(doc1, events.get(0).get(0).getFirstSubject());
+        assertEquals(user2, events.get(0).get(0).getActioner());
+        assertEquals(user1, events.get(1).get(0).getActioner());
+    }
+
+    private DocumentaryUnit createItemWithIdentifier(String id, UserProfile userProfile) throws Exception {
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
                 .withDataValue(Ontology.IDENTIFIER_KEY, id);
         return docViews.create(bundle, userProfile);
+    }
+
+    private DocumentaryUnit updateItem(DocumentaryUnit item, String key, String value, UserProfile user) throws
+            Exception {
+        Bundle bundle = new Serializer.Builder(graph).dependentOnly().build()
+                .vertexFrameToBundle(item);
+        Bundle bundle1 = bundle.withDataValue(key, value);
+        Mutation<DocumentaryUnit> update = new LoggingCrudViews<>(graph, DocumentaryUnit.class)
+                .update(bundle1, user);
+        return update.getNode();
     }
 }
