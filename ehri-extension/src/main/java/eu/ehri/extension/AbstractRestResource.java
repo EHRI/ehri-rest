@@ -31,6 +31,9 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.Tx;
+import eu.ehri.project.core.TxGraph;
+import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
@@ -39,9 +42,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.core.Tx;
-import eu.ehri.project.core.TxGraph;
-import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.views.Query;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -65,7 +65,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 /**
@@ -191,34 +190,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param key the parameter name
      * @return a list of string values
      */
-    protected Optional<String> getStringQueryParam(String key) {
-        List<String> value = uriInfo.getQueryParameters().get(key);
-        return value.size() == 0
-                ? Optional.<String>absent()
-                : Optional.of(value.get(0));
-    }
-
-    /**
-     * Get a list of values for a given query parameter key.
-     *
-     * @param key the parameter name
-     * @return a list of string values
-     */
     protected List<String> getStringListQueryParam(String key) {
         List<String> value = uriInfo.getQueryParameters().get(key);
         return value == null ? Lists.<String>newArrayList() : value;
-    }
-
-    protected <T extends Enum<T>> List<T> getEnumListQueryParam(String key, Class<T> cls) {
-        List<T> out = Lists.newArrayList();
-        for (String t : getStringListQueryParam(key)) {
-            try {
-                out.add(Enum.valueOf(cls, t));
-            } catch (NoSuchElementException e) {
-                // ignore that value...
-            }
-        }
-        return out;
     }
 
     /**

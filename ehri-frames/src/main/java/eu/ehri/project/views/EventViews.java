@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -138,13 +139,25 @@ public class EventViews {
             return this;
         }
 
-        public Builder withEntityTypes(EntityClass... entities) {
-            this.entityTypes.addAll(Lists.newArrayList(entities));
+        public Builder withEntityTypes(String... entities) {
+            for (String entity: entities) {
+                try {
+                    this.entityTypes.add(EntityClass.withName(entity));
+                } catch (NoSuchElementException e) {
+                    logger.warn("Invalid entity type: " + entity);
+                }
+            }
             return this;
         }
 
-        public Builder withEventTypes(EventTypes... eventTypes) {
-            this.eventTypes.addAll(Lists.newArrayList(eventTypes));
+        public Builder withEventTypes(String... eventTypes) {
+            for (String eventType: eventTypes) {
+                try {
+                    this.eventTypes.add(EventTypes.valueOf(eventType));
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Invalid event type: " + eventType);
+                }
+            }
             return this;
         }
 
@@ -158,8 +171,14 @@ public class EventViews {
             return this;
         }
 
-        public Builder withShowType(ShowType... showType) {
-            this.showType.addAll(Lists.newArrayList(showType));
+        public Builder withShowType(String... showTypes) {
+            for (String showType: showTypes) {
+                try {
+                    this.showType.add(ShowType.valueOf(showType));
+                } catch (NoSuchElementException e) {
+                    logger.warn("Invalid show type type: " + showType);
+                }
+            }
             return this;
         }
 
