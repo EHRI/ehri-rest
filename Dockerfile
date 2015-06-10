@@ -1,7 +1,7 @@
 # Docker file for EHRI backend web service
-FROM dockerfile/java:oracle-java7
+FROM dockerfile/java:oracle-java8
 
-ENV NEO4J_VERSION 1.9.9
+ENV NEO4J_VERSION 2.2.2
 ENV NEO4J_HOME /opt/webapps/neo4j-community-$NEO4J_VERSION
 
 # Jax-RS classes we need to configure Neo4j server
@@ -15,11 +15,14 @@ ENV EHRI_PLUGIN assembly-0.1.tar.gz
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt-get update && \
   apt-get -y install lsof curl procps && \
+  groupadd -r neo4j && \
+  useradd -r -g neo4j neo4j && \
   mkdir -p /opt/webapps && \
   curl -0 http://neo4j.com/artifact.php?name=neo4j-community-$NEO4J_VERSION-unix.tar.gz | tar zx -C /opt/webapps && \
   echo $JAX_RS_CLASSES >> $NEO4J_HOME/conf/neo4j-server.properties && \
   echo org.neo4j.server.webserver.address=0.0.0.0 >> $NEO4J_HOME/conf/neo4j-server.properties && \
-  $NEO4J_HOME/bin/neo4j install && \
+  perl -pi -e 's/dbms\.security\.auth_enabled=true/dbms.security.auth_enabled=false/' $NEO4J_HOME/conf/neo4j-server.properties && \
+  $NEO4J_HOME/bin/neo4j-installer install && \
   mkdir -p $NEO4J_HOME/plugins/ehri && \
   mkdir -p $NEO4J_HOME/scripts
 
