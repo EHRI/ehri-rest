@@ -37,6 +37,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.tools.JsonDataExporter;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.codehaus.jackson.type.TypeReference;
@@ -93,6 +94,25 @@ public class AdminResource extends AbstractRestResource {
                     Accessor accessor = getRequesterUserProfile();
                     AclGraph<?> aclGraph = new AclGraph<IndexableGraph>(graph.getBaseGraph(), accessor);
                     GraphSONWriter.outputGraph(aclGraph, stream, GraphSONMode.EXTENDED);
+                    tx.success();
+                } catch (BadRequester e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_exportJSON")
+    public Response exportNodes() throws Exception {
+        return Response.ok(new StreamingOutput() {
+            @Override
+            public void write(OutputStream stream) throws IOException, WebApplicationException {
+                try (final Tx tx = graph.getBaseGraph().beginTx()) {
+                    Accessor accessor = getRequesterUserProfile();
+                    AclGraph<?> aclGraph = new AclGraph<IndexableGraph>(graph.getBaseGraph(), accessor);
+                    JsonDataExporter.outputGraph(aclGraph, stream);
                     tx.success();
                 } catch (BadRequester e) {
                     throw new RuntimeException(e);

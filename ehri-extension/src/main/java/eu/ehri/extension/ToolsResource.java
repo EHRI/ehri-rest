@@ -23,7 +23,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -32,11 +34,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.FindReplace;
@@ -56,6 +60,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -402,6 +407,33 @@ public class ToolsResource extends AbstractRestResource {
             return String.valueOf(done);
         } catch (SerializationError e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @POST
+    @Produces("text/csv")
+    @Path("/_setIdsOnEventLinks")
+    public String setIdsOnEventLinks()
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            long done = 0;
+            for (Vertex v : graph.getVertices()) {
+                if ("eventLink".equals(v.getProperty("_debugType"))) {
+                    String id = v.getProperty(EntityType.ID_KEY);
+                    if (id == null) {
+                        UUID timeBasedUUID = GenericIdGenerator.getTimeBasedUUID();
+                        v.setProperty(EntityType.ID_KEY, timeBasedUUID.toString());
+                        v.setProperty(EntityType.TYPE_KEY, Entities.EVENT_LINK);
+                        done++;
+
+                        if (done % 10000 == 0) {
+                            graph.getBaseGraph().commit();
+                        }
+                    }
+                }
+            }
+            tx.success();
+            return String.valueOf(done);
         }
     }
 

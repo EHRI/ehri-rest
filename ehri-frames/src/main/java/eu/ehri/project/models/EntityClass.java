@@ -25,6 +25,7 @@ import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.events.EventLink;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
@@ -71,7 +72,8 @@ public enum EntityClass {
     MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
     UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
     LINK (Entities.LINK, "lnk", Link.class),
-    VIRTUAL_UNIT(Entities.VIRTUAL_UNIT, "vu", VirtualUnit.class, IdentifiableEntityIdGenerator.INSTANCE);
+    VIRTUAL_UNIT(Entities.VIRTUAL_UNIT, "vu", VirtualUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
+    EVENT_LINK(Entities.EVENT_LINK, "elnk", EventLink.class);
     // @formatter:on
 
     // Accessors.

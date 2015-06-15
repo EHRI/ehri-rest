@@ -37,6 +37,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.events.EventLink;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
@@ -516,10 +517,14 @@ public final class ActionManager {
      * type purely for debugging purposes.
      */
     private Vertex getLinkNode(String linkType) {
-        Vertex vertex = graph.addVertex(null);
-        vertex.setProperty(DEBUG_TYPE, EVENT_LINK);
-        vertex.setProperty(LINK_TYPE, linkType);
-        return vertex;
+        try {
+            return dao.create(Bundle.Builder.withClass(EntityClass.EVENT_LINK)
+                    .addDataValue(DEBUG_TYPE, EVENT_LINK)
+                    .addDataValue(LINK_TYPE, linkType).build(),
+                    EventLink.class).asVertex();
+        } catch (ValidationError e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

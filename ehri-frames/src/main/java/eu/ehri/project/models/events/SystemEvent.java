@@ -28,6 +28,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
@@ -152,7 +153,8 @@ public interface SystemEvent extends AccessibleEntity {
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return isValidTarget(vertexLoopBundle.getObject());
+                            return isValidEndpoint(vertexLoopBundle.getObject(),
+                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
                         }
                     }));
         }
@@ -162,17 +164,18 @@ public interface SystemEvent extends AccessibleEntity {
             // Ugh: horrible code duplication is horrible - unfortunately
             // just calling getSubjects() fails for an obscure reason to do
             // with Frames not being thinking it has an iterable???
-            GremlinPipeline<Vertex,Vertex> subjects = gremlin().in(Ontology.ENTITY_HAS_EVENT)
+            GremlinPipeline<Vertex, Vertex> subjects = gremlin().in(Ontology.ENTITY_HAS_EVENT)
                     .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return isValidTarget(vertexLoopBundle.getObject());
+                            return isValidEndpoint(vertexLoopBundle.getObject(),
+                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
                         }
                     });
-            return (AccessibleEntity)(subjects.iterator().hasNext()
-                ? frame(subjects.iterator().next())
-                : null);
+            return (AccessibleEntity) (subjects.iterator().hasNext()
+                    ? frame(subjects.iterator().next())
+                    : null);
         }
 
         @Override
@@ -182,24 +185,25 @@ public interface SystemEvent extends AccessibleEntity {
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return isValidActioner(vertexLoopBundle.getObject());
+                            return isValidEndpoint(vertexLoopBundle.getObject(),
+                                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
                         }
                     });
-            return (Actioner)(actioners.iterator().hasNext()
+            return (Actioner) (actioners.iterator().hasNext()
                     ? frame(actioners.iterator().next())
                     : null);
         }
 
-        private boolean isValidActioner(Vertex vertex) {
-            return (!vertex.getVertices(Direction.IN,
-                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION).iterator().hasNext())
-                    && vertex.getProperty(EntityType.TYPE_KEY) != null;
-        }
-
-        private boolean isValidTarget(Vertex vertex) {
-            return (!vertex.getVertices(Direction.IN,
-                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext())
-                    && vertex.getProperty(EntityType.TYPE_KEY) != null;
+        private boolean isValidEndpoint(final Vertex vertex, final String linkRel) {
+            // A node at the end of an event link chain will have
+            //  - a) no in-coming event link relations
+            //  - b) be of a different type than an event link
+            if (vertex.getEdges(Direction.IN, linkRel).iterator().hasNext()) {
+                return false;
+            } else {
+                final String type = vertex.getProperty(EntityType.TYPE_KEY);
+                return type != null && !type.equals(Entities.EVENT_LINK);
+            }
         }
     }
 }

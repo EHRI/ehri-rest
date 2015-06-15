@@ -82,6 +82,17 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     @Override
+    public Map<String,Object> getProperties(Vertex vertex) {
+        Map<String,Object> props = Maps.newHashMap();
+        for (String key : vertex.getPropertyKeys()) {
+            if (!key.startsWith(METADATA_PREFIX)) {
+                props.put(key, vertex.getProperty(key));
+            }
+        }
+        return props;
+    }
+
+    @Override
     public EntityClass getEntityClass(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
         return EntityClass.withName(getType(vertex));
