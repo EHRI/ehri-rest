@@ -54,4 +54,5 @@ public class Entities {
     public static final String UNDETERMINED_RELATIONSHIP = "relationship";
     public static final String AUTHORITATIVE_SET = "authoritativeSet";
     public static final String VIRTUAL_UNIT = "virtualUnit";
+    public static final String EVENT_LINK = "eventLink";
 }

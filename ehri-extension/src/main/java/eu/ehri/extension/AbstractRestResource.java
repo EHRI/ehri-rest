@@ -400,13 +400,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
         return Response.ok(new StreamingOutput() {
             @Override
-            public void write(OutputStream os) throws IOException {
-                os.write(header.getBytes(utf8));
+            public void write(OutputStream stream) throws IOException {
                 try {
+                    stream.write(header.getBytes(utf8));
                     for (T item : page.getIterable()) {
-                        os.write(serializer.vertexFrameToXmlString(item)
+                        stream.write(serializer.vertexFrameToXmlString(item)
                                 .getBytes(utf8));
                     }
+                    stream.write(tail.getBytes(utf8));
+
                     tx.success();
                 } catch (SerializationError serializationError) {
                     tx.failure();
@@ -414,7 +416,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 } finally {
                     tx.close();
                 }
-                os.write(tail.getBytes(utf8));
             }
         }).header(RANGE_HEADER_NAME, getPaginationResponseHeader(page))
                 .build();
@@ -447,14 +448,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         final Serializer cacheSerializer = serializer.withCache();
         StreamingOutput output = new StreamingOutput() {
             @Override
-            public void write(OutputStream os) throws IOException {
-                JsonGenerator g = jsonFactory.createJsonGenerator(os);
-                g.writeStartArray();
-                try {
+            public void write(OutputStream stream) throws IOException {
+                try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+                    g.writeStartArray();
                     for (T item : page.getIterable()) {
-                        g.writeRaw('\n');
                         jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                        g.writeRaw('\n');
                     }
+                    g.writeEndArray();
+
                     tx.success();
                 } catch (SerializationError e) {
                     tx.failure();
@@ -462,8 +464,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 } finally {
                     tx.close();
                 }
-                g.writeEndArray();
-                g.close();
             }
         };
         return Response.ok(output)
@@ -517,12 +517,14 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream os) throws IOException {
-                os.write(header.getBytes(utf8));
                 try {
+                    os.write(header.getBytes(utf8));
                     for (T item : list) {
                         os.write(serializer.vertexFrameToXmlString(item)
                                 .getBytes(utf8));
                     }
+                    os.write(tail.getBytes(utf8));
+
                     tx.success();
                 } catch (SerializationError e) {
                     tx.failure();
@@ -530,7 +532,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 } finally {
                     tx.close();
                 }
-                os.write(tail.getBytes(utf8));
             }
         }).build();
     }
@@ -541,13 +542,14 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
-                g.writeStartArray();
-                try {
+                try (JsonGenerator g = jsonFactory.createJsonGenerator(arg0)) {
+                    g.writeStartArray();
                     for (T item : list) {
                         g.writeRaw('\n');
                         jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     }
+                    g.writeEndArray();
+
                     tx.success();
                 } catch (SerializationError e) {
                     e.printStackTrace();
@@ -556,8 +558,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 } finally {
                     tx.close();
                 }
-                g.writeEndArray();
-                g.close();
             }
         }).build();
     }
@@ -567,18 +567,19 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
             @Override
-            public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
-                g.writeStartArray();
-                try {
+            public void write(OutputStream stream) throws IOException {
+                try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+                    g.writeStartArray();
                     for (Collection<T> collect : list) {
-                        g.writeRaw('\n');
                         g.writeStartArray();
-                        for (T item: collect) {
+                        for (T item : collect) {
                             jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                         }
                         g.writeEndArray();
+                        g.writeRaw('\n');
                     }
+                    g.writeEndArray();
+
                     tx.success();
                 } catch (SerializationError e) {
                     e.printStackTrace();
@@ -587,8 +588,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 } finally {
                     tx.close();
                 }
-                g.writeEndArray();
-                g.close();
             }
         }).build();
     }
@@ -606,14 +605,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
             @Override
-            public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
-                g.writeStartArray();
-                try {
+            public void write(OutputStream stream) throws IOException {
+                try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+                    g.writeStartArray();
                     for (Vertex item : list) {
-                        g.writeRaw('\n');
                         jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));
+                        g.writeRaw('\n');
                     }
+                    g.writeEndArray();
+
                     tx.success();
                 } catch (SerializationError e) {
                     tx.failure();
@@ -621,8 +621,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 } finally {
                     tx.close();
                 }
-                g.writeEndArray();
-                g.close();
             }
         }).build();
     }

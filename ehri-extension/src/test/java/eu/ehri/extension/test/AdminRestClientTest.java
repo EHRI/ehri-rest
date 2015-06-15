@@ -67,6 +67,15 @@ public class AdminRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testExportJSON() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "_exportJSON"));
+        ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
+                .get(ClientResponse.class);
+        String data = response.getEntity(String.class);
+        assertStatus(OK, response);
+    }
+
+    @Test
     public void testReindexInternal() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "_reindexInternal"));
         ClientResponse response = resource.post(ClientResponse.class);

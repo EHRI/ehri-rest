@@ -69,6 +69,13 @@ public interface GraphManager {
     public String getType(Vertex vertex);
 
     /**
+     * Get a vertex's properties.
+     *
+     * @return a map of property objects
+     */
+    public Map<String,Object> getProperties(Vertex vertex);
+
+    /**
      * Get the type of an arbitrary vertex.
      *
      * @param vertex A vertex
@@ -233,7 +240,7 @@ public interface GraphManager {
      * Rename an existing vertex, changing its ID.
      *
      * @param vertex the vertex
-     * @param vertex the old ID
+     * @param oldId the old ID
      * @param newId  the new ID
      */
     public void renameVertex(Vertex vertex, String oldId, String newId);
