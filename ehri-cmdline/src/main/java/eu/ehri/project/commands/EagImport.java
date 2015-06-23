@@ -27,7 +27,7 @@ import eu.ehri.project.importers.EagImporter;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class EagImport  extends ImportCommand implements Command {
+public class EagImport  extends ImportCommand {
 
     final static String NAME = "eag-import";
 

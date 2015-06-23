@@ -29,5 +29,5 @@ import eu.ehri.project.persistence.Mutation;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface ImportCallback {
-    public void itemImported(final Mutation<? extends AccessibleEntity> mutation);
+    void itemImported(Mutation<? extends AccessibleEntity> mutation);
 }

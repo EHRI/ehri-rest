@@ -139,7 +139,7 @@ public class EacImporter extends EaImporter {
 
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        final String REL = "relation";
+        String REL = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
             if (key.equals(REL)) {

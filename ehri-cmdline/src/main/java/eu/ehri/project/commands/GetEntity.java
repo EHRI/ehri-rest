@@ -33,7 +33,7 @@ import org.apache.commons.cli.CommandLine;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class GetEntity extends BaseCommand implements Command {
+public class GetEntity extends BaseCommand {
 
     final static String NAME = "get";
 
@@ -52,7 +52,7 @@ public class GetEntity extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

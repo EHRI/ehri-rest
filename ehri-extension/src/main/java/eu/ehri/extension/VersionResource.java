@@ -77,7 +77,7 @@ public class VersionResource extends
     @Path("/for/{id:.+}")
     public Response listFor(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             AccessibleEntity item = views

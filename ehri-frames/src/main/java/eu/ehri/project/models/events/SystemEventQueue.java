@@ -37,10 +37,10 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 @EntityType(EntityClass.SYSTEM)
 public interface SystemEventQueue extends Frame {
 
-    public static final String STREAM_START = Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream";
+    String STREAM_START = Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream";
 
     @JavaHandler
-    public Iterable<SystemEvent> getSystemEvents();
+    Iterable<SystemEvent> getSystemEvents();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, SystemEventQueue {
         public Iterable<SystemEvent> getSystemEvents() {

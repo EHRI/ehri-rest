@@ -51,7 +51,7 @@ import static eu.ehri.project.models.EntityClass.REPOSITORY;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class Check extends BaseCommand implements Command {
+public class Check extends BaseCommand {
 
     final static String NAME = "check";
 
@@ -76,10 +76,10 @@ public class Check extends BaseCommand implements Command {
     
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
-        final GraphManager manager = GraphManagerFactory.getInstance(graph);
+        GraphManager manager = GraphManagerFactory.getInstance(graph);
         checkPermissionScopes(graph, manager);
         checkOwnerPermGrantsHaveNoScope(manager);
 
@@ -98,8 +98,8 @@ public class Check extends BaseCommand implements Command {
      * @param manager The graph manager
      * @throws Exception
      */
-    public void checkPermissionScopes(final FramedGraph<?> graph,
-            final GraphManager manager) throws Exception {
+    public void checkPermissionScopes(FramedGraph<?> graph,
+            GraphManager manager) throws Exception {
 
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
@@ -138,7 +138,7 @@ public class Check extends BaseCommand implements Command {
         }
     }
 
-    private void checkOwnerPermGrantsHaveNoScope(final GraphManager manager) throws Exception {
+    private void checkOwnerPermGrantsHaveNoScope(GraphManager manager) throws Exception {
         try (CloseableIterable<PermissionGrant> items = manager
                 .getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
             for (PermissionGrant grant : items) {
@@ -146,7 +146,7 @@ public class Check extends BaseCommand implements Command {
                 Frame perm = grant.getPermission();
                 if (scope != null && perm != null && perm.getId().equals(PermissionType.OWNER.getName())) {
                     System.err.println(
-                            String.format("Owner permission grant with scope: " + grant.asVertex().getId()));
+                            String.format("Owner permission grant with scope: %s", grant.asVertex().getId()));
                 }
             }
         }

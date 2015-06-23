@@ -205,17 +205,17 @@ public class EventViews {
     }
 
     private EventViews(
-            final FramedGraph<?> graph,
-            final int offset,
-            final int limit,
-            final Collection<String> users,
-            final Collection<String> ids,
-            final Collection<EntityClass> entityTypes,
-            final Collection<EventTypes> eventTypes,
-            final Optional<String> from,
-            final Optional<String> to,
-            final Collection<ShowType> showType,
-            final Aggregation aggregation) {
+            FramedGraph<?> graph,
+            int offset,
+            int limit,
+            Collection<String> users,
+            Collection<String> ids,
+            Collection<EntityClass> entityTypes,
+            Collection<EventTypes> eventTypes,
+            Optional<String> from,
+            Optional<String> to,
+            Collection<ShowType> showType,
+            Aggregation aggregation) {
         this.graph = graph;
         this.actionManager = new ActionManager(graph);
         this.manager = GraphManagerFactory.getInstance(graph);

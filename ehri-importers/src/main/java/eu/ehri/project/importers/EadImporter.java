@@ -328,7 +328,7 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "relation";
+        String REL = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
             if (key.equals(REL)) {

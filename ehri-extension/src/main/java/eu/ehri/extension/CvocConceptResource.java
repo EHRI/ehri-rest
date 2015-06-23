@@ -146,7 +146,7 @@ public class CvocConceptResource
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             Concept concept = views.detail(id, user);
@@ -184,7 +184,7 @@ public class CvocConceptResource
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor user = getRequesterUserProfile();
+            Accessor user = getRequesterUserProfile();
             final Concept parent = views.detail(id, user);
             Response item = createItem(bundle, accessors, new Handler<Concept>() {
                 @Override
@@ -268,7 +268,7 @@ public class CvocConceptResource
     @Path("/{id:.+}/broader/list")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
         Concept concept = views.detail(id, getRequesterUserProfile());
             return streamingList(concept.getBroaderConcepts(), tx);
@@ -291,7 +291,7 @@ public class CvocConceptResource
     @Path("/{id:.+}/related/list")
     public Response getCvocRelatedConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Concept concept = views.detail(id, getRequesterUserProfile());
             return streamingList(concept.getRelatedConcepts(), tx);
@@ -316,7 +316,7 @@ public class CvocConceptResource
     @Path("/{id:.+}/relatedBy/list")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Concept concept = views.detail(id, getRequesterUserProfile());
             return streamingList(concept.getRelatedByConcepts(), tx);

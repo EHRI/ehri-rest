@@ -37,42 +37,42 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
  *
  */
 public interface Promotable extends AccessibleEntity {
-    public static final String PROMOTION_SCORE = "_promotionScore";
+    String PROMOTION_SCORE = "_promotionScore";
 
     @Fetch(value = Ontology.PROMOTED_BY, numLevels = 1)
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
-    public Iterable<UserProfile> getPromoters();
+    Iterable<UserProfile> getPromoters();
 
     @Fetch(value = Ontology.DEMOTED_BY, numLevels = 1)
     @Adjacency(label = Ontology.DEMOTED_BY, direction = Direction.OUT)
-    public Iterable<UserProfile> getDemoters();
+    Iterable<UserProfile> getDemoters();
 
     @JavaHandler
-    public void addPromotion(final UserProfile user);
+    void addPromotion(UserProfile user);
 
     @JavaHandler
-    public void addDemotion(final UserProfile user);
+    void addDemotion(UserProfile user);
 
     @JavaHandler
-    public void removePromotion(final UserProfile user);
+    void removePromotion(UserProfile user);
 
     @JavaHandler
-    public void removeDemotion(final UserProfile user);
+    void removeDemotion(UserProfile user);
 
     @JavaHandler
-    public boolean isPromoted();
+    boolean isPromoted();
 
     @JavaHandler
-    public boolean isPromotedBy(final UserProfile user);
+    boolean isPromotedBy(UserProfile user);
 
     @JavaHandler
-    public boolean isPromotable();
+    boolean isPromotable();
 
     @JavaHandler
-    public long getPromotionScore();
+    long getPromotionScore();
 
     @JavaHandler
-    public void updatePromotionScoreCache();
+    void updatePromotionScoreCache();
 
     /**
      * Implementation of complex methods.
@@ -84,24 +84,24 @@ public interface Promotable extends AccessibleEntity {
             it().setProperty(PROMOTION_SCORE, score);
         }
 
-        public void addPromotion(final UserProfile user) {
+        public void addPromotion(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
             updatePromotionScoreCache();
         }
 
-        public void removePromotion(final UserProfile user) {
+        public void removePromotion(UserProfile user) {
             removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
             updatePromotionScoreCache();
         }
 
-        public void addDemotion(final UserProfile user) {
+        public void addDemotion(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.DEMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
             updatePromotionScoreCache();
         }
 
-        public void removeDemotion(final UserProfile user) {
+        public void removeDemotion(UserProfile user) {
             removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
             updatePromotionScoreCache();
         }
@@ -117,7 +117,7 @@ public interface Promotable extends AccessibleEntity {
                     : score;
         }
 
-        public boolean isPromotedBy(final UserProfile user) {
+        public boolean isPromotedBy(UserProfile user) {
             return hasRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
         }
 

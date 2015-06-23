@@ -72,8 +72,8 @@ public class Linker {
     private final String defaultLanguageCode;
     private final Optional<String> logMessage;
 
-    private Linker(FramedGraph<?> graph, final Set<String> accessPointTypes,
-            final String defaultLanguageCode, final Optional<String> logMessage,
+    private Linker(FramedGraph<?> graph, Set<String> accessPointTypes,
+            String defaultLanguageCode, Optional<String> logMessage,
             boolean tolerant, boolean excludeSingles) {
         this.graph = graph;
         this.accessPointTypes = accessPointTypes;
@@ -332,7 +332,7 @@ public class Linker {
     // Helpers...
 
     private static boolean willCreateItems(Map<String, Integer> identifierCounts, boolean excludeSingles) {
-        if (identifierCounts.size() == 0) {
+        if (identifierCounts.isEmpty()) {
             return false;
         } else if (excludeSingles) {
             Integer maxCount = 0;

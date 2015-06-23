@@ -105,7 +105,7 @@ public final class ActionManager {
      *
      * @param graph The framed graph
      */
-    public ActionManager(final FramedGraph<?> graph, final Frame scope) {
+    public ActionManager(FramedGraph<?> graph, Frame scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());

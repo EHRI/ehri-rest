@@ -42,7 +42,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
-public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
+public interface AuthoritativeSet extends AccessibleEntity,
         PermissionScope, ItemHolder, NamedEntity {
 
     /**
@@ -51,7 +51,7 @@ public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
      * @return an iterable of authoritative items
      */
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
-    public Iterable<AuthoritativeItem> getAuthoritativeItems();
+    Iterable<AuthoritativeItem> getAuthoritativeItems();
 
     /**
      * Add an authoritative item to this set.
@@ -59,7 +59,7 @@ public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
      * @param item an authoritative item frame
      */
     @JavaHandler
-    public void addItem(final AuthoritativeItem item);
+    void addItem(AuthoritativeItem item);
 
     /**
      * Implementation of complex methods.
@@ -70,7 +70,7 @@ public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
             return gremlin().inE(Ontology.ITEM_IN_AUTHORITATIVE_SET).count();
         }
 
-        public void addItem(final AuthoritativeItem item) {
+        public void addItem(AuthoritativeItem item) {
             JavaHandlerUtils.addSingleRelationship(item.asVertex(), it(),
                     Ontology.ITEM_IN_AUTHORITATIVE_SET);
         }

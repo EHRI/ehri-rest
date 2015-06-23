@@ -57,13 +57,13 @@ public final class Serializer {
     private static class LruCache<A, B> extends LinkedHashMap<A, B> {
         private final int maxEntries;
 
-        public LruCache(final int maxEntries) {
+        public LruCache(int maxEntries) {
             super(maxEntries + 1, 1.0f, true);
             this.maxEntries = maxEntries;
         }
 
         @Override
-        protected boolean removeEldestEntry(final Map.Entry<A, B> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<A, B> eldest) {
             return super.size() > maxEntries;
         }
     }
@@ -89,10 +89,10 @@ public final class Serializer {
     public static class Builder {
         private final FramedGraph<?> graph;
         private int maxTraversals = Fetch.DEFAULT_TRAVERSALS;
-        private boolean dependentOnly = false;
-        private boolean liteMode = false;
+        private boolean dependentOnly;
+        private boolean liteMode;
         private List<String> includeProps = Lists.newArrayList();
-        private LruCache<String, Bundle> cache = null;
+        private LruCache<String, Bundle> cache;
 
         public Builder(FramedGraph<?> graph) {
             this.graph = graph;
@@ -127,7 +127,7 @@ public final class Serializer {
             return this;
         }
 
-        public Builder withIncludedProperties(final List<String> properties) {
+        public Builder withIncludedProperties(List<String> properties) {
             this.includeProps = Lists.newArrayList(properties);
             return this;
         }
@@ -327,7 +327,7 @@ public final class Serializer {
      * @param cb   A callback object
      */
     public <T extends Frame> void traverseSubtree(T item,
-            final TraversalCallback cb) {
+            TraversalCallback cb) {
         traverseSubtree(item, 0, cb);
     }
 
@@ -566,7 +566,7 @@ public final class Serializer {
      * the top-level node.
      */
     private <T extends Frame> void traverseSubtree(T item, int depth,
-            final TraversalCallback cb) {
+            TraversalCallback cb) {
 
         if (depth < maxTraversals) {
             Class<?> cls = EntityClass.withName(

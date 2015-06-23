@@ -39,33 +39,33 @@ public interface PermissionGrant extends Frame {
 
     @Fetch(value = Ontology.PERMISSION_GRANT_HAS_SUBJECT, ifBelowLevel = 1, numLevels = 1)
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SUBJECT)
-    public Accessor getSubject();
+    Accessor getSubject();
 
     @Fetch(value = Ontology.PERMISSION_GRANT_HAS_GRANTEE, ifBelowLevel = 1, numLevels = 1)
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_GRANTEE)
-    public Accessor getGrantee();
+    Accessor getGrantee();
     
     @Fetch(value = Ontology.PERMISSION_GRANT_HAS_TARGET, ifBelowLevel = 1, numLevels = 1)
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_TARGET)
-    public Iterable<PermissionGrantTarget> getTargets();
+    Iterable<PermissionGrantTarget> getTargets();
 
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_TARGET)
-    public void addTarget(final PermissionGrantTarget target);
+    void addTarget(PermissionGrantTarget target);
 
     @Fetch(Ontology.PERMISSION_GRANT_HAS_PERMISSION)
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_PERMISSION)
-    public Permission getPermission();
+    Permission getPermission();
 
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_PERMISSION)
-    public void setPermission(final Permission permission);
+    void setPermission(Permission permission);
 
     @Fetch(value = Ontology.PERMISSION_GRANT_HAS_SCOPE, ifBelowLevel = 1, numLevels = 0)
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE)
-    public PermissionScope getScope();
+    PermissionScope getScope();
     
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE)
-    public void setScope(final PermissionScope scope);
+    void setScope(PermissionScope scope);
 
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE)
-    public void removeScope(final PermissionScope scope);
+    void removeScope(PermissionScope scope);
 }

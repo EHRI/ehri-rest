@@ -80,13 +80,13 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected final Stack<String> currentPath = new Stack<>();
     protected final Stack<StringBuilder> currentText = new Stack<>();
 
-    protected String currentEntity = null;
+    protected String currentEntity;
 
     protected final AbstractImporter<Map<String, Object>> importer;
     protected final XmlImportProperties properties;
 
-    protected int depth = 0;
-    String attribute=null;
+    protected int depth;
+    String attribute;
 
     /**
      * 

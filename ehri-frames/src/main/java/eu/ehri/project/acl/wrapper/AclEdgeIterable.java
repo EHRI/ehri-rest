@@ -14,7 +14,7 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
     private final Iterable<Edge> iterable;
     private final AclGraph<?> graph;
 
-    public AclEdgeIterable(final Iterable<Edge> iterable, final AclGraph<?> graph) {
+    public AclEdgeIterable(Iterable<Edge> iterable, AclGraph<?> graph) {
         this.iterable = iterable;
         this.graph = graph;
     }
@@ -42,7 +42,7 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
                     return true;
                 }
                 while (this.itty.hasNext()) {
-                    final Edge edge = this.itty.next();
+                    Edge edge = this.itty.next();
                     nextEdge = new AclEdge(edge, graph);
                     return true;
                 }
@@ -52,12 +52,12 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
 
             public Edge next() {
                 if (null != this.nextEdge) {
-                    final AclEdge temp = this.nextEdge;
+                    AclEdge temp = this.nextEdge;
                     this.nextEdge = null;
                     return temp;
                 } else {
                     while (this.itty.hasNext()) {
-                        final Edge edge = this.itty.next();
+                        Edge edge = this.itty.next();
                         return new AclEdge(edge, graph);
                     }
                     throw new NoSuchElementException();

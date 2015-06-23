@@ -46,12 +46,12 @@ public interface ImportManager {
      * @throws InputParseError when parsing the file fails
      * @throws ValidationError when the content of the file is invalid
      */
-    public ImportLog importFile(String filePath, String logMessage)
+    ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError;
 
-    public ImportLog importFile(InputStream ios, String logMessage)
+    ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, InputParseError, ValidationError;
     
-    public ImportLog importFiles(List<String> paths, String logMessage)
+    ImportLog importFiles(List<String> paths, String logMessage)
             throws IOException, ValidationError;
 }

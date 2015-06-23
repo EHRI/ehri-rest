@@ -24,11 +24,11 @@ abstract class Neo4j2Element implements Element {
     protected final Neo4j2Graph graph;
     protected PropertyContainer rawElement;
 
-    public Neo4j2Element(final Neo4j2Graph graph) {
+    public Neo4j2Element(Neo4j2Graph graph) {
         this.graph = graph;
     }
 
-    public <T> T getProperty(final String key) {
+    public <T> T getProperty(String key) {
         this.graph.autoStartTransaction(false);
         if (this.rawElement.hasProperty(key))
             return (T) tryConvertCollectionToArrayList(this.rawElement.getProperty(key));
@@ -36,14 +36,14 @@ abstract class Neo4j2Element implements Element {
             return null;
     }
 
-    public void setProperty(final String key, final Object value) {
+    public void setProperty(String key, Object value) {
         ElementHelper.validateProperty(this, key, value);
         this.graph.autoStartTransaction(true);
         // attempts to take a collection and convert it to an array so that Neo4j can consume it
         this.rawElement.setProperty(key, tryConvertCollectionToArray(value));
     }
 
-    public <T> T removeProperty(final String key) {
+    public <T> T removeProperty(String key) {
         if (!this.rawElement.hasProperty(key))
             return null;
         else {
@@ -54,8 +54,8 @@ abstract class Neo4j2Element implements Element {
 
     public Set<String> getPropertyKeys() {
         this.graph.autoStartTransaction(false);
-        final Set<String> keys = new HashSet<String>();
-        for (final String key : this.rawElement.getPropertyKeys()) {
+        Set<String> keys = new HashSet<String>();
+        for (String key : this.rawElement.getPropertyKeys()) {
             keys.add(key);
         }
         return keys;
@@ -85,18 +85,18 @@ abstract class Neo4j2Element implements Element {
             this.graph.removeEdge((Edge) this);
     }
 
-    public boolean equals(final Object object) {
+    public boolean equals(Object object) {
         return ElementHelper.areEqual(this, object);
     }
 
-    private Object tryConvertCollectionToArray(final Object value) {
+    private Object tryConvertCollectionToArray(Object value) {
         if (value instanceof Collection<?>) {
             // convert this collection to an array.  the collection must
             // be all of the same type.
             try {
-                final Collection<?> collection = (Collection<?>) value;
+                Collection<?> collection = (Collection<?>) value;
                 Object[] array = null;
-                final Iterator<?> objects = collection.iterator();
+                Iterator<?> objects = collection.iterator();
                 for (int i = 0; objects.hasNext(); i++) {
                     Object object = objects.next();
                     if (array == null) {
@@ -106,7 +106,7 @@ abstract class Neo4j2Element implements Element {
                     array[i] = object;
                 }
                 return array;
-            } catch (final ArrayStoreException ase) {
+            } catch (ArrayStoreException ase) {
                 // this fires off if the collection is not all of the same type
                 return value;
             }
@@ -115,7 +115,7 @@ abstract class Neo4j2Element implements Element {
         }
     }
 
-    private Object tryConvertCollectionToArrayList(final Object value) {
+    private Object tryConvertCollectionToArrayList(Object value) {
         if (value.getClass().isArray()) {
             // convert primitive array to an ArrayList.  
             try {
@@ -126,7 +126,7 @@ abstract class Neo4j2Element implements Element {
                     list.add(object);
                 }
                 return list;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // this fires off if the collection is not an array
                 return value;
             }

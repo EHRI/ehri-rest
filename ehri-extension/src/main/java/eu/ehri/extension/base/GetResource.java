@@ -39,7 +39,7 @@ public interface GetResource {
      * @throws AccessDenied
      * @throws BadRequester
      */
-    public Response get(String id)
+    Response get(String id)
             throws ItemNotFound, AccessDenied, BadRequester;
 
 }

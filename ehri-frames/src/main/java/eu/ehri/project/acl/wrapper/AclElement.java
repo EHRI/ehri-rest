@@ -13,7 +13,7 @@ public abstract class AclElement implements Element {
     protected Element baseElement;
     protected AclGraph<?> graph;
 
-    protected AclElement(final Element baseElement, final AclGraph<?> graph) {
+    protected AclElement(Element baseElement, AclGraph<?> graph) {
         this.baseElement = baseElement;
         this.graph = graph;
     }
@@ -54,7 +54,7 @@ public abstract class AclElement implements Element {
     }
 
     @Override
-    public boolean equals(final Object object) {
+    public boolean equals(Object object) {
         return ElementHelper.areEqual(this, object);
     }
 

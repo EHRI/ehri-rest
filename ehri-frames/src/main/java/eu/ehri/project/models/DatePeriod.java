@@ -41,7 +41,7 @@ public interface DatePeriod extends AnnotatableEntity {
      * @return A UTC date string
      */
     @Property(Ontology.DATE_PERIOD_START_DATE)
-    public String getStartDate();
+    String getStartDate();
 
     /**
      * The end date in UTC format.
@@ -49,7 +49,7 @@ public interface DatePeriod extends AnnotatableEntity {
      * @return A UTC string
      */
     @Property(Ontology.DATE_PERIOD_END_DATE)
-    public String getEndDate();
+    String getEndDate();
 
     /**
      * Get the entity described by this date period.
@@ -57,5 +57,5 @@ public interface DatePeriod extends AnnotatableEntity {
      * @return a temporal item
      */
     @Adjacency(label = Ontology.ENTITY_HAS_DATE, direction = Direction.IN)
-    public TemporalEntity getEntity();
+    TemporalEntity getEntity();
 }

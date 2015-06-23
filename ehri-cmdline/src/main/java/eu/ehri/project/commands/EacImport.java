@@ -27,7 +27,7 @@ import eu.ehri.project.importers.EacImporter;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class EacImport extends ImportCommand implements Command {
+public class EacImport extends ImportCommand {
 
     final static String NAME = "eac-import";
 

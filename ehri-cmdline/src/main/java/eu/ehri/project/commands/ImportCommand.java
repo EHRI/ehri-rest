@@ -51,7 +51,7 @@ import java.util.Map;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public abstract class ImportCommand extends BaseCommand implements Command{
+public abstract class ImportCommand extends BaseCommand {
     protected Class<? extends SaxXmlHandler> handler;
     protected Class<? extends AbstractImporter> importer;
     
@@ -77,7 +77,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     }
     
      @Override
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -86,7 +86,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         List<String> filePaths = Lists.newArrayList();
         if (cmdLine.hasOption("files-from")) {
             getPathsFromFile(cmdLine.getOptionValue("files-from"), filePaths);
-        } else if (cmdLine.getArgList().size() > 0) {
+        } else if (!cmdLine.getArgList().isEmpty()) {
             for (int i = 0; i < cmdLine.getArgList().size(); i++) {
                 filePaths.add((String) cmdLine.getArgList().get(i));
             }

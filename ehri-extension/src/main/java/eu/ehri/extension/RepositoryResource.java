@@ -99,7 +99,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             Repository repository = views.detail(id, user);
@@ -197,7 +197,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor user = getRequesterUserProfile();
+            Accessor user = getRequesterUserProfile();
             final Repository repository = views.detail(id, user);
             Response response = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
                 @Override

@@ -33,6 +33,6 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.HISTORICAL_AGENT)
-public interface HistoricalAgent extends AuthoritativeItem, AccessibleEntity, IdentifiableEntity,
-        DescribedEntity, AnnotatableEntity, Watchable {
+public interface HistoricalAgent extends AuthoritativeItem,
+        DescribedEntity, Watchable {
 }

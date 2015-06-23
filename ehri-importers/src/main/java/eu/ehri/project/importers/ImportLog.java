@@ -35,10 +35,10 @@ import java.util.Map;
  */
 public class ImportLog {
 
-    private int created = 0;
-    private int updated = 0;
-    private int unchanged = 0;
-    private int errored = 0;
+    private int created;
+    private int updated;
+    private int unchanged;
+    private int errored;
     private EventContext eventContext;
     private Map<String, String> errors = Maps.newHashMap();
 
@@ -48,7 +48,7 @@ public class ImportLog {
      *
      * @param action An event context
      */
-    public ImportLog(final EventContext action) {
+    public ImportLog(EventContext action) {
         this.eventContext = action;
     }
 

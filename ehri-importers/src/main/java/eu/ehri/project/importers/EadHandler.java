@@ -58,7 +58,7 @@ public class EadHandler extends SaxXmlHandler {
             AUTHOR = "author";
 
     List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
-    int maintenanceOrder = 0;
+    int maintenanceOrder;
 
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(

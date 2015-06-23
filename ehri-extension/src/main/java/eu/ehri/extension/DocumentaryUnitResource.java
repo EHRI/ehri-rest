@@ -99,7 +99,7 @@ public class DocumentaryUnitResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
             Iterable<DocumentaryUnit> units = all
@@ -183,7 +183,7 @@ public class DocumentaryUnitResource
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor user = getRequesterUserProfile();
+            Accessor user = getRequesterUserProfile();
             final DocumentaryUnit parent = views.detail(id, user);
             Response resource = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
                         @Override

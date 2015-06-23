@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Fetch {
-    public static final int DEFAULT_TRAVERSALS = 10;
+    int DEFAULT_TRAVERSALS = 10;
 
     /**
      * Only serialize this relationship if the depth of traversal

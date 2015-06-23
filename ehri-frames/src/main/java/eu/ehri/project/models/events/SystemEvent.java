@@ -53,7 +53,7 @@ public interface SystemEvent extends AccessibleEntity {
 
     @Meta(ItemHolder.CHILD_COUNT)
     @JavaHandler
-    public long subjectCount();
+    long subjectCount();
 
     /**
      * Fetch the time stamp of this event.
@@ -62,7 +62,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Mandatory
     @Property(Ontology.EVENT_TIMESTAMP)
-    public String getTimestamp();
+    String getTimestamp();
 
     /**
      * Fetch the event type of this event.
@@ -71,7 +71,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Mandatory
     @Property(Ontology.EVENT_TYPE)
-    public EventTypes getEventType();
+    EventTypes getEventType();
 
     /**
      * Fetch the log message associated with this event.
@@ -79,7 +79,7 @@ public interface SystemEvent extends AccessibleEntity {
      * @return A string
      */
     @Property(Ontology.EVENT_LOG_MESSAGE)
-    public String getLogMessage();
+    String getLogMessage();
 
     /**
      * Fetch the actioner who triggered this event.
@@ -88,7 +88,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Fetch(value = Ontology.EVENT_HAS_ACTIONER, numLevels = 0)
     @JavaHandler
-    public Actioner getActioner();
+    Actioner getActioner();
 
     /**
      * Fetch the subject items to whom this event pertains.
@@ -96,7 +96,7 @@ public interface SystemEvent extends AccessibleEntity {
      * @return an iterable of frame items
      */
     @JavaHandler
-    public Iterable<AccessibleEntity> getSubjects();
+    Iterable<AccessibleEntity> getSubjects();
 
     /**
      * If new versions have been created, fetch the prior versions
@@ -106,7 +106,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Fetch(value = Ontology.VERSION_HAS_EVENT, ifLevel = 0)
     @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.IN)
-    public Iterable<Version> getPriorVersions();
+    Iterable<Version> getPriorVersions();
 
     /**
      * Fetch the first subject of this event. This is a shortcut
@@ -116,7 +116,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Fetch(value = Ontology.EVENT_HAS_FIRST_SUBJECT, ifLevel = 0)
     @JavaHandler
-    public AccessibleEntity getFirstSubject();
+    AccessibleEntity getFirstSubject();
 
     /**
      * Fetch the "scope" of this event, or the context in which a
@@ -126,7 +126,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Fetch(value = Ontology.EVENT_HAS_SCOPE, ifLevel = 0)
     @Adjacency(label = Ontology.EVENT_HAS_SCOPE, direction = Direction.OUT)
-    public Frame getEventScope();
+    Frame getEventScope();
 
     /**
      * Set the scope of this event.
@@ -134,7 +134,7 @@ public interface SystemEvent extends AccessibleEntity {
      * @param frame a scope item
      */
     @Adjacency(label = Ontology.EVENT_HAS_SCOPE, direction = Direction.OUT)
-    public void setEventScope(final Frame frame);
+    void setEventScope(Frame frame);
 
     /**
      * Implementation of complex methods.
@@ -194,14 +194,14 @@ public interface SystemEvent extends AccessibleEntity {
                     : null);
         }
 
-        private boolean isValidEndpoint(final Vertex vertex, final String linkRel) {
+        private boolean isValidEndpoint(Vertex vertex, String linkRel) {
             // A node at the end of an event link chain will have
             //  - a) no in-coming event link relations
             //  - b) be of a different type than an event link
             if (vertex.getEdges(Direction.IN, linkRel).iterator().hasNext()) {
                 return false;
             } else {
-                final String type = vertex.getProperty(EntityType.TYPE_KEY);
+                String type = vertex.getProperty(EntityType.TYPE_KEY);
                 return type != null && !type.equals(Entities.EVENT_LINK);
             }
         }

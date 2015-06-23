@@ -16,7 +16,7 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
     private final AclGraph<?> graph;
     private final PipeFunction<Vertex,Boolean> aclFilter;
 
-    public AclVertexIterable(final Iterable<Vertex> iterable, final AclGraph<?> graph) {
+    public AclVertexIterable(Iterable<Vertex> iterable, AclGraph<?> graph) {
         this.iterable = iterable;
         this.graph = graph;
         this.aclFilter = AclManager.getAclFilterFunction(graph.getAccessor());
@@ -41,7 +41,7 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
                     return true;
                 }
                 while (this.itty.hasNext()) {
-                    final Vertex vertex = this.itty.next();
+                    Vertex vertex = this.itty.next();
                     if (aclFilter.compute(vertex)) {
                         this.nextVertex = new AclVertex(vertex, graph);
                         return true;
@@ -54,12 +54,12 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
             @Override
             public Vertex next() {
                 if (null != this.nextVertex) {
-                    final AclVertex temp = this.nextVertex;
+                    AclVertex temp = this.nextVertex;
                     this.nextVertex = null;
                     return temp;
                 } else {
                     while (this.itty.hasNext()) {
-                        final Vertex vertex = this.itty.next();
+                        Vertex vertex = this.itty.next();
                         if (aclFilter.compute(vertex)) {
                             return new AclVertex(vertex, graph);
                         }

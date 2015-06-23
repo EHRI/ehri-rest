@@ -51,7 +51,7 @@ public class DeserializationErrorMapper implements
 
     @SuppressWarnings("serial")
     @Override
-    public Response toResponse(final DeserializationError e) {
+    public Response toResponse(DeserializationError e) {
         return Response
                 .status(Status.BAD_REQUEST)
                 .entity(WebDeserializationError.errorToJson(e)

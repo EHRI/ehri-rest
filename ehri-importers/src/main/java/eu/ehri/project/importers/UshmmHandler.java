@@ -42,7 +42,7 @@ public class UshmmHandler extends EadHandler {
     // Default language to use in units without language
     protected String defaultLanguage = "en";
 
-	private int ushmmcount = 0;
+	private int ushmmcount;
     
 	/**
 	 * @param importer

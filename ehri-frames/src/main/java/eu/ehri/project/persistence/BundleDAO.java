@@ -330,7 +330,7 @@ public final class BundleDAO {
      * @param direction The relationship direction
      * @return A set of related nodes
      */
-    private Set<Vertex> getCurrentRelationships(final Vertex src,
+    private Set<Vertex> getCurrentRelationships(Vertex src,
             String label, Direction direction) {
         HashSet<Vertex> out = Sets.newHashSet();
         for (Vertex end : src.getVertices(direction, label)) {

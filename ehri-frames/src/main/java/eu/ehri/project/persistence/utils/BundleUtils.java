@@ -36,11 +36,11 @@ import java.util.Map;
 public class BundleUtils {
 
     private interface SetOperation {
-        Bundle run(final Bundle bundle, final BundlePath path);
+        Bundle run(Bundle bundle, BundlePath path);
     }
 
     private interface GetOperation<T> {
-        T run(final Bundle bundle, final BundlePath path);
+        T run(Bundle bundle, BundlePath path);
     }
 
     public static class BundlePathError extends NullPointerException {
@@ -72,7 +72,7 @@ public class BundleUtils {
     public static <T> T get(Bundle bundle, String path) {
         return fetchAttribute(bundle, BundlePath.fromString(path),
                 new GetOperation<T>() {
-                    public T run(final Bundle subjectNode,
+                    public T run(Bundle subjectNode,
                             BundlePath subjectPath) {
                         return subjectNode.getDataValue(subjectPath
                                 .getTerminus());
@@ -114,7 +114,7 @@ public class BundleUtils {
     public static Bundle delete(Bundle bundle, String path) {
         return mutateAttribute(bundle, BundlePath.fromString(path),
                 new SetOperation() {
-                    public Bundle run(final Bundle subject, final BundlePath p) {
+                    public Bundle run(Bundle subject, BundlePath p) {
                         Map<String, Object> data = Maps.newHashMap(subject
                                 .getData());
                         data.remove(p.getTerminus());
@@ -160,7 +160,7 @@ public class BundleUtils {
     public static <T> Bundle set(Bundle bundle, String path, final T value) {
         return mutateAttribute(bundle, BundlePath.fromString(path),
                 new SetOperation() {
-                    public Bundle run(final Bundle subject, final BundlePath p) {
+                    public Bundle run(Bundle subject, BundlePath p) {
                         return subject.withDataValue(p.getTerminus(), value);
                     }
                 });
@@ -202,7 +202,7 @@ public class BundleUtils {
     public static List<Bundle> getRelations(Bundle bundle, String path) {
         return fetchAttribute(bundle, BundlePath.fromString(path),
                 new GetOperation<List<Bundle>>() {
-                    public List<Bundle> run(final Bundle subjectNode,
+                    public List<Bundle> run(Bundle subjectNode,
                             BundlePath subjectPath) {
                         return subjectNode.getRelations(subjectPath
                                 .getTerminus());

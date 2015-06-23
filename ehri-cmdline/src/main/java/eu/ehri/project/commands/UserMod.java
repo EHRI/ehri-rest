@@ -43,7 +43,7 @@ import org.apache.commons.cli.Options;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class UserMod extends BaseCommand implements Command {
+public class UserMod extends BaseCommand {
 
     final static String NAME = "usermod";
 
@@ -69,12 +69,12 @@ public class UserMod extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError,
             PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = cmdLine.getOptionValue("c",
+        String logMessage = cmdLine.getOptionValue("c",
                 "Adding user to groups");
 
         if (cmdLine.getArgList().size() < 1)

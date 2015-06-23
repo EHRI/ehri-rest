@@ -31,8 +31,8 @@ import eu.ehri.project.models.base.LinkableEntity;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public interface AuthoritativeItem extends AccessibleEntity, LinkableEntity, IdentifiableEntity {
+public interface AuthoritativeItem extends LinkableEntity, IdentifiableEntity {
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
-    public AuthoritativeSet getAuthoritativeSet();
+    AuthoritativeSet getAuthoritativeSet();
 }

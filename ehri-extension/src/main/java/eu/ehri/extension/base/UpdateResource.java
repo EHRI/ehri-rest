@@ -45,7 +45,7 @@ public interface UpdateResource {
      * @throws eu.ehri.project.exceptions.ItemNotFound
      * @throws eu.ehri.extension.errors.BadRequester
      */
-    public Response update(Bundle bundle) throws PermissionDenied,
+    Response update(Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester;
 
@@ -62,7 +62,7 @@ public interface UpdateResource {
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response update(String id, Bundle bundle)
+    Response update(String id, Bundle bundle)
                 throws AccessDenied, PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound, BadRequester;
 }

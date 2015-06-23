@@ -46,7 +46,7 @@ public interface CreateResource {
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response create(Bundle bundle, List<String> accessors)
+    Response create(Bundle bundle, List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester;
 }

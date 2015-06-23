@@ -90,7 +90,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Path("/list/{id:.+}")
     public Response listPermissionGrants(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = manager.getFrame(id, Accessor.class);
             Accessor accessor = getRequesterUserProfile();
@@ -116,7 +116,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Path("/listForItem/{id:.+}")
     public Response listPermissionGrantsForItem(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             PermissionGrantTarget target = manager.getFrame(id,
                     PermissionGrantTarget.class);
@@ -141,7 +141,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Path("/listForScope/{id:.+}")
     public Response listPermissionGrantsForScope(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
             Accessor accessor = getRequesterUserProfile();

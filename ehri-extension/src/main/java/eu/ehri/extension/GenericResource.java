@@ -25,6 +25,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -77,11 +78,11 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             // Object a lazily-computed view of the ids->vertices...
             Iterable<Vertex> vertices = manager.getVertices(ids);
-            PipeFunction<Vertex, Boolean> filter = aclManager
+            PipeFunction<Vertex, Boolean> filter = AclManager
                     .getAclFilterFunction(getRequesterUserProfile());
             GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                     vertices)
@@ -126,7 +127,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         // This is ugly, but to return 404 on a bad item we have to
         // iterate the list first otherwise the streaming response will be
         // broken.
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             for (Long id : ids) {
                 if (graph.getVertex(id) == null) {
@@ -141,7 +142,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
                         }
                     });
 
-            PipeFunction<Vertex, Boolean> filter = aclManager
+            PipeFunction<Vertex, Boolean> filter = AclManager
                     .getAclFilterFunction(getRequesterUserProfile());
             GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                     vertices)
@@ -191,7 +192,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
             Accessor currentUser = getRequesterUserProfile();
             if (item == null || !aclManager.getContentTypeFilterFunction().compute(item)) {
                 throw new ItemNotFound(id);
-            } else if (!aclManager.getAclFilterFunction(currentUser).compute(item)) {
+            } else if (!AclManager.getAclFilterFunction(currentUser).compute(item)) {
                 throw new AccessDenied(currentUser.getId(), id);
             }
 

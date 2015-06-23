@@ -56,11 +56,11 @@ public interface VirtualUnit extends AbstractUnit {
 
     @Meta(CHILD_COUNT)
     @JavaHandler
-    public long getChildCount();
+    long getChildCount();
 
     @Fetch(Ontology.VC_IS_PART_OF)
     @Adjacency(label = Ontology.VC_IS_PART_OF)
-    public VirtualUnit getParent();
+    VirtualUnit getParent();
 
     /**
      * Add a child.
@@ -69,7 +69,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @return Whether or not the operation was allowed.
      */
     @JavaHandler
-    public boolean addChild(final VirtualUnit child);
+    boolean addChild(VirtualUnit child);
 
     /**
      * Remove a child virtual unit from this one.
@@ -78,13 +78,13 @@ public interface VirtualUnit extends AbstractUnit {
      * @return whether or not the item was removed
      */
     @JavaHandler
-    public boolean removeChild(final VirtualUnit child);
+    boolean removeChild(VirtualUnit child);
 
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
      */
     @JavaHandler
-    public Iterable<VirtualUnit> getAncestors();
+    Iterable<VirtualUnit> getAncestors();
 
     /**
      * Get the child virtual units subordinate to this one.
@@ -92,7 +92,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @return an iterable of virtual unit frames
      */
     @JavaHandler
-    public Iterable<VirtualUnit> getChildren();
+    Iterable<VirtualUnit> getChildren();
 
     /**
      * Fetch <b>all</b> child virtual units and their children
@@ -101,7 +101,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @return an iterable of virtual unit frames
      */
     @JavaHandler
-    public Iterable<VirtualUnit> getAllChildren();
+    Iterable<VirtualUnit> getAllChildren();
 
     /**
      * Fetch documentary unit items included in this virtual unit.
@@ -110,7 +110,7 @@ public interface VirtualUnit extends AbstractUnit {
      */
     @Fetch(value = Ontology.VC_INCLUDES_UNIT, full = true)
     @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.OUT)
-    public Iterable<DocumentaryUnit> getIncludedUnits();
+    Iterable<DocumentaryUnit> getIncludedUnits();
 
     /**
      * Get the repositories which hold the documentary unit items
@@ -119,7 +119,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @return an iterable of repository frames
      */
     @JavaHandler
-    public Iterable<Repository> getRepositories();
+    Iterable<Repository> getRepositories();
 
     /**
      * Add a documentary unit to be included in this virtual unit.
@@ -128,7 +128,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @return whether or not the item was newly added
      */
     @JavaHandler
-    public boolean addIncludedUnit(final DocumentaryUnit unit);
+    boolean addIncludedUnit(DocumentaryUnit unit);
 
     /**
      * Remove a documentary unit item from this virtual unit.
@@ -136,7 +136,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @param unit a documentary unit frame
      */
     @JavaHandler
-    public void removeIncludedUnit(final DocumentaryUnit unit);
+    void removeIncludedUnit(DocumentaryUnit unit);
 
     /**
      * Fetch the author of this virtual unit.
@@ -145,7 +145,7 @@ public interface VirtualUnit extends AbstractUnit {
      */
     @Fetch(value = Ontology.VC_HAS_AUTHOR, numLevels = 0)
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
-    public Accessor getAuthor();
+    Accessor getAuthor();
 
     /**
      * Set the author of this virtual unit.
@@ -153,7 +153,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @param accessor a user or group frame
      */
     @JavaHandler
-    public void setAuthor(final Accessor accessor);
+    void setAuthor(Accessor accessor);
 
     /**
      * Fetch the descriptions of this virtual unit.
@@ -161,18 +161,18 @@ public interface VirtualUnit extends AbstractUnit {
      * @return an iterable of documentary unit description frames
      */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    public Iterable<DocumentDescription> getVirtualDescriptions();
+    Iterable<DocumentDescription> getVirtualDescriptions();
 
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, VirtualUnit {
 
-        public void setAuthor(final Accessor accessor) {
+        public void setAuthor(Accessor accessor) {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
-        public void removeIncludedUnit(final DocumentaryUnit unit) {
+        public void removeIncludedUnit(DocumentaryUnit unit) {
             removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
@@ -180,7 +180,7 @@ public interface VirtualUnit extends AbstractUnit {
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF));
         }
 
-        public boolean addChild(final VirtualUnit child) {
+        public boolean addChild(VirtualUnit child) {
             if (child.asVertex().equals(it())) {
                 // Self-referential.
                 return false;
@@ -195,7 +195,7 @@ public interface VirtualUnit extends AbstractUnit {
             return addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
         }
 
-        public boolean removeChild(final VirtualUnit child) {
+        public boolean removeChild(VirtualUnit child) {
             return removeAllRelationships(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
         }
 
@@ -217,7 +217,7 @@ public interface VirtualUnit extends AbstractUnit {
             return frameVertices(traverseAncestors());
         }
 
-        public boolean addIncludedUnit(final DocumentaryUnit unit) {
+        public boolean addIncludedUnit(DocumentaryUnit unit) {
             return addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 

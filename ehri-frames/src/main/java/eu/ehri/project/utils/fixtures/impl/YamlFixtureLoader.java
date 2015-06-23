@@ -255,9 +255,9 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    private Bundle createBundle(final String id, final EntityClass type,
-            final Map<String, Object> nodeData,
-            final Multimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
+    private Bundle createBundle(String id, EntityClass type,
+            Map<String, Object> nodeData,
+            Multimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
         Map<String, Object> data = ImmutableMap.of(
             Bundle.ID_KEY, id,
             Bundle.TYPE_KEY, type.getName(),

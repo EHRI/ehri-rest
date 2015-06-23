@@ -51,7 +51,7 @@ public enum ContentTypes {
     
     private final String name;
     
-    private ContentTypes(String name) {
+    ContentTypes(String name) {
         this.name = name;
     }
 

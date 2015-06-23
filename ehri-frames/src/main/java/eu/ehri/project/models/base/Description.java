@@ -43,22 +43,22 @@ public interface Description extends NamedEntity, AccessibleEntity {
      * Process by which this description was created. Currently supported
      * values allow for automatic import or manual creation (by a human).
      */
-    public static enum CreationProcess {
+    enum CreationProcess {
         MANUAL, IMPORT
     }
 
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
-    public DescribedEntity getEntity();
+    DescribedEntity getEntity();
 
     @Mandatory
     @Property(Ontology.LANGUAGE_OF_DESCRIPTION)
-    public String getLanguageOfDescription();
+    String getLanguageOfDescription();
 
     @Property(Ontology.IDENTIFIER_KEY)
-    public String getDescriptionCode();
+    String getDescriptionCode();
 
     @Property(Ontology.CREATION_PROCESS)
-    public CreationProcess getCreationProcess();
+    CreationProcess getCreationProcess();
 
     /**
      * Get the described entity of a description. This 
@@ -67,32 +67,32 @@ public interface Description extends NamedEntity, AccessibleEntity {
      */
     @Fetch(value = Ontology.DESCRIPTION_FOR_ENTITY, ifLevel =0)
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
-    public DescribedEntity getDescribedEntity();    
+    DescribedEntity getDescribedEntity();
 
     @Dependent
     @Fetch(value = Ontology.HAS_MAINTENANCE_EVENT, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
-    public abstract Iterable<MaintenanceEvent> getMaintenanceEvents();
+    Iterable<MaintenanceEvent> getMaintenanceEvents();
 
     @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
-    public abstract void setMaintenanceEvents(final Iterable<MaintenanceEvent> maintenanceEvents);
+    void setMaintenanceEvents(Iterable<MaintenanceEvent> maintenanceEvents);
 
     @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
-    public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
+    void addMaintenanceEvent(MaintenanceEvent maintenanceEvent);
 
     @Dependent
     @Fetch(value = Ontology.HAS_ACCESS_POINT, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
-    public Iterable<UndeterminedRelationship> getUndeterminedRelationships();
+    Iterable<UndeterminedRelationship> getUndeterminedRelationships();
 
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
-    public void setUndeterminedRelationships(final Iterable<UndeterminedRelationship> relationship);
+    void setUndeterminedRelationships(Iterable<UndeterminedRelationship> relationship);
 
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
-    public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
+    void addUndeterminedRelationship(UndeterminedRelationship relationship);
 
     @Dependent
     @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifLevel = 1, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_UNKNOWN_PROPERTY)
-    public Iterable<UnknownProperty> getUnknownProperties();
+    Iterable<UnknownProperty> getUnknownProperties();
 }

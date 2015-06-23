@@ -31,7 +31,7 @@ import eu.ehri.project.importers.SaxXmlHandler;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class DcImport extends ImportCommand implements Command {
+public class DcImport extends ImportCommand {
 
     final static String NAME = "dc-import";
 

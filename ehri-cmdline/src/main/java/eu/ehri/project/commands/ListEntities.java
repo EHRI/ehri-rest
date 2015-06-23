@@ -49,7 +49,7 @@ import java.io.UnsupportedEncodingException;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class ListEntities extends BaseCommand implements Command {
+public class ListEntities extends BaseCommand {
 
     final static String NAME = "list";
 
@@ -80,7 +80,7 @@ public class ListEntities extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
 
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)

@@ -215,10 +215,10 @@ public final class JenaSkosImporter implements SkosImporter {
             throws IOException, ValidationError {
 
         // Create a new action for this import
-        final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
+        ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
                 actioner, EventTypes.ingest, getLogMessage(logMessage));
         // Create a manifest to store the results of the import.
-        final ImportLog log = new ImportLog(eventContext);
+        ImportLog log = new ImportLog(eventContext);
 
         OntModel model = ModelFactory.createOntologyModel();
         model.read(ios, null, format);
@@ -364,12 +364,12 @@ public final class JenaSkosImporter implements SkosImporter {
         return null;
     }
 
-    private static interface ConnectFunc {
+    private interface ConnectFunc {
 
-        public void connect(Concept current, Concept related);
+        void connect(Concept current, Concept related);
     }
 
-    private List<RDFNode> getObjectWithPredicate(final Resource item, final URI propUri) {
+    private List<RDFNode> getObjectWithPredicate(Resource item, final URI propUri) {
         // NB: this should be possible with simply item.listProperties(propUri)
         // but for some reason that doesn't work... I can't grok why.
         return item.listProperties().filterKeep(new Filter<Statement>() {

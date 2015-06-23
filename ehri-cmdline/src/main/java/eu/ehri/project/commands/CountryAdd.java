@@ -45,7 +45,7 @@ import org.apache.commons.cli.Options;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class CountryAdd extends BaseCommand implements Command {
+public class CountryAdd extends BaseCommand {
 
     final static String NAME = "countryadd";
 
@@ -70,11 +70,11 @@ public class CountryAdd extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = cmdLine.getOptionValue("c",
+        String logMessage = cmdLine.getOptionValue("c",
                 "Created via command-line");
 
         if (cmdLine.getArgList().size() < 1)

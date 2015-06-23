@@ -11,7 +11,7 @@ import com.tinkerpop.blueprints.util.wrappers.WrapperVertexQuery;
  */
 public class AclVertex extends AclElement implements Vertex {
 
-    protected AclVertex(final Vertex baseVertex, final AclGraph<?> graph) {
+    protected AclVertex(Vertex baseVertex, AclGraph<?> graph) {
         super(baseVertex, graph);
     }
 

@@ -28,5 +28,5 @@ import eu.ehri.project.models.base.Frame;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface TraversalCallback {
-    public void process(Frame vertexFrame, int depth, String relation, int relationIndex);
+    void process(Frame vertexFrame, int depth, String relation, int relationIndex);
 }

@@ -59,7 +59,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
     @Override
-    public Response toResponse(final ValidationError e) {
+    public Response toResponse(ValidationError e) {
         try {
             return Response.status(Status.BAD_REQUEST)
                     .entity(e.getErrorSet().toJson()

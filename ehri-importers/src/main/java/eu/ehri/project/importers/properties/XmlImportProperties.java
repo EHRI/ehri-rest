@@ -40,7 +40,7 @@ import java.util.Set;
 public class XmlImportProperties implements ImportProperties {
 
     private String configFileName;
-    private Properties cachedProperties = null;
+    private Properties cachedProperties;
 
     public XmlImportProperties(String configFile) {
         setConfigFileName(configFile);
@@ -209,14 +209,14 @@ abstract class PropertyLoader {
             if (LOAD_AS_RESOURCE_BUNDLE) {
                 name = name.replace('/', '.');
                 // Throws MissingResourceException on lookup failures:
-                final ResourceBundle rb = ResourceBundle.getBundle(name, Locale
+                ResourceBundle rb = ResourceBundle.getBundle(name, Locale
                         .getDefault(), loader);
 
                 result = new Properties();
                 for (Enumeration<String> keys = rb.getKeys(); keys
                         .hasMoreElements(); ) {
-                    final String key = keys.nextElement();
-                    final String value = rb.getString(key);
+                    String key = keys.nextElement();
+                    String value = rb.getString(key);
 
                     result.put(key, value);
                 }
@@ -271,7 +271,7 @@ abstract class PropertyLoader {
      * A convenience overload of {@link #loadProperties(String, ClassLoader)} that uses the current thread's context
      * classloader.
      */
-    public static Properties loadProperties(final String name) {
+    public static Properties loadProperties(String name) {
         return loadProperties(name, Thread.currentThread()
                 .getContextClassLoader());
     }

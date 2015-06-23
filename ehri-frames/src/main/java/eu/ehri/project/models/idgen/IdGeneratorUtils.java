@@ -54,7 +54,7 @@ public class IdGeneratorUtils {
 
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
-    public static ListMultimap<String, String> handleIdCollision(final Collection<String> scopeIds,
+    public static ListMultimap<String, String> handleIdCollision(Collection<String> scopeIds,
             String dataKey, String ident) {
 
         logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, Lists.newArrayList(scopeIds));
@@ -92,7 +92,7 @@ public class IdGeneratorUtils {
      * @param ident    the item's identifier
      * @return The complete id string
      */
-    public static String generateId(final Collection<String> scopeIds, final Bundle bundle, String ident) {
+    public static String generateId(Collection<String> scopeIds, Bundle bundle, String ident) {
 
         // Validation should have ensured that ident exists...
         if (ident == null || ident.trim().isEmpty()) {

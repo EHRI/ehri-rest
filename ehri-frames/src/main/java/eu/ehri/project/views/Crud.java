@@ -39,19 +39,19 @@ import eu.ehri.project.persistence.Mutation;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface Crud<E extends AccessibleEntity> {
-    public Crud<E> setScope(PermissionScope scope);
+    Crud<E> setScope(PermissionScope scope);
     
-    public E detail(String id, Accessor user) throws ItemNotFound;
+    E detail(String id, Accessor user) throws ItemNotFound;
 
-    public Mutation<E> update(Bundle bundle, Accessor user)
+    Mutation<E> update(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
 
-    public E create(Bundle bundle, Accessor user)
+    E create(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError;
 
-    public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
+    Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError;
 
-    public Integer delete(String id, Accessor user) throws PermissionDenied,
+    Integer delete(String id, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError, ItemNotFound;
 }

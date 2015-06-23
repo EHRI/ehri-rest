@@ -30,7 +30,7 @@ import eu.ehri.project.importers.SaxXmlHandler;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class IcaAtomEadImport extends ImportCommand implements Command {
+public class IcaAtomEadImport extends ImportCommand {
 
     final static String NAME = "ica-atom-ead-import";
 

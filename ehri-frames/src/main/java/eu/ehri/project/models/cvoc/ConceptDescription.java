@@ -62,7 +62,7 @@ public interface ConceptDescription extends Description {
     // Note: maybe we could make a OptionalProperty annotation?
 
     @Property(Ontology.PREFLABEL)
-    public String getPrefLabel();
+    String getPrefLabel();
     
 // NOTE if it's optional then don't use this Entity interface!
     

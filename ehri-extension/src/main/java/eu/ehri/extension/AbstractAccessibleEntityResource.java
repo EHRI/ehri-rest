@@ -72,8 +72,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Functor used to post-process items.
      */
-    public static interface Handler<E extends AccessibleEntity> {
-        public void process(E frame) throws PermissionDenied;
+    public interface Handler<E extends AccessibleEntity> {
+        void process(E frame) throws PermissionDenied;
     }
 
     /**
@@ -114,7 +114,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws BadRequester
      */
     public Response listItems() throws BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             return streamingPage(getQuery(cls).page(getRequesterUserProfile()), tx);
         } catch (Exception e) {

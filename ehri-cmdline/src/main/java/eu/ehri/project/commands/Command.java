@@ -36,7 +36,7 @@ public interface Command {
      *
      * @return a help text
      */
-    public String getHelp();
+    String getHelp();
 
     /**
      * Get information about the usage of the command, including
@@ -44,7 +44,7 @@ public interface Command {
      *
      * @return a usage text
      */
-    public String getUsage();
+    String getUsage();
 
     /**
      * Execute this command with the given command line options.
@@ -54,7 +54,7 @@ public interface Command {
      * @return a status code (0 = success)
      * @throws Exception
      */
-    public int execWithOptions(final FramedGraph<?> graph, CommandLine cmdLine) throws Exception;
+    int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception;
 
     /**
      * Execute this command with the given arguments.
@@ -64,5 +64,5 @@ public interface Command {
      * @return a status code (0 = success)
      * @throws Exception
      */
-    public int exec(FramedGraph<?> graph, String[] args) throws Exception;
+    int exec(FramedGraph<?> graph, String[] args) throws Exception;
 }

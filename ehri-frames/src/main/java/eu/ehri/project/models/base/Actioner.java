@@ -40,10 +40,10 @@ public interface Actioner extends NamedEntity {
      * @return
      */
     @JavaHandler
-    public Iterable<SystemEvent> getActions();
+    Iterable<SystemEvent> getActions();
 
     @JavaHandler
-    public Iterable<SystemEvent> getLatestAction();
+    Iterable<SystemEvent> getLatestAction();
 
     /**
      * Implementation of complex methods.

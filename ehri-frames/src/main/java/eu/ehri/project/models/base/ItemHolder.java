@@ -26,7 +26,7 @@ package eu.ehri.project.models.base;
  *
  */
 public interface ItemHolder {
-    public static final String CHILD_COUNT = "childCount";
+    String CHILD_COUNT = "childCount";
 
-    public long getChildCount();
+    long getChildCount();
 }

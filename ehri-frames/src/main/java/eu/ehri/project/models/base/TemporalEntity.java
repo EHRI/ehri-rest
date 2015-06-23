@@ -37,12 +37,12 @@ public interface TemporalEntity extends Frame {
     @Dependent
     @Fetch(value = Ontology.ENTITY_HAS_DATE, whenNotLite = true)
     @Adjacency(label = Ontology.ENTITY_HAS_DATE)
-    public abstract Iterable<DatePeriod> getDatePeriods();
+    Iterable<DatePeriod> getDatePeriods();
 
     @Adjacency(label = Ontology.ENTITY_HAS_DATE)
-    public abstract void setDatePeriods(final Iterable<DatePeriod> datePeriods);
+    void setDatePeriods(Iterable<DatePeriod> datePeriods);
 
     @Adjacency(label = Ontology.ENTITY_HAS_DATE)
-    public abstract void addDatePeriod(final DatePeriod period);
+    void addDatePeriod(DatePeriod period);
 
 }

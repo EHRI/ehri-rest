@@ -33,8 +33,8 @@ import eu.ehri.project.models.Link;
  */
 public interface LinkableEntity extends AccessibleEntity {
     @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
-    public Iterable<Link> getLinks();
+    Iterable<Link> getLinks();
 
     @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
-    public void addLink(final Link link);
+    void addLink(Link link);
 }

@@ -34,5 +34,5 @@ public interface IdentifiableEntity extends Frame {
 
     @Mandatory
     @Property(Ontology.IDENTIFIER_KEY)
-    public String getIdentifier();
+    String getIdentifier();
 }

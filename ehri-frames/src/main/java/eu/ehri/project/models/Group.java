@@ -47,12 +47,12 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.GROUP)
-public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
+public interface Group extends Accessor, AccessibleEntity,
         PermissionScope, NamedEntity, ItemHolder {
     
-    public static final String ADMIN_GROUP_IDENTIFIER = "admin";
-    public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
-    public static final String ADMIN_GROUP_NAME = "Administrators";
+    String ADMIN_GROUP_IDENTIFIER = "admin";
+    String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
+    String ADMIN_GROUP_NAME = "Administrators";
 
     /**
      * Fetch the groups to which this group belongs.
@@ -61,13 +61,13 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      */
     @Fetch(Ontology.ACCESSOR_BELONGS_TO_GROUP)
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP)
-    public Iterable<Group> getGroups();
+    Iterable<Group> getGroups();
 
     /**
      * TODO FIXME use this in case we need AccesibleEnity's instead of Accessors, 
      */
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
-    public Iterable<AccessibleEntity> getMembersAsEntities();
+    Iterable<AccessibleEntity> getMembersAsEntities();
 
     /**
      * Get members of this group.
@@ -75,7 +75,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      * @return an iterable of user or group frames
      */
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
-    public Iterable<Accessor> getMembers();
+    Iterable<Accessor> getMembers();
 
     /**
      * Get the number of items within this group.
@@ -84,7 +84,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    public long getChildCount();
+    long getChildCount();
 
     /**
      * Adds a Accessor as a member to this Group, so it has the permissions of the Group.
@@ -92,7 +92,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      * @param accessor a user or group frame
      */
     @JavaHandler
-    public void addMember(final Accessor accessor);
+    void addMember(Accessor accessor);
 
     /**
      * Removes a member from this group.
@@ -100,7 +100,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      * @param accessor a user or group frame
      */
     @JavaHandler
-    public void removeMember(final Accessor accessor);
+    void removeMember(Accessor accessor);
 
     /**
      * Get <b>all</b> members of this group, including members of
@@ -109,7 +109,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
      * @return an iterable of user or group frames
      */
     @JavaHandler
-    public Iterable<AccessibleEntity> getAllUserProfileMembers();
+    Iterable<AccessibleEntity> getAllUserProfileMembers();
 
     /**
      * Implementation of complex methods.
@@ -120,12 +120,12 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
             return gremlin().inE(Ontology.ACCESSOR_BELONGS_TO_GROUP).count();
         }
 
-        public void addMember(final Accessor accessor) {
+        public void addMember(Accessor accessor) {
             JavaHandlerUtils.addUniqueRelationship(accessor.asVertex(), it(),
                     Ontology.ACCESSOR_BELONGS_TO_GROUP);
         }
 
-        public void removeMember(final Accessor accessor) {
+        public void removeMember(Accessor accessor) {
             JavaHandlerUtils.removeAllRelationships(accessor.asVertex(),
                     it(), Ontology.ACCESSOR_BELONGS_TO_GROUP);
         }

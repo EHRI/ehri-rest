@@ -27,7 +27,7 @@ import eu.ehri.project.importers.PersonalitiesImporter;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class PersonalitiesImport extends ImportCsvCommand implements Command {
+public class PersonalitiesImport extends ImportCsvCommand {
 
     final static String NAME = "csv-pers-import";
 

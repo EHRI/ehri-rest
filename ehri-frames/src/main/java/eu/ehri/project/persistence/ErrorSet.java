@@ -105,7 +105,7 @@ public final class ErrorSet {
      * @param errors A map of top-level errors
      * @param relations A map of relations
      */
-    public ErrorSet(Multimap<String, String> errors, final Multimap<String, ErrorSet> relations) {
+    public ErrorSet(Multimap<String, String> errors, Multimap<String, ErrorSet> relations) {
         this.errors = ImmutableListMultimap.copyOf(errors);
         this.relations = ImmutableListMultimap.copyOf(relations);
     }
@@ -153,7 +153,7 @@ public final class ErrorSet {
      * @param errors A set of errors
      * @return A new error set
      */
-    public ErrorSet withErrors(final Multimap<String, String> errors) {
+    public ErrorSet withErrors(Multimap<String, String> errors) {
         return new ErrorSet(errors, relations);
     }
 
@@ -280,7 +280,7 @@ public final class ErrorSet {
      * Convert the ordered relationship set into an unordered one for comparison.
      * FIXME: Clean up the code and optimise this function.
      */
-    private Map<String, LinkedHashMultiset<ErrorSet>> unorderedRelations(final Multimap<String, ErrorSet> rels) {
+    private Map<String, LinkedHashMultiset<ErrorSet>> unorderedRelations(Multimap<String, ErrorSet> rels) {
         Map<String, LinkedHashMultiset<ErrorSet>> map = Maps.newHashMap();
         for (Map.Entry<String, Collection<ErrorSet>> entry : rels.asMap().entrySet()) {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
