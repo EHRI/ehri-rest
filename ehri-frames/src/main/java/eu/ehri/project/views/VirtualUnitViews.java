@@ -145,7 +145,7 @@ public class VirtualUnitViews {
                         return !vertex.getEdges(Direction.OUT, Ontology.VC_IS_PART_OF)
                                 .iterator().hasNext();
                     }
-                }).filter(aclManager.getAclFilterFunction(accessor));
+                }).filter(AclManager.getAclFilterFunction(accessor));
 
         return graph.frameVertices(out, VirtualUnit.class);
     }
@@ -161,7 +161,7 @@ public class VirtualUnitViews {
         GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<>();
         Pipeline<Vertex, Vertex> filtered = pipe.start(user.asVertex())
                 .in(Ontology.VC_HAS_AUTHOR)
-                .filter(aclManager.getAclFilterFunction(accessor));
+                .filter(AclManager.getAclFilterFunction(accessor));
 
         return graph.frameVertices(filtered, VirtualUnit.class);
     }

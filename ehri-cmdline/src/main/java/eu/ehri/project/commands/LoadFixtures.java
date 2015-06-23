@@ -34,7 +34,7 @@ import java.io.FileInputStream;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class LoadFixtures extends BaseCommand implements Command {
+public class LoadFixtures extends BaseCommand {
 
     final static String NAME = "load-fixtures";
 
@@ -58,7 +58,7 @@ public class LoadFixtures extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
         boolean initialize = cmdLine.hasOption("init");
         FixtureLoader loader = FixtureLoaderFactory.getInstance(graph, initialize);

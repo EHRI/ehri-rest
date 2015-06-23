@@ -125,7 +125,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false")  boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             Vocabulary vocabulary = views.detail(id, user);
@@ -230,7 +230,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor user = getRequesterUserProfile();
+            Accessor user = getRequesterUserProfile();
             final Vocabulary vocabulary = views.detail(id, user);
             Response item = createItem(bundle, accessors, new Handler<Concept>() {
                 @Override

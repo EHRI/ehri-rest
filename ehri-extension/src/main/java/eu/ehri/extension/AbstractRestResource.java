@@ -327,7 +327,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return a serialized representation, with location and cache control
      * headers.
      */
-    protected <T extends Frame> Response single(final T item) {
+    protected <T extends Frame> Response single(T item) {
         try {
             return Response.status(Response.Status.OK)
                     .entity(getRepresentation(item).getBytes(Charsets.UTF_8))
@@ -344,7 +344,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param item A graph vertex
      * @return A serialized representation.
      */
-    protected Response single(final Vertex item) {
+    protected Response single(Vertex item) {
         try {
             // FIXME: We can add cache control and location here
             return Response.status(Response.Status.OK)
@@ -362,7 +362,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx the current transaction
      * @return A streaming response
      */
-    protected <T extends Frame> Response streamingPage(final Query.Page<T> page, Tx tx) {
+    protected <T extends Frame> Response streamingPage(Query.Page<T> page, Tx tx) {
         return streamingPage(page, getSerializer(), tx);
     }
 
@@ -376,7 +376,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return A streaming response
      */
     protected <T extends Frame> Response streamingPage(
-            final Query.Page<T> page, final Serializer serializer, Tx tx) {
+            Query.Page<T> page, Serializer serializer, Tx tx) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getStreamingXmlOutput(page, serializer, tx)
                 : getStreamingJsonOutput(page, serializer, tx);
@@ -443,7 +443,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx         the current transaction
      * @return A JSON response
      */
-    private <T extends Frame> Response getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
+    private <T extends Frame> Response getStreamingJsonOutput(final Query.Page<T> page, Serializer serializer,
             final Tx tx) {
         final Serializer cacheSerializer = serializer.withCache();
         StreamingOutput output = new StreamingOutput() {
@@ -478,7 +478,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return A streaming response
      */
     protected <T extends Frame> Response streamingList(
-            final Iterable<T> list, final Tx tx) {
+            Iterable<T> list, Tx tx) {
         return streamingList(list, getSerializer(), tx);
     }
 
@@ -490,7 +490,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return a streaming response
      */
     protected <T extends Frame> Response streamingListOfLists(
-            final Iterable<? extends Collection<T>> lists, final Tx tx) {
+            Iterable<? extends Collection<T>> lists, Tx tx) {
         return getStreamingJsonGroupOutput(lists, getSerializer(), tx);
     }
 
@@ -502,7 +502,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return A streaming response
      */
     protected <T extends Frame> Response streamingList(
-            final Iterable<T> list, final Serializer serializer, final Tx tx) {
+            Iterable<T> list, Serializer serializer, Tx tx) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getStreamingXmlOutput(list, serializer, tx)
                 : getStreamingJsonOutput(list, serializer, tx);
@@ -536,7 +536,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         }).build();
     }
 
-    private <T extends Frame> Response getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
+    private <T extends Frame> Response getStreamingJsonOutput(final Iterable<T> list, Serializer serializer,
             final Tx tx) {
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
@@ -563,7 +563,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> Response getStreamingJsonGroupOutput(
-            final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
+            final Iterable<? extends Collection<T>> list, Serializer serializer, final Tx tx) {
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
             @Override
@@ -601,7 +601,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return a streaming response
      */
     protected Response streamingVertexList(
-            final Iterable<Vertex> list, final Serializer serializer, final Tx tx) {
+            final Iterable<Vertex> list, Serializer serializer, final Tx tx) {
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
             @Override

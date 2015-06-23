@@ -102,7 +102,7 @@ public class CountryResource
     public Response listChildren(@PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             Country country = views.detail(id, user);
@@ -211,7 +211,7 @@ public class CountryResource
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor user = getRequesterUserProfile();
+            Accessor user = getRequesterUserProfile();
             final Country country = views.detail(id, user);
             Response item = createItem(bundle, accessors, new Handler<Repository>() {
                 @Override

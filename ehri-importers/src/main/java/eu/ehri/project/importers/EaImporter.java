@@ -115,7 +115,7 @@ public abstract class EaImporter extends MapImporter {
      * @return an Iterable of new Maps representing related nodes and their types
      */
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        final String REL = "relation";
+        String REL = "relation";
         List<Map<String, Object>> listOfRelations = Lists.newArrayList();
         for (Entry<String, Object> itemProperty : itemData.entrySet()) {
             if (itemProperty.getKey().equals(REL)) {

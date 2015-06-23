@@ -205,7 +205,7 @@ public class GroupResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
             Iterable<AccessibleEntity> members = all

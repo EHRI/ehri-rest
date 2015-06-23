@@ -39,35 +39,35 @@ import eu.ehri.project.models.base.TemporalEntity;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.LINK)
-public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable, TemporalEntity {
+public interface Link extends Promotable, TemporalEntity {
 
     @Fetch(value = Ontology.LINK_HAS_LINKER, numLevels = 0)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
-    public UserProfile getLinker();
+    UserProfile getLinker();
 
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
-    public void setLinker(final Accessor accessor);
+    void setLinker(Accessor accessor);
 
     @Fetch(value = Ontology.LINK_HAS_TARGET, ifLevel = 0, numLevels = 1)
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
-    public Iterable<LinkableEntity> getLinkTargets();
+    Iterable<LinkableEntity> getLinkTargets();
 
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
-    public void addLinkTarget(final LinkableEntity entity);
+    void addLinkTarget(LinkableEntity entity);
 
     @Fetch(Ontology.LINK_HAS_BODY)
     @Adjacency(label = Ontology.LINK_HAS_BODY)
-    public Iterable<AccessibleEntity> getLinkBodies();
+    Iterable<AccessibleEntity> getLinkBodies();
 
     @Adjacency(label = Ontology.LINK_HAS_BODY)
-    public void addLinkBody(final AccessibleEntity entity);
+    void addLinkBody(AccessibleEntity entity);
 
     @Mandatory
     @Property(Ontology.LINK_HAS_TYPE)
-    public String getLinkType();
+    String getLinkType();
 
     @Property(Ontology.LINK_HAS_DESCRIPTION)
-    public String getDescription();
+    String getDescription();
 }
 
 

@@ -52,7 +52,7 @@ public interface Version extends AccessibleEntity {
      */
     @Mandatory
     @Property(Ontology.VERSION_ENTITY_CLASS)
-    public String getEntityType();
+    String getEntityType();
 
     /**
      * Fetch the ID of the entity that this version pertains to.
@@ -61,7 +61,7 @@ public interface Version extends AccessibleEntity {
      */
     @Mandatory
     @Property(Ontology.VERSION_ENTITY_ID)
-    public String getEntityId();
+    String getEntityId();
 
     /**
      * Fetch a serialized snapshot of the item's data in JSON format.
@@ -70,7 +70,7 @@ public interface Version extends AccessibleEntity {
      */
     @Mandatory
     @Property(Ontology.VERSION_ENTITY_DATA)
-    public String getEntityData();
+    String getEntityData();
 
     /**
      * Fetch the event that triggered this version.
@@ -79,7 +79,7 @@ public interface Version extends AccessibleEntity {
      */
     @Fetch(value = Ontology.VERSION_HAS_EVENT, ifLevel = 0)
     @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.OUT)
-    public SystemEvent getTriggeringEvent();
+    SystemEvent getTriggeringEvent();
 
     /**
      * Loops up through the chain of versions until the latest and fetches
@@ -88,7 +88,7 @@ public interface Version extends AccessibleEntity {
      * @return the entity to which this version refers.
      */
     @JavaHandler
-    public AccessibleEntity getEntity();
+    AccessibleEntity getEntity();
 
     /**
      * Implementation of complex methods.

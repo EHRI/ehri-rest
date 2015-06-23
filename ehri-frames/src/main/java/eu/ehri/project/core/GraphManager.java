@@ -41,7 +41,7 @@ public interface GraphManager {
     /**
      * Get a pointer to the underlying graph.
      */
-    public FramedGraph<?> getGraph();
+    FramedGraph<?> getGraph();
 
     /**
      * Cast one frame to another.
@@ -50,7 +50,7 @@ public interface GraphManager {
      * @param cls   The frame class to cast into
      * @return The input frame cast as the output class
      */
-    public <T extends Frame> T cast(Frame frame, Class<T> cls);
+    <T extends Frame> T cast(Frame frame, Class<T> cls);
 
     /**
      * Get the id of a given vertex.
@@ -58,7 +58,7 @@ public interface GraphManager {
      * @param vertex A vertex
      * @return The vertex's string ID
      */
-    public String getId(Vertex vertex);
+    String getId(Vertex vertex);
 
     /**
      * Get the id of a given vertex.
@@ -66,14 +66,14 @@ public interface GraphManager {
      * @param vertex A vertex
      * @return The vertex's string type
      */
-    public String getType(Vertex vertex);
+    String getType(Vertex vertex);
 
     /**
      * Get a vertex's properties.
      *
      * @return a map of property objects
      */
-    public Map<String,Object> getProperties(Vertex vertex);
+    Map<String,Object> getProperties(Vertex vertex);
 
     /**
      * Get the type of an arbitrary vertex.
@@ -81,7 +81,7 @@ public interface GraphManager {
      * @param vertex A vertex
      * @return The vertex's entity class
      */
-    public EntityClass getEntityClass(Vertex vertex);
+    EntityClass getEntityClass(Vertex vertex);
 
     /**
      * Get the type of an arbitrary framed vertex.
@@ -89,7 +89,7 @@ public interface GraphManager {
      * @param frame A framed vertex
      * @return The frame's entity class
      */
-    public EntityClass getEntityClass(Frame frame);
+    EntityClass getEntityClass(Frame frame);
 
     /**
      * Check if a node with the given ID exists or not.
@@ -97,7 +97,7 @@ public interface GraphManager {
      * @param id A string id
      * @return Whether or not a node with that ID exists in the graph.
      */
-    public boolean exists(String id);
+    boolean exists(String id);
 
     /**
      * Get a node with the given ID.
@@ -105,7 +105,7 @@ public interface GraphManager {
      * @param id The vertex's string ID
      * @return The vertex
      */
-    public Vertex getVertex(String id) throws ItemNotFound;
+    Vertex getVertex(String id) throws ItemNotFound;
 
     /**
      * Get a node with the given ID and type.
@@ -113,7 +113,7 @@ public interface GraphManager {
      * @param id The vertex's string ID
      * @return The vertex
      */
-    public Vertex getVertex(String id, EntityClass type) throws ItemNotFound;
+    Vertex getVertex(String id, EntityClass type) throws ItemNotFound;
 
     /**
      * Get a node with the given ID, and frame it with the given interface
@@ -123,7 +123,7 @@ public interface GraphManager {
      * @param cls The desired frame class
      * @return The framed vertex
      */
-    public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound;
+    <T> T getFrame(String id, Class<T> cls) throws ItemNotFound;
 
     /**
      * Get a node with the given ID and type, framing it with the given
@@ -134,7 +134,7 @@ public interface GraphManager {
      * @param cls  The desired frame class
      * @return The framed vertex
      */
-    public <T> T getFrame(String id, EntityClass type, Class<T> cls)
+    <T> T getFrame(String id, EntityClass type, Class<T> cls)
             throws ItemNotFound;
 
     /**
@@ -143,7 +143,7 @@ public interface GraphManager {
      * @param type The entity type
      * @return An iterable of vertices belonging to that entity class
      */
-    public CloseableIterable<Vertex> getVertices(EntityClass type);
+    CloseableIterable<Vertex> getVertices(EntityClass type);
 
     /**
      * Get a CloseableIterable of vertices with the given ids.
@@ -151,7 +151,7 @@ public interface GraphManager {
      * @param ids An iterable of String IDs
      * @return An iterable of vertices with the given IDs
      */
-    public CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
+    CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given
@@ -160,7 +160,7 @@ public interface GraphManager {
      * @param type The entity type
      * @return An iterable of vertices with the given key/value properties
      */
-    public CloseableIterable<Vertex> getVertices(String key,
+    CloseableIterable<Vertex> getVertices(String key,
             Object value, EntityClass type);
 
     /**
@@ -170,7 +170,7 @@ public interface GraphManager {
      * @param type The entity type
      * @return An iterable of framed vertices with the given framed class.
      */
-    public <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls);
+    <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls);
 
     // CRUD functions
 
@@ -183,7 +183,7 @@ public interface GraphManager {
      * @return The new vertex
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityClass type,
+    Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data) throws IntegrityError;
 
     /**
@@ -197,7 +197,7 @@ public interface GraphManager {
      * @return The new vertex
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityClass type,
+    Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys)
             throws IntegrityError;
 
@@ -210,7 +210,7 @@ public interface GraphManager {
      * @return The updated vertex
      * @throws ItemNotFound
      */
-    public Vertex updateVertex(String id, EntityClass type,
+    Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data) throws ItemNotFound;
 
     /**
@@ -224,7 +224,7 @@ public interface GraphManager {
      * @return The updated vertex
      * @throws ItemNotFound
      */
-    public Vertex updateVertex(String id, EntityClass type,
+    Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws ItemNotFound;
 
     /**
@@ -234,7 +234,7 @@ public interface GraphManager {
      * @param key    The property key
      * @param value  The property value
      */
-    public void setProperty(Vertex vertex, String key, Object value);
+    void setProperty(Vertex vertex, String key, Object value);
 
     /**
      * Rename an existing vertex, changing its ID.
@@ -243,7 +243,7 @@ public interface GraphManager {
      * @param oldId the old ID
      * @param newId  the new ID
      */
-    public void renameVertex(Vertex vertex, String oldId, String newId);
+    void renameVertex(Vertex vertex, String oldId, String newId);
 
     // CRUD functions
 
@@ -252,17 +252,17 @@ public interface GraphManager {
      *
      * @param id The vertex's string ID
      */
-    public void deleteVertex(String id) throws ItemNotFound;
+    void deleteVertex(String id) throws ItemNotFound;
 
     /**
      * Delete the given vertex.
      *
      * @param vertex The vertex to delete
      */
-    public void deleteVertex(Vertex vertex);
+    void deleteVertex(Vertex vertex);
 
     /**
      * Rebuild the internal graph index.
      */
-    public void rebuildIndex();
+    void rebuildIndex();
 }

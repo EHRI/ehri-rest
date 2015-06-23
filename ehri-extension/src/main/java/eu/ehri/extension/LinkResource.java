@@ -206,7 +206,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @Path("/for/{id:.+}")
     public Response listRelatedItems(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Query<Link> linkQuery = new Query<>(graph, Link.class)
                 .setStream(isStreaming());

@@ -44,7 +44,7 @@ public interface DeleteResource {
      * @throws BadRequester
      * @throws SerializationError
      */
-    public Response delete(String id)
+    Response delete(String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError;
 }

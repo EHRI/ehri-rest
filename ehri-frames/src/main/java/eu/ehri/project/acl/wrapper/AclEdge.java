@@ -12,14 +12,14 @@ import eu.ehri.project.acl.AclManager;
 public class AclEdge extends AclElement implements Edge {
     private final PipeFunction<Vertex,Boolean> aclFilter;
 
-    protected AclEdge(final Edge baseEdge, final AclGraph<?> aclGraph) {
+    protected AclEdge(Edge baseEdge, AclGraph<?> aclGraph) {
         super(baseEdge, aclGraph);
         aclFilter = AclManager.getAclFilterFunction(aclGraph.getAccessor());
     }
 
     @Override
     public Vertex getVertex(Direction direction) throws IllegalArgumentException {
-        final Vertex vertex = ((Edge) baseElement).getVertex(direction);
+        Vertex vertex = ((Edge) baseElement).getVertex(direction);
         return aclFilter.compute(vertex) ? new AclVertex(((Edge) baseElement).getVertex(direction), graph) : null;
     }
 

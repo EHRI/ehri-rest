@@ -43,7 +43,7 @@ import java.util.NoSuchElementException;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> implements GraphManager {
+public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> {
 
     public Neo4jGraphManager(FramedGraph<T> graph) {
         super(graph);
@@ -73,7 +73,7 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
         String queryStr = getLuceneQuery(key, value, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         return (CloseableIterable<Vertex>) new Neo4j2VertexIterable(rawQuery,
-                graph.getBaseGraph(), false);
+                graph.getBaseGraph());
     }
 
     private org.neo4j.graphdb.index.Index<Node> getRawIndex() {

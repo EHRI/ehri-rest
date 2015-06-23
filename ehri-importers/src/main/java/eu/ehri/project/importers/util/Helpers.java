@@ -53,7 +53,7 @@ public class Helpers {
     private static final Map<String, Locale> localeNameMap;
 
     static {
-        final String[] languages = Locale.getISOLanguages();
+        String[] languages = Locale.getISOLanguages();
         locale2Map = Maps.newHashMapWithExpectedSize(languages.length);
         localeNameMap = Maps.newHashMapWithExpectedSize(languages.length);
         for (String language : languages) {

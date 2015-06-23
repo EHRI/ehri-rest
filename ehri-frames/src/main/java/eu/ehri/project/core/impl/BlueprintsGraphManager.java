@@ -168,7 +168,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     @Override
-    public CloseableIterable<Vertex> getVertices(String key, Object value, final EntityClass type) {
+    public CloseableIterable<Vertex> getVertices(String key, Object value, EntityClass type) {
         // NB: This is rather annoying.
         List<Vertex> elems = Lists.newArrayList();
         try (CloseableIterable<Vertex> query = getIndex().get(key, value)) {

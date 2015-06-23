@@ -75,7 +75,7 @@ public final class Bundle {
          * @param bundle The bundle
          * @return  Whether to remove the item
          */
-        boolean remove(final String relationLabel, final Bundle bundle);
+        boolean remove(String relationLabel, Bundle bundle);
     }
 
     /**
@@ -86,7 +86,7 @@ public final class Bundle {
     public static final String MANAGED_PREFIX = "_";
 
     public static class Builder {
-        private String id = null;
+        private String id;
         private final EntityClass type;
         final Multimap<String, Bundle> relations = ArrayListMultimap.create();
         final Map<String, Object> data = Maps.newHashMap();
@@ -150,8 +150,8 @@ public final class Bundle {
      * @param meta      An initial map of metadata
      * @param temp      A marker to indicate the ID has been generated
      */
-    private Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final Multimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
+    private Bundle(String id, EntityClass type, Map<String, Object> data,
+            Multimap<String, Bundle> relations, Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
@@ -168,8 +168,8 @@ public final class Bundle {
      * @param data      An initial map of data
      * @param relations An initial set of relations
      */
-    public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final Multimap<String, Bundle> relations) {
+    public Bundle(String id, EntityClass type, Map<String, Object> data,
+            Multimap<String, Bundle> relations) {
         this(id, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
@@ -182,8 +182,8 @@ public final class Bundle {
      * @param relations An initial set of relations
      * @param meta      An initial map of metadata
      */
-    public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final Multimap<String, Bundle> relations, final Map<String, Object> meta) {
+    public Bundle(String id, EntityClass type, Map<String, Object> data,
+            Multimap<String, Bundle> relations, Map<String, Object> meta) {
         this(id, type, data, relations, meta, false);
     }
 
@@ -194,8 +194,8 @@ public final class Bundle {
      * @param data      An initial map of data
      * @param relations An initial set of relations
      */
-    public Bundle(EntityClass type, final Map<String, Object> data,
-            final Multimap<String, Bundle> relations) {
+    public Bundle(EntityClass type, Map<String, Object> data,
+            Multimap<String, Bundle> relations) {
         this(null, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
@@ -215,7 +215,7 @@ public final class Bundle {
      * @param type The bundle's type class
      * @param data An initial map of data
      */
-    public Bundle(EntityClass type, final Map<String, Object> data) {
+    public Bundle(EntityClass type, Map<String, Object> data) {
         this(null, type, data, ArrayListMultimap.<String, Bundle>create(),
                 Maps.<String, Object>newHashMap());
     }
@@ -341,7 +341,7 @@ public final class Bundle {
      * @param data The full data map to set
      * @return The new bundle
      */
-    public Bundle withData(final Map<String, Object> data) {
+    public Bundle withData(Map<String, Object> data) {
         return new Bundle(id, type, data, relations, meta, temp);
     }
 
@@ -351,7 +351,7 @@ public final class Bundle {
      * @param meta The full metadata map to set
      * @return The new bundle
      */
-    public Bundle withMetaData(final Map<String, Object> meta) {
+    public Bundle withMetaData(Map<String, Object> meta) {
         return new Bundle(id, type, data, relations, meta, temp);
     }
 
@@ -638,7 +638,7 @@ public final class Bundle {
      * @param scopes A set of parent scopes.
      * @return A new bundle
      */
-    public Bundle generateIds(final Collection<String> scopes) {
+    public Bundle generateIds(Collection<String> scopes) {
         boolean isTemp = id == null;
         IdGenerator idGen = getType().getIdgen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
@@ -704,7 +704,7 @@ public final class Bundle {
     /**
      * Convert the ordered relationship set into an unordered one for comparison.
      */
-    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(final Multimap<String, Bundle> rels) {
+    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(Multimap<String, Bundle> rels) {
         Map<String, LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
         for (Map.Entry<String, Collection<Bundle>> entry : rels.asMap().entrySet()) {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));

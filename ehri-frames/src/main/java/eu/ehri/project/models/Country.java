@@ -42,10 +42,10 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.COUNTRY)
-public interface Country extends IdentifiableEntity, AccessibleEntity,
+public interface Country extends AccessibleEntity,
         PermissionScope, ItemHolder {
 
-    public static final String COUNTRY_CODE = Ontology.IDENTIFIER_KEY;
+    String COUNTRY_CODE = Ontology.IDENTIFIER_KEY;
 
     /**
      * Alias function for fetching the country code identifier.
@@ -54,7 +54,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
      */
     @Mandatory
     @Property(COUNTRY_CODE)
-    public String getCode();
+    String getCode();
 
     /**
      * Fetch a count of the number of repositories in this country.
@@ -63,7 +63,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    public long getChildCount();
+    long getChildCount();
 
     /**
      * Fetch all repositories in this country.
@@ -71,7 +71,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
      * @return an iterable of repository frames
      */
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN)
-    public Iterable<Repository> getRepositories();
+    Iterable<Repository> getRepositories();
 
     /**
      * Add a repository to this country.
@@ -79,7 +79,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
      * @param repository a repository frame
      */
     @JavaHandler
-    public void addRepository(final Repository repository);
+    void addRepository(Repository repository);
 
     /**
      * Implementation of complex methods.
@@ -90,7 +90,7 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
             return gremlin().inE(Ontology.REPOSITORY_HAS_COUNTRY).count();
         }
 
-        public void addRepository(final Repository repository) {
+        public void addRepository(Repository repository) {
             JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
                     Ontology.REPOSITORY_HAS_COUNTRY);
         }

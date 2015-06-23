@@ -51,50 +51,50 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * @author Paul Boon (http://github.com/PaulBoon)
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-public interface Concept extends AccessibleEntity, IdentifiableEntity,
+public interface Concept extends
         DescribedEntity, AuthoritativeItem, ItemHolder {
 
     // NB: As an AuthoritativeItem the set will be @Fetched automatically
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
-    public Vocabulary getVocabulary();
+    Vocabulary getVocabulary();
 
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
-    public void setVocabulary(final Vocabulary vocabulary);
+    void setVocabulary(Vocabulary vocabulary);
 
     @Property(CHILD_COUNT)
-    public long getChildCount();
+    long getChildCount();
 
     // relations to other concepts
     
     // Note that multiple broader concepts are possible
     @Fetch(Ontology.CONCEPT_HAS_BROADER)
     @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction=Direction.IN)
-    public Iterable<Concept> getBroaderConcepts();
+    Iterable<Concept> getBroaderConcepts();
 
     // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
     @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.OUT)
-    public Iterable<Concept> getNarrowerConcepts();
+    Iterable<Concept> getNarrowerConcepts();
 
     @JavaHandler
-    public void addNarrowerConcept(final Concept concept);
+    void addNarrowerConcept(Concept concept);
 
     @JavaHandler
-    public void removeNarrowerConcept(final Concept concept);
+    void removeNarrowerConcept(Concept concept);
 
     
     // Related concepts, should be like a symmetric associative link... 
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
-    public Iterable<Concept> getRelatedConcepts();
+    Iterable<Concept> getRelatedConcepts();
 
     @JavaHandler
-    public void addRelatedConcept(final Concept concept);
+    void addRelatedConcept(Concept concept);
 
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
-    public void removeRelatedConcept(final Concept concept);
+    void removeRelatedConcept(Concept concept);
     
     // Hmm, does not 'feel' symmetric
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED, direction=Direction.IN)
-    public Iterable<Concept> getRelatedByConcepts();
+    Iterable<Concept> getRelatedByConcepts();
 
     /**
      * Implementation of complex methods.
@@ -105,19 +105,19 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
             return gremlin().outE(Ontology.CONCEPT_HAS_NARROWER).count();
         }
 
-        public void addRelatedConcept(final Concept related) {
+        public void addRelatedConcept(Concept related) {
             JavaHandlerUtils.addUniqueRelationship(it(),
                     related.asVertex(), Ontology.CONCEPT_HAS_RELATED);
         }
 
-        public void addNarrowerConcept(final Concept concept) {
+        public void addNarrowerConcept(Concept concept) {
             if (!concept.asVertex().equals(it())) {
                 JavaHandlerUtils.addUniqueRelationship(it(),
                         concept.asVertex(), Ontology.CONCEPT_HAS_NARROWER);
             }
         }
 
-        public void removeNarrowerConcept(final Concept concept) {
+        public void removeNarrowerConcept(Concept concept) {
             JavaHandlerUtils.removeAllRelationships(it(), concept.asVertex(),
                     Ontology.CONCEPT_HAS_NARROWER);
         }

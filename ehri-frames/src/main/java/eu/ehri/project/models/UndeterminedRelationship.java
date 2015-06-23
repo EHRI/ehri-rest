@@ -45,7 +45,7 @@ public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity,
      * @return a description frame
      */
     @Adjacency(label = Ontology.HAS_ACCESS_POINT, direction = Direction.IN)
-    public Description getDescription();
+    Description getDescription();
 
     /**
      * Fetch the links which make up the body of this UR (if any.)
@@ -53,7 +53,7 @@ public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity,
      * @return an iterable of link frames
      */
     @Adjacency(label = Ontology.LINK_HAS_BODY, direction = Direction.IN)
-    public Iterable<Link> getLinks();
+    Iterable<Link> getLinks();
 
     /**
      * Get the relationship type of this UR.
@@ -62,7 +62,7 @@ public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity,
      */
     @Mandatory
     @Property(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)
-    public String getRelationshipType();
+    String getRelationshipType();
 }
 
 

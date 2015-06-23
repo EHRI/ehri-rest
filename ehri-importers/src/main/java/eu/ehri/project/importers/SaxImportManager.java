@@ -67,7 +67,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner  the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-            final PermissionScope scope, final Actioner actioner,
+            PermissionScope scope, Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             Optional<XmlImportProperties> properties,
             List<ImportCallback> callbacks) {
@@ -87,7 +87,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner  the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-            final PermissionScope scope, final Actioner actioner,
+            PermissionScope scope, Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             List<ImportCallback> callbacks) {
         this(graph, scope, actioner, importerClass, handlerClass, Optional.<XmlImportProperties>absent(), callbacks);
@@ -101,7 +101,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner  the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-            final PermissionScope scope, final Actioner actioner,
+            PermissionScope scope, Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             XmlImportProperties properties) {
         this(graph, scope, actioner, importerClass, handlerClass, Optional.fromNullable(properties),
@@ -116,7 +116,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner  the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-            final PermissionScope scope, final Actioner actioner,
+            PermissionScope scope, Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this(graph, scope, actioner, importerClass, handlerClass, Lists.<ImportCallback>newArrayList());
     }

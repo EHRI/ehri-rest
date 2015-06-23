@@ -52,7 +52,7 @@ public interface ParentResource {
      * @return A list of serialized item representations
      * @throws BadRequester
      */
-    public Response listChildren(String id, boolean all)
+    Response listChildren(String id, boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied;
 
     /**
@@ -66,7 +66,7 @@ public interface ParentResource {
      * @throws BadRequester
      * @throws PermissionDenied
      */
-    public long countChildren(String id, boolean all)
+    long countChildren(String id, boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied;
 
     /**
@@ -83,8 +83,8 @@ public interface ParentResource {
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response createChild(String id,
-                                Bundle bundle, List<String> accessors)
+    Response createChild(String id,
+            Bundle bundle, List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester;
 }

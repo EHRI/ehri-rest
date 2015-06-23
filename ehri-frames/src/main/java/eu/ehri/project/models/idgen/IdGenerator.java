@@ -36,7 +36,7 @@ public interface IdGenerator {
      * @param bundle The entity's bundle data
      * @return A set of errors
      */
-    public ListMultimap<String, String> handleIdCollision(Collection<String> scopeIds, Bundle bundle);
+    ListMultimap<String, String> handleIdCollision(Collection<String> scopeIds, Bundle bundle);
 
     /**
      * Generate an ID given an array of scope IDs. This can be used
@@ -46,12 +46,12 @@ public interface IdGenerator {
      * @param bundle   The entity's bundle data
      * @return A generated ID string
      */
-    public String generateId(Collection<String> scopeIds, Bundle bundle);
+    String generateId(Collection<String> scopeIds, Bundle bundle);
 
     /**
      * Return the base data for the id, sans scoping.
      * @param bundle The entity's bundle.
      * @return The base id string.
      */
-    public String getIdBase(Bundle bundle);
+    String getIdBase(Bundle bundle);
 }

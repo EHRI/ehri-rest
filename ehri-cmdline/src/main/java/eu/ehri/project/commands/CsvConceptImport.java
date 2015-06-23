@@ -26,7 +26,7 @@ import eu.ehri.project.importers.CsvConceptImporter;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class CsvConceptImport extends ImportCsvCommand implements Command {
+public class CsvConceptImport extends ImportCsvCommand {
 
     final static String NAME = "csv-concept-import";
 

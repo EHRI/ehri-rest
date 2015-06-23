@@ -74,13 +74,13 @@ public class GraphInitializer {
         });
 
         // Create permission nodes corresponding to the Enum values
-        for (final PermissionType pt : PermissionType.values()) {
+        for (PermissionType pt : PermissionType.values()) {
             manager.createVertex(pt.getName(), EntityClass.PERMISSION,
                     Maps.<String, Object>newHashMap());
         }
 
         // Create content type nodes corresponding to the Enum values
-        for (final ContentTypes ct : ContentTypes.values()) {
+        for (ContentTypes ct : ContentTypes.values()) {
             manager.createVertex(ct.getName(), EntityClass.CONTENT_TYPE,
                     Maps.<String, Object>newHashMap());
         }

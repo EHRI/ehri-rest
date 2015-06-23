@@ -23,13 +23,13 @@ import java.util.Iterator;
  */
 public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
 
-    public Neo4j2Vertex(final Node node, final Neo4j2Graph graph) {
+    public Neo4j2Vertex(Node node, Neo4j2Graph graph) {
         super(graph);
         this.rawElement = node;
 
     }
 
-    public Iterable<Edge> getEdges(final com.tinkerpop.blueprints.Direction direction, final String... labels) {
+    public Iterable<Edge> getEdges(com.tinkerpop.blueprints.Direction direction, String... labels) {
         this.graph.autoStartTransaction(false);
         if (direction.equals(com.tinkerpop.blueprints.Direction.OUT))
             return new Neo4jVertexEdgeIterable(this.graph, (Node) this.rawElement, Direction.OUTGOING, labels);
@@ -39,7 +39,7 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
             return new MultiIterable(Arrays.asList(new Neo4jVertexEdgeIterable(this.graph, (Node) this.rawElement, Direction.OUTGOING, labels), new Neo4jVertexEdgeIterable(this.graph, (Node) this.rawElement, Direction.INCOMING, labels)));
     }
 
-    public Iterable<Vertex> getVertices(final com.tinkerpop.blueprints.Direction direction, final String... labels) {
+    public Iterable<Vertex> getVertices(com.tinkerpop.blueprints.Direction direction, String... labels) {
         this.graph.autoStartTransaction(false);
         if (direction.equals(com.tinkerpop.blueprints.Direction.OUT))
             return new Neo4jVertexVertexIterable(this.graph, (Node) this.rawElement, Direction.OUTGOING, labels);
@@ -49,13 +49,13 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
             return new MultiIterable(Arrays.asList(new Neo4jVertexVertexIterable(this.graph, (Node) this.rawElement, Direction.OUTGOING, labels), new Neo4jVertexVertexIterable(this.graph, (Node) this.rawElement, Direction.INCOMING, labels)));
     }
 
-    public Edge addEdge(final String label, final Vertex vertex) {
+    public Edge addEdge(String label, Vertex vertex) {
         return this.graph.addEdge(null, this, vertex, label);
     }
 
     public Collection<String> getLabels() {
         this.graph.autoStartTransaction(false);
-        final Collection<String> labels = new ArrayList<String>();
+        Collection<String> labels = new ArrayList<String>();
         for (Label label : getRawVertex().getLabels()) {
             labels.add(label.name());
         }
@@ -77,7 +77,7 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
         return new DefaultVertexQuery(this);
     }
 
-    public boolean equals(final Object object) {
+    public boolean equals(Object object) {
         return object instanceof Neo4j2Vertex && ((Neo4j2Vertex) object).getId().equals(this.getId());
     }
 
@@ -95,7 +95,7 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
         private final Direction direction;
         private final DynamicRelationshipType[] labels;
 
-        public Neo4jVertexVertexIterable(final Neo4j2Graph graph, final Node node, final Direction direction, final String... labels) {
+        public Neo4jVertexVertexIterable(Neo4j2Graph graph, Node node, Direction direction, String... labels) {
             this.graph = graph;
             this.node = node;
             this.direction = direction;
@@ -139,7 +139,7 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
         private final Direction direction;
         private final DynamicRelationshipType[] labels;
 
-        public Neo4jVertexEdgeIterable(final Neo4j2Graph graph, final Node node, final Direction direction, final String... labels) {
+        public Neo4jVertexEdgeIterable(Neo4j2Graph graph, Node node, Direction direction, String... labels) {
             this.graph = graph;
             this.node = node;
             this.direction = direction;

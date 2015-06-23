@@ -130,7 +130,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Path("/list")
     public Response listEvents() throws BadRequester {
 
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             EventViews eventViews = getEventViewsBuilder().build();
@@ -151,10 +151,10 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/aggregate")
     public Response aggregateEvents(
-            final @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
             throws BadRequester {
 
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             EventViews eventViews = getEventViewsBuilder()
@@ -179,10 +179,10 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/byUser/{userId:.+}")
     public Response listUserActions(
-            final @PathParam("userId") String userId)
+            @PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
 
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = manager.getFrame(userId, UserProfile.class);
@@ -209,11 +209,11 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/aggregateByUser/{userId:.+}")
     public Response aggregateUserActions(
-            final @PathParam("userId") String userId,
-            final @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation)
+            @PathParam("userId") String userId,
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation)
             throws ItemNotFound, BadRequester {
 
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = manager.getFrame(userId, UserProfile.class);
@@ -239,9 +239,9 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/forUser/{userId:.+}")
     public Response listEventsForUser(
-            final @PathParam("userId") String userId)
+            @PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             UserProfile asUser = manager.getFrame(userId, UserProfile.class);
@@ -268,10 +268,10 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/aggregateForUser/{userId:.+}")
     public Response aggregateEventsForUser(
-            final @PathParam("userId") String userId,
-            final @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
+            @PathParam("userId") String userId,
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             UserProfile asUser = manager.getFrame(userId, UserProfile.class);
@@ -297,9 +297,9 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public Response pageEventsForItem(
-            final @PathParam("id") String id)
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             AccessibleEntity item = views
@@ -325,10 +325,10 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/aggregateFor/{id:.+}")
     public Response aggregateEventsForItem(
-            final @PathParam("id") String id,
-            final @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
+            @PathParam("id") String id,
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
             throws ItemNotFound, BadRequester, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             AccessibleEntity item = views
@@ -357,7 +357,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Path("/{id:.+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
             SystemEvent event = views.detail(id, user);

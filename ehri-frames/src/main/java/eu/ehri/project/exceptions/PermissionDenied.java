@@ -29,10 +29,10 @@ public class PermissionDenied extends Exception {
 
     private static final long serialVersionUID = -3948097018322416889L;
 
-    private String accessor = null;
-    private String entity = null;
-    private String scope = null;
-    private String permission = null;
+    private String accessor;
+    private String entity;
+    private String scope;
+    private String permission;
 
     public PermissionDenied(String accessor, String message) {
         super(String.format("Permission denied accessing resource as '%s': %s",

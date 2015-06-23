@@ -39,22 +39,22 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 public interface Accessor extends IdentifiableEntity {
 
     @JavaHandler
-    public boolean isAdmin();
+    boolean isAdmin();
 
     @JavaHandler
-    public boolean isAnonymous();
+    boolean isAnonymous();
 
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP)
-    public Iterable<Accessor> getParents();
+    Iterable<Accessor> getParents();
 
     @JavaHandler
-    public Iterable<Accessor> getAllParents();
+    Iterable<Accessor> getAllParents();
 
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SUBJECT, direction=Direction.IN)
-    public Iterable<PermissionGrant> getPermissionGrants();
+    Iterable<PermissionGrant> getPermissionGrants();
 
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SUBJECT, direction=Direction.IN)
-    public void addPermissionGrant(final PermissionGrant grant);
+    void addPermissionGrant(PermissionGrant grant);
 
     abstract class Impl implements JavaHandlerContext<Vertex>, Accessor {
 

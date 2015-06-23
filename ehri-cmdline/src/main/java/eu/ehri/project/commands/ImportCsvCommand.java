@@ -42,7 +42,7 @@ import java.util.Map;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public abstract class ImportCsvCommand extends BaseCommand implements Command {
+public abstract class ImportCsvCommand extends BaseCommand {
     Class<? extends MapImporter> importer;
 
     public ImportCsvCommand(Class<? extends MapImporter> importer) {
@@ -62,7 +62,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

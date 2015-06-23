@@ -49,24 +49,24 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity, 
-        Annotator, Actioner, NamedEntity {
+public interface UserProfile extends Accessor, AccessibleEntity,
+        Annotator, Actioner {
 
-    public static final String FOLLOWER_COUNT = "followers";
-    public static final String FOLLOWING_COUNT = "following";
-    public static final String WATCHING_COUNT = "watching";
+    String FOLLOWER_COUNT = "followers";
+    String FOLLOWING_COUNT = "following";
+    String WATCHING_COUNT = "watching";
 
     @Meta(FOLLOWER_COUNT)
     @JavaHandler
-    public long getFollowerCount();
+    long getFollowerCount();
 
     @Meta(FOLLOWING_COUNT)
     @JavaHandler
-    public long getFollowingCount();
+    long getFollowingCount();
 
     @Meta(WATCHING_COUNT)
     @JavaHandler
-    public long getWatchingCount();
+    long getWatchingCount();
 
     /**
      * Get the groups to which this user belongs.
@@ -75,7 +75,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      */
     @Fetch(Ontology.ACCESSOR_BELONGS_TO_GROUP)
     @Adjacency(label = ACCESSOR_BELONGS_TO_GROUP)
-    public Iterable<Group> getGroups();
+    Iterable<Group> getGroups();
 
     /**
      * Get users who follow this user.
@@ -83,7 +83,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of user frames
      */
     @Adjacency(label = USER_FOLLOWS_USER, direction = Direction.IN)
-    public Iterable<UserProfile> getFollowers();
+    Iterable<UserProfile> getFollowers();
 
     /**
      * Get users who this user follows.
@@ -91,7 +91,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of user frames
      */
     @Adjacency(label = USER_FOLLOWS_USER, direction = Direction.OUT)
-    public Iterable<UserProfile> getFollowing();
+    Iterable<UserProfile> getFollowing();
 
     /**
      * Add a user the those this user follows.
@@ -99,7 +99,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @param user a user frame
      */
     @JavaHandler
-    public void addFollowing(final UserProfile user);
+    void addFollowing(UserProfile user);
 
     /**
      * Remove a user from those this user follows.
@@ -107,7 +107,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @param user a user frame
      */
     @JavaHandler
-    public void removeFollowing(final UserProfile user);
+    void removeFollowing(UserProfile user);
 
     /**
      * Ascertain whether this user is following another user.
@@ -116,7 +116,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return whether this user is following the other
      */
     @JavaHandler
-    public boolean isFollowing(final UserProfile otherUser);
+    boolean isFollowing(UserProfile otherUser);
 
     /**
      * Ascertain whether the other user is following this user.
@@ -125,7 +125,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return whether the other user is following this user
      */
     @JavaHandler
-    public boolean isFollower(final UserProfile otherUser);
+    boolean isFollower(UserProfile otherUser);
 
     /**
      * Fetch items this user is watching.
@@ -133,7 +133,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of generic item frames
      */
     @Adjacency(label = USER_WATCHING_ITEM, direction = Direction.OUT)
-    public Iterable<Watchable> getWatching();
+    Iterable<Watchable> getWatching();
 
     /**
      * Fetch links belonging to this user.
@@ -141,7 +141,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of link frames
      */
     @Adjacency(label = Ontology.LINK_HAS_LINKER, direction = Direction.IN)
-    public Iterable<Link> getLinks();
+    Iterable<Link> getLinks();
 
     /**
      * Fetch annotations belonging to this user.
@@ -150,7 +150,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      */
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)
     @Override
-    public Iterable<Annotation> getAnnotations();
+    Iterable<Annotation> getAnnotations();
 
     /**
      * Fetch virtual units created by this user.
@@ -158,7 +158,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of virtual unit frames
      */
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.IN)
-    public Iterable<VirtualUnit> getVirtualUnits();
+    Iterable<VirtualUnit> getVirtualUnits();
 
     /**
      * Add an item to this user's watch list.
@@ -166,7 +166,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @param item a generic item frame
      */
     @JavaHandler
-    public void addWatching(final Watchable item);
+    void addWatching(Watchable item);
 
     /**
      * Remove an item from this user's watch list.
@@ -174,7 +174,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @param item a generic item frame
      */
     @JavaHandler
-    public void removeWatching(final Watchable item);
+    void removeWatching(Watchable item);
 
     /**
      * Add a user to this user's block list.
@@ -182,7 +182,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @param user a user frame
      */
     @JavaHandler
-    public void addBlocked(final UserProfile user);
+    void addBlocked(UserProfile user);
 
     /**
      * Remove a user from this user's block list.
@@ -190,7 +190,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @param user a user frame
      */
     @JavaHandler
-    public void removeBlocked(final UserProfile user);
+    void removeBlocked(UserProfile user);
 
     /**
      * Fetch users on this user's block list.
@@ -198,7 +198,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of user frames
      */
     @Adjacency(label = Ontology.USER_BLOCKS_USER)
-    public Iterable<UserProfile> getBlocked();
+    Iterable<UserProfile> getBlocked();
 
     /**
      * Ascertain whether this user is blocking another user.
@@ -206,7 +206,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return whther the other user is on this user's block list
      */
     @JavaHandler
-    public boolean isBlocking(final UserProfile user);
+    boolean isBlocking(UserProfile user);
 
     /**
      * Fetch users who share groups with this user.
@@ -214,7 +214,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return an iterable of user frames
      */
     @JavaHandler
-    public Iterable<UserProfile> coGroupMembers();
+    Iterable<UserProfile> coGroupMembers();
 
     /**
      * Ascertain whether this user is watching an item.
@@ -223,7 +223,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
      * @return whether the item is in this user's watch list
      */
     @JavaHandler
-    public boolean isWatching(final Watchable item);
+    boolean isWatching(Watchable item);
 
 
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
@@ -244,37 +244,37 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
         }
 
         @Override
-        public void addFollowing(final UserProfile user) {
+        public void addFollowing(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
-        public void removeFollowing(final UserProfile user) {
+        public void removeFollowing(UserProfile user) {
             removeAllRelationships(it(), user.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
-        public boolean isFollowing(final UserProfile otherUser) {
+        public boolean isFollowing(UserProfile otherUser) {
             return hasRelationship(it(), otherUser.asVertex(), USER_FOLLOWS_USER);
         }
 
         @Override
-        public boolean isFollower(final UserProfile otherUser) {
+        public boolean isFollower(UserProfile otherUser) {
             return hasRelationship(otherUser.asVertex(), it(), USER_FOLLOWS_USER);
         }
 
         @Override
-        public void addWatching(final Watchable item) {
+        public void addWatching(Watchable item) {
             addUniqueRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
         @Override
-        public void removeWatching(final Watchable item) {
+        public void removeWatching(Watchable item) {
             removeAllRelationships(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
         @Override
-        public boolean isWatching(final Watchable item) {
+        public boolean isWatching(Watchable item) {
             return hasRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
         }
 
@@ -298,19 +298,19 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
         }
 
         @Override
-        public void addBlocked(final UserProfile user) {
+        public void addBlocked(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(),
                     Ontology.USER_BLOCKS_USER);
         }
 
         @Override
-        public void removeBlocked(final UserProfile user) {
+        public void removeBlocked(UserProfile user) {
             removeAllRelationships(it(), user.asVertex(),
                     Ontology.USER_BLOCKS_USER);
         }
 
         @Override
-        public boolean isBlocking(final UserProfile user) {
+        public boolean isBlocking(UserProfile user) {
             return hasRelationship(it(), user.asVertex(),
                     Ontology.USER_BLOCKS_USER);
         }

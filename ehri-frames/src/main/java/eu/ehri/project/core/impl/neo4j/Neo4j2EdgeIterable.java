@@ -20,11 +20,11 @@ public class Neo4j2EdgeIterable<T extends Edge> implements CloseableIterable<Neo
      * @deprecated the {@code checkTransaction} parameter is no longer used.
      */
     @Deprecated
-    public Neo4j2EdgeIterable(final Iterable<Relationship> relationships, final Neo4j2Graph graph, final boolean checkTransaction) {
+    public Neo4j2EdgeIterable(Iterable<Relationship> relationships, Neo4j2Graph graph, boolean checkTransaction) {
         this(relationships, graph);
     }
 
-    public Neo4j2EdgeIterable(final Iterable<Relationship> relationships, final Neo4j2Graph graph) {
+    public Neo4j2EdgeIterable(Iterable<Relationship> relationships, Neo4j2Graph graph) {
         this.relationships = relationships;
         this.graph = graph;
     }

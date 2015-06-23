@@ -26,7 +26,7 @@ import eu.ehri.project.importers.EadImporter;
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class CsvDocDescImport extends ImportCsvCommand implements Command {
+public class CsvDocDescImport extends ImportCsvCommand {
 
     final static String NAME = "csv-doc-import";
 

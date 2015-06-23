@@ -45,7 +45,7 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
 
     @Fetch(value = Ontology.IS_ACCESSIBLE_TO, ifBelowLevel = 1)
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
-    public Iterable<Accessor> getAccessors();
+    Iterable<Accessor> getAccessors();
 
     /**
      * only Accessor accessor can access this AccessibleEntity.
@@ -53,19 +53,19 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
      * @param accessor 
      */
     @JavaHandler
-    public void addAccessor(final Accessor accessor);
+    void addAccessor(Accessor accessor);
 
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
-    public void removeAccessor(final Accessor accessor);
+    void removeAccessor(Accessor accessor);
 
     @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE)
-    public PermissionScope getPermissionScope();
+    PermissionScope getPermissionScope();
 
     @JavaHandler
-    public void setPermissionScope(final PermissionScope scope);
+    void setPermissionScope(PermissionScope scope);
 
     @JavaHandler
-    public Iterable<PermissionScope> getPermissionScopes();
+    Iterable<PermissionScope> getPermissionScopes();
 
     /**
      * Fetch a list of Actions for this entity in order.
@@ -73,11 +73,11 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
      * @return
      */
     @JavaHandler
-    public Iterable<SystemEvent> getHistory();
+    Iterable<SystemEvent> getHistory();
 
     @Fetch(value = Ontology.ENTITY_HAS_LIFECYCLE_EVENT, ifLevel = 0)
     @JavaHandler
-    public SystemEvent getLatestEvent();
+    SystemEvent getLatestEvent();
 
     @JavaHandler
     boolean hasAccessRestriction();
@@ -87,12 +87,12 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
 
-        public void addAccessor(final Accessor accessor) {
+        public void addAccessor(Accessor accessor) {
             addUniqueRelationship(it(), accessor.asVertex(),
                     Ontology.IS_ACCESSIBLE_TO);
         }
 
-        public void setPermissionScope(final PermissionScope scope) {
+        public void setPermissionScope(PermissionScope scope) {
             addSingleRelationship(it(), scope.asVertex(),
                     Ontology.HAS_PERMISSION_SCOPE);
         }

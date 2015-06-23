@@ -58,7 +58,7 @@ import java.util.zip.GZIPInputStream;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class GraphSON extends BaseCommand implements Command {
+public class GraphSON extends BaseCommand {
 
     final static String NAME = "graphson";
 
@@ -82,7 +82,7 @@ public class GraphSON extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1) {
@@ -107,7 +107,7 @@ public class GraphSON extends BaseCommand implements Command {
         return 0;
     }
 
-    public void saveDump(final FramedGraph<?> graph,
+    public void saveDump(FramedGraph<?> graph,
             CommandLine cmdLine) throws IOException {
 
         String filepath = (String) cmdLine.getArgList().get(0);
@@ -124,7 +124,7 @@ public class GraphSON extends BaseCommand implements Command {
         }
     }
 
-    public void loadDump(final FramedGraph<?> graph,
+    public void loadDump(FramedGraph<?> graph,
             CommandLine cmdLine) throws IOException {
         GraphSONReader reader = new GraphSONReader(graph);
         String filepath = (String) cmdLine.getArgList().get(0);

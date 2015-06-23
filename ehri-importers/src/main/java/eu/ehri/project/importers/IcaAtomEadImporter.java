@@ -200,7 +200,7 @@ public class IcaAtomEadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "AccessPoint";
+        String REL = "AccessPoint";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {

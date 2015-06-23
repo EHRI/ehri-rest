@@ -143,7 +143,7 @@ public final class AclViews implements Scoped<AclViews> {
         Map<ContentTypes, Collection<PermissionType>> permissionMap
                 = permissionSet.asMap();
         // Check we have grant permissions for the requested content types
-        if (!acl.belongsToAdmin(accessor)) {
+        if (!AclManager.belongsToAdmin(accessor)) {
             try {
                 Permission grantPerm = manager.getFrame(
                         PermissionType.GRANT.getName(), Permission.class);
@@ -249,7 +249,7 @@ public final class AclViews implements Scoped<AclViews> {
         // a) they belong to that group themselves, and
         // b) they have the modify permission on that group, and
         // c) they have grant permissions for the user
-        if (!acl.belongsToAdmin(grantee)) {
+        if (!AclManager.belongsToAdmin(grantee)) {
             boolean found = false;
             for (Accessor acc : grantee.getAllParents()) {
                 if (group.equals(acc)) {

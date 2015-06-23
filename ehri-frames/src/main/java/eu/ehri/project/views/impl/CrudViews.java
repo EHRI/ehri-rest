@@ -129,7 +129,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         // Owner permissions do not have a scope.
         // FIXME: Currently a hack here so this doesn't apply to admin
         // users - but it probably should...
-        if (!acl.belongsToAdmin(user)) {
+        if (!AclManager.belongsToAdmin(user)) {
             acl.withScope(SystemScope.INSTANCE)
                     .grantPermission(item, PermissionType.OWNER, user);
         }

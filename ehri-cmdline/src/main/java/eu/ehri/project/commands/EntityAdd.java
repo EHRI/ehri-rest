@@ -46,7 +46,7 @@ import java.util.Properties;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class EntityAdd extends BaseCommand implements Command {
+public class EntityAdd extends BaseCommand {
 
     final static String NAME = "add";
 
@@ -82,7 +82,7 @@ public class EntityAdd extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -135,7 +135,7 @@ public class EntityAdd extends BaseCommand implements Command {
     // Suppressing warnings here because we throw a RuntimeException if the
     // item class is not of an acceptable type.
     @SuppressWarnings("unchecked")
-    public void createItem(final FramedGraph<?> graph,
+    public void createItem(FramedGraph<?> graph,
             CommandLine cmdLine, String id, Bundle bundle,
             PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
             ValidationError, PermissionDenied {

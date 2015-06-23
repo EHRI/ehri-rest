@@ -37,12 +37,12 @@ public interface Frame extends VertexFrame {
      * @return id
      */
     @Property(EntityType.ID_KEY)
-    public String getId();
+    String getId();
 
     /**
      * Get the type key for this frame.
      * @return type
      */
     @Property(EntityType.TYPE_KEY)
-    public String getType();
+    String getType();
 }

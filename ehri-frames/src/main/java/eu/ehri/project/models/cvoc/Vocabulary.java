@@ -36,9 +36,9 @@ import eu.ehri.project.models.base.PermissionScope;
  * @author Paul Boon (http://github.com/PaulBoon)
  */
 @EntityType(EntityClass.CVOC_VOCABULARY)
-public interface Vocabulary extends AccessibleEntity, IdentifiableEntity,
-        PermissionScope, AuthoritativeSet, NamedEntity {
+public interface Vocabulary extends
+        AuthoritativeSet {
 
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
-    public Iterable<Concept> getConcepts();
+    Iterable<Concept> getConcepts();
 }

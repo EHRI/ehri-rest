@@ -109,7 +109,7 @@ public abstract class AbstractImporter<T> {
      *
      * @param callback a callback function object
      */
-    public void addCallback(final ImportCallback callback) {
+    public void addCallback(ImportCallback callback) {
         callbacks.add(callback);
     }
 

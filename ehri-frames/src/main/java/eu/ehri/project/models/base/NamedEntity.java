@@ -34,5 +34,5 @@ public interface NamedEntity extends Frame {
 
     @Mandatory
     @Property(Ontology.NAME_KEY)
-    public String getName();
+    String getName();
 }

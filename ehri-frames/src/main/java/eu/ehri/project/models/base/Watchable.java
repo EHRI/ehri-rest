@@ -39,11 +39,11 @@ public interface Watchable extends AccessibleEntity {
     String WATCHED_COUNT = "watchedBy";
 
     @Adjacency(label = USER_WATCHING_ITEM, direction = Direction.IN)
-    public Iterable<UserProfile> getWatchers();
+    Iterable<UserProfile> getWatchers();
 
     @Meta(WATCHED_COUNT)
     @JavaHandler
-    public long getWatchedCount();
+    long getWatchedCount();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, Watchable {
 

@@ -30,7 +30,7 @@ import org.apache.commons.cli.Options;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class Reindex extends BaseCommand implements Command {
+public class Reindex extends BaseCommand {
 
     final static String NAME = "reindex";
 
@@ -54,7 +54,7 @@ public class Reindex extends BaseCommand implements Command {
 
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         GraphManagerFactory.getInstance(graph).rebuildIndex();
         return 0;
     }

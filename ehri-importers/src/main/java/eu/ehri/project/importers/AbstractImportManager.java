@@ -51,12 +51,12 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
-    private boolean tolerant = false;
+    private boolean tolerant;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
-    private String currentFile = null;
-    private Integer currentPosition = null;
+    private String currentFile;
+    private Integer currentPosition;
     protected Class<? extends AbstractImporter> importerClass;
 
     /**
@@ -68,7 +68,7 @@ public abstract class AbstractImportManager implements ImportManager {
      */
     public AbstractImportManager(
             FramedGraph<?> graph,
-            final PermissionScope scope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
+            PermissionScope scope, Actioner actioner, Class<? extends AbstractImporter> importerClass) {
         this.framedGraph = graph;
         this.permissionScope = scope;
         this.actioner = actioner;
@@ -125,11 +125,11 @@ public abstract class AbstractImportManager implements ImportManager {
             throws IOException, ValidationError, InputParseError {
         try {
             // Create a new action for this import
-            final ActionManager.EventContext action = new ActionManager(
+            ActionManager.EventContext action = new ActionManager(
                     framedGraph, permissionScope).newEventContext(actioner,
                     EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
-            final ImportLog log = new ImportLog(action);
+            ImportLog log = new ImportLog(action);
 
             // Do the import...
             importFile(ios, action, log);
@@ -159,10 +159,10 @@ public abstract class AbstractImportManager implements ImportManager {
 
         try {
 
-            final ActionManager.EventContext action = new ActionManager(
+            ActionManager.EventContext action = new ActionManager(
                     framedGraph, permissionScope).newEventContext(actioner,
                     EventTypes.ingest, getLogMessage(logMessage));
-            final ImportLog log = new ImportLog(action);
+            ImportLog log = new ImportLog(action);
             for (String path : paths) {
                 try {
                     currentFile = path;
@@ -203,7 +203,7 @@ public abstract class AbstractImportManager implements ImportManager {
      * @throws InvalidInputFormatError
      */
     protected abstract void importFile(InputStream ios,
-            final ActionManager.EventContext eventContext, final ImportLog log)
+            ActionManager.EventContext eventContext, ImportLog log)
             throws IOException, ValidationError, InputParseError,
             InvalidXmlDocument, InvalidInputFormatError;
 

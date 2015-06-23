@@ -49,7 +49,7 @@ public enum PermissionType {
     private final String name;
     private final int mask;
     
-    private PermissionType(String name, int mask) {
+    PermissionType(String name, int mask) {
         this.name = name;
         this.mask = mask;
     }

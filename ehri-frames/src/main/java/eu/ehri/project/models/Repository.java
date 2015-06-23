@@ -45,8 +45,8 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.REPOSITORY)
-public interface Repository extends AccessibleEntity, DescribedEntity,
-        AnnotatableEntity, PermissionScope, ItemHolder, Watchable {
+public interface Repository extends DescribedEntity,
+        ItemHolder, Watchable {
 
     /**
      * Count the number of top-level documentary unit items within
@@ -56,7 +56,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    public long getChildCount();
+    long getChildCount();
 
     /**
      * Fetch all top-level documentary unit items within this
@@ -65,7 +65,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      * @return an iterable of top-level items
      */
     @Adjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, direction = Direction.IN)
-    public Iterable<DocumentaryUnit> getCollections();
+    Iterable<DocumentaryUnit> getCollections();
 
     /**
      * Fetch items at <b>all</b> levels (including children of top-level
@@ -74,7 +74,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      * @return an iterable of documentary unit items
      */
     @JavaHandler
-    public Iterable<DocumentaryUnit> getAllCollections();
+    Iterable<DocumentaryUnit> getAllCollections();
 
     /**
      * Add a documentary unit as a top-level item in this
@@ -83,7 +83,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      * @param unit a documentary unit item
      */
     @JavaHandler
-    public void addCollection(final DocumentaryUnit unit);
+    void addCollection(DocumentaryUnit unit);
 
     /**
      * Fetch the country in which this repository resides.
@@ -92,7 +92,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      */
     @Fetch(Ontology.REPOSITORY_HAS_COUNTRY)
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
-    public Iterable<Country> getCountry();
+    Iterable<Country> getCountry();
 
     /**
      * The the country in which this repository resides.
@@ -100,7 +100,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
      * @param country a country frame
      */
     @JavaHandler
-    public void setCountry(final Country country);
+    void setCountry(Country country);
 
     /**
      * Implementation of complex methods.
@@ -111,12 +111,12 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             return gremlin().inE(Ontology.DOC_HELD_BY_REPOSITORY).count();
         }
 
-        public void addCollection(final DocumentaryUnit unit) {
+        public void addCollection(DocumentaryUnit unit) {
             JavaHandlerUtils.addSingleRelationship(unit.asVertex(), it(),
                     Ontology.DOC_HELD_BY_REPOSITORY);
         }
 
-        public void setCountry(final Country country) {
+        public void setCountry(Country country) {
             country.addRepository(frame(it(), Repository.class));
         }
 

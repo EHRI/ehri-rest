@@ -17,7 +17,7 @@ public class AggregatorPipe<E> extends AbstractPipe<E, List<E>> implements
         TransformPipe<E, List<E>> {
 
     public interface AggregatorFunction<T> {
-        public boolean aggregate(T a, T b, int aggregateCount);
+        boolean aggregate(T a, T b, int aggregateCount);
     }
 
     private final AggregatorFunction<E> function;

@@ -30,7 +30,7 @@ import org.apache.commons.cli.Options;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class Initialize extends BaseCommand implements Command {
+public class Initialize extends BaseCommand {
     
     final static String NAME = "initialize";
 
@@ -53,7 +53,7 @@ public class Initialize extends BaseCommand implements Command {
     }
 
     @Override
-    public int execWithOptions(final FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         GraphInitializer initializer = new GraphInitializer(graph);
         initializer.initialize();
         return 0;

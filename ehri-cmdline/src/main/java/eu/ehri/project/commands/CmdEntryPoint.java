@@ -51,7 +51,7 @@ public class CmdEntryPoint extends BaseCommand {
      * 0 means 'OK', 1 'bad arguments', 2 'bad data',
      * 3 'bad permissions'
      */
-    public static enum RetCode {
+    public enum RetCode {
 
         OK(0),
         BAD_ARGS(1),
@@ -60,7 +60,7 @@ public class CmdEntryPoint extends BaseCommand {
 
         private final int code;
 
-        private RetCode(int code) {
+        RetCode(int code) {
             this.code = code;
         }
 
@@ -118,7 +118,7 @@ public class CmdEntryPoint extends BaseCommand {
         StringBuilder buffer = new StringBuilder(String.format(
                 "Command line interface for the EHRI graph database.%n%n " +
                         "The following commands are available:%n%n"));
-        for (String key : Ordering.natural().sortedCopy(CmdEntryPoint.COMMANDS.keySet())) {
+        for (String key : Ordering.natural().sortedCopy(COMMANDS.keySet())) {
             buffer.append("  ");
             buffer.append(key);
             buffer.append(sep);
@@ -144,16 +144,16 @@ public class CmdEntryPoint extends BaseCommand {
         if (args.length < 2) {
             return new CmdEntryPoint().exec(null, args);
         } else if (args[1].equals("help")) {
-            if (args.length > 2 && CmdEntryPoint.COMMANDS.containsKey(args[2])) {
-                Command cmd = CmdEntryPoint.COMMANDS.get(args[2]).getConstructor().newInstance();
+            if (args.length > 2 && COMMANDS.containsKey(args[2])) {
+                Command cmd = COMMANDS.get(args[2]).getConstructor().newInstance();
                 System.err.println(cmd.getHelp());
                 return RetCode.BAD_ARGS.getCode();
             } else {
                 return new CmdEntryPoint().exec(null, args);
             }
         } else {
-            if (CmdEntryPoint.COMMANDS.containsKey(args[1])) {
-                Command cmd = CmdEntryPoint.COMMANDS.get(args[1]).getConstructor().newInstance();
+            if (COMMANDS.containsKey(args[1])) {
+                Command cmd = COMMANDS.get(args[1]).getConstructor().newInstance();
                 FramedGraph<? extends TxGraph> graph
                         = new FramedGraphFactory(new JavaHandlerModule()).create(
                         new TxNeo4jGraph(args[0]));

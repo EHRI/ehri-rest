@@ -336,7 +336,7 @@ class DataConverter {
                 new StreamResult(new OutputStreamWriter(out, "UTF-8")));
     }
 
-    private static Element bundleDataToElement(final Document document, final Bundle bundle) {
+    private static Element bundleDataToElement(Document document, Bundle bundle) {
         Element root = document.createElement("item");
         root.setAttribute(Bundle.ID_KEY, bundle.getId());
         root.setAttribute(Bundle.TYPE_KEY, bundle.getType().getName());
@@ -365,7 +365,7 @@ class DataConverter {
         return root;
     }
 
-    private static Element bundleDataValueToElement(final Document document, String key, Object value) {
+    private static Element bundleDataValueToElement(Document document, String key, Object value) {
         if (value instanceof Object[]) {
             Element dataValue = document.createElement("propertySequence");
             for (Object item : (Object[]) value) {

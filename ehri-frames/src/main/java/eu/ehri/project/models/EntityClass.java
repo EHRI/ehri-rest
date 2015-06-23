@@ -127,7 +127,7 @@ public enum EntityClass {
     private final Class<? extends Frame> cls;
     private final IdGenerator idgen;
 
-    private EntityClass(String name, String abbr,
+    EntityClass(String name, String abbr,
             Class<? extends Frame> cls, IdGenerator idgen) {
         this.name = name;
         this.abbr = abbr;
@@ -142,7 +142,7 @@ public enum EntityClass {
      * @param abbr
      * @param cls
      */
-    private EntityClass(String name, String abbr,
+    EntityClass(String name, String abbr,
             Class<? extends Frame> cls) {
         this(name, abbr, cls, GenericIdGenerator.INSTANCE);
     }

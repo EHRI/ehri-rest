@@ -33,5 +33,5 @@ public interface TxCheckedResource {
      *
      * @return a transactional graph database.
      */
-    public FramedGraph<? extends TxGraph> getGraph();
+    FramedGraph<? extends TxGraph> getGraph();
 }

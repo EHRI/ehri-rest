@@ -103,7 +103,7 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param format      The RDF format
      */
     public XmlSkosImporter(FramedGraph<?> framedGraph,
-            final Actioner actioner, Vocabulary vocabulary, boolean tolerant, String format) {
+            Actioner actioner, Vocabulary vocabulary, boolean tolerant, String format) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
@@ -119,7 +119,7 @@ public final class XmlSkosImporter implements SkosImporter {
      * @param vocabulary  The vocabulary
      */
     public XmlSkosImporter(FramedGraph<?> framedGraph,
-            final Actioner actioner, Vocabulary vocabulary) {
+            Actioner actioner, Vocabulary vocabulary) {
         this(framedGraph, actioner, vocabulary, false, null);
     }
 
@@ -152,10 +152,10 @@ public final class XmlSkosImporter implements SkosImporter {
             throws IOException, ValidationError, InputParseError {
         try {
             // Create a new action for this import
-            final EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
+            EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
                     actioner, EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
-            final ImportLog log = new ImportLog(eventContext);
+            ImportLog log = new ImportLog(eventContext);
 
             // Do the import...
             importFile(ios, eventContext, log);
@@ -170,8 +170,8 @@ public final class XmlSkosImporter implements SkosImporter {
         }
     }
 
-    private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
-            final ImportLog log) throws IOException, ValidationError,
+    private void importFile(InputStream ios, ActionManager.EventContext eventContext,
+            ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidXmlDocument, InvalidInputFormatError {
 
         // XML parsing boilerplate...
@@ -206,8 +206,8 @@ public final class XmlSkosImporter implements SkosImporter {
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void importDocWithinAction(Document doc, final ActionManager.EventContext eventContext,
-            final ImportLog manifest) throws ValidationError,
+    private void importDocWithinAction(Document doc, ActionManager.EventContext eventContext,
+            ImportLog manifest) throws ValidationError,
             InvalidInputFormatError {
 
         createConcepts(doc, eventContext, manifest);
@@ -223,8 +223,8 @@ public final class XmlSkosImporter implements SkosImporter {
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void createConcepts(Document doc, final ActionManager.EventContext action,
-            final ImportLog manifest) throws ValidationError,
+    private void createConcepts(Document doc, ActionManager.EventContext action,
+            ImportLog manifest) throws ValidationError,
             InvalidInputFormatError {
 
         // the Concept is extracted from the XML
@@ -369,8 +369,8 @@ public final class XmlSkosImporter implements SkosImporter {
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void createVocabularyStructure(Document doc, final EventContext eventContext,
-            final ImportLog manifest) throws ValidationError,
+    private void createVocabularyStructure(Document doc, EventContext eventContext,
+            ImportLog manifest) throws ValidationError,
             InvalidInputFormatError {
 
         logger.debug("Number of concepts in lookup: " + conceptLookup.size());
@@ -388,8 +388,8 @@ public final class XmlSkosImporter implements SkosImporter {
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void createBroaderNarrowerRelations(Document doc, final EventContext eventContext,
-            final ImportLog manifest) throws ValidationError,
+    private void createBroaderNarrowerRelations(Document doc, EventContext eventContext,
+            ImportLog manifest) throws ValidationError,
             InvalidInputFormatError {
 
         // check the lookup and start making the BT relations (and narrower implicit)
@@ -446,8 +446,8 @@ public final class XmlSkosImporter implements SkosImporter {
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void createNonspecificRelations(Document doc, final EventContext eventContext,
-            final ImportLog manifest) throws ValidationError,
+    private void createNonspecificRelations(Document doc, EventContext eventContext,
+            ImportLog manifest) throws ValidationError,
             InvalidInputFormatError {
 
         // check the lookup and start making the relations

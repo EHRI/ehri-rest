@@ -41,7 +41,7 @@ public interface SkosImporter {
      * @throws InputParseError
      * @throws ValidationError
      */
-    public ImportLog importFile(String filePath, String logMessage)
+    ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError;
 
     /**
@@ -54,7 +54,7 @@ public interface SkosImporter {
      * @throws InputParseError
      * @throws ValidationError
      */
-    public ImportLog importFile(InputStream ios, String logMessage)
+    ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, InputParseError, ValidationError;
 
     /**
@@ -64,7 +64,7 @@ public interface SkosImporter {
      * @param tolerant Allow individual items to error
      * @return A new SKOS importer with the given tolerance mode
      */
-    public SkosImporter setTolerant(boolean tolerant);
+    SkosImporter setTolerant(boolean tolerant);
 
     /**
      * Set the RDF format. Supported values are: N3, TTL, TURTLE,
@@ -73,7 +73,7 @@ public interface SkosImporter {
      * @param format The RDF format string.
      * @return A new SKOS importer with the given format
      */
-    public SkosImporter setFormat(String format);
+    SkosImporter setFormat(String format);
 
     /**
      * Set default language for literals without a lang suffix.
@@ -81,5 +81,5 @@ public interface SkosImporter {
      * @param lang A two- or three-letter language code
      * @return A new SKOS importer with the given default language
      */
-    public SkosImporter setDefaultLang(String lang);
+    SkosImporter setDefaultLang(String lang);
 }

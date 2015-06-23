@@ -180,7 +180,7 @@ public class AnnotationResource
     public Response listAnnotationsForSubtree(
             @PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             AccessibleEntity item = new CrudViews<>(graph, AccessibleEntity.class)
                     .detail(id, getRequesterUserProfile());

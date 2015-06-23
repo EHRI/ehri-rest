@@ -643,7 +643,7 @@ public final class AclManager {
      */
     private static HashSet<Vertex> getAllAccessors(Accessor accessor) {
 
-        final HashSet<Vertex> all = Sets.newHashSet();
+        HashSet<Vertex> all = Sets.newHashSet();
         if (!isAnonymous(accessor)) {
             Iterable<Accessor> parents = accessor.getAllParents();
             for (Accessor a : parents) {

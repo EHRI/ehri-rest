@@ -124,10 +124,10 @@ public final class OwlApiSkosImporter implements SkosImporter {
             throws IOException, ValidationError, InputParseError {
 
         // Create a new action for this import
-        final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
+        ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
                 actioner, EventTypes.ingest, getLogMessage(logMessage));
         // Create a manifest to store the results of the import.
-        final ImportLog log = new ImportLog(eventContext);
+        ImportLog log = new ImportLog(eventContext);
 
         OWLOntology ontology;
         try {
@@ -224,8 +224,8 @@ public final class OwlApiSkosImporter implements SkosImporter {
         return undetermined;
     }
 
-    private static interface ConnectFunc {
-        public void connect(Concept current, Concept related);
+    private interface ConnectFunc {
+        void connect(Concept current, Concept related);
     }
 
     private void connectRelation(Concept current, OWLNamedIndividual item,

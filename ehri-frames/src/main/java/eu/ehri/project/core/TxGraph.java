@@ -7,18 +7,18 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public interface TxGraph extends Graph, TransactionalGraph, IndexableGraph {
+public interface TxGraph extends TransactionalGraph, IndexableGraph {
     /**
      * Obtain a wrapped transaction object.
      *
      * @return a transaction wrapper
      */
-    public Tx beginTx();
+    Tx beginTx();
 
     /**
      * Determine if this graph is in a transaction.
      *
      * @return whether or not a transaction is open in this thread
      */
-    public boolean isInTransaction();
+    boolean isInTransaction();
 }

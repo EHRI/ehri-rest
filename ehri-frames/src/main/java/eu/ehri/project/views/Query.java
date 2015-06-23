@@ -89,7 +89,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     /**
      * Directions for sort.
      */
-    public static enum Sort {
+    public enum Sort {
         ASC, DESC
     }
 
@@ -98,7 +98,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      *
      * @author Mike Bryant (http://github.com/mikesname)
      */
-    public static enum FilterPredicate {
+    public enum FilterPredicate {
         EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES, GT, GTE, LT, LTE
     }
 
@@ -106,17 +106,17 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * Full Constructor.
      */
     private Query(
-            final FramedGraph<?> graph, Class<E> cls,
-            final PermissionScope scope,
-            final int offset,
-            final int limit,
-            final SortedMap<String, Sort> sort,
-            final SortedMap<QueryUtils.TraversalPath, Sort> traversalSort,
-            final Optional<Pair<String, Sort>> defSort,
-            final SortedMap<String, Pair<FilterPredicate, String>> filters,
-            final Map<Pair<String, Direction>, Integer> depthFilters,
-            final List<GremlinPipeline<Vertex, Vertex>> traversalFilters,
-            final boolean stream) {
+            FramedGraph<?> graph, Class<E> cls,
+            PermissionScope scope,
+            int offset,
+            int limit,
+            SortedMap<String, Sort> sort,
+            SortedMap<QueryUtils.TraversalPath, Sort> traversalSort,
+            Optional<Pair<String, Sort>> defSort,
+            SortedMap<String, Pair<FilterPredicate, String>> filters,
+            Map<Pair<String, Direction>, Integer> depthFilters,
+            List<GremlinPipeline<Vertex, Vertex>> traversalFilters,
+            boolean stream) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -212,7 +212,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
             implements Iterable<Vertex> {
         final Iterable<T> iterable;
 
-        public FramedVertexIterableAdaptor(final Iterable<T> iterable) {
+        public FramedVertexIterableAdaptor(Iterable<T> iterable) {
             this.iterable = iterable;
         }
 
@@ -693,7 +693,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     }
 
     private PipeFunction<Pair<Vertex, Vertex>, Integer> getTraversalOrderFunction(
-            final QueryUtils.TraversalPath tp, final Sort sort) {
+            QueryUtils.TraversalPath tp, final Sort sort) {
         // FIXME: Make this less horribly inefficient!
         final GremlinPipeline<Vertex, String> pipe = getOrderTraversalPipeline(tp);
         final Map<Vertex, String> cache = Maps.newHashMap();

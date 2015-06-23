@@ -35,7 +35,7 @@ public enum AnonymousAccessor implements Accessor {
     
     INSTANCE;
 
-    private AnonymousAccessor() {}
+    AnonymousAccessor() {}
 
     public boolean isAdmin() {
         return false;

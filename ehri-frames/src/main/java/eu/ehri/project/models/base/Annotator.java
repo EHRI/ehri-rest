@@ -32,5 +32,5 @@ import eu.ehri.project.models.Annotation;
  */
 public interface Annotator extends Frame {
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)
-    public Iterable<Annotation> getAnnotations();
+    Iterable<Annotation> getAnnotations();
 }

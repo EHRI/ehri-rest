@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AbstractUnit {
 
-    static final Logger logger = LoggerFactory.getLogger(DocumentaryUnit.class);
+    Logger logger = LoggerFactory.getLogger(DocumentaryUnit.class);
 
     /**
      * Get the repository that holds this documentary unit.
@@ -55,7 +55,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
     @JavaHandler
-    public Repository getRepository();
+    Repository getRepository();
 
     /**
      * Set the repository that holds this documentary unit.
@@ -63,7 +63,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @param repository a repository instance
      */
     @JavaHandler
-    public void setRepository(final Repository repository);
+    void setRepository(Repository repository);
 
     /**
      * Get parent documentary unit, if any
@@ -72,7 +72,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     @Fetch(Ontology.DOC_IS_CHILD_OF)
     @Adjacency(label = Ontology.DOC_IS_CHILD_OF)
-    public DocumentaryUnit getParent();
+    DocumentaryUnit getParent();
 
     /**
      * Add a child document to this one.
@@ -80,7 +80,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @param child a documentary unit instance
      */
     @JavaHandler
-    public void addChild(final DocumentaryUnit child);
+    void addChild(DocumentaryUnit child);
 
     /**
      * Fetches a list of all ancestors (parent -> parent -> parent)
@@ -88,7 +88,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @return an Iterable of DocumentaryUnits that are ancestors
      */
     @JavaHandler
-    public Iterable<DocumentaryUnit> getAncestors();
+    Iterable<DocumentaryUnit> getAncestors();
 
     /**
      * Count the number of child units at the immediate lower
@@ -98,7 +98,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    public long getChildCount();
+    long getChildCount();
 
     /**
      * Get child documentary units
@@ -106,7 +106,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @return an Iterable of DocumentaryUnits that are children
      */
     @JavaHandler
-    public Iterable<DocumentaryUnit> getChildren();
+    Iterable<DocumentaryUnit> getChildren();
 
     /**
      * Fetch <b>all</b> ancestor items, including children of
@@ -115,7 +115,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @return child items at all lower levels
      */
     @JavaHandler
-    public Iterable<DocumentaryUnit> getAllChildren();
+    Iterable<DocumentaryUnit> getAllChildren();
 
     /**
      * Get the description items for this documentary unit.
@@ -123,7 +123,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @return a iterable of document descriptions
      */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    public Iterable<DocumentDescription> getDocumentDescriptions();
+    Iterable<DocumentDescription> getDocumentDescriptions();
 
     /**
      * Implementation of complex methods.
@@ -138,7 +138,7 @@ public interface DocumentaryUnit extends AbstractUnit {
             return frameVertices(gremlin().in(Ontology.DOC_IS_CHILD_OF));
         }
 
-        public void addChild(final DocumentaryUnit child) {
+        public void addChild(DocumentaryUnit child) {
             JavaHandlerUtils
                     .addSingleRelationship(child.asVertex(), it(), Ontology.DOC_IS_CHILD_OF);
         }
@@ -152,7 +152,7 @@ public interface DocumentaryUnit extends AbstractUnit {
         }
 
 
-        public void setRepository(final Repository repository) {
+        public void setRepository(Repository repository) {
             // NB: Convenience methods that proxies addCollection (which
             // in turn maintains the child item cache.)
             repository.addCollection(frame(it(), DocumentaryUnit.class));

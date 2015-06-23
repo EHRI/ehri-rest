@@ -43,7 +43,7 @@ import java.util.List;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class GraphViz extends BaseCommand implements Command {
+public class GraphViz extends BaseCommand {
 
     final static String NAME = "graphviz";
 
@@ -68,10 +68,10 @@ public class GraphViz extends BaseCommand implements Command {
 
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
-        final GraphManager manager = GraphManagerFactory.getInstance(graph);
+        GraphManager manager = GraphManagerFactory.getInstance(graph);
         GraphDatabaseService neo4jGraph = ((Neo4j2Graph)graph.getBaseGraph()).getRawGraph();
 
         // Cmdline arguments should be a node and a list of relationship types

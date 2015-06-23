@@ -39,7 +39,7 @@ import java.io.OutputStream;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class RdfExport extends BaseCommand implements Command {
+public class RdfExport extends BaseCommand {
 
     public final static String NAME = "export-rdf";
 

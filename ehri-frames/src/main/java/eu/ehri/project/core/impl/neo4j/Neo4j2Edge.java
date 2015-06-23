@@ -13,7 +13,7 @@ import org.neo4j.graphdb.Relationship;
  */
 public class Neo4j2Edge extends Neo4j2Element implements Edge {
 
-    public Neo4j2Edge(final Relationship relationship, final Neo4j2Graph graph) {
+    public Neo4j2Edge(Relationship relationship, Neo4j2Graph graph) {
         super(graph);
         this.rawElement = relationship;
     }
@@ -23,7 +23,7 @@ public class Neo4j2Edge extends Neo4j2Element implements Edge {
         return ((Relationship) this.rawElement).getType().name();
     }
 
-    public Vertex getVertex(final Direction direction) {
+    public Vertex getVertex(Direction direction) {
         this.graph.autoStartTransaction(false);
         if (direction.equals(Direction.OUT))
             return new Neo4j2Vertex(((Relationship) this.rawElement).getStartNode(), this.graph);
@@ -34,7 +34,7 @@ public class Neo4j2Edge extends Neo4j2Element implements Edge {
 
     }
 
-    public boolean equals(final Object object) {
+    public boolean equals(Object object) {
         return object instanceof Neo4j2Edge && ((Neo4j2Edge) object).getId().equals(this.getId());
     }
 

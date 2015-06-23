@@ -36,23 +36,23 @@ import eu.ehri.project.models.base.TemporalEntity;
  */
 @EntityType(EntityClass.MAINTENANCE_EVENT)
 public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity {
-     public static final String EVENTTYPE = "eventType";
-     public static final String AGENTTYPE = "agentType";
-     public enum EventType { CREATED, REVISED }
-     public enum AgentType { HUMAN }
+     String EVENTTYPE = "eventType";
+     String AGENTTYPE = "agentType";
+     enum EventType { CREATED, REVISED }
+     enum AgentType { HUMAN }
      
     //TODO: decide whether to make these required
     @Mandatory
     @Property(EVENTTYPE)
-    public void setEventType(EventType eventType);
+    void setEventType(EventType eventType);
 
     @Property(AGENTTYPE)
-    public void setAgentType(AgentType agentType);
+    void setAgentType(AgentType agentType);
 
     //not required
     @Adjacency(label = Ontology.HISTORICAL_AGENT_CREATED, direction = Direction.IN)
-    public Iterable<HistoricalAgent> getCreators();
+    Iterable<HistoricalAgent> getCreators();
 
     @Adjacency(label = Ontology.HISTORICAL_AGENT_CREATED, direction = Direction.IN)
-    public void addCreator(final HistoricalAgent creator);
+    void addCreator(HistoricalAgent creator);
 }

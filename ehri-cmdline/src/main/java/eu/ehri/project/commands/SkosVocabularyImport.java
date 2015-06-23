@@ -39,7 +39,7 @@ import java.util.Map.Entry;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class SkosVocabularyImport extends BaseCommand implements Command {
+public class SkosVocabularyImport extends BaseCommand {
 
     final static String NAME = "skos-import";
 
@@ -67,7 +67,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
                 + sep + "Vocabulary and User.";
     }
 
-    public int execWithOptions(final FramedGraph<?> graph,
+    public int execWithOptions(FramedGraph<?> graph,
                                CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

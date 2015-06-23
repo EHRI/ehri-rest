@@ -20,11 +20,11 @@ public class Neo4j2VertexIterable<T extends Vertex> implements CloseableIterable
      * @deprecated the {@code checkTransaction} parameter is no longer used.
      */
     @Deprecated
-    public Neo4j2VertexIterable(final Iterable<Node> nodes, final Neo4j2Graph graph, final boolean checkTransaction) {
+    public Neo4j2VertexIterable(Iterable<Node> nodes, Neo4j2Graph graph, boolean checkTransaction) {
         this(nodes, graph);
     }
 
-    public Neo4j2VertexIterable(final Iterable<Node> nodes, final Neo4j2Graph graph) {
+    public Neo4j2VertexIterable(Iterable<Node> nodes, Neo4j2Graph graph) {
         this.nodes = nodes;
         this.graph = graph;
     }

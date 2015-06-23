@@ -31,7 +31,7 @@ public interface ImportProperties {
 	/**
      * Get the value for the specified key.
      */
-    public String getProperty(String key);
+    String getProperty(String key);
 
     /**
      * See whether a value exists in the properties file.
@@ -39,20 +39,20 @@ public interface ImportProperties {
      * @param value a value to look for
      * @return true when found, false when it doesn't exist in the file
      */
-    public boolean containsPropertyValue(String value);
+    boolean containsPropertyValue(String value);
 
     /**
      * 
      * @return the right-hand side of the properties file 
      */
-    public Set<String> getAllNonAttributeValues();
+    Set<String> getAllNonAttributeValues();
 
-    public boolean containsProperty(String key);
+    boolean containsProperty(String key);
 
-    public boolean hasAttributeProperty(String key);
+    boolean hasAttributeProperty(String key);
 
     /**
      * Get the value for the given attribute name.
      */
-    public String getAttributeProperty(String key);
+    String getAttributeProperty(String key);
 }

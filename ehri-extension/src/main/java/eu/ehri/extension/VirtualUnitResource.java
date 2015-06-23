@@ -28,6 +28,7 @@ import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -112,7 +113,7 @@ public final class VirtualUnitResource extends
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
             Iterable<VirtualUnit> units = all
@@ -131,7 +132,7 @@ public final class VirtualUnitResource extends
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
             return streamingPage(getQuery(DocumentaryUnit.class)
@@ -286,7 +287,7 @@ public final class VirtualUnitResource extends
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor currentUser = getRequesterUserProfile();
+            Accessor currentUser = getRequesterUserProfile();
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);
             final VirtualUnit parent = views.detail(id, currentUser);
@@ -313,7 +314,7 @@ public final class VirtualUnitResource extends
     @Path("/forUser/{userId:.+}")
     public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
             throws AccessDenied, ItemNotFound, BadRequester {
-        final Tx tx = graph.getBaseGraph().beginTx();
+        Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             Accessor currentUser = getRequesterUserProfile();
@@ -335,7 +336,7 @@ public final class VirtualUnitResource extends
             throws ItemNotFound, BadRequester {
         Iterable<Vertex> vertices = manager.getVertices(ids);
 
-        PipeFunction<Vertex, Boolean> aclFilter = aclManager.getAclFilterFunction(accessor);
+        PipeFunction<Vertex, Boolean> aclFilter = AclManager.getAclFilterFunction(accessor);
 
         PipeFunction<Vertex, Boolean> typeFilter = new PipeFunction<Vertex, Boolean>() {
             @Override

@@ -30,7 +30,7 @@ import eu.ehri.project.importers.VirtualEadImporter;
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-public class EadAsVirtualCollectionImport extends ImportCommand implements Command {
+public class EadAsVirtualCollectionImport extends ImportCommand {
 
     final static String NAME = "virtual-ead-import";
 

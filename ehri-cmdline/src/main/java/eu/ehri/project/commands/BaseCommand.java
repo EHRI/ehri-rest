@@ -72,7 +72,7 @@ public abstract class BaseCommand implements Command {
      * @return a command return code
      * @throws Exception
      */
-    public final int exec(final FramedGraph<?> graph, String[] args) throws Exception {
+    public final int exec(FramedGraph<?> graph, String[] args) throws Exception {
         setCustomOptions(options);
         return execWithOptions(graph, parser.parse(options, args));
     }
@@ -86,7 +86,7 @@ public abstract class BaseCommand implements Command {
      * @return a command return code
      * @throws Exception
      */
-    public abstract int execWithOptions(final FramedGraph<?> graph,
+    public abstract int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception;
 
     /**
