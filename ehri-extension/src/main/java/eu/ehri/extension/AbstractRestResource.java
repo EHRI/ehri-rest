@@ -61,8 +61,11 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
@@ -271,7 +274,12 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected Optional<String> getLogMessage() {
         List<String> list = requestHeaders.getRequestHeader(LOG_MESSAGE_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
-            return Optional.of(list.get(0));
+            try {
+                return Optional.of(URLDecoder.decode(list.get(0), StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                logger.error("Unsupported encoding in header: {}", e);
+                return Optional.absent();
+            }
         }
         return Optional.absent();
     }
