@@ -6,10 +6,10 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.10.2-SNAPSHOT</version>
+        <version>0.10.3-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-importers</artifactId>
-    <version>0.10.2-SNAPSHOT</version>
+    <version>0.10.3-SNAPSHOT</version>
 
     <name>Import Tools</name>
     <description>Classes for importing data.</description>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.10.2-SNAPSHOT</version>
+            <version>0.10.3-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -52,7 +52,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.10.2-SNAPSHOT</version>
+            <version>0.10.3-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
