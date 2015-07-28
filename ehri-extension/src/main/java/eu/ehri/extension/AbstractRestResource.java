@@ -107,9 +107,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * Header names
      */
     public static final String RANGE_HEADER_NAME = "Content-Range";
-    public static final String AUTH_HEADER_NAME = "Authorization";
     public static final String PATCH_HEADER_NAME = "Patch";
-    public static final String LOG_MESSAGE_HEADER_NAME = "logMessage";
+    public static final String AUTH_HEADER_NAME = "X-User";
+    public static final String LOG_MESSAGE_HEADER_NAME = "X-LogMessage";
     public static final String STREAM_HEADER_NAME = "X-Stream";
 
 

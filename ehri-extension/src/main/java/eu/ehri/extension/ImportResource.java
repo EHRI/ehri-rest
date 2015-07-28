@@ -92,7 +92,7 @@ public class ImportResource extends AbstractRestResource {
      * <p/>
      * <pre>
      * <code>curl -X POST \
-     *      -H "Authorization: mike" \
+     *      -H "X-User: mike" \
      *      --data-binary @skos-data.rdf \
      *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&log=testing&tolerant=true"
      * </code>
@@ -150,7 +150,7 @@ public class ImportResource extends AbstractRestResource {
      * <p/>
      * <pre>
      * <code>curl -X POST \
-     *      -H "Authorization: mike" \
+     *      -H "X-User: mike" \
      *      --data-binary @ead-list.txt \
      *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&log=testing&tolerant=true"
      *
@@ -229,7 +229,7 @@ public class ImportResource extends AbstractRestResource {
      * <p/>
      * <pre>
      * <code>curl -X POST \
-     *      -H "Authorization: mike" \
+     *      -H "X-User: mike" \
      *      --data-binary @ead-file.xml \
      *      "http://localhost:7474/ehri/import/single_ead?scope=my-repo-id&log=testing&tolerant=true"
      *
@@ -302,7 +302,7 @@ public class ImportResource extends AbstractRestResource {
      * <p/>
      * <pre>
      * <code>curl -X POST \
-     *      -H "Authorization: mike" \
+     *      -H "X-User: mike" \
      *      --data-binary @csv-list.txt \
      *      "http://localhost:7474/ehri/import/csv?scope=my-repo-id&log=testing"
      *

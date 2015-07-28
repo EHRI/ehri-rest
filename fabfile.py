@@ -173,7 +173,7 @@ def import_ead(scope, log, properties, file_dir):
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -m 7200 -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
+    run("curl -m 7200 -X POST -H \"X-User: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
 
 @task
 def import_ead_with_handler(scope, log, properties, file_dir, handler):
@@ -192,7 +192,7 @@ def import_ead_with_handler(scope, log, properties, file_dir, handler):
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -m 7200 -X POST -H \"Authorization: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
+    run("curl -m 7200 -X POST -H \"X-User: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
 
 @task
 def import_large_ead_with_handler(scope, log, properties, file_dir, handler):
@@ -226,7 +226,7 @@ def import_skos(scope, log, file):
     fab stage import_skos:scope=ehri-camps,log=This+list+of+camps+has+been+compiled+by+EHRI+in+2014,file=authoritativeSet/camps-import.rdf"""
 
     full_file_path = "/opt/webapps/data/import-data/" + file
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
+    run("curl -X POST -H \"X-User: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
 
 @task
 def import_csv(scope, log, importer, file):
@@ -243,7 +243,7 @@ def import_csv(scope, log, importer, file):
 
     full_file_path = "/opt/webapps/data/import-data/" + file
     full_log_path= "/opt/webapps/data/import-data/logs/" + log
-    run("curl -X POST -H \"Authorization: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, full_log_path, importer) )
+    run("curl -X POST -H \"X-User: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, full_log_path, importer) )
 
 @task
 def online_clone_db(local_dir):
@@ -393,7 +393,7 @@ def reindex_users():
     indexer_cmd = [
        "java", "-jar", env.index_helper,
         "--index",
-        "-H", "Authorization=admin",
+        "-H", "X-User=admin",
         "--stats",
         "--solr", "http://localhost:8080/ehri/portal",
         "--rest", "http://localhost:7474/ehri",
@@ -408,7 +408,7 @@ def reindex_concepts():
     indexer_cmd = [
        "java", "-jar", env.index_helper,
         "--index",
-        "-H", "Authorization=admin",
+        "-H", "X-User=admin",
         "--stats",
         "--solr", "http://localhost:8080/ehri/portal",
         "--rest", "http://localhost:7474/ehri",
@@ -422,7 +422,7 @@ def reindex_virtualcollections():
     indexer_cmd = [
        "java", "-jar", env.index_helper,
         "--index",
-        "-H", "Authorization=admin",
+        "-H", "X-User=admin",
         "--stats",
         "--solr", "http://localhost:8080/ehri/portal",
         "--rest", "http://localhost:7474/ehri",
@@ -437,7 +437,7 @@ def reindex_repository(repo_id):
         "java", "-jar", env.index_helper,
         "--clear-key-value", "holderId=" + repo_id,
         "--index",
-        "-H", "Authorization=admin",
+        "-H", "X-User=admin",
         "--stats",
         "--solr", "http://localhost:8080/ehri/portal",
         "--rest", "http://localhost:7474/ehri",
@@ -456,7 +456,7 @@ def reindex_all():
         "java", "-jar", env.index_helper,
         "--clear-all",
         "--index",
-        "-H", "Authorization=admin",
+        "-H", "X-User=admin",
         "--stats",
         "--solr", "http://localhost:8080/ehri/portal",
         "--rest", "http://localhost:7474/ehri",

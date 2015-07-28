@@ -21,7 +21,7 @@ split -l 100 /opt/webapps/data/import-metadata/$SCOPE.txt /opt/webapps/data/impo
 for TFILE in `ls /opt/webapps/data/import-metadata/$SCOPE-split*`; do
     echo "importing $TFILE..."
     head $TFILE
-    curl -X POST -m 7200 -H "Authorization: $USER" --data-binary @$TFILE -H "Content-Type: text/plain" "http://localhost:7474/ehri/import/ead?scope=$SCOPE&log=$LOGFILE&&properties=$PROPERTIES&handler=$HANDLER"    
+    curl -X POST -m 7200 -H "X-User: $USER" --data-binary @$TFILE -H "Content-Type: text/plain" "http://localhost:7474/ehri/import/ead?scope=$SCOPE&log=$LOGFILE&&properties=$PROPERTIES&handler=$HANDLER"
 done
 
 # Remove split files
