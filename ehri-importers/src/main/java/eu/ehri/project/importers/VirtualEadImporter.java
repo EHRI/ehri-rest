@@ -44,17 +44,17 @@ import java.util.Map;
 
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:
- * <p/>
+ * <p>
  * the archdesc should describe the purpose of this vc. it can not in itself refer to a DU.
- * <p/>
+ * <p>
  * every c level is either 1) a virtual level (=VirtualLevel), or 2) it points to an existing DocumentaryUnit
  * (=VirtualReferrer) (and consequently to the entire subtree beneath it) 1) there is no repository-tag with a
  * ehri-label
- * <p/>
- * 2) there is exactly one repository-tag with an ehri-label <repository
- * label="ehri_repository_vc">il-002777</repository> (this will not be shown in the portal) and exactly one unitid with
+ * <p>
+ * 2) there is exactly one repository-tag with an ehri-label &lt;repository
+ * label="ehri_repository_vc"&gt;il-002777&lt;/repository&gt; (this will not be shown in the portal) and exactly one unitid with
  * a ehri-main-identifier label, that is identical to the existing unitid within the graph for this repository
- * <p/>
+ * <p>
  * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
  * should not be any c-levels beneath such a c-level
  *
@@ -184,7 +184,7 @@ public class VirtualEadImporter extends EaImporter {
 
     /**
      * Creates a Map containing properties of a Virtual Unit.
-     * <p/>
+     * <p>
      * These properties are the unit's identifiers.
      *
      * @param itemData Map of all extracted information

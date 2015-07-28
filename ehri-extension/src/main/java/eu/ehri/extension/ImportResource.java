@@ -87,15 +87,16 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
-     * <p/>
+     * <p>
      * Example:
-     * <p/>
+     * <p>
      * <pre>
-     * <code>curl -X POST \
+     * {@code
+     * curl -X POST \
      *      -H "X-User: mike" \
      *      --data-binary @skos-data.rdf \
      *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&log=testing&tolerant=true"
-     * </code>
+     * }
      * </pre>
      *
      * @param scopeId    The id of the import scope (i.e. repository)
@@ -105,7 +106,7 @@ public class ImportResource extends AbstractRestResource {
      * @param format     The RDF format of the POSTed data
      * @param stream     A stream of SKOS data in a valid format.
      * @return A JSON object showing how many records were created,
-     *         updated, or unchanged.
+     * updated, or unchanged.
      */
     @POST
 //    @Consumes({"application/rdf+xml","text/turtle","application/n-triples","application/trig","application/n-quads","application/ld+json"})
@@ -145,22 +146,23 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of EAD files. The body of the POST
      * request should be a newline separated list of file
      * paths.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
-     * <code>curl -X POST \
+     * {@code
+     *     curl -X POST \
      *      -H "X-User: mike" \
      *      --data-binary @ead-list.txt \
      *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&log=testing&tolerant=true"
      *
      * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
      * # it needs url encoding.
-     * </code>
+     * }
      * </pre>
-     * <p/>
+     * <p>
      * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
-     * <p/>
+     * <p>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -176,7 +178,7 @@ public class ImportResource extends AbstractRestResource {
      * @param pathList      A string containing a list of local file paths
      *                      to import.
      * @return A JSON object showing how many records were created,
-     *         updated, or unchanged.
+     * updated, or unchanged.
      */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
@@ -224,20 +226,21 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a single EAD file. The body of the POST
      * request should be an EAD file.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
-     * <code>curl -X POST \
-     *      -H "X-User: mike" \
-     *      --data-binary @ead-file.xml \
-     *      "http://localhost:7474/ehri/import/single_ead?scope=my-repo-id&log=testing&tolerant=true"
+     * {@code
+     * curl -X POST \
+     * -H "X-User: mike" \
+     * --data-binary @ead-file.xml \
+     * "http://localhost:7474/ehri/import/single_ead?scope=my-repo-id&log=testing&tolerant=true"
      *
      * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
      * # it needs url encoding.
-     * </code>
+     * }
      * </pre>
-     * <p/>
+     * <p>
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
@@ -251,7 +254,7 @@ public class ImportResource extends AbstractRestResource {
      *                      configuration file.
      * @param input         An XML document that is a valid EAD document.
      * @return A JSON object showing how many records were created,
-     *         updated, or unchanged.
+     * updated, or unchanged.
      */
     @POST
     @Consumes(MediaType.APPLICATION_XML)
@@ -297,22 +300,23 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of CSV files. The body of the POST
      * request should be a newline separated list of file
      * paths.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
-     * <code>curl -X POST \
+     * {@code
+     *     curl -X POST \
      *      -H "X-User: mike" \
      *      --data-binary @csv-list.txt \
      *      "http://localhost:7474/ehri/import/csv?scope=my-repo-id&log=testing"
      *
      * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
      * # it needs url encoding.
-     * </code>
+     * }
      * </pre>
-     * <p/>
+     * <p>
      * (Assuming <code>csv-list.txt</code> is a list of newline separated CSV file paths.)
-     * <p/>
+     * <p>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -320,12 +324,12 @@ public class ImportResource extends AbstractRestResource {
      *                      its contents will be used.
      * @param importerClass The fully-qualified import class name
      * @param stream        A stream of CSV data
-     *
-     * There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
+     *                      <p>
+     *                      There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
      * @return A JSON object showing how many records were created,
-     *         updated, or unchanged.
+     * updated, or unchanged.
      */
-    
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/csv")

@@ -56,7 +56,7 @@ import java.util.SortedMap;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
- * <p/>
+ * <p>
  * TODO: Possibly refactor more of the ACL logic into AclManager.
  *
  * @param <E>
@@ -204,7 +204,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     /**
      * Wrapper method for FramedVertexIterables that converts a
-     * FramedVertexIterable<T> back into a plain Iterable<Vertex>.
+     * {@code FramedVertexIterable<T>} back into a plain {@code Iterable<Vertex>}.
      *
      * @param <T>
      */
@@ -319,7 +319,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     /**
      * Count items.
-     * <p/>
+     * <p>
      * NB: Count doesn't 'account' for ACL privileges!
      */
     public long count() {
@@ -328,7 +328,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     /**
      * Count items accessible to a given user.
-     * <p/>
+     * <p>
      * NB: Count doesn't 'account' for ACL privileges!
      */
     public <T> long count(Iterable<T> vertices) {
@@ -339,7 +339,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     /**
      * Count all items of a given type.
-     * <p/>
+     * <p>
      * NB: Count doesn't 'account' for ACL privileges!
      */
     public long count(EntityClass type) {
@@ -411,7 +411,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     /**
      * Add a set of string order clauses. Clauses must be of the form:
-     * <p/>
+     * <p>
      * property__DIRECTION
      *
      * @param orderSpecs list of orderSpecs
@@ -512,7 +512,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     /**
      * Add a set of unparsed filter clauses. Clauses must be of the format:
      * property__PREDICATE:value
-     * <p/>
+     * <p>
      * If PREDICATE is omitted, EQUALS is the default.
      *
      * @param filters list of filters
@@ -627,12 +627,12 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * Create a filter that limits the selected nodes to with a particular depth
      * of a relationship chain. For example, if a set of nodes form a
      * hierarchical relationship such as:
-     * <p/>
-     * child -[childOf]-> parent -[childOf]-> grandparent
-     * <p/>
-     * Then a depthFilter of childOf -> 0 would filter out all except the
+     * <p>
+     * child -[childOf]-&gt; parent -[childOf]-&gt; grandparent
+     * <p>
+     * Then a depthFilter of childOf -&gt; 0 would filter out all except the
      * grandparent node.
-     * <p/>
+     * <p>
      * TODO: Figure out how to do this will Gremlin's loop() construct.
      */
     private PipeFunction<Vertex, Boolean> getDepthFilterFunction() {

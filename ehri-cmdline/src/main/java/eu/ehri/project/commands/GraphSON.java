@@ -39,21 +39,25 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Dump the complete graph as graphSON file, or import such a dump
- * <p/>
+ * <p>
  * Example usage:
- * - stop the server
+ * <pre>
+ *     <code>
+ * # stop the server
  * $NEO4J_HOME/bin/neo4j stop
- * - save a dump
+ * # save a dump
  * ./scripts/cmd graphson -d out graph.json
- * or
- * ./scripts/cmd graphson -d out - > graph.json
- * - edit it
- * - remove the graph
+ * # or
+ * ./scripts/cmd graphson -d out - &gt; graph.json
+ * # edit it
+ * # remove the graph
  * rm -rf $NEO4J_HOME/data/graph.db
- * - load edited graph
+ * # load edited graph
  * ./scripts/cmd graphson -d in graph.json
- * - start server
+ * # start server
  * $NEO4J_HOME/bin/neo4j start
+ *     </code>
+ * </pre>
  *
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

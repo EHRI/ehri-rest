@@ -52,7 +52,7 @@ import java.util.Set;
 
 /**
  * Class for dealing with actions.
- * <p/>
+ * <p>
  * Events are captured as a linked list with new events placed
  * at the head. The head event is connected to a node called the
  * {@link eu.ehri.project.models.events.SystemEventQueue}. Events
@@ -62,22 +62,22 @@ import java.util.Set;
  * possible to fetch new events easily and prevent having to sort
  * by timestamp, etc. Schematically, the graph thus formed looks
  * something like:
- * <p/>
+ * <p>
  * <pre>
  * <code>
  * Actioner              SystemEventQueue             Subject
  * \/                        \/                      \/
  * [lifecycleAction]     [lifecycleActionStream]     [lifecycleEvent]
  * |                         |                       |
- * e3--[actionHasEvent]->-- Event 3 ---[hasEvent]--<--e3
+ * e3--[actionHasEvent]-&gt;-- Event 3 ---[hasEvent]--&lt;--e3
  * \/                        \/                      \/
  * [lifecycleAction]         [lifecycleAction]       [lifecycleEvent]
  * |                         |                       |
- * e2--[actionHasEvent]->-- Event 2 ---[hasEvent]--<--e2
+ * e2--[actionHasEvent]-&gt;-- Event 2 ---[hasEvent]--&lt;--e2
  * \/                        \/                      \/
  * [lifecycleAction]         [lifecycleAction]       [lifecycleEvent]
  * |                         |                       |
- * e1--[actionHasEvent]->-- Event 1 ---[hasEvent]--<--e1
+ * e1--[actionHasEvent]-&gt;-- Event 1 ---[hasEvent]--&lt;--e1
  * </code>
  * </pre>
  *
@@ -391,14 +391,14 @@ public final class ActionManager {
     /**
      * Determine if two events are the same according to the following
      * definition:
-     * <p/>
+     * <p>
      * <ol>
      *     <li>They have the same scope and subject</li>
      *     <li>They have the same actioner</li>
      *     <li>They are both of the same type</li>
      *     <li>They have the same log message, if any</li>
      * </ol>
-     * <p/>
+     * <p>
      * This function allows filtering an event stream for duplicates,
      * like someone repeatedly updating the same item.
      *

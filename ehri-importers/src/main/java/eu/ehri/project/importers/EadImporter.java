@@ -62,7 +62,7 @@ import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
  * a hierarchical structure describing their child items. This means that we need to recursively descend through the
  * archdesc and c,c01-12 levels.
- * <p/>
+ * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
@@ -262,10 +262,14 @@ public class EadImporter extends EaImporter {
     /**
      * subclasses can override this method to cater to their special needs for UndeterminedRelationships
      * by default, it expects something like this in the original EAD:
-     * <p/>
+     * <p>
+     * <pre>
+     * {@code
      * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
      * Leonhard (* 11.5.1886)</persname>
-     * <p/>
+     * }
+     * </pre>
+     * <p>
      * it works in unison with the extractRelations() method.
      *
      * @param unit       the current unit

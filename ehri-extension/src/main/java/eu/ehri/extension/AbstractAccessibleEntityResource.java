@@ -250,7 +250,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
     /**
      * Update (change) an instance of the 'entity' in the database
-     * <p/>
+     * <p>
      * If the Patch header is true top-level bundle data will be merged
      * instead of overwritten.
      *

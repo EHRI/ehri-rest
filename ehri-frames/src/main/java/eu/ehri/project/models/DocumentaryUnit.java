@@ -83,7 +83,7 @@ public interface DocumentaryUnit extends AbstractUnit {
     void addChild(DocumentaryUnit child);
 
     /**
-     * Fetches a list of all ancestors (parent -> parent -> parent)
+     * Fetches a list of all ancestors (parent -&gt; parent -&gt; parent)
      *
      * @return an Iterable of DocumentaryUnits that are ancestors
      */

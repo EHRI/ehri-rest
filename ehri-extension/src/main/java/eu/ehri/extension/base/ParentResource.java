@@ -41,7 +41,7 @@ public interface ParentResource {
     /**
      * List available resources subordinate to this item. Behaviour is the same
      * as the general list method with respect to parameters.
-     * <p/>
+     * <p>
      * Example:
      * <pre>
      *     <code>

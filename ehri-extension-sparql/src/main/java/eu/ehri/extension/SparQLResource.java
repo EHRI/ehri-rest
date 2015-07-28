@@ -48,11 +48,11 @@ import java.util.Map;
 /**
  * Resource for executing SparQL queries on the graph
  * database.
- * <p/>
+ * <p>
  * <b>Insecure and SHOULD NOT be a public endpoint.</b>
- * <p/>
+ * <p>
  * Example query:
- * <p/>
+ * <p>
  * <pre>
  *     <code>
  * PREFIX edge:   <http://tinkerpop.com/pgm/edge/>

@@ -77,7 +77,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     protected String eadLanguage = DEFAULT_LANGUAGE;
 
     /**
-     * EAD identifier as found in `<eadid>` in the currently handled EAD file
+     * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
      */
     private String eadId;
     private String author;
@@ -148,7 +148,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
     /**
      * Called when the XML parser encounters an end tag. This is tuned for EAD files, which come in many flavours.
-     * <p/>
+     * <p>
      * Certain elements represent subcollections, for which we create new nodes (here, we create representative Maps for nodes).
      * Many EAD producers use the standard in their own special way, so this method calls generalised methods to filter, get data
      * in the right place and reformat.
@@ -286,7 +286,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     /**
      * Get the EAD identifier of the EAD being imported
      *
-     * @return the <code><eadid></code> or null if it was not parsed yet or empty
+     * @return the <code>&lt;eadid&gt;</code> or null if it was not parsed yet or empty
      */
     protected String getEadId() {
         if (eadId == null)

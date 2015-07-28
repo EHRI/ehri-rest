@@ -49,7 +49,7 @@ import java.util.List;
  * theory, since identifiers are generally very stable this works
  * fine, but occasionally they change, invalidating the identifiers
  * of their child items.
- * <p/>
+ * <p>
  * We also sometimes tweak the ID generation algorithm itself, which
  * necessitates bulk ID re-generation.
  *

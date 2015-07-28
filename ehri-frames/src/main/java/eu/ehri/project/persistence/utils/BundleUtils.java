@@ -57,7 +57,7 @@ public class BundleUtils {
 
     /**
      * XPath-like method for getting the value of a nested relation's attribute.
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * String lang = BundleUtils.get(bundle, "describes[0]/languageCode"));
@@ -82,7 +82,7 @@ public class BundleUtils {
 
     /**
      * XPath-like method for getting a bundle at a given path.
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * Bundle description = BundleUtils.getBundle(bundle, "describes[0]"));
@@ -100,7 +100,7 @@ public class BundleUtils {
     /**
      * XPath-like method for deleting the value of a nested relation's
      * attribute.
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * Bundle newBundle = BundleUtils.delete(bundle, "describes[0]/languageCode"));
@@ -126,7 +126,7 @@ public class BundleUtils {
 
     /**
      * XPath-like method for deleting a node from a nested tree, i.e:
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * Bundle newBundle = BundleUtils.deleteBundle(bundle, "describes[0]"));
@@ -144,7 +144,7 @@ public class BundleUtils {
     /**
      * Xpath-like method for creating a new bundle by updating a nested relation
      * of an existing bundle.
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * Bundle newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate", "1923-10-10");
@@ -169,7 +169,7 @@ public class BundleUtils {
     /**
      * Xpath-like method for creating a new bundle by updating a nested relation
      * of an existing bundle.
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * Bundle dateBundle = ...
@@ -188,7 +188,7 @@ public class BundleUtils {
 
     /**
      * Xpath-like method to fetch a set of nested relations.
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * List<Bundle> dates = BundleUtils.getRelations(bundle, "hasDate");

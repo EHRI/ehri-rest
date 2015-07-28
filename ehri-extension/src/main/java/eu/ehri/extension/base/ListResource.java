@@ -31,12 +31,12 @@ public interface ListResource {
     /**
      * List available resources. The default behaviour is to
      * return a page of 20 items.
-     * <p/>
+     * <p>
      * The default list limit can be overridden using the <code>limit</code>
      * parameter, and disabled completely using a value of -1.
-     * <p/>
+     * <p>
      * Item lists are paginated using the <code>page</code> parameter.
-     * <p/>
+     * <p>
      * The page, limit, and total number of items is returned in the Content-Range response
      * header in the form:
      *
@@ -45,12 +45,12 @@ public interface ListResource {
      * If the header <code>X-Stream</code> is set to <code>true</code>
      * no count of total items will be performed. This is more efficient when returning large
      * numbers of items or when limiting is disabled completely.
-     * <p/>
+     * <p>
      * Example:
      * <pre>
-     *     <code>
+     * {@code
      * curl http://localhost:7474/ehri/[RESOURCE]/list?page=5&limit=10
-     *     </code>
+     * }
      * </pre>
      *
      * @return A list of serialized item representations

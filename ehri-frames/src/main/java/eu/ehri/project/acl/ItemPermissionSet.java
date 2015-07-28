@@ -28,11 +28,11 @@ import java.util.Set;
 /**
  * Convenience wrapper for the permission set data structure, which
  * looks like:
- * <p/>
+ * <p>
  * <pre>
  *     <code>
  *  {
- *      contentType -> [perms...],
+ *      contentType -&gt; [perms...],
  *      ...
  *  }
  *     </code>

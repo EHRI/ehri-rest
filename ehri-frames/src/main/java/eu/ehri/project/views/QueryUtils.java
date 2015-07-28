@@ -127,7 +127,7 @@ public class QueryUtils {
      * Attempt to parse a traversal pattern from a input string. The
      * string should look like this:
      *
-     *  ->relation1->relation2.propertyName
+     *  -&gt;relation1-&gt;relation2.propertyName
      *
      * @param input A traversal path spec
      * @return A traversal path
