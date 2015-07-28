@@ -184,10 +184,10 @@ class DataConverter {
 
     /**
      * Convert generic data into a bundle.
-     * <p/>
+     * <p>
      * Prize to whomever can remove all the unchecked warnings. I don't really
      * know how else to do this otherwise.
-     * <p/>
+     * <p>
      * NB: We also strip out all NULL property values at this stage.
      *
      * @throws DeserializationError

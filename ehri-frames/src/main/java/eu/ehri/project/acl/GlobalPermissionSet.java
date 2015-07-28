@@ -35,7 +35,7 @@ import java.util.Map;
  * looks like:
  *
  *  {
- *      contentType -> [perms...],
+ *      contentType -&gt; [perms...],
  *      ...
  *  }
  */

@@ -173,7 +173,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     /**
      * Get a serializer according to passed-in serialization config.
-     * <p/>
+     * <p>
      * Currently the only parameter is <code>_ip=[propertyName]</code> which
      * ensures a given property is always included in the output.
      *
@@ -431,7 +431,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     /**
      * Get a response header string for a page of data.
-     * <p/>
+     * <p>
      * NB: Subject to change!
      *
      * @param page The input page

@@ -45,12 +45,12 @@ import java.util.Map;
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
  * a hierarchical structure describing their child items. This means that we need to recursively descend through the
  * archdesc and c,c01-12 levels.
- * <p/>
+ * <p>
  * will preserve existing 'otherIdentifiers' on the DocumentaryUnit.
- * <p/>
+ * <p>
  * Furthermore, it will always try to resolve the UndeterminedRelationships, not just on creation.
  * This is not standard behaviour, so use with caution.
- * <p/>
+ * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

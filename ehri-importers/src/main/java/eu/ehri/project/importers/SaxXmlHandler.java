@@ -44,12 +44,12 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * 
  * path/within/xml/=node/property
  *
- * if no <node> is given, it is the default logical-unit or unit-description of this property file. 
+ * if no &lt;node&gt; is given, it is the default logical-unit or unit-description of this property file.
  * with eac.properties this would be an HistoricalAgent with an HistoricalAgentDescription
- * if there is a <node> given, it will translate to another graph node, like Address.
+ * if there is a &lt;node&gt; given, it will translate to another graph node, like Address.
  *
- * lines starting with '@' give the attributes:
- * <code>@attribute=tmpname
+ * lines starting with '{@literal @}' give the attributes:
+ * <code>{@literal @}attribute=tmpname
  * path/within/xml/@tmpname=node/property</code>
  *
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node, 
@@ -386,7 +386,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier
      * 
      * @param path did/unitid/
-     * @param attribute @ehrilabel
+     * @param attribute {@literal @}ehrilabel
      * @param attributevalue $ehri_main_identifier
      * 
      * @return returns true if this path is a key in the properties file. 

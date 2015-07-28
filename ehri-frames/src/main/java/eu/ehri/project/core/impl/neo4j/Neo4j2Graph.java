@@ -272,7 +272,7 @@ public class Neo4j2Graph implements TransactionalGraph, IndexableGraph, MetaGrap
 
     /**
      * {@inheritDoc}
-     * <p/>
+     * <p>
      * Note that this method will force a successful closing of the current
      * thread's transaction. As such, once the index is dropped, the operation
      * is committed.
@@ -338,7 +338,7 @@ public class Neo4j2Graph implements TransactionalGraph, IndexableGraph, MetaGrap
 
     /**
      * {@inheritDoc}
-     * <p/>
+     * <p>
      * The underlying Neo4j graph does not natively support this method within a
      * transaction. If the graph is not currently in a transaction, then the
      * operation runs efficiently and correctly. If the graph is currently in a
@@ -364,7 +364,7 @@ public class Neo4j2Graph implements TransactionalGraph, IndexableGraph, MetaGrap
 
     /**
      * {@inheritDoc}
-     * <p/>
+     * <p>
      * The underlying Neo4j graph does not natively support this method within a
      * transaction. If the graph is not currently in a transaction, then the
      * operation runs efficiently and correctly. If the graph is currently in a

@@ -48,8 +48,7 @@ import java.util.List;
  * Provides a web service interface for the Event model. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
- *
- * </p>
+ * <p>
  * The following query parameters apply to all actions in this
  * resource to apply filtering to the event streams.
  * </p>
@@ -61,7 +60,7 @@ import java.util.List;
  * <dt>from</dt><dd>Exclude events prior to this date (ISO 8601 format)</dd>
  * <dt>to</dt><dd>Exclude events after this date (ISO 8601 format)</dd>
  * </dl>
- * <p/>
+ * <p>
  * Additionally the aggregate* end-points accept an <code>aggregation</code>
  * parameter that groups sequential events according to one of two different
  * strategies:
@@ -80,7 +79,7 @@ import java.util.List;
  *         </ul>
  *     </dd>
  * </dl>
- * <p/>
+ * <p>
  * Additionally, aggregation can be disabled by using <code>aggregation=off</code>.
  *
  * Standard paging parameters apply to all end-points.

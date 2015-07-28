@@ -49,7 +49,7 @@ import java.util.Map;
  * with their constituent logical data, description(s), and date periods.
  *
  * @param <T> Type of node representation that can be imported. In this version,
- *            the only implementation is for <code>Map<String, Object></code>
+ *            the only implementation is for {@code Map<String, Object>}.
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public abstract class AbstractImporter<T> {

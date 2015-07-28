@@ -47,7 +47,7 @@ public class CmdEntryPoint extends BaseCommand {
 
     /**
      * Default return codes for shell tools.
-     * <p/>
+     * <p>
      * 0 means 'OK', 1 'bad arguments', 2 'bad data',
      * 3 'bad permissions'
      */

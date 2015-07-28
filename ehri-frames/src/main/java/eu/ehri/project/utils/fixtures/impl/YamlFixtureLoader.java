@@ -54,7 +54,7 @@ import java.util.Map.Entry;
 
 /**
  * Load data from YAML fixtures.
- * <p/>
+ * <p>
  * The YAML fixture format is almost identical to the plain bundle format, but
  * has some extensions to a) allow for creating non-dependent relationships, and
  * b) allow for single relations to be more naturally expressed. For example,
@@ -62,15 +62,15 @@ import java.util.Map.Entry;
  * a list (even if there is typically only one), the YAML format allows using a
  * single item and it will be loaded as if it were a list containing just one
  * item, i.e, instead of writing
- * <p/>
+ * <p>
  * <pre>
  *     <code>
  * relationships: heldBy: - some-repo
  *     </code>
  * </pre>
- * <p/>
+ * <p>
  * we can just write:
- * <p/>
+ * <p>
  * <pre>
  *     <code>
  * relationships: heldBy: some-repo

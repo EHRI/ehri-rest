@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 /**
  * A grab-bag of useful functions for making changes to the
  * graph data.
- * <p/>
+ * <p>
  * NB: Most uses of the methods here can be trivially accomplished
  * with mutating Cypher but that's an even sharper tool. The purpose
  * here is to formalise some very common operations with specific

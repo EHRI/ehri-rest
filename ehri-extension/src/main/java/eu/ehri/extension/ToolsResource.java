@@ -143,7 +143,7 @@ public class ToolsResource extends AbstractRestResource {
      * if an Address has a property with name &quot;url&quot; and value &quot;www.foo.com/bar&quot;,
      * providing a regex value <code>^www</code> and replacement <code>http://www</code> will
      * give the property a value of &quot;http://www.foo.com/bar&quot;.
-     * <p/>
+     * <p>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -172,7 +172,7 @@ public class ToolsResource extends AbstractRestResource {
 
     /**
      * Change a property key name across an entire entity class.
-     * <p/>
+     * <p>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -201,7 +201,7 @@ public class ToolsResource extends AbstractRestResource {
      * Find an replace a property value across an entire entity class, e.g.
      * if a DocumentaryUnit has a property with name &quot;foo&quot; and value &quot;bar&quot;,
      * change the value to &quot;baz&quot; on all items.
-     * <p/>
+     * <p>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -244,7 +244,7 @@ public class ToolsResource extends AbstractRestResource {
      * @param tolerant   skip items that could cause collisions rather
      *                   then throwing an error
      * @param commit     whether or not to rename the item
-     * @return a tab old->new mapping, or an empty
+     * @return a tab old-to-new mapping, or an empty
      * body if nothing was changed
      * @throws ItemNotFound
      * @throws IOException
@@ -287,7 +287,7 @@ public class ToolsResource extends AbstractRestResource {
      * @param tolerant   skip items that could cause collisions rather
      *                   then throwing an error
      * @param commit     whether or not to rename the items
-     * @return a tab list old->new mappings, or an empty
+     * @return a tab list old-to-new mappings, or an empty
      * body if nothing was changed
      * @throws IOException
      */
@@ -332,7 +332,7 @@ public class ToolsResource extends AbstractRestResource {
      * @param tolerant   skip items that could cause collisions rather
      *                   then throwing an error
      * @param commit     whether or not to rename the items
-     * @return a tab list old->new mappings, or an empty
+     * @return a tab list old-to-new mappings, or an empty
      * body if nothing was changed
      * @throws ItemNotFound
      * @throws IOException

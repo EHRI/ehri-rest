@@ -80,7 +80,7 @@ public class AdminResource extends AbstractRestResource {
     /**
      * Export the DB as a stream of JSON in
      * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
-     * <p/>
+     * <p>
      * The mode used is EXTENDED.
      */
     @GET
@@ -123,7 +123,7 @@ public class AdminResource extends AbstractRestResource {
 
     /**
      * Re-build the graph's internal lucene index.
-     * <p/>
+     * <p>
      * NB: This takes a lot of memory for large graphs. Do
      * not use willy-nilly and increase the heap size as
      * necessary. TODO: Add incremental buffered commit.

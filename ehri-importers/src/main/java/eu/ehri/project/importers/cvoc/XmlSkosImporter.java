@@ -65,10 +65,10 @@ import java.util.Map;
 /**
  * Importer for the controlled vocabulary (TemaTres thesaurus)
  * specified by a SKOS-Core RDF file.
- * <p/>
+ * <p>
  * This is different from the other importing mainly because I don't fully understand that.
  * So this importer will also do the 'management' and we will see later how to refactor it.
- * <p/>
+ * <p>
  * Note: most code was copied from the EadImportManager and its base classes
  * Also note that: We don't have an Repository for the CVOCs, but a Vocabulary instead!
  *
@@ -357,7 +357,7 @@ public final class XmlSkosImporter implements SkosImporter {
 
     /**
      * Create the Vocabulary structure by creating all relations (BT/NT/RT) between the concepts
-     * <p/>
+     * <p>
      * Note that we want this to be done in the same database 'transaction'
      * and this 'current' one is not finished.
      * Therefore the Concepts are not retrievable from the database yet

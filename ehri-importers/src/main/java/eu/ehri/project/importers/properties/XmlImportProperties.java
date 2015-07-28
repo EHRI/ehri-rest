@@ -149,7 +149,7 @@ public class XmlImportProperties implements ImportProperties {
      * properties like 'did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier'
      *
      * @param key       did/unitid/
-     * @param attribute @ehrilabel
+     * @param attribute {@literal @}ehrilabel
      * @return ehri_main_identifier or null if no attribute value could be found in this property file
      */
     public String getValueForAttributeProperty(String key, String attribute) {
@@ -172,7 +172,7 @@ abstract class PropertyLoader {
      * Looks up a resource named 'name' in the classpath. The resource must map to a file with .properties extention.
      * The name is assumed to be absolute and can use either "/" or "." for package segment separation with an optional
      * leading "/" and optional ".properties" suffix. Thus, the following names refer to the same resource:
-     * <p/>
+     * <p>
      * <pre>
      * some.pkg.Resource
      * some.pkg.Resource.properties

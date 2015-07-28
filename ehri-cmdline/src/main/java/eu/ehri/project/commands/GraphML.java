@@ -46,20 +46,21 @@ import java.io.OutputStream;
  * Dump the complete graph as graphml file or import such a dump
  *
  * Example usage:
- * - stop the server
- *   $NEO4J_HOME/bin/neo4j stop
- * - save a dump
- *   ./scripts/cmd graphml -d out graph.xml
- *   or
- *   ./scripts/cmd graphml -d out - > graph.xml
- * - edit it
- * - remove the graph
- *   rm -rf $NEO4J_HOME/data/graph.db
- * - load edited graph
- *   ./scripts/cmd graphml -d in graph.xml
- * - start server
- *   $NEO4J_HOME/bin/neo4j start
- *
+ * <pre><code>
+ * # stop the server
+ * $NEO4J_HOME/bin/neo4j stop
+ * # save a dump
+ * ./scripts/cmd graphml -d out graph.xml
+ * # or
+ * ./scripts/cmd graphml -d out - &gt; graph.xml
+ * # edit it
+ * # remove the graph
+ * rm -rf $NEO4J_HOME/data/graph.db
+ * # load edited graph
+ * ./scripts/cmd graphml -d in graph.xml
+ * # start server
+ * $NEO4J_HOME/bin/neo4j start
+ * </code></pre>
  *
  * @author Mike Bryant (https://github.com/mikesname)
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)

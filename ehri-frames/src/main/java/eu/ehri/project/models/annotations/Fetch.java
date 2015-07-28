@@ -43,7 +43,7 @@ public @interface Fetch {
 
     /**
      * Only traverse this relationship at the specified level. Ignored
-     * if the level is < 0.
+     * if the level is less than 0.
      *
      * @return the level at which this relation should be traversed
      */

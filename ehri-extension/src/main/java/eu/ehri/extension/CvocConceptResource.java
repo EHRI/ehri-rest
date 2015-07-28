@@ -203,6 +203,7 @@ public class CvocConceptResource
      *
      * @param id         The item ID
      * @param idNarrower The narrower item ID
+     *
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -231,7 +232,7 @@ public class CvocConceptResource
      *
      * @param id         The item ID
      * @param idNarrower The narrower item ID
-     * @throws PermissionDenied,
+     *
      * @throws AccessDenied
      * @throws ItemNotFound
      * @throws BadRequester
@@ -332,6 +333,7 @@ public class CvocConceptResource
      *
      * @param id        The item ID
      * @param idRelated The related item ID
+     *
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -362,6 +364,7 @@ public class CvocConceptResource
      *
      * @param id        The item ID
      * @param idRelated The related item ID
+     *
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound

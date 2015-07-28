@@ -98,7 +98,7 @@ public class InheritedItemPermissionSet {
      * Serialize the InheritedItemPermissionSet to a list
      * containing a mappings of accessor ID to permissions.
      *
-     * @return A list of accessor id -> permission mappings
+     * @return A list of accessor id -&gt; permission mappings
      */
     @JsonValue
     public List<Map<String, List<PermissionType>>> serialize() {
