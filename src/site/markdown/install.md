@@ -83,7 +83,7 @@ Now we can start the server again and check everything is working:
 
 	$NEO4J_HOME/bin/neo4j start
 
-	curl -H "Authorization:$USER" localhost:7474/ehri/userProfile/$USER
+	curl -H "X-User:$USER" localhost:7474/ehri/userProfile/$USER
 
 We should get the following output (with "mike" replaced by your $USER):
 
