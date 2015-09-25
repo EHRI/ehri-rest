@@ -384,11 +384,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * We cannot just return a regular StreamingResponse here
      * because then HEAD requests will leak the transaction.
      */
-    static abstract class TransactionalOutputStream {
+    static abstract class TransactionalStreamWrapper {
         protected final Tx tx;
         protected final Request request;
 
-        public TransactionalOutputStream(final Request request, final Tx tx) {
+        public TransactionalStreamWrapper(final Request request, final Tx tx) {
             this.tx = tx;
             this.request = request;
         }
@@ -420,10 +420,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         }
     }
 
-    static abstract class TransactionalPageOutputStream<T> extends TransactionalOutputStream {
+    static abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
         protected Query.Page<T> page;
 
-        public TransactionalPageOutputStream(final Request request, final Query.Page<T> page, final Tx tx) {
+        public TransactionalPageStreamWrapper(final Request request, final Query.Page<T> page, final Tx tx) {
             super(request, tx);
             this.page = page;
         }
@@ -447,15 +447,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> Response streamingPage(
             final Query.Page<T> page, final Serializer serializer, final Tx tx) {
-        TransactionalOutputStream tos = MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+        TransactionalStreamWrapper tos = MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getStreamingXmlOutput(page, serializer, tx)
                 : getStreamingJsonOutput(page, serializer, tx);
         return tos.getResponse();
     }
 
-    private <T extends Frame> TransactionalOutputStream getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
+    private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
             final Tx tx) {
-        return new TransactionalPageOutputStream<T>(request, page, tx) {
+        return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Charset utf8 = Charset.forName("UTF-8");
@@ -486,9 +486,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         };
     }
 
-    private <T extends Frame> TransactionalOutputStream getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
+    private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
             final Tx tx) {
-        return new TransactionalPageOutputStream<T>(request, page, tx) {
+        return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
@@ -548,15 +548,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> Response streamingList(
             Iterable<T> list, Serializer serializer, Tx tx) {
-        TransactionalOutputStream tos = MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+        TransactionalStreamWrapper tos = MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getStreamingXmlOutput(list, serializer, tx)
                 : getStreamingJsonOutput(list, serializer, tx);
         return tos.getResponse();
     }
 
-    private <T extends Frame> TransactionalOutputStream getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
+    private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
             final Tx tx) {
-        return new TransactionalOutputStream(request, tx) {
+        return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Charset utf8 = Charset.forName("UTF-8");
@@ -586,9 +586,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         };
     }
 
-    private <T extends Frame> TransactionalOutputStream getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
+    private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
             final Tx tx) {
-        return new TransactionalOutputStream(request, tx) {
+        return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
@@ -619,7 +619,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     private <T extends Frame> Response getStreamingJsonGroupOutput(
             final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalOutputStream(request, tx) {
+        return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
@@ -662,7 +662,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected Response streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalOutputStream(request, tx) {
+        return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
