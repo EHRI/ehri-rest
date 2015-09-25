@@ -135,7 +135,7 @@ public class BaseRestClientTest extends RunningServerTest {
      */
     protected List<Map<String, Object>> getEntityList(String entityType,
             String userId, MultivaluedMap<String, String> params) throws Exception {
-        return getItemList("/" + entityType + "/list", userId, params);
+        return getItemList("/" + entityType, userId, params);
     }
 
     protected Integer getPaginationPage(ClientResponse response) {
@@ -161,15 +161,12 @@ public class BaseRestClientTest extends RunningServerTest {
     protected Long getEntityCount(String entityType,
             String userId) throws Exception {
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + entityType + "/count");
+                + "/" + entityType);
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
-                .get(ClientResponse.class);
-        String json = response.getEntity(String.class);
-        TypeReference<Long> typeRef = new TypeReference<Long>() {
-        };
-        return jsonMapper.readValue(json, typeRef);
+                .head();
+        return Long.valueOf(getPaginationTotal(response));
     }
 
     protected UriBuilder ehriUriBuilder(String... segments) {

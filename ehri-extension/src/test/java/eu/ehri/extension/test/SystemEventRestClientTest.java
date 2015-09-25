@@ -51,7 +51,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
     public void testListActions() throws Exception {
         // Create a new agent. We're going to test that this creates
         // a corresponding action.
-        String url = "/" + Entities.SYSTEM_EVENT + "/aggregate";
+        String url = "/" + Entities.SYSTEM_EVENT;
         List<List<Map<String, Object>>> actionsBefore = getItemListOfLists(
                 url, getAdminUserProfileId());
 
@@ -88,7 +88,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         MultivaluedMap<String, String> badFilters = new MultivaluedMapImpl();
         badFilters.add(SystemEventResource.USER_PARAM, "nobody");
 
-        String url = "/" + Entities.SYSTEM_EVENT + "/aggregate";
+        String url = "/" + Entities.SYSTEM_EVENT;
         List<List<Map<String, Object>>> goodFiltered = getItemListOfLists(
                 url, getAdminUserProfileId(), goodFilters);
 

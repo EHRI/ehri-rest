@@ -124,20 +124,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
 
     /**
-     * Count items accessible to a given user.
-     *
-     * @return Number of items.
-     * @throws BadRequester
-     */
-    public long countItems() throws BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            long count = getQuery(cls).count();
-            tx.success();
-            return count;
-        }
-    }
-
-    /**
      * Create an instance of the 'entity' in the database
      *
      * @param entityBundle A bundle of item data

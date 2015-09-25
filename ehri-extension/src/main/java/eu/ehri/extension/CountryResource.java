@@ -81,18 +81,9 @@ public class CountryResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        return countItems();
     }
 
     @GET
@@ -111,24 +102,6 @@ public class CountryResource
         } catch (Exception e) {
             tx.close();
             throw e;
-        }
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
-    @Override
-    public long countChildren(
-            @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Country country = views.detail(id, user);
-            long count = getQuery(Repository.class)
-                    .count(country.getRepositories());
-            tx.success();
-            return count;
         }
     }
 
