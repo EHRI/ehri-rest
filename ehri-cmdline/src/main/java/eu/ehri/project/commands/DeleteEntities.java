@@ -77,7 +77,7 @@ public class DeleteEntities extends BaseCommand {
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
+        Class<?> cls = type.getJavaClass();
 
         String logMessage = "Deleting items of type " + type + " via the command-line";
         if (cmdLine.hasOption("log")) {

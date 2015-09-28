@@ -373,7 +373,7 @@ public final class Bundle {
     public Multimap<String,Bundle> getDependentRelations() {
         Multimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
         Map<String, Direction> dependents = ClassUtils
-                .getDependentRelations(type.getEntityClass());
+                .getDependentRelations(type.getJavaClass());
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle child : relations.get(relation)) {
@@ -508,8 +508,8 @@ public final class Bundle {
      *
      * @return The bundle's type class
      */
-    public Class<?> getBundleClass() {
-        return type.getEntityClass();
+    public Class<?> getBundleJavaClass() {
+        return type.getJavaClass();
     }
 
     /**
@@ -519,7 +519,7 @@ public final class Bundle {
      * @return A list of property keys for the bundle's type
      */
     public Collection<String> getPropertyKeys() {
-        return ClassUtils.getPropertyKeys(type.getEntityClass());
+        return ClassUtils.getPropertyKeys(type.getJavaClass());
     }
 
     /**
@@ -528,7 +528,7 @@ public final class Bundle {
      * @return A list of unique property keys for the bundle's type
      */
     public Collection<String> getUniquePropertyKeys() {
-        return ClassUtils.getUniquePropertyKeys(type.getEntityClass());
+        return ClassUtils.getUniquePropertyKeys(type.getJavaClass());
     }
 
     /**

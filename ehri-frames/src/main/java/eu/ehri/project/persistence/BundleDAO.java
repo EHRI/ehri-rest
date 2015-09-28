@@ -182,7 +182,7 @@ public final class BundleDAO {
         try {
             Vertex node = manager.createVertex(bundle.getId(), bundle.getType(),
                     bundle.getData(), bundle.getPropertyKeys());
-            createDependents(node, bundle.getBundleClass(), bundle.getRelations());
+            createDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
             return node;
         } catch (IntegrityError e) {
             // Mmmn, if we get here, it means that there's been an ID generation error
@@ -207,7 +207,7 @@ public final class BundleDAO {
                 logger.trace("Bundles differ\n\n{}\n\n{}", bundle.toJson(), nodeBundle.toJson());
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData(), bundle.getPropertyKeys());
-                updateDependents(node, bundle.getBundleClass(), bundle.getRelations());
+                updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(node, MutationState.UPDATED, nodeBundle);
             } else {
                 logger.debug("Not updating equivalent bundle {}", bundle.getId());
@@ -312,7 +312,7 @@ public final class BundleDAO {
                 if (!updating.contains(manager.getId(v))) {
                     try {
                         delete(serializer.vertexFrameToBundle(graph.frame(v,
-                                manager.getEntityClass(v).getEntityClass())));
+                                manager.getEntityClass(v).getJavaClass())));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }

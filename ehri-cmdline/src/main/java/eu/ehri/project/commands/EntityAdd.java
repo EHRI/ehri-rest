@@ -140,12 +140,12 @@ public class EntityAdd extends BaseCommand {
             PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
             ValidationError, PermissionDenied {
 
-        if (!AccessibleEntity.class.isAssignableFrom(bundle.getBundleClass())) {
-            throw new DeserializationError("Item class: " + bundle.getBundleClass().getSimpleName() +
+        if (!AccessibleEntity.class.isAssignableFrom(bundle.getBundleJavaClass())) {
+            throw new DeserializationError("Item class: " + bundle.getBundleJavaClass().getSimpleName() +
                     " is not a first-class database item");
         }
 
-        LoggingCrudViews<?> view = new LoggingCrudViews(graph, bundle.getBundleClass(), scope);
+        LoggingCrudViews<?> view = new LoggingCrudViews(graph, bundle.getBundleJavaClass(), scope);
         if (cmdLine.hasOption("update")) {
             view.createOrUpdate(bundle.withId(id), user, getLogMessage(logMessage));
         } else {

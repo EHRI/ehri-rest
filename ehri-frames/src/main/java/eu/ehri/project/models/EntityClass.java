@@ -101,7 +101,7 @@ public enum EntityClass {
      * 
      * @return
      */
-    public Class<? extends Frame> getEntityClass() {
+    public Class<? extends Frame> getJavaClass() {
         return cls;
     }
 

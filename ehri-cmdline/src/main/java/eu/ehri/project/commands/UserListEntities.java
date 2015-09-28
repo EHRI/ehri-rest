@@ -68,7 +68,7 @@ public class UserListEntities extends BaseCommand {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
+        Class<?> cls = type.getJavaClass();
 
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);

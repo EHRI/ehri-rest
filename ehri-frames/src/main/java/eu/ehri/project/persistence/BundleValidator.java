@@ -171,7 +171,7 @@ public final class BundleValidator {
      * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
      */
     private static void checkFields(Bundle bundle, ErrorSet.Builder builder) {
-        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleClass())) {
+        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
             checkField(bundle, builder, key);
         }
     }
@@ -200,11 +200,11 @@ public final class BundleValidator {
      * Check that the entity type annotation is present in the bundle's class.
      */
     private static void checkEntityType(Bundle bundle, ErrorSet.Builder builder) {
-        EntityType annotation = bundle.getBundleClass().getAnnotation(EntityType.class);
+        EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
         if (annotation == null) {
             builder.addError(Bundle.TYPE_KEY, MessageFormat.format(Messages
                     .getString("BundleValidator.missingTypeAnnotation"), //$NON-NLS-1$
-                    bundle.getBundleClass().getName()));
+                    bundle.getBundleJavaClass().getName()));
         }
     }
 
