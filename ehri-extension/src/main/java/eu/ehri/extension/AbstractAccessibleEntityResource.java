@@ -206,7 +206,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             E entity = views.detail(id, getRequesterUserProfile());
-            if (!manager.getEntityClass(entity).getEntityClass().equals(cls)) {
+            if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
                 throw new ItemNotFound(id);
             }
             Response response = single(entity);

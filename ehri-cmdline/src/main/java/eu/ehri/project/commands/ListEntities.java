@@ -86,7 +86,7 @@ public class ListEntities extends BaseCommand {
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
+        Class<?> cls = type.getJavaClass();
 
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);

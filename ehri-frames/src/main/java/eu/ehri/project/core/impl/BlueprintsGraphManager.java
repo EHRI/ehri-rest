@@ -362,7 +362,7 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
         String typeName = vertex.getProperty(EntityType.TYPE_KEY);
         try {
             EntityClass entityClass = EntityClass.withName(typeName);
-            return ClassUtils.getPropertyKeys(entityClass.getEntityClass());
+            return ClassUtils.getPropertyKeys(entityClass.getJavaClass());
         } catch (Exception e) {
             return new EmptyIterable<>();
         }

@@ -104,7 +104,7 @@ public class Check extends BaseCommand {
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
         for (EntityClass entityClass : types) {
-            try (CloseableIterable<? extends Frame> items = manager.getFrames(entityClass, entityClass.getEntityClass())) {
+            try (CloseableIterable<? extends Frame> items = manager.getFrames(entityClass, entityClass.getJavaClass())) {
                 for (Frame item : items) {
                     AccessibleEntity entity = graph.frame(item.asVertex(), AccessibleEntity.class);
                     PermissionScope scope = entity.getPermissionScope();

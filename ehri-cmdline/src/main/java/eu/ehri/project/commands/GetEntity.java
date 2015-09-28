@@ -63,7 +63,7 @@ public class GetEntity extends BaseCommand {
 
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         String id = cmdLine.getArgs()[1];
-        Class<?> cls = type.getEntityClass();
+        Class<?> cls = type.getJavaClass();
 
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);

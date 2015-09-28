@@ -348,7 +348,7 @@ public final class Serializer {
             String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
 
-            Class<? extends Frame> cls = type.getEntityClass();
+            Class<? extends Frame> cls = type.getJavaClass();
             Bundle.Builder builder = Bundle.Builder.withClass(type)
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
@@ -520,7 +520,7 @@ public final class Serializer {
      */
     private List<String> getMandatoryOrSpecificProps(EntityClass type) {
         return Lists.newArrayList(
-                Iterables.concat(ClassUtils.getMandatoryPropertyKeys(type.getEntityClass()),
+                Iterables.concat(ClassUtils.getMandatoryPropertyKeys(type.getJavaClass()),
                         includeProps));
     }
 
@@ -571,7 +571,7 @@ public final class Serializer {
         if (depth < maxTraversals) {
             Class<?> cls = EntityClass.withName(
                     (String) item.asVertex().getProperty(EntityType.TYPE_KEY))
-                    .getEntityClass();
+                    .getJavaClass();
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
