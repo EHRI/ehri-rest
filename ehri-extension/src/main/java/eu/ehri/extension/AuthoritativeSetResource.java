@@ -85,22 +85,9 @@ public class AuthoritativeSetResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
-            long items = countItems();
-            tx.success();
-            return items;
-        }
     }
 
     @GET
@@ -120,23 +107,6 @@ public class AuthoritativeSetResource extends
         } catch (Exception e) {
             tx.close();
             throw e;
-        }
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
-    @Override
-    public long countChildren(
-            @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            AuthoritativeSet set = views.detail(id, user);
-            long count = getQuery(AuthoritativeItem.class).count(set.getAuthoritativeItems());
-            tx.success();
-            return count;
         }
     }
 

@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
@@ -120,36 +121,16 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     }
 
     /**
-     * List global events. Standard list parameters for paging and filtering apply.
+     * List aggregated global events. Standard list parameters for paging apply.
      *
-     * @throws BadRequester
-     */
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
-    public Response listEvents() throws BadRequester {
-
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            Accessor user = getRequesterUserProfile();
-            EventViews eventViews = getEventViewsBuilder().build();
-            return streamingList(eventViews.list(user), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
-        }
-    }
-
-    /**
-     * Aggregate of global events.
-     *
-     * @param aggregation Aggregate events by strict, or user
+     * @param aggregation The manner in which to aggregate the results, accepting
+     *                    "user", "strict" or "off" (no aggregation). Default is
+     *                    "user".
      * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/aggregate")
-    public Response aggregateEvents(
+    public Response list(
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
             throws BadRequester {
 

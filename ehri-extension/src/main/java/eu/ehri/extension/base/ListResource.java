@@ -57,12 +57,4 @@ public interface ListResource {
      * @throws BadRequester
      */
     Response list() throws BadRequester;
-
-    /**
-     * Count the number of available resources.
-     *
-     * @return The total number of applicable items
-     * @throws BadRequester
-     */
-    long count() throws BadRequester;
 }

@@ -21,6 +21,7 @@ package eu.ehri.extension;
 
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.PermissionType;
@@ -70,7 +71,7 @@ import java.util.List;
  */
 @Path(Entities.LINK)
 public class LinkResource extends AbstractAccessibleEntityResource<Link>
-        implements GetResource, DeleteResource, UpdateResource {
+        implements GetResource, ListResource, DeleteResource, UpdateResource {
 
     public static final String BODY_PARAM = "body";
 
@@ -94,16 +95,8 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    public long countResources() throws BadRequester {
-        return countItems();
     }
 
     @PUT

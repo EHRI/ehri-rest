@@ -92,18 +92,9 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        return countItems();
     }
 
     @GET
@@ -187,24 +178,6 @@ public final class VirtualUnitResource extends
             vuViews.moveIncludedUnits(fromVu, toVu, units, currentUser);
             tx.success();
             return Response.status(Response.Status.OK).build();
-        }
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
-    public long countChildVirtualUnits(
-            @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-            Iterable<VirtualUnit> units = all
-                    ? parent.getAllChildren()
-                    : parent.getChildren();
-            long count = getQuery(cls).count(units);
-            tx.success();
-            return count;
         }
     }
 

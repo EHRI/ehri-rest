@@ -86,35 +86,9 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        return countItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
-    @Override
-    public long countChildren(
-            @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Vocabulary vocabulary = views.detail(id, user);
-            long count = getQuery(cls).count(vocabulary.getConcepts());
-            tx.success();
-            return count;
-        }
     }
 
     @GET

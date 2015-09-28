@@ -77,18 +77,9 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        return countItems();
     }
 
     @GET
@@ -110,26 +101,6 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         } catch (Exception e) {
             tx.close();
             throw e;
-        }
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
-    @Override
-    public long countChildren(
-            @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Repository repository = views.detail(id, user);
-            Iterable<DocumentaryUnit> units = all
-                    ? repository.getAllCollections()
-                    : repository.getCollections();
-            long count = getQuery(DocumentaryUnit.class).count(units);
-            tx.success();
-            return count;
         }
     }
 

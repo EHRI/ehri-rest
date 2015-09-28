@@ -56,20 +56,6 @@ public interface ParentResource {
             throws ItemNotFound, BadRequester, PermissionDenied;
 
     /**
-     * Count the number of available resources subordinate to this item.
-     *
-     * @param id  The requested item id
-     * @param all Whether to count all child items, or just those at the
-     *            immediate sub-level.
-     * @return The total number of applicable items
-     * @throws ItemNotFound
-     * @throws BadRequester
-     * @throws PermissionDenied
-     */
-    long countChildren(String id, boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied;
-
-    /**
      * Create a subordinate resource.
      *
      * @param id The parent resource ID.

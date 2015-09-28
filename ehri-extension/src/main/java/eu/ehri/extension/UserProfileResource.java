@@ -92,15 +92,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        return countItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
@@ -182,7 +173,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + FOLLOWERS)
     public Response listFollowers(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
@@ -199,7 +190,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + FOLLOWING)
     public Response listFollowing(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
@@ -251,14 +242,12 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            if (!otherIds.isEmpty()) {
-                Accessor accessor = getRequesterUserProfile();
-                UserProfile user = views.detail(userId, accessor);
-                for (String id : otherIds) {
-                    user.addFollowing(manager.getFrame(id, UserProfile.class));
-                }
-                tx.success();
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
+            for (String id : otherIds) {
+                user.addFollowing(manager.getFrame(id, UserProfile.class));
             }
+            tx.success();
             return Response.status(Status.OK).build();
         }
     }
@@ -285,11 +274,12 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + BLOCKED)
     public Response listBlocked(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(UserProfile.class).page(user.getBlocked(), accessor), tx);
+            return streamingPage(getQuery(UserProfile.class)
+                    .page(user.getBlocked(), accessor), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -351,9 +341,8 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + WATCHING)
     public Response listWatching(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             return streamingPage(getQuery(Watchable.class)
@@ -419,9 +408,8 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + Entities.ANNOTATION)
     public Response listAnnotations(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             return streamingPage(getQuery(Annotation.class)
@@ -437,12 +425,12 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + Entities.LINK)
     public Response pageLinks(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(Link.class).page(user.getLinks(), accessor), tx);
+            return streamingPage(getQuery(Link.class)
+                    .page(user.getLinks(), accessor), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -454,9 +442,8 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("{userId:.+}/" + Entities.VIRTUAL_UNIT)
     public Response pageVirtualUnits(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             return streamingPage(getQuery(VirtualUnit.class)

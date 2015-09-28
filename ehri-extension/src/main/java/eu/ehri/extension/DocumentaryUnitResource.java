@@ -77,18 +77,9 @@ public class DocumentaryUnitResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list")
     @Override
     public Response list() throws BadRequester {
         return listItems();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/count")
-    @Override
-    public long count() throws BadRequester {
-        return countItems();
     }
 
     @GET
@@ -109,25 +100,6 @@ public class DocumentaryUnitResource
         } catch (Exception e) {
             tx.close();
             throw e;
-        }
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
-    @Override
-    public long countChildren(
-            @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
-            Iterable<DocumentaryUnit> units = all
-                    ? parent.getAllChildren()
-                    : parent.getChildren();
-            long count = getQuery(cls).count(units);
-            tx.success();
-            return count;
         }
     }
 
