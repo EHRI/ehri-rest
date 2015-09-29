@@ -27,8 +27,8 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.assertEquals;
 import static eu.ehri.extension.ToolsResource.ENDPOINT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**

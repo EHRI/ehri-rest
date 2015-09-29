@@ -19,7 +19,6 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -38,9 +37,7 @@ public interface DeleteResource {
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
-     * @throws BadRequester
      */
     Response delete(String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester;
+            throws PermissionDenied, ItemNotFound, ValidationError;
 }

@@ -27,34 +27,20 @@ import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -84,15 +70,14 @@ public final class VirtualUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     @Override
-    public Response get(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
-    public Response list() throws BadRequester {
+    public Response list() {
         return listItems();
     }
 
@@ -101,8 +86,7 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/list")
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
@@ -120,8 +104,7 @@ public final class VirtualUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + INCLUDED)
     public Response listIncludedVirtualUnits(
-            @PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+            @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
@@ -137,7 +120,7 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/" + INCLUDED)
     public Response addIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit parent = views.detail(id, currentUser);
@@ -152,7 +135,7 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/" + INCLUDED)
     public Response removeIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit parent = views.detail(id, currentUser);
@@ -168,7 +151,7 @@ public final class VirtualUnitResource extends
     public Response moveIncludedVirtualUnits(
             @PathParam("from") String fromId, @PathParam("to") String toId,
             @QueryParam(ID_PARAM) List<String> includedIds)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit fromVu = views.detail(fromId, currentUser);
@@ -187,7 +170,7 @@ public final class VirtualUnitResource extends
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor currentUser = getCurrentUser();
             final Iterable<DocumentaryUnit> includedUnits
@@ -214,7 +197,7 @@ public final class VirtualUnitResource extends
     @Override
     public Response update(@PathParam("id") String id,
             Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError, ItemNotFound, BadRequester {
+            ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
@@ -226,8 +209,7 @@ public final class VirtualUnitResource extends
     @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester {
+            throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);
             tx.success();
@@ -243,7 +225,7 @@ public final class VirtualUnitResource extends
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws AccessDenied, PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor currentUser = getRequesterUserProfile();
             final Iterable<DocumentaryUnit> includedUnits
@@ -271,7 +253,7 @@ public final class VirtualUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/forUser/{userId:.+}")
     public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
-            throws AccessDenied, ItemNotFound, BadRequester {
+            throws AccessDenied, ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
@@ -290,8 +272,7 @@ public final class VirtualUnitResource extends
      * they actually are the right type.
      */
     private List<DocumentaryUnit> getIncludedUnits(
-            List<String> ids, Accessor accessor)
-            throws ItemNotFound {
+            List<String> ids, Accessor accessor) throws ItemNotFound {
         Iterable<Vertex> vertices = manager.getVertices(ids);
 
         PipeFunction<Vertex, Boolean> aclFilter = AclManager.getAclFilterFunction(accessor);

@@ -24,7 +24,7 @@ import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -36,20 +36,10 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -77,15 +67,14 @@ public class GroupResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     @Override
-    public Response get(@PathParam("id") String id) throws ItemNotFound,
-            BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
-    public Response list() throws BadRequester {
+    public Response list() {
         return listItems();
     }
 
@@ -96,7 +85,7 @@ public class GroupResource
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final UserProfile currentUser = getCurrentUser();
             final Set<Accessor> groupMembers = Sets.newHashSet();
@@ -125,7 +114,7 @@ public class GroupResource
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
@@ -140,7 +129,7 @@ public class GroupResource
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response addMember(@PathParam("id") String id,
             @PathParam("aid") String aid)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getFrame(aid, Accessor.class);
@@ -158,7 +147,7 @@ public class GroupResource
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response removeMember(@PathParam("id") String id,
             @PathParam("aid") String aid) throws PermissionDenied,
-            ItemNotFound, BadRequester {
+            ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getFrame(aid, Accessor.class);
@@ -179,8 +168,7 @@ public class GroupResource
     @Path("/{id:[^/]+}/list")
     public Response listChildren(
             @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
@@ -199,8 +187,7 @@ public class GroupResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public long countChildResources(@PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             Group group = views.detail(id, user);
@@ -221,8 +208,7 @@ public class GroupResource
     @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester {
+            throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);
             tx.success();

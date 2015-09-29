@@ -19,8 +19,6 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.extension.errors.BadRequester;
-
 import javax.ws.rs.core.Response;
 
 /**
@@ -54,7 +52,6 @@ public interface ListResource {
      * </pre>
      *
      * @return A list of serialized item representations
-     * @throws BadRequester
      */
-    Response list() throws BadRequester;
+    Response list();
 }

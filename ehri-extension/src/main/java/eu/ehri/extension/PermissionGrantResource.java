@@ -19,22 +19,17 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -63,13 +58,12 @@ public class PermissionGrantResource extends AbstractRestResource {
      * @return The permission grant
      * @throws ItemNotFound
      * @throws PermissionDenied
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     public Response getPermissionGrant(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester, SerializationError {
+            throws ItemNotFound, PermissionDenied, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             PermissionGrant grant = manager.getFrame(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class);
@@ -84,12 +78,11 @@ public class PermissionGrantResource extends AbstractRestResource {
      * @param id The ID of the permission grant
      * @throws ItemNotFound
      * @throws PermissionDenied
-     * @throws BadRequester
      */
     @DELETE
     @Path("{id:.+}")
     public Response revokePermissionGrant(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class),

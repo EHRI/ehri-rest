@@ -23,33 +23,21 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.CsvImportManager;
-import eu.ehri.project.importers.EadHandler;
-import eu.ehri.project.importers.EadImporter;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxImportManager;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.*;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.core.Tx;
 import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -87,9 +75,9 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
-     * <p>
+     * <p/>
      * Example:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      * curl -X POST \
@@ -118,7 +106,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
             InputStream stream)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -146,9 +134,9 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of EAD files. The body of the POST
      * request should be a newline separated list of file
      * paths.
-     * <p>
+     * <p/>
      * The way you would run with would typically be:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      *     curl -X POST \
@@ -160,9 +148,9 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p>
+     * <p/>
      * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
-     * <p>
+     * <p/>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -192,7 +180,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             String pathList)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -226,9 +214,9 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a single EAD file. The body of the POST
      * request should be an EAD file.
-     * <p>
+     * <p/>
      * The way you would run with would typically be:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      * curl -X POST \
@@ -240,7 +228,7 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p>
+     * <p/>
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
@@ -268,7 +256,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream input)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -300,9 +288,9 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of CSV files. The body of the POST
      * request should be a newline separated list of file
      * paths.
-     * <p>
+     * <p/>
      * The way you would run with would typically be:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      *     curl -X POST \
@@ -314,9 +302,9 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p>
+     * <p/>
      * (Assuming <code>csv-list.txt</code> is a list of newline separated CSV file paths.)
-     * <p>
+     * <p/>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -324,7 +312,7 @@ public class ImportResource extends AbstractRestResource {
      *                      its contents will be used.
      * @param importerClass The fully-qualified import class name
      * @param stream        A stream of CSV data
-     *                      <p>
+     *                      <p/>
      *                      There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
      * @return A JSON object showing how many records were created,
      * updated, or unchanged.
@@ -338,7 +326,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream stream)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

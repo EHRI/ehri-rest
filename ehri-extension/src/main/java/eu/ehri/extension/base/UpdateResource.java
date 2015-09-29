@@ -19,7 +19,6 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -42,9 +41,8 @@ public interface UpdateResource {
      * @throws ValidationError
      * @throws DeserializationError
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     Response update(String id, Bundle bundle)
                 throws PermissionDenied,
-            ValidationError, DeserializationError, ItemNotFound, BadRequester;
+            ValidationError, DeserializationError, ItemNotFound;
 }

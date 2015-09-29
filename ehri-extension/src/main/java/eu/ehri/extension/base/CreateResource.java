@@ -19,7 +19,6 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -42,9 +41,8 @@ public interface CreateResource {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
     Response create(Bundle bundle, List<String> accessors)
             throws PermissionDenied, ValidationError,
-            DeserializationError, BadRequester;
+            DeserializationError;
 }

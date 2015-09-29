@@ -20,14 +20,9 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
@@ -110,9 +105,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * List all instances of the 'entity' accessible to the given user.
      *
      * @return List of entities
-     * @throws BadRequester
      */
-    public Response listItems() throws BadRequester {
+    public Response listItems() {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             return streamingPage(getQuery(cls).page(getRequesterUserProfile()), tx);
@@ -140,12 +134,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
     public <T extends AccessibleEntity> Response createItem(Bundle entityBundle, List<String> accessorIds,
                                                             Handler<T> handler, LoggingCrudViews<T> views)
             throws PermissionDenied, ValidationError,
-            DeserializationError, BadRequester {
+            DeserializationError {
         try {
             Accessor user = getRequesterUserProfile();
             T entity = views
@@ -178,16 +171,15 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
     public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
-            throws PermissionDenied, ValidationError, DeserializationError, BadRequester {
+            throws PermissionDenied, ValidationError, DeserializationError {
         return createItem(entityBundle, accessorIds, handler, views);
     }
 
     public Response createItem(Bundle entityBundle, List<String> accessorIds)
             throws PermissionDenied, ValidationError,
-            DeserializationError, BadRequester {
+            DeserializationError {
         return createItem(entityBundle, accessorIds, noOpHandler);
     }
 
@@ -198,9 +190,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the request, which contains the json
      *         representation
      * @throws ItemNotFound
-     * @throws BadRequester
      */
-    public Response getItem(String id) throws ItemNotFound, BadRequester {
+    public Response getItem(String id) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             E entity = views.detail(id, getRequesterUserProfile());
             if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
@@ -220,11 +211,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
     public Response updateItem(Bundle entityBundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            BadRequester {
+            ValidationError, DeserializationError {
         Mutation<E> update = views
                 .update(entityBundle, getRequesterUserProfile(), getLogMessage());
         return single(update.getNode());
@@ -243,11 +232,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws DeserializationError
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     public Response updateItem(String id, Bundle rawBundle) throws PermissionDenied,
             ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
+            ItemNotFound {
         try {
             E entity = views.detail(id, getRequesterUserProfile());
             if (isPatch()) {
@@ -272,11 +260,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
-     * @throws BadRequester
      */
     protected Response deleteItem(String id, Handler<E> preProcess) throws PermissionDenied,
             ItemNotFound,
-            ValidationError, BadRequester {
+            ValidationError {
         try {
             Accessor user = getRequesterUserProfile();
             preProcess.process(views.detail(id, user));
@@ -295,11 +282,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
-     * @throws BadRequester
      */
     protected Response deleteItem(String id) throws PermissionDenied,
             ItemNotFound,
-            ValidationError, BadRequester {
+            ValidationError {
         return deleteItem(id, noOpHandler);
     }
 

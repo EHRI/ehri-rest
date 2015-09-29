@@ -21,7 +21,6 @@ package eu.ehri.extension;
 
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.ContentType;
@@ -54,15 +53,14 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     @Override
-    public Response get(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
-    public Response list() throws BadRequester {
+    public Response list() {
         return listItems();
     }
 }

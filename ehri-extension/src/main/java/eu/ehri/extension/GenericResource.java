@@ -24,28 +24,21 @@ import com.google.common.collect.FluentIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.core.Tx;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -73,11 +66,10 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @param ids A list of string IDs
      * @return A serialized list of items
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound, BadRequester {
+    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             // Object a lazily-computed view of the ids->vertices...
@@ -101,13 +93,12 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @return A serialized list of items
      * @throws ItemNotFound
      * @throws PermissionDenied
-     * @throws BadRequester
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listFromJson(String json)
-            throws ItemNotFound, PermissionDenied, BadRequester, DeserializationError, IOException {
+            throws ItemNotFound, PermissionDenied, DeserializationError, IOException {
         return this.list(parseIds(json));
     }
 
@@ -118,12 +109,11 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @param ids A list of graph IDs
      * @return A serialized list of items
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/listByGraphId")
-    public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound, BadRequester {
+    public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound {
         // This is ugly, but to return 404 on a bad item we have to
         // iterate the list first otherwise the streaming response will be
         // broken.
@@ -162,13 +152,12 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @return A serialized list of items
      * @throws ItemNotFound
      * @throws PermissionDenied
-     * @throws BadRequester
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/listByGraphId")
     public Response listByGidFromJson(String json) throws ItemNotFound,
-            PermissionDenied, DeserializationError, BadRequester, IOException {
+            PermissionDenied, DeserializationError, IOException {
 
         return this.listByGid(parseGraphIds(json));
     }
@@ -179,12 +168,11 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @param id The item's ID
      * @return A serialized representation.
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path("/{id:.+}")
-    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied, BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Vertex item = manager.getVertex(id);
 

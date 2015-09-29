@@ -19,35 +19,17 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -75,15 +57,14 @@ public class CvocConceptResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     @Override
-    public Response get(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
-    public Response list() throws BadRequester {
+    public Response list() {
         return listItems();
     }
 
@@ -94,7 +75,7 @@ public class CvocConceptResource
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
@@ -106,8 +87,7 @@ public class CvocConceptResource
     @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester {
+            throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);
             tx.success();
@@ -120,8 +100,7 @@ public class CvocConceptResource
     @Path("/{id:.+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
-                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
+                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
@@ -142,7 +121,7 @@ public class CvocConceptResource
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             final Concept parent = views.detail(id, user);
@@ -167,14 +146,13 @@ public class CvocConceptResource
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Path("/{id:.+}/narrower/{idNarrower:.+}")
     public Response addNarrowerCvocConcept(
             @PathParam("id") String id,
             @PathParam("idNarrower") String idNarrower)
-            throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
+            throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
             Concept concept = views.detail(id, accessor);
@@ -195,14 +173,13 @@ public class CvocConceptResource
      *
      * @throws AccessDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @DELETE
     @Path("/{id:.+}/narrower/{idNarrower:.+}")
     public Response removeNarrowerCvocConcept(
             @PathParam("id") String id,
             @PathParam("idNarrower") String idNarrower)
-            throws PermissionDenied, AccessDenied, ItemNotFound, BadRequester {
+            throws PermissionDenied, AccessDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
             Concept concept = views.detail(id, accessor);
@@ -222,13 +199,12 @@ public class CvocConceptResource
      * @return A list of broader resources
      * @throws ItemNotFound
      * @throws AccessDenied
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/broader/list")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+            throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
         Concept concept = views.detail(id, getRequesterUserProfile());
@@ -245,13 +221,11 @@ public class CvocConceptResource
      * @param id The item ID
      * @return A list of related resources
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/related/list")
-    public Response getCvocRelatedConcepts(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Concept concept = views.detail(id, getRequesterUserProfile());
@@ -270,13 +244,11 @@ public class CvocConceptResource
      * @param id The item ID
      * @return A list of related resources
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/relatedBy/list")
-    public Response getCvocRelatedByConcepts(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Concept concept = views.detail(id, getRequesterUserProfile());
@@ -297,14 +269,13 @@ public class CvocConceptResource
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Path("/{id:.+}/related/{idRelated:.+}")
     public Response addRelatedCvocConcept(
             @PathParam("id") String id,
             @PathParam("idRelated") String idRelated)
-            throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
+            throws AccessDenied, PermissionDenied, ItemNotFound {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
@@ -328,14 +299,13 @@ public class CvocConceptResource
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @DELETE
     @Path("/{id:.+}/related/{idRelated:.+}")
     public Response removeRelatedCvocConcept(
             @PathParam("id") String id,
             @PathParam("idRelated") String idRelated)
-            throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
+            throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
             Concept concept = views.detail(id, accessor);

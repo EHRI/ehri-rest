@@ -29,7 +29,6 @@ import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -39,10 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
