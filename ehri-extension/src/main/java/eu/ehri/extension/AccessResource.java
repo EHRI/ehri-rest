@@ -19,13 +19,12 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.POST;
@@ -62,13 +61,12 @@ public class AccessResource extends
      * @return the updated object
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Path("/{id:[^/]+}")
     public Response setVisibility(@PathParam("id") String id,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
-            throws PermissionDenied, ItemNotFound, BadRequester, SerializationError {
+                                  @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
+            throws PermissionDenied, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Accessor current = getRequesterUserProfile();

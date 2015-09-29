@@ -24,13 +24,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
@@ -46,15 +42,9 @@ import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
-import eu.ehri.project.core.Tx;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -102,7 +92,6 @@ public class ToolsResource extends AbstractRestResource {
      *                         are unique to a single item
      * @return the number of links created
      * @throws ItemNotFound
-     * @throws BadRequester
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
@@ -117,7 +106,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String languageCode,
             @QueryParam(SINGLE_PARAM) @DefaultValue("true") boolean excludeSingle,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
-            throws ItemNotFound, BadRequester, ValidationError,
+            throws ItemNotFound, ValidationError,
             PermissionDenied, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
@@ -230,12 +219,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for a given item, optionally
      * renaming it.
-     *
+     * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     *
+     * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param id         the item's existing ID
@@ -273,12 +262,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID all items of a given
      * type.
-     *
+     * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     *
+     * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param type       the item type
@@ -318,12 +307,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for all items within the
      * permission scope and lower levels.
-     *
+     * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     *
+     * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param scopeId    the scope item's ID

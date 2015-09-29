@@ -23,33 +23,21 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.CsvImportManager;
-import eu.ehri.project.importers.EadHandler;
-import eu.ehri.project.importers.EadImporter;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxImportManager;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.*;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.core.Tx;
 import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -111,14 +99,14 @@ public class ImportResource extends AbstractRestResource {
     @POST
 //    @Consumes({"application/rdf+xml","text/turtle","application/n-triples","application/trig","application/n-quads","application/ld+json"})
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/skos")
+    @Path("skos")
     public Response importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
             InputStream stream)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -183,7 +171,7 @@ public class ImportResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/ead")
+    @Path("ead")
     public Response importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
@@ -192,7 +180,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             String pathList)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -259,7 +247,7 @@ public class ImportResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/single_ead")
+    @Path("single_ead")
     public Response importSingleEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
@@ -268,7 +256,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream input)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -332,13 +320,13 @@ public class ImportResource extends AbstractRestResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/csv")
+    @Path("csv")
     public Response importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream stream)
-            throws BadRequester, ItemNotFound, ValidationError,
+            throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

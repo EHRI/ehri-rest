@@ -34,14 +34,13 @@ import java.util.Map;
  *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 @Provider
 public class AccessDeniedMapper implements ExceptionMapper<AccessDenied> {
 
-	@SuppressWarnings("serial")
+    @SuppressWarnings("serial")
     @Override
-	public Response toResponse(final AccessDenied e) {
+    public Response toResponse(final AccessDenied e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
                 put("error", AccessDenied.class.getSimpleName());
@@ -54,11 +53,11 @@ public class AccessDeniedMapper implements ExceptionMapper<AccessDenied> {
                 });
             }
         };
-		try {
+        try {
             return Response.status(Status.UNAUTHORIZED)
-            	.entity(new ObjectMapper().writeValueAsBytes(out)).build();
+                    .entity(new ObjectMapper().writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
-	}
+    }
 }

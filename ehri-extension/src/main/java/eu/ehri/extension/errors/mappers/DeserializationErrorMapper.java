@@ -35,7 +35,6 @@ import java.io.StringWriter;
  *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 @Provider
 public class DeserializationErrorMapper implements

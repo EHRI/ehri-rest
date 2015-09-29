@@ -19,12 +19,8 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.GlobalPermissionSet;
-import eu.ehri.project.acl.InheritedGlobalPermissionSet;
-import eu.ehri.project.acl.InheritedItemPermissionSet;
-import eu.ehri.project.acl.ItemPermissionSet;
+import eu.ehri.project.acl.*;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -33,16 +29,10 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -83,13 +73,11 @@ public class PermissionsResource extends AbstractRestResource {
      * @param id The user's id
      * @return A list of permission grants for the user
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list/{id:.+}")
-    public Response listPermissionGrants(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response listPermissionGrants(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = manager.getFrame(id, Accessor.class);
@@ -109,13 +97,12 @@ public class PermissionsResource extends AbstractRestResource {
      * @return A list of grants for this item
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/listForItem/{id:.+}")
     public Response listPermissionGrantsForItem(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            throws PermissionDenied, ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             PermissionGrantTarget target = manager.getFrame(id,
@@ -134,13 +121,11 @@ public class PermissionsResource extends AbstractRestResource {
      *
      * @return A list of grants for the given scope
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/listForScope/{id:.+}")
-    public Response listPermissionGrantsForScope(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester {
+    public Response listPermissionGrantsForScope(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
@@ -161,12 +146,11 @@ public class PermissionsResource extends AbstractRestResource {
      * @return The current user's global permissions
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public InheritedGlobalPermissionSet getGlobalMatrix() throws PermissionDenied,
-            ItemNotFound, BadRequester {
+            ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             InheritedGlobalPermissionSet matrix = getGlobalMatrix(getRequesterUserProfile().getId());
             tx.success();
@@ -184,7 +168,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}")
+    @Path("{userId:.+}")
     public InheritedGlobalPermissionSet getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -203,15 +187,14 @@ public class PermissionsResource extends AbstractRestResource {
      * @return The new permissions
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}")
+    @Path("{userId:.+}")
     public InheritedGlobalPermissionSet setGlobalMatrix(
             @PathParam("userId") String userId,
-            GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound, BadRequester {
+            GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             Accessor grantee = getRequesterUserProfile();
@@ -233,7 +216,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/{id:.+}")
+    @Path("{userId:.+}/{id:.+}")
     public InheritedItemPermissionSet getEntityMatrix(
             @PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
@@ -257,9 +240,9 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/scope/{id:.+}")
+    @Path("{userId:.+}/scope/{id:.+}")
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userId") String userId,
-            @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
+                                                        @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
@@ -279,16 +262,15 @@ public class PermissionsResource extends AbstractRestResource {
      * @return The new permission matrix
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/scope/{id:.+}")
+    @Path("{userId:.+}/scope/{id:.+}")
     public InheritedGlobalPermissionSet setScopedPermissions(
             @PathParam("userId") String userId,
             @PathParam("id") String id,
-            GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound, BadRequester {
+            GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
@@ -308,16 +290,15 @@ public class PermissionsResource extends AbstractRestResource {
      * @param itemPerms the serialized permission list
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/{id:.+}")
+    @Path("{userId:.+}/{id:.+}")
     public InheritedItemPermissionSet setItemPermissions(
             @PathParam("userId") String userId,
             @PathParam("id") String id,
-            ItemPermissionSet itemPerms) throws PermissionDenied, ItemNotFound, BadRequester {
+            ItemPermissionSet itemPerms) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);

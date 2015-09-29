@@ -40,17 +40,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.INTERNAL_SERVER_ERROR;
-import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
@@ -222,7 +215,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Map<String, Object>> data = getEntityList(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
-        assertTrue(data.size() > 0);
+        assertTrue(!data.isEmpty());
         Collections.sort(data, dataSort);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
@@ -309,7 +302,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(ehriUri(Entities.DOCUMENTARY_UNIT));
+        resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

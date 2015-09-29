@@ -20,8 +20,6 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
@@ -34,12 +32,7 @@ import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.EventViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -66,23 +59,23 @@ import java.util.List;
  * parameter that groups sequential events according to one of two different
  * strategies:
  * <dl>
- *     <dt>user</dt>
- *     <dd>Groups sequential events of all types that are initiated by the same actioner</dd>
- *     <dt>strict</dt>
- *     <dd>
- *         Groups sequential events that:
- *         <ul>
- *             <li>have the same type</li>
- *             <li>have the same actioner</li>
- *             <li>have the same subjects</li>
- *             <li>have the same scope</li>
- *             <li>have the same log message</li>
- *         </ul>
- *     </dd>
+ * <dt>user</dt>
+ * <dd>Groups sequential events of all types that are initiated by the same actioner</dd>
+ * <dt>strict</dt>
+ * <dd>
+ * Groups sequential events that:
+ * <ul>
+ * <li>have the same type</li>
+ * <li>have the same actioner</li>
+ * <li>have the same subjects</li>
+ * <li>have the same scope</li>
+ * <li>have the same log message</li>
+ * </ul>
+ * </dd>
  * </dl>
  * <p>
  * Additionally, aggregation can be disabled by using <code>aggregation=off</code>.
- *
+ * <p>
  * Standard paging parameters apply to all end-points.
  *
  * @author Mike Bryant (http://github.com/mikesname)
@@ -115,8 +108,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     @Override
-    public Response get(@PathParam("id") String id) throws ItemNotFound,
-            AccessDenied, BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }
 
@@ -126,13 +118,11 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
      * @param aggregation The manner in which to aggregate the results, accepting
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    "user".
-     * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response list(
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
-            throws BadRequester {
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation) {
 
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -150,17 +140,15 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     /**
      * Fetch a list of a user's actions.
      *
-     * @param userId     the user's ID
+     * @param userId the user's ID
      * @return a list of event ranges
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/byUser/{userId:.+}")
     public Response listUserActions(
-            @PathParam("userId") String userId)
-            throws ItemNotFound, BadRequester {
+            @PathParam("userId") String userId) throws ItemNotFound {
 
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -177,21 +165,19 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     /**
      * Fetch an aggregate list of a user's actions.
      *
-     * @param userId     the user's ID
+     * @param userId      the user's ID
      * @param aggregation The manner in which to aggregate the results, accepting
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>strict</b>.
      * @return a list of event ranges
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/aggregateByUser/{userId:.+}")
     public Response aggregateUserActions(
             @PathParam("userId") String userId,
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation) throws ItemNotFound {
 
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -213,14 +199,12 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
      *
      * @param userId the user's ID
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/forUser/{userId:.+}")
     public Response listEventsForUser(
-            @PathParam("userId") String userId)
-            throws ItemNotFound, BadRequester {
+            @PathParam("userId") String userId) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
@@ -237,20 +221,18 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
      * Aggregate actions that are relevant to a given user based on
      * the other users that they follow and the items they watch.
      *
-     * @param userId     the user's ID
+     * @param userId      the user's ID
      * @param aggregation The manner in which to aggregate the results, accepting
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    "user".
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/aggregateForUser/{userId:.+}")
     public Response aggregateEventsForUser(
             @PathParam("userId") String userId,
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
@@ -271,14 +253,13 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
      * @param id The event id
      * @return A list of events
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public Response pageEventsForItem(
             @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+            throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
@@ -295,11 +276,10 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     /**
      * Lookup and page the history for a given item.
      *
-     * @param id The event id
-     * @param aggregation the aggregation stategy          
+     * @param id          The event id
+     * @param aggregation the aggregation stategy
      * @return A list of events
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -307,7 +287,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     public Response aggregateEventsForItem(
             @PathParam("id") String id,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
-            throws ItemNotFound, BadRequester, AccessDenied {
+            throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
@@ -330,13 +310,12 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
      * @param id the event id
      * @return a list of subject items
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+            throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();

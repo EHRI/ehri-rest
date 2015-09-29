@@ -19,13 +19,12 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Promotable;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.PromotionViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -59,12 +58,11 @@ public class PromotionResource extends AbstractRestResource {
      * @return 200 response
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
-    @Path("/{id:.+}/up")
+    @Path("{id:.+}/up")
     public Response addPromotion(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
@@ -84,12 +82,11 @@ public class PromotionResource extends AbstractRestResource {
      * @return 200 response
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:.+}/up")
+    @Path("{id:.+}/up")
     public Response removePromotion(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
+            throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
@@ -106,12 +103,11 @@ public class PromotionResource extends AbstractRestResource {
      * @return 200 response
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
-    @Path("/{id:.+}/down")
+    @Path("{id:.+}/down")
     public Response addDemotion(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
@@ -131,12 +127,11 @@ public class PromotionResource extends AbstractRestResource {
      * @return 200 response
      * @throws PermissionDenied
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:.+}/down")
+    @Path("{id:.+}/down")
     public Response removeDemotion(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
+            throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Promotable item = manager.getFrame(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();

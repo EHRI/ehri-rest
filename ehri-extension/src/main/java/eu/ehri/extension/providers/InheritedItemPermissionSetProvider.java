@@ -43,8 +43,8 @@ import java.lang.reflect.Type;
 @Produces(MediaType.APPLICATION_JSON)
 public class InheritedItemPermissionSetProvider implements MessageBodyWriter<InheritedItemPermissionSet> {
 
-    private static JsonFactory factory = new JsonFactory();
-    private static ObjectMapper mapper = new ObjectMapper(factory);
+    private static final JsonFactory factory = new JsonFactory();
+    private static final ObjectMapper mapper = new ObjectMapper(factory);
 
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -53,15 +53,15 @@ public class InheritedItemPermissionSetProvider implements MessageBodyWriter<Inh
 
     @Override
     public long getSize(InheritedItemPermissionSet permissionSet, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType) {
+                        MediaType mediaType) {
         return -1L;
     }
 
     @Override
     public void writeTo(InheritedItemPermissionSet itemPermissionSet,
-            Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> headers,
-            OutputStream outputStream) throws IOException, WebApplicationException {
+                        Class<?> aClass, Type type, Annotation[] annotations,
+                        MediaType mediaType, MultivaluedMap<String, Object> headers,
+                        OutputStream outputStream) throws IOException, WebApplicationException {
         headers.putSingle(HttpHeaders.CACHE_CONTROL,
                 PermissionsResource.getCacheControl().toString());
         mapper.writeValue(outputStream, itemPermissionSet.serialize());

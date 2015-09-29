@@ -19,7 +19,6 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
@@ -54,13 +53,12 @@ public class VersionResource extends
      * @param id the version id
      * @return a version item
      * @throws ItemNotFound
-     * @throws BadRequester
      * @throws AccessDenied
      */
     @GET
     @Path("/{id:[^/]+}")
     public Response getVersion(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+            throws ItemNotFound, AccessDenied {
         return getItem(id);
     }
 
@@ -70,13 +68,12 @@ public class VersionResource extends
      * @param id the event id
      * @return a list of versions
      * @throws ItemNotFound
-     * @throws BadRequester
      * @throws AccessDenied
      */
     @GET
     @Path("/for/{id:.+}")
     public Response listFor(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+            throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();

@@ -20,21 +20,15 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.core.Tx;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.ViewHelper;
@@ -53,7 +47,7 @@ import java.util.Set;
  * eu.ehri.project.views.Views class generic code. Resources for specific
  * entities can extend this class.
  *
- * @param <E> The specific AccessibleEntity derived class
+ * @param <E> the specific AccessibleEntity derived class
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (https://github.com/mikesname)
  */
@@ -79,7 +73,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Implementation of a Handler that does nothing.
      *
-     * @param <E> The specific AccessibleEntity derived class
+     * @param <E> the specific AccessibleEntity derived class
      */
     public static class NoOpHandler<E extends AccessibleEntity> implements Handler<E> {
         @Override
@@ -92,8 +86,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Constructor
      *
-     * @param database Injected neo4j database
-     * @param cls      The 'entity' class
+     * @param database the injected neo4j database
+     * @param cls      the entity Java class
      */
     public AbstractAccessibleEntityResource(
             @Context GraphDatabaseService database, Class<E> cls) {
@@ -110,10 +104,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * List all instances of the 'entity' accessible to the given user.
      *
-     * @return List of entities
-     * @throws BadRequester
+     * @return a list of entities
      */
-    public Response listItems() throws BadRequester {
+    public Response listItems() {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             return streamingPage(getQuery(cls).page(getRequesterUserProfile()), tx);
@@ -126,27 +119,25 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Create an instance of the 'entity' in the database
      *
-     * @param entityBundle A bundle of item data
+     * @param entityBundle a bundle of item data
      *                     'id' fields)
-     * @param accessorIds  List of accessors who can initially view this item
-     * @param handler      A callback function that allows additional operations
+     * @param accessorIds  a list of accessors who can initially view this item
+     * @param handler      a callback function that allows additional operations
      *                     to be run on the created object after it is initialised
      *                     but before the response is generated. This is useful for adding
      *                     relationships to the new item.
-     * @param views        The view instance to use to create the item. This allows callers
+     * @param views        the view instance to use to create the item. This allows callers
      *                     to override the scope and the class used.
-     * @param <T>          The generic type of class T
-     * @return The response of the create request, the 'location' will contain
-     *         the url of the newly created instance.
+     * @param <T>          the generic type of class T
+     * @return the response of the create request, the 'location' will contain
+     * the url of the newly created instance.
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
     public <T extends AccessibleEntity> Response createItem(Bundle entityBundle, List<String> accessorIds,
                                                             Handler<T> handler, LoggingCrudViews<T> views)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, BadRequester {
+            throws PermissionDenied, ValidationError, DeserializationError {
         try {
             Accessor user = getRequesterUserProfile();
             T entity = views
@@ -167,43 +158,38 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Create an instance of the 'entity' in the database
      *
-     * @param entityBundle A bundle of item data
+     * @param entityBundle a bundle of item data
      *                     'id' fields)
-     * @param accessorIds  List of accessors who can initially view this item
-     * @param handler      A callback function that allows additional operations
+     * @param accessorIds  a list of accessors who can initially view this item
+     * @param handler      a callback function that allows additional operations
      *                     to be run on the created object after it is initialised
      *                     but before the response is generated. This is useful for adding
      *                     relationships to the new item.
-     * @return The response of the create request, the 'location' will contain
-     *         the url of the newly created instance.
+     * @return the response of the create request, the 'location' will contain
+     * the url of the newly created instance.
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
     public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
-            throws PermissionDenied, ValidationError, DeserializationError, BadRequester {
+            throws PermissionDenied, ValidationError, DeserializationError {
         return createItem(entityBundle, accessorIds, handler, views);
     }
 
     public Response createItem(Bundle entityBundle, List<String> accessorIds)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, BadRequester {
+            throws PermissionDenied, ValidationError, DeserializationError {
         return createItem(entityBundle, accessorIds, noOpHandler);
     }
 
     /**
      * Retieve (get) an instance of the 'entity' in the database
      *
-     * @param id The Entities identifier string
-     * @return The response of the request, which contains the json
-     *         representation
+     * @param id the Entities identifier string
+     * @return the response of the request, which contains the json
+     * representation
      * @throws ItemNotFound
-     * @throws AccessDenied
-     * @throws BadRequester
      */
-    public Response getItem(String id) throws AccessDenied, ItemNotFound,
-            BadRequester {
+    public Response getItem(String id) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             E entity = views.detail(id, getRequesterUserProfile());
             if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
@@ -218,17 +204,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Update (change) an instance of the 'entity' in the database.
      *
-     * @param entityBundle The bundle
-     * @return The response of the update request
-     * @throws ItemNotFound
+     * @param entityBundle the bundle
+     * @return the response of the update request
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws BadRequester
      */
-    public Response updateItem(Bundle entityBundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            BadRequester, ItemNotFound {
+    public Response updateItem(Bundle entityBundle)
+            throws PermissionDenied, ValidationError, DeserializationError {
         Mutation<E> update = views
                 .update(entityBundle, getRequesterUserProfile(), getLogMessage());
         return single(update.getNode());
@@ -240,19 +223,17 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * If the Patch header is true top-level bundle data will be merged
      * instead of overwritten.
      *
-     * @param id   The items identifier property
-     * @param rawBundle The bundle
-     * @return The response of the update request
-     * @throws AccessDenied
+     * @param id        the item's ID
+     * @param rawBundle the bundle
+     * @return the response of the update request
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
      * @throws ItemNotFound
-     * @throws BadRequester
      */
-    public Response updateItem(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
+    public Response updateItem(String id, Bundle rawBundle)
+            throws PermissionDenied, ValidationError,
+            DeserializationError, ItemNotFound {
         try {
             E entity = views.detail(id, getRequesterUserProfile());
             if (isPatch()) {
@@ -271,18 +252,15 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * Delete (remove) an instance of the 'entity' in the database,
      * running a handler callback beforehand.
      *
-     * @param id         The vertex id
-     * @param preProcess A handler to run before deleting the item
-     * @return The response of the delete request
-     * @throws AccessDenied
+     * @param id         the item's ID
+     * @param preProcess a handler to run before deleting the item
+     * @return the response of the delete request
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
-     * @throws BadRequester
      */
-    protected Response deleteItem(String id, Handler<E> preProcess) throws AccessDenied, PermissionDenied,
-            ItemNotFound,
-            ValidationError, BadRequester {
+    protected Response deleteItem(String id, Handler<E> preProcess)
+            throws PermissionDenied, ItemNotFound, ValidationError {
         try {
             Accessor user = getRequesterUserProfile();
             preProcess.process(views.detail(id, user));
@@ -296,17 +274,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Delete (remove) an instance of the 'entity' in the database
      *
-     * @param id The vertex id
-     * @return The response of the delete request
-     * @throws AccessDenied
+     * @param id the item's ID
+     * @return the response of the delete request
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
-     * @throws BadRequester
      */
-    protected Response deleteItem(String id) throws AccessDenied, PermissionDenied,
-            ItemNotFound,
-            ValidationError, BadRequester {
+    protected Response deleteItem(String id)
+            throws PermissionDenied, ItemNotFound, ValidationError {
         return deleteItem(id, noOpHandler);
     }
 
@@ -316,7 +291,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * Get a set of accessor frames given a list of names.
      *
      * @param accessorIds a list of accessor IDs
-     * @param current the current accessor
+     * @param current     the current accessor
      * @return a set a accessors
      */
     protected Set<Accessor> getAccessors(List<String> accessorIds, Accessor current) {

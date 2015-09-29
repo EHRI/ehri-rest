@@ -37,12 +37,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static org.junit.Assert.*;
 
 public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
@@ -170,7 +166,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     public void testListVirtualUnit() throws Exception {
         List<Map<String, Object>> data = getEntityList(
                 Entities.VIRTUAL_UNIT, getAdminUserProfileId());
-        assertTrue(data.size() > 0);
+        assertTrue(!data.isEmpty());
         Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> c1, Map<String, Object> c2) {
@@ -224,7 +220,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(ehriUri(Entities.VIRTUAL_UNIT));
+        resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

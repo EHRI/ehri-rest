@@ -25,7 +25,6 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.AccessResource;
 import eu.ehri.project.definitions.Entities;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;

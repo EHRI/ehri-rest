@@ -19,8 +19,6 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -50,27 +48,24 @@ public interface ParentResource {
      * </pre>
      *
      * @return A list of serialized item representations
-     * @throws BadRequester
      */
     Response listChildren(String id, boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied;
+            throws ItemNotFound;
 
     /**
      * Create a subordinate resource.
      *
-     * @param id The parent resource ID.
-     * @param bundle A resource bundle.
+     * @param id        The parent resource ID.
+     * @param bundle    A resource bundle.
      * @param accessors The users/groups who can access this item.
      * @return A serialized representation of the created resource.
-     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
      * @throws ItemNotFound
-     * @throws BadRequester
      */
     Response createChild(String id,
-            Bundle bundle, List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester;
+                         Bundle bundle, List<String> accessors)
+            throws PermissionDenied, ValidationError,
+            DeserializationError, ItemNotFound;
 }

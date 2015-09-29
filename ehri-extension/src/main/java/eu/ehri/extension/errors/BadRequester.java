@@ -19,7 +19,7 @@
 
 package eu.ehri.extension.errors;
 
-public class BadRequester extends Exception {
+public class BadRequester extends RuntimeException {
 
     private static final long serialVersionUID = 2608176871477505511L;
 

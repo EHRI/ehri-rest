@@ -30,12 +30,10 @@ import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 import static eu.ehri.extension.AbstractRestResource.AUTH_HEADER_NAME;
 import static eu.ehri.extension.AdminResource.ENDPOINT;
+import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
+import static org.junit.Assert.*;
 
 /**
  * Test admin REST functions.

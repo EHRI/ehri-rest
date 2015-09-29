@@ -21,9 +21,7 @@ package eu.ehri.extension;
 
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.ContentType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -53,17 +51,16 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
-    public Response get(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
-    public Response list() throws BadRequester {
+    public Response list() {
         return listItems();
     }
 }

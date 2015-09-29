@@ -31,10 +31,8 @@ import javax.ws.rs.core.Response;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static eu.ehri.extension.DescriptionResource.ENDPOINT;
+import static org.junit.Assert.*;
 
 public class DescriptionRestClientTest extends BaseRestClientTest {
 

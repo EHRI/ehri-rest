@@ -52,15 +52,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Variant;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -239,9 +231,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * anonymous.
      *
      * @return The UserProfile
-     * @throws BadRequester
      */
-    protected Accessor getRequesterUserProfile() throws BadRequester {
+    protected Accessor getRequesterUserProfile() {
         Optional<String> id = getRequesterIdentifier();
         if (!id.isPresent()) {
             return AnonymousAccessor.getInstance();
@@ -260,7 +251,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      *
      * @return The current user profile
      */
-    protected UserProfile getCurrentUser() throws BadRequester {
+    protected UserProfile getCurrentUser() {
         Accessor profile = getRequesterUserProfile();
         if (profile.isAdmin() || profile.isAnonymous()
                 || !profile.getType().equals(Entities.USER_PROFILE)) {
@@ -421,7 +412,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     static abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
-        protected Query.Page<T> page;
+        protected final Query.Page<T> page;
 
         public TransactionalPageStreamWrapper(final Request request, final Query.Page<T> page, final Tx tx) {
             super(request, tx);
@@ -454,7 +445,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
-            final Tx tx) {
+                                                                               final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -487,7 +478,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
-            final Tx tx) {
+                                                                                final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {
@@ -555,7 +546,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
-            final Tx tx) {
+                                                                               final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -587,7 +578,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
-            final Tx tx) {
+                                                                                final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
