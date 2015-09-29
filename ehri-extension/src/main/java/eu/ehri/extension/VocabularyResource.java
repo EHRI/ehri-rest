@@ -76,7 +76,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @Override
     public Response listChildren(
             @PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false")  boolean all) throws ItemNotFound {
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
@@ -95,8 +95,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @Override
     public Response create(Bundle bundle,
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = createItem(bundle, accessors);
             tx.success();

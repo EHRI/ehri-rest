@@ -75,9 +75,9 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
-     * <p/>
+     * <p>
      * Example:
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * curl -X POST \
@@ -134,9 +134,9 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of EAD files. The body of the POST
      * request should be a newline separated list of file
      * paths.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      *     curl -X POST \
@@ -148,9 +148,9 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p/>
+     * <p>
      * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
-     * <p/>
+     * <p>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -214,9 +214,9 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a single EAD file. The body of the POST
      * request should be an EAD file.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * curl -X POST \
@@ -228,7 +228,7 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p/>
+     * <p>
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
@@ -288,9 +288,9 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of CSV files. The body of the POST
      * request should be a newline separated list of file
      * paths.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      *     curl -X POST \
@@ -302,9 +302,9 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p/>
+     * <p>
      * (Assuming <code>csv-list.txt</code> is a list of newline separated CSV file paths.)
-     * <p/>
+     * <p>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -312,7 +312,7 @@ public class ImportResource extends AbstractRestResource {
      *                      its contents will be used.
      * @param importerClass The fully-qualified import class name
      * @param stream        A stream of CSV data
-     *                      <p/>
+     *                      <p>
      *                      There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
      * @return A JSON object showing how many records were created,
      * updated, or unchanged.

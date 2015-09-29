@@ -142,7 +142,6 @@ public class CvocConceptResource
      *
      * @param id         The item ID
      * @param idNarrower The narrower item ID
-     *
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -170,7 +169,6 @@ public class CvocConceptResource
      *
      * @param id         The item ID
      * @param idNarrower The narrower item ID
-     *
      * @throws AccessDenied
      * @throws ItemNotFound
      */
@@ -207,7 +205,7 @@ public class CvocConceptResource
             throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-        Concept concept = views.detail(id, getRequesterUserProfile());
+            Concept concept = views.detail(id, getRequesterUserProfile());
             return streamingList(concept.getBroaderConcepts(), tx);
         } catch (Exception e) {
             tx.close();
@@ -265,7 +263,6 @@ public class CvocConceptResource
      *
      * @param id        The item ID
      * @param idRelated The related item ID
-     *
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -295,7 +292,6 @@ public class CvocConceptResource
      *
      * @param id        The item ID
      * @param idRelated The related item ID
-     *
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound

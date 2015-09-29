@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Provides a RESTful interface for the UserProfile.
+ * Provides a web service interface for the UserProfile.
  *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (https://github.com/mikesname)

@@ -445,7 +445,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
-            final Tx tx) {
+                                                                               final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -478,7 +478,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
-            final Tx tx) {
+                                                                                final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {
@@ -546,7 +546,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
-            final Tx tx) {
+                                                                               final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -578,7 +578,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
-            final Tx tx) {
+                                                                                final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {

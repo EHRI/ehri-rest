@@ -46,14 +46,14 @@ public class BooleanJsonProvider implements MessageBodyWriter<Boolean> {
 
     @Override
     public long getSize(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType) {
+                        MediaType mediaType) {
         return -1L;
     }
 
     @Override
     public void writeTo(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> headers,
-            OutputStream outputStream) throws IOException, WebApplicationException {
+                        MediaType mediaType, MultivaluedMap<String, Object> headers,
+                        OutputStream outputStream) throws IOException, WebApplicationException {
         outputStream.write(bool.toString().getBytes(Charsets.UTF_8));
     }
 }

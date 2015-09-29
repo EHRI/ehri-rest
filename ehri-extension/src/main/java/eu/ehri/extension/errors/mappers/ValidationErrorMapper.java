@@ -33,28 +33,28 @@ import javax.ws.rs.ext.Provider;
  * ValidationErrors are a recursive structure with a 'relations'
  * map that contains lists of the errors found in each top-level
  * item's children. The end result should look like:
- *
+ * <p>
  * {
- *   "errors":{},
- *   "relations":{
- *      "describes":[
- *          {}
- *      ],
- *      "hasDate":[
- *          {
- *              "errors":{
- *                  "startDate":["Missing mandatory field"],
- *                  "endDate":["Missing mandatory field"]
- *              },
- *              "relations":{}
- *           }
- *      ]
- *   }
+ * "errors":{},
+ * "relations":{
+ * "describes":[
+ * {}
+ * ],
+ * "hasDate":[
+ * {
+ * "errors":{
+ * "startDate":["Missing mandatory field"],
+ * "endDate":["Missing mandatory field"]
+ * },
+ * "relations":{}
  * }
- *
+ * ]
+ * }
+ * }
+ * <p>
  * The response is sent with HTTP status Bad Request.
- * @author Mike Bryant (http://github.com/mikesname)
  *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {

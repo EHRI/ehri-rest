@@ -219,12 +219,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for a given item, optionally
      * renaming it.
-     *
+     * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     *
+     * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param id         the item's existing ID
@@ -262,12 +262,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID all items of a given
      * type.
-     *
+     * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     *
+     * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param type       the item type
@@ -307,12 +307,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for all items within the
      * permission scope and lower levels.
-     *
+     * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     *
+     * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param scopeId    the scope item's ID

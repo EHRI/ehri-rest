@@ -40,7 +40,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Provides a RESTful interface for dealing with described entities.
+ * Provides a web service interface for dealing with described entities.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -53,7 +53,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     public DescriptionResource(@Context GraphDatabaseService database) {
         super(database, DescribedEntity.class);
-            descriptionViews = new DescriptionViews<>(graph, DescribedEntity.class);
+        descriptionViews = new DescriptionViews<>(graph, DescribedEntity.class);
     }
 
     @POST
@@ -102,7 +102,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/{did:.+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
-            @PathParam("did") String did, Bundle bundle)
+                                            @PathParam("did") String did, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, SerializationError {
         return updateDescription(id, bundle.withId(did));
@@ -112,7 +112,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Path("/{id:.+}/{did:.+}")
     public Response deleteDescription(
             @PathParam("id") String id, @PathParam("did") String did)
-            throws PermissionDenied, ItemNotFound, ValidationError,SerializationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             DescribedEntity item = views.detail(id, user);
@@ -138,7 +138,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP)
     public Response createAccessPoint(@PathParam("id") String id,
-                @PathParam("did") String did, Bundle bundle)
+                                      @PathParam("did") String did, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -160,7 +160,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @DELETE
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
-            @PathParam("did") String did, @PathParam("apid") String apid)
+                                      @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

@@ -93,9 +93,8 @@ public class AuthoritativeSetResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Override
     public Response create(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError {
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = createItem(bundle, accessors);
             tx.success();
@@ -138,12 +137,12 @@ public class AuthoritativeSetResource extends
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             AuthoritativeSet set = views.detail(id, user);
-        	LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<>(graph,
+            LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<>(graph,
                     AuthoritativeItem.class, set);
-        	Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
-        	for (AuthoritativeItem agent : agents) {
-        		agentViews.delete(agent.getId(), user);
-        	}
+            Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
+            for (AuthoritativeItem agent : agents) {
+                agentViews.delete(agent.getId(), user);
+            }
             tx.success();
             return Response.status(Status.OK).build();
         } catch (ValidationError | SerializationError e) {
@@ -157,7 +156,7 @@ public class AuthoritativeSetResource extends
     @Path("/{id:.+}/" + Entities.HISTORICAL_AGENT)
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (Tx tx = graph.getBaseGraph().beginTx()) {

@@ -43,6 +43,6 @@ public interface UpdateResource {
      * @throws ItemNotFound
      */
     Response update(String id, Bundle bundle)
-                throws PermissionDenied,
+            throws PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound;
 }

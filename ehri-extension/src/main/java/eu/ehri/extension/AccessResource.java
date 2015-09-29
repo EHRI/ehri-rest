@@ -65,7 +65,7 @@ public class AccessResource extends
     @POST
     @Path("/{id:[^/]+}")
     public Response setVisibility(@PathParam("id") String id,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
+                                  @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);

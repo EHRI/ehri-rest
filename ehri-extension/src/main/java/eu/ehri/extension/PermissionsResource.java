@@ -242,7 +242,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("{userId:.+}/scope/{id:.+}")
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userId") String userId,
-            @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
+                                                        @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);

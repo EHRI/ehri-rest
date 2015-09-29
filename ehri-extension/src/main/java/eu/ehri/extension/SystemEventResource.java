@@ -59,23 +59,23 @@ import java.util.List;
  * parameter that groups sequential events according to one of two different
  * strategies:
  * <dl>
- *     <dt>user</dt>
- *     <dd>Groups sequential events of all types that are initiated by the same actioner</dd>
- *     <dt>strict</dt>
- *     <dd>
- *         Groups sequential events that:
- *         <ul>
- *             <li>have the same type</li>
- *             <li>have the same actioner</li>
- *             <li>have the same subjects</li>
- *             <li>have the same scope</li>
- *             <li>have the same log message</li>
- *         </ul>
- *     </dd>
+ * <dt>user</dt>
+ * <dd>Groups sequential events of all types that are initiated by the same actioner</dd>
+ * <dt>strict</dt>
+ * <dd>
+ * Groups sequential events that:
+ * <ul>
+ * <li>have the same type</li>
+ * <li>have the same actioner</li>
+ * <li>have the same subjects</li>
+ * <li>have the same scope</li>
+ * <li>have the same log message</li>
+ * </ul>
+ * </dd>
  * </dl>
  * <p>
  * Additionally, aggregation can be disabled by using <code>aggregation=off</code>.
- *
+ * <p>
  * Standard paging parameters apply to all end-points.
  *
  * @author Mike Bryant (http://github.com/mikesname)
@@ -140,7 +140,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     /**
      * Fetch a list of a user's actions.
      *
-     * @param userId     the user's ID
+     * @param userId the user's ID
      * @return a list of event ranges
      * @throws ItemNotFound
      */
@@ -165,7 +165,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     /**
      * Fetch an aggregate list of a user's actions.
      *
-     * @param userId     the user's ID
+     * @param userId      the user's ID
      * @param aggregation The manner in which to aggregate the results, accepting
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>strict</b>.
@@ -221,7 +221,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
      * Aggregate actions that are relevant to a given user based on
      * the other users that they follow and the items they watch.
      *
-     * @param userId     the user's ID
+     * @param userId      the user's ID
      * @param aggregation The manner in which to aggregate the results, accepting
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    "user".
@@ -276,8 +276,8 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     /**
      * Lookup and page the history for a given item.
      *
-     * @param id The event id
-     * @param aggregation the aggregation stategy          
+     * @param id          The event id
+     * @param aggregation the aggregation stategy
      * @return A list of events
      * @throws ItemNotFound
      */

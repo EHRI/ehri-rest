@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response.Status;
 
 /**
  * Provides a web service interface for the PermissionGrant model.
- * 
+ * <p>
  * FIXME: PermissionGrant is not currently an AccessibleEntity so
  * handling it is complicated. We need to re-architect the REST views
  * to handle more than just the initially-envisaged scenarios.
@@ -72,6 +72,7 @@ public class PermissionGrantResource extends AbstractRestResource {
             return response;
         }
     }
+
     /**
      * Revoke a particular permission grant.
      *
@@ -85,7 +86,7 @@ public class PermissionGrantResource extends AbstractRestResource {
             throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
-                    EntityClass.PERMISSION_GRANT, PermissionGrant.class),
+                            EntityClass.PERMISSION_GRANT, PermissionGrant.class),
                     getRequesterUserProfile());
             tx.success();
             return Response.status(Status.OK).build();

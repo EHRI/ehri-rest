@@ -39,11 +39,10 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for managing countries
+ * Provides a web service interface for managing countries
  * and creating repositories within them.
- * 
+ *
  * @author Mike Bryant (http://github.com/mikesname)
- * 
  */
 @Path(Entities.COUNTRY)
 public class CountryResource
@@ -74,7 +73,7 @@ public class CountryResource
     @Path("/{id:.+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
+                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
@@ -93,8 +92,7 @@ public class CountryResource
     @Override
     public Response create(Bundle bundle,
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = createItem(bundle, accessors);
             tx.success();
@@ -132,7 +130,7 @@ public class CountryResource
     /**
      * Create a top-level repository unit for this country.
      *
-     * @param id The country id
+     * @param id     The country id
      * @param bundle The new repository data
      * @return The new repository
      * @throws PermissionDenied
@@ -146,7 +144,7 @@ public class CountryResource
     @Path("/{id:.+}/" + Entities.REPOSITORY)
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (Tx tx = graph.getBaseGraph().beginTx()) {

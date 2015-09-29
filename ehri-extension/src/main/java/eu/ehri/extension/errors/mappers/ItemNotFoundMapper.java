@@ -35,7 +35,6 @@ import java.util.Map;
  *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 @Provider
 public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
@@ -44,7 +43,7 @@ public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
 
     @SuppressWarnings("serial")
     @Override
-	public Response toResponse(final ItemNotFound e) {
+    public Response toResponse(final ItemNotFound e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
                 put("error", ItemNotFound.class.getSimpleName());
@@ -59,11 +58,11 @@ public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
         };
         try {
             return Response.status(Status.NOT_FOUND)
-                .entity(mapper.writeValueAsString(out)
-                        .getBytes(Charsets.UTF_8)).build();
+                    .entity(mapper.writeValueAsString(out)
+                            .getBytes(Charsets.UTF_8)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
-	}
+    }
 
 }

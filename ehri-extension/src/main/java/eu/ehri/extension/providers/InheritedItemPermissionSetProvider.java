@@ -53,15 +53,15 @@ public class InheritedItemPermissionSetProvider implements MessageBodyWriter<Inh
 
     @Override
     public long getSize(InheritedItemPermissionSet permissionSet, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType) {
+                        MediaType mediaType) {
         return -1L;
     }
 
     @Override
     public void writeTo(InheritedItemPermissionSet itemPermissionSet,
-            Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> headers,
-            OutputStream outputStream) throws IOException, WebApplicationException {
+                        Class<?> aClass, Type type, Annotation[] annotations,
+                        MediaType mediaType, MultivaluedMap<String, Object> headers,
+                        OutputStream outputStream) throws IOException, WebApplicationException {
         headers.putSingle(HttpHeaders.CACHE_CONTROL,
                 PermissionsResource.getCacheControl().toString());
         mapper.writeValue(outputStream, itemPermissionSet.serialize());

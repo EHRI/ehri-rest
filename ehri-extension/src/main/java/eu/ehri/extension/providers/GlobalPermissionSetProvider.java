@@ -60,7 +60,7 @@ public class GlobalPermissionSetProvider implements MessageBodyReader<GlobalPerm
 
     @Override
     public GlobalPermissionSet readFrom(Class<GlobalPermissionSet> bundleClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String,
+                                        MediaType mediaType, MultivaluedMap<String,
             String> headers, InputStream stream) throws IOException, WebApplicationException {
 
         try {

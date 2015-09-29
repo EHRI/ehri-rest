@@ -82,8 +82,8 @@ public class GroupResource
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createGroup(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-            @QueryParam(MEMBER_PARAM) List<String> members)
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -128,7 +128,7 @@ public class GroupResource
     @POST
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response addMember(@PathParam("id") String id,
-            @PathParam("aid") String aid)
+                              @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
@@ -146,7 +146,7 @@ public class GroupResource
     @DELETE
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response removeMember(@PathParam("id") String id,
-            @PathParam("aid") String aid) throws PermissionDenied,
+                                 @PathParam("aid") String aid) throws PermissionDenied,
             ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
@@ -187,7 +187,7 @@ public class GroupResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public long countChildResources(@PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
+                                    @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             Group group = views.detail(id, user);

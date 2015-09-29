@@ -39,7 +39,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the Repository.
+ * Provides a web service interface for the Repository.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -116,8 +116,8 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     /**
      * Create a documentary unit for this repository.
-     * 
-     * @param id The repository ID
+     *
+     * @param id     The repository ID
      * @param bundle The new unit data
      * @return The new unit
      * @throws PermissionDenied

@@ -34,7 +34,6 @@ import java.util.Map;
  *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 @Provider
 public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied> {
@@ -43,7 +42,7 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
 
     @SuppressWarnings("serial")
     @Override
-	public Response toResponse(final PermissionDenied e) {
+    public Response toResponse(final PermissionDenied e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
                 put("error", PermissionDenied.class.getSimpleName());
@@ -57,11 +56,11 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
                 });
             }
         };
-		try {
+        try {
             return Response.status(Status.UNAUTHORIZED)
-            	.entity(mapper.writeValueAsBytes(out)).build();
+                    .entity(mapper.writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
-	}
+    }
 }

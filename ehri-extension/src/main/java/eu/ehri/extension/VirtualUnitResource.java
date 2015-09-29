@@ -47,7 +47,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the VirtualUnit type
+ * Provides a web service interface for the VirtualUnit type
  *
  * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (https://github.com/mikesname)
@@ -167,8 +167,8 @@ public final class VirtualUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createTopLevelVirtualUnit(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-            @QueryParam(ID_PARAM) List<String> includedIds)
+                                              @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                              @QueryParam(ID_PARAM) List<String> includedIds)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -195,9 +195,9 @@ public final class VirtualUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     @Override
-    public Response update(@PathParam("id") String id,
-            Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError, ItemNotFound {
+    public Response update(@PathParam("id") String id, Bundle bundle)
+            throws PermissionDenied, ValidationError,
+            DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
@@ -222,8 +222,8 @@ public final class VirtualUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.VIRTUAL_UNIT)
     public Response createChildVirtualUnit(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-            @QueryParam(ID_PARAM) List<String> includedIds)
+                                           Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                           @QueryParam(ID_PARAM) List<String> includedIds)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

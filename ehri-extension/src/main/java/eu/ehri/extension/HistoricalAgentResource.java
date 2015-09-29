@@ -71,8 +71,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     @Override
     public Response create(Bundle bundle,
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = createItem(bundle, accessors);
             tx.success();

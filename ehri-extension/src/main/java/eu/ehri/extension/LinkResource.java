@@ -83,7 +83,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ItemNotFound, ValidationError,DeserializationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
@@ -96,7 +96,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
      *
      * @param targetId  The link target
      * @param sourceId  The link source
-     * @param bundle      The link body data
+     * @param bundle    The link body data
      * @param bodies    optional list of entities to provide the body
      * @param accessors The IDs of accessors who can see this link
      * @return The created link item
@@ -138,7 +138,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     @DELETE
     @Path("/accessPoint/{id:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,SerializationError {
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor userProfile = getRequesterUserProfile();
             UndeterminedRelationship rel = manager.getFrame(id, UndeterminedRelationship.class);
@@ -166,7 +166,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Query<Link> linkQuery = new Query<>(graph, Link.class)
-                .setStream(isStreaming());
+                    .setStream(isStreaming());
             return streamingPage(linkQuery.setStream(isStreaming()).page(
                     manager.getFrame(id, LinkableEntity.class).getLinks(),
                     getRequesterUserProfile()), tx);

@@ -46,14 +46,14 @@ public class NumberJsonProvider implements MessageBodyWriter<Number> {
 
     @Override
     public long getSize(Number number, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType) {
+                        MediaType mediaType) {
         return -1L;
     }
 
     @Override
     public void writeTo(Number number, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> headers,
-            OutputStream outputStream) throws IOException, WebApplicationException {
+                        MediaType mediaType, MultivaluedMap<String, Object> headers,
+                        OutputStream outputStream) throws IOException, WebApplicationException {
         outputStream.write(number.toString().getBytes(Charsets.UTF_8));
     }
 }

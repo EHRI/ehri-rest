@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful(ish) interface for creating.
+ * Web service interface for creating annotations.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
@@ -76,10 +76,10 @@ public class AnnotationResource
     /**
      * Create an annotation for a particular item.
      *
-     * @param id        The ID of the item being annotation
-     * @param bundle      The JSON representation of the annotation
-     * @param accessors User IDs who can access the annotation
-     * @return The annotation
+     * @param id        the ID of the item being annotation
+     * @param bundle    the JSON representation of the annotation
+     * @param accessors user IDs who can access the annotation
+     * @return the annotation
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -91,7 +91,7 @@ public class AnnotationResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     public Response createAnnotationFor(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                                        Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -107,11 +107,11 @@ public class AnnotationResource
     /**
      * Create an annotation for a dependent node on a given item.
      *
-     * @param id        The ID of the item being annotation
-     * @param did       The ID of the description being annotated
-     * @param bundle      The JSON representation of the annotation
-     * @param accessors User IDs who can access the annotation
-     * @return The annotation
+     * @param id        the ID of the item being annotation
+     * @param did       the ID of the description being annotated
+     * @param bundle    the JSON representation of the annotation
+     * @param accessors user IDs who can access the annotation
+     * @return the annotation
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -142,8 +142,8 @@ public class AnnotationResource
      * Return a map of annotations for the subtree of the given item and its
      * child items. Standard list parameters apply.
      *
-     * @param id The item ID
-     * @return A list of annotations on the item and it's dependent children.
+     * @param id the item ID
+     * @return a list of annotations on the item and it's dependent children.
      * @throws ItemNotFound
      */
     @GET
@@ -168,7 +168,7 @@ public class AnnotationResource
     @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ItemNotFound, ValidationError,DeserializationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = updateItem(id, bundle);
             tx.success();

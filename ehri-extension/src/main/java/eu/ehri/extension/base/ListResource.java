@@ -37,9 +37,9 @@ public interface ListResource {
      * <p>
      * The page, limit, and total number of items is returned in the Content-Range response
      * header in the form:
-     *
+     * <p>
      * <pre><code>page=1; count=20; total=50</code></pre>
-     *
+     * <p>
      * If the header <code>X-Stream</code> is set to <code>true</code>
      * no count of total items will be performed. This is more efficient when returning large
      * numbers of items or when limiting is disabled completely.
