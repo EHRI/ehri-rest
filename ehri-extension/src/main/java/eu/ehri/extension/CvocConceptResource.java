@@ -31,7 +31,6 @@ import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
@@ -74,10 +73,10 @@ public class CvocConceptResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+            throws ItemNotFound, BadRequester {
         return getItem(id);
     }
 
@@ -91,24 +90,10 @@ public class CvocConceptResource
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Override
-    public Response update(Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = updateItem(bundle);
-            tx.success();
-            return item;
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
@@ -118,11 +103,11 @@ public class CvocConceptResource
     }
 
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, SerializationError {
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);
             tx.success();
@@ -156,7 +141,7 @@ public class CvocConceptResource
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();

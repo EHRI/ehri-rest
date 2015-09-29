@@ -20,7 +20,6 @@
 package eu.ehri.extension.base;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 
 import javax.ws.rs.core.Response;
@@ -36,10 +35,9 @@ public interface GetResource {
      * @param id The requested item id
      * @return A serialized item representation
      * @throws ItemNotFound
-     * @throws AccessDenied
      * @throws BadRequester
      */
     Response get(String id)
-            throws ItemNotFound, AccessDenied, BadRequester;
+            throws ItemNotFound, BadRequester;
 
 }

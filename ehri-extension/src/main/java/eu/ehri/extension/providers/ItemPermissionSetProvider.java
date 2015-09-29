@@ -48,8 +48,8 @@ import java.util.Set;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ItemPermissionSetProvider implements MessageBodyReader<ItemPermissionSet> {
 
-    private static JsonFactory factory = new JsonFactory();
-    private static ObjectMapper mapper = new ObjectMapper(factory);
+    private static final JsonFactory factory = new JsonFactory();
+    private static final ObjectMapper mapper = new ObjectMapper(factory);
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {

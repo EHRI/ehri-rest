@@ -34,7 +34,6 @@ import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -83,10 +82,10 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+            throws ItemNotFound, BadRequester {
         return getItem(id);
     }
 
@@ -211,24 +210,10 @@ public final class VirtualUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Override
-    public Response update(Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = updateItem(bundle);
-            tx.success();
-            return item;
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id,
-            Bundle bundle) throws AccessDenied, PermissionDenied,
+            Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
@@ -238,11 +223,11 @@ public final class VirtualUnitResource extends
     }
 
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, SerializationError {
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);
             tx.success();
@@ -306,7 +291,7 @@ public final class VirtualUnitResource extends
      */
     private List<DocumentaryUnit> getIncludedUnits(
             List<String> ids, Accessor accessor)
-            throws ItemNotFound, BadRequester {
+            throws ItemNotFound {
         Iterable<Vertex> vertices = manager.getVertices(ids);
 
         PipeFunction<Vertex, Boolean> aclFilter = AclManager.getAclFilterFunction(accessor);
@@ -315,8 +300,7 @@ public final class VirtualUnitResource extends
             @Override
             public Boolean compute(Vertex vertex) {
                 EntityClass entityClass = manager.getEntityClass(vertex);
-                return entityClass != null && entityClass
-                        .equals(EntityClass.DOCUMENTARY_UNIT);
+                return EntityClass.DOCUMENTARY_UNIT.equals(entityClass);
             }
         };
 

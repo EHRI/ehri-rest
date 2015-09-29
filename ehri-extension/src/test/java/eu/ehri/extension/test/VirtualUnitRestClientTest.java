@@ -170,7 +170,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     public void testListVirtualUnit() throws Exception {
         List<Map<String, Object>> data = getEntityList(
                 Entities.VIRTUAL_UNIT, getAdminUserProfileId());
-        assertTrue(data.size() > 0);
+        assertTrue(!data.isEmpty());
         Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> c1, Map<String, Object> c2) {
@@ -224,7 +224,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(ehriUri(Entities.VIRTUAL_UNIT));
+        resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

@@ -20,7 +20,6 @@
 package eu.ehri.extension.base;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -53,7 +52,7 @@ public interface ParentResource {
      * @throws BadRequester
      */
     Response listChildren(String id, boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied;
+            throws ItemNotFound, BadRequester;
 
     /**
      * Create a subordinate resource.
@@ -62,7 +61,6 @@ public interface ParentResource {
      * @param bundle A resource bundle.
      * @param accessors The users/groups who can access this item.
      * @return A serialized representation of the created resource.
-     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -71,6 +69,6 @@ public interface ParentResource {
      */
     Response createChild(String id,
             Bundle bundle, List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester;
 }

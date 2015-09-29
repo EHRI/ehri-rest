@@ -20,7 +20,6 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
@@ -116,7 +115,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
     @Path("/{id:.+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound,
-            AccessDenied, BadRequester {
+            BadRequester {
         return getItem(id);
     }
 

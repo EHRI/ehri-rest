@@ -120,7 +120,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 UPDATED_NAME);
 
         // -update
-        response = jsonCallAs(getAdminUserProfileId(), ehriUri(Entities.USER_PROFILE))
+        response = jsonCallAs(getAdminUserProfileId(), location)
                 .entity(entityBundle.toJson()).put(ClientResponse.class);
         assertStatus(OK, response);
 

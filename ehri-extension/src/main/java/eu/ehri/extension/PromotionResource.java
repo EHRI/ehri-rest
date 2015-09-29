@@ -62,7 +62,7 @@ public class PromotionResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @POST
-    @Path("/{id:.+}/up")
+    @Path("{id:.+}/up")
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -87,7 +87,7 @@ public class PromotionResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:.+}/up")
+    @Path("{id:.+}/up")
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -109,7 +109,7 @@ public class PromotionResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @POST
-    @Path("/{id:.+}/down")
+    @Path("{id:.+}/down")
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -134,7 +134,7 @@ public class PromotionResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:.+}/down")
+    @Path("{id:.+}/down")
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

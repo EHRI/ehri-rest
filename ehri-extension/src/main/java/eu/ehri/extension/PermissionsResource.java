@@ -184,7 +184,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}")
+    @Path("{userId:.+}")
     public InheritedGlobalPermissionSet getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -208,7 +208,7 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}")
+    @Path("{userId:.+}")
     public InheritedGlobalPermissionSet setGlobalMatrix(
             @PathParam("userId") String userId,
             GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound, BadRequester {
@@ -233,7 +233,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/{id:.+}")
+    @Path("{userId:.+}/{id:.+}")
     public InheritedItemPermissionSet getEntityMatrix(
             @PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
@@ -257,7 +257,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/scope/{id:.+}")
+    @Path("{userId:.+}/scope/{id:.+}")
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -284,7 +284,7 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/scope/{id:.+}")
+    @Path("{userId:.+}/scope/{id:.+}")
     public InheritedGlobalPermissionSet setScopedPermissions(
             @PathParam("userId") String userId,
             @PathParam("id") String id,
@@ -313,7 +313,7 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:.+}/{id:.+}")
+    @Path("{userId:.+}/{id:.+}")
     public InheritedItemPermissionSet setItemPermissions(
             @PathParam("userId") String userId,
             @PathParam("id") String id,

@@ -67,7 +67,7 @@ public class PermissionGrantResource extends AbstractRestResource {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     public Response getPermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -87,7 +87,7 @@ public class PermissionGrantResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     public Response revokePermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

@@ -222,7 +222,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Map<String, Object>> data = getEntityList(
                 Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
-        assertTrue(data.size() > 0);
+        assertTrue(!data.isEmpty());
         Collections.sort(data, dataSort);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
@@ -309,7 +309,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(ehriUri(Entities.DOCUMENTARY_UNIT));
+        resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

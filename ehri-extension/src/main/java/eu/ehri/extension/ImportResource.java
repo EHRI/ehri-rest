@@ -111,7 +111,7 @@ public class ImportResource extends AbstractRestResource {
     @POST
 //    @Consumes({"application/rdf+xml","text/turtle","application/n-triples","application/trig","application/n-quads","application/ld+json"})
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/skos")
+    @Path("skos")
     public Response importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
@@ -183,7 +183,7 @@ public class ImportResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/ead")
+    @Path("ead")
     public Response importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
@@ -259,7 +259,7 @@ public class ImportResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/single_ead")
+    @Path("single_ead")
     public Response importSingleEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
@@ -332,7 +332,7 @@ public class ImportResource extends AbstractRestResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/csv")
+    @Path("csv")
     public Response importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @QueryParam(LOG_PARAM) String logMessage,

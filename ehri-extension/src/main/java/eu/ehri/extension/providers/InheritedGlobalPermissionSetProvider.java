@@ -43,8 +43,8 @@ import java.lang.reflect.Type;
 @Produces(MediaType.APPLICATION_JSON)
 public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<InheritedGlobalPermissionSet> {
 
-    private static JsonFactory factory = new JsonFactory();
-    private static ObjectMapper mapper = new ObjectMapper(factory);
+    private static final JsonFactory factory = new JsonFactory();
+    private static final ObjectMapper mapper = new ObjectMapper(factory);
 
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {

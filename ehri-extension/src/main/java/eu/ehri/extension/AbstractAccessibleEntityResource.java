@@ -22,7 +22,7 @@ package eu.ehri.extension;
 import com.google.common.collect.Sets;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -34,7 +34,6 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.core.Tx;
 import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.ViewHelper;
@@ -199,11 +198,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the request, which contains the json
      *         representation
      * @throws ItemNotFound
-     * @throws AccessDenied
      * @throws BadRequester
      */
-    public Response getItem(String id) throws AccessDenied, ItemNotFound,
-            BadRequester {
+    public Response getItem(String id) throws ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             E entity = views.detail(id, getRequesterUserProfile());
             if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
@@ -220,7 +217,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      *
      * @param entityBundle The bundle
      * @return The response of the update request
-     * @throws ItemNotFound
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -228,7 +224,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response updateItem(Bundle entityBundle) throws PermissionDenied,
             ValidationError, DeserializationError,
-            BadRequester, ItemNotFound {
+            BadRequester {
         Mutation<E> update = views
                 .update(entityBundle, getRequesterUserProfile(), getLogMessage());
         return single(update.getNode());
@@ -243,14 +239,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param id   The items identifier property
      * @param rawBundle The bundle
      * @return The response of the update request
-     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response updateItem(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
+    public Response updateItem(String id, Bundle rawBundle) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         try {
@@ -274,13 +269,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param id         The vertex id
      * @param preProcess A handler to run before deleting the item
      * @return The response of the delete request
-     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response deleteItem(String id, Handler<E> preProcess) throws AccessDenied, PermissionDenied,
+    protected Response deleteItem(String id, Handler<E> preProcess) throws PermissionDenied,
             ItemNotFound,
             ValidationError, BadRequester {
         try {
@@ -298,13 +292,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      *
      * @param id The vertex id
      * @return The response of the delete request
-     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response deleteItem(String id) throws AccessDenied, PermissionDenied,
+    protected Response deleteItem(String id) throws PermissionDenied,
             ItemNotFound,
             ValidationError, BadRequester {
         return deleteItem(id, noOpHandler);

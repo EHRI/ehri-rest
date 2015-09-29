@@ -26,7 +26,6 @@ import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -76,10 +75,10 @@ public class GroupResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound,
-            AccessDenied, BadRequester {
+            BadRequester {
         return getItem(id);
     }
 
@@ -122,24 +121,10 @@ public class GroupResource
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Override
-    public Response update(Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = updateItem(bundle);
-            tx.success();
-            return item;
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
@@ -233,10 +218,10 @@ public class GroupResource
      * Delete a group with the given identifier string.
      */
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);

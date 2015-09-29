@@ -71,7 +71,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     public Response createDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
@@ -92,7 +92,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     public Response updateDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {

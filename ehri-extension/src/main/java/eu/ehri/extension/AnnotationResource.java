@@ -74,10 +74,10 @@ public class AnnotationResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound,
-            AccessDenied, BadRequester {
+            BadRequester {
         return getItem(id);
     }
 
@@ -184,10 +184,10 @@ public class AnnotationResource
     }
 
     @PUT
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = updateItem(id, bundle);
@@ -196,23 +196,11 @@ public class AnnotationResource
         }
     }
 
-    @PUT
-    @Override
-    public Response update(Bundle bundle)
-            throws PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response response = updateItem(bundle);
-            tx.success();
-            return response;
-        }
-    }
-
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = deleteItem(id);

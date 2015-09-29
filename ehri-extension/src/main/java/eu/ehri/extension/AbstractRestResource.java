@@ -421,7 +421,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     static abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
-        protected Query.Page<T> page;
+        protected final Query.Page<T> page;
 
         public TransactionalPageStreamWrapper(final Request request, final Query.Page<T> page, final Tx tx) {
             super(request, tx);

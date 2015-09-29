@@ -77,10 +77,10 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+            throws ItemNotFound, BadRequester {
         return getItem(id);
     }
 
@@ -93,7 +93,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/list")
+    @Path("{id:.+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -129,24 +129,10 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Override
-    public Response update(Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = updateItem(bundle);
-            tx.success();
-            return item;
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
@@ -156,10 +142,10 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     }
 
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = deleteItem(id);

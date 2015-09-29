@@ -26,7 +26,6 @@ import eu.ehri.extension.base.ParentResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -68,10 +67,10 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound,
-            AccessDenied, BadRequester {
+            BadRequester {
         return getItem(id);
     }
 
@@ -107,24 +106,10 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Override
-    public Response update(Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response response = updateItem(bundle);
-            tx.success();
-            return response;
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = updateItem(id, bundle);
@@ -134,10 +119,10 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = deleteItem(id);

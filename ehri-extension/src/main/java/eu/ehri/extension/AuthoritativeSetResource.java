@@ -76,10 +76,10 @@ public class AuthoritativeSetResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+            throws ItemNotFound, BadRequester {
         return getItem(id);
     }
 
@@ -117,7 +117,7 @@ public class AuthoritativeSetResource extends
     public Response create(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, BadRequester {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = createItem(bundle, accessors);
             tx.success();
@@ -128,24 +128,10 @@ public class AuthoritativeSetResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Override
-    public Response update(Bundle bundle) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Response response = updateItem(bundle);
-            tx.success();
-            return response;
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = updateItem(id, bundle);
@@ -155,10 +141,10 @@ public class AuthoritativeSetResource extends
     }
 
     @DELETE
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response delete(@PathParam("id") String id)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = deleteItem(id);
@@ -195,7 +181,7 @@ public class AuthoritativeSetResource extends
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
