@@ -95,7 +95,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
             for (String key : v.getPropertyKeys()) {
                 String value = "";
                 if (v.getProperty(key) instanceof String[]) {
-                    String[] list = (String[]) v.getProperty(key);
+                    String[] list = v.getProperty(key);
                     for (String o : list) {
                         value += "[" + o + "] ";
                     }
@@ -127,7 +127,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         Iterable<Description> descriptions = c.getDescriptions();
         for (Description d : descriptions) {
             String lang = d.getLanguageOfDescription();
-            String prefLabel = (String) d.asVertex().getProperty(Ontology.PREFLABEL); // can't use the getPrefLabel() !
+            String prefLabel = d.getName();
             out.print(", \"" + prefLabel + "\"(" + lang + ")");
         }
         // TODO Print related concept ids?

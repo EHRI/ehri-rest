@@ -27,23 +27,43 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.*;
+import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.CsvImportManager;
+import eu.ehri.project.importers.EadHandler;
+import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportManager;
+import eu.ehri.project.importers.SaxImportManager;
+import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -54,6 +74,7 @@ import java.util.List;
 @Path("import")
 public class ImportResource extends AbstractRestResource {
 
+    private static final Logger logger = LoggerFactory.getLogger(ImportResource.class);
     private static final Class<? extends SaxXmlHandler> DEFAULT_EAD_HANDLER
             = EadHandler.class;
     private static final Class<? extends AbstractImporter> DEFAULT_EAD_IMPORTER
@@ -131,9 +152,15 @@ public class ImportResource extends AbstractRestResource {
     }
 
     /**
-     * Import a set of EAD files. The body of the POST
-     * request should be a newline separated list of file
-     * paths.
+     * Import a set of EAD files. The POST body can be one of:
+     * <ul>
+     * <li>a single EAD file</li>
+     * <li>multiple EAD files in an archive</li>
+     * <li>a plain test file containing local file paths</li>
+     * </ul>
+     * The Content-Type header is used to distinguish the contents.
+     * <br>
+     * <b>Note:</b> The archive does not currently support compression.
      * <p>
      * The way you would run with would typically be:
      * <p>
@@ -163,13 +190,16 @@ public class ImportResource extends AbstractRestResource {
      *                      (defaults to EadImporter)
      * @param propertyFile  A local file path pointing to an import properties
      *                      configuration file.
-     * @param pathList      A string containing a list of local file paths
-     *                      to import.
+     * @param data          File data containing one of: a single EAD file,
+     *                      multiple EAD files in an archive, a list of local file
+     *                      paths. The Content-Type header is used to distinguish
+     *                      the contents.
      * @return A JSON object showing how many records were created,
      * updated, or unchanged.
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("ead")
     public Response importEad(
@@ -179,83 +209,7 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            String pathList)
-            throws ItemNotFound, ValidationError,
-            IOException, DeserializationError {
-
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            checkPropertyFile(propertyFile);
-            Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
-            Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
-
-            // Get the current user from the Authorization header and the scope
-            // from the query params...
-            UserProfile user = getCurrentUser();
-            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
-
-            // Extract our list of paths...
-            List<String> paths = getFilePaths(pathList);
-
-            // Run the import!
-            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
-                    .withProperties(propertyFile)
-                    .setTolerant(tolerant)
-                    .importFiles(paths, getLogMessage(logMessage).orNull());
-
-            tx.success();
-            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
-        } catch (ClassNotFoundException e) {
-            throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new DeserializationError(e.getMessage());
-        }
-    }
-
-    /**
-     * Import a single EAD file. The body of the POST
-     * request should be an EAD file.
-     * <p>
-     * The way you would run with would typically be:
-     * <p>
-     * <pre>
-     * {@code
-     * curl -X POST \
-     * -H "X-User: mike" \
-     * --data-binary @ead-file.xml \
-     * "http://localhost:7474/ehri/import/single_ead?scope=my-repo-id&log=testing&tolerant=true"
-     *
-     * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
-     * # it needs url encoding.
-     * }
-     * </pre>
-     * <p>
-     *
-     * @param scopeId       The id of the import scope (i.e. repository)
-     * @param tolerant      Whether or not to die on the first validation error
-     * @param logMessage    Log message for import. If this refers to an accessible local file
-     *                      its contents will be used.
-     * @param handlerClass  The fully-qualified handler class name
-     *                      (defaults to EadHandler)
-     * @param importerClass The fully-qualified import class name
-     *                      (defaults to EadImporter)
-     * @param propertyFile  A local file path pointing to an import properties
-     *                      configuration file.
-     * @param input         An XML document that is a valid EAD document.
-     * @return A JSON object showing how many records were created,
-     * updated, or unchanged.
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("single_ead")
-    public Response importSingleEad(
-            @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @QueryParam(LOG_PARAM) String logMessage,
-            @QueryParam(PROPERTIES_PARAM) String propertyFile,
-            @QueryParam(HANDLER_PARAM) String handlerClass,
-            @QueryParam(IMPORTER_PARAM) String importerClass,
-            InputStream input)
+            InputStream data)
             throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
@@ -270,16 +224,37 @@ public class ImportResource extends AbstractRestResource {
             PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
 
             // Run the import!
-            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
+            ImportManager importManager = new SaxImportManager(graph, scope, user, importer, handler)
                     .withProperties(propertyFile)
-                    .setTolerant(tolerant)
-                    .importFile(input, getLogMessage(logMessage).orNull());
+                    .setTolerant(tolerant);
+
+            ImportLog log;
+            String message = getLogMessage(logMessage).orNull();
+            MediaType mediaType = requestHeaders.getMediaType();
+
+            if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
+                // Extract our list of paths...
+                List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
+                log = importManager
+                        .importFiles(paths, message);
+            } else if (MediaType.TEXT_XML_TYPE.equals(mediaType)
+                    || MediaType.APPLICATION_XML_TYPE.equals(mediaType)) {
+                log = importManager.importFile(data, message);
+            } else {
+                logger.info("Import via compressed archive...");
+                try (BufferedInputStream bis = new BufferedInputStream(data);
+                     ArchiveInputStream archiveInputStream = new
+                        ArchiveStreamFactory().createArchiveInputStream(bis)) {
+                    log = importManager
+                            .importFiles(archiveInputStream, message);
+                }
+            }
 
             tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | InputParseError e) {
+        } catch (IllegalArgumentException | InputParseError | ArchiveException e) {
             throw new DeserializationError(e.getMessage());
         }
     }
@@ -428,15 +403,15 @@ public class ImportResource extends AbstractRestResource {
         }
     }
 
-    private Optional<String> getLogMessage(String logMessage) throws IOException {
-        if (logMessage == null || logMessage.isEmpty()) {
-            return Optional.absent();
+    private Optional<String> getLogMessage(String logMessagePathOrText) throws IOException {
+        if (logMessagePathOrText == null || logMessagePathOrText.trim().isEmpty()) {
+            return getLogMessage();
         } else {
-            File fileTest = new File(logMessage);
+            File fileTest = new File(logMessagePathOrText);
             if (fileTest.exists()) {
                 return Optional.of(FileUtils.readFileToString(fileTest, "UTF-8"));
             } else {
-                return Optional.of(logMessage);
+                return Optional.of(logMessagePathOrText);
             }
         }
     }

@@ -60,6 +60,7 @@
                 <include>xerces:xercesImpl</include>
                 <include>xml-apis:xml-apis</include>
                 <include>org.apache.commons:commons-lang3</include>
+                <include>org.apache.commons:commons-compress</include>
             </includes>
         </dependencySet>
     </dependencySets>
