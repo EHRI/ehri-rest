@@ -21,6 +21,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,5 +54,8 @@ public interface ImportManager {
             throws IOException, InputParseError, ValidationError;
     
     ImportLog importFiles(List<String> paths, String logMessage)
+            throws IOException, ValidationError;
+
+    ImportLog importFiles(ArchiveInputStream inputStream, String logMessage)
             throws IOException, ValidationError;
 }

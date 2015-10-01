@@ -112,11 +112,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * With each request the headers of that request are injected into the
      * requestHeaders parameter.
      */
-    @Context
-    private HttpHeaders requestHeaders;
+    @Context protected HttpHeaders requestHeaders;
 
-    @Context
-    private Request request;
+    @Context protected Request request;
 
     /**
      * Fetch the media type of the incoming request.
