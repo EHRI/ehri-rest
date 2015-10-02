@@ -29,8 +29,12 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.CsvImportManager;
+import eu.ehri.project.importers.EacHandler;
+import eu.ehri.project.importers.EacImporter;
 import eu.ehri.project.importers.EadHandler;
 import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.EagHandler;
+import eu.ehri.project.importers.EagImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportManager;
 import eu.ehri.project.importers.SaxImportManager;
@@ -71,14 +75,14 @@ import java.util.List;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("import")
+@Path(ImportResource.ENDPOINT)
 public class ImportResource extends AbstractRestResource {
 
+    public static final String ENDPOINT = "import";
+
     private static final Logger logger = LoggerFactory.getLogger(ImportResource.class);
-    private static final Class<? extends SaxXmlHandler> DEFAULT_EAD_HANDLER
-            = EadHandler.class;
-    private static final Class<? extends AbstractImporter> DEFAULT_EAD_IMPORTER
-            = EadImporter.class;
+    private static final String DEFAULT_EAD_HANDLER = EadHandler.class.getName();
+    private static final String DEFAULT_EAD_IMPORTER = EadImporter.class.getName();
 
     public static final String LOG_PARAM = "log";
     public static final String SCOPE_PARAM = "scope";
@@ -87,6 +91,8 @@ public class ImportResource extends AbstractRestResource {
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
+
+    public static final String CSV_MEDIA_TYPE = "text/csv";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -215,8 +221,10 @@ public class ImportResource extends AbstractRestResource {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             checkPropertyFile(propertyFile);
-            Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
-            Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
+            Class<? extends SaxXmlHandler> handler
+                    = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
+            Class<? extends AbstractImporter> importer
+                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             // Get the current user from the Authorization header and the scope
             // from the query params...
@@ -224,32 +232,12 @@ public class ImportResource extends AbstractRestResource {
             PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
 
             // Run the import!
+            String message = getLogMessage(logMessage).orNull();
             ImportManager importManager = new SaxImportManager(graph, scope, user, importer, handler)
                     .withProperties(propertyFile)
                     .setTolerant(tolerant);
-
-            ImportLog log;
-            String message = getLogMessage(logMessage).orNull();
-            MediaType mediaType = requestHeaders.getMediaType();
-
-            if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
-                // Extract our list of paths...
-                List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
-                log = importManager
-                        .importFiles(paths, message);
-            } else if (MediaType.TEXT_XML_TYPE.equals(mediaType)
-                    || MediaType.APPLICATION_XML_TYPE.equals(mediaType)) {
-                log = importManager.importFile(data, message);
-            } else {
-                logger.info("Import via compressed archive...");
-                try (BufferedInputStream bis = new BufferedInputStream(data);
-                     ArchiveInputStream archiveInputStream = new
-                        ArchiveStreamFactory().createArchiveInputStream(bis)) {
-                    log = importManager
-                            .importFiles(archiveInputStream, message);
-                }
-            }
-
+            ImportLog log = importDataStream(importManager, message, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
             tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
@@ -260,52 +248,72 @@ public class ImportResource extends AbstractRestResource {
     }
 
     /**
-     * Import a set of CSV files. The body of the POST
-     * request should be a newline separated list of file
-     * paths.
-     * <p>
-     * The way you would run with would typically be:
-     * <p>
-     * <pre>
-     * {@code
-     *     curl -X POST \
-     *      -H "X-User: mike" \
-     *      --data-binary @csv-list.txt \
-     *      "http://localhost:7474/ehri/import/csv?scope=my-repo-id&log=testing"
-     *
-     * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
-     * # it needs url encoding.
-     * }
-     * </pre>
-     * <p>
-     * (Assuming <code>csv-list.txt</code> is a list of newline separated CSV file paths.)
-     * <p>
-     * (TODO: Might be better to use a different way of encoding the local file paths...)
-     *
-     * @param scopeId       The id of the import scope (i.e. repository)
-     * @param logMessage    Log message for import. If this refers to a local file
-     *                      its contents will be used.
-     * @param importerClass The fully-qualified import class name
-     * @param stream        A stream of CSV data
-     *                      <p>
-     *                      There is no property file for this. Either the csv-heading is already in graph-compatible wording, or the Importer takes care of this.
-     * @return A JSON object showing how many records were created,
-     * updated, or unchanged.
+     * Import EAG files. See EAD import for details.
      */
-
     @POST
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("eag")
+    public Response importEag(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            InputStream data)
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+        return importEad(scopeId, tolerant, logMessage, propertyFile,
+                nameOrDefault(handlerClass, EagHandler.class.getName()),
+                nameOrDefault(importerClass, EagImporter.class.getName()), data);
+    }
+
+    /**
+     * Import EAC files. See EAD import for details.
+     */
+    @POST
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("eac")
+    public Response importEac(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            InputStream data)
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+        return importEad(scopeId, tolerant, logMessage, propertyFile,
+                nameOrDefault(handlerClass, EacHandler.class.getName()),
+                nameOrDefault(importerClass, EacImporter.class.getName()), data);
+    }
+
+    /**
+     * Import a set of CSV files. See EAD handler for options and
+     * defaults but substitute text/csv for the input mimetype when
+     * a single file is POSTed.
+     * <p>
+     * Additional note: no handler class is required.
+     */
+    @POST
+    @Consumes({MediaType.TEXT_PLAIN, CSV_MEDIA_TYPE,
+            MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("csv")
     public Response importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            InputStream stream)
+            InputStream data)
             throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
+            Class<? extends AbstractImporter> importer
+                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             // Get the current user from the Authorization header and the scope
             // from the query params...
@@ -313,26 +321,49 @@ public class ImportResource extends AbstractRestResource {
             PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
 
             // Run the import!
-            ImportLog log = new CsvImportManager(graph, scope, user, importer)
-                    .importFile(stream, getLogMessage(logMessage).orNull());
-
+            String message = getLogMessage(logMessage).orNull();
+            ImportManager importManager = new CsvImportManager(graph, scope, user, importer);
+            ImportLog log = importDataStream(importManager, message, data,
+                    MediaType.valueOf(CSV_MEDIA_TYPE));
             tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (InputParseError ex) {
             throw new DeserializationError("ParseError: " + ex.getMessage());
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ArchiveException e) {
             throw new DeserializationError(e.getMessage());
         }
     }
 
-    /**
-     * Extract and validate input path list.
-     *
-     * @param pathList Newline separated list of file paths.
-     * @return Validated list of path strings.
-     */
+    // Helpers
+
+    private ImportLog importDataStream(ImportManager importManager, String message, InputStream data,
+            MediaType... accepts) throws IOException, ValidationError, InputParseError, ArchiveException {
+        MediaType mediaType = requestHeaders.getMediaType();
+        if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
+            // Extract our list of paths...
+            List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
+            return importManager
+                    .importFiles(paths, message);
+        } else if (Lists.newArrayList(accepts).contains(mediaType)) {
+            return importManager.importFile(data, message);
+        } else {
+            return importArchive(importManager, message, data);
+        }
+    }
+
+    private ImportLog importArchive(ImportManager importManager, String logMessage, InputStream data)
+            throws IOException, ValidationError, ArchiveException {
+        logger.info("Import via compressed archive...");
+        try (BufferedInputStream bis = new BufferedInputStream(data);
+             ArchiveInputStream archiveInputStream = new
+                     ArchiveStreamFactory().createArchiveInputStream(bis)) {
+            return importManager
+                    .importFiles(archiveInputStream, logMessage);
+        }
+    }
+
     private static List<String> getFilePaths(String pathList) {
         List<String> files = Lists.newArrayList();
         for (String path : Splitter.on("\n").omitEmptyStrings().trimResults().split(pathList)) {
@@ -355,52 +386,29 @@ public class ImportResource extends AbstractRestResource {
         }
     }
 
-    /**
-     * Load a handler by name. Note: a valid class that's not a valid handler
-     * will throw a `NoSuchMethodException` in the import manager but not actually
-     * crash, so the import will appear to do nothing.
-     *
-     * @param handlerName The handler name
-     * @return A handler class
-     * @throws ClassNotFoundException
-     */
     @SuppressWarnings("unchecked")
-    private static Class<? extends SaxXmlHandler> getEadHandler(String handlerName)
+    private static Class<? extends SaxXmlHandler> getHandlerCls(String handlerName, String
+            defaultHandler)
             throws ClassNotFoundException, DeserializationError {
-        if (handlerName == null || handlerName.trim().isEmpty()) {
-            return DEFAULT_EAD_HANDLER;
-        } else {
-            Class<?> handler = Class.forName(handlerName);
-            if (!SaxXmlHandler.class.isAssignableFrom(handler)) {
-                throw new DeserializationError("Class '" + handlerName + "' is" +
-                        " not an instance of " + SaxXmlHandler.class.getSimpleName());
-            }
-            return (Class<? extends SaxXmlHandler>) handler;
+        String name = nameOrDefault(handlerName, defaultHandler);
+        Class<?> handler = Class.forName(name);
+        if (!SaxXmlHandler.class.isAssignableFrom(handler)) {
+            throw new DeserializationError("Class '" + handlerName + "' is" +
+                    " not an instance of " + SaxXmlHandler.class.getSimpleName());
         }
+        return (Class<? extends SaxXmlHandler>) handler;
     }
 
-    /**
-     * Load an importer by name. Note: a valid class that's not a valid importer
-     * will throw a `NoSuchMethodException` in the import manager but not actually
-     * crash, so the import will appear to do nothing.
-     *
-     * @param importerName The importer name
-     * @return An importer class
-     * @throws ClassNotFoundException
-     */
     @SuppressWarnings("unchecked")
-    private static Class<? extends AbstractImporter> getEadImporter(String importerName)
+    private static Class<? extends AbstractImporter> getImporterCls(String importerName, String defaultImporter)
             throws ClassNotFoundException, DeserializationError {
-        if (importerName == null || importerName.trim().isEmpty()) {
-            return DEFAULT_EAD_IMPORTER;
-        } else {
-            Class<?> importer = Class.forName(importerName);
-            if (!AbstractImporter.class.isAssignableFrom(importer)) {
-                throw new DeserializationError("Class '" + importerName + "' is" +
-                        " not an instance of " + AbstractImporter.class.getSimpleName());
-            }
-            return (Class<? extends AbstractImporter>) importer;
+        String name = nameOrDefault(importerName, defaultImporter);
+        Class<?> importer = Class.forName(name);
+        if (!AbstractImporter.class.isAssignableFrom(importer)) {
+            throw new DeserializationError("Class '" + importerName + "' is" +
+                    " not an instance of " + AbstractImporter.class.getSimpleName());
         }
+        return (Class<? extends AbstractImporter>) importer;
     }
 
     private Optional<String> getLogMessage(String logMessagePathOrText) throws IOException {
@@ -414,5 +422,9 @@ public class ImportResource extends AbstractRestResource {
                 return Optional.of(logMessagePathOrText);
             }
         }
+    }
+
+    private static String nameOrDefault(String name, String defaultName) {
+        return (name == null || name.trim().isEmpty()) ? defaultName : name;
     }
 }
