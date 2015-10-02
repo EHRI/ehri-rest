@@ -23,13 +23,22 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
+import eu.ehri.extension.ImportResource;
+import eu.ehri.project.importers.EagHandler;
+import eu.ehri.project.importers.EagImporter;
 import eu.ehri.project.importers.IcaAtomEadHandler;
 import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -55,10 +64,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         // Get the path of an EAD file
         InputStream payloadStream = ClassLoader.getSystemResourceAsStream("simple.n3");
 
-        URI uri = ehriUriBuilder("import", "skos")
-                .queryParam(LOG_PARAM, "Testing SKOS")
-                .queryParam(SCOPE_PARAM, "cvoc1")
-                .queryParam(TOLERANT_PARAM, "true")
+        URI uri = getImportUrl("skos", "cvoc1", "Testing SKOS", true)
                 .queryParam(FORMAT_PARAM, "Turtle")
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -67,7 +73,6 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
 
         assertStatus(ClientResponse.Status.OK, response);
         String output = response.getEntity(String.class);
-        System.out.println("SKOS: " + output);
         JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
@@ -80,7 +85,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
         String logText = "Testing import";
-        URI uri = getImportUrl("r1", logText, false)
+        URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -104,7 +109,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream(SINGLE_EAD);
         String logText = "Testing import";
-        URI uri = getImportUrl("r1", logText, false)
+        URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -127,7 +132,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
-        URI uri = getImportUrl("r1", "Test", false)
+        URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(HANDLER_PARAM, "IDontExist") // oops
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -148,7 +153,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
-        URI uri = getImportUrl("r1", "Test", false)
+        URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(HANDLER_PARAM, "java.lang.String") // oops
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -170,7 +175,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
         String logText = "Testing import";
-        URI uri = getImportUrl("r1", getTestLogFilePath(logText), false)
+        URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
@@ -191,38 +196,80 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
     @Test
     public void testImportEadWithMultipleFilesInZip() throws Exception {
         File temp = File.createTempFile("test-zip", ".zip");
-        try {
+        temp.deleteOnExit();
+        createZip(temp, SINGLE_EAD, HIERARCHICAL_EAD);
 
-            createZip(temp, SINGLE_EAD, HIERARCHICAL_EAD);
+        // Get the path of an EAD file
+        InputStream payloadStream = new FileInputStream(temp);
 
-            // Get the path of an EAD file
-            InputStream payloadStream = new FileInputStream(temp);
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
+                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .header("Content-Type", "application/octet-stream")
+                .entity(payloadStream)
+                .post(ClientResponse.class);
 
-            String logText = "Testing import";
-            URI uri = getImportUrl("r1", getTestLogFilePath(logText), false)
-                    .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
-                    .build();
-            ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                    .header("Content-Type", "application/octet-stream")
-                    .entity(payloadStream)
-                    .post(ClientResponse.class);
+        String output = response.getEntity(String.class);
+        System.out.println(output);
+        assertStatus(ClientResponse.Status.OK, response);
 
-            String output = response.getEntity(String.class);
-            System.out.println(output);
-            assertStatus(ClientResponse.Status.OK, response);
-
-            JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
-            assertEquals(6, rootNode.path("created").asInt());
-            assertEquals(0, rootNode.path("updated").asInt());
-            assertEquals(0, rootNode.path("unchanged").asInt());
-            assertEquals(logText, rootNode.path("message").asText());
-        } finally {
-            temp.delete();
-        }
+        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        assertEquals(6, rootNode.path("created").asInt());
+        assertEquals(0, rootNode.path("updated").asInt());
+        assertEquals(0, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
     }
 
-    private UriBuilder getImportUrl(String scopeId, String log, boolean tolerant) {
-        return ehriUriBuilder("import", "ead")
+    @Test
+    public void testImportEag() throws Exception {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("eag-2896.xml");
+        String logText = "Testing import";
+        URI uri = getImportUrl("eag", "nl", logText, false)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .header("Content-Type", "text/xml")
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        String output = response.getEntity(String.class);
+        System.out.println(output);
+        assertStatus(ClientResponse.Status.OK, response);
+
+        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        assertEquals(1, rootNode.path("created").asInt());
+        assertEquals(0, rootNode.path("updated").asInt());
+        assertEquals(0, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
+    }
+
+    @Test
+    public void testImportEac() throws Exception {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("abwehr.xml");
+        String logText = "Testing import";
+        URI uri = getImportUrl("eac", "auths", logText, false)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .header("Content-Type", "text/xml")
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        String output = response.getEntity(String.class);
+        System.out.println(output);
+        assertStatus(ClientResponse.Status.OK, response);
+
+        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        assertEquals(1, rootNode.path("created").asInt());
+        assertEquals(0, rootNode.path("updated").asInt());
+        assertEquals(0, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
+    }
+
+    private UriBuilder getImportUrl(String endPoint, String scopeId, String log, boolean tolerant) {
+        return ehriUriBuilder(ImportResource.ENDPOINT, endPoint)
                 .queryParam(LOG_PARAM, log)
                 .queryParam(SCOPE_PARAM, scopeId)
                 .queryParam(TOLERANT_PARAM, String.valueOf(tolerant));
