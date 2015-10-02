@@ -56,7 +56,7 @@ import static org.junit.Assert.assertTrue;
 public class ImportResourceRestClientTest extends BaseRestClientTest {
     // NB: This file is *copied* into the extension test resources because
     // I can't figure out how to refer to resources in another module...
-    protected static final String SINGLE_EAD = "single-ead.xml";
+    protected static final String SINGLE_EAD = "ead.xml";
     protected static final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
 
     @Test
@@ -225,7 +225,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
     @Test
     public void testImportEag() throws Exception {
         InputStream payloadStream = getClass()
-                .getClassLoader().getResourceAsStream("eag-2896.xml");
+                .getClassLoader().getResourceAsStream("eag.xml");
         String logText = "Testing import";
         URI uri = getImportUrl("eag", "nl", logText, false)
                 .build();
@@ -248,7 +248,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
     @Test
     public void testImportEac() throws Exception {
         InputStream payloadStream = getClass()
-                .getClassLoader().getResourceAsStream("abwehr.xml");
+                .getClassLoader().getResourceAsStream("eac.xml");
         String logText = "Testing import";
         URI uri = getImportUrl("eac", "auths", logText, false)
                 .build();

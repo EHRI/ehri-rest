@@ -34,6 +34,7 @@
             <item href="serialization.html" name="Data Serialization Config"/>
             <item href="validation.html" name="Validation"/>
             <item href="identifiers.html" name="Identifiers"/>
+            <item href="web-service.html" name="Web Service Usage"/>
         </menu>
 
         <!-- Doing this manually instead of using ref="modules" because we want
@@ -54,6 +55,10 @@
 
         <menu name="Web Service Docs">
             <item href="ehri-extension/wsdocs/index.html" name="Web API"/>
+        </menu>
+
+        <menu ref="resources">
+            <item href="samples.tgz" name="Import Data Samples"/>
         </menu>
     </body>
 </project>

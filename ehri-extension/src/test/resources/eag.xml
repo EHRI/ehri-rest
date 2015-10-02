@@ -1,0 +1,46 @@
+<eag audience="internal" xmlns="http://www.ministryculture.es/" schemaLocation="http://www.archivesportaleurope.net/Portal/profiles/eag_2012.xsd" xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <eagheader status="draft" langencoding="iso639-2b" countryencoding="iso3166-1" dateencoding="iso8601" scriptencoding="iso15924" repositoryencoding="iso15511">
+    <eagid>test-repository</eagid>
+    <languagedecl>
+      <language langcode="eng" scriptcode="Latn"/>
+    </languagedecl>
+  </eagheader>
+  <archguide>
+    <identity>
+      <repositorid repositorycode="test-repository" countrycode="NL">test</repositorid>
+      <autform>Test Repository</autform>
+      <nonpreform>Test Repository - Alt Name</nonpreform>
+    </identity>
+    <desc>
+      <postalcode>ABC 123</postalcode>
+      <street>Any Street</street>
+      <municipality>A Town</municipality>
+      <telephone>12345 678910</telephone>
+      <email href="info@example.com">Email</email>
+      <webpage href="www.example.com">Website</webpage>
+      <timetable>
+        <opening>9-5 All week</opening>
+      </timetable>
+      <access question="yes">
+        <restaccess/>
+      </access>
+      <repositorhist>
+        <p>Example Repository Description</p>
+      </repositorhist>
+      <buildinginfo>
+        <building>
+          <p/>
+        </building>
+        <searchroom>
+          <num unit="volume"/>
+        </searchroom>
+        <handicapped question="no">Use public transport</handicapped>
+      </buildinginfo>
+      <extent>Large<num unit="volume"/></extent>
+      <techservices>
+        <reproductionser question="yes"/>
+        <library question="yes"/>
+      </techservices>
+    </desc>
+  </archguide>
+</eag>

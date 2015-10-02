@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eac-cpf xmlns="urn:isbn:1-931666-33-4" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <control>
+        <recordId>test-eac</recordId>
+        <maintenanceStatus>new</maintenanceStatus>
+        <publicationStatus>approved</publicationStatus>
+        <conventionDeclaration>
+            <abbreviation>conventionDeclaration</abbreviation>
+        </conventionDeclaration>
+        <sources>
+            <source>
+                <sourceEntry>Test source</sourceEntry>
+            </source>
+        </sources>
+    </control>
+
+    <cpfDescription>
+        <identity>
+            <entityId xlink:href="http://authorities.ehri-project.eu/index.php/abwehr;eac">test-eac</entityId>
+            <entityType>corporateBody</entityType>
+            <nameEntry type="authorized">
+                <part>Test Corporate Body</part>
+            </nameEntry>
+        </identity>
+        <description>
+            <existDates>
+                <date>2000-01-01</date>
+            </existDates>
+            <place>
+                <placeEntry>United Kingdom</placeEntry>
+            </place>
+            <biogHist>
+                <p>Description for test corporate body</p>
+            </biogHist>
+        </description>
+    </cpfDescription>
+</eac-cpf>
