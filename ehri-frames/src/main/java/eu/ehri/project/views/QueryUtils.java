@@ -30,6 +30,7 @@ import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -52,7 +53,7 @@ public class QueryUtils {
      * @return A map of filter specs
      */
     static SortedMap<String, Pair<Query.FilterPredicate, String>> parseFilters(
-            Iterable<String> filterList) {
+            Collection<String> filterList) {
         ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>> builder = new ImmutableSortedMap.Builder<>(
                 Ordering.natural());
         Splitter psplit = Splitter.on("__");
@@ -81,7 +82,7 @@ public class QueryUtils {
      * @param orderSpecs A list of order spec strings
      * @return A map of order specs
      */
-    static SortedMap<String, Query.Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
+    static SortedMap<String, Query.Sort> parseOrderSpecs(Collection<String> orderSpecs) {
         ImmutableSortedMap.Builder<String, Query.Sort> builder = new ImmutableSortedMap.Builder<>(
                 Ordering.natural());
         Splitter psplit = Splitter.on("__");

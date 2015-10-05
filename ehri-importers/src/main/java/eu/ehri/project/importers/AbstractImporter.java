@@ -83,7 +83,7 @@ public abstract class AbstractImporter<T> {
 
     public BundleDAO getPersister(List<String> scopeIds) {
         return new BundleDAO(framedGraph,
-                Iterables.concat(permissionScope.idPath(), scopeIds));
+                Lists.newArrayList(Iterables.concat(permissionScope.idPath(), scopeIds)));
     }
 
     public BundleDAO getPersister() {

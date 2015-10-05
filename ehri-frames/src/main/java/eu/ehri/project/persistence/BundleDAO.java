@@ -36,6 +36,7 @@ import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,7 +62,7 @@ public final class BundleDAO {
      * @param graph The graph
      * @param scopeIds The ID set for the current scope.
      */
-    public BundleDAO(FramedGraph<?> graph, Iterable<String> scopeIds) {
+    public BundleDAO(FramedGraph<?> graph, Collection<String> scopeIds) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).dependentOnly().build();

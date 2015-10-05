@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -416,7 +417,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      *
      * @param orderSpecs list of orderSpecs
      */
-    public Query<E> orderBy(Iterable<String> orderSpecs) {
+    public Query<E> orderBy(Collection<String> orderSpecs) {
         SortedMap<String, Sort> tmp = QueryUtils.parseOrderSpecs(orderSpecs);
         Query<E> query = this;
         for (Entry<String, Sort> entry : tmp.entrySet()) {
@@ -518,7 +519,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * @param filters list of filters
      * @return a new query object
      */
-    public Query<E> filter(Iterable<String> filters) {
+    public Query<E> filter(Collection<String> filters) {
         // FIXME: This is really gross, but we want to allow the arguments
         // to .filter() to be a mix of property filters and traversal path
         // filters, because they'll usually just come straight from some
