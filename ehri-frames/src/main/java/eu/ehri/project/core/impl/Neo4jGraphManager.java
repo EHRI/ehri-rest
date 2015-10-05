@@ -20,13 +20,14 @@
 package eu.ehri.project.core.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
 import eu.ehri.project.core.impl.neo4j.Neo4j2VertexIterable;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -35,6 +36,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -79,6 +83,28 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     private org.neo4j.graphdb.index.Index<Node> getRawIndex() {
         IndexManager index = graph.getBaseGraph().getRawGraph().index();
         return index.forNodes(INDEX_NAME);
+    }
+
+    @Override
+    public Vertex createVertex(String id, EntityClass type,
+            Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
+        Neo4j2Vertex node = (Neo4j2Vertex)super.createVertex(id, type, data, keys);
+        node.addLabel(type.getName());
+        return node;
+    }
+
+    @Override
+    public Vertex updateVertex(String id, EntityClass type,
+            Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
+        Neo4j2Vertex node = (Neo4j2Vertex)super.updateVertex(id, type, data, keys);
+        List<String> labels = Lists.newArrayList(node.getLabels());
+        if (!(labels.size() == 1 && labels.get(0).equals(type.getName()))) {
+            for (String label: labels) {
+                node.removeLabel(label);
+            }
+            node.addLabel(type.getName());
+        }
+        return node;
     }
 
     private String getLuceneQuery(String key, Object value, String type) {
