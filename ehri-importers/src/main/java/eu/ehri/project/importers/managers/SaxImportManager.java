@@ -17,14 +17,17 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.managers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -62,9 +65,9 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Constructor.
      *
-     * @param graph     the framed graph
-     * @param scope     the permission scope
-     * @param actioner  the actioner
+     * @param graph    the framed graph
+     * @param scope    the permission scope
+     * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
@@ -82,9 +85,9 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Constructor.
      *
-     * @param graph     the framed graph
-     * @param scope     a permission scope
-     * @param actioner  the actioner
+     * @param graph    the framed graph
+     * @param scope    a permission scope
+     * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
@@ -96,9 +99,9 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Constructor.
      *
-     * @param graph     the framed graph
-     * @param scope     a permission scope
-     * @param actioner  the actioner
+     * @param graph    the framed graph
+     * @param scope    a permission scope
+     * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
@@ -111,9 +114,9 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Constructor.
      *
-     * @param graph     the framed graph
-     * @param scope     a permission scope
-     * @param actioner  the actioner
+     * @param graph    the framed graph
+     * @param scope    a permission scope
+     * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
@@ -124,24 +127,23 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Import XML from the given InputStream, as part of the given action.
      *
-     * @param ios           an input stream
-     * @param eventContext  the event context
-     * @param log           a logger object
+     * @param ios          an input stream
+     * @param eventContext the event context
+     * @param log          a logger object
      * @throws IOException
      * @throws ValidationError
      * @throws InputParseError
-     * @throws InvalidInputFormatError
      * @throws InvalidXmlDocument
      */
     @Override
     protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
-            final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidXmlDocument, InvalidInputFormatError {
+            final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {
-            AbstractImporter<Map<String, Object>> importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
-                    ImportLog.class).newInstance(framedGraph, permissionScope, log);
-            
+            AbstractImporter<Map<String, Object>> importer = importerClass
+                    .getConstructor(FramedGraph.class, PermissionScope.class,
+                            ImportLog.class).newInstance(framedGraph, permissionScope, log);
+
             for (ImportCallback callback : extraCallbacks) {
                 importer.addCallback(callback);
             }
@@ -168,7 +170,7 @@ public class SaxImportManager extends AbstractImportManager {
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
             SaxXmlHandler handler = properties.isPresent()
                     ? handlerClass.getConstructor(AbstractImporter.class, XmlImportProperties.class)
-                            .newInstance(importer, properties.get())
+                    .newInstance(importer, properties.get())
                     : handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -182,22 +184,12 @@ public class SaxImportManager extends AbstractImportManager {
             SAXParser saxParser = spf.newSAXParser();
             saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             saxParser.parse(ios, handler);
-        } catch (InstantiationException ex) {
-            logger.error("InstantiationException: " + ex.getMessage());
-        } catch (IllegalAccessException ex) {
-            logger.error("IllegalAccess: " + ex.getMessage());
-        } catch (IllegalArgumentException ex) {
-            logger.error("IllegalArgumentException: " + ex.getMessage());
-            ex.printStackTrace(System.out);
-        } catch (InvocationTargetException ex) {
-            logger.error("InvocationTargetException: " + ex.getMessage());
-        } catch (NoSuchMethodException ex) {
-            logger.error("NoSuchMethodException: " + ex.getMessage());
-        } catch (SecurityException ex) {
-            logger.error("SecurityException: " + ex.getMessage());
-        } catch (ParserConfigurationException ex) {
-            logger.error("ParserConfigurationException: " + ex.getMessage());
-            throw new RuntimeException(ex);
+        } catch (InstantiationException | IllegalAccessException |
+                IllegalArgumentException | InvocationTargetException |
+                NoSuchMethodException | SecurityException |
+                ParserConfigurationException e) {
+            logger.error("{}: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
         } catch (SAXException e) {
             logger.error("SAXException: " + e.getMessage());
             throw new InputParseError(e);

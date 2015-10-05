@@ -17,15 +17,15 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.managers;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
@@ -47,8 +47,7 @@ import java.util.List;
  */
 public abstract class AbstractImportManager implements ImportManager {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(AbstractImportManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
@@ -88,18 +87,16 @@ public abstract class AbstractImportManager implements ImportManager {
         return this;
     }
 
+    /**
+     * Determine if the importer is in tolerant mode.
+     *
+     * @return a boolean value
+     */
     public boolean isTolerant() {
         return tolerant;
     }
 
-    /**
-     * Import a Description file by specifying its path.
-     *
-     * @param filePath   a path to a description XML file
-     * @param logMessage the log message
-     * @throws IOException
-     * @throws ValidationError
-     */
+
     @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
@@ -108,51 +105,29 @@ public abstract class AbstractImportManager implements ImportManager {
         }
     }
 
-    /**
-     * Import a file, creating a new action with the given log message.
-     *
-     * @param ios        an input stream object
-     * @param logMessage the log message
-     * @return an ImportLog for the given InputStream
-     * @throws IOException
-     * @throws ValidationError
-     * @throws InputParseError
-     */
     @Override
     public ImportLog importFile(InputStream ios, String logMessage)
-            throws IOException, ValidationError, InputParseError {
-        try {
-            // Create a new action for this import
-            ActionManager.EventContext action = new ActionManager(
-                    framedGraph, permissionScope).newEventContext(actioner,
-                    EventTypes.ingest, getLogMessage(logMessage));
-            // Create a manifest to store the results of the import.
-            ImportLog log = new ImportLog(action);
+            throws IOException, InputParseError, ValidationError {
+        // Create a new action for this import
+        ActionManager.EventContext action = new ActionManager(
+                framedGraph, permissionScope).newEventContext(actioner,
+                EventTypes.ingest, getLogMessage(logMessage));
+        // Create a manifest to store the results of the import.
+        ImportLog log = new ImportLog(action);
 
-            // Do the import...
-            importFile(ios, action, log);
-            // If nothing was imported, remove the action...
-            if (log.hasDoneWork()) {
-                action.commit();
-            }
-
-            return log;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        // Do the import...
+        importFile(ios, action, log);
+        // If nothing was imported, remove the action...
+        if (log.hasDoneWork()) {
+            action.commit();
         }
+
+        return log;
     }
 
-    /**
-     * Import multiple files in the same batch/transaction.
-     *
-     * @param paths      a list of file paths to description objects
-     * @param logMessage a log message
-     * @throws IOException
-     * @throws ValidationError
-     */
     @Override
     public ImportLog importFiles(List<String> paths, String logMessage)
-            throws IOException, ValidationError {
+            throws IOException, ValidationError, InputParseError {
 
         try {
 
@@ -167,7 +142,7 @@ public abstract class AbstractImportManager implements ImportManager {
                         logger.info("Importing file: " + path);
                         importFile(ios, action, log);
                     }
-                } catch (InvalidXmlDocument e) {
+                } catch (ValidationError e) {
                     log.setErrored(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
                         throw e;
@@ -188,53 +163,38 @@ public abstract class AbstractImportManager implements ImportManager {
         }
     }
 
-    /**
-     * Import multiple files in the same batch/transaction.
-     *
-     * @param inputStream a compressed archive containing multiple files
-     * @param logMessage  a log message
-     * @throws IOException
-     * @throws ValidationError
-     */
     @Override
     public ImportLog importFiles(ArchiveInputStream inputStream, String logMessage)
-            throws IOException, ValidationError {
+            throws IOException, InputParseError, ValidationError {
+        ActionManager.EventContext action = new ActionManager(
+                framedGraph, permissionScope).newEventContext(actioner,
+                EventTypes.ingest, getLogMessage(logMessage));
+        ImportLog log = new ImportLog(action);
 
-        try {
-
-            ActionManager.EventContext action = new ActionManager(
-                    framedGraph, permissionScope).newEventContext(actioner,
-                    EventTypes.ingest, getLogMessage(logMessage));
-            ImportLog log = new ImportLog(action);
-
-            ArchiveEntry entry;
-            while ((entry = inputStream.getNextEntry()) != null) {
-                try {
-                    currentFile = entry.getName();
-                    BoundedInputStream boundedInputStream
-                            = new BoundedInputStream(inputStream, entry.getSize());
-                    boundedInputStream.setPropagateClose(false);
-                    logger.info("Importing file: " + currentFile);
-                    importFile(boundedInputStream, action, log);
-                } catch (InvalidXmlDocument e) {
-                    log.setErrored(formatErrorLocation(), e.getMessage());
-                    if (!tolerant) {
-                        throw e;
-                    }
+        ArchiveEntry entry;
+        while ((entry = inputStream.getNextEntry()) != null) {
+            try {
+                currentFile = entry.getName();
+                BoundedInputStream boundedInputStream
+                        = new BoundedInputStream(inputStream, entry.getSize());
+                boundedInputStream.setPropagateClose(false);
+                logger.info("Importing file: " + currentFile);
+                importFile(boundedInputStream, action, log);
+            } catch (InputParseError | ValidationError e) {
+                log.setErrored(formatErrorLocation(), e.getMessage());
+                if (!tolerant) {
+                    throw e;
                 }
             }
-
-            // Only mark the transaction successful if we're
-            // actually accomplished something.
-            if (log.hasDoneWork()) {
-                action.commit();
-            }
-
-            return log;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
         }
+
+        // Only mark the transaction successful if we're
+        // actually accomplished something.
+        if (log.hasDoneWork()) {
+            action.commit();
+        }
+
+        return log;
     }
 
     /**
@@ -246,13 +206,13 @@ public abstract class AbstractImportManager implements ImportManager {
      * @throws IOException
      * @throws ValidationError
      * @throws InputParseError
-     * @throws InvalidXmlDocument      if an implementing subclass encounters invalid XML
-     * @throws InvalidInputFormatError
      */
     protected abstract void importFile(InputStream ios,
             ActionManager.EventContext eventContext, ImportLog log)
-            throws IOException, ValidationError, InputParseError,
-            InvalidXmlDocument, InvalidInputFormatError;
+            throws IOException, ValidationError, InputParseError;
+
+
+    // Helpers
 
     private Optional<String> getLogMessage(String msg) {
         return (msg == null || msg.trim().isEmpty())

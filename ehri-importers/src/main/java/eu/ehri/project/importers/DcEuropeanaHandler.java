@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
                     extractIdentifier(currentMap);
                     extractName(currentMap);
                     
-                    putPropertyInGraph(currentMap, "sourceFileId", currentMap.get("objectIdentifier").toString());
+                    Helpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get("objectIdentifier").toString());
                     importer.importItem(currentMap, new Stack<String>());
 //                importer.importTopLevelExtraNodes(topLevel, current);
                     //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());

@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -60,12 +59,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
-    
-    /**
-     * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
-     */
-    public static final String LANGUAGE_KEY_PREFIX = "language";
-    
+
     /**
      * Keys in the node that denote unknown properties must start with the value of UNKNOWN.
      */
@@ -197,7 +191,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 attribute= null;
             }
         } else {
-            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
+            Helpers.putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
         }
 
 
@@ -236,7 +230,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String isLangAttribute = withoutNamespace(attributes.getQName(attr));
             String prop = properties.getAttributeProperty(isLangAttribute);
-            if (prop != null && prop.equals(LANGUAGE_OF_DESCRIPTION)) {
+            if (LANGUAGE_OF_DESCRIPTION.equals(prop)) {
                 logger.debug("Language detected!");
                 return Optional.of(attributes.getValue(attr));
             }
@@ -283,52 +277,9 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value     the property value
      */
     protected void putPropertyInCurrentGraph(String property, String value) {
-        putPropertyInGraph(currentGraphPath.peek(), property, value);
+        Helpers.putPropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
-    /**
-     * Stores this property value pair in the given graph node representation.
-     * If the value is effectively empty, nothing happens.
-     * If the property already exists, it is added to the value list.
-     *
-     * @param c a Map representation of a graph node
-     * @param property the key to store the value for
-     * @param value the value to store
-     */
-    protected static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
-        if (value == null)
-            return;
-        String valuetrimmed = value.trim();
-        if (valuetrimmed.isEmpty()) {
-            return;
-        }
-
-        // Language properties 
-
-        if (property.startsWith(LANGUAGE_KEY_PREFIX)) {
-            valuetrimmed = Helpers.iso639DashTwoCode(valuetrimmed);
-        }
-
-        valuetrimmed = StringUtils.normalizeSpace(valuetrimmed);
-
-        logger.debug("putProp: " + property + " " + valuetrimmed);
-
-        Object propertyList;
-        if (c.containsKey(property)) {
-            propertyList = c.get(property);
-            if (propertyList instanceof List) {
-                ((List<Object>) propertyList).add(valuetrimmed);
-            } else {
-                List<Object> o = Lists.newArrayList();
-                o.add(c.get(property));
-                o.add(valuetrimmed);
-                c.put(property, o);
-            }
-        } else {
-            c.put(property, valuetrimmed);
-        }
-    }
-    
     /**
      * Overwrite a value in the current graph.
      * 

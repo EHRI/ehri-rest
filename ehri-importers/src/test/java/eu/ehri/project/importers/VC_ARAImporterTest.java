@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.io.InputStream;
 import java.util.List;

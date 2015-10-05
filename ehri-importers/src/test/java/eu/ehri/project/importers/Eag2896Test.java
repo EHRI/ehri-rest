@@ -22,6 +22,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;

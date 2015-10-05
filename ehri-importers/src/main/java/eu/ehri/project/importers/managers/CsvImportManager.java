@@ -17,13 +17,17 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.managers;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
+import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -58,16 +62,15 @@ public class CsvImportManager extends AbstractImportManager {
     /**
      * Import CSV from the given InputStream, as part of the given action.
      *
-     * @param ios The input stream
+     * @param ios          The input stream
      * @param eventContext The event context in which the ingest is happening
-     * @param log An import log instance
+     * @param log          An import log instance
      * @throws IOException
      * @throws ValidationError
-     * @throws InvalidInputFormatError
      */
     @Override
     protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
-            final ImportLog log) throws IOException, ValidationError, InvalidInputFormatError {
+            final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         CSVReader reader = null;
         try {
@@ -97,21 +100,18 @@ public class CsvImportManager extends AbstractImportManager {
             reader = new CSVReader(new InputStreamReader(ios, "UTF-8"), VALUE_DELIMITER);
             String[] headers = reader.readNext();
             if (headers == null) {
-                throw new InvalidInputFormatError("no content found");
+                throw new InputParseError("no content found");
             } else {
                 for (int i = 0; i < headers.length; i++) {
                     headers[i] = headers[i].replaceAll("\\s", "");
                 }
             }
 
-//            importer.checkProperties(headers);
-            //per record, call importer.importItem(Map<String, Object> itemData
-
             String[] data;
             while ((data = reader.readNext()) != null) {
                 Map<String, Object> dataMap = Maps.newHashMap();
                 for (int i = 0; i < data.length; i++) {
-                    SaxXmlHandler.putPropertyInGraph(dataMap, headers[i], data[i]);
+                    Helpers.putPropertyInGraph(dataMap, headers[i], data[i]);
                 }
                 try {
                     importer.importItem(dataMap);
@@ -123,7 +123,8 @@ public class CsvImportManager extends AbstractImportManager {
                     }
                 }
             }
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
+        } catch (IllegalAccessException | InvocationTargetException |
+                InstantiationException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         } finally {
             if (reader != null) {

@@ -29,7 +29,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxImportManager;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.UserProfile;

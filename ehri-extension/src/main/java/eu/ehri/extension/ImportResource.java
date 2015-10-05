@@ -28,7 +28,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.CsvImportManager;
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.EacHandler;
 import eu.ehri.project.importers.EacImporter;
 import eu.ehri.project.importers.EadHandler;
@@ -36,8 +36,8 @@ import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.EagHandler;
 import eu.ehri.project.importers.EagImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ImportManager;
-import eu.ehri.project.importers.SaxImportManager;
+import eu.ehri.project.importers.managers.ImportManager;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
@@ -354,7 +354,7 @@ public class ImportResource extends AbstractRestResource {
     }
 
     private ImportLog importArchive(ImportManager importManager, String logMessage, InputStream data)
-            throws IOException, ValidationError, ArchiveException {
+            throws IOException, ValidationError, ArchiveException, InputParseError {
         logger.info("Import via compressed archive...");
         try (BufferedInputStream bis = new BufferedInputStream(data);
              ArchiveInputStream archiveInputStream = new

@@ -25,6 +25,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.managers.AbstractImportManager;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;

@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;

@@ -29,6 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -85,7 +86,7 @@ public class WienerLibraryTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, 
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class,
                 new XmlImportProperties("wienerlib.properties"))
                 .setTolerant(Boolean.FALSE);
         ImportLog log = importManager.importFile(ios, logMessage);

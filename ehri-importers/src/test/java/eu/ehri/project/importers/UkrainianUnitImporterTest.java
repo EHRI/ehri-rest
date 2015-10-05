@@ -20,6 +20,7 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
