@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
@@ -400,7 +401,7 @@ public class ToolsResource extends AbstractRestResource {
     }
 
     @POST
-    @Produces("text/csv")
+    @Produces("text/plain")
     @Path("/_setIdsOnEventLinks")
     public String setIdsOnEventLinks()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
@@ -419,6 +420,34 @@ public class ToolsResource extends AbstractRestResource {
                             graph.getBaseGraph().commit();
                         }
                     }
+                }
+            }
+            tx.success();
+            return String.valueOf(done);
+        }
+    }
+
+    @POST
+    @Produces("text/plain")
+    @Path("/_setLabels")
+    public String setLabels()
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            long done = 0;
+            for (Vertex v : graph.getVertices()) {
+                Neo4j2Vertex neo4j2Vertex = (Neo4j2Vertex)v;
+                List<String> labels = Lists.newArrayList(neo4j2Vertex.getLabels());
+                for (String label : labels) {
+                    neo4j2Vertex.removeLabel(label);
+                }
+                String type = neo4j2Vertex.getProperty(EntityType.TYPE_KEY);
+                if (type != null) {
+                    neo4j2Vertex.addLabel(type);
+                    done++;
+                }
+
+                if (done % 10000 == 0) {
+                    graph.getBaseGraph().commit();
                 }
             }
             tx.success();
