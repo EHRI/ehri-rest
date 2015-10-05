@@ -46,6 +46,7 @@ import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.persistence.TraversalCallback;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -97,7 +98,7 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    public Annotation createFor(String id, String did, Bundle bundle, Accessor user, Iterable<Accessor> accessibleTo)
+    public Annotation createFor(String id, String did, Bundle bundle, Accessor user, Collection<Accessor> accessibleTo)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound {
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
         AnnotatableEntity dep = manager.getFrame(did, AnnotatableEntity.class);

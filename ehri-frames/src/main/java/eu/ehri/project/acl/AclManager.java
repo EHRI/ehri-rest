@@ -181,7 +181,7 @@ public final class AclManager {
      * @param accessors A set of users/groups who can access the item
      */
     public void setAccessors(AccessibleEntity entity,
-            Iterable<Accessor> accessors) {
+            Collection<Accessor> accessors) {
         Set<Accessor> accessorVertices = Sets.newHashSet(accessors);
         Set<Accessor> remove = Sets.newHashSet();
         for (Accessor accessor : entity.getAccessors()) {
