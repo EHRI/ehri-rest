@@ -101,7 +101,7 @@ public class AraEadImporter extends EadImporter {
             for (String s : rel.keySet()) {
                 logger.debug(s);
             }
-            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {

@@ -268,7 +268,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
         // If the given id is a placeholder, generate it according to type rules
         if (id.trim().contentEquals(GENERATE_ID_PLACEHOLDER)) {
-            String newId = type.getIdgen().generateId(Lists.<String>newArrayList(), b);
+            String newId = type.getIdGen().generateId(Lists.<String>newArrayList(), b);
             b = b.withId(newId);
         }
         return b;

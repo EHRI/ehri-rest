@@ -68,7 +68,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "0";
-        Query<Concept> query = new Query<Concept>(graph, Concept.class);
+        Query<Concept> query = new Query<>(graph, Concept.class);
 
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).page(

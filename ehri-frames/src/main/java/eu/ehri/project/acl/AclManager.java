@@ -600,7 +600,7 @@ public final class AclManager {
     private PermissionGrant createPermissionGrant() {
         try {
             Vertex vertex = manager.createVertex(
-                    EntityClass.PERMISSION_GRANT.getIdgen()
+                    EntityClass.PERMISSION_GRANT.getIdGen()
                             .generateId(Lists.<String>newArrayList(), null),
                     EntityClass.PERMISSION_GRANT,
                     Maps.<String, Object>newHashMap());

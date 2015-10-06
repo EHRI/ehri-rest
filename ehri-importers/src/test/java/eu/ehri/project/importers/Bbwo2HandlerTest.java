@@ -31,7 +31,7 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.models.base.PermissionScope;
@@ -70,8 +70,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
                                 .withDataValue(Ontology.NAME_KEY, "NIOD Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "joodse-raad");
-        Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
-        Concept concept_716 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
+        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
+        Concept concept_716 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_716);
         
         
@@ -122,7 +122,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         boolean passTest = false;
         DocumentaryUnit person = manager.getFrame("nl-r1-1505", DocumentaryUnit.class);
         for (Description d : person.getDescriptions()) {
-            for (UndeterminedRelationship rel : d.getUndeterminedRelationships()) {
+            for (AccessPoint rel : d.getAccessPoints()) {
                 if (rel.getRelationshipType().equals("subjectAccess")) {
                     if (rel.getName().equals("kinderen")) {
                         assertEquals(1, toList(rel.getLinks()).size());

@@ -36,8 +36,8 @@ import eu.ehri.project.models.base.NamedEntity;
  * 
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-@EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
-public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity, Annotator {
+@EntityType(EntityClass.ACCESS_POINT)
+public interface AccessPoint extends AccessibleEntity, NamedEntity, Annotator {
 
     /**
      * Fetch the description to which this UR belongs.
@@ -61,7 +61,7 @@ public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity,
      * @return A type string
      */
     @Mandatory
-    @Property(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)
+    @Property(Ontology.ACCESS_POINT_TYPE)
     String getRelationshipType();
 }
 

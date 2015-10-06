@@ -57,7 +57,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     protected String currentFile;
     protected Integer currentPosition;
-    protected Class<? extends AbstractImporter> importerClass;
+    protected final Class<? extends AbstractImporter> importerClass;
 
     /**
      * Constructor.

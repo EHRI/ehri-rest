@@ -49,7 +49,7 @@ import java.util.Map;
 public class UkrainianUnitImporter extends MapImporter {
 
     public static final String MULTIVALUE_SEP = ",,";
-    private XmlImportProperties p;
+    private final XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianUnitImporter.class);
 
     public UkrainianUnitImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {

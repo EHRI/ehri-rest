@@ -65,10 +65,10 @@ public class Wp2YvEadTest extends AbstractImporterTest {
                                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
-        Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle,
+        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle,
                 validUser);
         logger.debug(vocabulary.getId());
-        Concept concept_288 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser);
+        Concept concept_288 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_288);
 
         Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);

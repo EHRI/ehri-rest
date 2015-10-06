@@ -30,7 +30,7 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.DescriptionViews;
@@ -141,7 +141,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor userProfile = getRequesterUserProfile();
-            UndeterminedRelationship rel = manager.getFrame(id, UndeterminedRelationship.class);
+            AccessPoint rel = manager.getFrame(id, AccessPoint.class);
             Description description = rel.getDescription();
             if (description == null) {
                 throw new ItemNotFound(id);

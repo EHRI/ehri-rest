@@ -53,7 +53,7 @@ public class TerezinDataConverter {
                 values = line.split(";");
             } else {
                 if (quotes[0].length() <= 1) {
-                    logger.error(quotes[0] + " has a problem: " + line);
+                    logger.error("Problem found at line: {}: {}", line, quotes[0]);
                     break;
                 }
                 values = new String[2];
@@ -71,9 +71,7 @@ public class TerezinDataConverter {
                 }
             } else {
                 logger.error(values[0] + " has a problem: " + line);
-
             }
-
         }
         scanner.close();
     }
@@ -83,22 +81,22 @@ public class TerezinDataConverter {
         List<Calendar> dates = Lists.newArrayList();
         dates.add(Calendar.getInstance());
 
-        if(trimmedDate.startsWith("before ")){
+        if (trimmedDate.startsWith("before ")) {
             dates = parseDate(trimmedDate.substring(6));
-            if(dates ==  null)
+            if (dates == null)
                 return null;
-            
+
             dates.add(0, Calendar.getInstance());
             dates.get(0).set(Calendar.YEAR, 1900);
             dates.get(0).set(Calendar.DATE, 1);
             dates.get(0).set(Calendar.MONTH, Calendar.JANUARY);
             return dates;
         }
-        if(trimmedDate.startsWith("after ")){
+        if (trimmedDate.startsWith("after ")) {
             dates = parseDate(trimmedDate.substring(5));
-            if(dates ==  null)
+            if (dates == null)
                 return null;
-            dates.get(0).set(Calendar.YEAR, dates.get(0).get(Calendar.YEAR)+1);
+            dates.get(0).set(Calendar.YEAR, dates.get(0).get(Calendar.YEAR) + 1);
             dates.add(1, Calendar.getInstance());
             return dates;
         }
@@ -112,10 +110,10 @@ public class TerezinDataConverter {
             dates.get(0).setTime(d);
             dates.add(Calendar.getInstance());
             dates.get(1).setTime(d);
-            
+
             dates.get(0).set(Calendar.DATE, 1);
-            
-            dates.get(1).set(Calendar.MONTH, dates.get(1).get(Calendar.MONTH)+1);
+
+            dates.get(1).set(Calendar.MONTH, dates.get(1).get(Calendar.MONTH) + 1);
             dates.get(1).set(Calendar.DATE, 0);
             return dates;
         }
@@ -132,7 +130,7 @@ public class TerezinDataConverter {
             d = monthDateFormat.parse(m.group(2), p);
             if (p.getIndex() > 0) {
                 dates.get(1).setTime(d);
-                dates.get(1).set(Calendar.MONTH, dates.get(1).get(Calendar.MONTH)+1);
+                dates.get(1).set(Calendar.MONTH, dates.get(1).get(Calendar.MONTH) + 1);
                 dates.get(1).set(Calendar.DATE, 0);
             }
 
@@ -153,7 +151,7 @@ public class TerezinDataConverter {
             d = monthDateFormat.parse(m.group(2), p);
             if (p.getIndex() > 0) {
                 dates.get(1).setTime(d);
-                dates.get(1).set(Calendar.MONTH, dates.get(1).get(Calendar.MONTH)+1);
+                dates.get(1).set(Calendar.MONTH, dates.get(1).get(Calendar.MONTH) + 1);
                 dates.get(1).set(Calendar.DATE, 0);
                 dates.get(0).set(Calendar.YEAR, dates.get(1).get(Calendar.YEAR));
             }
@@ -220,7 +218,7 @@ public class TerezinDataConverter {
             dates.get(0).set(Calendar.DATE, 1);
 
             dates.add(Calendar.getInstance());
-            dates.get(1).set(Calendar.YEAR, 1900+ new Integer(m.group(2)));
+            dates.get(1).set(Calendar.YEAR, 1900 + new Integer(m.group(2)));
             dates.get(1).set(Calendar.MONTH, Calendar.DECEMBER);
             dates.get(1).set(Calendar.DATE, 31);
 
@@ -237,7 +235,7 @@ public class TerezinDataConverter {
         if ((m = parseDate(trimmedDate, "(\\d*)\\.(\\d*)\\.(\\d{2})")) != null) {
             dates.get(0).set(Calendar.DATE, new Integer(m.group(1)));
             dates.get(0).set(Calendar.MONTH, new Integer(m.group(2)) - 1);
-            dates.get(0).set(Calendar.YEAR, 1900+ new Integer(m.group(3)));
+            dates.get(0).set(Calendar.YEAR, 1900 + new Integer(m.group(3)));
             return dates;
         }
         //1942

@@ -30,7 +30,7 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
@@ -221,7 +221,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
             for (DatePeriod ignored : d.getDatePeriods()) shouldDelete++;
-            for (UndeterminedRelationship ignored : d.getUndeterminedRelationships()) shouldDelete++;
+            for (AccessPoint ignored : d.getAccessPoints()) shouldDelete++;
         }
 
         Integer deleted = docViews.delete(item.getId(), validUser);

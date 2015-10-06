@@ -319,7 +319,7 @@ public final class JenaSkosImporter implements SkosImporter {
         for (Map.Entry<String, URI> rel : RELATION_PROPS.entrySet()) {
             for (RDFNode annotation : getObjectWithPredicate(item, rel.getValue())) {
                 if (annotation.isLiteral()) {
-                    undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                    undetermined.add(new Bundle(EntityClass.ACCESS_POINT)
                             .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
                             .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                 } else {
@@ -329,7 +329,7 @@ public final class JenaSkosImporter implements SkosImporter {
                         if (found != null) {
                             linkedItems.put(found, rel.getKey());
                         } else {
-                            undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                            undetermined.add(new Bundle(EntityClass.ACCESS_POINT)
                                     .withDataValue(Ontology.ANNOTATION_TYPE, "associate")
                                     .withDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":") + 1))
                                     .withDataValue(Ontology.NAME_KEY, annotation.toString()));

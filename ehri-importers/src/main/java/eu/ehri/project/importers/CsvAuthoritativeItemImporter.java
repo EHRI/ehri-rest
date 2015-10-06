@@ -53,8 +53,6 @@ import java.util.Map;
  */
 public class CsvAuthoritativeItemImporter extends MapImporter {
 
-//    private final XmlImportProperties p = new XmlImportProperties("csvconcept.properties");
-
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
     public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
@@ -65,25 +63,21 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = getPersister();
-
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
-
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
-
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<AuthoritativeItem> mutation = persister.createOrUpdate(unit, AuthoritativeItem.class);
         AuthoritativeItem frame = mutation.getNode();
 
-        if (!permissionScope.equals(SystemScope.getInstance())
-                && mutation.created()) {
+        if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
         handleCallbacks(mutation);
         return frame;
-
     }
 
     @Override
@@ -103,19 +97,15 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         return item;
     }
 
-  
-
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = Maps.newHashMap();
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
-
         Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
         for (String key : itemData.keySet()) {
             if (!key.equals("id") && !key.equals("name")) {
-                    Helpers.putPropertyInGraph(item, key, itemData.get(key).toString());
+                Helpers.putPropertyInGraph(item, key, itemData.get(key).toString());
             }
-
         }
         if (!item.containsKey("typeOfEntity")) {
             Helpers.putPropertyInGraph(item, "typeOfEntity", "subject");
@@ -126,11 +116,6 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         return item;
     }
 
-
-    /**
-     * @param itemData
-     * @return returns a List with Maps with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
-     */
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> itemData) {
 
@@ -139,7 +124,6 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
 
         String end = (String) itemData.get("DateofdeathYYYY-MM-DD");
         String start = (String) itemData.get("DateofbirthYYYY-MM-DD");
-
         if (start != null && start.endsWith("00-00")) {
             start = start.substring(0, 4);
         }
@@ -155,5 +139,4 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         }
         return l;
     }
-
 }

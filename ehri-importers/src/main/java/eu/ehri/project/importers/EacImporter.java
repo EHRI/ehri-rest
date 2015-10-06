@@ -22,6 +22,7 @@ package eu.ehri.project.importers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
@@ -31,7 +32,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -56,6 +57,8 @@ import java.util.Map;
 public class EacImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
+    public static final String REL_TYPE = "type";
+    public static final String REL_NAME = "name";
 
     /**
      * Construct an EacImporter object.
@@ -82,8 +85,8 @@ public class EacImporter extends EaImporter {
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -91,7 +94,7 @@ public class EacImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
 
-        //add the address to the description bundle
+        // add the address to the description bundle
         Map<String, Object> address = extractAddress(itemData);
         if (!address.isEmpty()) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
@@ -110,20 +113,18 @@ public class EacImporter extends EaImporter {
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
-            if (rel.containsKey("type") && rel.get("type").equals("subjectAccess")) {
+            if (rel.containsKey(REL_TYPE) && rel.get(REL_TYPE).equals("subjectAccess")) {
                 logger.debug("relation found");
-                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
             }
         }
 
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
-
-//        if (mutation.created()) {
         solveUndeterminedRelationships(frame, descBundle);
-//        }
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())
@@ -139,29 +140,30 @@ public class EacImporter extends EaImporter {
 
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        String REL = "relation";
+        String relKey = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
-            if (key.equals(REL)) {
+            if (key.equals(relKey)) {
                 //name identifier
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemData.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     for (String eventkey : origRelation.keySet()) {
-                        if (eventkey.equals("type")) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, origRelation.get(eventkey) + "Access");
-                        } else if (eventkey.equals("name") && origRelation.get("type").equals("subject")) {
+                        if (eventkey.equals(REL_TYPE)) {
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get(eventkey) + "Access");
+                        } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
                             Map<String, Object> m = (Map) ((List) origRelation.get(eventkey)).get(0);
                             //try to find the original identifier
                             relationNode.put(LINK_TARGET, m.get("concept"));
                             //try to find the original name
-                            relationNode.put(Ontology.NAME_KEY, m.get("name"));
+                            relationNode.put(Ontology.NAME_KEY, m.get(REL_NAME));
                             relationNode.put("cvoc", m.get("cvoc"));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
-                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                    if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
+                        // Corporate bodies are the default type
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }
@@ -189,9 +191,8 @@ public class EacImporter extends EaImporter {
                     && !key.startsWith("IGNORE")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
-                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
+                description.put(key, flattenNonMultivaluedProperties(key, itemData.get(key), entity));
             }
-
         }
 
         return description;
@@ -204,27 +205,29 @@ public class EacImporter extends EaImporter {
         //so they have id's. 
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
-            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
-                for (String key : rel.asVertex().getPropertyKeys()) {
-                    logger.debug("solving undetermindRels: " + key + " " + rel.asVertex().getProperty(key));
+            for (AccessPoint rel : Sets.newHashSet(unitdesc.getAccessPoints())) {
+                Vertex relationVertex = rel.asVertex();
+                for (String key : relationVertex.getPropertyKeys()) {
+                    logger.debug("solving undetermindRels: {} {} ({})",
+                            key, relationVertex.getProperty(key), descBundle.getId());
                 }
                 /*
                  * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
                  * they need to be found in the vocabularies that are in the graph
                  */
-                if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
-                    String cvoc_id = rel.asVertex().getProperty("cvoc");
-                    String concept_id = rel.asVertex().getProperty(LINK_TARGET);
-                    logger.debug(cvoc_id + "  " + concept_id);
-                    Vocabulary vocabulary;
+                if (relationVertex.getPropertyKeys().contains("cvoc")) {
+                    String cvocId = relationVertex.getProperty("cvoc");
+                    String conceptId = relationVertex.getProperty(LINK_TARGET);
+                    logger.debug("{} -> {}", cvocId, conceptId);
                     try {
-                        vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                        Vocabulary vocabulary = manager.getFrame(cvocId, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
-                            logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
-                            if (concept.getIdentifier().equals(concept_id)) {
+                            logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
+                            if (concept.getIdentifier().equals(conceptId)) {
                                 try {
+                                    String linkType = relationVertex.getProperty(REL_TYPE);
                                     Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                            .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
+                                            .withDataValue(Ontology.LINK_HAS_TYPE, linkType)
                                             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
                                     UserProfile user = manager.cast(log.getActioner(), UserProfile.class);
                                     Link link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
@@ -232,16 +235,14 @@ public class EacImporter extends EaImporter {
                                     concept.addLink(link);
                                     link.addLinkBody(rel);
                                 } catch (PermissionDenied ex) {
-                                    logger.error(ex.getMessage());
+                                    logger.error("Unexpected permission error on EAC relationship creation: {}", ex);
+                                    throw new RuntimeException(ex);
                                 }
-
                             }
-
                         }
                     } catch (ItemNotFound ex) {
-                        logger.error("Vocabulary with id " + cvoc_id + " not found. " + ex.getMessage());
+                        logger.error("Vocabulary with id {} not found: {}", cvocId, ex);
                     }
-
                 }
             }
         }
@@ -254,32 +255,33 @@ public class EacImporter extends EaImporter {
         if (books instanceof List) {
             for (Object book : (List) books) {
                 if (book instanceof Map) {
-                    Map<String, Object> bookentry = (Map) book;
+                    Map bookEntry = (Map) book;
                     boolean created = false;
                     String publication = "";
-                    for (String entrykey : bookentry.keySet()) {
-                        if (entrykey.equals("bookentry")) {
-                            if (bookentry.get(entrykey) instanceof List) {
-                                for (Object entry : (List) bookentry.get(entrykey)) {
-                                    if (entry instanceof Map) {
-                                        if (((Map<String, Object>) entry).containsKey("type") && ((Map<String, Object>) entry).containsKey("bookentry")) {
-                                            String type = ((Map<String, Object>) entry).get("type").toString();
-                                            String value = ((Map<String, Object>) entry).get("bookentry").toString();
-                                            publication = publication.concat(
-                                                    (type.equals("isbn") || type.equals("creator")
-                                                            ? " " + type + ":"
-                                                            : ""
-                                                    )
-                                                            + value)
-                                            ;
+                    for (Object entryKey : bookEntry.keySet()) {
+                        switch ((String) entryKey) {
+                            case "bookentry":
+                                if (bookEntry.get(entryKey) instanceof List) {
+                                    for (Object entry : (List) bookEntry.get(entryKey)) {
+                                        if (entry instanceof Map
+                                                && ((Map) entry).containsKey(REL_TYPE)
+                                                && ((Map) entry).containsKey("bookentry")) {
+                                            String type = ((Map) entry).get(REL_TYPE).toString();
+                                            String value = ((Map) entry).get("bookentry").toString();
+                                            String join = type.equals("isbn") || type.equals("creator")
+                                                    ? " " + type + ":"
+                                                    : "";
+                                            publication = publication.concat(join + value);
                                         }
                                     }
                                 }
-                            }
-                        } else if (entrykey.equals("type")) {
-                            created = (bookentry.get(entrykey).equals("creatorOf"));
-                        } else {
-                            publication = publication.concat(entrykey + ":" + bookentry.get(entrykey));
+                                break;
+                            case REL_TYPE:
+                                created = (bookEntry.get(entryKey).equals("creatorOf"));
+                                break;
+                            default:
+                                publication = publication.concat(entryKey + ":" + bookEntry.get(entryKey));
+                                break;
                         }
                     }
                     if (created) {
@@ -287,7 +289,6 @@ public class EacImporter extends EaImporter {
                     } else {
                         subjectOf.add(publication);
                     }
-
                 }
             }
         }

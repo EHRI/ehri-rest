@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -47,21 +46,23 @@ public class EacHandler extends EaHandler {
 
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder()
-                .put("maintenanceEvent", MaintenanceEvent.class)
-                .put("relation", Annotation.class)
-                .put("book", Annotation.class)
-                .put("bookentry", Annotation.class)
-                .put("accessPoint", Annotation.class)
-                .put("name", UnknownProperty.class).build();
+            .put("maintenanceEvent", MaintenanceEvent.class)
+            .put("relation", Annotation.class)
+            .put("book", Annotation.class)
+            .put("bookentry", Annotation.class)
+            .put("accessPoint", Annotation.class)
+            .put("name", UnknownProperty.class).build();
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("eac.properties"));
     }
+
     public EacHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super(importer, properties);
     }
+
     @Override
     protected boolean needToCreateSubNode(String key) {
         return possibleSubnodes.containsKey(getImportantPath(currentPath));
@@ -106,8 +107,4 @@ public class EacHandler extends EaHandler {
         }
     }
 
-    @Override
-    protected List<String> getSchemas() {
-        return Lists.newArrayList("eac.xsd");
-    }
 }

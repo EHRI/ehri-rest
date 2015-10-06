@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -83,11 +82,6 @@ private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
         
         
 
-    }
-    
-    @Override
-    protected List<String> getSchemas() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

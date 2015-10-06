@@ -378,7 +378,7 @@ public class ToolsResource extends AbstractRestResource {
                                     : Lists.<String>newArrayList();
                             idPath.add(entity.getIdentifier());
                             Bundle descBundle = depSerializer.vertexFrameToBundle(desc);
-                            String newId = entityClass.getIdgen().generateId(idPath, descBundle);
+                            String newId = entityClass.getIdGen().generateId(idPath, descBundle);
                             if (!newId.equals(desc.getId()) && commit) {
                                 manager.renameVertex(desc.asVertex(), desc.getId(), newId);
                                 done++;

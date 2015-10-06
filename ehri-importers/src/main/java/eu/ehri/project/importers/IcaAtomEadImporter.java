@@ -95,7 +95,7 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         for (Map<String, Object> rel : extractRelations(data)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
             logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
-            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(data);
         if (!unknowns.isEmpty()) {
@@ -210,14 +210,14 @@ public class IcaAtomEadImporter extends EaImporter {
                     for (String eventkey : origRelation.keySet()) {
                         logger.debug(eventkey);
                         if (eventkey.endsWith(REL)) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey);
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, eventkey);
                             relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
-                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccessPoint");
+                    if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccessPoint");
                     }
                     list.add(relationNode);
                 }

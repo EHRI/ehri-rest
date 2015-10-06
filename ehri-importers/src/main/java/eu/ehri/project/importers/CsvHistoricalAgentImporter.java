@@ -54,25 +54,20 @@ public class CsvHistoricalAgentImporter extends CsvAuthoritativeItemImporter {
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = getPersister();
-
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
-
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
-
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
-        if (!permissionScope.equals(SystemScope.getInstance())
-                && mutation.created()) {
+        if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
         handleCallbacks(mutation);
         return frame;
-
     }
-
 }

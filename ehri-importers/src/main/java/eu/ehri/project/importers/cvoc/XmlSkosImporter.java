@@ -172,7 +172,7 @@ public final class XmlSkosImporter implements SkosImporter {
 
     private void importFile(InputStream ios, ActionManager.EventContext eventContext,
             ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidXmlDocument, InvalidInputFormatError {
+            InputParseError, InvalidInputFormatError {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -311,7 +311,7 @@ public final class XmlSkosImporter implements SkosImporter {
             Map<String, Object> rel = extractRelations(element, "owl:sameAs");
             if (!rel.isEmpty()) {
                 descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT,
-                        new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+                        new Bundle(EntityClass.ACCESS_POINT, rel));
             }
 
             // NOTE maybe test if prefLabel is there?
@@ -502,7 +502,7 @@ public final class XmlSkosImporter implements SkosImporter {
         for (Concept relatedBy : from.concept.getRelatedByConcepts()) {
             //logger.debug("Related By: " + relatedBy.asVertex().getProperty(EntityType.ID_KEY));
             String relatedByStoreId = relatedBy.asVertex().getProperty(EntityType.ID_KEY);
-            if (relatedByStoreId == to.storeId) {
+            if (relatedByStoreId.equals(to.storeId)) {
                 result = true;
                 break; // found
             }
@@ -718,10 +718,10 @@ public final class XmlSkosImporter implements SkosImporter {
      * Used in the lookup which is needed for creating the Vocabulary structure
      */
     private class ConceptPlaceholder {
-        public String storeId; // the identifier used for storage and referring in the repository
-        List<String> broaderIds;
-        List<String> relatedIds;
-        Concept concept;
+        public final String storeId; // the identifier used for storage and referring in the repository
+        final List<String> broaderIds;
+        final List<String> relatedIds;
+        final Concept concept;
 
         public ConceptPlaceholder(String storeId,
                 List<String> broaderIds,

@@ -163,7 +163,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
             shouldDelete += Iterables.count(d.getDatePeriods());
-            shouldDelete += Iterables.count(d.getUndeterminedRelationships());
+            shouldDelete += Iterables.count(d.getAccessPoints());
         }
 
         String log = "Deleting item";

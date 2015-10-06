@@ -94,7 +94,7 @@ public class Eag2896Test extends AbstractImporterTest {
         // MB: Test priority hack - this should be pulled out of the
         // maintenanceNotes field into its own int field
         Object priority = unit.asVertex().getProperty(EagImporter.PRIORITY);
-        assertEquals(Integer.valueOf(5), priority);
+        assertEquals(5, priority);
 
         // Check scope
         assertEquals(country, unit.getPermissionScope());

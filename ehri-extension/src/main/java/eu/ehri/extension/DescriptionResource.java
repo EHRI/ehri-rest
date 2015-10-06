@@ -23,7 +23,7 @@ import com.google.common.base.Charsets;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
@@ -136,7 +136,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP)
+    @Path("/{id:.+}/{did:.+}/" + Entities.ACCESS_POINT)
     public Response createAccessPoint(@PathParam("id") String id,
                                       @PathParam("did") String did, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -145,9 +145,9 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             Accessor user = getRequesterUserProfile();
             DescribedEntity item = views.detail(id, user);
             Description desc = manager.getFrame(did, Description.class);
-            UndeterminedRelationship rel = descriptionViews.create(id, bundle,
-                    UndeterminedRelationship.class, user, getLogMessage());
-            desc.addUndeterminedRelationship(rel);
+            AccessPoint rel = descriptionViews.create(id, bundle,
+                    AccessPoint.class, user, getLogMessage());
+            desc.addAccessPoint(rel);
             Response response = buildResponse(item, rel, Response.Status.CREATED);
             tx.success();
             return response;
@@ -158,7 +158,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     @SuppressWarnings("unused")
     @DELETE
-    @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP + "/{apid:.+}")
+    @Path("/{id:.+}/{did:.+}/" + Entities.ACCESS_POINT + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
                                       @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError,

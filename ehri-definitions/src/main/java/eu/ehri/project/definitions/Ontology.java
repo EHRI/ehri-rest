@@ -42,7 +42,7 @@ public class Ontology {
     public static final String LANGUAGE_OF_DESCRIPTION = "languageCode";
     public static final String LANGUAGE = LANGUAGE_OF_DESCRIPTION; //"languageCode";
 
-    public static final String UNDETERMINED_RELATIONSHIP_TYPE = "type";
+    public static final String ACCESS_POINT_TYPE = "type";
 
     // Links
     public static final String LINK_HAS_BODY = "hasLinkBody";

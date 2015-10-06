@@ -63,12 +63,13 @@ public abstract class AbstractImporter<T> {
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
-    protected List<ImportCallback> callbacks = Lists.newLinkedList();
+    protected final List<ImportCallback> callbacks = Lists.newLinkedList();
 
     private NodeProperties pc;
 
     /**
      * Call all registered ImportCallbacks for the given mutation.
+     *
      * @param mutation the Mutation to handle callbacks for
      */
     protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation) {
@@ -93,9 +94,9 @@ public abstract class AbstractImporter<T> {
     /**
      * Constructor.
      *
-     * @param graph     the framed graph
-     * @param scope     the permission scope
-     * @param log       the log object
+     * @param graph the framed graph
+     * @param scope the permission scope
+     * @param log   the log object
      */
     public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log) {
         this.permissionScope = scope;
@@ -115,7 +116,7 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Import an item representation into the graph, and return the Node.
-     * 
+     *
      * @param itemData the item representation to import
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
@@ -124,7 +125,7 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Import an item representation into the graph at a certain depth, and return the Node.
-     * 
+     *
      * @param itemData the item representation to import
      * @param scopeIds parent identifiers for ID generation,
      *                 not including permission scope
@@ -137,7 +138,7 @@ public abstract class AbstractImporter<T> {
     /**
      * Extract a list of DatePeriod bundles from an item's data.
      *
-     * @param data  the raw map of date data
+     * @param data the raw map of date data
      * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
@@ -147,57 +148,47 @@ public abstract class AbstractImporter<T> {
      * only properties that have the multivalued-status can actually be multivalued. all other properties will be
      * flattened by this method.
      *
-     * @param key       a property key
-     * @param value     a property value
-     * @param entity    the EntityClass with which this frameMap must comply
+     * @param key    a property key
+     * @param value  a property value
+     * @param entity the EntityClass with which this frameMap must comply
      */
-    protected Object changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
+    protected Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
         if (pc == null) {
-            pc = new NodeProperties();
-            BufferedReader br = null;
-            try {
-                InputStream fis = getClass().getClassLoader().getResourceAsStream(NODE_PROPERTIES);
-                if (fis == null) {
-                    throw new RuntimeException("Missing properties file: " + NODE_PROPERTIES);
-                }
-                br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-                String firstline = br.readLine();
-                pc.setTitles(firstline);
-
-                String line;
-                while ((line = br.readLine()) != null) {
-                    pc.addRow(line);
-                }
-            } catch (IOException ex) {
-                logger.error(ex.getMessage());
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        logger.error("Failed to close the buffered reader: {}", e.getMessage());
-                    }
-                }
-            }
+            pc = loadNodeProperties();
         }
         if (value instanceof List
-                && (!pc.hasProperty(entity.getName(), key) || !pc.isMultivaluedProperty(entity.getName(), key))) {
-            return stringJoiner.join((List<String>) value);
+                && !(pc.hasProperty(entity.getName(), key) && pc.isMultivaluedProperty(entity.getName(), key))) {
+            logger.trace("Flattening array property value: {}: {}", key, value);
+            return stringJoiner.join((List) value);
         } else {
             return value;
         }
     }
-    
+
     public abstract Iterable<Map<String, Object>> extractMaintenanceEvent(T itemData);
+
     public abstract Map<String, Object> getMaintenanceEvent(T event);
+
     public abstract MaintenanceEvent importMaintenanceEvent(T event);
 
-/**
- * all data that is stored above the first imported DocumentaryUnit will be processed here, and added to the DocumentDescriptions.
- * this might include MaintenanceEvents, or in the case of EAD there might be author/creation data.
- * 
- * @param topLevelUnit the top level DocumentaryUnit to append the maintenanceEvents to (if any)
- * @param itemData the item representation to import, in which to search for maintenanceEvents
- */
-//    public abstract void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData);
+    // Helpers
+
+    private NodeProperties loadNodeProperties() {
+        try (InputStream fis = getClass().getClassLoader().getResourceAsStream(NODE_PROPERTIES);
+             BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")))) {
+            NodeProperties nodeProperties = new NodeProperties();
+            String headers = br.readLine();
+            nodeProperties.setTitles(headers);
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                nodeProperties.addRow(line);
+            }
+            return nodeProperties;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        } catch (NullPointerException npe) {
+            throw new RuntimeException("Missing or empty properties file: " + NODE_PROPERTIES);
+        }
+    }
 }

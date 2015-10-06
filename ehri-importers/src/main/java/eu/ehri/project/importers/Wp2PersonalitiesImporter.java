@@ -61,28 +61,25 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
-
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
-
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         BundleDAO persister = getPersister();
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
-        if (!permissionScope.equals(SystemScope.getInstance())
-                && mutation.created()) {
+        if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
         handleCallbacks(mutation);
         return frame;
-
     }
 
     public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
@@ -99,7 +96,6 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
         }
         return item;
     }
-
 
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = Maps.newHashMap();
@@ -123,7 +119,6 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
         }
         return item;
     }
-
 
     /**
      * @param itemData the item data map

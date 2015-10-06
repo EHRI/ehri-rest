@@ -221,7 +221,7 @@ public final class BundleValidator {
         }
         if (manager.exists(bundle.getId())) {
             ListMultimap<String, String> idErrors = bundle
-                    .getType().getIdgen().handleIdCollision(scopes, bundle);
+                    .getType().getIdGen().handleIdCollision(scopes, bundle);
             for (Map.Entry<String, String> entry : idErrors.entries()) {
                 builder.addError(entry.getKey(), entry.getValue());
             }

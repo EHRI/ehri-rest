@@ -48,7 +48,7 @@ public class LinkTest extends AbstractFixtureTest {
     @Test
     public void testGetLinkBodies() throws Exception {
         Link link = manager.getFrame("link2", Link.class);
-        UndeterminedRelationship ur1 = manager.getFrame("ur1", UndeterminedRelationship.class);
+        AccessPoint ur1 = manager.getFrame("ur1", AccessPoint.class);
         assertTrue(Iterables.contains(link.getLinkBodies(), ur1));
     }
 }
