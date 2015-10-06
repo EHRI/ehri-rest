@@ -640,7 +640,7 @@ public final class Bundle {
      */
     public Bundle generateIds(Collection<String> scopes) {
         boolean isTemp = id == null;
-        IdGenerator idGen = getType().getIdgen();
+        IdGenerator idGen = getType().getIdGen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
         Multimap<String, Bundle> idRels = ArrayListMultimap.create();
         List<String> nextScopes = Lists.newArrayList(scopes);

@@ -44,7 +44,7 @@ import java.util.Map;
 
 /**
  * Importer of historical agents encoded in {@link Map}s.
- * <p>
+ * <p/>
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  *
@@ -64,28 +64,24 @@ public class PersonalitiesImporter extends MapImporter {
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = getPersister();
-
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
-
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
-
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+            .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
-        if (!permissionScope.equals(SystemScope.getInstance())
-                && mutation.created()) {
+        if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
         handleCallbacks(mutation);
         return frame;
-
     }
 
     @Override
@@ -147,7 +143,6 @@ public class PersonalitiesImporter extends MapImporter {
         }
         return item;
     }
-
 
     /**
      * @param itemData the item data map

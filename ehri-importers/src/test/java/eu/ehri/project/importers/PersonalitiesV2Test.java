@@ -30,7 +30,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -137,9 +137,9 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
                                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382");
-        Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
+        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
         logger.debug(vocabulary.getId());
-        Concept concept_716 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
+        Concept concept_716 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_716);
         
         
@@ -174,7 +174,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 //        printGraph(graph);
         HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
         for (Description d : person.getDescriptions()) {
-            for (UndeterminedRelationship rel : d.getUndeterminedRelationships()) {
+            for (AccessPoint rel : d.getAccessPoints()) {
                 if (rel.getRelationshipType().equals("subjectAccess")) {
                     if (rel.getName().equals("Diplomatic documents")) {
                         assertEquals(1, toList(rel.getLinks()).size());

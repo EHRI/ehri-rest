@@ -66,7 +66,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "PLACE.ČSÚ.544256";
-        Query<Concept> query = new Query<Concept>(graph, Concept.class);
+        Query<Concept> query = new Query<>(graph, Concept.class);
 
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).page(

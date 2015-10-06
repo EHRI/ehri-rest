@@ -54,25 +54,20 @@ public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = getPersister();
-
-        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT, extractUnit(itemData));
-
-        Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.CVOC_CONCEPT_DESCRIPTION));
-
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.CVOC_CONCEPT_DESCRIPTION));
+        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT, extractUnit(itemData))
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<Concept> mutation = persister.createOrUpdate(unit, Concept.class);
         Concept frame = mutation.getNode();
 
-        if (!permissionScope.equals(SystemScope.getInstance())
-                && mutation.created()) {
+        if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
             manager.cast(permissionScope, Vocabulary.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
         handleCallbacks(mutation);
         return frame;
-
     }
-
 }

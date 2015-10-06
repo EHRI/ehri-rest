@@ -36,11 +36,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractSkosImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractSkosImporterTest.class);
-    public static String FILE1 = "cvoc/simple.xml";
-    public static String FILE2 = "cvoc/simple.n3";
-    public static String FILE3 = "cvoc/repository-types.xml";
-    public static String FILE4 = "cvoc/camps.rdf";
-    public static String FILE5 = "cvoc/ghettos.rdf";
+    public static final String FILE1 = "cvoc/simple.xml";
+    public static final String FILE2 = "cvoc/simple.n3";
+    public static final String FILE3 = "cvoc/repository-types.xml";
+    public static final String FILE4 = "cvoc/camps.rdf";
+    public static final String FILE5 = "cvoc/ghettos.rdf";
 
     protected Actioner actioner;
     protected ActionManager actionManager;

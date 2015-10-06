@@ -36,70 +36,59 @@ import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 
 /**
  * Mapping of Entity type names to Frames interfaces classes and
- * their associated IdGenerator functors.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
+ * their associated id generator classes.
  *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum EntityClass {
 
-    // @formatter:off
-    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
-    REPOSITORY(Entities.REPOSITORY, "r", Repository.class, IdentifiableEntityIdGenerator.INSTANCE),
-    HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, "a", HistoricalAgent.class, IdentifiableEntityIdGenerator.INSTANCE),
-    GROUP(Entities.GROUP, "g", Group.class, IdentifiableEntityIdGenerator.INSTANCE),
-    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, IdentifiableEntityIdGenerator.INSTANCE),
-    AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET, "as", AuthoritativeSet.class, IdentifiableEntityIdGenerator.INSTANCE),
-    COUNTRY(Entities.COUNTRY, "ct", Country.class, IdentifiableEntityIdGenerator.INSTANCE),
-    CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, "cvv", Vocabulary.class, IdentifiableEntityIdGenerator.INSTANCE),
-    CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class, IdentifiableEntityIdGenerator.INSTANCE),
+    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, DocumentaryUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
+    REPOSITORY(Entities.REPOSITORY, Repository.class, IdentifiableEntityIdGenerator.INSTANCE),
+    HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, HistoricalAgent.class, IdentifiableEntityIdGenerator.INSTANCE),
+    GROUP(Entities.GROUP, Group.class, IdentifiableEntityIdGenerator.INSTANCE),
+    USER_PROFILE(Entities.USER_PROFILE, UserProfile.class, IdentifiableEntityIdGenerator.INSTANCE),
+    AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET, AuthoritativeSet.class, IdentifiableEntityIdGenerator.INSTANCE),
+    COUNTRY(Entities.COUNTRY, Country.class, IdentifiableEntityIdGenerator.INSTANCE),
+    CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, Vocabulary.class, IdentifiableEntityIdGenerator.INSTANCE),
+    CVOC_CONCEPT(Entities.CVOC_CONCEPT, Concept.class, IdentifiableEntityIdGenerator.INSTANCE),
+    VIRTUAL_UNIT(Entities.VIRTUAL_UNIT, VirtualUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
+
+    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, DocumentDescription.class, DescriptionIdGenerator.INSTANCE),
+    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, RepositoryDescription.class, DescriptionIdGenerator.INSTANCE),
+    HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, HistoricalAgentDescription.class, DescriptionIdGenerator.INSTANCE),
+    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, ConceptDescription.class, DescriptionIdGenerator.INSTANCE),
 
     // Generic entities.
-    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class, DescriptionIdGenerator.INSTANCE),
-    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, "rd", RepositoryDescription.class, DescriptionIdGenerator.INSTANCE),
-    HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, "ad", HistoricalAgentDescription.class, DescriptionIdGenerator.INSTANCE),
-    DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
-    ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
-    ADDRESS(Entities.ADDRESS, "adr", Address.class),
-    SYSTEM_EVENT(Entities.SYSTEM_EVENT, "ev", SystemEvent.class, GenericIdGenerator.INSTANCE),
-    VERSION(Entities.VERSION, "ver", Version.class),
-    SYSTEM(Entities.SYSTEM, "sys", SystemEventQueue.class),
-    UNKNOWN_PROPERTY(Entities.UNKNOWN_PROPERTY, "p", UnknownProperty.class),
-    PERMISSION(Entities.PERMISSION, "pm", Permission.class),
-    PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
-    CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
-    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class, DescriptionIdGenerator.INSTANCE),
-    MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
-    UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
-    LINK (Entities.LINK, "lnk", Link.class),
-    VIRTUAL_UNIT(Entities.VIRTUAL_UNIT, "vu", VirtualUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
-    EVENT_LINK(Entities.EVENT_LINK, "elnk", EventLink.class);
-    // @formatter:on
+    DATE_PERIOD(Entities.DATE_PERIOD, DatePeriod.class),
+    ANNOTATION(Entities.ANNOTATION, Annotation.class),
+    ADDRESS(Entities.ADDRESS, Address.class),
+    SYSTEM_EVENT(Entities.SYSTEM_EVENT, SystemEvent.class),
+    VERSION(Entities.VERSION, Version.class),
+    SYSTEM(Entities.SYSTEM, SystemEventQueue.class),
+    UNKNOWN_PROPERTY(Entities.UNKNOWN_PROPERTY, UnknownProperty.class),
+    PERMISSION(Entities.PERMISSION, Permission.class),
+    PERMISSION_GRANT(Entities.PERMISSION_GRANT, PermissionGrant.class),
+    CONTENT_TYPE(Entities.CONTENT_TYPE, ContentType.class),
+    MAINTENANCE_EVENT(Entities.MAINTENANCE_EVENT, MaintenanceEvent.class),
+    ACCESS_POINT(Entities.ACCESS_POINT, AccessPoint.class),
+    LINK(Entities.LINK, Link.class),
+    EVENT_LINK(Entities.EVENT_LINK, EventLink.class);
 
     // Accessors.
 
     /**
      * Get the string name of this EntityType.
-     * 
-     * @return
+     *
+     * @return the type's name
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Get the abbreviation code of this entityType.
-     * 
-     * @return
-     */
-    public String getAbbreviation() {
-        return abbr;
-    }
-
-    /**
      * Get the interface to which this EntityType refers.
-     * 
-     * @return
+     *
+     * @return the Java model class associated with the type
      */
     public Class<? extends Frame> getJavaClass() {
         return cls;
@@ -107,11 +96,11 @@ public enum EntityClass {
 
     /**
      * Get the ID generator class for this entityType.
-     * 
-     * @return
+     *
+     * @return the IdGenerator instance associated with the type
      */
-    public IdGenerator getIdgen() {
-        return idgen;
+    public IdGenerator getIdGen() {
+        return idGen;
     }
 
     public static EntityClass withName(String name) {
@@ -123,28 +112,17 @@ public enum EntityClass {
     }
 
     private final String name;
-    private final String abbr;
     private final Class<? extends Frame> cls;
-    private final IdGenerator idgen;
+    private final IdGenerator idGen;
 
-    EntityClass(String name, String abbr,
-            Class<? extends Frame> cls, IdGenerator idgen) {
+    EntityClass(String name, Class<? extends Frame> cls, IdGenerator idGen) {
         this.name = name;
-        this.abbr = abbr;
         this.cls = cls;
-        this.idgen = idgen;
+        this.idGen = idGen;
     }
 
-    /**
-     * Short constructor.
-     * 
-     * @param name
-     * @param abbr
-     * @param cls
-     */
-    EntityClass(String name, String abbr,
-            Class<? extends Frame> cls) {
-        this(name, abbr, cls, GenericIdGenerator.INSTANCE);
+    EntityClass(String name, Class<? extends Frame> cls) {
+        this(name, cls, GenericIdGenerator.INSTANCE);
     }
 
     @Override

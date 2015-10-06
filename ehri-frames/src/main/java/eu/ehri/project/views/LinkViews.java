@@ -32,7 +32,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
@@ -140,12 +140,12 @@ public final class LinkViews implements Scoped<LinkViews> {
         //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
         helper.checkEntityPermission(description.getEntity(), user, PermissionType.UPDATE);
         Link link = new BundleDAO(graph).create(bundle, Link.class);
-        Bundle relBundle = new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+        Bundle relBundle = new Bundle(EntityClass.ACCESS_POINT)
                 .withDataValue(Ontology.NAME_KEY, bodyName)
-                .withDataValue(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, bodyType)
+                .withDataValue(Ontology.ACCESS_POINT_TYPE, bodyType)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, link.getDescription());
-        UndeterminedRelationship rel = new BundleDAO(graph).create(relBundle, UndeterminedRelationship.class);
-        description.addUndeterminedRelationship(rel);
+        AccessPoint rel = new BundleDAO(graph).create(relBundle, AccessPoint.class);
+        description.addAccessPoint(rel);
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
         link.setLinker(user);

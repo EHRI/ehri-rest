@@ -28,7 +28,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.persistence.ActionManager;
@@ -69,7 +69,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
     public void testCreateLink() throws Exception {
         DocumentaryUnit src = manager.getFrame("c1", DocumentaryUnit.class);
         HistoricalAgent dst = manager.getFrame("a1", HistoricalAgent.class);
-        UndeterminedRelationship rel = manager.getFrame("ur1", UndeterminedRelationship.class);
+        AccessPoint rel = manager.getFrame("ur1", AccessPoint.class);
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
@@ -107,8 +107,8 @@ public class LinkViewsTest extends AbstractFixtureTest {
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
         assertEquals(1L, Iterables.size(link.getLinkBodies()));
-        UndeterminedRelationship rel = manager.cast(link.getLinkBodies().iterator().next(),
-                UndeterminedRelationship.class);
+        AccessPoint rel = manager.cast(link.getLinkBodies().iterator().next(),
+                AccessPoint.class);
         assertEquals(rel.getName(), linkDesc);
         assertEquals(rel.getRelationshipType(), linkType);
         Description d = rel.getDescription();

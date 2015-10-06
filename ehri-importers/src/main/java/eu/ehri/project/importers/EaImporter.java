@@ -74,7 +74,7 @@ public abstract class EaImporter extends MapImporter {
     /**
      * Extract DocumentaryUnit properties from the itemData and return them as a new Map.
      * This implementation only extracts the objectIdentifier.
-     * <p>
+     * <p/>
      * This implementation does not throw ValidationErrors.
      *
      * @param itemData a Map containing raw properties of a DocumentaryUnit
@@ -115,31 +115,31 @@ public abstract class EaImporter extends MapImporter {
      * @return an Iterable of new Maps representing related nodes and their types
      */
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        String REL = "relation";
+        String relName = "relation";
         List<Map<String, Object>> listOfRelations = Lists.newArrayList();
         for (Entry<String, Object> itemProperty : itemData.entrySet()) {
-            if (itemProperty.getKey().equals(REL)) {
+            if (itemProperty.getKey().equals(relName)) {
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemProperty.getValue()) {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     for (Entry<String, Object> relationProperty : origRelation.entrySet()) {
-                        if (relationProperty.getKey().equals(REL + "/type")) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, relationProperty.getValue());
-                        } else if (relationProperty.getKey().equals(REL + "/url")) {
+                        if (relationProperty.getKey().equals(relName + "/type")) {
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, relationProperty.getValue());
+                        } else if (relationProperty.getKey().equals(relName + "/url")) {
                             //try to find the original identifier
                             relationNode.put(LINK_TARGET, relationProperty.getValue());
-                        } else if (relationProperty.getKey().equals(REL + "/" + Ontology.NAME_KEY)) {
+                        } else if (relationProperty.getKey().equals(relName + "/" + Ontology.NAME_KEY)) {
                             //try to find the original identifier
                             relationNode.put(Ontology.NAME_KEY, relationProperty.getValue());
-                        } else if (relationProperty.getKey().equals(REL + "/notes")) {
+                        } else if (relationProperty.getKey().equals(relName + "/notes")) {
                             relationNode.put(Ontology.LINK_HAS_DESCRIPTION, relationProperty.getValue());
                         } else {
                             relationNode.put(relationProperty.getKey(), relationProperty.getValue());
                         }
                     }
                     // Set a default relationship type if no type was found in the relationship
-                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                    if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
                     }
                     listOfRelations.add(relationNode);
                 }
@@ -166,7 +166,7 @@ public abstract class EaImporter extends MapImporter {
             if (itemProperty.getKey().equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemProperty.getValue());
             } else if (itemProperty.getKey().equals("conditionsOfAccess")) {
-                description.put(itemProperty.getKey(), changeForbiddenMultivaluedProperties(
+                description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
                         itemProperty.getKey(), itemProperty.getValue(), entity));
             } else if (!itemProperty.getKey().startsWith(SaxXmlHandler.UNKNOWN)
                     && !itemProperty.getKey().equals("objectIdentifier")
@@ -178,7 +178,7 @@ public abstract class EaImporter extends MapImporter {
                     && !itemProperty.getKey().startsWith("address/")
                     && !itemProperty.getKey().endsWith("Access")
                     && !itemProperty.getKey().endsWith("AccessPoint")) {
-                description.put(itemProperty.getKey(), changeForbiddenMultivaluedProperties(
+                description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
                         itemProperty.getKey(), itemProperty.getValue(), entity));
             }
         }

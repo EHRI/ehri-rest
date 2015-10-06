@@ -56,27 +56,26 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
 
     private static final Logger logger = LoggerFactory.getLogger(MapImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
-    protected final String DESCRIPTION_ID = "descriptionIdentifier";
     private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
 
     // Various date patterns
     private final Pattern[] datePatterns = {
-        // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
-        // Yad Vashem in Wp2: 12-15-1941, 9-30-1944
-        Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
-        Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})$"),
-        Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
-        Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
-        Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
-        Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
-        Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
-        Pattern.compile("^(\\d{2})th century$"),
-        Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
-        //bundesarchive: 1906/19
-        Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
-        Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})"),
-        Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
-        Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
+            // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
+            // Yad Vashem in Wp2: 12-15-1941, 9-30-1944
+            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
+            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})$"),
+            Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
+            Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
+            Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
+            Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
+            Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
+            Pattern.compile("^(\\d{2})th century$"),
+            Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
+            //bundesarchive: 1906/19
+            Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
+            Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})"),
+            Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
+            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
     public MapImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
@@ -84,14 +83,13 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     }
 
     private void extractDateFromValue(List<Map<String, Object>> extractedDates, String value) throws ValidationError {
-        logger.debug("date: " + value);
+        logger.debug("date: {}", value);
         Map<String, Object> dpb;
         dpb = extractDate(value);
         if (dpb != null) {
             extractedDates.add(dpb);
         }
-        logger.debug("nr of dates found: " + extractedDates.size());
-
+        logger.debug("nr of dates found: {}", extractedDates.size());
     }
 
     /**
@@ -133,61 +131,60 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
             try {
                 extractDateFromValue(extractedDates, s);
             } catch (ValidationError e) {
-                System.out.println("ERROR WITH DATES");
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
         return extractedDates;
     }
-    
+
     /**
      * The dates that have been extracted to the extractedDates will be removed from the data map
      *
-     * @param data the data map
+     * @param data           the data map
      * @param extractedDates the set of extracted dates
      */
-    protected void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates){
+    protected void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates) {
         Map<String, String> datevalues = returnDatesAsString(data, dates);
         Map<String, String> datetypes = Maps.newHashMap();
-        for(String datevalue: datevalues.keySet()){
+        for (String datevalue : datevalues.keySet()) {
             datetypes.put(datevalues.get(datevalue), null);
         }
-            
-        
-        for(Map<String, Object> datemap : extractedDates){
+
+
+        for (Map<String, Object> datemap : extractedDates) {
             datevalues.remove(datemap.get(Ontology.DATE_HAS_DESCRIPTION));
         }
         //replace dates in data map
-        for(String datevalue : datevalues.keySet()){
+        for (String datevalue : datevalues.keySet()) {
             String datetype = datevalues.get(datevalue);
             logger.debug("{} -- {}", datevalue, datetype);
-            if(datetypes.containsKey(datetype) && datetypes.get(datetype) != null){
-                datetypes.put(datetype, datetypes.get(datetype)+", "+datevalue.trim());
-            }else{
+            if (datetypes.containsKey(datetype) && datetypes.get(datetype) != null) {
+                datetypes.put(datetype, datetypes.get(datetype) + ", " + datevalue.trim());
+            } else {
                 datetypes.put(datetype, datevalue.trim());
             }
         }
-        for(String datetype : datetypes.keySet()){
+        for (String datetype : datetypes.keySet()) {
             logger.debug("datetype {} -- {}", datetype, datetypes.get(datetype));
-            if(datetypes.get(datetype) == null){
+            if (datetypes.get(datetype) == null) {
                 data.remove(datetype);
-            }else{
+            } else {
                 data.put(datetype, datetypes.get(datetype));
             }
-            logger.debug(""+data.get(datetype));
+            logger.debug("" + data.get(datetype));
         }
-        
+
     }
-    
+
     /**
      * Extract an Iterable of representations of maintenance events from the itemData.
-     * 
+     *
      * @param itemData a Map containing raw properties of a unit
      * @return a List of node representations of maintenance events (may be empty)
      */
     @Override
-    public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
+    public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData) {
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
             if (key.equals("maintenanceEvent")) {
@@ -199,11 +196,11 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         }
         return list;
     }
-    
+
     /**
      * Convert a representation of a maintenance event from the maintenanceEvent data,
      * using property names from MaintenanceEvent.
-     * 
+     *
      * @param event a Map of event properties
      * @return a correct node representation of a single maintenance event
      */
@@ -224,7 +221,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         }
         return me;
     }
-    
+
 
     @Override
     public MaintenanceEvent importMaintenanceEvent(Map<String, Object> event) {
@@ -252,7 +249,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
     private Map<String, Object> extractDate(Object date) /*throws ValidationError*/ {
-        logger.debug("date value: " + date);
+        logger.debug("date value: {}", date);
         Map<String, Object> data = matchDate((String) date);
         return data.isEmpty() ? null : data;
     }
@@ -262,7 +259,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
-                logger.debug("matched "+ date);
+                logger.debug("matched {}", date);
                 data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
                 data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
                         .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));
@@ -276,13 +273,13 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     private static String normaliseDate(String date) {
         return normaliseDate(date, Ontology.DATE_PERIOD_START_DATE);
     }
-    
+
     /**
      * Normalise a date in a string.
-     * 
-     * @param date a String date that needs formatting
+     *
+     * @param date       a String date that needs formatting
      * @param beginOrEnd a string signifying whether this date is the begin of
-     * a period or the end of a period
+     *                   a period or the end of a period
      * @return a String containing the formatted date.
      */
     public static String normaliseDate(String date, String beginOrEnd) {
@@ -309,8 +306,9 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         }
         return returndate;
     }
-    
+
     //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several
+
     /**
      * extract data nodes from the data, that are not covered by their respectable properties file.
      *
@@ -329,5 +327,4 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         return l;
 
     }
-    
 }

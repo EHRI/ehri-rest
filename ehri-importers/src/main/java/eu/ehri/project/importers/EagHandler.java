@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,7 +65,6 @@ public class EagHandler extends SaxXmlHandler {
             logger.debug("just before popping: " + depth + "-" + getImportantPath(currentPath) + "-" + qName);
             Map<String, Object> currentGraph = currentGraphPath.pop();
             putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
-//            currentGraphPath.pop();
             depth--;
         }
 
@@ -101,10 +99,5 @@ public class EagHandler extends SaxXmlHandler {
                 logger.error(ex.getMessage());
             }
         }
-    }
-
-    @Override
-    protected List<String> getSchemas() {
-        return Lists.newArrayList("eag.xsd");
     }
 }

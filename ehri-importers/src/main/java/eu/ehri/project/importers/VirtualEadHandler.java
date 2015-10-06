@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
 public class VirtualEadHandler extends SaxXmlHandler {
     public static final String AUTHOR = "authors",
             SOURCEFILEID = "sourceFileId";
-    List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
+    final List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes = ImmutableMap.<String, Class<?
             extends Frame>>of("maintenanceEvent", MaintenanceEvent.class);
 
@@ -299,17 +299,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
     }
 
     /**
-     * Handler-specific code for extraction or generation of description languages.
-     * Default method is empty; override when necessary.
-     *
-     * @param currentGraph
-     */
-    protected void extractEadLanguage(Map<String, Object> currentGraph) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
      * Checks given currentGraph for a language and sets a default language code
      * for the description if no language is found.
      *
@@ -402,11 +391,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
             need = need || path.endsWith("AccessPoint");
         }
         return need || possibleSubnodes.containsKey(getImportantPath(currentPath));
-    }
-
-    @Override
-    protected List<String> getSchemas() {
-        return Lists.newArrayList("xlink.xsd", "ead.xsd");
     }
 
     /**

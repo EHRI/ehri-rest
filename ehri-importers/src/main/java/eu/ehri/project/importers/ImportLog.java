@@ -39,8 +39,8 @@ public class ImportLog {
     private int updated;
     private int unchanged;
     private int errored;
-    private EventContext eventContext;
-    private Map<String, String> errors = Maps.newHashMap();
+    private final EventContext eventContext;
+    private final Map<String, String> errors = Maps.newHashMap();
 
 
     /**

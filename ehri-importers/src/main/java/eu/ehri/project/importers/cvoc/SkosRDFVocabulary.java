@@ -66,7 +66,7 @@ public enum SkosRDFVocabulary {
     DEFINITION("definition"),
     CHANGE_NOTE("changeNote");
 
-    private String NAMESPACE = "http://www.w3.org/2004/02/skos/core#";
+    private final String NAMESPACE = "http://www.w3.org/2004/02/skos/core#";
     private final URI uri;
 
     SkosRDFVocabulary(String localName) {

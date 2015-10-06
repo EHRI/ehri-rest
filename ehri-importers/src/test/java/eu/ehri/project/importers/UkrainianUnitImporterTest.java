@@ -52,7 +52,7 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest{
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "uk");
         repoBundle = repoBundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, repoDescBundle);
         repoBundle = repoBundle.withRelation(Ontology.REPOSITORY_HAS_COUNTRY, ukrainianBundle);
-        Repository repo = new CrudViews<Repository>(graph, Repository.class).create(repoBundle, validUser);
+        Repository repo = new CrudViews<>(graph, Repository.class).create(repoBundle, validUser);
 
         int count = getNodeCount(graph);
         

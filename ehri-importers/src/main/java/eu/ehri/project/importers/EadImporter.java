@@ -28,11 +28,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -62,7 +62,7 @@ import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
  * a hierarchical structure describing their child items. This means that we need to recursively descend through the
  * archdesc and c,c01-12 levels.
- * <p>
+ * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
@@ -71,8 +71,8 @@ public class EadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
-    private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
-    private Serializer mergeSerializer;
+    private final EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
+    private final Serializer mergeSerializer;
     public static final String ACCESS_POINT = "AccessPoint";
 
     /**
@@ -115,7 +115,7 @@ public class EadImporter extends EaImporter {
             for (String s : rel.keySet()) {
                 logger.debug(s);
             }
-            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
@@ -262,14 +262,14 @@ public class EadImporter extends EaImporter {
     /**
      * subclasses can override this method to cater to their special needs for UndeterminedRelationships
      * by default, it expects something like this in the original EAD:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
      * Leonhard (* 11.5.1886)</persname>
      * }
      * </pre>
-     * <p>
+     * <p/>
      * it works in unison with the extractRelations() method.
      *
      * @param unit       the current unit
@@ -282,7 +282,7 @@ public class EadImporter extends EaImporter {
         //so they have id's. 
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
-            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
+            for (AccessPoint rel : Sets.newHashSet(unitdesc.getAccessPoints())) {
                 /*
                  * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
                  * they need to be found in the vocabularies that are in the graph
@@ -345,13 +345,13 @@ public class EadImporter extends EaImporter {
                         //try to find the original name
                         relationNode.put(Ontology.NAME_KEY, origRelation.get("name"));
                         relationNode.put("cvoc", origRelation.get("cvoc"));
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, origRelation.get("type"));
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get("type"));
                     } else {
                         relationNode.put(Ontology.NAME_KEY, origRelation.get(REL));
                     }
-                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                    if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
                         logger.debug("relationNode without type: " + relationNode.get(Ontology.NAME_KEY));
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }
@@ -370,15 +370,15 @@ public class EadImporter extends EaImporter {
                         Map<String, Object> relationNode = Maps.newHashMap();
                         for (String eventkey : origRelation.keySet()) {
                             if (eventkey.endsWith(ACCESS_POINT)) {
-                                relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
+                                relationNode.put(Ontology.ACCESS_POINT_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
                                 relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
 //logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
                             } else {
                                 relationNode.put(eventkey, origRelation.get(eventkey));
                             }
                         }
-                        if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
                         }
                         //if no name is given, it was apparently an empty <controlaccess> tag?
                         if (relationNode.containsKey(Ontology.NAME_KEY)) {
@@ -387,7 +387,7 @@ public class EadImporter extends EaImporter {
                     }
                 } else {
                     Map<String, Object> relationNode = Maps.newHashMap();
-                    relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, key.substring(0, key.indexOf("Point")));
+                    relationNode.put(Ontology.ACCESS_POINT_TYPE, key.substring(0, key.indexOf("Point")));
                     relationNode.put(Ontology.NAME_KEY, data.get(key));
                     list.add(relationNode);
 

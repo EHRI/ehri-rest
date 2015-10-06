@@ -154,15 +154,15 @@ public void setStageTest() throws PermissionDenied, ValidationError {
                                 .withDataValue(Ontology.NAME_KEY, UNIT2+"title")
                                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "cze");
 
-        repository1 = new CrudViews<Repository>(graph, Repository.class).create(repo1Bundle, validUser);
-        repository2 = new CrudViews<Repository>(graph, Repository.class).create(repo2Bundle, validUser);
+        repository1 = new CrudViews<>(graph, Repository.class).create(repo1Bundle, validUser);
+        repository2 = new CrudViews<>(graph, Repository.class).create(repo2Bundle, validUser);
         
         documentaryUnit1Bundle = documentaryUnit1Bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, documentDescription1Bundle);
-        unit1 = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class).create(documentaryUnit1Bundle, validUser);
+        unit1 = new CrudViews<>(graph, DocumentaryUnit.class).create(documentaryUnit1Bundle, validUser);
         unit1.setRepository(repository1);
         
         documentaryUnit2Bundle = documentaryUnit2Bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, documentDescription2Bundle);
-        unit2 = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class).create(documentaryUnit2Bundle, validUser);
+        unit2 = new CrudViews<>(graph, DocumentaryUnit.class).create(documentaryUnit2Bundle, validUser);
         unit2.setRepository(repository2);
 
     }

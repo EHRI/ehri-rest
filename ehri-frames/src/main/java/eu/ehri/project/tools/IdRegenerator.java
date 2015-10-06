@@ -121,7 +121,7 @@ public class IdRegenerator {
 
         EntityClass entityClass = manager.getEntityClass(item);
         try {
-            IdGenerator idgen = entityClass.getIdgen();
+            IdGenerator idgen = entityClass.getIdGen();
             Bundle itemBundle = depSerializer.vertexFrameToBundle(item);
             String newId = idgen.generateId(idChain, itemBundle);
             if (collisionMode) {
@@ -149,7 +149,7 @@ public class IdRegenerator {
                             descIdChain.add(idBase);
                             for (Description d : manager.cast(item, DescribedEntity.class).getDescriptions()) {
                                 Bundle desc = depSerializer.vertexFrameToBundle(d);
-                                String newDescriptionId = desc.getType().getIdgen().generateId(descIdChain, desc);
+                                String newDescriptionId = desc.getType().getIdGen().generateId(descIdChain, desc);
                                 manager.renameVertex(d.asVertex(), d.getId(), newDescriptionId);
                             }
 

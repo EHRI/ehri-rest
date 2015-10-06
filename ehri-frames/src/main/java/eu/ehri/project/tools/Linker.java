@@ -33,7 +33,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -124,7 +124,7 @@ public class Linker {
 
         for (DocumentaryUnit doc : repository.getAllCollections()) {
             for (DocumentDescription description : doc.getDocumentDescriptions()) {
-                for (UndeterminedRelationship relationship : description.getUndeterminedRelationships()) {
+                for (AccessPoint relationship : description.getAccessPoints()) {
                     if (accessPointTypes.isEmpty() || accessPointTypes
                             .contains(relationship.getRelationshipType())) {
                         String trimmedName = relationship.getName().trim();
@@ -211,7 +211,7 @@ public class Linker {
         long linkCount = 0L;
         for (DocumentaryUnit doc : repository.getAllCollections()) {
             for (DocumentDescription description : doc.getDocumentDescriptions()) {
-                for (UndeterminedRelationship relationship : description.getUndeterminedRelationships()) {
+                for (AccessPoint relationship : description.getAccessPoints()) {
                     if (accessPointTypes.isEmpty() || accessPointTypes
                             .contains(relationship.getRelationshipType())) {
 
@@ -348,7 +348,7 @@ public class Linker {
         return true;
     }
 
-    private static String getIdentifier(UndeterminedRelationship relationship) {
+    private static String getIdentifier(AccessPoint relationship) {
         return Slugify.slugify(relationship.getName().trim())
                 .replaceAll("^-+", "")
                 .replaceAll("-+$", "");

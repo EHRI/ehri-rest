@@ -92,7 +92,7 @@ public class CountryAdd extends BaseCommand {
                 .withDataValue(Ontology.IDENTIFIER_KEY, countryId)
                 .withDataValue(Ontology.NAME_KEY, countryName);
 
-        String nodeId = EntityClass.COUNTRY.getIdgen().generateId(SystemScope.getInstance().idPath(), bundle);
+        String nodeId = EntityClass.COUNTRY.getIdGen().generateId(SystemScope.getInstance().idPath(), bundle);
         bundle = bundle.withId(nodeId);
 
         try {

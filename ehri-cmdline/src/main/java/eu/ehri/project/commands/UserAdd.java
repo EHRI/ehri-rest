@@ -97,7 +97,7 @@ public class UserAdd extends BaseCommand {
                 Maps.<String, Object> newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, userId)
                 .withDataValue(Ontology.NAME_KEY, userName);
-        String nodeId = EntityClass.USER_PROFILE.getIdgen()
+        String nodeId = EntityClass.USER_PROFILE.getIdGen()
                 .generateId(SystemScope.getInstance().idPath(), bundle);
         bundle = bundle.withId(nodeId);
 

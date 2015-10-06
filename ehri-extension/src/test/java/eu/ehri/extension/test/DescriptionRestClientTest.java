@@ -106,7 +106,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteAccessPoints() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", "cd2", Entities.UNDETERMINED_RELATIONSHIP))
+                ehriUri(ENDPOINT, "c2", "cd2", Entities.ACCESS_POINT))
                 .entity(accessPointTestStr).post(ClientResponse.class);
         assertStatus(CREATED, response);
         JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
@@ -118,7 +118,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
 
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, "c2", "cd2",
-                        Entities.UNDETERMINED_RELATIONSHIP, value))
+                        Entities.ACCESS_POINT, value))
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
     }

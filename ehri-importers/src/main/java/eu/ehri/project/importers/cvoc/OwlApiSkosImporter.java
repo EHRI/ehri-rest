@@ -214,7 +214,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
             Set<OWLAnnotation> annotations = item.getAnnotations(dataset, propName);
             for (OWLAnnotation annotation : annotations) {
                 if (annotation.getValue() instanceof OWLLiteral) {
-                    undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                    undetermined.add(new Bundle(EntityClass.ACCESS_POINT)
                             .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
                             .withDataValue(Ontology.NAME_KEY, rel.getValue().toString()));
                 }

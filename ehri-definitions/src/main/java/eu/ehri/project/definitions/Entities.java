@@ -51,7 +51,7 @@ public class Entities {
     public static final String CVOC_CONCEPT_DESCRIPTION = "cvocConceptDescription";
     public static final String SYSTEM = "system";
     public static final String MAINTENANCE_EVENT ="maintenanceEvent";
-    public static final String UNDETERMINED_RELATIONSHIP = "relationship";
+    public static final String ACCESS_POINT = "relationship";
     public static final String AUTHORITATIVE_SET = "authoritativeSet";
     public static final String VIRTUAL_UNIT = "virtualUnit";
     public static final String EVENT_LINK = "eventLink";

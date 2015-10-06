@@ -70,7 +70,6 @@ public class EagImporter extends EaImporter {
     @Override
     public Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> data = super.extractUnit(itemData);
-
         // MB: Hack hack hack - extract EHRI-specific 'priority' field out of the
         // pattern "Priority: <digit>" in the maintenanceNotes field.
         Object notes = itemData.get(MAINTENANCE_NOTES);
@@ -99,8 +98,6 @@ public class EagImporter extends EaImporter {
 
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
-        Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
-
         Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
         descmap.put(Ontology.IDENTIFIER_KEY, descmap.get(Ontology.IDENTIFIER_KEY) + "#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
@@ -127,7 +124,8 @@ public class EagImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData))
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<Repository> mutation = persister.createOrUpdate(unit, Repository.class);
         handleCallbacks(mutation);

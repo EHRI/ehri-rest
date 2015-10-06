@@ -114,7 +114,7 @@ public class EntityAdd extends BaseCommand {
             builder.addDataValue((String) prop, properties.getProperty((String) prop));
         }
         Bundle bundle = builder.build();
-        String id = entityClass.getIdgen().generateId(scope.idPath(), bundle);
+        String id = entityClass.getIdGen().generateId(scope.idPath(), bundle);
 
         try {
             createItem(graph, cmdLine, id, bundle, scope, user, logMessage);

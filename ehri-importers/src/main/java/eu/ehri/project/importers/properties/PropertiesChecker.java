@@ -32,7 +32,7 @@ import java.util.Set;
 public class PropertiesChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesChecker.class);
-    private NodeProperties allowed;
+    private final NodeProperties allowed;
 
     public PropertiesChecker(NodeProperties allowedproperties) {
         allowed = allowedproperties;

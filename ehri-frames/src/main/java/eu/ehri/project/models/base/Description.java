@@ -24,7 +24,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
@@ -83,13 +83,10 @@ public interface Description extends NamedEntity, AccessibleEntity {
     @Dependent
     @Fetch(value = Ontology.HAS_ACCESS_POINT, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
-    Iterable<UndeterminedRelationship> getUndeterminedRelationships();
+    Iterable<AccessPoint> getAccessPoints();
 
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
-    void setUndeterminedRelationships(Iterable<UndeterminedRelationship> relationship);
-
-    @Adjacency(label = Ontology.HAS_ACCESS_POINT)
-    void addUndeterminedRelationship(UndeterminedRelationship relationship);
+    void addAccessPoint(AccessPoint accessPoint);
 
     @Dependent
     @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifLevel = 1, whenNotLite = true)

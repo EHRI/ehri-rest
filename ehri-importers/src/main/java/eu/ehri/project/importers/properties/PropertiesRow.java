@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class PropertiesRow {
 
-    Map<String, String> properties;
+    final Map<String, String> properties;
 
     protected PropertiesRow() {
         properties = Maps.newHashMap();

@@ -38,10 +38,10 @@ public class NodeProperties {
     public final static String MULTIVALUED = "multivalued?";
     public final static String REQUIRED = "required?";
     public final static String HANDLERNAME = "handlerTempName";
-    private List<String> titles;
+    private final List<String> titles;
     public static final String SEP = ",";
-    private Map<String, List<PropertiesRow>> p;
-    private Set<String> allKnownNodes;
+    private final Map<String, List<PropertiesRow>> p;
+    private final Set<String> allKnownNodes;
 
     public NodeProperties() {
         titles = Lists.newArrayList();

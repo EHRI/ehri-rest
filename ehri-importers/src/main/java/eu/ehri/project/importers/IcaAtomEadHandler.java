@@ -44,6 +44,7 @@ public class IcaAtomEadHandler extends EadHandler {
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
+     *
      * @param publicId the public component of the EAD DTD
      * @param systemId the system component of the EAD DTD
      * @return returns essentially an empty dtd file
@@ -55,17 +56,19 @@ public class IcaAtomEadHandler extends EadHandler {
         // This is the equivalent of returning a null dtd.
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
+
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super(importer, properties);
         children[depth] = Lists.newArrayList();
     }
+
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         this(importer, new XmlImportProperties("icaatom.properties"));
     }
 
     @Override
     protected void extractTitle(Map<String, Object> currentGraph) {
-    	if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
+        if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
             //finding some name for this unit:
             if (currentGraph.containsKey("title")) {
                 currentGraph.put(Ontology.NAME_KEY, currentGraph.get("title"));
@@ -74,7 +77,5 @@ public class IcaAtomEadHandler extends EadHandler {
                 currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title");
             }
         }
-
     }
-
 }
