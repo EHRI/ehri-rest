@@ -25,7 +25,7 @@ package eu.ehri.project.importers.exceptions;
  * @author Mike Bryant (http://github.com/mikesname)
  *
  */
-public class InvalidXmlDocument extends Exception {
+public class InvalidXmlDocument extends InputParseError {
     private static final long serialVersionUID = -3771058149749123884L;
 
     public InvalidXmlDocument(String type) {

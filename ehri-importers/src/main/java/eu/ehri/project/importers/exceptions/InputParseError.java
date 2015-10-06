@@ -21,7 +21,7 @@ package eu.ehri.project.importers.exceptions;
 
 /**
  * The input data supplied was invalid in some way, detailed by @param cause.
- * 
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class InputParseError extends Exception {
@@ -29,10 +29,29 @@ public class InputParseError extends Exception {
 
     /**
      * Constructor.
-     * 
-     * @param cause
+     *
+     * @param cause the root exception
      */
     public InputParseError(Throwable cause) {
         super(cause);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param message a description of the error
+     */
+    public InputParseError(String message) {
+        super(message);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param message a description of the error
+     * @param cause the root exception
+     */
+    public InputParseError(String message, Throwable cause) {
+        super(message, cause);
     }
 }

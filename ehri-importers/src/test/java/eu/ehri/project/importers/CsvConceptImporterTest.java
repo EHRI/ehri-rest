@@ -23,6 +23,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;

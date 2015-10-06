@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -454,7 +455,7 @@ public class EadHandler extends SaxXmlHandler {
 
     private void addAuthor(Map<String, Object> currentGraph) {
         if (getAuthor() != null) {
-            putPropertyInGraph(currentGraph, "processInfo", getAuthor());
+            Helpers.putPropertyInGraph(currentGraph, "processInfo", getAuthor());
         }
     }
 }

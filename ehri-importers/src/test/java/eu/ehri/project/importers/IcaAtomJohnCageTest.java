@@ -21,6 +21,7 @@ package eu.ehri.project.importers;
 
 import java.io.InputStream;
 
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 import static org.junit.Assert.*;

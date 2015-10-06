@@ -24,7 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.importers.CsvImportManager;
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.MapImporter;
 import eu.ehri.project.models.UserProfile;

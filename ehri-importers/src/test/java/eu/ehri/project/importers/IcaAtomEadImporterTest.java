@@ -21,6 +21,8 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.managers.ImportManager;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -58,7 +60,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        AbstractImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);

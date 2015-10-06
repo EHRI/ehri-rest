@@ -29,6 +29,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
@@ -36,14 +37,13 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-
-import java.util.List;
-import java.util.Map;
-
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Importer of authoritative items such as historical agents and concepts, loaded
@@ -110,18 +110,18 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
 
-        SaxXmlHandler.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
+        Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
         for (String key : itemData.keySet()) {
             if (!key.equals("id") && !key.equals("name")) {
-                    SaxXmlHandler.putPropertyInGraph(item, key, itemData.get(key).toString());
+                    Helpers.putPropertyInGraph(item, key, itemData.get(key).toString());
             }
 
         }
         if (!item.containsKey("typeOfEntity")) {
-            SaxXmlHandler.putPropertyInGraph(item, "typeOfEntity", "subject");
+            Helpers.putPropertyInGraph(item, "typeOfEntity", "subject");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            SaxXmlHandler.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
     }

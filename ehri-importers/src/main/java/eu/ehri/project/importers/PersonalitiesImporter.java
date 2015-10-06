@@ -26,6 +26,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -126,23 +127,23 @@ public class PersonalitiesImporter extends MapImporter {
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
 
-        SaxXmlHandler.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
+        Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
-                    SaxXmlHandler.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    Helpers.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
                 } else {
-                    SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
+                    Helpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
                 }
             }
 
         }
         //create all otherFormsOfName
         if (!item.containsKey("typeOfEntity")) {
-            SaxXmlHandler.putPropertyInGraph(item, "typeOfEntity", "person");
+            Helpers.putPropertyInGraph(item, "typeOfEntity", "person");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            SaxXmlHandler.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
     }

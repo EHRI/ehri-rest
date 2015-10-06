@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.importers.managers.SaxImportManager;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;

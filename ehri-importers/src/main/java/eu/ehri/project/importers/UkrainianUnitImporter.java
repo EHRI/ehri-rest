@@ -25,6 +25,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -165,23 +166,23 @@ public class UkrainianUnitImporter extends MapImporter {
                     (!key.equals("language_of_description"))  //dealt with in importItem
                     ) {
                 if (!p.containsProperty(key)) {
-                    SaxXmlHandler.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    Helpers.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
                 } else {
                     Object value = itemData.get(key);
                     // TODO: Check if the property is an allowedMultivalue one...
                     if (value.toString().contains(MULTIVALUE_SEP)) {
                         for (String v : value.toString().split(MULTIVALUE_SEP)) {
-                            SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), v);
+                            Helpers.putPropertyInGraph(item, p.getProperty(key), v);
                         }
                     } else {
-                        SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), value.toString());
+                        Helpers.putPropertyInGraph(item, p.getProperty(key), value.toString());
                     }
                 }
             }
 
         }
         //replace the language from the itemData with the one specified in the param
-        SaxXmlHandler.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
+        Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
         return item;
     }
 }
