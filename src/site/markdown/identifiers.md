@@ -80,6 +80,16 @@ transliteration, so if, for example, there was a hierarchy like so:
  - `us` => `005578` => `doc_1` => `1` => `2` => `3` (remove leading/training replacements)
  - `us-005578-doc_1-1-2-3` (joining sections with hyphens)
  
+## Identifiers for descriptions
+
+Descriptions for items (e.g. documentary units, repositories etc) also have identifiers that are unique
+within their scope (the item.) A description's local identifier is typically its 
+[ISO-639-2](https://en.wikipedia.org/wiki/ISO_639-2) 3-letter language code, with an optional additional
+disambiguator if there is more than one description in the same language. The global identifier of a description
+is its item's global identifier joined via a period ("."). For example:
+
+ - `us-005578-doc_1-1-2-3.eng` (description local ID appended with a period.)
+ 
 ## Restrictions
 
 This scheme places some restrictions on what can be used as an identifier in an EHRI item:
