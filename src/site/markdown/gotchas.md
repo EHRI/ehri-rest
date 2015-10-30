@@ -22,7 +22,7 @@ which means that item index lookups fail. The way to fix this is to rebuild the 
 via the `reindex` command. First, make sure the Neo4j server is stopped:
 
 ```
-./neo4j-community-2.2.5/bin/neo4j stop
+./neo4j-community-2.3.0/bin/neo4j stop
 ```
 
 Then, ensuring that the `$NEO4J_HOME` var is correctly set to point to your database, run:
