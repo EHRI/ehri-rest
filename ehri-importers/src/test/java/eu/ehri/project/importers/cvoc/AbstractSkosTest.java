@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public abstract class AbstractSkosImporterTest extends AbstractFixtureTest {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractSkosImporterTest.class);
+public abstract class AbstractSkosTest extends AbstractFixtureTest {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractSkosTest.class);
     public static final String FILE1 = "cvoc/simple.xml";
     public static final String FILE2 = "cvoc/simple.n3";
     public static final String FILE3 = "cvoc/repository-types.xml";

@@ -19,7 +19,13 @@
 
 package eu.ehri.project.importers.cvoc;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Ontology;
+
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Mike Bryant (http://github.com/mikesname)
@@ -66,11 +72,55 @@ public enum SkosRDFVocabulary {
     DEFINITION("definition"),
     CHANGE_NOTE("changeNote");
 
-    private final String NAMESPACE = "http://www.w3.org/2004/02/skos/core#";
+    public static final String DEFAULT_BASE_URI = "http://data.ehri-project.eu#";
+    public static final String NAMESPACE_URI = "http://www.w3.org/2004/02/skos/core#";
+
+    public static final Map<String, String> NAMESPACES = ImmutableMap.<String,String>builder()
+        .put("skos", "http://www.w3.org/2004/02/skos/core#")
+        .put("dc",   "http://purl.org/dc/elements/1.1/name")
+        .put("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
+        .put("foaf", "http://xmlns.com/foaf/0.1/")
+        .put("sem",  "http://semanticweb.cs.vu.nl/2009/11/sem/")
+        .put("geo",  "http://www.w3.org/2003/01/geo/wgs84_pos#")
+        .put("owl",  "http://www.w3.org/2002/07/owl#")
+        .build();
+
+    // Language-agnostic properties.
+    public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
+            .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
+            .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
+            .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
+            .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
+            .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
+            .put("personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
+            .build();
+
+    // Properties that end up as undeterminedRelation nodes.
+    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.<String, URI>builder()
+            .put("owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs"))
+            .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
+            .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
+            .put("skos:broadMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
+            .put("skos:relatedMatch", URI.create("http://www.w3.org/2004/02/skos/core#relatedMatch"))
+            .put("sem:personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("sem:placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
+            .build();
+
+    public static final Map<String, List<URI>> LANGUAGE_PROPS = ImmutableMap.<String,List<URI>>builder()
+            .put(Ontology.CONCEPT_ALTLABEL, Lists.newArrayList(ALT_LABEL.getURI()))
+            .put(Ontology.CONCEPT_HIDDENLABEL, Lists.newArrayList(HIDDEN_LABEL.getURI()))
+            .put(Ontology.CONCEPT_DEFINITION, Lists.newArrayList(DEFINITION.getURI()))
+            .put(Ontology.CONCEPT_SCOPENOTE, Lists.newArrayList(SCOPE_NOTE.getURI(),
+                    URI.create("http://www.w3.org/2000/01/rdf-schema#comment")))
+            .put(Ontology.CONCEPT_NOTE, Lists.newArrayList(NOTE.getURI()))
+            .put(Ontology.CONCEPT_EDITORIAL_NOTE, Lists.newArrayList(EDITORIAL_NOTE.getURI()))
+            .build();
+
     private final URI uri;
 
     SkosRDFVocabulary(String localName) {
-        this.uri = URI.create(NAMESPACE + localName);
+        this.uri = URI.create(NAMESPACE_URI + localName);
     }
 
     public URI getURI() {

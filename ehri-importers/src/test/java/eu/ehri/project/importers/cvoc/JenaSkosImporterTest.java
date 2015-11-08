@@ -25,12 +25,14 @@ import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Ignore;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class JenaSkosImporterTest extends AbstractSkosImporterTest {
+public class JenaSkosImporterTest extends AbstractSkosTest {
     @Test
     public void testImportFile1() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
@@ -104,4 +106,5 @@ public class JenaSkosImporterTest extends AbstractSkosImporterTest {
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE5), "ghettos");
         assertEquals(2, importLog2.getUnchanged());
     }
+
 }

@@ -125,6 +125,7 @@ public class ToolsRestClientTest extends BaseRestClientTest {
         // 2 Historical agent descriptions
         // 4 Repository descriptions
         // 6 Doc Unit descriptions (total 7, 1 is okay in fixtures)
-        assertEquals("12", out);
+        // 1 Concept description
+        assertEquals("13", out);
     }
 }

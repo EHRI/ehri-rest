@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.util;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -38,6 +39,9 @@ import java.util.Map;
 public class Helpers {
 
     private static final Logger logger = LoggerFactory.getLogger(Helpers.class);
+
+    // Splitter to breaking up
+    private static final Splitter codeSplitter = Splitter.on("-").omitEmptyStrings().limit(2);
 
     /**
      * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
@@ -61,6 +65,7 @@ public class Helpers {
             .build();
 
     private static final Map<String, Locale> locale2Map;
+    private static final Map<String, String> locale3Map;
     private static final Map<String, Locale> localeNameMap;
 
     /**
@@ -109,20 +114,22 @@ public class Helpers {
     static {
         String[] languages = Locale.getISOLanguages();
         locale2Map = Maps.newHashMapWithExpectedSize(languages.length);
+        locale3Map = Maps.newHashMapWithExpectedSize(languages.length);
         localeNameMap = Maps.newHashMapWithExpectedSize(languages.length);
         for (String language : languages) {
             Locale locale = new Locale(language);
             locale2Map.put(language, locale);
+            locale3Map.put(locale.getISO3Language(), language);
             localeNameMap.put(locale.getDisplayLanguage(Locale.ENGLISH).toLowerCase(), locale);
         }
 
     }
 
     /**
-     * Take a nameOrCode or a language name and try and map to a valid ISO639-2 nameOrCode.
+     * Take an ISO-639-1 code or a language name and try and map to a valid ISO639-2 code.
      * 
      * @param nameOrCode a language code or name to convert
-     * @return the ISO 639-2t language code for that code or name, or the input string if 
+     * @return the ISO 639-2 language code for that code or name, or the input string if
      *         no conversion was found
      */
     public static String iso639DashTwoCode(String nameOrCode) {
@@ -137,7 +144,32 @@ public class Helpers {
              * e.g. a server with non-English locale
              */
         }
-        // FAIL!!!
+        return nameOrCode;
+    }
+
+    /**
+     * Take an ISO-639-2 code or a language name and try and map to a valid ISO639-1 code.
+     *
+     * @param nameOrCode a language code or name to convert
+     * @return the ISO 639-1 language code for that code or name, or the input string if
+     *         no conversion was found
+     */
+    public static String iso639DashOneCode(String nameOrCode) {
+        if (nameOrCode.length() == 3 && locale3Map.containsKey(nameOrCode)) {
+            return locale3Map.get(nameOrCode);
+        } else if (nameOrCode.length() == 3 && iso639BibTermLookup.containsKey(nameOrCode)) {
+            return locale3Map.get(iso639BibTermLookup.get(nameOrCode));
+        } else if (nameOrCode.length() > 3 && localeNameMap.containsKey(nameOrCode.toLowerCase())) {
+            return localeNameMap.get(nameOrCode.toLowerCase()).getLanguage();
+        } else if (nameOrCode.length() > 2 && nameOrCode.contains("-")) {
+            // Attempt to handle codes like 'heb-Hebr' and 'eng-Latn'
+            List<String> parts = Lists.newArrayList(codeSplitter.split(nameOrCode));
+            if (parts.size() == 1) {
+                return iso639DashOneCode(parts.get(0));
+            } else if (parts.size() == 2) {
+                return iso639DashOneCode(parts.get(0)) + "-" + parts.get(1);
+            }
+        }
         return nameOrCode;
     }
 }

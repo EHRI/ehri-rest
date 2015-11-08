@@ -36,4 +36,16 @@ public class HelpersTest {
         // FIXME fails when executed on a server with a Dutch locale
         assertEquals("eng", Helpers.iso639DashTwoCode("English"));
     }
+
+    @Test
+    public void testIso639DashOneCode() throws Exception {
+        assertEquals("en", Helpers.iso639DashOneCode("eng"));
+        assertEquals("cs", Helpers.iso639DashOneCode("ces"));
+        assertEquals("cs", Helpers.iso639DashOneCode("cze"));
+        assertEquals("sq", Helpers.iso639DashOneCode("sqi"));
+        assertEquals("en", Helpers.iso639DashOneCode("English"));
+        assertEquals("en-Latn", Helpers.iso639DashOneCode("eng-Latn"));
+        assertEquals("en", Helpers.iso639DashOneCode("eng-"));
+        assertEquals("---", Helpers.iso639DashOneCode("---"));
+    }
 }

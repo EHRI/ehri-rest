@@ -28,7 +28,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class XmlSkosImporterTest extends AbstractSkosImporterTest {
+public class XmlSkosImporterTest extends AbstractSkosTest {
     @Ignore("XML SKOS importer fails for simple file")
     @Test
     public void testImportFile1() throws Exception {
