@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class OwlApiSkosImporterTest extends AbstractSkosImporterTest {
+public class OwlApiSkosImporterTest extends AbstractSkosTest {
     @Test
     public void testImportFile1() throws Exception {
         SkosImporter importer = new OwlApiSkosImporter(graph, actioner, vocabulary);

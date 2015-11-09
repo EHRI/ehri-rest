@@ -608,6 +608,13 @@
   data:
     identifier: cvocc1
   relationships:
+    describes:
+      - id: cvocc1-desc
+        type: cvocConceptDescription
+        data:
+          name: Concept 1
+          languageCode: eng
+          altLabel: Another Name for Concept 1
     inAuthoritativeSet: cvoc1
 
 --- # Virtual Units

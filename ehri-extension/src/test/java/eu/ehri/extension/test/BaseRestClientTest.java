@@ -183,12 +183,23 @@ public class BaseRestClientTest extends RunningServerTest {
 
     protected WebResource.Builder jsonCallAs(String user, URI uri) {
         return callAs(user, uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON);
+    }
+
+    protected WebResource.Builder jsonCallAs(String user, String... segments) {
+        return callAs(user, segments)
+                .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON);
     }
 
     protected WebResource.Builder callAs(String user, URI uri) {
         return client.resource(uri)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, user);
+    }
+
+    protected WebResource.Builder callAs(String user, String... segments) {
+        return callAs(user, ehriUriBuilder(segments).build());
     }
 
     public void assertStatus(ClientResponse.Status status, ClientResponse response) {
@@ -201,18 +212,6 @@ public class BaseRestClientTest extends RunningServerTest {
         } catch (DeserializationError deserializationError) {
             throw new RuntimeException(deserializationError);
         }
-    }
-
-    protected WebResource.Builder jsonCallAs(String user, String... segments) {
-        UriBuilder builder = UriBuilder.fromPath(getExtensionEntryPointUri());
-        for (String segment : segments) {
-            builder = builder.segment(segment);
-        }
-        URI uri = builder.build();
-        return client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user);
     }
 
     protected String readResourceFileAsString(String resourceName)

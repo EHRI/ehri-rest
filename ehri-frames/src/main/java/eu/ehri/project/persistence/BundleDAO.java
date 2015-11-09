@@ -205,7 +205,7 @@ public final class BundleDAO {
         try {
             Bundle nodeBundle = serializer.vertexFrameToBundle(node);
             if (!nodeBundle.equals(bundle)) {
-                logger.trace("Bundles differ\n\n{}\n\n{}", bundle.toJson(), nodeBundle.toJson());
+                logger.trace("Bundles differ\nnew:\n{}\nold:\n{}", bundle.toJson(), nodeBundle.toJson());
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData(), bundle.getPropertyKeys());
                 updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());

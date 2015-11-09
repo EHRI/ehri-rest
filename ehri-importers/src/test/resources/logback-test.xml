@@ -8,10 +8,13 @@
     </encoder>
   </appender>
 
+  <!-- Uncomment to debug idempotent create/update or no change. -->
+  <!-- <logger name="eu.ehri.project.persistence.BundleDAO" level="TRACE" /> -->
+
   <logger name="eu.ehri.project.importers" level="${ehri.test.log.level:-info}" />
   <logger name="eu.ehri" level="${ehri.log.level:-info}" />
 
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

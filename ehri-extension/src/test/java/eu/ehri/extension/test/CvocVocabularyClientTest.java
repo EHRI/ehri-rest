@@ -19,14 +19,20 @@
 
 package eu.ehri.extension.test;
 
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.VocabularyResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class CvocVocabularyClientTest extends BaseRestClientTest {
@@ -91,6 +97,33 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
     @Test
     public void testGetVocabulary() throws Exception {
         testGet(ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID));
+    }
+
+    @Test
+    public void testExportVocabulary() throws Exception {
+        UriBuilder uri = ehriUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "export");
+        ClientResponse response = client.resource(uri.build())
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals(MediaType.valueOf(VocabularyResource.TURTLE_MIMETYPE + "; charset=utf-8"), response.getType());
+
+        response = client.resource(uri.build())
+                .header("Accept", VocabularyResource.RDF_XML_MIMETYPE)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals(MediaType.valueOf(VocabularyResource.RDF_XML_MIMETYPE + "; charset=utf-8"), response.getType());
+
+        response = client.resource(uri.build())
+                .header("Accept", VocabularyResource.N3_MIMETYPE)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals(MediaType.valueOf(VocabularyResource.N3_MIMETYPE + "; charset=utf-8"), response.getType());
+
+        response = client.resource(uri.build())
+                .queryParam("format", "N3")
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals(MediaType.valueOf(VocabularyResource.N3_MIMETYPE + "; charset=utf-8"), response.getType());
     }
 
     @Test

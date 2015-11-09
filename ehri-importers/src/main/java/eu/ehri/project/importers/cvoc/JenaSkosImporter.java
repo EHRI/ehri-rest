@@ -20,10 +20,8 @@
 package eu.ehri.project.importers.cvoc;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
@@ -66,12 +64,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
+ * Import SKOS RDF.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class JenaSkosImporter implements SkosImporter {
@@ -85,51 +84,6 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String format;
     private final String defaultLang;
     public static final String DEFAULT_LANG = "eng";
-
-    // Language-sensitive properties.
-    private static void addToMap(Map<String, Set<URI>> map, String key, URI value) {
-        if (map.containsKey(key)) {
-            map.get(key).add(value);
-        } else {
-            Set<URI> uris = Sets.newHashSet();
-            uris.add(value);
-            map.put(key, uris);
-        }
-    }
-
-    public static final Map<String, Set<URI>> LANGUAGE_PROPS = Maps.newHashMap();
-
-    //    = ImmutableMap.<String, Set<URI>>builder()
-    static {
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI());
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI());
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI());
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI());
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_SCOPENOTE, URI.create("http://www.w3.org/2000/01/rdf-schema#comment"));
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI());
-        addToMap(LANGUAGE_PROPS, Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI());
-    }
-
-    // Language-agnostic properties.
-    public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
-            .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
-            .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
-            .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
-            .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
-            .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
-            .put("personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
-            .put("placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
-            .build();
-    // Properties that end up as undeterminedRelation nodes.
-    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.<String, URI>builder()
-            .put("owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs"))
-            .put("skos:exactMatch", URI.create("http://www.w3.org/2004/02/skos/core#exactMatch"))
-            .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
-            .put("skos:broadMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
-            .put("skos:relatedMatch", URI.create("http://www.w3.org/2004/02/skos/core#relatedMatch"))
-            .put("sem:personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
-            .put("sem:placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
-            .build();
 
     /**
      * Constructor
@@ -309,30 +263,31 @@ public final class JenaSkosImporter implements SkosImporter {
             } catch (ItemNotFound | ValidationError | PermissionDenied ex) {
                 logger.error(ex.getMessage());
             }
-
         }
     }
 
     private List<Bundle> getUndeterminedRelations(Resource item, Map<AuthoritativeItem, String> linkedItems) {
         List<Bundle> undetermined = Lists.newArrayList();
 
-        for (Map.Entry<String, URI> rel : RELATION_PROPS.entrySet()) {
+        for (Map.Entry<String, URI> rel : SkosRDFVocabulary.RELATION_PROPS.entrySet()) {
             for (RDFNode annotation : getObjectWithPredicate(item, rel.getValue())) {
                 if (annotation.isLiteral()) {
-                    undetermined.add(new Bundle(EntityClass.ACCESS_POINT)
-                            .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
-                            .withDataValue(Ontology.NAME_KEY, annotation.toString()));
+                    undetermined.add(Bundle.Builder.withClass(EntityClass.ACCESS_POINT)
+                            .addDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                            .addDataValue(Ontology.NAME_KEY, annotation.toString())
+                            .build());
                 } else {
                     if (rel.getKey().startsWith("skos:") || rel.getKey().startsWith("sem:")) {
                         String prefix = rel.getKey().startsWith("skos:") ? "skos" : "sem";
-                        AuthoritativeItem found = findRelatedConcept(annotation.toString());
-                        if (found != null) {
-                            linkedItems.put(found, rel.getKey());
+                        Optional<AuthoritativeItem> found = findRelatedConcept(annotation.toString());
+                        if (found.isPresent()) {
+                            linkedItems.put(found.get(), rel.getKey());
                         } else {
-                            undetermined.add(new Bundle(EntityClass.ACCESS_POINT)
-                                    .withDataValue(Ontology.ANNOTATION_TYPE, "associate")
-                                    .withDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":") + 1))
-                                    .withDataValue(Ontology.NAME_KEY, annotation.toString()));
+                            undetermined.add(Bundle.Builder.withClass(EntityClass.ACCESS_POINT)
+                                    .addDataValue(Ontology.ANNOTATION_TYPE, "associate")
+                                    .addDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":") + 1))
+                                    .addDataValue(Ontology.NAME_KEY, annotation.toString())
+                                    .build());
                         }
                     }
                 }
@@ -341,27 +296,27 @@ public final class JenaSkosImporter implements SkosImporter {
         return undetermined;
     }
 
-    private AuthoritativeItem findRelatedConcept(String name) {
+    private Optional<AuthoritativeItem> findRelatedConcept(String name) {
         if (name != null) {
             String[] domains = name.split("/");
             if (domains.length > 2) {
-                String cvoc_id = domains[domains.length - 2];
-                String concept_id = domains[domains.length - 1];
+                String cvocId = domains[domains.length - 2];
+                String conceptId = domains[domains.length - 1];
                 AuthoritativeSet referredSet;
                 try {
                     GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
-                    referredSet = manager.getFrame(cvoc_id, AuthoritativeSet.class);
+                    referredSet = manager.getFrame(cvocId, AuthoritativeSet.class);
                     for (AuthoritativeItem authItem : referredSet.getAuthoritativeItems()) {
-                        if (authItem.getIdentifier().equals(concept_id)) {
-                            return authItem;
+                        if (authItem.getIdentifier().equals(conceptId)) {
+                            return Optional.of(authItem);
                         }
                     }
                 } catch (ItemNotFound ex) {
-                    logger.error("AuthoritativeSet with id " + cvoc_id + " not found. " + ex.getMessage());
+                    logger.error("AuthoritativeSet with id " + cvocId + " not found. " + ex.getMessage());
                 }
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     private interface ConnectFunc {
@@ -440,14 +395,14 @@ public final class JenaSkosImporter implements SkosImporter {
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
 
-            for (Map.Entry<String, URI> prop : GENERAL_PROPS.entrySet()) {
+            for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                     if (target.isLiteral()) {
                         if (prop.getKey().equals("latitude/longitude")) {
-                            String[] latlong = target.asLiteral().getString().split(",");
-                            if (latlong.length > 1) {
-                                builder.addDataValue("latitude", latlong[0]);
-                                builder.addDataValue("longitude", latlong[1]);
+                            String[] latLon = target.asLiteral().getString().split(",");
+                            if (latLon.length > 1) {
+                                builder.addDataValue("latitude", latLon[0]);
+                                builder.addDataValue("longitude", latLon[1]);
                             }
                         } else {
                             builder.addDataValue(prop.getKey(), target.asLiteral().getString());
@@ -458,7 +413,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 }
             }
 
-            for (Map.Entry<String, Set<URI>> prop : LANGUAGE_PROPS.entrySet()) {
+            for (Map.Entry<String, List<URI>> prop : SkosRDFVocabulary.LANGUAGE_PROPS.entrySet()) {
                 List<String> values = Lists.newArrayList();
                 for (URI uri : prop.getValue()) {
                     for (RDFNode target : getObjectWithPredicate(item, uri)) {
@@ -474,6 +429,11 @@ public final class JenaSkosImporter implements SkosImporter {
                     }
                 }
                 if (!values.isEmpty()) {
+                    // Sorting the related literal values in
+                    // natural order gives consistency between
+                    // import/export round-trips. The data is
+                    // otherwise unsorted.
+                    Collections.sort(values);
                     builder.addDataValue(prop.getKey(), values);
                 }
             }
@@ -498,4 +458,5 @@ public final class JenaSkosImporter implements SkosImporter {
     private boolean isValidLanguageCode(String language) {
         return !(language == null || language.isEmpty());
     }
+
 }
