@@ -24,11 +24,13 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.AbstractSkosTest;
 import eu.ehri.project.importers.cvoc.JenaSkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -52,6 +54,8 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
             importer.setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
                     .importFile(ClassLoader.getSystemResourceAsStream(entry.getKey()), "test");
 
+            List<VertexProxy> before = getGraphState(graph);
+            int edgeCountBefore = getEdgeCount(graph);
             SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
                     .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue());
             OutputStream outputStream = new ByteArrayOutputStream();
@@ -60,11 +64,16 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
             ImportLog log = importer.setFormat(entry.getValue())
                     .importFile(new ByteArrayInputStream(skos.getBytes()), "test");
             log.printReport();
+            List<VertexProxy> after = getGraphState(graph);
             assertTrue(log.getUnchanged() > 0);
             assertEquals(0, log.getChanged());
             assertEquals(0, log.getCreated());
             assertEquals(0, log.getErrored());
-
+            GraphDiff graphDiff = diffGraph(before, after);
+            assertTrue(graphDiff.added.isEmpty());
+            assertTrue(graphDiff.removed.isEmpty());
+            int edgeCountAfter = getEdgeCount(graph);
+            assertEquals(edgeCountBefore, edgeCountAfter);
         }
     }
 
@@ -84,6 +93,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
             String skos = outputStream.toString();
             //System.out.println(skos);
             assertTrue(skos.contains(baseUri));
+            assertTrue(skos.contains(baseUri + "989"));
         }
     }
 }

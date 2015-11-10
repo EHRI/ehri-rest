@@ -231,9 +231,10 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @Produces({TURTLE_MIMETYPE, RDF_XML_MIMETYPE, N3_MIMETYPE})
     public Response exportSkos(@PathParam("id") String id,
             final @QueryParam("format") String format,
-            final @QueryParam("baseUri") @DefaultValue(SkosRDFVocabulary.DEFAULT_BASE_URI) String baseUri)
+            final @QueryParam("baseUri") String baseUri)
             throws IOException, ItemNotFound {
         final String rdfFormat = getRdfFormat(format, "TTL");
+        final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -245,9 +246,9 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             return Response.ok(new StreamingOutput() {
                 @Override
                 public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                    skosImporter.export(outputStream, baseUri);
+                    skosImporter.export(outputStream, base);
                 }
-            }).type(mediaType +"; charset=utf-8").build();
+            }).type(mediaType + "; charset=utf-8").build();
         } catch (Exception e) {
             tx.close();
             throw e;

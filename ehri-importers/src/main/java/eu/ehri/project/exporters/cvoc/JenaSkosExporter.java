@@ -133,15 +133,15 @@ public class JenaSkosExporter implements SkosExporter {
             }
 
             for (Concept other : concept.getBroaderConcepts()) {
-                Resource otherResource = model.createResource(baseUri + other.getId());
+                Resource otherResource = model.createResource(baseUri + other.getIdentifier());
                 model.add(resource, model.createProperty(SkosRDFVocabulary.BROADER.getURI().toString()), otherResource);
             }
             for (Concept other : concept.getNarrowerConcepts()) {
-                Resource otherResource = model.createResource(baseUri + other.getId());
+                Resource otherResource = model.createResource(baseUri + other.getIdentifier());
                 model.add(resource, model.createProperty(SkosRDFVocabulary.NARROWER.getURI().toString()), otherResource);
             }
             for (Concept other : concept.getRelatedConcepts()) {
-                Resource otherResource = model.createResource(baseUri + other.getId());
+                Resource otherResource = model.createResource(baseUri + other.getIdentifier());
                 model.add(resource, model.createProperty(SkosRDFVocabulary.RELATED.getURI().toString()), otherResource);
             }
         }
