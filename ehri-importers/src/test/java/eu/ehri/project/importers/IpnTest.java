@@ -157,28 +157,28 @@ public class IpnTest extends AbstractImporterTest{
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
             assertEquals("Collections from Oddział Instytutu Pamięci Narodowej we Wrocławiu", d.getName());
             boolean hasProvenance=false;
-            for(String property : d.asVertex().getPropertyKeys()){
+            for(String property : d.getPropertyKeys()){
                 if(property.equals("processInfo")){
                     hasProvenance=true;
-                    System.out.println(d.asVertex().getProperty(property));
-                    assertTrue(((List<String>)d.asVertex().getProperty(property)).get(0).startsWith("This selection has been "));
+                    System.out.println(d.getProperty(property));
+                    assertTrue(((List<String>)d.getProperty(property)).get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
         }
         for(DocumentDescription desc : c1_1.getDocumentDescriptions()){
-            for(String p : desc.asVertex().getPropertyKeys()){
-                System.out.println(p + " --> "+ desc.asVertex().getProperty(p));
+            for(String p : desc.getPropertyKeys()){
+                System.out.println(p + " --> "+ desc.getProperty(p));
             }
                 assertEquals("Cukrownia w Pszennie – August Gross i Synowie [August Gross & Söhne Zuckerfabrik Weizenrodau]", desc.getName());
-                assertFalse(desc.asVertex().getPropertyKeys().contains("unitDates"));
+                assertFalse(desc.getPropertyKeys().contains("unitDates"));
         }
     //test hierarchy
         assertEquals(2L, archdesc.getChildCount());
         
     //test level-of-desc
         for(DocumentDescription d : c1_1.getDocumentDescriptions()){
-            assertEquals("collection", d.asVertex().getProperty("levelOfDescription"));
+            assertEquals("collection", d.getProperty("levelOfDescription"));
         }
     // test dates
         boolean hasDates = false;
@@ -251,11 +251,11 @@ public class IpnTest extends AbstractImporterTest{
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
             assertEquals("Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie", d.getName());
             boolean hasProvenance=false;
-            for(String property : d.asVertex().getPropertyKeys()){
+            for(String property : d.getPropertyKeys()){
                 if(property.equals("processInfo")){
                     hasProvenance=true;
-                    System.out.println(d.asVertex().getProperty(property));
-                    assertTrue(((List<String>)d.asVertex().getProperty(property)).get(0).startsWith("This selection has been "));
+                    System.out.println(d.getProperty(property));
+                    assertTrue(((List<String>)d.getProperty(property)).get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
@@ -268,7 +268,7 @@ public class IpnTest extends AbstractImporterTest{
         
     //test level-of-desc
         for(DocumentDescription d : c1_1.getDocumentDescriptions()){
-            assertEquals("collection", d.asVertex().getProperty("levelOfDescription"));
+            assertEquals("collection", d.getProperty("levelOfDescription"));
         }
     // test dates
         boolean hasDates = false;

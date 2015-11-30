@@ -19,6 +19,7 @@
 
 package eu.ehri.project.acl;
 
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
@@ -37,10 +38,12 @@ public enum AnonymousAccessor implements Accessor {
 
     AnonymousAccessor() {}
 
+    @Override
     public boolean isAdmin() {
         return false;
     }
 
+    @Override
     public boolean isAnonymous() {
         return true;
     }
@@ -53,35 +56,53 @@ public enum AnonymousAccessor implements Accessor {
         return INSTANCE;
     }
 
+    @Override
     public String getId() {
         return Group.ANONYMOUS_GROUP_IDENTIFIER;
     }
 
+    @Override
     public String getType() {
         return Entities.GROUP;
     }
-        
+
+    @Override
     public Vertex asVertex() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getIdentifier() {
         return Group.ANONYMOUS_GROUP_IDENTIFIER;
     }
 
+    @Override
     public Iterable<Accessor> getParents() {
         return new EmptyIterable<>();
     }
 
+    @Override
     public Iterable<Accessor> getAllParents() {
         return new EmptyIterable<>();
     }
 
+    @Override
     public Iterable<PermissionGrant> getPermissionGrants() {
         return new EmptyIterable<>();
     }
 
+    @Override
     public void addPermissionGrant(PermissionGrant grant) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T getProperty(String key) {
+        return null;
+    }
+
+    @Override
+    public java.util.Set<String> getPropertyKeys() {
+        return Sets.newHashSet();
     }
 }

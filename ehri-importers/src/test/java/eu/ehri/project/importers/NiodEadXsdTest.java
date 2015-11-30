@@ -129,12 +129,12 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         //test ref
         boolean hasRef = false;
         for(DocumentDescription d : c1.getDocumentDescriptions()){
-          for(String key: d.asVertex().getPropertyKeys()){
+          for(String key: d.getPropertyKeys()){
             if(key.equals("ref")){
-                assertTrue(d.asVertex().getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2"));
+                assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2"));
                 
-                assertTrue(d.asVertex().getProperty(key).toString().contains("http://files.archieven.nl/php/get_thumb.php?adt_id=298&toegang=250b&id=324872297&file=250b_19.jpg"));
-                assertTrue(d.asVertex().getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&miadt=298&miaet=1&micode=250b&minr=1182347&miview=ldt"));
+                assertTrue(d.getProperty(key).toString().contains("http://files.archieven.nl/php/get_thumb.php?adt_id=298&toegang=250b&id=324872297&file=250b_19.jpg"));
+                assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&miadt=298&miaet=1&micode=250b&minr=1182347&miview=ldt"));
                 hasRef=true;
             }
           }
@@ -146,8 +146,8 @@ public class NiodEadXsdTest extends AbstractImporterTest{
             assertEquals("Caransa, A.", d.getName());
         }
         //test other identifiers
-        assertNull(c1.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS));
-        assertEquals("NL-AsdNIOD/809/2", c2_1.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS));
+        assertNull(c1.getProperty(Ontology.OTHER_IDENTIFIERS));
+        assertEquals("NL-AsdNIOD/809/2", c2_1.getProperty(Ontology.OTHER_IDENTIFIERS));
 
         for(DocumentDescription desc : c1.getDocumentDescriptions()){
                 assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
@@ -159,16 +159,16 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         }
         for(DocumentDescription d : c3_2.getDocumentDescriptions()){
             //test level-of-desc
-            assertEquals("file", d.asVertex().getProperty("levelOfDescription"));
+            assertEquals("file", d.getProperty("levelOfDescription"));
             
             //test odd -> notes
-            assertTrue(d.asVertex().getProperty("notes").toString().contains("Fotokopieën"));
-            assertTrue(d.asVertex().getProperty("notes").toString().contains("ONTWIKKELINGSSTADIUM"));
+            assertTrue(d.getProperty("notes").toString().contains("Fotokopieën"));
+            assertTrue(d.getProperty("notes").toString().contains("ONTWIKKELINGSSTADIUM"));
         }
     //test dates
         for(DocumentDescription d : c2_1.getDocumentDescriptions()){
         	// Single date is just a string
-        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
+        	assertFalse(d.getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1980-01-01", dp.getStartDate());
         		assertEquals("1980-12-31", dp.getEndDate());

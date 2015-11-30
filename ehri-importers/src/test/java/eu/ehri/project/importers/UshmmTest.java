@@ -87,7 +87,7 @@ public class UshmmTest extends AbstractImporterTest{
         
         // Check the alternative ID was added
         boolean foundAltId = false;
-        for(String altId : (List<String>) unit.asVertex().getProperty("otherIdentifiers")) {
+        for(String altId : (List<String>) unit.getProperty("otherIdentifiers")) {
         	if (altId.equals(IMPORTED_ITEM_ALT_ID)) {
         		foundAltId = true;
         		break;

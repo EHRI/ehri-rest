@@ -21,29 +21,27 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import static org.junit.Assert.*;
-
-import java.io.InputStream;
-import java.util.List;
-
-import eu.ehri.project.importers.managers.SaxImportManager;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tinkerpop.blueprints.Vertex;
-
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class ItsTest extends AbstractImporterTest {
 
@@ -53,25 +51,26 @@ public class ItsTest extends AbstractImporterTest {
     protected final String GESTAPO = "its-gestapo-preprocessed.xml"; //provenance
     protected final String GESTAPO_WHOLE = "its-gestapo-whole.xml"; //provenance
     protected final String IMPORTED_ITEM_ID = "DE ITS [OuS 1.1.7]";
-    
+
     DocumentaryUnit archdesc, c1, c2, c7_1, c7_2;
 
     @Test
-    public void testUnitdate() throws Exception{
+    public void testUnitdate() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
-         final String logMessage = "Importing a single EAD by ItsTest";
-               importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
-        ImportLog log_en = importManager.importFile(ios, logMessage);
- DocumentaryUnit unit = graph.frame(
-                getVertexByIdentifier(graph,IMPORTED_ITEM_ID),
+        final String logMessage = "Importing a single EAD by ItsTest";
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
+        importManager.importFile(ios, logMessage);
+        DocumentaryUnit unit = graph.frame(
+                getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                 DocumentaryUnit.class);
 
-       for(DocumentDescription desc : unit.getDocumentDescriptions()){
-           for(String k : desc.asVertex().getPropertyKeys()){
-               System.out.println(k + " - "+ desc.asVertex().getProperty(k));
-           }
-       }
+        for (DocumentDescription desc : unit.getDocumentDescriptions()) {
+            for (String k : desc.getPropertyKeys()) {
+                System.out.println(k + " - " + desc.getProperty(k));
+            }
+        }
     }
+
     @Test
     public void testItsImportEsterwegen() throws Exception {
         final String logMessage = "Importing a single EAD by ItsTest";
@@ -93,7 +92,7 @@ public class ItsTest extends AbstractImporterTest {
 // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
-               printGraph(graph);
+        printGraph(graph);
         diff.printDebug(System.out);
 
 
@@ -129,18 +128,18 @@ public class ItsTest extends AbstractImporterTest {
         assertEquals(1L, unit.getChildCount());
 
         for (Description d : unit.getDocumentDescriptions()) {
-            boolean hasDate=false;
-            for(Edge e : d.asVertex().getEdges(Direction.OUT)){
-                if(e.getLabel().equals("hasDate"))
-                    hasDate=true;
+            boolean hasDate = false;
+            for (Edge e : d.asVertex().getEdges(Direction.OUT)) {
+                if (e.getLabel().equals("hasDate"))
+                    hasDate = true;
             }
             assertTrue(hasDate);
             logger.debug("Description language: " + d.getLanguageOfDescription());
             if (d.getLanguageOfDescription().equals("eng")) {
                 assertEquals("Concentration Camp Esterwegen", d.getName());
-                assertTrue(d.asVertex().getProperty("extentAndMedium").toString().endsWith("draft by Susanne Laux"));
-                
-                assertEquals("2 folders\n\ndigitised\n\n7\n\nOriginals, Photocopies\n\ndraft by Susanne Laux", d.asVertex().getProperty("extentAndMedium"));
+                assertTrue(d.getProperty("extentAndMedium").toString().endsWith("draft by Susanne Laux"));
+
+                assertEquals("2 folders\n\ndigitised\n\n7\n\nOriginals, Photocopies\n\ndraft by Susanne Laux", d.getProperty("extentAndMedium"));
 
             } else if (d.getLanguageOfDescription().equals("deu")) {
                 assertEquals("Konzentrationslager Esterwegen", d.getName());
@@ -201,49 +200,48 @@ public class ItsTest extends AbstractImporterTest {
 //               printGraph(graph);
         int createCount = origCount + 63;
         assertEquals(createCount, getNodeCount(graph));
-        
+
         DocumentaryUnit u = graph.frame(
                 getVertexByIdentifier(graph, "R 2"), DocumentaryUnit.class);
-        
-            boolean foundOtherIdentifier = false;
-            for(String s : (List<String>) u.asVertex().getProperty("otherIdentifiers")){
-                if(s.equals("Folder 0143"))
-                    foundOtherIdentifier=true;
-            }
-            assertTrue(foundOtherIdentifier);
 
-            boolean foundDoc=false;
-        for(DocumentDescription d : u.getDocumentDescriptions()){
-            assertEquals("R 2 Geheime Staatspolizei (Gestapo).ead#DEU", d.asVertex().getProperty("sourceFileId"));
-            
-            assertTrue(((String) d.asVertex().getProperty("processInfo")).equals("ITS employee"));
-            foundDoc=true;
+        boolean foundOtherIdentifier = false;
+        for (String s : (List<String>) u.getProperty("otherIdentifiers")) {
+            if (s.equals("Folder 0143"))
+                foundOtherIdentifier = true;
+        }
+        assertTrue(foundOtherIdentifier);
 
-            int countRevised_ME=0;
-            int countCreated_ME=0;
+        boolean foundDoc = false;
+        for (DocumentDescription d : u.getDocumentDescriptions()) {
+            assertEquals("R 2 Geheime Staatspolizei (Gestapo).ead#DEU", d.getProperty("sourceFileId"));
+
+            assertTrue((d.getProperty("processInfo")).equals("ITS employee"));
+            foundDoc = true;
+
+            int countRevised_ME = 0;
+            int countCreated_ME = 0;
             for (MaintenanceEvent me : d.getMaintenanceEvents()) {
-                if (me.asVertex().getProperty(MaintenanceEvent.EVENTTYPE).equals(MaintenanceEvent.EventType.REVISED.toString())) {
-                    assertNotNull(me.asVertex().getProperty("source"));
-                    assertNotNull(me.asVertex().getProperty("date"));
-                    assertNotNull(me.asVertex().getProperty(MaintenanceEvent.EVENTTYPE));
-                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.asVertex().getProperty(MaintenanceEvent.EVENTTYPE));
+                if (me.getProperty(MaintenanceEvent.EVENTTYPE).equals(MaintenanceEvent.EventType.REVISED.toString())) {
+                    assertNotNull(me.getProperty("source"));
+                    assertNotNull(me.getProperty("date"));
+                    assertNotNull(me.getProperty(MaintenanceEvent.EVENTTYPE));
+                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.getProperty(MaintenanceEvent.EVENTTYPE));
                     countRevised_ME++;
-                } else if (me.asVertex().getProperty(MaintenanceEvent.EVENTTYPE).equals(MaintenanceEvent.EventType.CREATED.toString())) {
-                    assertNotNull(me.asVertex().getProperty("source"));
-                    assertNull(me.asVertex().getProperty("date"));
-                    assertNotNull(me.asVertex().getProperty(MaintenanceEvent.EVENTTYPE));
-                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty(MaintenanceEvent.EVENTTYPE));
+                } else if (me.getProperty(MaintenanceEvent.EVENTTYPE).equals(MaintenanceEvent.EventType.CREATED.toString())) {
+                    assertNotNull(me.getProperty("source"));
+                    assertNull(me.getProperty("date"));
+                    assertNotNull(me.getProperty(MaintenanceEvent.EVENTTYPE));
+                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty(MaintenanceEvent.EVENTTYPE));
                     countCreated_ME++;
                 }
 
-                
+
             }
             assertEquals(3, countRevised_ME);
             assertEquals(1, countCreated_ME);
         }
         assertTrue(foundDoc);
-        
-        
+
 
     }
 
@@ -304,7 +302,7 @@ public class ItsTest extends AbstractImporterTest {
 // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
-         printGraph(graph);
+        printGraph(graph);
 
         diff.printDebug(System.out);
         /*
@@ -320,6 +318,6 @@ public class ItsTest extends AbstractImporterTest {
 
         int createCount = origCount + 21;
         assertEquals(createCount, getNodeCount(graph));
-       
+
     }
 }

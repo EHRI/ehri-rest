@@ -108,23 +108,23 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         
         Concept bloodForGoods = manager.getFrame("cvoc1-1", Concept.class);
         for(Description desc : bloodForGoods.getDescriptions()){
-            assertTrue(desc.asVertex().getPropertyKeys().contains(Ontology.CONCEPT_SCOPENOTE));
+            assertTrue(desc.getPropertyKeys().contains(Ontology.CONCEPT_SCOPENOTE));
         }
         Concept teheranChildren = manager.getFrame("cvoc1-2", Concept.class);
         for(Description desc : teheranChildren.getDescriptions()){
-//            for(String k : desc.asVertex().getPropertyKeys())
-//                System.out.println(k+"-"+desc.asVertex().getProperty(k));
-            assertTrue(desc.asVertex().getPropertyKeys().contains("personAccess"));
+//            for(String k : desc.getPropertyKeys())
+//                System.out.println(k+"-"+desc.getProperty(k));
+            assertTrue(desc.getPropertyKeys().contains("personAccess"));
         }
         
         AuthoritativeItem ad1 = manager.getFrame("ad1", AuthoritativeItem.class);
         boolean found=false;
         for(Link desc : teheranChildren.getLinks()){
             found=true;
-            assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
-            assertEquals("associate", desc.asVertex().getProperty("type"));
-            assertTrue(desc.asVertex().getPropertyKeys().contains("sem"));
-            assertEquals("personAccess", desc.asVertex().getProperty("sem"));
+            assertTrue(desc.getPropertyKeys().contains("type"));
+            assertEquals("associate", desc.getProperty("type"));
+            assertTrue(desc.getPropertyKeys().contains("sem"));
+            assertEquals("personAccess", desc.getProperty("sem"));
             for(LinkableEntity e : desc.getLinkTargets()){
                 assertTrue(e.getId().equals("cvoc1-2") || e.getId().equals("a1"));
             }
@@ -173,10 +173,10 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         boolean found=false;
         for(Link desc : termJR.getLinks()){
             found=true;
-            assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
-            assertEquals("associate", desc.asVertex().getProperty("type"));
-            assertTrue(desc.asVertex().getPropertyKeys().contains("skos"));
-            assertTrue(desc.asVertex().getProperty("skos").equals("broadMatch") || desc.asVertex().getProperty("skos").equals("relatedMatch"));
+            assertTrue(desc.getPropertyKeys().contains("type"));
+            assertEquals("associate", desc.getProperty("type"));
+            assertTrue(desc.getPropertyKeys().contains("skos"));
+            assertTrue(desc.getProperty("skos").equals("broadMatch") || desc.getProperty("skos").equals("relatedMatch"));
         }
         assertTrue(found);
 

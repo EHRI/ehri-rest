@@ -90,7 +90,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
 
         // Test ID generation andhierarchy
         assertEquals("nl-r1-ns_1", archUnit.getId());
-        assertTrue(archUnit.asVertex().getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
+        assertTrue(archUnit.getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
 
         assertNull(archUnit.getParent());
         assertEquals(agent, archUnit.getRepository());
@@ -103,7 +103,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         //test dates
         for (DocumentDescription d : archUnit.getDocumentDescriptions()) {
             // Single date is just a string
-            assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
+            assertFalse(d.getPropertyKeys().contains("unitDates"));
             List<DatePeriod> datePeriods = Lists.newArrayList(d.getDatePeriods());
             assertEquals(1, datePeriods.size());
             assertEquals("1906-01-01", datePeriods.get(0).getStartDate());

@@ -247,7 +247,7 @@ public class EadHandler extends SaxXmlHandler {
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
                     //add the maintenanceEvents, but only to the DD that was just created
                     for (DocumentDescription dd : current.getDocumentDescriptions()) {
-                        if (getSourceFileId() == null || getSourceFileId().equals(dd.asVertex().getProperty(Ontology.SOURCEFILE_KEY))) {
+                        if (getSourceFileId() == null || getSourceFileId().equals(dd.getProperty(Ontology.SOURCEFILE_KEY))) {
                             for (MaintenanceEvent me : maintenanceEvents) {
                                 dd.addMaintenanceEvent(me);
                             }

@@ -79,14 +79,14 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         while(i.hasNext()){
             DocumentDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
-            assertEquals("VAKKA-326611.KA#FIN", desc.asVertex().getProperty("sourceFileId"));
+            assertEquals("VAKKA-326611.KA#FIN", desc.getProperty("sourceFileId"));
             assertEquals("fin", desc.getLanguageOfDescription());
             nrOfDesc++;
         }
         assertEquals(1, nrOfDesc);
         
         for(DocumentDescription dd : c2.getDocumentDescriptions()){
-            assertEquals("VAKKA-326611.KA#FIN", dd.asVertex().getProperty("sourceFileId"));
+            assertEquals("VAKKA-326611.KA#FIN", dd.getProperty("sourceFileId"));
         }
  // Before...
        List<VertexProxy> graphState1 = getGraphState(graph);
@@ -115,9 +115,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
             
             //sourceFileId with added languagetag:
             if(desc.getLanguageOfDescription().equals("eng")){
-                assertEquals("VAKKA-326611.KA#ENG", desc.asVertex().getProperty("sourceFileId"));
+                assertEquals("VAKKA-326611.KA#ENG", desc.getProperty("sourceFileId"));
             }else{
-                assertEquals("VAKKA-326611.KA#FIN", desc.asVertex().getProperty("sourceFileId"));
+                assertEquals("VAKKA-326611.KA#FIN", desc.getProperty("sourceFileId"));
             }
             //assertEquals("fin", desc.getLanguageOfDescription());
             nrOfDesc++;

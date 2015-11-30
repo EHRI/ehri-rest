@@ -78,7 +78,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         //  Space stripping: https://github.com/mikesname/ehri-rest/issues/12
         //  Paragraph ordering: https://github.com/mikesname/ehri-rest/issues/13
         Description firstDesc = unit.getDocumentDescriptions().iterator().next();
-        String scopeContent = firstDesc.asVertex().getProperty("scopeAndContent");
+        String scopeContent = firstDesc.getProperty("scopeAndContent");
         String expected =
                 "This is some test scope and content.\n\n" +
                 "This contains Something & Something else.\n\n" +

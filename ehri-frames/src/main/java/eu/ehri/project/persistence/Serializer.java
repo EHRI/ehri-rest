@@ -569,9 +569,8 @@ public final class Serializer {
             TraversalCallback cb) {
 
         if (depth < maxTraversals) {
-            Class<?> cls = EntityClass.withName(
-                    (String) item.asVertex().getProperty(EntityType.TYPE_KEY))
-                    .getJavaClass();
+            Class<?> cls = EntityClass
+                    .withName(item.<String>getProperty(EntityType.TYPE_KEY)).getJavaClass();
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 

@@ -19,9 +19,14 @@
 
 package eu.ehri.project.models.base;
 
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.models.annotations.EntityType;
+
+import java.util.Set;
 
 /**
  * Base interface for all EHRI framed vertex types.
@@ -45,4 +50,32 @@ public interface Frame extends VertexFrame {
      */
     @Property(EntityType.TYPE_KEY)
     String getType();
+
+    /**
+     * Get an arbitrary property from the underlying vertex.
+     * @param key the property key
+     * @param <T> the property's type
+     * @return the property value, or null
+     */
+    @JavaHandler
+    <T> T getProperty(String key);
+
+    /**
+     * Get the property keys from the underlying vertex.
+     *
+     * @return a set of string keys
+     */
+    @JavaHandler
+    Set<String> getPropertyKeys();
+
+    abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
+        public <T> T getProperty(String key) {
+            return it().getProperty(key);
+        }
+
+        @Override
+        public Set<String> getPropertyKeys() {
+            return it().getPropertyKeys();
+        }
+    }
 }

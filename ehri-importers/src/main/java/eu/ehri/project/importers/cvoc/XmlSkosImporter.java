@@ -500,8 +500,8 @@ public final class XmlSkosImporter implements SkosImporter {
     private boolean reverseRelationExists(ConceptPlaceholder from, ConceptPlaceholder to) {
         boolean result = false;
         for (Concept relatedBy : from.concept.getRelatedByConcepts()) {
-            //logger.debug("Related By: " + relatedBy.asVertex().getProperty(EntityType.ID_KEY));
-            String relatedByStoreId = relatedBy.asVertex().getProperty(EntityType.ID_KEY);
+            //logger.debug("Related By: " + relatedBy.getProperty(EntityType.ID_KEY));
+            String relatedByStoreId = relatedBy.getProperty(EntityType.ID_KEY);
             if (relatedByStoreId.equals(to.storeId)) {
                 result = true;
                 break; // found

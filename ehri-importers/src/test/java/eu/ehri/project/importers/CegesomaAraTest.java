@@ -102,22 +102,22 @@ public class CegesomaAraTest extends AbstractImporterTest {
         assertEquals(c1.getId() + "-aa_1134_32", c2_1.getId());
         assertEquals(c1.getId() + "-aa_1134_34", c2_2.getId());
 
-        for (String key : archdesc.asVertex().getPropertyKeys()) {
-            logger.debug(key + " " + archdesc.asVertex().getProperty(key));
+        for (String key : archdesc.getPropertyKeys()) {
+            logger.debug(key + " " + archdesc.getProperty(key));
         }
-        assertTrue(((List<String>) archdesc.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AA 627"));
+        assertTrue(((List<String>) archdesc.getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AA 627"));
 
         InputStream ios_ara = ClassLoader.getSystemResourceAsStream(ARA_XMLFILE);
         importManager = new SaxImportManager(graph, repository, validUser, AraEadImporter.class, EadHandler.class, new XmlImportProperties("ara.properties"))
                 .setTolerant(Boolean.TRUE);
 
         ImportLog log_ara = importManager.importFile(ios_ara, logMessage);
-        for (String key : archdesc.asVertex().getPropertyKeys()) {
-            logger.debug(key + " " + archdesc.asVertex().getProperty(key));
+        for (String key : archdesc.getPropertyKeys()) {
+            logger.debug(key + " " + archdesc.getProperty(key));
         }
-        assertTrue(archdesc.asVertex().getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
-        assertTrue(((List<String>) archdesc.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AA 627"));
-        assertTrue(((List<String>) archdesc.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AC559"));
+        assertTrue(archdesc.getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
+        assertTrue(((List<String>) archdesc.getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AA 627"));
+        assertTrue(((List<String>) archdesc.getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AC559"));
         
 
     }

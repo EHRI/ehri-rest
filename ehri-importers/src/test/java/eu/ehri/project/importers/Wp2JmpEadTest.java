@@ -112,10 +112,10 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
 //        languages
         for(DocumentDescription d : c2.getDocumentDescriptions()){
-            for(String key : d.asVertex().getPropertyKeys()){
+            for(String key : d.getPropertyKeys()){
                 System.out.println(key);
             }
-            assertEquals("deu", d.asVertex().getProperty("languageOfMaterial").toString());
+            assertEquals("deu", d.getProperty("languageOfMaterial").toString());
         }
 
         List<AccessibleEntity> subjects = toList(ev.getSubjects());
@@ -134,7 +134,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : fonds.getDocumentDescriptions()){
-            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty("processInfo"));
+            assertEquals("Shoah History Department, Jewish Museum in Prague", d.getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

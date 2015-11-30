@@ -99,7 +99,7 @@ public class CegesomaABTest extends AbstractImporterTest{
                 Link link = graph.frame(relation, Link.class);
                 if (link.getLinkType().equals("creatorAccess")) {
                     hasPersonAccess = true;
-                    assertEquals("José Gotovitch", link.asVertex().getProperty(Ontology.NAME_KEY));
+                    assertEquals("José Gotovitch", link.getProperty(Ontology.NAME_KEY));
                 }
             }
             assertTrue(hasPersonAccess);
@@ -109,8 +109,8 @@ public class CegesomaABTest extends AbstractImporterTest{
         for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("Liste des objets, documents et témoignages rassemblés pour l'exposition : (\"Résister à la solution finale\")", dd.getName());
             assertEquals("fra", dd.getLanguageOfDescription());
-            assertEquals("Cege Soma", dd.asVertex().getProperty("processInfo"));
-            assertEquals("en français et en anglais", dd.asVertex().getProperty("languageOfMaterial"));
+            assertEquals("Cege Soma", dd.getProperty("processInfo"));
+            assertEquals("en français et en anglais", dd.getProperty("languageOfMaterial"));
         }
         
         //test MaintenanceEvent order
@@ -119,10 +119,10 @@ public class CegesomaABTest extends AbstractImporterTest{
             boolean meFound = false;
             for(MaintenanceEvent me : dd.getMaintenanceEvents()){
                 meFound=true;
-                if(me.asVertex().getProperty("order").equals(0)){
-                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty("eventType"));
+                if(me.getProperty("order").equals(0)){
+                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty("eventType"));
                 }else{
-                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.asVertex().getProperty("eventType"));
+                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.getProperty("eventType"));
                 }
             }
             assertTrue(meFound);

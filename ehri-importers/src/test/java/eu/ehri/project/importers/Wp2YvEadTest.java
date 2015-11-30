@@ -129,7 +129,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(c3.getLinks()).size() > 0);
+        assertTrue(!toList(c3.getLinks()).isEmpty());
         for(Link a : c3.getLinks()){
             logger.debug(a.getLinkType() + " " + a.getDescription());
             assertEquals("subjectAccess", a.getLinkType());
@@ -160,7 +160,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         
         // Check the author of the top level description
         for (DocumentDescription d : fonds.getDocumentDescriptions()){
-            assertEquals("BT", d.asVertex().getProperty("processInfo"));
+            assertEquals("BT", d.getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

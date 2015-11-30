@@ -30,16 +30,17 @@ import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
@@ -59,19 +60,19 @@ public class JoodsRaadTest extends AbstractImporterTest {
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
         assertNotNull(ios);
-        
+
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
 
         // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+        List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = importer.importFile(ios, logMessage);
 //        log.printReport();
         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
-       
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+
 
 //        printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -97,15 +98,15 @@ public class JoodsRaadTest extends AbstractImporterTest {
             assertEquals(vocabulary, e.getPermissionScope());
         }
         Concept term698 = manager.getFrame("cvoc1-698", Concept.class);
-        boolean found=false;
-        for(Concept rel : term698.getRelatedConcepts()){
-            found=true;
+        boolean found = false;
+        for (Concept rel : term698.getRelatedConcepts()) {
+            found = true;
             assertEquals("307", rel.getIdentifier());
         }
         assertTrue(found);
     }
 
-   @Test
+    @Test
     public void testCloseMatchOutsideScheme() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
@@ -115,10 +116,10 @@ public class JoodsRaadTest extends AbstractImporterTest {
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
 
-        
+
         int count = getNodeCount(graph);
         assertNotNull(ios);
-        
+
         Vocabulary cvoc2 = manager.getFrame("cvoc2", Vocabulary.class);
         InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM);
         assertNotNull(niod_ios);
@@ -133,7 +134,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-       
+
 
 //        printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -147,56 +148,54 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertEquals(voccount + 1, toList(cvoc2.getConcepts()).size());
 
         Concept term698 = manager.getFrame("cvoc1-698", Concept.class);
-        boolean found=false;
-        for(Concept rel : term698.getRelatedConcepts()){
-            found=true;
+        boolean found = false;
+        for (Concept rel : term698.getRelatedConcepts()) {
+            found = true;
             assertEquals("307", rel.getIdentifier());
         }
         assertTrue(found);
 
         Concept termJR = manager.getFrame("cvoc2-joodse_raad", Concept.class);
-        
-        for(Link desc : termJR.getLinks()){
-            assertTrue(desc.asVertex().getPropertyKeys().contains("type"));
-            assertEquals("associate", desc.asVertex().getProperty("type"));
-            assertTrue(desc.asVertex().getPropertyKeys().contains("skos"));
-            assertEquals("exactMatch", desc.asVertex().getProperty("skos"));
+
+        for (Link desc : termJR.getLinks()) {
+            assertTrue(desc.getPropertyKeys().contains("type"));
+            assertEquals("associate", desc.getProperty("type"));
+            assertTrue(desc.getPropertyKeys().contains("skos"));
+            assertEquals("exactMatch", desc.getProperty("skos"));
         }
 
         Concept concept698 = manager.getFrame("cvoc1-698", Concept.class);
-        found=false;
-        for(Edge e : concept698.asVertex().getEdges(Direction.IN, "hasLinkTarget")){
+        found = false;
+        for (Edge e : concept698.asVertex().getEdges(Direction.IN, "hasLinkTarget")) {
             Link l = graph.frame(e.getVertex(Direction.OUT), Link.class);
             boolean bothTargetsFound = false;
-            for (LinkableEntity entity : l.getLinkTargets()){
-                if(entity.equals(termJR))
-                    bothTargetsFound=true;
+            for (LinkableEntity entity : l.getLinkTargets()) {
+                if (entity.equals(termJR))
+                    bothTargetsFound = true;
             }
             assertTrue(bothTargetsFound);
-            for(String k : e.getVertex(Direction.OUT).getPropertyKeys()){
+            for (String k : e.getVertex(Direction.OUT).getPropertyKeys()) {
                 logger.debug(k + ":" + e.getVertex(Direction.OUT).getProperty(k));
             }
-            int countHasLinkTarget=0;
-            for(Edge out : e.getVertex(Direction.OUT).getEdges(Direction.OUT)){
+            int countHasLinkTarget = 0;
+            for (Edge out : e.getVertex(Direction.OUT).getEdges(Direction.OUT)) {
                 logger.debug(out.getLabel());
-                if(out.getLabel().equals("hasLinkTarget")){
+                if (out.getLabel().equals("hasLinkTarget")) {
                     countHasLinkTarget++;
                 }
             }
             assertEquals(2, countHasLinkTarget);
-            found=true;
+            found = true;
         }
         assertTrue(found);
-                
-        found=false;
-        for(Concept rel : termJR.getRelatedConcepts()){
-            for(String key : rel.asVertex().getPropertyKeys()){
-                logger.debug(key + "" + rel.asVertex().getProperty(key));
+
+        found = false;
+        for (Concept rel : termJR.getRelatedConcepts()) {
+            for (String key : rel.getPropertyKeys()) {
+                logger.debug(key + "" + rel.getProperty(key));
             }
-            found=true;
+            found = true;
         }
         assertFalse(found);
-}
-
-
+    }
 }

@@ -81,16 +81,16 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         assertEquals(count+7, getNodeCount(graph));
         printGraph(graph);
         HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
-        assertEquals(2, ((List)person.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS)).size());
+        assertEquals(2, ((List)person.getProperty(Ontology.OTHER_IDENTIFIERS)).size());
         
         for(Description d : person.getDescriptions()){
-            assertFalse(d.asVertex().getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
+            assertFalse(d.getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
             assertEquals("deu", d.getLanguageOfDescription());
             assertEquals("Booooris the third", d.getName());
-            assertTrue(d.asVertex().getProperty("otherFormsOfName") instanceof List);
-            assertEquals(2, ((List)d.asVertex().getProperty("otherFormsOfName")).size());
-            assertTrue(d.asVertex().getProperty("place") instanceof List);
-            assertEquals(2, ((List)d.asVertex().getProperty("place")).size());
+            assertTrue(d.getProperty("otherFormsOfName") instanceof List);
+            assertEquals(2, ((List)d.getProperty("otherFormsOfName")).size());
+            assertTrue(d.getProperty("place") instanceof List);
+            assertEquals(2, ((List)d.getProperty("place")).size());
         }
     }
     
@@ -123,10 +123,10 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
         for(Description d : person.getDescriptions()){
             assertEquals("deu", d.getLanguageOfDescription());
-            assertTrue(d.asVertex().getProperty("otherFormsOfName") instanceof List);
-            assertEquals(2, ((List)d.asVertex().getProperty("otherFormsOfName")).size());
-            assertTrue(d.asVertex().getProperty("place") instanceof List);
-            assertEquals(2, ((List)d.asVertex().getProperty("place")).size());
+            assertTrue(d.getProperty("otherFormsOfName") instanceof List);
+            assertEquals(2, ((List)d.getProperty("otherFormsOfName")).size());
+            assertTrue(d.getProperty("place") instanceof List);
+            assertEquals(2, ((List)d.getProperty("place")).size());
         }
     }
     
@@ -188,8 +188,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
                             }
                             assertTrue(conceptFound);
                             logger.debug(link.getLinkType());
-                            for (String key : link.asVertex().getPropertyKeys()) {
-                                logger.debug(key + ":" + link.asVertex().getProperty(key));
+                            for (String key : link.getPropertyKeys()) {
+                                logger.debug(key + ":" + link.getProperty(key));
                             }
                         }
                     }

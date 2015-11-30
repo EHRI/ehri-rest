@@ -133,10 +133,10 @@ public class EacImporterTest extends AbstractImporterTest {
         assertEquals(Entities.HISTORICAL_AGENT_DESCRIPTION, c1.getType());
 
 
-        assertTrue(c1.asVertex().getProperty(Ontology.NAME_KEY) instanceof String);
-        assertNotNull(c1.asVertex().getProperty("otherFormsOfName"));
+        assertTrue(c1.getProperty(Ontology.NAME_KEY) instanceof String);
+        assertNotNull(c1.getProperty("otherFormsOfName"));
         // Alt names should be an array
-        assertFalse(c1.asVertex().getProperty("otherFormsOfName") instanceof String);
+        assertFalse(c1.getProperty("otherFormsOfName") instanceof String);
 
         // Ensure that c1 is a description of the unit
         for (Description d : unit.getDescriptions()) {

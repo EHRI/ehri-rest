@@ -141,9 +141,9 @@ public class CvocConceptTest extends ModelTestBase {
                             put(Ontology.LANGUAGE_OF_DESCRIPTION, TEST_LABEL_LANG);
                             put(Ontology.PREFLABEL, "pref1");
                             // other properties are optional, but we put them in
-                            put("altLabel", Lists.<String>newArrayList("alt1", "alt2"));
-                            put(Ontology.CONCEPT_DEFINITION, Lists.<String>newArrayList("def1")); // allow multiple
-                            put(Ontology.CONCEPT_SCOPENOTE, Lists.<String>newArrayList("sn1")); // allow multiple
+                            put("altLabel", Lists.newArrayList("alt1", "alt2"));
+                            put(Ontology.CONCEPT_DEFINITION, Lists.newArrayList("def1")); // allow multiple
+                            put(Ontology.CONCEPT_SCOPENOTE, Lists.newArrayList("sn1")); // allow multiple
                         }});
                     }});
                 }});
@@ -155,7 +155,7 @@ public class CvocConceptTest extends ModelTestBase {
     @Test
     public void testCreateConceptWithDescription() throws Exception {
         UserProfile validUser = manager.getFrame("mike", UserProfile.class);
-        Crud<Concept> conceptViews = new CrudViews<Concept>(graph,
+        Crud<Concept> conceptViews = new CrudViews<>(graph,
                 Concept.class);
         Bundle bundle = Bundle.fromData(getAppleTestBundle());
 
@@ -181,7 +181,7 @@ public class CvocConceptTest extends ModelTestBase {
 		//String[] altLabels = descr.getAltLabels();		
 		//assertEquals("alt2", altLabels[1]);
 		// NOTE we can't call getAltLabels() on the interface, because it is optional
-		List<String> altLabels = descr.asVertex().getProperty(Ontology.CONCEPT_ALTLABEL);
+		List<String> altLabels = descr.getProperty(Ontology.CONCEPT_ALTLABEL);
 		assertFalse(altLabels == null);
 		assertEquals(2, altLabels.size());
 		assertEquals("alt2", altLabels.get(1));

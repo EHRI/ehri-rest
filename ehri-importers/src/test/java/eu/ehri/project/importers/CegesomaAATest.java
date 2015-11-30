@@ -117,25 +117,25 @@ public class CegesomaAATest extends AbstractImporterTest{
         for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
-            assertEquals("In het Frans", dd.asVertex().getProperty("languageOfMaterial"));
-            assertEquals("Zie ook AA 1297", dd.asVertex().getProperty("relatedMaterial"));
-            assertTrue(dd.asVertex().getProperty("notes").toString().startsWith("Nr 1-2-13: fotokopies Bibliothek"));
-            assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.asVertex().getProperty("findingAids"));
-//            for(String key : dd.asVertex().getPropertyKeys())
+            assertEquals("In het Frans", dd.getProperty("languageOfMaterial"));
+            assertEquals("Zie ook AA 1297", dd.getProperty("relatedMaterial"));
+            assertTrue(dd.getProperty("notes").toString().startsWith("Nr 1-2-13: fotokopies Bibliothek"));
+            assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.getProperty("findingAids"));
+//            for(String key : dd.getPropertyKeys())
 //                System.out.println(key);
             for (MaintenanceEvent me : dd.getMaintenanceEvents()){
-              assertEquals("Automatisch gegenereerd door PALLAS systeem", me.asVertex().getProperty("source"));
-              assertEquals("28/03/2013", me.asVertex().getProperty("date"));
-              assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty("eventType"));
+              assertEquals("Automatisch gegenereerd door PALLAS systeem", me.getProperty("source"));
+              assertEquals("28/03/2013", me.getProperty("date"));
+              assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty("eventType"));
             }
-            assertEquals("SOMA_CEGES_72695#NLD", dd.asVertex().getProperty("sourceFileId"));
+            assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
         }
         
         // There should be one DocumentDescription for the (only) <c01>
         for(DocumentDescription dd : c1.getDocumentDescriptions()){
             assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
-            assertEquals("SOMA_CEGES_72695#NLD", dd.asVertex().getProperty("sourceFileId"));
+            assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
 //            TODO
 //            assertEquals(1, toList(dd.getMaintenanceEvents()).size());
         }
@@ -144,7 +144,7 @@ public class CegesomaAATest extends AbstractImporterTest{
         for(DocumentDescription dd : c2_2.getDocumentDescriptions()){
             assertEquals("Wetteksten (U.) S.R.A.", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
-            assertEquals("item", dd.asVertex().getProperty("levelOfDescription"));
+            assertEquals("item", dd.getProperty("levelOfDescription"));
         }
     
         /**
@@ -157,7 +157,7 @@ public class CegesomaAATest extends AbstractImporterTest{
     //test dates
         for (DocumentDescription d : c2_1.getDocumentDescriptions()) {
             // Single date is just a string
-            assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
+            assertFalse(d.getPropertyKeys().contains("unitDates"));
             for (DatePeriod dp : d.getDatePeriods()) {
                 assertEquals("1944-01-01", dp.getStartDate());
                 assertEquals("1948-12-31", dp.getEndDate());
@@ -172,11 +172,11 @@ public class CegesomaAATest extends AbstractImporterTest{
         for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
             // start and end dates correctly parsed and setup
             
-            assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
+            assertFalse(d.getPropertyKeys().contains("unitDates"));
             List<DatePeriod> dps = toList(d.getDatePeriods());
             assertEquals(2, dps.size());
             for (DatePeriod dp : dps) {
-                String dateDesc = dp.asVertex().getProperty(Ontology.DATE_HAS_DESCRIPTION);
+                String dateDesc = dp.getProperty(Ontology.DATE_HAS_DESCRIPTION);
                 logger.info("Date object: {}", dateDesc);
                 if (dateDesc.equals("1944-1948")) {
                     assertEquals("1944-01-01", dp.getStartDate());

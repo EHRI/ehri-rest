@@ -83,11 +83,11 @@ public class JmpEadTest extends AbstractImporterTest {
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
         for(DocumentDescription d : fonds.getDocumentDescriptions()){
-            for(String key : d.asVertex().getPropertyKeys()){
+            for(String key : d.getPropertyKeys()){
                 System.out.println(key);
             }
-            System.out.println(d.asVertex().getProperty("languageOfMaterial").toString());
-            assertTrue(d.asVertex().getProperty("languageOfMaterial").toString().startsWith("[deu"));
+            System.out.println(d.getProperty("languageOfMaterial"));
+            assertTrue(d.getProperty("languageOfMaterial").toString().startsWith("[deu"));
         }
 
         List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());

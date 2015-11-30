@@ -153,7 +153,7 @@ assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
         logger.debug("size: "+ toList(m19.getDocumentDescriptions()).size());
         for(DocumentDescription m19desc : m19.getDocumentDescriptions()){
-            logger.debug(m19desc.getId() + ":" + m19desc.getLanguageOfDescription() + ":" + m19desc.asVertex().getProperty(Ontology.SOURCEFILE_KEY));
+            logger.debug(m19desc.getId() + ":" + m19desc.getLanguageOfDescription() + ":" + m19desc.getProperty(Ontology.SOURCEFILE_KEY));
         }
         
         i = c1.getDocumentDescriptions().iterator();

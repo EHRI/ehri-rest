@@ -51,7 +51,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testDetail() throws ItemNotFound {
-        Crud<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
+        Crud<DocumentaryUnit> docViews = new CrudViews<>(graph,
                 DocumentaryUnit.class);
         DocumentaryUnit unit = docViews.detail(item.getId(), validUser);
         assertEquals(item.asVertex(), unit.asVertex());
@@ -59,7 +59,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testUserProfile() throws ItemNotFound {
-        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<>(graph,
                 UserProfile.class);
         UserProfile user = userViews.detail(validUser.getId(), validUser);
         assertEquals(validUser.asVertex(), user.asVertex());
@@ -67,39 +67,39 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test(expected = ItemNotFound.class)
     public void testDetailAnonymous() throws ItemNotFound {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         docViews.detail(item.getId(), AnonymousAccessor.getInstance());
     }
 
     @Test(expected = ItemNotFound.class)
     public void testDetailPermissionDenied() throws ItemNotFound {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         docViews.detail(item.getId(), invalidUser);
     }
 
     @Test
     public void testCreate() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUnauthorized() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
     }
 
     @Test
     public void testCreateAsUnauthorizedAndThenGrant() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
 
@@ -108,7 +108,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
             fail("Creation should throw "
                     + PermissionDenied.class.getSimpleName());
         } catch (PermissionDenied e) {
-            // We expected that permission denied... now explicitely add
+            // We expected that permission denied... now explicitly add
             // permissions.
             PermissionGrantTarget target = manager.getFrame(
                     ContentTypes.DOCUMENTARY_UNIT.getName(),
@@ -116,43 +116,43 @@ public class CrudViewsTest extends AbstractFixtureTest {
             new AclManager(graph).grantPermission(target, PermissionType.CREATE, invalidUser
             );
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
-            assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+            assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
         }
     }
 
     @Test
     public void testCreateWithScope() throws Exception {
-        Crud<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
+        Crud<DocumentaryUnit> docViews = new LoggingCrudViews<>(
                 graph, DocumentaryUnit.class, manager.getFrame("r1",
-                        Repository.class));
+                Repository.class));
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
     }
 
     @Test
     public void testUserDetailAccessDenied() throws ItemNotFound {
-        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<>(graph,
                 UserProfile.class);
         userViews.detail(validUser.getId(), invalidUser);
     }
 
     @Test
     public void testUpdate() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue(
                 "name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
-        assertEquals(newName, changedUnit.asVertex().getProperty("name"));
+        assertEquals(newName, changedUnit.getProperty("name"));
         DocumentDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
                 DocumentDescription.class);
@@ -168,7 +168,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testUserUpdate() throws Exception {
-        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<>(graph,
                 UserProfile.class);
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = userViews.create(bundle, validUser);
@@ -183,7 +183,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testUserCreate() throws Exception {
-        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<>(graph,
                 UserProfile.class);
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = userViews.create(bundle, validUser);
@@ -192,7 +192,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testGroupCreate() throws Exception {
-        CrudViews<Group> groupViews = new CrudViews<Group>(graph, Group.class);
+        CrudViews<Group> groupViews = new CrudViews<>(graph, Group.class);
         Bundle bundle = Bundle.fromData(TestData.getTestGroupBundle());
         Group group = groupViews.create(bundle, validUser);
         assertEquals(TestData.TEST_GROUP_NAME, group.getName());
@@ -200,19 +200,19 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateWithError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
                 .removeDataValue("name");
 
         // This shouldn't barf because the collection does not need a name.
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(null, unit.asVertex().getProperty("name"));
+        assertEquals(null, unit.getProperty("name"));
     }
 
     @Test
     public void testDelete() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         Integer shouldDelete = 1;
 
