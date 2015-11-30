@@ -120,7 +120,7 @@ public class IfzTest extends AbstractImporterTest {
             assertEquals("deu", dd.getLanguageOfDescription());
             List<String> s = Lists.newArrayList("TO BE FILLED with selection", "IfZ");
             assertEquals(s, dd.asVertex().<List<String>>getProperty("processInfo"));
-            assertEquals("recordgrp", dd.asVertex().getProperty("levelOfDescription"));
+            assertEquals("recordgrp", dd.getProperty("levelOfDescription"));
 
         }
 
@@ -128,7 +128,7 @@ public class IfzTest extends AbstractImporterTest {
         for (DocumentDescription dd : c1.getDocumentDescriptions()) {
             assertEquals("Internationale u. ausländische Gerichtsorte", dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
-            assertEquals("series", dd.asVertex().getProperty("levelOfDescription"));
+            assertEquals("series", dd.getProperty("levelOfDescription"));
         }
 
         /**
@@ -141,7 +141,7 @@ public class IfzTest extends AbstractImporterTest {
         //test dates
         for (DocumentDescription d : c3_2.getDocumentDescriptions()) {
             // Single date is just a string 1945/1957
-            assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
+            assertFalse(d.getPropertyKeys().contains("unitDates"));
             for (DatePeriod dp : d.getDatePeriods()) {
                 assertEquals("1945-01-01", dp.getStartDate());
                 assertEquals("1957-12-31", dp.getEndDate());

@@ -211,7 +211,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
                     //add the maintenanceEvents, but only to the DD that was just created
                     for (Description dd : current.getDescriptions()) {
-                        if (getSourceFileId().equals(dd.asVertex().getProperty(SOURCEFILEID))) {
+                        if (getSourceFileId().equals(dd.getProperty(SOURCEFILEID))) {
                             for (MaintenanceEvent me : maintenanceEvents) {
                                 dd.addMaintenanceEvent(me);
                             }

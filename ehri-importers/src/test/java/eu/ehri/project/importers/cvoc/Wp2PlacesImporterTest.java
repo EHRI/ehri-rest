@@ -77,8 +77,8 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         //	<geo:long>20.716666666666665</geo:long>
         Iterable<Description> ghetto0desc = location.getDescriptions();
         for (Description d : ghetto0desc) {
-            assertEquals("48.9756578", d.asVertex().getProperty("latitude"));
-            assertEquals("14.480255", d.asVertex().getProperty("longitude"));
+            assertEquals("48.9756578", d.getProperty("latitude"));
+            assertEquals("14.480255", d.getProperty("longitude"));
         }
 
         // and print the tree

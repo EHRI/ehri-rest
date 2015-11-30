@@ -82,7 +82,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest{
         assertNotNull(antisemitism);
         for(Description d :  antisemitism.getDescriptions()){
             assertEquals("Antisemitism",d.getName());
-            assertEquals("http://id.worldcat.org/fast/810769/", d.asVertex().getProperty("url"));
+            assertEquals("http://id.worldcat.org/fast/810769/", d.getProperty("url"));
         }
     }
 }

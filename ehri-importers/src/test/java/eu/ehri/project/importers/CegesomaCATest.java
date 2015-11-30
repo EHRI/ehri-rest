@@ -28,12 +28,15 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test the import of a Cegesoma CA EAD file.
@@ -42,28 +45,30 @@ import static org.junit.Assert.*;
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  * @author Ben Companjen (http://github.com/bencomp)
  */
-public class CegesomaCATest extends AbstractImporterTest{
-    
+public class CegesomaCATest extends AbstractImporterTest {
+
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE_NL = "CS-foto-188845-nl.xml";
     protected final String XMLFILE_FR = "CS-foto-188845-fr.xml";
     protected final String ARCHDESC = "CA FE 1437";
-    DocumentaryUnit archdesc;
-    int origCount=0;
-            
+    int origCount;
+
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        
+
         PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaCA.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser,
+                EadImporter.class, EadHandler.class,
+                new XmlImportProperties("cegesomaCA.properties")).importFile(ios, logMessage);
+        assertTrue(log.hasDoneWork());
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)
-       	// - 1 more DocumentDescription
+        // - 1 more DocumentDescription
         // - 1 more DatePeriod
         // - 2 more subjectAccess nodes
         // - 1 UP
@@ -72,9 +77,9 @@ public class CegesomaCATest extends AbstractImporterTest{
         // MaintenanceEvent 1
         int newCount = origCount + 10;
         assertEquals(newCount, getNodeCount(graph));
-        
-        archdesc = graph.frame(
-                getVertexByIdentifier(graph,ARCHDESC),
+
+        DocumentaryUnit archdesc = graph.frame(
+                getVertexByIdentifier(graph, ARCHDESC),
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
@@ -84,25 +89,22 @@ public class CegesomaCATest extends AbstractImporterTest{
          * Test titles
          */
         // There should be one DocumentDescription for the <archdesc>
-        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+        for (DocumentDescription dd : archdesc.getDocumentDescriptions()) {
             assertTrue(dd.getName().startsWith("Dessin caricatural d'un juif ayant "));
             assertEquals("fra", dd.getLanguageOfDescription());
         }
-        
-       
+
+
         // Fonds has two dates with different types -> list
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
-        	// unitDates still around?
-        	assertFalse(d.asVertex().getPropertyKeys().contains("unitDates"));
-        	
-        	// start and end dates correctly parsed and setup
-        	List<DatePeriod> dp = toList(d.getDatePeriods());
-        	assertEquals(1, dp.size());
-        	assertEquals("1940-01-01", dp.get(0).getStartDate());
-        	assertEquals("1945-12-31", dp.get(0).getEndDate());
-        	
-        	
+        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+            // unitDates still around?
+            assertFalse(d.getPropertyKeys().contains("unitDates"));
+
+            // start and end dates correctly parsed and setup
+            List<DatePeriod> dp = toList(d.getDatePeriods());
+            assertEquals(1, dp.size());
+            assertEquals("1940-01-01", dp.get(0).getStartDate());
+            assertEquals("1945-12-31", dp.get(0).getEndDate());
         }
-        
     }
 }

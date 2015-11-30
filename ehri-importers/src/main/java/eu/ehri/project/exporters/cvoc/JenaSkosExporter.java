@@ -90,7 +90,7 @@ public class JenaSkosExporter implements SkosExporter {
 
         // Write name and description as DC elements.
         for (String dcElement : new String[]{"name", "description"}) {
-            Object prop = vocabulary.asVertex().getProperty(dcElement);
+            Object prop = vocabulary.getProperty(dcElement);
             if (prop != null) {
                 writeListOrScalar(model, vocabResource,
                         model.createProperty(DC_URI + dcElement), prop, "en");

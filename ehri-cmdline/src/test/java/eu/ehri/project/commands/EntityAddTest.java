@@ -43,7 +43,7 @@ public class EntityAddTest extends AbstractFixtureTest {
         CommandLine cmdLine = ua.getCmdLine(args);
         assertEquals(OK.getCode(), ua.execWithOptions(graph, cmdLine));
         Country el = manager.getFrame("el", EntityClass.COUNTRY, Country.class);
-        assertEquals("Elbonia", el.asVertex().getProperty("name"));
+        assertEquals("Elbonia", el.getProperty("name"));
     }
 
     @Test

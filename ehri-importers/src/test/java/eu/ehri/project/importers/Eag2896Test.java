@@ -84,7 +84,7 @@ public class Eag2896Test extends AbstractImporterTest {
         // check the child items
         RepositoryDescription c1 = graph.frame(getVertexByIdentifier(graph, AGENT_DESC_ID), RepositoryDescription.class);
         assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.getType());
-        Object notes = c1.asVertex().getProperty(EagImporter.MAINTENANCE_NOTES);
+        Object notes = c1.getProperty(EagImporter.MAINTENANCE_NOTES);
         if (notes instanceof String[]) {
             fail("Maintenance notes property should not be an array");
         } else {
@@ -93,7 +93,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
         // MB: Test priority hack - this should be pulled out of the
         // maintenanceNotes field into its own int field
-        Object priority = unit.asVertex().getProperty(EagImporter.PRIORITY);
+        Object priority = unit.getProperty(EagImporter.PRIORITY);
         assertEquals(5, priority);
 
         // Check scope

@@ -61,12 +61,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         Bundle descBundle = bundle
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
@@ -90,12 +90,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test(expected = ValidationError.class)
     public void testCreateDependentWithValidationError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         Bundle descBundle = bundle
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
@@ -108,12 +108,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testUpdateDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
         Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
@@ -129,12 +129,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test(expected = ValidationError.class)
     public void testUpdateDependentWithValidationError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
@@ -147,12 +147,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testDeleteDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
                 graph, DocumentaryUnit.class);
         DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
 
@@ -231,6 +231,6 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     }
 
     private <T  extends DescribedEntity> DescriptionViews<T> getView(Class<T> cls) {
-        return new DescriptionViews<T>(graph, cls);
+        return new DescriptionViews<>(graph, cls);
     }
 }

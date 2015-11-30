@@ -100,10 +100,10 @@ public class MemShoahTest extends AbstractImporterTest{
             for(MaintenanceEvent me : dd.getMaintenanceEvents()){
                 meFound=true;
                 countME++;
-                if(me.asVertex().getProperty("order").equals(0)){
-                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty("eventType"));
+                if(me.getProperty("order").equals(0)){
+                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty("eventType"));
                 }else{
-                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.asVertex().getProperty("eventType"));
+                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.getProperty("eventType"));
                 }
             }
             assertTrue(meFound);

@@ -60,17 +60,17 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
-        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<>(
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
-        assertEquals(newName, changedUnit.asVertex().getProperty("name"));
+        assertEquals(newName, changedUnit.getProperty("name"));
         assertTrue(changedUnit.getDescriptions().iterator().hasNext());
         DocumentDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
@@ -96,7 +96,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
-        LoggingCrudViews<UserProfile> userViews = new LoggingCrudViews<UserProfile>(
+        LoggingCrudViews<UserProfile> userViews = new LoggingCrudViews<>(
                 graph, UserProfile.class);
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = userViews.create(bundle, validUser);
@@ -153,7 +153,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError, ItemNotFound {
-        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<>(
                 graph, DocumentaryUnit.class);
         int shouldDelete = 1;
         int origActionCount = toList(validUser.getHistory()).size();

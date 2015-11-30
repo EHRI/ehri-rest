@@ -136,13 +136,13 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
             }
             boolean hasScopeAndContent=false;
             boolean hasLanguageOfMaterial=false;
-            for(String property : d.asVertex().getPropertyKeys()){
+            for(String property : d.getPropertyKeys()){
                 if(property.equals("scopeAndContent")){
                     hasScopeAndContent=true;
-                    assertTrue(d.asVertex().getProperty(property).toString().startsWith("Inleiding"));
+                    assertTrue(d.getProperty(property).toString().startsWith("Inleiding"));
                 }else if(property.equals("languageOfMaterial")){
                     hasLanguageOfMaterial=true;
-                    assertEquals("nld", d.asVertex().getProperty(property).toString());
+                    assertEquals("nld", d.getProperty(property).toString());
                 }
             }
             assertTrue(hasScopeAndContent);
@@ -158,23 +158,23 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
         }
     //test level-of-desc
         for(DocumentDescription d : c3_2.getDocumentDescriptions()){
-            assertEquals("file", d.asVertex().getProperty("levelOfDescription"));
+            assertEquals("file", d.getProperty("levelOfDescription"));
         }
     
         boolean c3HasOtherIdentifier=false;
-        for(String property : c3.asVertex().getPropertyKeys()){
+        for(String property : c3.getPropertyKeys()){
             if(property.equals("otherIdentifiers")){
-                assertEquals("29", c3.asVertex().getProperty(property).toString());
+                assertEquals("29", c3.getProperty(property).toString());
                 c3HasOtherIdentifier=true;
             }
         }
         assertTrue(c3HasOtherIdentifier);
         boolean c3HasRef=false;
         for(DocumentDescription d : c3.getDocumentDescriptions()){
-            for(String property : d.asVertex().getPropertyKeys()){
+            for(String property : d.getPropertyKeys()){
                 if(property.equals("ref")){
                     assertEquals("http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/29",
-                        d.asVertex().getProperty(property).toString() );
+                        d.getProperty(property).toString() );
                     c3HasRef=true;
                 }
             }

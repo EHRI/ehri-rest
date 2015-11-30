@@ -78,8 +78,8 @@ public class GhettosImporterTest extends AbstractImporterTest {
         //	<geo:long>20.716666666666665</geo:long>
         Iterable<Description> ghetto0desc = ghetto0.getDescriptions();
         for (Description d : ghetto0desc) {
-            assertEquals("52.43333333333333", d.asVertex().getProperty("latitude"));
-            assertEquals("20.716666666666665", d.asVertex().getProperty("longitude"));
+            assertEquals("52.43333333333333", d.getProperty("latitude"));
+            assertEquals("20.716666666666665", d.getProperty("longitude"));
         }
 
         // and print the tree

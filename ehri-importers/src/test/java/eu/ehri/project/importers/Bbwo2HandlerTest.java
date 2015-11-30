@@ -109,10 +109,10 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         assertNotNull(archdesc);
         for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("More refugee children arrive from Germany - in time ...", d.getName());
-            assertEquals("1505", d.asVertex().getProperty("sourceFileId"));
-            logger.debug("id:"+d.getId() + " - identifier:" + archdesc.asVertex().getProperty("identifier"));
+            assertEquals("1505", d.getProperty("sourceFileId"));
+            logger.debug("id:"+d.getId() + " - identifier:" + archdesc.getProperty("identifier"));
             //unitDates: [23-12-1938 (Opname), 23-12-1938 (Opname)]
-            assertEquals("23-12-1938 (Opname)", d.asVertex().getProperty("unitDates"));
+            assertEquals("23-12-1938 (Opname)", d.getProperty("unitDates"));
         }
 
         for(Concept concept : vocabularyTest.getConcepts()){
@@ -137,8 +137,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
                             assertTrue(conceptFound);
                             passTest=true;
                             logger.debug(link.getLinkType());
-                            for (String key : link.asVertex().getPropertyKeys()) {
-                                logger.debug(key + ":" + link.asVertex().getProperty(key));
+                            for (String key : link.getPropertyKeys()) {
+                                logger.debug(key + ":" + link.getProperty(key));
                             }
                         }
                     }

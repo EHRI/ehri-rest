@@ -20,6 +20,7 @@
 package eu.ehri.project.acl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
@@ -89,5 +90,15 @@ public enum SystemScope implements PermissionScope {
     @Override
     public Collection<String> idPath() {
         return Lists.newArrayList();
+    }
+
+    @Override
+    public <T> T getProperty(String key) {
+        return null;
+    }
+
+    @Override
+    public java.util.Set<String> getPropertyKeys() {
+        return Sets.newHashSet();
     }
 }

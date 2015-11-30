@@ -146,7 +146,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(c1_b.getLinks()).size() > 0);
+        assertTrue(!toList(c1_b.getLinks()).isEmpty());
         for(Link a : c1_b.getLinks()){
             logger.debug(a.getLinkType());
         }
@@ -169,7 +169,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : fonds.getDocumentDescriptions()){
-            assertEquals("EHRI", d.asVertex().getProperty("processInfo"));
+            assertEquals("EHRI", d.getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

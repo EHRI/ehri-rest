@@ -287,11 +287,11 @@ public class EadImporter extends EaImporter {
                  * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
                  * they need to be found in the vocabularies that are in the graph
                  */
-                if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
-                    String cvoc_id = rel.asVertex().getProperty("cvoc");
-                    String concept_id = rel.asVertex().getProperty("concept");
+                if (rel.getPropertyKeys().contains("cvoc")) {
+                    String cvoc_id = rel.getProperty("cvoc");
+                    String concept_id = rel.getProperty("concept");
                     if (concept_id == null) {
-                        concept_id = rel.asVertex().getProperty("target");
+                        concept_id = rel.getProperty("target");
                     }
                     logger.debug("cvoc:" + cvoc_id + "  concept:" + concept_id);
                     Vocabulary vocabulary;
@@ -302,7 +302,7 @@ public class EadImporter extends EaImporter {
                             if (concept.getIdentifier().equalsIgnoreCase(concept_id)) {
                                 try {
                                     Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                            .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
+                                            .withDataValue(Ontology.LINK_HAS_TYPE, rel.getProperty("type").toString())
                                             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
                                     UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                     Link link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
