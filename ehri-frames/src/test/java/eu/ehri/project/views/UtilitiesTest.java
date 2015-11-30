@@ -45,10 +45,10 @@ public class UtilitiesTest extends AbstractFixtureTest {
     @Test
     public void testFindReplacePropertyValue() throws Exception {
         long count = findReplace.propertyValue(EntityClass.ADDRESS,
-                "streetAddress", "Strand", "Drury Lane");
+                "street", "Strand", "Drury Lane");
         assertEquals(1L, count);
         assertEquals("Drury Lane", manager.getFrame("ar2", Address.class)
-                .asVertex().getProperty("streetAddress"));
+                .getProperty("street"));
     }
 
     @Test
@@ -70,10 +70,10 @@ public class UtilitiesTest extends AbstractFixtureTest {
         assertEquals(3L, count);
         // Check the replacement works for both scalar and array values
         List<String> webPages = manager.getFrame("ar1", Address.class)
-                .asVertex().getProperty("webpage");
+                .getProperty("webpage");
         assertEquals("https://www.niod.nl", webPages.get(0));
         assertEquals("https://www.kcl.ac.uk", manager.getFrame("ar2", Address.class)
-                .asVertex().getProperty("webpage"));
+                .getProperty("webpage"));
 
         // Illustrating what a sharp tool this is, the names of all documentary units
         // with the same thing...
@@ -94,7 +94,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
         long count = findReplace.propertyName(EntityClass.ADDRESS, "webpage", "url");
         assertEquals(2L, count);
         assertEquals("http://www.kcl.ac.uk", manager.getFrame("ar2", Address.class)
-                .asVertex().getProperty("url"));
+                .getProperty("url"));
     }
 
     @Test

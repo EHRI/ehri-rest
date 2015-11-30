@@ -172,4 +172,16 @@ public class Helpers {
         }
         return nameOrCode;
     }
+
+    public static String codeToName(String code) {
+        if (code.length() == 2 && locale2Map.containsKey(code)) {
+            return locale2Map.get(code).getDisplayCountry();
+        } else if (code.length() == 3) {
+            String twoCode = locale3Map.get(code);
+            if (locale2Map.containsKey(twoCode)) {
+                return locale2Map.get(twoCode).getDisplayCountry();
+            }
+        }
+        return code;
+    }
 }

@@ -35,10 +35,14 @@ import eu.ehri.project.models.base.TemporalEntity;
 @EntityType(EntityClass.DATE_PERIOD)
 public interface DatePeriod extends AnnotatableEntity {
 
+    enum DatePeriodType {
+        creation, existence
+    }
+
     /**
      * The start date in UTC format.
      *
-     * @return A UTC date string
+     * @return a UTC date string
      */
     @Property(Ontology.DATE_PERIOD_START_DATE)
     String getStartDate();
@@ -46,10 +50,18 @@ public interface DatePeriod extends AnnotatableEntity {
     /**
      * The end date in UTC format.
      *
-     * @return A UTC string
+     * @return a UTC string
      */
     @Property(Ontology.DATE_PERIOD_END_DATE)
     String getEndDate();
+
+    /**
+     * Get the date period type.
+     *
+     * @return a type string
+     */
+    @Property(Ontology.DATE_PERIOD_TYPE)
+    DatePeriodType getDateType();
 
     /**
      * Get the entity described by this date period.

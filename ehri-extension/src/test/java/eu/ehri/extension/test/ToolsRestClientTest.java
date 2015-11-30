@@ -41,7 +41,7 @@ public class ToolsRestClientTest extends BaseRestClientTest {
     public void testPropertyRename() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "_findReplacePropertyValue"))
                 .queryParam("type", Entities.ADDRESS)
-                .queryParam("name", "streetAddress")
+                .queryParam("name", "street")
                 .queryParam("from", "Strand")
                 .queryParam("to", "Drury Lane");
         ClientResponse response = resource
@@ -67,7 +67,7 @@ public class ToolsRestClientTest extends BaseRestClientTest {
     public void testPropertyKeyRename() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "_findReplacePropertyName"))
                 .queryParam("type", Entities.ADDRESS)
-                .queryParam("from", "streetAddress")
+                .queryParam("from", "street")
                 .queryParam("to", "somethingElse");
         ClientResponse response = resource
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);

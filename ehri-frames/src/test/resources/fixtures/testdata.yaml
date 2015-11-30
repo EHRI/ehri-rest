@@ -143,7 +143,7 @@
               type: address
               data:
                 name: An Address
-                streetAddress: 1 Some St.
+                street: 1 Some St.
                 city: Amsterdam
                 webpage:
                   - http://www.niod.nl
@@ -170,8 +170,8 @@
               type: address
               data:
                 name: An Address
-                streetAddress: Strand
-                city: London
+                street: Strand
+                municipality: London
                 webpage: http://www.kcl.ac.uk
 
 - id: r3 # should be dans
@@ -195,7 +195,7 @@
               type: address
               data:
                 name: An Address
-                city: The Hague
+                municipality: The Hague
 
 - id: r4 # should be soma
   type: repository
@@ -218,7 +218,7 @@
               type: address
               data:
                 name: An Address
-                city: Brussels
+                municipality: Brussels
 
 
 --- # Collections
@@ -324,6 +324,7 @@
             - id: c3-dp1
               type: datePeriod
               data:
+                type: creation
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
     childOf: c2
@@ -350,6 +351,7 @@
             - id: c4-dp1
               type: datePeriod
               data:
+                type: creation
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
           hasUnknownProperty:

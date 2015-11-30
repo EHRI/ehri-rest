@@ -53,7 +53,7 @@ public class SerializerTest extends AbstractFixtureTest {
 
         // But the address data shouldn't
         try {
-            BundleUtils.get(serialized, "heldBy[0]/describes[0]/hasAddress[0]/streetAddress");
+            BundleUtils.get(serialized, "heldBy[0]/describes[0]/hasAddress[0]/street");
             fail("Default serializer should not serialize addresses in repository descriptions");
         } catch (BundleUtils.BundlePathError e) {
             // okay
