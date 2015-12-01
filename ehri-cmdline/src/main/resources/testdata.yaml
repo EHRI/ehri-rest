@@ -134,7 +134,7 @@
               type: address
               data:
                 name: "An Address"
-                streetAddress: 1 Some St.
+                street: 1 Some St.
                 city: Amsterdam
 
 - id: r2 # should be named kcl
@@ -158,7 +158,7 @@
               type: address
               data:
                 name: "An Address"
-                streetAddress: Strand
+                street: Strand
                 city: London
                          
 - id: r3 # should be dans

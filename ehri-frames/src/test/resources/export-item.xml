@@ -77,13 +77,13 @@
                 <hasAddress>
                   <item id="09bcf488-9b2c-4736-b8c6-fadbbb6a3626" type="address">
                     <data>
-                      <property name="streetAddress" type="xs:string">29 Russell Square</property>
+                      <property name="street" type="xs:string">29 Russell Square</property>
                       <property name="fax" type="xs:string">+44 (0) 20 7436 6428</property>
                       <property name="name" type="xs:string">Primary</property>
                       <property name="countryCode" type="xs:string">en</property>
                       <property name="telephone" type="xs:string">+44 (0) 20 7636 7247</property>
-                      <property name="url" type="xs:string">www.wienerlibrary.co.uk</property>
-                      <property name="city" type="xs:string">London</property>
+                      <property name="webpage" type="xs:string">www.wienerlibrary.co.uk</property>
+                      <property name="municipality" type="xs:string">London</property>
                     </data>
                   </item>
                 </hasAddress>

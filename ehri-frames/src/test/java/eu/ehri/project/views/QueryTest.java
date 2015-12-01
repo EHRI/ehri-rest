@@ -263,7 +263,7 @@ public class QueryTest extends AbstractFixtureTest {
         Query<Repository> query2 = new Query<>(graph,
                 Repository.class);
         List<String> filters2 = ImmutableList.of(
-                "<-describes->hasAddress.city:Brussels"
+                "<-describes->hasAddress.municipality:Brussels"
         );
         Iterable<Repository> list2 = query2
                 .filter(filters2).page(validUser);

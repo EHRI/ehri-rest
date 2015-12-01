@@ -26,15 +26,24 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.ead.Ead2002Exporter;
+import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -134,6 +143,45 @@ public class DocumentaryUnitResource
                     views.setScope(parent));
             tx.success();
             return resource;
+        }
+    }
+
+    /**
+     * Export the given documentary unit as EAD.
+     *
+     * @param id      the unit id
+     * @param lang    a three-letter ISO639-2 code
+     * @return an EAD XML Document
+     * @throws IOException
+     * @throws ItemNotFound
+     */
+    @GET
+    @Path("{id:.+}/ead")
+    @Produces(MediaType.TEXT_XML)
+    public Response exportSkos(@PathParam("id") String id,
+            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            throws IOException, ItemNotFound, ParserConfigurationException {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            final Accessor user = getRequesterUserProfile();
+            final DocumentaryUnit unit = views.detail(id, user);
+            final EadExporter eadExporter = new Ead2002Exporter(graph);
+            final Document document = eadExporter.export(unit, lang);
+            final EadExporter.DocumentWriter writer
+                    = new EadExporter.DocumentWriter(document);
+            return Response.ok(new StreamingOutput() {
+                @Override
+                public void write(OutputStream outputStream) throws IOException {
+                    try {
+                        writer.write(outputStream);
+                    } catch (TransformerException e) {
+                        throw new WebApplicationException(e);
+                    }
+                }
+            }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
+        } catch (ParserConfigurationException e) {
+            tx.close();
+            throw e;
         }
     }
 }

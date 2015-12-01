@@ -35,13 +35,6 @@
             <includes>
                 <include>com.tinkerpop:*</include>
                 <include>com.tinkerpop.*:*</include>
-                <include>org.codehaus.groovy:groovy</include>
-                <include>org.fusesource.jansi:jansi</include>
-                <include>antlr:antlr</include>
-                <include>asm:asm-commons</include>
-                <include>asm:asm-util</include>
-                <include>asm:asm-analysis</include>
-                <include>asm:asm-tree</include>
                 <include>stax:stax-api</include>
                 <include>org.codehaus.jettison:jettison</include>
                 <include>org.javassist:javassist</include>
@@ -61,6 +54,9 @@
                 <include>xml-apis:xml-apis</include>
                 <include>org.apache.commons:commons-lang3</include>
                 <include>org.apache.commons:commons-compress</include>
+                <include>org.pegdown:pegdown</include>
+                <include>org.parboiled:parboiled-java</include>
+                <include>org.ow2.asm:*</include>
             </includes>
         </dependencySet>
     </dependencySets>

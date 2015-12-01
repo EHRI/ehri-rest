@@ -74,13 +74,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.tinkerpop</groupId>
-            <artifactId>frames</artifactId>
-            <version>2.6.0</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -98,6 +91,13 @@
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>2.3</version>
+        </dependency>
+
+        <!-- Markdown rendering -->
+        <dependency>
+            <groupId>org.pegdown</groupId>
+            <artifactId>pegdown</artifactId>
+            <version>1.6.0</version>
         </dependency>
 
         <dependency>
