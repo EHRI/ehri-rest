@@ -19,9 +19,9 @@
 
 package eu.ehri.extension.errors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import eu.ehri.project.exceptions.DeserializationError;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

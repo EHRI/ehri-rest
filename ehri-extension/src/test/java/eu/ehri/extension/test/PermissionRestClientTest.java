@@ -19,6 +19,7 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -26,8 +27,6 @@ import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +37,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -51,7 +53,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     static final String TEST_HOLDER_IDENTIFIER = "r2";
 
     private String jsonDocumentaryUnitTestStr;
-    private final JsonFactory factory = new JsonFactory();
 
     @Before
     public void setUp() throws Exception {

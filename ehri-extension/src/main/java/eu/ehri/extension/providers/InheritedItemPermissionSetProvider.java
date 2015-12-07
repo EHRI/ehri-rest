@@ -19,10 +19,10 @@
 
 package eu.ehri.extension.providers;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.acl.InheritedItemPermissionSet;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;

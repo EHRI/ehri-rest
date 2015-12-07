@@ -19,11 +19,11 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
@@ -47,7 +47,7 @@ public class VersionRestClientTest extends BaseRestClientTest {
 
         String json = response.getEntity(String.class);
         // Check the response contains a new version
-        JsonNode rootNode = jsonMapper.readValue(json, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(json);
         assertFalse(rootNode.path(0).path(Bundle.DATA_KEY)
                 .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
         assertStatus(OK, response);

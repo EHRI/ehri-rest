@@ -19,9 +19,9 @@
 
 package eu.ehri.extension.errors.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import eu.ehri.project.exceptions.ItemNotFound;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

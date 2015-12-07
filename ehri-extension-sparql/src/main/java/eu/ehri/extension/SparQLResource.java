@@ -19,13 +19,13 @@
 
 package eu.ehri.extension;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.oupls.sail.pg.PropertyGraphSail;
 import eu.ehri.project.core.Tx;
 import info.aduna.iteration.CloseableIteration;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
@@ -74,9 +74,10 @@ import java.util.Map;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-@Path("sparql")
+@Path(SparQLResource.ENDPOINT)
 public class SparQLResource extends AbstractRestResource {
 
+    public static final String ENDPOINT = "sparql";
     public static final String HTTP_EHRI_PROJECT_EU = "http://ehri-project.eu";
     public static final String QUERY_PARAM = "q";
 

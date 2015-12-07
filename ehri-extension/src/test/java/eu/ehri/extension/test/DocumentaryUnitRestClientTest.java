@@ -28,7 +28,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -147,7 +147,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(BAD_REQUEST, response);
 
-        JsonNode rootNode = jsonMapper.readValue(errString, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(errString);
         JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -166,7 +166,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // Check the JSON gives use the correct error
         // In this case the start and end dates for the
         // first date relation should be missing
-        JsonNode rootNode = jsonMapper.readValue(errorJson, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(errorJson);
         JsonNode errValue1 = rootNode.path(ErrorSet.REL_KEY)
                 .path(Ontology.DESCRIPTION_FOR_ENTITY).path(0)
                 .path(ErrorSet.ERROR_KEY).path(Ontology.NAME_KEY);
@@ -182,12 +182,11 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
-        assertEquals(TEST_JSON_IDENTIFIER, errValue.getTextValue());
+        assertEquals(TEST_JSON_IDENTIFIER, errValue.textValue());
     }
 
     @Test
@@ -201,12 +200,11 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
-        assertEquals(CREATED_ID, errValue.getTextValue());
+        assertEquals(CREATED_ID, errValue.textValue());
     }
 
     @Test

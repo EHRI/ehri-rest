@@ -19,6 +19,8 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -26,16 +28,13 @@ import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,13 +173,14 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertTrue(groupIds.contains(GROUP_ID2));
     }
 
-    private Set<String> getGroupIdsFromEntityJson(String jsonString) throws JSONException {
-        JSONObject obj = new JSONObject(jsonString);
-        Set<String> groupIds = new HashSet<String>();
-        JSONArray jsonArray = ((JSONObject) obj.get("relationships")).getJSONArray("belongsTo");
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject item = jsonArray.getJSONObject(i);
-            groupIds.add(item.getString("id"));
+    private Set<String> getGroupIdsFromEntityJson(String jsonString) throws IOException {
+        Set<String> groupIds = Sets.newHashSet();
+        JsonNode node = jsonMapper.readTree(jsonString);
+        JsonNode belongs = node.path(Bundle.REL_KEY).path(Ontology.ACCESSOR_BELONGS_TO_GROUP);
+        int i = 0;
+        while (belongs.has(i)) {
+            groupIds.add(belongs.path(i).path(Bundle.ID_KEY).asText());
+            i++;
         }
         return groupIds;
     }

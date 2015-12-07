@@ -1,1 +1,9 @@
+sudo: false
+
 language: java
+
+install:
+  - mvn -Psparql install -DskipTests=true
+
+script:
+  - mvn -Psparql test -Dmaven.javadoc.skip=true

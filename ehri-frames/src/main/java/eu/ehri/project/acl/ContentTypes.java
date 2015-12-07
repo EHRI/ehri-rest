@@ -19,9 +19,9 @@
 
 package eu.ehri.project.acl;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import eu.ehri.project.definitions.Entities;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * An enum of entity types that represent first-class

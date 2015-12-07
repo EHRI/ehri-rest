@@ -19,10 +19,10 @@
 
 package eu.ehri.project.importers;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Maps;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.ActionManager.EventContext;
-import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.Map;
 

@@ -19,6 +19,8 @@
 
 package eu.ehri.extension;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -32,10 +34,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -192,11 +190,9 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
 
     private List<Long> parseGraphIds(String json) throws IOException, DeserializationError {
         try {
-            JsonFactory factory = new JsonFactory();
-            ObjectMapper mapper = new ObjectMapper(factory);
             TypeReference<List<Long>> typeRef = new TypeReference<List<Long>>() {
             };
-            return mapper.readValue(json, typeRef);
+            return jsonMapper.readValue(json, typeRef);
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
         }
@@ -204,11 +200,9 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
 
     private List<String> parseIds(String json) throws IOException, DeserializationError {
         try {
-            JsonFactory factory = new JsonFactory();
-            ObjectMapper mapper = new ObjectMapper(factory);
             TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
             };
-            return mapper.readValue(json, typeRef);
+            return jsonMapper.readValue(json, typeRef);
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
         }

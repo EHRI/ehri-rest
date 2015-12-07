@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -39,7 +40,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.JsonDataExporter;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
-import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -188,8 +188,8 @@ public class AdminResource extends AbstractRestResource {
             return Maps.newHashMap();
         } else {
             TypeReference<HashMap<String, Object>> typeRef = new TypeReference<
-                    HashMap<String, Object>
-                    >() {
+                                HashMap<String, Object>
+                                >() {
             };
             return jsonMapper.readValue(json, typeRef);
         }
