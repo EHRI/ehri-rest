@@ -19,19 +19,23 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.GroupResource;
 import eu.ehri.project.definitions.Entities;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
@@ -131,12 +135,14 @@ public class GroupRestClientTest extends BaseRestClientTest {
      * Helpers **
      */
 
-    private Set<String> getIdsFromEntityListJson(String jsonString) throws JSONException {
-        JSONArray jsonArray = new JSONArray(jsonString);
+    private Set<String> getIdsFromEntityListJson(String jsonString) throws IOException {
+        TypeReference<ArrayList<HashMap<String, Object>>> typeReference = new TypeReference<ArrayList<HashMap<String,
+                Object>>>() {
+        };
+        List<HashMap<String, Object>> data = jsonMapper.readValue(jsonString, typeReference);
         Set<String> ids = Sets.newHashSet();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject item = jsonArray.getJSONObject(i);
-            ids.add(item.getString("id"));
+        for (Map<String, Object> bundle : data) {
+            ids.add((String) bundle.get(Bundle.ID_KEY));
         }
         return ids;
     }

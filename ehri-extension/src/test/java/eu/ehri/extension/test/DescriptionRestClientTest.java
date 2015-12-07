@@ -19,11 +19,11 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jackson.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,7 +32,9 @@ import javax.ws.rs.core.Response;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.DescriptionResource.ENDPOINT;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DescriptionRestClientTest extends BaseRestClientTest {
 
@@ -55,21 +57,20 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
 
         // Check ID is the correct concatenation of all the scope IDs...
         JsonNode idValue = rootNode
                 .path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
-        assertEquals("nl-r1-c1-c2.en-another_description", idValue.getTextValue());
+        assertEquals("nl-r1-c1-c2.en-another_description", idValue.textValue());
 
         // Check the identifier is present and correct...
         JsonNode identValue = rootNode
                 .path(Bundle.DATA_KEY)
                 .path(Ontology.IDENTIFIER_KEY);
         assertFalse(identValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, identValue.getTextValue());
+        assertEquals(TEST_DESCRIPTION_IDENTIFIER, identValue.textValue());
     }
 
     @Test
@@ -81,13 +82,12 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 .entity(descriptionTestStr).put(ClientResponse.class);
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode idValue = rootNode
                 .path(Bundle.DATA_KEY)
                 .path(Ontology.IDENTIFIER_KEY);
         assertFalse(idValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
+        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.textValue());
         // Assert there are no extra descriptions
         assertTrue(rootNode.path(Bundle.REL_KEY).path(
                 Ontology.DESCRIPTION_FOR_ENTITY).path(1).isMissingNode());
@@ -109,8 +109,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 ehriUri(ENDPOINT, "c2", "cd2", Entities.ACCESS_POINT))
                 .entity(accessPointTestStr).post(ClientResponse.class);
         assertStatus(CREATED, response);
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode idNode = rootNode
                 .path(Bundle.ID_KEY);
         assertFalse(idNode.isMissingNode());

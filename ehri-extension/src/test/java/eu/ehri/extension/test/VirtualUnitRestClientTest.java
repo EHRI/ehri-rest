@@ -19,6 +19,7 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
@@ -26,7 +27,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
-import org.codehaus.jackson.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -120,7 +120,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(BAD_REQUEST, response);
 
-        JsonNode rootNode = jsonMapper.readValue(errString, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(errString);
         JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -135,12 +135,11 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
-        assertEquals(TEST_JSON_IDENTIFIER, errValue.getTextValue());
+        assertEquals(TEST_JSON_IDENTIFIER, errValue.textValue());
     }
 
     @Test
@@ -154,12 +153,11 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
-        assertEquals(CREATED_ID, errValue.getTextValue());
+        assertEquals(CREATED_ID, errValue.textValue());
     }
 
     @Test

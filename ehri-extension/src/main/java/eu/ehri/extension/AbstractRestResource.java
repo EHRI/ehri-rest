@@ -19,6 +19,9 @@
 
 package eu.ehri.extension;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -45,9 +48,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Query;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -484,7 +484,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 return new StreamingOutput() {
                     @Override
                     public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
                             g.writeStartArray();
                             for (T item : page.getIterable()) {
                                 jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
@@ -583,8 +583,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 final Serializer cacheSerializer = serializer.withCache();
                 return new StreamingOutput() {
                     @Override
-                    public void write(OutputStream arg0) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createJsonGenerator(arg0)) {
+                    public void write(OutputStream stream) throws IOException {
+                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
                             g.writeStartArray();
                             for (T item : list) {
                                 g.writeRaw('\n');
@@ -615,7 +615,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 return new StreamingOutput() {
                     @Override
                     public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
                             g.writeStartArray();
                             for (Collection<T> collect : list) {
                                 g.writeStartArray();
@@ -658,7 +658,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 return new StreamingOutput() {
                     @Override
                     public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
                             g.writeStartArray();
                             for (Vertex item : list) {
                                 jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));

@@ -19,8 +19,8 @@
 
 package eu.ehri.extension.errors.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.exceptions.AccessDenied;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

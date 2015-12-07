@@ -19,8 +19,8 @@
 
 package eu.ehri.project.acl;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
-import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.List;
 import java.util.Map;

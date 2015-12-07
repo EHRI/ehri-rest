@@ -19,8 +19,8 @@
 
 package eu.ehri.project.acl;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableMap;
-import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.Map;
 

@@ -19,6 +19,9 @@
 
 package eu.ehri.project.tools;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Direction;
@@ -27,9 +30,6 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -58,7 +58,7 @@ public class JsonDataExporter {
     public static void outputGraph(Graph graph, OutputStream stream)
             throws IOException {
 
-        try (JsonGenerator g = jsonFactory.createJsonGenerator(stream)) {
+        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
             g.writeStartArray();
             for (Vertex vertex : graph.getVertices()) {
 

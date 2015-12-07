@@ -19,6 +19,9 @@
 
 package eu.ehri.project.persistence;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -27,8 +30,6 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistence.utils.DataUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,7 +54,8 @@ import java.util.Map.Entry;
 
 class DataConverter {
 
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 
     /**
      * Convert an error set to a generic data structure.
@@ -85,15 +87,10 @@ class DataConverter {
      * @throws SerializationError
      */
     public static String errorSetToJson(ErrorSet errorSet) throws SerializationError {
-        Map<String, Object> data = errorSetToData(errorSet);
         try {
-            // Note: defaultPrettyPrintWriter has been replaced by
-            // writerWithDefaultPrettyPrinter in newer versions of
-            // Jackson, though not the one available in Neo4j.
-            @SuppressWarnings("deprecation")
-            ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
+            Map<String, Object> data = errorSetToData(errorSet);
             return writer.writeValueAsString(data);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new SerializationError("Error writing errorSet to JSON", e);
         }
     }
@@ -133,15 +130,10 @@ class DataConverter {
      * @throws SerializationError
      */
     public static String bundleToJson(Bundle bundle) throws SerializationError {
-        Map<String, Object> data = bundleToData(bundle);
         try {
-            // Note: defaultPrettyPrintWriter has been replaced by
-            // writerWithDefaultPrettyPrinter in newer versions of
-            // Jackson, though not the one available in Neo4j.
-            @SuppressWarnings("deprecation")
-            ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
+            Map<String, Object> data = bundleToData(bundle);
             return writer.writeValueAsString(data);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new SerializationError("Error writing bundle to JSON", e);
         }
     }
@@ -156,9 +148,7 @@ class DataConverter {
     public static Bundle streamToBundle(InputStream inputStream) throws DeserializationError {
         try {
             return dataToBundle(mapper.readValue(inputStream, Map.class));
-        } catch (DeserializationError e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new DeserializationError("Error decoding JSON", e);
         }
@@ -184,10 +174,10 @@ class DataConverter {
 
     /**
      * Convert generic data into a bundle.
-     * <p>
+     * <p/>
      * Prize to whomever can remove all the unchecked warnings. I don't really
      * know how else to do this otherwise.
-     * <p>
+     * <p/>
      * NB: We also strip out all NULL property values at this stage.
      *
      * @throws DeserializationError
@@ -304,6 +294,12 @@ class DataConverter {
         }
     }
 
+    /**
+     * Pretty-print a bundle as XML to a string.
+     *
+     * @param bundle a bundle
+     * @return an XML string
+     */
     public static String bundleToXmlString(Bundle bundle) {
         Document doc = bundleToXml(bundle);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

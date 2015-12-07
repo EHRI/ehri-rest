@@ -21,7 +21,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -72,11 +72,10 @@ public class GenericRestClientTest extends BaseRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, ITEM1)).get(ClientResponse.class);
         assertStatus(OK, response);
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode idValue = rootNode.path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
-        assertEquals(ITEM1, idValue.getTextValue());
+        assertEquals(ITEM1, idValue.textValue());
     }
 
     @Test
@@ -101,11 +100,10 @@ public class GenericRestClientTest extends BaseRestClientTest {
     }
 
     private void testResponse(ClientResponse response, String expectedId) throws IOException {
-        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
-        assertEquals(expectedId, idValue.getTextValue());
+        assertEquals(expectedId, idValue.textValue());
         // ensure only one item was returned...
         assertFalse(rootNode.path(1).isMissingNode());
         assertTrue(rootNode.path(2).isMissingNode());

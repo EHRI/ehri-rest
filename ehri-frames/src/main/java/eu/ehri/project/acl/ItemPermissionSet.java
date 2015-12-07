@@ -19,16 +19,16 @@
 
 package eu.ehri.project.acl;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Sets;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.Set;
 
 /**
  * Convenience wrapper for the permission set data structure, which
  * looks like:
- * <p>
+ * <p/>
  * <pre>
  *     <code>
  *  {

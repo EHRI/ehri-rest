@@ -24,11 +24,9 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.ImportResource;
-import eu.ehri.project.importers.EagHandler;
-import eu.ehri.project.importers.EagImporter;
 import eu.ehri.project.importers.IcaAtomEadHandler;
 import org.apache.commons.io.FileUtils;
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
@@ -73,7 +71,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
 
         assertStatus(ClientResponse.Status.OK, response);
         String output = response.getEntity(String.class);
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
@@ -96,7 +94,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         assertStatus(ClientResponse.Status.OK, response);
         String output = response.getEntity(String.class);
 
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
@@ -120,7 +118,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         assertStatus(ClientResponse.Status.OK, response);
         String output = response.getEntity(String.class);
 
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
@@ -143,7 +141,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         assertStatus(ClientResponse.Status.BAD_REQUEST, response);
         String output = response.getEntity(String.class);
         System.out.println(output);
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertTrue("Has correct error messages", rootNode.path("details").toString()
                 .contains("Class not found"));
     }
@@ -164,7 +162,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         assertStatus(ClientResponse.Status.BAD_REQUEST, response);
         String output = response.getEntity(String.class);
         System.out.println(output);
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertTrue("Has correct error messages", rootNode.path("details").toString()
                 .contains("not an instance of"));
     }
@@ -186,7 +184,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         assertStatus(ClientResponse.Status.OK, response);
         String output = response.getEntity(String.class);
 
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
@@ -215,7 +213,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         System.out.println(output);
         assertStatus(ClientResponse.Status.OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(6, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
@@ -238,7 +236,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         System.out.println(output);
         assertStatus(ClientResponse.Status.OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
@@ -261,7 +259,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         System.out.println(output);
         assertStatus(ClientResponse.Status.OK, response);
 
-        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
         assertEquals(1, rootNode.path("created").asInt());
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());

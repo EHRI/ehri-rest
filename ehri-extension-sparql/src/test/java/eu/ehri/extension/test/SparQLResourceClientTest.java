@@ -19,15 +19,13 @@
 
 package eu.ehri.extension.test;
 
-import com.google.common.collect.ImmutableMap;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.SparQLResource;
-import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
 
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
@@ -46,13 +44,13 @@ public class SparQLResourceClientTest extends BaseRestClientTest {
     public void testSparQLQuery() throws Exception {
         String testQuery = readResourceFileAsString("testquery.sparql");
         String encoded = URLEncoder.encode(testQuery, "UTF-8").replaceAll("\\+", "%20");
-        URI queryUri = ehriUriBuilder("sparql")
+        URI queryUri = ehriUriBuilder(SparQLResource.ENDPOINT)
                 .queryParam(SparQLResource.QUERY_PARAM, encoded)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), queryUri).get(ClientResponse.class);
         assertStatus(OK, response);
         String data = response.getEntity(String.class);
-        JsonNode rootNode = jsonMapper.readValue(data, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readTree(data);
         assertTrue(rootNode.isArray());
         JsonNode firstObject = rootNode.path(0);
         assertFalse(firstObject.isMissingNode());
