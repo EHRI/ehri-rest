@@ -1,6 +1,6 @@
-package eu.ehri.project.exporters.ead;
+package eu.ehri.project.exporters.eag;
 
-import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
@@ -8,33 +8,33 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Encoded Archival Description (EAD) export.
+ * Encoded Archive Guide (EAD) export.
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public interface EadExporter {
+public interface EagExporter {
 
     /**
-     * Export a documentary unit as an EAD document.
+     * Export a repository as an EAG document.
      *
-     * @param unit         the unit
+     * @param repository   the repository
      * @param outputStream the output stream to write to.
      * @param langCode     the preferred language code when multiple
      *                     descriptions are available
      * @throws IOException
      * @throws TransformerException
      */
-    void export(DocumentaryUnit unit,
+    void export(Repository repository,
             OutputStream outputStream, String langCode) throws IOException, TransformerException;
 
     /**
-     * Export a documentary unit as an EAD document.
+     * Export a repository as an EAG document.
      *
-     * @param unit         the unit
-     * @param langCode     the preferred language code when multiple
-     *                     descriptions are available
+     * @param repository the repository
+     * @param langCode   the preferred language code when multiple
+     *                   descriptions are available
      * @return a DOM document
      * @throws IOException
      */
-    Document export(DocumentaryUnit unit, String langCode) throws IOException;
+    Document export(Repository repository, String langCode) throws IOException;
 }

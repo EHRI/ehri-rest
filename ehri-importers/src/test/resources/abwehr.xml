@@ -1,155 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <eac-cpf xmlns="urn:isbn:1-931666-33-4" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-  <control>
-
-    <recordId>65</recordId>
-
-    <maintenanceStatus>new</maintenanceStatus>
-
-    <publicationStatus>approved</publicationStatus>
-
-    <maintenanceAgency>
-
-      <agencyName/>
-
-    </maintenanceAgency>
-
-    
-
-    <conventionDeclaration>
-
-      <abbreviation>conventionDeclaration</abbreviation>
-
-      <citation/>
-
-    </conventionDeclaration>
-
-    <localTypeDeclaration>
-
-      <abbreviation>detailLevel</abbreviation>
-
-      <citation>http://ica-atom.org/doc/RS-2#5.4</citation>
-
-    </localTypeDeclaration>
-
-    <localControl localType="detailLevel">
-
-      <term/>
-
-    </localControl>
-
-    <maintenanceHistory><maintenanceEvent>
-  <eventType>created</eventType>
-  <eventDateTime standardDateTime="2012-03-21T15:10:40">March 21, 2012 3:10:40 PM CET</eventDateTime>
-  <agentType>human</agentType>
-  <agent/>
-</maintenanceEvent>
-
-<maintenanceEvent>
-  <eventType>revised</eventType>
-  <eventDateTime standardDateTime="2012-07-11T15:12:03">July 11, 2012 3:12:03 PM CEST</eventDateTime>
-  <agentType>human</agentType>
-  <agent/>
-</maintenanceEvent>
-</maintenanceHistory>
-
-    <sources>
-
-      <source>
-
-        <sourceEntry>Dictionary of the Holocaust : Biography, geography, and terminology / E.J. Epstein, P. Rosen. - Westport, 1997. - p. 1, 2</sourceEntry>
-
-      </source>
-
-    </sources>
-
-  </control>
-
-  <cpfDescription>
-
-    <identity>
-
-    <!-- EHRI Using ICA Atom Primary key as entityId 
-      <entityId></entityId>
-    -->
-      <entityId xlink:href="http://authorities.ehri-project.eu/index.php/abwehr;eac">381</entityId>
-
-      <entityType>corporateBody</entityType>
-
-      <nameEntry type="authorized">
-
-        <part>Abwehr</part>
-
-      </nameEntry>
-
-              <nameEntry type="parallel">
-
-          <part>Self-defense</part>
-
-        </nameEntry>
-      
-      
-
-    </identity>
-
-    <description>
-
-      <existDates><date>1933/1944-02-18</date></existDates>
-
-      <place>
-
-        <placeEntry>Founded and active in Germany.</placeEntry>
-
-      </place>
-
-      <legalStatus>
-
-        <term/>
-
-      </legalStatus>
-
-      <function>
-
-        <descriptiveNote/>
-
-      </function>
-
-      <occupation>
-
-        <descriptiveNote/>
-
-      </occupation>
-
-      <mandate>
-
-        <term/>
-
-      </mandate>
-
-      <structureOrGenealogy><p/></structureOrGenealogy>
-
-      <generalContext><p/></generalContext>
-
-      <biogHist><p>Abwehr was a German intelligence agency. Formed in 1933, it was attached to the foreign and counterintelligence department of the Oberkommando der Wehrmacht. Its head, Admiral Wilhelm Canaris, was an opponent of the Nazi regime. After 1938, Abwehr became the center of a conspiracy against the Hitler government. On 1944-02-18, the Abwehr was dissolved into the SS Rasse- und Siedlungshauptamt.</p></biogHist>
-
-    </description>
-
-    <relations>
-
-              <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/ss-rasse-und-siedlungshauptamt;eac" xlink:type="simple">
-          <relationEntry>SS Rasse- und Siedlungshauptamt</relationEntry>
-	  <descriptiveNote>On 1944-02-18, the Abwehr was dissolved into the SS Rasse- und Siedlungshauptamt.</descriptiveNote>
-                  </cpfRelation>
-              <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/geheime-feldpolizei;eac" xlink:type="simple">
-          <relationEntry>Geheime Feldpolizei</relationEntry>
-	  <descriptiveNote>Members of the Geheime Feldpolizei were actually the executives of the Abwehr.</descriptiveNote>
-                  </cpfRelation>
-      
-      
-      
-    </relations>
-
-  </cpfDescription>
-
+    <control>
+        <recordId>65</recordId>
+        <maintenanceStatus>new</maintenanceStatus>
+        <publicationStatus>approved</publicationStatus>
+        <maintenanceAgency>
+            <agencyName/>
+        </maintenanceAgency>
+        <conventionDeclaration>
+            <abbreviation>conventionDeclaration</abbreviation>
+            <citation/>
+        </conventionDeclaration>
+        <localTypeDeclaration>
+            <abbreviation>detailLevel</abbreviation>
+            <citation>http://ica-atom.org/doc/RS-2#5.4</citation>
+        </localTypeDeclaration>
+        <localControl localType="detailLevel">
+            <term/>
+        </localControl>
+        <maintenanceHistory>
+            <maintenanceEvent>
+                <eventType>created</eventType>
+                <eventDateTime standardDateTime="2012-03-21T15:10:40">March 21, 2012 3:10:40 PM CET</eventDateTime>
+                <agentType>human</agentType>
+                <agent/>
+            </maintenanceEvent>
+            <maintenanceEvent>
+                <eventType>revised</eventType>
+                <eventDateTime standardDateTime="2012-07-11T15:12:03">July 11, 2012 3:12:03 PM CEST</eventDateTime>
+                <agentType>human</agentType>
+                <agent/>
+            </maintenanceEvent>
+        </maintenanceHistory>
+        <sources>
+            <source>
+                <sourceEntry>Dictionary of the Holocaust : Biography, geography, and terminology / E.J. Epstein, P.
+                    Rosen. - Westport, 1997. - p. 1, 2
+                </sourceEntry>
+            </source>
+        </sources>
+    </control>
+    <cpfDescription>
+        <identity>
+            <!-- EHRI Using ICA Atom Primary key as entityId
+              <entityId></entityId>
+            -->
+            <entityId xlink:href="http://authorities.ehri-project.eu/index.php/abwehr;eac">381</entityId>
+            <entityType>corporateBody</entityType>
+            <nameEntry type="authorized">
+                <part>Abwehr</part>
+            </nameEntry>
+            <nameEntry type="parallel">
+                <part>Self-defense</part>
+            </nameEntry>
+        </identity>
+        <description>
+            <existDates>
+                <dateRange>
+                    <fromDate>1933</fromDate>
+                    <toDate>1944</toDate>
+                </dateRange>
+                <date>1933/1944-02-18</date>
+            </existDates>
+            <place>
+                <placeEntry>Founded and active in Germany.</placeEntry>
+            </place>
+            <legalStatus>
+                <term>Governmental</term>
+            </legalStatus>
+            <function>
+                <term>Administrative</term>
+            </function>
+            <mandate>
+                <term>Administrative</term>
+            </mandate>
+            <structureOrGenealogy>
+                <p/>
+            </structureOrGenealogy>
+            <generalContext>
+                <p/>
+            </generalContext>
+            <biogHist>
+                <p>Abwehr was a German intelligence agency. Formed in 1933, it was attached to the foreign and
+                    counterintelligence department of the Oberkommando der Wehrmacht. Its head, Admiral Wilhelm Canaris,
+                    was an opponent of the Nazi regime. After 1938, Abwehr became the center of a conspiracy against the
+                    Hitler government. On 1944-02-18, the Abwehr was dissolved into the SS Rasse- und Siedlungshauptamt.
+                </p>
+            </biogHist>
+        </description>
+        <relations>
+            <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/ss-rasse-und-siedlungshauptamt;eac" xlink:type="simple">
+                <relationEntry>SS Rasse- und Siedlungshauptamt</relationEntry>
+                <descriptiveNote>On 1944-02-18, the Abwehr was dissolved into the SS Rasse- und Siedlungshauptamt.
+                </descriptiveNote>
+            </cpfRelation>
+            <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/geheime-feldpolizei;eac" xlink:type="simple">
+                <relationEntry>Geheime Feldpolizei</relationEntry>
+                <descriptiveNote>Members of the Geheime Feldpolizei were actually the executives of the Abwehr.
+                </descriptiveNote>
+            </cpfRelation>
+        </relations>
+    </cpfDescription>
 </eac-cpf>

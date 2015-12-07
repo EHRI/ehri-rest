@@ -19,23 +19,45 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.*;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.ParentResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.DocumentWriter;
+import eu.ehri.project.exporters.eag.Eag2012Exporter;
+import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.w3c.dom.Document;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -131,7 +153,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     @Override
     public Response createChild(@PathParam("id") String id,
-                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -145,6 +167,39 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             }, views.setScope(repository).setClass(DocumentaryUnit.class));
             tx.success();
             return response;
+        }
+    }
+
+    /**
+     * Export the given repository as an EAG file.
+     *
+     * @param id   the unit id
+     * @param lang a three-letter ISO639-2 code
+     * @return an EAD XML Document
+     * @throws IOException
+     * @throws ItemNotFound
+     */
+    @GET
+    @Path("{id:.+}/eag")
+    @Produces(MediaType.TEXT_XML)
+    public Response exportEag(@PathParam("id") String id,
+            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            throws IOException, ItemNotFound {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Repository repo = views.detail(id, getRequesterUserProfile());
+            EagExporter eagExporter = new Eag2012Exporter(graph);
+            final Document document = eagExporter.export(repo, lang);
+            tx.success();
+            return Response.ok(new StreamingOutput() {
+                @Override
+                public void write(OutputStream outputStream) throws IOException {
+                    try {
+                        new DocumentWriter(document).write(outputStream);
+                    } catch (TransformerException e) {
+                        throw new WebApplicationException(e);
+                    }
+                }
+            }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }
     }
 }

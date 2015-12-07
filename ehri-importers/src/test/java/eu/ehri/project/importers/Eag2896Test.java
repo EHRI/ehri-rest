@@ -47,7 +47,7 @@ public class Eag2896Test extends AbstractImporterTest {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Eag2896Test.class);
     protected final String SINGLE_UNIT = "eag-2896.xml";
     // Depends on fixtures
-    protected final String TEST_COUNTRY = "r1";
+    protected final String TEST_COUNTRY = "nl";
     // Depends on SINGLE_UNIT
     protected final String IMPORTED_ITEM_ID = "NL-002896";
     protected final String AGENT_DESC_ID = "NL-002896#desc";

@@ -1,7 +1,6 @@
 package eu.ehri.project.exporters.ead;
 
-import com.google.common.io.Resources;
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.exporters.test.XmlExporterTest;
 import eu.ehri.project.importers.IcaAtomEadHandler;
 import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.managers.ImportManager;
@@ -13,27 +12,13 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class Ead2002ExporterTest extends AbstractImporterTest {
+public class Ead2002ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExport1() throws Exception {
@@ -68,12 +53,50 @@ public class Ead2002ExporterTest extends AbstractImporterTest {
                 "//ead/eadheader/filedesc/publicationstmt/publisher/text()");
         assertXPath(doc, "NIOD Description",
                 "//ead/archdesc/did/repository/corpname/text()");
-        assertXPath(doc, "Scope and contents note content no label |||",
+        assertXPath(doc, "Scope and contents note content no label |||\n\n" +
+                        "Scope and contents note content |||",
                 "//ead/archdesc/scopecontent/p/text()");
         assertXPath(doc, "Series I",
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",
-                "//ead/archdesc/dsc/c01[2]/c02[6]/did/unitid/text()");
+                "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
+    }
+
+    @Test
+    public void testExportWithComprehensiveFixture() throws Exception {
+        DocumentaryUnit test = manager.getFrame("nl-000001-1", DocumentaryUnit.class);
+        String xml = testExport(test, "eng");
+        //System.out.println(xml);
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "nl-000001-1", "/ead/eadheader/eadid");
+        assertXPath(doc, "Example Documentary Unit 1",
+                "//ead/eadheader/filedesc/titlestmt/titleproper");
+        assertXPath(doc, "Institution Example",
+                "//ead/eadheader/filedesc/publicationstmt/publisher");
+        assertXPath(doc, "Netherlands",
+                "//ead/eadheader/filedesc/publicationstmt/address/addressline[8]");
+        assertXPath(doc, "eng", "//ead/eadheader/profiledesc/langusage/language/@langcode");
+        assertXPath(doc, "1", "//ead/archdesc/did/unitid");
+        assertXPath(doc, "Example Documentary Unit 1", "//ead/archdesc/did/unittitle");
+        assertXPath(doc, "Institution Example", "//ead/archdesc/did/repository/corpname");
+        assertXPath(doc, "a", "//ead/archdesc/dsc/c01/did/unitid");
+        assertXPath(doc, "i", "//ead/archdesc/dsc/c01/c02/did/unitid");
+        assertXPath(doc, "Example text", "//ead/archdesc/scopecontent/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/arrangement/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/bibliography/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/altformavail/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/originalsloc/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/bioghist/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/accessrestrict/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/userestrict/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/accruals/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/acqinfo/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/appraisal/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/custodhist/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/phystech/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/odd/p");
+        assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname");
+        assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject");
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {
@@ -102,24 +125,7 @@ public class Ead2002ExporterTest extends AbstractImporterTest {
         return xml;
     }
 
-    private Document parseDocument(String xml) throws Exception {
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return documentBuilder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
-    }
-
     private void isValidEad(String eadXml) throws IOException, SAXException {
-        SchemaFactory factory = SchemaFactory
-                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = factory.newSchema(Resources.getResource("ead.xsd"));
-        Validator validator = schema.newValidator();
-        validator.validate(new StreamSource(new ByteArrayInputStream(eadXml.getBytes("UTF-8"))));
-    }
-
-    private void assertXPath(Document doc, String value, String path) throws Exception {
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
-        XPathExpression expr = xPath.compile(path);
-        Object out = expr.evaluate(doc, XPathConstants.STRING);
-        assertEquals(value, out);
+        validatesSchema(eadXml, "ead.xsd");
     }
 }

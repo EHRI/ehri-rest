@@ -91,6 +91,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     private final GraphManager manager;
     private final BundleDAO dao;
     private final boolean initialize;
+    private GraphInitializer initializer;
 
     /**
      * Constructor
@@ -103,6 +104,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
         dao = new BundleDAO(graph);
+        initializer = new GraphInitializer(graph);
     }
 
     /**
@@ -129,9 +131,12 @@ public class YamlFixtureLoader implements FixtureLoader {
      * Load default fixtures.
      */
     private void loadFixtures() {
-        InputStream ios = this.getClass().getClassLoader()
-                .getResourceAsStream(DEFAULT_FIXTURE_FILE);
-        loadTestData(ios);
+        try(InputStream ios = this.getClass().getClassLoader()
+                .getResourceAsStream(DEFAULT_FIXTURE_FILE)) {
+            loadTestData(ios);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -142,18 +147,11 @@ public class YamlFixtureLoader implements FixtureLoader {
      */
     public void loadTestData(String resourceNameOrPath) {
         File file = new File(resourceNameOrPath);
-        try {
-            InputStream stream = file.exists() && file.isFile()
+        try (InputStream stream = file.exists() && file.isFile()
                     ? new FileInputStream(file)
                     : this.getClass().getClassLoader()
-                    .getResourceAsStream(resourceNameOrPath);
-            try {
+                    .getResourceAsStream(resourceNameOrPath)) {
                 loadTestData(stream);
-            } finally {
-                if (stream != null) {
-                    stream.close();
-                }
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -168,10 +166,9 @@ public class YamlFixtureLoader implements FixtureLoader {
         // Initialize the DB
         try {
             if (initialize) {
-                new GraphInitializer(graph).initialize();
+                initializer.initialize();
             }
             loadFixtureFileStream(stream);
-            stream.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

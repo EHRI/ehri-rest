@@ -27,6 +27,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -126,8 +127,8 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = Lists.newLinkedList();
-        Map<String, String> datevalues = returnDatesAsString(data, dates);
-        for (String s : datevalues.keySet()) {
+        Map<String, String> dateValues = returnDatesAsString(data, dates);
+        for (String s : dateValues.keySet()) {
             try {
                 extractDateFromValue(extractedDates, s);
             } catch (ValidationError e) {
@@ -209,15 +210,16 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         Map<String, Object> me = Maps.newHashMap();
         for (Entry<String, Object> eventEntry : event.entrySet()) {
             if (eventEntry.getKey().equals("maintenanceEvent/type")) {
-                me.put(MaintenanceEvent.EVENTTYPE, eventEntry.getValue());
+                me.put(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType
+                        .withName((String)eventEntry.getValue()));
             } else if (eventEntry.getKey().equals("maintenanceEvent/agentType")) {
-                me.put(MaintenanceEvent.AGENTTYPE, eventEntry.getValue());
+                me.put(Ontology.MAINTENANCE_EVENT_AGENT_TYPE, eventEntry.getValue());
             } else {
                 me.put(eventEntry.getKey(), eventEntry.getValue());
             }
         }
-        if (!me.containsKey(MaintenanceEvent.EVENTTYPE)) {
-            me.put(MaintenanceEvent.EVENTTYPE, "unknown event type");
+        if (!me.containsKey(Ontology.MAINTENANCE_EVENT_TYPE)) {
+            me.put(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType.updated.name());
         }
         return me;
     }

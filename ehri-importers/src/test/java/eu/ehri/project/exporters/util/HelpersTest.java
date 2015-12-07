@@ -17,28 +17,30 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models;
+package eu.ehri.project.exporters.util;
 
-import com.tinkerpop.frames.Property;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.TemporalEntity;
+import com.google.common.base.Optional;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * Frame class representing a pre-ingest event that took place
- * upon some documentary unit item.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Mike Bryant (http://github.com/mikesname)
  */
-@EntityType(EntityClass.MAINTENANCE_EVENT)
-public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity {
+public class HelpersTest {
 
-    @Mandatory
-    @Property(Ontology.MAINTENANCE_EVENT_TYPE)
-    MaintenanceEventType getEventType();
+    @Test
+    public void testCountryCodeToContinent() throws Exception {
+        Optional<String> c1 = Helpers.countryCodeToContinent("gb");
+        assertTrue(c1.isPresent());
+        assertEquals("Europe", c1.get());
 
-    @Property(Ontology.MAINTENANCE_EVENT_AGENT_TYPE)
-    MaintenanceEventAgentType getAgentType();
+        Optional<String> c2 = Helpers.countryCodeToContinent("us");
+        assertTrue(c2.isPresent());
+        assertEquals("North America", c2.get());
+
+        Optional<String> c3 = Helpers.countryCodeToContinent("nz");
+        assertTrue(c3.isPresent());
+        assertEquals("Australia", c3.get());
+    }
 }

@@ -136,6 +136,8 @@
         data:
           identifier: niod-en
           name: NIOD Description
+          otherFormsOfName:
+            - NIOD
           languageCode: eng
         relationships:
           hasAddress:
@@ -145,9 +147,15 @@
                 name: An Address
                 street: 1 Some St.
                 city: Amsterdam
+                email:
+                  - test@example.com
                 webpage:
                   - http://www.niod.nl
                   - http://www.niod.nl/en
+                telephone:
+                  - 00 31 012345677
+                fax:
+                  - 00 31 012345677
 
 - id: r2 # should be named kcl
   type: repository
@@ -403,6 +411,14 @@
         data:
           typeOfEntity: person
           name: An Authority 1
+          parallelFormsOfName:
+            - Un Authority 1
+            - Das Authority 1
+          otherFormsOfName:
+            - A1
+          generalContext: |
+              this is some
+              test text
           languageCode: eng
     inAuthoritativeSet: auths
     hasPermissionScope: auths

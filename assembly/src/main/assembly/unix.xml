@@ -53,9 +53,6 @@
                 <include>xml-apis:xml-apis</include>
                 <include>org.apache.commons:commons-lang3</include>
                 <include>org.apache.commons:commons-compress</include>
-                <include>org.pegdown:pegdown</include>
-                <include>org.parboiled:parboiled-java</include>
-                <include>org.ow2.asm:*</include>
             </includes>
         </dependencySet>
     </dependencySets>

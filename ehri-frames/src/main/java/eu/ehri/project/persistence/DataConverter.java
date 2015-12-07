@@ -350,7 +350,8 @@ class DataConverter {
             Element relations = document.createElement(Bundle.REL_KEY);
             root.appendChild(relations);
             for (Entry<String, Collection<Bundle>> entry : bundle.getRelations().asMap().entrySet()) {
-                Element relation = document.createElement(entry.getKey());
+                Element relation = document.createElement("relationship");
+                relation.setAttribute("label", entry.getKey());
                 relations.appendChild(relation);
                 for (Bundle relationBundle : entry.getValue()) {
                     relation.appendChild(bundleDataToElement(document, relationBundle));
