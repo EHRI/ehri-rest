@@ -29,6 +29,7 @@ import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,10 +141,10 @@ public class EadHandler extends SaxXmlHandler {
             children[depth] = Lists.newArrayList();
         }
         if (qName.equals("change")) {
-            putPropertyInCurrentGraph("eventType", MaintenanceEvent.EventType.REVISED.toString());
+            putPropertyInCurrentGraph("eventType", MaintenanceEventType.updated.toString());
         }
         if (qName.equals("profiledesc")) {
-            putPropertyInCurrentGraph("eventType", MaintenanceEvent.EventType.CREATED.toString());
+            putPropertyInCurrentGraph("eventType", MaintenanceEventType.created.toString());
         }
         if (attributes.getValue(MAINAGENCYCODE) != null) {
             eadfileValues.put(MAINAGENCYCODE, attributes.getValue(MAINAGENCYCODE));

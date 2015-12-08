@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistence.utils.BundleUtils;
@@ -114,6 +115,15 @@ public class BundleTest {
         Bundle b2 = bundle.withData(map);
         assertNull(b2.getDataValue(Ontology.IDENTIFIER_KEY));
         assertEquals("bar", b2.getDataValue("foo"));
+    }
+
+    @Test
+    public void testWithDataIncludingEnumValues() throws Exception {
+        HashMap<String, Object> map = Maps.newHashMap();
+        map.put("foo", EventTypes.creation);
+        Bundle b2 = bundle.withData(map);
+        assertNull(b2.getDataValue(Ontology.IDENTIFIER_KEY));
+        assertEquals(EventTypes.creation.name(), b2.getDataValue("foo"));
     }
 
     @Test

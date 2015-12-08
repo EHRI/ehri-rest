@@ -141,4 +141,8 @@ public class Ontology {
     public static final String USER_FOLLOWS_USER = "isFollowing";
     public static final String USER_BLOCKS_USER = "isBlocking";
     public static final String USER_WATCHING_ITEM = "isWatching";
+
+    // Maintenance events
+    public static final String MAINTENANCE_EVENT_TYPE = "eventType";
+    public static final String MAINTENANCE_EVENT_AGENT_TYPE = "agentType";
 }

@@ -1,0 +1,300 @@
+# Comprehensive fixture data for testing EAD/EAC/EAG export
+
+# Institution
+- id: nl-000001
+  type: repository
+  data:
+    identifier: !!str 000001
+    name: Institution Example
+  relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
+    describes:
+      - id: nl-000001.eng
+        type: repositoryDescription
+        data:
+          languageCode: eng
+          name: Institution Example
+          parallelFormsOfName:
+            - Exemple institution
+            - Institution Beispiel
+            - מוסד דוגמא
+          otherFormsOfName:
+            - EI
+          history: >
+            Example text
+          geoculturalContext: >
+            Example text
+          mandates: >
+            Example text
+          administrativeStructure: >
+            Example text
+          records: >
+            Example text
+          buildings: >
+            Example text
+          holdings: >
+            Example text
+          findingAids: >
+            Example text
+          openingTimes: >
+            Example text
+          conditions: >
+            Example text
+          accessibility: >
+            Example text
+          researchServices: >
+            Example text
+          reproductionServices: >
+            Example text
+          publicAreas: >
+            Example text
+          rulesAndConventions: >
+            Example text
+          status: >
+            Example text
+          datesOfDescription: >
+            Example text
+          languages:
+            - eng
+            - fre
+            - ger
+            - heb
+          scripts:
+            - Latn
+            - Hebr
+          sources:
+            - Source 1
+            - Source 2
+          maintenanceNotes: >
+            Example text
+        relationships:
+          maintenance:
+            - id: example-maintenance-event-1
+              type: maintenanceEvent
+              data:
+                maintenanceEvent/date: !!str 2013-09-09
+                maintenanceEvent/source: Exported from ICA-AtoM
+                eventType: updated
+          hasAddress:
+            - id: example-address-1
+              type: address
+              data:
+                name: An Address
+                street: 1 Example Street
+                city: The Hague
+                postalcode: !!str 001122
+                email:
+                  - test@example.com
+                webpage:
+                  - http://www.example.nl
+                  - http://www.example.nl/en
+                telephone:
+                  - 00 12 3456789
+                fax:
+                  - 00 12 3456789
+
+# Historical Agent
+- id: auths-000001
+  type: historicalAgent
+  data:
+    identifier: !!str 000001
+    name: Historical Agent Example
+  relationships:
+    hasAuthoritativeSet: auths
+    hasPermissionScope: auths
+    describes:
+      - id: auths-000001.eng
+        type: historicalAgentDescription
+        data:
+          languageCode: eng
+          name: Historical Agent Example
+          parallelFormsOfName:
+            - Historique Agent Exemple
+            - Historische Agent- Beispiel
+            - היסטורי סוכן דוגמא
+          otherFormsOfName:
+            - HAE
+          typeOfEntity: person
+          biographicalHistory: >
+            Example text
+          generalContext: >
+            Example text
+          structure: >
+            Example text
+          place:
+            - Example text
+          legalStatus: >
+            Example text
+          functions: >
+            Example text
+          occupation: >
+            Example text
+          mandates: >
+            Example text
+          datesOfExistence: >
+            Example text
+          languages:
+            - eng
+            - fre
+            - ger
+            - heb
+          scripts:
+            - Latn
+            - Hebr
+          sources:
+            - Source 1
+            - Source 2
+          maintenanceNotes: >
+            Example text
+        relationships:
+          maintenance:
+            - id: example-maintenance-event-2
+              type: maintenanceEvent
+              data:
+                maintenanceEvent/date: !!str 2013-09-09
+                maintenanceEvent/source: Exported from ICA-AtoM
+                eventType: updated
+          hasDate:
+            - id: example-date-1
+              type: datePeriod
+              data:
+                startDate: !!str 1940-01-01
+                endDate: !!str 1945-01-01
+                dateType: existence
+
+# Documentary Units
+- id: nl-000001-1
+  type: documentaryUnit
+  data:
+    identifier: !!str 1
+  relationships:
+    describes:
+      - id: nl-000001-1.eng
+        type: documentDescription
+        data:
+          name: Example Documentary Unit 1
+          languageCode: eng
+          abstract: Example text
+          rulesAndConventions: Example text
+          accruals: Example text
+          acquisition: Example text
+          appraisal: Example text
+          archivalHistory: Example text
+          biographicalHistory: Example text
+          conditionsOfAccess: Example text
+          conditionsOfReproduction: Example text
+          extentAndMedium: Example text
+          locationOfCopies:
+            - Example text
+          locationOfOriginals:
+            - Example text
+          physicalLocation:
+            - Example text
+          physicalCharacteristics: Example text
+          scopeAndContent: Example text
+          systemOfArrangement: Example text
+          unitDates: 1939-1945
+          levelOfDescription: fonds
+          notes:
+            - Example text
+          languageOfMaterials:
+            - eng
+            - ger
+          scriptOfMaterials:
+            - Latn
+          findingAids:
+            - Example text
+          publicationNote:
+            - Example text
+          datesOfDescription:
+            - Example text
+          archivistNote: Example text
+          provenance: Example text
+          sources:
+            - Example text
+          sourceFileId:
+            - ead-1.xml
+          relatedUnitsOfDescription:
+            - c1
+        relationships:
+          hasDate:
+            - id: example-date-2
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+            - id: example-date-3
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+          relatesTo:
+            - id: example-access-point-1
+              type: relationship
+              data:
+                name: Example Subject 1
+                type: subjectAccess
+                description: test description
+            - id: example-access-point-2
+              type: relationship
+              data:
+                name: Example Person 1
+                type: personAccess
+                description: test description
+    heldBy: nl-000001
+    hasPermissionScope: nl-000001
+
+# C2 is also held by NIOD, and is a child item of C1
+- id: nl-000001-1-a
+  type: documentaryUnit
+  data:
+    identifier: a
+  relationships:
+    describes:
+      - id: nl-000001-1-a.eng
+        type: documentDescription
+        data:
+          name: Example Documentary Unit Child 1
+          languageCode: eng
+          scopeAndContent: >
+            Example text
+          sourceFileId:
+            - ead-1.xml
+        relationships:
+          hasDate:
+            - id: example-date-4
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+    childOf: nl-000001-1
+    hasPermissionScope: nl-000001-1
+
+# C3 is also held by NIOD, and is a child item of C2
+- id: nl-000001-1-a-i
+  type: documentaryUnit
+  data:
+    identifier: i
+  relationships:
+    describes:
+      - id: nl-000001-1-a-i.eng
+        type: documentDescription
+        data:
+          name: Example Documentary Unit Child 2
+          languageCode: eng
+          scopeAndContent: >
+            Example text
+          sourceFileId:
+            - ead-1.xml
+        relationships:
+          hasDate:
+            - id: example-date-5
+              type: datePeriod
+              data:
+                type: creation
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+    childOf: nl-000001-1-a
+    hasPermissionScope: nl-000001-1-a
+

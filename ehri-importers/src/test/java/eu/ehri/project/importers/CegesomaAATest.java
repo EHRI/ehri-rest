@@ -30,6 +30,7 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.PermissionScope;
 
 import java.io.IOException;
@@ -126,7 +127,7 @@ public class CegesomaAATest extends AbstractImporterTest{
             for (MaintenanceEvent me : dd.getMaintenanceEvents()){
               assertEquals("Automatisch gegenereerd door PALLAS systeem", me.getProperty("source"));
               assertEquals("28/03/2013", me.getProperty("date"));
-              assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty("eventType"));
+              assertEquals(MaintenanceEventType.created.toString(), me.getProperty("eventType"));
             }
             assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
         }

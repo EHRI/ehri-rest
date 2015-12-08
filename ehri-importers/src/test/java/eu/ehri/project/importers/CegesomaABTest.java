@@ -32,6 +32,7 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,9 +121,9 @@ public class CegesomaABTest extends AbstractImporterTest{
             for(MaintenanceEvent me : dd.getMaintenanceEvents()){
                 meFound=true;
                 if(me.getProperty("order").equals(0)){
-                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty("eventType"));
+                    assertEquals(MaintenanceEventType.created.toString(), me.getProperty("eventType"));
                 }else{
-                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.getProperty("eventType"));
+                    assertEquals(MaintenanceEventType.updated.toString(), me.getProperty("eventType"));
                 }
             }
             assertTrue(meFound);

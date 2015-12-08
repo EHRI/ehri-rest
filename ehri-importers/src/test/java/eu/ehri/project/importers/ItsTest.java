@@ -22,6 +22,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -30,6 +31,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Ignore;
@@ -221,17 +223,17 @@ public class ItsTest extends AbstractImporterTest {
             int countRevised_ME = 0;
             int countCreated_ME = 0;
             for (MaintenanceEvent me : d.getMaintenanceEvents()) {
-                if (me.getProperty(MaintenanceEvent.EVENTTYPE).equals(MaintenanceEvent.EventType.REVISED.toString())) {
+                if (me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE).equals(MaintenanceEventType.updated.toString())) {
                     assertNotNull(me.getProperty("source"));
                     assertNotNull(me.getProperty("date"));
-                    assertNotNull(me.getProperty(MaintenanceEvent.EVENTTYPE));
-                    assertEquals(MaintenanceEvent.EventType.REVISED.toString(), me.getProperty(MaintenanceEvent.EVENTTYPE));
+                    assertNotNull(me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE));
+                    assertEquals(MaintenanceEventType.updated.toString(), me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE));
                     countRevised_ME++;
-                } else if (me.getProperty(MaintenanceEvent.EVENTTYPE).equals(MaintenanceEvent.EventType.CREATED.toString())) {
+                } else if (me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE).equals(MaintenanceEventType.created.toString())) {
                     assertNotNull(me.getProperty("source"));
                     assertNull(me.getProperty("date"));
-                    assertNotNull(me.getProperty(MaintenanceEvent.EVENTTYPE));
-                    assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.getProperty(MaintenanceEvent.EVENTTYPE));
+                    assertNotNull(me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE));
+                    assertEquals(MaintenanceEventType.created.toString(), me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE));
                     countCreated_ME++;
                 }
 

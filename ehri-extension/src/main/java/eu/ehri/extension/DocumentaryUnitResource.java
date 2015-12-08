@@ -19,13 +19,18 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.*;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.ParentResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -33,14 +38,22 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -158,30 +171,24 @@ public class DocumentaryUnitResource
     @GET
     @Path("{id:.+}/ead")
     @Produces(MediaType.TEXT_XML)
-    public Response exportSkos(@PathParam("id") String id,
+    public Response exportEad(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
-            throws IOException, ItemNotFound, ParserConfigurationException {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            final Accessor user = getRequesterUserProfile();
-            final DocumentaryUnit unit = views.detail(id, user);
-            final EadExporter eadExporter = new Ead2002Exporter(graph);
+            throws IOException, ItemNotFound {
+        try(final Tx tx = graph.getBaseGraph().beginTx()) {
+            DocumentaryUnit unit = views.detail(id, getRequesterUserProfile());
+            EadExporter eadExporter = new Ead2002Exporter(graph);
             final Document document = eadExporter.export(unit, lang);
-            final EadExporter.DocumentWriter writer
-                    = new EadExporter.DocumentWriter(document);
+            tx.success();
             return Response.ok(new StreamingOutput() {
                 @Override
                 public void write(OutputStream outputStream) throws IOException {
                     try {
-                        writer.write(outputStream);
+                        new DocumentWriter(document).write(outputStream);
                     } catch (TransformerException e) {
                         throw new WebApplicationException(e);
                     }
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
-        } catch (ParserConfigurationException e) {
-            tx.close();
-            throw e;
         }
     }
 }

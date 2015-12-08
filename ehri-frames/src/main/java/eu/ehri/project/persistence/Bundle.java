@@ -674,13 +674,18 @@ public final class Bundle {
     // Helpers...
 
     /**
-     * Return an immutable copy of the given data map with nulls removed.
+     * Return an immutable copy of the given data map with nulls removed
+     * and enums converted to string values.
      */
     private ImmutableMap<String, Object> filterData(Map<String, Object> data) {
         Map<String, Object> filtered = Maps.newHashMap();
         for (Map.Entry<? extends String, Object> entry : data.entrySet()) {
             if (entry.getValue() != null) {
-                filtered.put(entry.getKey(), entry.getValue());
+                Object value = entry.getValue();
+                if (value instanceof Enum<?>) {
+                    value = ((Enum) value).name();
+                }
+                filtered.put(entry.getKey(), value);
             }
         }
         return ImmutableMap.copyOf(filtered);

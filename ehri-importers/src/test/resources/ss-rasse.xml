@@ -1,156 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <eac-cpf xmlns="urn:isbn:1-931666-33-4" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-  <control>
-
-    <recordId>104</recordId>
-
-    <maintenanceStatus>new</maintenanceStatus>
-
-    <publicationStatus>approved</publicationStatus>
-
-    <maintenanceAgency>
-
-      <agencyName/>
-
-    </maintenanceAgency>
-
-    
-
-    <conventionDeclaration>
-
-      <abbreviation>conventionDeclaration</abbreviation>
-
-      <citation/>
-
-    </conventionDeclaration>
-
-    <localTypeDeclaration>
-
-      <abbreviation>detailLevel</abbreviation>
-
-      <citation>http://ica-atom.org/doc/RS-2#5.4</citation>
-
-    </localTypeDeclaration>
-
-    <localControl localType="detailLevel">
-
-      <term/>
-
-    </localControl>
-
-    <maintenanceHistory><maintenanceEvent>
-  <eventType>created</eventType>
-  <eventDateTime standardDateTime="2012-03-21T16:40:46">March 21, 2012 4:40:46 PM CET</eventDateTime>
-  <agentType>human</agentType>
-  <agent/>
-</maintenanceEvent>
-
-<maintenanceEvent>
-  <eventType>revised</eventType>
-  <eventDateTime standardDateTime="2012-07-03T10:12:02">July 3, 2012 10:12:02 AM CEST</eventDateTime>
-  <agentType>human</agentType>
-  <agent/>
-</maintenanceEvent>
-</maintenanceHistory>
-
-    <sources>
-
-      <source>
-
-        <sourceEntry>Dictionary of the Holocaust : Biography, geography, and terminology / E.J. Epstein, P. Rosen. – Westport, 1997. – p. 240</sourceEntry>
-
-      </source>
-
-    </sources>
-
-  </control>
-
-  <cpfDescription>
-
-    <identity>
-
-    <!-- EHRI Using ICA Atom Primary key as entityId 
-      <entityId></entityId>
-    -->
-      <entityId xlink:href="http://authorities.ehri-project.eu/index.php/ss-rasse-und-siedlungshauptamt;eac">418</entityId>
-
-      <entityType>corporateBody</entityType>
-
-      <nameEntry type="authorized">
-
-        <part>SS Rasse- und Siedlungshauptamt</part>
-
-      </nameEntry>
-
-              <nameEntry type="parallel">
-
-          <part>Race and Resettlement Main Office</part>
-
-        </nameEntry>
-      
-              <nameEntry type="other">
-
-          <part>RuSHA</part>
-
-        </nameEntry>
-      
-
-    </identity>
-
-    <description>
-
-      <existDates><date/></existDates>
-
-      <place>
-
-        <placeEntry>Founded in Germany.</placeEntry>
-
-      </place>
-
-      <legalStatus>
-
-        <term/>
-
-      </legalStatus>
-
-      <function>
-
-        <descriptiveNote/>
-
-      </function>
-
-      <occupation>
-
-        <descriptiveNote/>
-
-      </occupation>
-
-      <mandate>
-
-        <term/>
-
-      </mandate>
-
-      <structureOrGenealogy><p/></structureOrGenealogy>
-
-      <generalContext><p/></generalContext>
-
-      <biogHist><p>The SS Rasse- und Siedlungshauptamt was a Nazi racial research office. This bureau compiled genealogical tables including racial statistics of families in Germany and the Netherlands. The RuSHA selected candidates for ‘Germanization’ and kidnapped Polish children who were designated for the Lebensborn, Fountain of Life. It also determined Aryan fitness of ethnic Germans (Volksdeutsche) who wanted to settle in conquered Polish territory and checked the purity of the SS and their mates.</p></biogHist>
-
-    </description>
-
-    <relations>
-
-              <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/abwehr;eac" xlink:type="simple">
-          <relationEntry>Abwehr</relationEntry>
-	  <descriptiveNote>On 1944-02-18, the Abwehr was dissolved into the SS Rasse- und Siedlungshauptamt.</descriptiveNote>
-                  </cpfRelation>
-      
-      
-      
-    </relations>
-
-  </cpfDescription>
-
+    <control>
+        <recordId>104</recordId>
+        <maintenanceStatus>new</maintenanceStatus>
+        <publicationStatus>approved</publicationStatus>
+        <maintenanceAgency>
+            <agencyName/>
+        </maintenanceAgency>
+        <conventionDeclaration>
+            <abbreviation>conventionDeclaration</abbreviation>
+            <citation/>
+        </conventionDeclaration>
+        <localTypeDeclaration>
+            <abbreviation>detailLevel</abbreviation>
+            <citation>http://ica-atom.org/doc/RS-2#5.4</citation>
+        </localTypeDeclaration>
+        <localControl localType="detailLevel">
+            <term/>
+        </localControl>
+        <maintenanceHistory>
+            <maintenanceEvent>
+                <eventType>created</eventType>
+                <eventDateTime standardDateTime="2012-03-21T16:40:46">March 21, 2012 4:40:46 PM CET</eventDateTime>
+                <agentType>human</agentType>
+                <agent/>
+            </maintenanceEvent>
+            <maintenanceEvent>
+                <eventType>revised</eventType>
+                <eventDateTime standardDateTime="2012-07-03T10:12:02">July 3, 2012 10:12:02 AM CEST</eventDateTime>
+                <agentType>human</agentType>
+                <agent/>
+            </maintenanceEvent>
+        </maintenanceHistory>
+        <sources>
+            <source>
+                <sourceEntry>Dictionary of the Holocaust : Biography, geography, and terminology / E.J. Epstein, P.
+                    Rosen. – Westport, 1997. – p. 240
+                </sourceEntry>
+            </source>
+        </sources>
+    </control>
+    <cpfDescription>
+        <identity>
+            <!-- EHRI Using ICA Atom Primary key as entityId
+              <entityId></entityId>
+            -->
+            <entityId xlink:href="http://authorities.ehri-project.eu/index.php/ss-rasse-und-siedlungshauptamt;eac">418</entityId>
+            <entityType>corporateBody</entityType>
+            <nameEntry type="authorized">
+                <part>SS Rasse- und Siedlungshauptamt</part>
+            </nameEntry>
+            <nameEntry type="parallel">
+                <part>Race and Resettlement Main Office</part>
+            </nameEntry>
+            <nameEntry type="other">
+                <part>RuSHA</part>
+            </nameEntry>
+        </identity>
+        <description>
+            <existDates>
+                <date/>
+            </existDates>
+            <place>
+                <placeEntry>Founded in Germany.</placeEntry>
+            </place>
+            <legalStatus>
+                <term/>
+            </legalStatus>
+            <function>
+                <descriptiveNote/>
+            </function>
+            <occupation>
+                <descriptiveNote/>
+            </occupation>
+            <mandate>
+                <term/>
+            </mandate>
+            <structureOrGenealogy>
+                <p/>
+            </structureOrGenealogy>
+            <generalContext>
+                <p/>
+            </generalContext>
+            <biogHist>
+                <p>The SS Rasse- und Siedlungshauptamt was a Nazi racial research office. This bureau compiled
+                    genealogical tables including racial statistics of families in Germany and the Netherlands. The
+                    RuSHA selected candidates for ‘Germanization’ and kidnapped Polish children who were designated for
+                    the Lebensborn, Fountain of Life. It also determined Aryan fitness of ethnic Germans (Volksdeutsche)
+                    who wanted to settle in conquered Polish territory and checked the purity of the SS and their mates.
+                </p>
+            </biogHist>
+        </description>
+        <relations>
+            <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/abwehr;eac" xlink:type="simple">
+                <relationEntry>Abwehr</relationEntry>
+                <descriptiveNote>On 1944-02-18, the Abwehr was dissolved into the SS Rasse- und Siedlungshauptamt.
+                </descriptiveNote>
+            </cpfRelation>
+        </relations>
+    </cpfDescription>
 </eac-cpf>

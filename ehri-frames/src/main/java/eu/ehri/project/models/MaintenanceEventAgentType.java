@@ -19,26 +19,13 @@
 
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.Property;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.TemporalEntity;
-
 /**
- * Frame class representing a pre-ingest event that took place
- * upon some documentary unit item.
+ * Values corresponding to the EAC-CPF 2010 and EAG 2012
+ * XML schema.
  *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
-@EntityType(EntityClass.MAINTENANCE_EVENT)
-public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity {
-
-    @Mandatory
-    @Property(Ontology.MAINTENANCE_EVENT_TYPE)
-    MaintenanceEventType getEventType();
-
-    @Property(Ontology.MAINTENANCE_EVENT_AGENT_TYPE)
-    MaintenanceEventAgentType getAgentType();
+public enum MaintenanceEventAgentType {
+    // MB
+    human, machine
 }
