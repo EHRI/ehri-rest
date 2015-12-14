@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -34,14 +35,16 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
+
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class Wp2BtEadTest extends AbstractImporterTest {
@@ -63,38 +66,36 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
-                                .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
-                                .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
-                                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");
         Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
         logger.debug(vocabulary.getId());
         Concept concept_716 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_716);
-        
-        
+
+
         Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
-        
+
         final String logMessage = "Importing Beit Terezin EAD";
- // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
 
         int count = getNodeCount(graph);
         InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-//        SaxImportManager importManagerVC = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
         SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
 
-        
-        importManager.setTolerant(Boolean.TRUE);
-        
-        ImportLog logVC = importManager.importFile(iosVC, logMessage);
-         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
 
-//        printGraph(graph);
+        importManager.setTolerant(Boolean.TRUE);
+
+        ImportLog logVC = importManager.importFile(iosVC, logMessage);
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits fonds 2C1 3C2
         // - 6 more DocumentDescription
@@ -107,19 +108,11 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
-//        assertTrue(docs.iterator().hasNext());
-                
+
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
-        Iterator<DocumentDescription> i = fonds.getDocumentDescriptions().iterator();
-        int countDocDesc = 0;
-        while(i.hasNext()){
-            DocumentDescription desc  = i.next();
-            assertEquals("mul", desc.getLanguageOfDescription());
-            countDocDesc++;
-        }        
-        assertEquals(1, countDocDesc);
-        
-        
+        List<DocumentDescription> descriptions = Lists.newArrayList(fonds.getDocumentDescriptions());
+        assertEquals(1, descriptions.size());
+        assertEquals("mul", descriptions.get(0).getLanguageOfDescription());
 
         // check the child items
         DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
@@ -130,7 +123,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         assertEquals(fonds, c1_a.getParent());
         assertEquals(fonds, c1_b.getParent());
-        
+
         assertEquals(c1_a, c1_a_c2.getParent());
 
         assertEquals(c1_b, c1_b_c2_a.getParent());
@@ -145,7 +138,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         //assert keywords are matched to cvocs
         assertTrue(!toList(c1_b.getLinks()).isEmpty());
-        for(Link a : c1_b.getLinks()){
+        for (Link a : c1_b.getLinks()) {
             logger.debug(a.getLinkType());
         }
 
@@ -164,9 +157,9 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(c1_a, c1_a_c2.getPermissionScope());
         assertEquals(c1_b, c1_b_c2_a.getPermissionScope());
         assertEquals(c1_b, c1_b_c2_b.getPermissionScope());
-        
+
         // Check the author of the description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
             assertEquals("EHRI", d.getProperty("processInfo"));
         }
 
