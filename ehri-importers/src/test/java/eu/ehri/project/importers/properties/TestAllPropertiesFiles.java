@@ -31,9 +31,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class TestAllPropertiesFiles {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPropertiesFiles.class);

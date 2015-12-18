@@ -44,9 +44,6 @@ import static org.junit.Assert.*;
 /**
  * Test the import of a Cegesoma AB EAD file.
  * This file was based on BundesarchiveTest.java.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Ben Companjen (http://github.com/bencomp)
  */
 public class CegesomaABTest extends AbstractImporterTest{
     

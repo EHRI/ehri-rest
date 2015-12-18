@@ -22,9 +22,6 @@ package eu.ehri.project.definitions;
 /**
  * Event types are used to log actions performed in the system. These
  * are the types of actions supported by the system.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- *
  */
 public enum EventTypes {
     creation,

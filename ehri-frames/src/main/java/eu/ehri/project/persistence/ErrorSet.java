@@ -35,8 +35,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Class that represents a set of validation errors associated with a bundle.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ErrorSet {
     private final Multimap<String, String> errors;

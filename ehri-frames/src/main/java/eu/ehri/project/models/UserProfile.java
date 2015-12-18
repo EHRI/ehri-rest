@@ -45,8 +45,6 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 
 /**
  * A frame class representing a user within the database.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.USER_PROFILE)
 public interface UserProfile extends Accessor, AccessibleEntity,

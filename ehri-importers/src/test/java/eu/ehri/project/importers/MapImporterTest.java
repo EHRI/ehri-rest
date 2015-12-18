@@ -35,9 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class MapImporterTest extends AbstractImporterTest {
 
     public MapImporterTest() {

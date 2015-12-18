@@ -30,8 +30,6 @@ import java.util.Map;
 
 /**
  * Helpers for working with the {@link Bundle} format.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class BundleUtils {
 

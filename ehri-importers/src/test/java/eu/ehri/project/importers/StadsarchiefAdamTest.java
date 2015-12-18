@@ -36,9 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class StadsarchiefAdamTest extends AbstractImporterTest{
     
 	private static final Logger logger = LoggerFactory.getLogger(StadsarchiefAdamTest.class);

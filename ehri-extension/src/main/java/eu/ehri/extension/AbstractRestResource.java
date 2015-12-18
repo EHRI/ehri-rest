@@ -67,8 +67,6 @@ import java.util.Map;
 
 /**
  * Base class for web service resources.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public abstract class AbstractRestResource implements TxCheckedResource {
 

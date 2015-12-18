@@ -40,9 +40,6 @@ import java.util.List;
  * Provides a web service interface for the Concept model. Note that the concept
  * creation endpoint is part of the VocabularyResource and creation without a
  * Vocabulary is not possible via this API.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CVOC_CONCEPT)
 public class CvocConceptResource

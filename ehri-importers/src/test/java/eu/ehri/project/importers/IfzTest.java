@@ -45,9 +45,6 @@ import static org.junit.Assert.assertFalse;
 /**
  * Test the import of a Ifz EAD file.
  * This file was based on BundesarchiveTest.java.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author ben
  */
 public class IfzTest extends AbstractImporterTest {
 

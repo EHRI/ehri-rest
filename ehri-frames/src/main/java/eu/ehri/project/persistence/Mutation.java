@@ -24,8 +24,6 @@ import com.google.common.base.Optional;
 /**
  * Class holding information about a create-or-update job. The item
  * will either have been created, been updated, or remained unchanged.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class Mutation<T> {
     private final T node;

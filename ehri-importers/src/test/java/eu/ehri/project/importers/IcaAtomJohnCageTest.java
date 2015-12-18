@@ -26,9 +26,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class IcaAtomJohnCageTest extends AbstractImporterTest {
 
     protected final String JOHNCAGEXML = "johnCage.xml";

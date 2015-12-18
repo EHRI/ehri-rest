@@ -38,8 +38,6 @@ import javax.ws.rs.core.Response;
  * Provides a web service interface for the ContentType model. Note: ContentType instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CONTENT_TYPE)
 public class ContentTypeResource extends AbstractAccessibleEntityResource<ContentType>

@@ -35,8 +35,6 @@ import java.util.Map;
 /**
  * Handler that reads EAG files. The resulting {@link Map}s should be imported by
  * {@link EagImporter}.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagHandler extends SaxXmlHandler {
 

@@ -45,8 +45,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * Frame class representing an event that happened in the
  * graph.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.SYSTEM_EVENT)
 public interface SystemEvent extends AccessibleEntity {

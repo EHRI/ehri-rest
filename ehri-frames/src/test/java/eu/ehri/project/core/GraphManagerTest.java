@@ -53,9 +53,6 @@ import static org.junit.Assert.fail;
  * Graph Manager tests. These do a bit of funky
  * reflectiveness to create a re-useable suite that
  * can be run for each implementation.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class GraphManagerTest {
     private static final String NON_EXISTING_ID = "non-existing-id-12345678";

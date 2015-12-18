@@ -51,8 +51,6 @@ import java.util.Map;
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
  * nested lists of EAD documents into the graph.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class SaxImportManager extends AbstractImportManager {
 

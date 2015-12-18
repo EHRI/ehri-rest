@@ -47,8 +47,6 @@ import java.util.List;
 
 /**
  * View class for handling annotation-related operations.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class LinkViews implements Scoped<LinkViews> {
 

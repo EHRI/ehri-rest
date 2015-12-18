@@ -48,9 +48,7 @@ import static eu.ehri.extension.ImportResource.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class ImportResourceRestClientTest extends BaseRestClientTest {
     // NB: This file is *copied* into the extension test resources because
     // I can't figure out how to refer to resources in another module...

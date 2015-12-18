@@ -26,9 +26,7 @@ import eu.ehri.project.models.annotations.Mandatory;
 /**
  * An entity that has a name.
  *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
- *
+
  */
 public interface NamedEntity extends Frame {
 

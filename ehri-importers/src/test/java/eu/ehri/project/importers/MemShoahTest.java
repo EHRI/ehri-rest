@@ -39,8 +39,6 @@ import static org.junit.Assert.*;
 
 /**
  * Test the import of a memorial de la shoah EAD file.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class MemShoahTest extends AbstractImporterTest{
     

@@ -35,9 +35,6 @@ import java.util.Map.Entry;
 
 /**
  * Import a single SKOS file from the command line.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class SkosVocabularyImport extends BaseCommand {
 

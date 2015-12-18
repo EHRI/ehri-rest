@@ -25,8 +25,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 /**
  * Holds information about the collection or institute, 
  * but we don't specify (in the database) what it exactly means.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.UNKNOWN_PROPERTY)
 public interface UnknownProperty extends AccessibleEntity {

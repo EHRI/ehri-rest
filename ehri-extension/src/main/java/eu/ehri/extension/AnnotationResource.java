@@ -43,8 +43,6 @@ import java.util.List;
 
 /**
  * Web service interface for creating annotations.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.ANNOTATION)
 public class AnnotationResource

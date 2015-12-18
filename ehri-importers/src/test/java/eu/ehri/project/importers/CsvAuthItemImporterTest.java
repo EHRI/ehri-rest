@@ -36,9 +36,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class CsvAuthItemImporterTest extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthItemImporterTest.class);

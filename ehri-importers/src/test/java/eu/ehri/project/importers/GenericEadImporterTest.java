@@ -25,9 +25,7 @@ import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class GenericEadImporterTest extends AbstractImporterTest{
     
        protected final String SINGLE_EAD = "genericEad.xml";

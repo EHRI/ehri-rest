@@ -36,9 +36,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
 public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<InheritedGlobalPermissionSet> {

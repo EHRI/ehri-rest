@@ -67,8 +67,6 @@ import static eu.ehri.project.exporters.util.Helpers.createCDataElement;
 
 /**
  * Export EAC 2010 XML.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Eac2010Exporter implements EacExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eac2010Exporter.class);

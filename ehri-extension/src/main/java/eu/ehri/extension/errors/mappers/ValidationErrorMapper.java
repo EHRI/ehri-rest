@@ -53,8 +53,6 @@ import javax.ws.rs.ext.Provider;
  * }
  * <p>
  * The response is sent with HTTP status Bad Request.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {

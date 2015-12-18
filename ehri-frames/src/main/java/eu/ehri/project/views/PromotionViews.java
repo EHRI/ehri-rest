@@ -31,8 +31,6 @@ import eu.ehri.project.persistence.ActionManager;
 
 /**
  * View class for managing item promotion.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class PromotionViews implements Scoped<PromotionViews> {
 

@@ -43,8 +43,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * Frame class representing a group of users or other groups
  * that can be assigned permissions.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.GROUP)
 public interface Group extends Accessor, AccessibleEntity,

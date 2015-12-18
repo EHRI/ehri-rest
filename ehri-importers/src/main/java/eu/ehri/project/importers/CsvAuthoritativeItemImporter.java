@@ -48,8 +48,6 @@ import java.util.Map;
 /**
  * Importer of authoritative items such as historical agents and concepts, loaded
  * from a CSV file.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CsvAuthoritativeItemImporter extends MapImporter {
 

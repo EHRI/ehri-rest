@@ -31,9 +31,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class JavaHandlerUtilsTest {
 
     private Graph graph;

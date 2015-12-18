@@ -28,8 +28,6 @@ import java.io.OutputStream;
 
 /**
  * Encoded Archive Context (EAC) export.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface EacExporter {
 

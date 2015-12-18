@@ -71,8 +71,6 @@ import java.util.Map;
  * LIMIT 100
  *     </code>
  * </pre>
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(SparQLResource.ENDPOINT)
 public class SparQLResource extends AbstractRestResource {

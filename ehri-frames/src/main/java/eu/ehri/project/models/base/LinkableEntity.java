@@ -27,9 +27,7 @@ import eu.ehri.project.models.Link;
 /**
  * An entity that can hold incoming links.
  *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
- *
+
  */
 public interface LinkableEntity extends AccessibleEntity {
     @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)

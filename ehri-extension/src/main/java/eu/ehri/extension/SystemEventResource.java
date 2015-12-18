@@ -77,8 +77,6 @@ import java.util.List;
  * Additionally, aggregation can be disabled by using <code>aggregation=off</code>.
  * <p>
  * Standard paging parameters apply to all end-points.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.SYSTEM_EVENT)
 public class SystemEventResource extends AbstractAccessibleEntityResource<SystemEvent>

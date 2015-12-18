@@ -24,8 +24,6 @@ import eu.ehri.project.core.TxGraph;
 
 /**
  * A resource which handles a transactional graph.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface TxCheckedResource {
     /**

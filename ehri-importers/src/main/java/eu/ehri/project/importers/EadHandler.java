@@ -48,9 +48,6 @@ import java.util.regex.Pattern;
  * should extend this class for that.
  * If there is no language, it does set the language of the description to English.
  * makes use of icaatom.properties with format: part/of/path/=attribute
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Ben Companjen (http://github.com/bencomp)
  */
 public class EadHandler extends SaxXmlHandler {
 

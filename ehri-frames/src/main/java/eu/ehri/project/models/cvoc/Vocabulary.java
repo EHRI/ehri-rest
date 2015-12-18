@@ -32,8 +32,6 @@ import eu.ehri.project.models.base.PermissionScope;
 /**
  * A collection of 'related' concepts, or maybe a bit like the SKOS Concept Scheme
  * Note that any concept in this Vocabulary that has no parent might be considered a topConcept. 
- * 
- * @author Paul Boon (http://github.com/PaulBoon)
  */
 @EntityType(EntityClass.CVOC_VOCABULARY)
 public interface Vocabulary extends

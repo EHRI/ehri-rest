@@ -64,8 +64,6 @@ import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
  * archdesc and c,c01-12 levels.
  * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EadImporter extends EaImporter {
 

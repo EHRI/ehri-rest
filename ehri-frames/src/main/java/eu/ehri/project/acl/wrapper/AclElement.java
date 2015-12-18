@@ -6,9 +6,7 @@ import eu.ehri.project.models.base.Accessor;
 
 import java.util.Set;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public abstract class AclElement implements Element {
     protected Element baseElement;
     protected AclGraph<?> graph;

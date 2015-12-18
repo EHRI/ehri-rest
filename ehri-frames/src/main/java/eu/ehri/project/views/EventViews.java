@@ -50,8 +50,6 @@ import java.util.Set;
 
 /**
  * View class for handling event streams.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class EventViews {
 

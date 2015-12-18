@@ -33,9 +33,7 @@ import eu.ehri.project.models.annotations.Mandatory;
 /**
  * An entity that describes another entity.
  *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
- *
+
  */
 public interface Description extends NamedEntity, AccessibleEntity {
 

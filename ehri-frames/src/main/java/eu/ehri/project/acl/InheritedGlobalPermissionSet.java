@@ -28,8 +28,6 @@ import java.util.Map;
 /**
  * A user's complete set of permissions, including
  * those inherited from groups to which they belong.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class InheritedGlobalPermissionSet {
 

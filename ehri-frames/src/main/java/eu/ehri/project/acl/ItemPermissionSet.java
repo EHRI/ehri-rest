@@ -37,8 +37,6 @@ import java.util.Set;
  *  }
  *     </code>
  * </pre>
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ItemPermissionSet {
 

@@ -31,9 +31,7 @@ import java.util.Set;
 /**
  * Base interface for all EHRI framed vertex types.
  *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
- *
+
  */
 public interface Frame extends VertexFrame {
 

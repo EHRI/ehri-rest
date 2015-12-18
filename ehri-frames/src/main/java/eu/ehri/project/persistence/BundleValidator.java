@@ -36,8 +36,6 @@ import java.util.Map;
 
 /**
  * Class responsible for validating bundles.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class BundleValidator {
 

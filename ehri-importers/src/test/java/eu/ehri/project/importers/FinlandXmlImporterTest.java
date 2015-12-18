@@ -29,9 +29,7 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class FinlandXmlImporterTest extends AbstractImporterTest{
     
        protected final String SINGLE_EAD = "EHRI-test-ead-fin.xml";

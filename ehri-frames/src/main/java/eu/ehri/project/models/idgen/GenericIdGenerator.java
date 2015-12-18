@@ -29,8 +29,6 @@ import java.util.UUID;
 
 /**
  * Generates a generic ID for tertiary node types.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum GenericIdGenerator implements IdGenerator {
 

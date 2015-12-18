@@ -36,8 +36,6 @@ import java.util.regex.Pattern;
 
 /**
  * Utility to convert Terezin data.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class TerezinDataConverter {
 

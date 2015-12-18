@@ -39,8 +39,6 @@ import static org.junit.Assert.assertTrue;
  * be removed.
  *
  * NB2: This might be to change.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class PromotionViewsTest extends AbstractFixtureTest {
 

@@ -56,8 +56,6 @@ import java.util.Set;
 
 /**
  * Helper class for checking and asserting access and write permissions.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class AclManager {
 

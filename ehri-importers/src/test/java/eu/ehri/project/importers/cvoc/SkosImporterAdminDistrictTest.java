@@ -31,9 +31,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
 
     protected final String SINGLE_SKOS = "cvoc/admin-dist-nolang.rdf";

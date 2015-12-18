@@ -19,8 +19,5 @@
 
 /**
  * Classes that map caught exceptions to appropriate HTTP responses.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 package eu.ehri.extension.errors.mappers;

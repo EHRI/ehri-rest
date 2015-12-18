@@ -42,8 +42,6 @@ import java.util.List;
 
 /**
  * Base ImportManager.
- *
- * @author Mike Bryant (https://github.com/mikesname)
  */
 public abstract class AbstractImportManager implements ImportManager {
 

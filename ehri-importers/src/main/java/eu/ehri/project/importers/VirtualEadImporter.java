@@ -57,8 +57,6 @@ import java.util.Map;
  * <p>
  * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
  * should not be any c-levels beneath such a c-level
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class VirtualEadImporter extends EaImporter {
 

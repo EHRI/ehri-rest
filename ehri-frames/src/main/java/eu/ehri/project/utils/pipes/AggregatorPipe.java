@@ -10,8 +10,6 @@ import java.util.NoSuchElementException;
 /**
  * Pipe processor to aggregate item streams into lists given a comparator
  * function that can compare neighbouring items.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class AggregatorPipe<E> extends AbstractPipe<E, List<E>> implements
         TransformPipe<E, List<E>> {

@@ -35,8 +35,6 @@ import eu.ehri.project.models.base.TemporalEntity;
 /**
  * Links two items together with a given body, with may either be
  * a text property or some other entity.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.LINK)
 public interface Link extends Promotable, TemporalEntity {

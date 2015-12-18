@@ -29,9 +29,7 @@ import javax.ws.rs.core.Response.Status;
 import java.util.HashMap;
 
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class WebDeserializationError extends WebApplicationException {
     private static final ObjectMapper mapper = new ObjectMapper();
 

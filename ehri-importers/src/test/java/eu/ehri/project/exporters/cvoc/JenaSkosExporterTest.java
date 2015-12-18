@@ -35,9 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class JenaSkosExporterTest extends AbstractSkosTest {
 
     @Test

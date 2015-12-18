@@ -28,8 +28,6 @@ import eu.ehri.project.persistence.ErrorSet;
  * some expected format. Like the {@link Bundle} class,
  * errors are held as a sub-tree corresponding to the
  * branches of the incoming data.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ValidationError extends Exception {
 

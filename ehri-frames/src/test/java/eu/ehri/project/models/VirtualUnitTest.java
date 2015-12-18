@@ -29,9 +29,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {

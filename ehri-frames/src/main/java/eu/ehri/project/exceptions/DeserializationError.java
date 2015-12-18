@@ -22,8 +22,6 @@ package eu.ehri.project.exceptions;
 /**
  * Represents an error caused when attempting to deserialize
  * incoming data to some internal format.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class DeserializationError extends Exception {
 

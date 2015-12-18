@@ -45,9 +45,7 @@ import eu.ehri.project.persistence.TraversalCallback;
 
 import java.util.Set;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class DescriptionViews <E extends DescribedEntity> {
 
     private final FramedGraph<?> graph;

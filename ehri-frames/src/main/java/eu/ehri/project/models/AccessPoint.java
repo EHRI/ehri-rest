@@ -33,8 +33,6 @@ import eu.ehri.project.models.base.NamedEntity;
 /**
  * Holds the information on a relationship specified in some Description,
  * but without the target-end of the relationship being determined.
- * 
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.ACCESS_POINT)
 public interface AccessPoint extends AccessibleEntity, NamedEntity, Annotator {

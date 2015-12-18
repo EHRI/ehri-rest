@@ -32,9 +32,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 @Provider
 @Produces(MediaType.TEXT_XML)
 public class BooleanXmlProvider implements MessageBodyWriter<Boolean> {

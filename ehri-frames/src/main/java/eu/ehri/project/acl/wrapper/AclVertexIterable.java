@@ -8,9 +8,7 @@ import eu.ehri.project.acl.AclManager;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class AclVertexIterable implements CloseableIterable<Vertex> {
     private final Iterable<Vertex> iterable;
     private final AclGraph<?> graph;

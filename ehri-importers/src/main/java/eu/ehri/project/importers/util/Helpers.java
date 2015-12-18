@@ -33,8 +33,7 @@ import java.util.Map;
 
 /**
  * Utility class for converting language codes.
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Ben Companjen (https://github.com/bencomp)
+
  */
 public class Helpers {
 

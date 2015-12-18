@@ -15,9 +15,7 @@ import eu.ehri.project.persistence.ActionManager;
 
 import java.util.List;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class UserProfileViews {
 
     private final FramedGraph<?> graph;

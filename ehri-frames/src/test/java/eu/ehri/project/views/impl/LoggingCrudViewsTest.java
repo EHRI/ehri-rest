@@ -38,9 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class LoggingCrudViewsTest extends AbstractFixtureTest {
 
     private ActionManager am;

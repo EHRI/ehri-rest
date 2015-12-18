@@ -47,8 +47,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * 
  * A nice glossary of terms used with controlled vocabularies can be found here: 
  * http://www.willpowerinfo.co.uk/glossary.htm
- * 
- * @author Paul Boon (http://github.com/PaulBoon)
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
 public interface Concept extends

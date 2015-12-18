@@ -40,8 +40,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A frame class for graph nodes representing documentary
  * unit items.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AbstractUnit {

@@ -33,9 +33,7 @@ import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class IcaAtomMultiLeveledTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomMultiLeveledTest.class);
      protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";

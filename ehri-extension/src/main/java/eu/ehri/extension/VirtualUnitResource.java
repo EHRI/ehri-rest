@@ -48,9 +48,6 @@ import java.util.List;
 
 /**
  * Provides a web service interface for the VirtualUnit type
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (https://github.com/mikesname)
  */
 @Path(Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends

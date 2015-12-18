@@ -32,9 +32,6 @@ import org.apache.commons.cli.Options;
 
 /**
  * Delete a single item via the command line.
- * 
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EntityDelete extends BaseCommand {
 

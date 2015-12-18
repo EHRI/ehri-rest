@@ -15,9 +15,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class Ead2002ExporterTest extends XmlExporterTest {
 
     @Test

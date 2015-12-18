@@ -18,9 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-/**
- * @author Marko A. Rodriguez (http://markorodriguez.com)
- */
+
 public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
 
     public Neo4j2Vertex(Node node, Neo4j2Graph graph) {

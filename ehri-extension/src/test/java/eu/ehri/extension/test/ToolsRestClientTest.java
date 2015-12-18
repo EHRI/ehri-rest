@@ -33,8 +33,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test admin REST functions.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ToolsRestClientTest extends BaseRestClientTest {
     @Test

@@ -24,9 +24,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class PropertiesCheckerTest {
 
     PropertiesChecker p;

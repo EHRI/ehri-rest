@@ -9,8 +9,6 @@ import java.io.OutputStream;
 
 /**
  * Encoded Archive Guide (EAD) export.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface EagExporter {
 

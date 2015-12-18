@@ -41,8 +41,6 @@ import java.util.logging.Logger;
 
 /**
  * Utility class to obtain a server.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ServerRunner {
 

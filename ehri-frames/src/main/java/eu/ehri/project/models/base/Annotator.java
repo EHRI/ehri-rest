@@ -26,9 +26,7 @@ import eu.ehri.project.models.Annotation;
 /**
  * An entity that can annotate {@link AnnotatableEntity}s.
  *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
- *
+
  */
 public interface Annotator extends Frame {
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)

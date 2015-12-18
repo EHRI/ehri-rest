@@ -32,8 +32,6 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * Generates an ID for nodes which represent Descriptions, where
  * the graph id is a combination of the parent scopes, plus the description
  * language code, plus an optional description identifier (say, 'alt').
- * 
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum DescriptionIdGenerator implements IdGenerator {
 

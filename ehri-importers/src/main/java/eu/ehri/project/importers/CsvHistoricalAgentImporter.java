@@ -41,8 +41,6 @@ import eu.ehri.project.persistence.Mutation;
 
 /**
  * Importer of historical agents loaded from a CSV file.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CsvHistoricalAgentImporter extends CsvAuthoritativeItemImporter {
 

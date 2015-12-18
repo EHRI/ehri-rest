@@ -18,7 +18,6 @@
  */
 
 /**
- *
  */
 package eu.ehri.project.importers;
 
@@ -32,8 +31,6 @@ import java.util.Map;
 /**
  * Handler for importing EAD files converted from the USHMM Solr index file.
  * These files were converted using the solr2ead XSLT stylesheet.
- *
- * @author Ben Companjen (http://github.com/bencomp)
  */
 public class UshmmHandler extends EadHandler {
 

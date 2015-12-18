@@ -22,8 +22,6 @@ package eu.ehri.project.utils;
 /**
  * Class for handling slugification of strings, for use
  * in global identifiers.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Slugify {
 

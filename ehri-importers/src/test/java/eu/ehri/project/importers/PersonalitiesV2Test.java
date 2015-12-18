@@ -45,8 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PersonalitiesV2Test extends AbstractImporterTest {
 

@@ -27,8 +27,6 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 
 /**
  * Factory for creating crud, with or without logging.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ViewFactory {
 

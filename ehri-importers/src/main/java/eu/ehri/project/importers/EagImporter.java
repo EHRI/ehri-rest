@@ -40,8 +40,6 @@ import java.util.regex.Pattern;
 
 /**
  * Importer of EAG-based descriptions.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagImporter extends EaImporter {
 

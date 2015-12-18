@@ -18,8 +18,6 @@ import static org.junit.Assert.*;
 
 /**
  * Tests for Neo4jGraphManager-specific functionality.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Neo4jGraphManagerTest {
 

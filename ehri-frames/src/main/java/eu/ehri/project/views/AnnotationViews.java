@@ -51,8 +51,6 @@ import java.util.Set;
 
 /**
  * View class for handling annotation-related operations.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class AnnotationViews implements Scoped<AnnotationViews> {
 

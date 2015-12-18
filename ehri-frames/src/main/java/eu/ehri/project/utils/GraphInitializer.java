@@ -41,8 +41,6 @@ import java.util.HashMap;
  *     <li>permission nodes</li>
  *     <li>content type nodes</li>
  * </ul>
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class GraphInitializer {
     private final GraphManager manager;

@@ -51,8 +51,6 @@ import java.util.Map;
 
 /**
  * Import EAC for a given repository into the database.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EacImporter extends EaImporter {
 

@@ -50,8 +50,6 @@ import java.util.regex.Pattern;
  * Importer of Map based representations of documentary units, historical agents,
  * virtual collections and other entities. Does not implement the actual
  * import methods.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class MapImporter extends AbstractImporter<Map<String, Object>> {
 

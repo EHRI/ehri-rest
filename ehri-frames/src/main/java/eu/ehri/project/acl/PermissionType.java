@@ -27,8 +27,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * permission grants. Like the {@link ContentTypes} enum,
  * each permission value has an equivalent node in the grant
  * to which permission grants point.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum PermissionType {
     CREATE("create", 1)

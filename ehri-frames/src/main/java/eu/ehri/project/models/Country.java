@@ -38,8 +38,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * Frame class representing a country. It's identifier should
  * be represented by an ISO3166 Alpha 2 code, lower cased.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.COUNTRY)
 public interface Country extends AccessibleEntity,

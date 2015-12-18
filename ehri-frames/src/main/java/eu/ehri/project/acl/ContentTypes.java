@@ -31,8 +31,6 @@ import eu.ehri.project.definitions.Entities;
  * individual permission grant nodes refer if they
  * pertain to an entire class of items rather than a
  * single item.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum ContentTypes {
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT),

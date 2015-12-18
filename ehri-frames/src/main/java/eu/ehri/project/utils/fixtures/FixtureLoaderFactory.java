@@ -25,9 +25,6 @@ import eu.ehri.project.utils.fixtures.impl.YamlFixtureLoader;
 /**
  * Factory class for concealing details of Fixture loading
  * implementation.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public class FixtureLoaderFactory {
     /**

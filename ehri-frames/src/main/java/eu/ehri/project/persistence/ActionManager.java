@@ -80,8 +80,6 @@ import java.util.Set;
  * e1--[actionHasEvent]-&gt;-- Event 1 ---[hasEvent]--&lt;--e1
  * </code>
  * </pre>
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ActionManager {
 
@@ -126,7 +124,6 @@ public final class ActionManager {
      * EventContext is a handle to a particular action to which additional
      * subjects can be added.
      *
-     * @author Mike Bryant (http://github.com/mikesname)
      */
     public class EventContext {
         private final ActionManager actionManager;

@@ -25,8 +25,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 /**
  * Frame class representing a type of content in the
  * graph.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.CONTENT_TYPE)
 public interface ContentType extends AccessibleEntity {

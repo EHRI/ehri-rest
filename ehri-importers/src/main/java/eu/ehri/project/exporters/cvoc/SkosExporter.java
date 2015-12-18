@@ -22,9 +22,7 @@ package eu.ehri.project.exporters.cvoc;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public interface SkosExporter {
     void export(OutputStream outputStream, String base) throws IOException;
 }

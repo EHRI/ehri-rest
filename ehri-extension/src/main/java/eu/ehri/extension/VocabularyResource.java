@@ -71,9 +71,6 @@ import java.util.List;
 /**
  * Provides a web service interface for the Vocabulary model. Vocabularies are
  * containers for Concepts.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabulary>

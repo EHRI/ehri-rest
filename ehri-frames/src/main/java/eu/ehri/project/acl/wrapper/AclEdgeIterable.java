@@ -6,9 +6,7 @@ import com.tinkerpop.blueprints.Edge;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class AclEdgeIterable implements CloseableIterable<Edge> {
 
     private final Iterable<Edge> iterable;

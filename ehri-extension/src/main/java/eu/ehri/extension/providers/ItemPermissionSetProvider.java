@@ -41,9 +41,7 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 public class ItemPermissionSetProvider implements MessageBodyReader<ItemPermissionSet> {

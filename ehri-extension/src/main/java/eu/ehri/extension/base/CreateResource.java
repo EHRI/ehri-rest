@@ -27,9 +27,7 @@ import eu.ehri.project.persistence.Bundle;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public interface CreateResource {
 
     /**

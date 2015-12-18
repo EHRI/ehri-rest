@@ -16,9 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/**
- * @author Marko A. Rodriguez (http://markorodriguez.com)
- */
+
 public class Neo4j2Index<T extends Neo4j2Element, S extends PropertyContainer> implements Index<T> {
 
     private final Class<T> indexClass;

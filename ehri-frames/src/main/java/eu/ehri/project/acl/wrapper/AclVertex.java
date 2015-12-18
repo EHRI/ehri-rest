@@ -6,9 +6,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.VertexQuery;
 import com.tinkerpop.blueprints.util.wrappers.WrapperVertexQuery;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class AclVertex extends AclElement implements Vertex {
 
     protected AclVertex(Vertex baseVertex, AclGraph<?> graph) {

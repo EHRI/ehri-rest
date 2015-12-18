@@ -25,9 +25,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.fail;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class GenericIdGeneratorTest {
     @Test
     public void testGetUUIDIsSequential() throws Exception {

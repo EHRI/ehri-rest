@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class Eag2012ExporterTest extends XmlExporterTest {
 
     @Test

@@ -33,9 +33,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "single-ead.xml";
 

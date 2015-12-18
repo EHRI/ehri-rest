@@ -42,8 +42,6 @@ import java.util.List;
 
 /**
  * Export SKOS RDF.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class JenaSkosExporter implements SkosExporter {
 

@@ -23,9 +23,6 @@ import java.io.InputStream;
 
 /**
  * Interface for classes which handle fixture loading.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public interface FixtureLoader {
 

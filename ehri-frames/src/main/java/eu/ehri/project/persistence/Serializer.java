@@ -45,8 +45,6 @@ import java.util.Map;
 /**
  * Class containing static methods to convert between FramedVertex instances,
  * EntityBundles, and raw data.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class Serializer {
 

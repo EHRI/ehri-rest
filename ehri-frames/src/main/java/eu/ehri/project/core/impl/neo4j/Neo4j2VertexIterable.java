@@ -8,9 +8,7 @@ import org.neo4j.graphdb.index.IndexHits;
 
 import java.util.Iterator;
 
-/**
- * @author Marko A. Rodriguez (http://markorodriguez.com)
- */
+
 public class Neo4j2VertexIterable<T extends Vertex> implements CloseableIterable<Neo4j2Vertex> {
 
     private final Iterable<Node> nodes;

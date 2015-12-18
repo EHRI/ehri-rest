@@ -57,8 +57,6 @@ import java.util.regex.Pattern;
 /**
  * Miscellaneous additional functionality that doesn't
  * fit anywhere else.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(ToolsResource.ENDPOINT)
 public class ToolsResource extends AbstractRestResource {

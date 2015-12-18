@@ -26,9 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class PropertiesChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesChecker.class);

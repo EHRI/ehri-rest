@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class NodeProperties {
 
     public final static String NODE = "node";

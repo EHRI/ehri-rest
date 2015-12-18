@@ -44,8 +44,6 @@ import java.util.Set;
 
 /**
  * Class responsible for creating, updating and deleting Bundles.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class BundleDAO {
 

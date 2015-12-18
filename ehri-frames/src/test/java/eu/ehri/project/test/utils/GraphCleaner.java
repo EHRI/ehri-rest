@@ -29,8 +29,7 @@ import com.tinkerpop.frames.FramedGraph;
  * Deletes all nodes and indices from a Neo4j graph. Use with care.
  * 
  * Note: This does NOT reset the Neo4j node auto-increment id.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
+ *
  * 
  */
 public class GraphCleaner<T extends IndexableGraph> {

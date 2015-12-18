@@ -26,9 +26,6 @@ import org.apache.commons.cli.CommandLine;
  * Command-line tools to perform actions on the graph database need
  * to specify a help text about the functionality of the tool and
  * a string to explain their usage.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public interface Command {
     /**

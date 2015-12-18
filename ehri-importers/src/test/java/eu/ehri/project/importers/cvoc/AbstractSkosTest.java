@@ -31,9 +31,7 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public abstract class AbstractSkosTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractSkosTest.class);
     public static final String FILE1 = "cvoc/simple.xml";

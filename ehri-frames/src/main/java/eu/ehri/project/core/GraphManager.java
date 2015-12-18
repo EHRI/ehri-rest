@@ -33,8 +33,6 @@ import java.util.Map;
  * An abstraction over the basic {@link FramedGraph} class
  * that provides unified CRUD semantics for low-level
  * graph operations.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface GraphManager {
 

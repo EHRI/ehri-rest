@@ -22,9 +22,7 @@ package eu.ehri.project.importers.util;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class HelpersTest {
     @Test
     public void testIso639DashTwoCode() throws Exception {

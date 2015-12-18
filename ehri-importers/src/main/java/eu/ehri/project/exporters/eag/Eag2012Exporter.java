@@ -48,8 +48,6 @@ import static eu.ehri.project.exporters.util.Helpers.createCDataElement;
 
 /**
  * Export EAG 2012 XML.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Eag2012Exporter implements EagExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eag2012Exporter.class);

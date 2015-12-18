@@ -35,9 +35,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class PermissionScopeTest extends AbstractFixtureTest {
     public DocumentaryUnit doc;
 

@@ -39,9 +39,6 @@ import java.util.List;
 /**
  * Dump a particular subgraph as a DOT file that can be visualised
  * using "dot", a part of GraphViz.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class GraphViz extends BaseCommand {
 

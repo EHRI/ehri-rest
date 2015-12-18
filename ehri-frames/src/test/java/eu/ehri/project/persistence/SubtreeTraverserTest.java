@@ -27,9 +27,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Test the subtree traverser actually works.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public class SubtreeTraverserTest extends AbstractFixtureTest {
 

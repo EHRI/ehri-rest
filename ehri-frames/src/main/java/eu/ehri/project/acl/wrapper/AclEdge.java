@@ -6,9 +6,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class AclEdge extends AclElement implements Edge {
     private final PipeFunction<Vertex,Boolean> aclFilter;
 

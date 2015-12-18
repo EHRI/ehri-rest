@@ -72,8 +72,6 @@ import java.util.List;
 
 /**
  * Resource class for import endpoints.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(ImportResource.ENDPOINT)
 public class ImportResource extends AbstractRestResource {

@@ -35,8 +35,6 @@ import eu.ehri.project.persistence.Mutation;
  * from {@link AccessibleEntity}.
  *
  * @param <E>
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface Crud<E extends AccessibleEntity> {
     Crud<E> setScope(PermissionScope scope);

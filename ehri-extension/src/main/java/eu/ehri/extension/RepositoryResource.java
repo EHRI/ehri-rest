@@ -62,8 +62,6 @@ import java.util.List;
 
 /**
  * Provides a web service interface for the Repository.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.REPOSITORY)
 public class RepositoryResource extends AbstractAccessibleEntityResource<Repository>

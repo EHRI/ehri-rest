@@ -32,7 +32,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * Class representing the system event queue node, of which
  * there Will Be Only One.
- *
  */
 @EntityType(EntityClass.SYSTEM)
 public interface SystemEventQueue extends Frame {

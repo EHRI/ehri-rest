@@ -29,8 +29,6 @@ import eu.ehri.project.models.base.TemporalEntity;
 
 /**
  * Frame class representing a date period.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.DATE_PERIOD)
 public interface DatePeriod extends AnnotatableEntity {

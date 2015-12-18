@@ -34,9 +34,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class CampsImporterTest extends AbstractImporterTest {
     protected final String SKOS_FILE = "cvoc/camps.rdf";
     protected final String SKOS_FILE_VERSION2 = "cvoc/campsv02.rdf";

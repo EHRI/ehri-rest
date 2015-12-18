@@ -24,9 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Vocabulary;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class SkosImporterFactory {
     public static SkosImporter newSkosImporter(FramedGraph<?> graph,
             Actioner actioner, Vocabulary vocabulary) {

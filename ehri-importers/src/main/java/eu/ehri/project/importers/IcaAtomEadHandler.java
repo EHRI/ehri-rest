@@ -34,8 +34,6 @@ import java.util.Map;
  * Handler of EADs exported from ICA-AtoM.
  * Only titles have to be handled in a special way.
  * makes use of icaatom.properties with format: part/of/path/=attribute
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadHandler extends EadHandler {
 

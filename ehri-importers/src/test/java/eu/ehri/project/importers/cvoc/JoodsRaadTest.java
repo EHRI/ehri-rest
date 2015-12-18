@@ -42,9 +42,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class JoodsRaadTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(JoodsRaadTest.class);
     protected final String EHRI_SKOS_TERM = "cvoc/joods_raad.xml";

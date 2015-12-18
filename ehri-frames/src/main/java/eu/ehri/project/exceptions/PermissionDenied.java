@@ -22,8 +22,6 @@ package eu.ehri.project.exceptions;
 /**
  * Represents a violation of the permission system constraints
  * on the modification of data.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class PermissionDenied extends Exception {
 

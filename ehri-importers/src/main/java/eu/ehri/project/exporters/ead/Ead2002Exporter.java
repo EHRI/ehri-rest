@@ -50,8 +50,6 @@ import static eu.ehri.project.exporters.util.Helpers.createCDataElement;
 
 /**
  * EAD 2002 Export.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Ead2002Exporter implements EadExporter {
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);

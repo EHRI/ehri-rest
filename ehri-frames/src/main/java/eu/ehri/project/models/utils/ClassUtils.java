@@ -43,8 +43,6 @@ import java.util.Map;
 
 /**
  * Helper functions for managing EntityType classes via reflection.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ClassUtils {
 

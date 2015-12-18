@@ -37,8 +37,6 @@ import java.util.NoSuchElementException;
  * 
  * Everything before the final slash is a PathSection and must indicate the
  * relation name and the index of the desired item.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 final class BundlePath {
 

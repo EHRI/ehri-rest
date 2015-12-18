@@ -44,9 +44,7 @@ import org.neo4j.helpers.collection.Iterables;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class DescriptionViewsTest extends AbstractFixtureTest {
 
     private ActionManager am;

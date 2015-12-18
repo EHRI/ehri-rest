@@ -20,6 +20,5 @@
 /**
  * Classes in this package support using .properties files to specify mappings
  * between pseudo-XPath chunks and properties of nodes in the graph.
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 package eu.ehri.project.importers.properties;

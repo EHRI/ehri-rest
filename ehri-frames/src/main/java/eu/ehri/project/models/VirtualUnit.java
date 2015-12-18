@@ -48,8 +48,6 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.removeAllRelationshi
  * an incoming "isDescribedBy" relationship from a VU. The difference
  * denotes ownership (dependency) which likewise controls cascading
  * deletions.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.VIRTUAL_UNIT)
 public interface VirtualUnit extends AbstractUnit {

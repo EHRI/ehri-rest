@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* @author Mike Bryant (http://github.com/mikesname)
 */ // Borrowed from https://github.com/simonjupp/java-skos-api
 public enum SkosRDFVocabulary {
     LABEL_RELATED("labelRelated"),

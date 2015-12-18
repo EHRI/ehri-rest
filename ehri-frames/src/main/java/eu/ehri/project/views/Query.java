@@ -61,7 +61,6 @@ import java.util.SortedMap;
  * TODO: Possibly refactor more of the ACL logic into AclManager.
  *
  * @param <E>
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
@@ -97,7 +96,6 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     /**
      * Filter predicates
      *
-     * @author Mike Bryant (http://github.com/mikesname)
      */
     public enum FilterPredicate {
         EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES, GT, GTE, LT, LTE

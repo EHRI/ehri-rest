@@ -42,7 +42,6 @@ import eu.ehri.project.views.Crud;
  * for CRUD actions.
  *
  * @param <E>
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 

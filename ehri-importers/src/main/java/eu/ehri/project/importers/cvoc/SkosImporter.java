@@ -26,9 +26,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public interface SkosImporter {
 
     /**

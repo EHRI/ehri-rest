@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Utilities for dealing with Gremlin pipelines and common
  * graph-manipulation functions.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class JavaHandlerUtils {
 

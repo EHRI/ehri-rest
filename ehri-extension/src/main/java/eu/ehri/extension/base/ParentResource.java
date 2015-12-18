@@ -31,8 +31,6 @@ import java.util.List;
 /**
  * Methods for managing resources that have a subordinate (hierarchical)
  * relationship to another resource.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface ParentResource {
 

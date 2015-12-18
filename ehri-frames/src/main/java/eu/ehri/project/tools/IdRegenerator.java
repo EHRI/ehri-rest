@@ -52,8 +52,6 @@ import java.util.List;
  * <p>
  * We also sometimes tweak the ID generation algorithm itself, which
  * necessitates bulk ID re-generation.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class IdRegenerator {
     private final FramedGraph<?> graph;

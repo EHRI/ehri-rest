@@ -39,8 +39,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * Frame class representing a serialized version of
  * some other node.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.VERSION)
 public interface Version extends AccessibleEntity {

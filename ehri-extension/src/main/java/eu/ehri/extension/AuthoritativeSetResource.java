@@ -42,8 +42,6 @@ import java.util.List;
  * Provides a web service interface for the AuthoritativeSet items. model.
  * Authoritative Sets are containers for Historical Agents
  * (authority files.)
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.AUTHORITATIVE_SET)
 public class AuthoritativeSetResource extends

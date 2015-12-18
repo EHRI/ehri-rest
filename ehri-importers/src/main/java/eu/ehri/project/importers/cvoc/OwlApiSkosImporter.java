@@ -61,9 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public final class OwlApiSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
             .getLogger(OwlApiSkosImporter.class);

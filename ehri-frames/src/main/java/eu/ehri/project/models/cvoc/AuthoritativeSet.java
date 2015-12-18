@@ -38,8 +38,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * A frame class representing a item that holds other
  * <i>authoritative</i> items, such as concepts and
  * historical agents.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
 public interface AuthoritativeSet extends AccessibleEntity,

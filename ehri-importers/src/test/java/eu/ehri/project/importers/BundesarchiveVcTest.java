@@ -34,9 +34,7 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class BundesarchiveVcTest extends AbstractImporterTest{
     
     protected final String TEST_REPO = "r1";

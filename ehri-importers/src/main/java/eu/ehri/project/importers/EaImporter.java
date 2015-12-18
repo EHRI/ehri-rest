@@ -36,8 +36,6 @@ import java.util.Map.Entry;
 
 /**
  * Import Map based representations of EAD or EAC for a given repository into the database.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class EaImporter extends MapImporter {
 

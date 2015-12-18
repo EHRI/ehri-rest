@@ -29,9 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Ignore;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class JenaSkosImporterTest extends AbstractSkosTest {
     @Test
     public void testImportFile1() throws Exception {

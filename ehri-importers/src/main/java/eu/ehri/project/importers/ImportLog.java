@@ -30,8 +30,6 @@ import java.util.Map;
  * Class that serves as a manifest for an import batch,
  * detailing how many items were created and updated,
  * and how many failed.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ImportLog {
 

@@ -61,8 +61,6 @@ import java.util.List;
 
 /**
  * Provides a web service interface for the DocumentaryUnit model.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource

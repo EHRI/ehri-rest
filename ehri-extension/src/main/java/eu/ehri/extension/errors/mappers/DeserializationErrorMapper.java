@@ -32,9 +32,6 @@ import java.io.StringWriter;
 
 /**
  * Maps the {@link DeserializationError} exception to the Bad Request response.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Provider
 public class DeserializationErrorMapper implements

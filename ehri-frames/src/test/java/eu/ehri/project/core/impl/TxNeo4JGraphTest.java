@@ -37,8 +37,6 @@ import static org.junit.Assert.*;
  * Neo4j2Graph we use for the command line utilities and the web
  * service. Essentially this overrides all the transaction-handling
  * behaviour and substitutes a more Neo4j-specific system.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class TxNeo4JGraphTest {
 

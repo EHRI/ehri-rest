@@ -31,9 +31,6 @@ import java.util.Map;
 
 /**
  * Maps the {@link AccessDenied} exception to the Unauthorized response.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Provider
 public class AccessDeniedMapper implements ExceptionMapper<AccessDenied> {

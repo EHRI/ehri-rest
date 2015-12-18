@@ -16,9 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-/**
- * @author Marko A. Rodriguez (http://markorodriguez.com)
- */
+
 abstract class Neo4j2Element implements Element {
 
     protected final Neo4j2Graph graph;

@@ -24,9 +24,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class HelpersTest {
 
     @Test

@@ -34,9 +34,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 public class BundleProvider implements MessageBodyReader<Bundle> {

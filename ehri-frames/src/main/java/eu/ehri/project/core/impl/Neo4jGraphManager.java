@@ -44,8 +44,6 @@ import java.util.NoSuchElementException;
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes,
  * with Neo4j Lucene query optimisations.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> {
 

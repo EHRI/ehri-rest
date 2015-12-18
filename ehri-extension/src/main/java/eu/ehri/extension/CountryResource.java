@@ -41,8 +41,6 @@ import java.util.List;
 /**
  * Provides a web service interface for managing countries
  * and creating repositories within them.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.COUNTRY)
 public class CountryResource

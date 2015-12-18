@@ -34,9 +34,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class YamlFixtureLoaderTest extends GraphTestBase {
 
     private FramedGraph<? extends TransactionalGraph> testGraph;

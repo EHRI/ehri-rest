@@ -22,8 +22,6 @@ package eu.ehri.project.models;
 /**
  * Values corresponding to the EAC-CPF 2010 and EAG 2012
  * XML schema.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public enum MaintenanceEventAgentType {
     // MB

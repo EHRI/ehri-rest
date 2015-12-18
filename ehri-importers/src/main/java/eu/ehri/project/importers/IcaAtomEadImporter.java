@@ -48,8 +48,6 @@ import java.util.Map;
  * archdesc and c,c01-12 levels.
  * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadImporter extends EaImporter {
 

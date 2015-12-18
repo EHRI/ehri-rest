@@ -36,8 +36,6 @@ import javax.ws.rs.core.Response;
 
 /**
  * Provides a RESTful(ish) interface for accessing item versions.
- *
- * @author Mike Bryant (https://github.com/mikesname)
  */
 @Path(Entities.VERSION)
 public class VersionResource extends

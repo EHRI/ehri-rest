@@ -32,9 +32,6 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 
 /**
  * An entity that can be promoted and demoted.
- *
- * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public interface Promotable extends AccessibleEntity {
     String PROMOTION_SCORE = "_promotionScore";

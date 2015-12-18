@@ -24,8 +24,6 @@ import eu.ehri.project.importers.EacImporter;
 
 /**
  * Import EAC-CPF files.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EacImport extends ImportCommand {
 

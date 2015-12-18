@@ -39,8 +39,6 @@ import java.util.logging.Logger;
 
 /**
  * A Blueprints implementation of the graph database Neo4j (http://neo4j.org)
- *
- * @author Marko A. Rodriguez (http://markorodriguez.com)
  */
 public class Neo4j2Graph implements TransactionalGraph, IndexableGraph, MetaGraph<GraphDatabaseService> {
     private static final Logger logger = Logger.getLogger(Neo4j2Graph.class.getName());

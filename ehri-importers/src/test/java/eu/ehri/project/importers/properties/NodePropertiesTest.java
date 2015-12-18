@@ -24,9 +24,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class NodePropertiesTest {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(NodePropertiesTest.class);
     

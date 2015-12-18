@@ -23,8 +23,6 @@ import eu.ehri.project.importers.EadImporter;
 
 /**
  * Specialisation of ImportCsvCommand that is used for importing EAD-like CSV files.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CsvDocDescImport extends ImportCsvCommand {
 

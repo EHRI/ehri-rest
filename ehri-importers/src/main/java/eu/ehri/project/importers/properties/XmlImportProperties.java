@@ -34,8 +34,6 @@ import java.util.Set;
 
 /**
  * wrapper class for the mapping of xml files to be imported.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class XmlImportProperties implements ImportProperties {
 

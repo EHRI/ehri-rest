@@ -48,8 +48,7 @@ import java.util.Set;
  * entities can extend this class.
  *
  * @param <E> the specific AccessibleEntity derived class
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (https://github.com/mikesname)
+
  */
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {

@@ -4,9 +4,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.TransactionalGraph;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public interface TxGraph extends TransactionalGraph, IndexableGraph {
     /**
      * Obtain a wrapped transaction object.

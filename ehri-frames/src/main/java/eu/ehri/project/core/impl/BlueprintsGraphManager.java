@@ -48,8 +48,6 @@ import java.util.NoSuchElementException;
  *
  * This class can be extended for when specific graph implementations (such
  * as Neo4j) can provide more efficient implementations of certain methods.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphManager {
 

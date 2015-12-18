@@ -32,8 +32,6 @@ import java.util.List;
  * An Import Manager takes a single file or stream, or a list of files, and a log message
  * and imports the data from the file into the database,
  * linking the import as an action with the given log message.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface ImportManager {
 

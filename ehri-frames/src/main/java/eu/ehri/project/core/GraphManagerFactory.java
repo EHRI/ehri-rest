@@ -28,8 +28,6 @@ import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 
 /**
  * A factory class for obtaining a {@link GraphManager} instance.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class GraphManagerFactory {
 

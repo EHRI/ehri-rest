@@ -41,9 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.io.PrintStream;
 import java.util.NoSuchElementException;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
 

@@ -36,8 +36,6 @@ import java.util.Stack;
 /**
  * Dublin Core files are imported directly beneath the scope provided.
  * There is NO structure beneath that.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DcEuropeanaHandler extends SaxXmlHandler {
 

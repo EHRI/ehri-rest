@@ -70,8 +70,6 @@ import java.util.Map;
 
 /**
  * Import SKOS RDF.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class JenaSkosImporter implements SkosImporter {
 

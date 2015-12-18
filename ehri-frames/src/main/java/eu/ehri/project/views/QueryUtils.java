@@ -39,8 +39,6 @@ import java.util.SortedMap;
  * for the ad-hoc (and out-dated) query syntax. This
  * is mainly used internally for testing and not exposed
  * externally.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class QueryUtils {
 

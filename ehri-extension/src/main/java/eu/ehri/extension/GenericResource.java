@@ -46,8 +46,6 @@ import java.util.List;
 /**
  * Provides a means of fetching items and lists of items
  * regardless of their specific type.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(GenericResource.ENDPOINT)
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {

@@ -76,8 +76,6 @@ import java.util.Map.Entry;
  * relationships: heldBy: some-repo
  *     </code>
  * </pre>
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class YamlFixtureLoader implements FixtureLoader {
 

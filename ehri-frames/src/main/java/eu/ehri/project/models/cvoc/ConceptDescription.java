@@ -31,9 +31,6 @@ import eu.ehri.project.models.base.Description;
  * 
  * NOTE: we should only allow one prefLabel (and thus one ConceptDescription) per language, 
  * but we cannot model that
- * 
- * @author Paul Boon (http://github.com/PaulBoon)
- *
  */
 @EntityType(EntityClass.CVOC_CONCEPT_DESCRIPTION)
 public interface ConceptDescription extends Description {

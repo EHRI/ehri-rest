@@ -41,9 +41,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class EventsSkosImporterTest extends AbstractImporterTest {
 
     protected final String EVENT_SKOS = "cvoc/ehri-events.rdf";

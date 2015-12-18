@@ -19,8 +19,7 @@
 
 /**
  * Tools to import controlled vocabularies into the graph database.
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Paul Boon (https://github.com/paulboon)
- * @author Ben Companjen (https://github.com/bencomp)
+
+
  */
 package eu.ehri.project.importers.cvoc;

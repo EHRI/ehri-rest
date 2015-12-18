@@ -23,9 +23,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 
 import javax.ws.rs.core.Response;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public interface GetResource {
 
     /**

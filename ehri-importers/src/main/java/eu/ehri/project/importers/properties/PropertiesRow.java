@@ -23,9 +23,7 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class PropertiesRow {
 
     final Map<String, String> properties;

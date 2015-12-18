@@ -26,8 +26,6 @@ import java.util.Collection;
 
 /**
  * Generate an ID given an entity type, a set of scopes, and some data.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface IdGenerator {
 

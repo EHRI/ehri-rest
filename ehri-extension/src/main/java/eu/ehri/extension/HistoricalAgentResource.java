@@ -60,8 +60,6 @@ import java.util.List;
 
 /**
  * Provides a web service interface for the HistoricalAgent model.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.HISTORICAL_AGENT)
 public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent>

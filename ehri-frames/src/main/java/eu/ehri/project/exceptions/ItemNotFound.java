@@ -22,8 +22,6 @@ package eu.ehri.project.exceptions;
 /**
  * Represents a failure to find an item in the graph based
  * on its ID value or an arbitrary key/value pair.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ItemNotFound extends Exception {
     private static final long serialVersionUID = -3562833443079995695L;

@@ -52,8 +52,6 @@ import java.util.Map;
  * This is not standard behaviour, so use with caution.
  * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class AraEadImporter extends EadImporter {
 

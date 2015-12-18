@@ -30,7 +30,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * @author Mike Bryant (http://github.com/mikesname)
  *
  * TODO: Cover class more comprehensively.
  */

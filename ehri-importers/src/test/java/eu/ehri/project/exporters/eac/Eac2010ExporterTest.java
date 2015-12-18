@@ -33,9 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class Eac2010ExporterTest extends XmlExporterTest {
     @Test
     public void testExport1() throws Exception {

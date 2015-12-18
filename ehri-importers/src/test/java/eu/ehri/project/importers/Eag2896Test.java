@@ -39,9 +39,7 @@ import static org.junit.Assert.*;
 
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class Eag2896Test extends AbstractImporterTest {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Eag2896Test.class);

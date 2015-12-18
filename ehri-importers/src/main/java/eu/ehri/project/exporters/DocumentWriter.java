@@ -14,8 +14,6 @@ import java.io.OutputStream;
 /**
  * Helper for writing XML documents to a stream, with
  * configurable indent.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class DocumentWriter {
     private final Document document;

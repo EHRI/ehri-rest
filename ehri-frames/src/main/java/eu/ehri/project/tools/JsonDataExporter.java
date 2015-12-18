@@ -40,8 +40,6 @@ import java.util.Map;
  * Tool for exporting a graph in a manner conducive
  * to converting it to other formats, e.g. RDF triples,
  * in a streaming manner.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class JsonDataExporter {
 

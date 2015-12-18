@@ -31,9 +31,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * An entity that may have prior versions.
  *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
- *
+
  */
 public interface VersionedEntity extends Frame {
     @Adjacency(label = Ontology.ENTITY_HAS_PRIOR_VERSION, direction = Direction.OUT)

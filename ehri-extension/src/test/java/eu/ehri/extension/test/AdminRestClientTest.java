@@ -37,8 +37,6 @@ import static org.junit.Assert.*;
 
 /**
  * Test admin REST functions.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class AdminRestClientTest extends BaseRestClientTest {
 

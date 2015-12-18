@@ -21,9 +21,6 @@ package eu.ehri.project.models.base;
 
 /**
  * An entity that can have child entities.
- *
- * @author Mike Bryant (http://github.com/mikesname)
- *
  */
 public interface ItemHolder {
     String CHILD_COUNT = "childCount";

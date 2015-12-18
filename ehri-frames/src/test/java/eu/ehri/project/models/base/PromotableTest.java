@@ -27,9 +27,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class PromotableTest extends AbstractFixtureTest {
 
     private UserProfile user1;

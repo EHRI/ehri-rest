@@ -21,8 +21,6 @@ package eu.ehri.project.exceptions;
 
 /**
  * Represents an access violation.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class AccessDenied extends Exception {
 

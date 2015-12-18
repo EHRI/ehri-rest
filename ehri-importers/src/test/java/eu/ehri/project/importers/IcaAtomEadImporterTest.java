@@ -37,9 +37,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class IcaAtomEadImporterTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);
        protected final String SINGLE_EAD = "hierarchical-ead.xml";

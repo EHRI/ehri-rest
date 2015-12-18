@@ -49,8 +49,6 @@ import java.util.Set;
 
 /**
  * Provides a web service interface for the Group model.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.GROUP)
 public class GroupResource

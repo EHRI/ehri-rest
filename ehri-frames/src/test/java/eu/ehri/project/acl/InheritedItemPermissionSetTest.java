@@ -31,9 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class InheritedItemPermissionSetTest extends AbstractFixtureTest {
 
     private AclManager aclManager;

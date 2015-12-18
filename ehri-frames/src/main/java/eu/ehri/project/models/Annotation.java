@@ -33,8 +33,6 @@ import eu.ehri.project.models.base.Promotable;
 
 /**
  * A frame class representing an annotation.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.ANNOTATION)
 public interface Annotation extends Promotable {

@@ -30,8 +30,6 @@ import java.io.IOException;
 /**
  * Test base class which starts a Neo4j server and loads the
  * resource classes as an unmanaged extension.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public abstract class RunningServerTest {
 

@@ -24,9 +24,6 @@ import eu.ehri.project.definitions.EventTypes;
 /**
  * Values corresponding to the EAC-CPF 2010 and EAG 2012
  * XML schema.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum MaintenanceEventType {
     created, revised, deleted, cancelled, derived, updated;

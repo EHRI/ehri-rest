@@ -45,8 +45,6 @@ import java.util.Map;
 /**
  * Import manager to use with CSV files.
  * When used to import documentaryUnits, make sure to have a 'sourceFileId' column as well.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CsvImportManager extends AbstractImportManager {
 

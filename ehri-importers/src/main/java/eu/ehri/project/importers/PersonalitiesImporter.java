@@ -47,8 +47,6 @@ import java.util.Map;
  * <p/>
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PersonalitiesImporter extends MapImporter {
 

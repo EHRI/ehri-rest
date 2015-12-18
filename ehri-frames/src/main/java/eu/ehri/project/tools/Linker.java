@@ -55,8 +55,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Utility class for performing operations on the database
  * related to the creation and validation of links between
  * items.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class Linker {
 

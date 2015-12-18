@@ -28,8 +28,6 @@ import java.lang.annotation.Target;
  * Annotation that marks a Frame method as serializable
  * metadata. This should only be applied on methods that
  * return scalar values.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

@@ -19,8 +19,6 @@ import static org.junit.Assert.*;
  * nodes that a given user is allowed to see. In these tests
  * the vertex representing documentary unit 'c1' has visibility
  * restrictions preventing it being seen by the invalid user.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class AclGraphTest extends AbstractFixtureTest {
 

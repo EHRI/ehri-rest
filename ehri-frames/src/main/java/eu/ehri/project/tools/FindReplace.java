@@ -40,8 +40,6 @@ import java.util.regex.Pattern;
  * with mutating Cypher but that's an even sharper tool. The purpose
  * here is to formalise some very common operations with specific
  * checks in place.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class FindReplace {
     private final GraphManager manager;

@@ -8,9 +8,7 @@ import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.base.Accessor;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
 
     protected final T baseGraph;

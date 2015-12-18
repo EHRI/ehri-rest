@@ -41,9 +41,6 @@ import org.apache.commons.cli.Options;
 
 /**
  * Add a country.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CountryAdd extends BaseCommand {
 

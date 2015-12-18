@@ -34,9 +34,7 @@ import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class Wp2KeywordsTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(Wp2KeywordsTest.class);
     protected final String SKOS_FILE = "cvoc/wp2_skos_keywords.xml";

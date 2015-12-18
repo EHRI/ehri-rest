@@ -33,9 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class LoadFixturesTest extends GraphTestBase {
 
     private FramedGraph<? extends TransactionalGraph> testGraph;

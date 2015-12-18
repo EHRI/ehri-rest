@@ -41,8 +41,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 /**
  * A frame class for graph nodes representing repository
  * items.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.REPOSITORY)
 public interface Repository extends DescribedEntity,

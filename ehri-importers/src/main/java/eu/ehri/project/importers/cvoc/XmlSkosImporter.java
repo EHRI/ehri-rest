@@ -71,8 +71,6 @@ import java.util.Map;
  * <p>
  * Note: most code was copied from the EadImportManager and its base classes
  * Also note that: We don't have an Repository for the CVOCs, but a Vocabulary instead!
- *
- * @author Paul Boon (http://github.com/PaulBoon)
  */
 public final class XmlSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory

@@ -32,9 +32,6 @@ import java.util.Map;
 
 /**
  * Maps the {@link ItemNotFound} exception to the Not Found response.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Provider
 public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {

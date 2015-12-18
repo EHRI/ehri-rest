@@ -56,8 +56,6 @@ import java.util.Map;
 /**
  * Provides additional Admin methods needed by client systems
  * and general graph-maintenance functionality.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(AdminResource.ENDPOINT)
 public class AdminResource extends AbstractRestResource {

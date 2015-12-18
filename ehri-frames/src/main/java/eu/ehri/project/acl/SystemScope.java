@@ -33,8 +33,6 @@ import java.util.Collection;
 /**
  * Singleton class representing the system scope for
  * permissions and ID namespaces.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public enum SystemScope implements PermissionScope {
     

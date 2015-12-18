@@ -35,9 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class Wp2JmpEadTest extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(Wp2JmpEadTest.class);

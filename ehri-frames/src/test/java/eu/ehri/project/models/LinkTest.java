@@ -26,9 +26,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class LinkTest extends AbstractFixtureTest {
     @Test
     public void testGetLinker() throws Exception {

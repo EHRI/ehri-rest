@@ -9,8 +9,6 @@ import java.io.OutputStream;
 
 /**
  * Encoded Archival Description (EAD) export.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface EadExporter {
 

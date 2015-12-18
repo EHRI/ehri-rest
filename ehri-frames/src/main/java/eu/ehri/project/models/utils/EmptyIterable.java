@@ -25,8 +25,7 @@ import java.util.NoSuchElementException;
 /**
  * A placeholder class for when dummy objects have to return an
  * iterable that contains no items.
- * 
- * @author Mike Bryant (http://github.com/mikesname)
+ *
  *
  * @param <T>
  */

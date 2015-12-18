@@ -31,8 +31,6 @@ import java.io.FileInputStream;
 
 /**
  * Command for loading a fixtures file into the graph.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class LoadFixtures extends BaseCommand {
 

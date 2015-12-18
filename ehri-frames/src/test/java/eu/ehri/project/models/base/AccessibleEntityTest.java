@@ -36,9 +36,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class AccessibleEntityTest extends AbstractFixtureTest {
     @Test
     public void testGetAccessors() throws Exception {

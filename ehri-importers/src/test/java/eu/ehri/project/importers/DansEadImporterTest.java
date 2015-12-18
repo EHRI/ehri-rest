@@ -29,9 +29,7 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class DansEadImporterTest extends AbstractImporterTest{
     
        protected final String SINGLE_EAD = "dans_convertedead_part.xml";

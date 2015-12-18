@@ -28,8 +28,6 @@ import eu.ehri.project.models.base.LinkableEntity;
 
 /**
  * An item that belongs in some authoritative set.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public interface AuthoritativeItem extends LinkableEntity, IdentifiableEntity {
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)

@@ -37,9 +37,7 @@ import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
- */
+
 public class CampsV2_1Test extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(CampsV2_1Test.class);
     protected final String SKOS_FILE = "cvoc/camps.rdf";

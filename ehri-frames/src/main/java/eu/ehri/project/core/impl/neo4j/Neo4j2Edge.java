@@ -8,9 +8,7 @@ import com.tinkerpop.blueprints.util.ExceptionFactory;
 import com.tinkerpop.blueprints.util.StringFactory;
 import org.neo4j.graphdb.Relationship;
 
-/**
- * @author Marko A. Rodriguez (http://markorodriguez.com)
- */
+
 public class Neo4j2Edge extends Neo4j2Element implements Edge {
 
     public Neo4j2Edge(Relationship relationship, Neo4j2Graph graph) {
