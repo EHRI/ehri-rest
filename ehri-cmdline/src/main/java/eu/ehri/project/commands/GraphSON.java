@@ -58,9 +58,6 @@ import java.util.zip.GZIPInputStream;
  * $NEO4J_HOME/bin/neo4j start
  *     </code>
  * </pre>
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class GraphSON extends BaseCommand {
 

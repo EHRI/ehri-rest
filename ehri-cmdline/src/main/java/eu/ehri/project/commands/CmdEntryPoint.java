@@ -39,9 +39,6 @@ import java.util.Map;
 
 /**
  * Entry point for launching admin commands.
- *
- * @author Paul Boon (http://github.com/PaulBoon)
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class CmdEntryPoint extends BaseCommand {
 

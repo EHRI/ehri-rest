@@ -26,9 +26,6 @@ import org.apache.commons.cli.Options;
 
 /**
  * Initialise the graph database with minimal nodes.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Initialize extends BaseCommand {
     

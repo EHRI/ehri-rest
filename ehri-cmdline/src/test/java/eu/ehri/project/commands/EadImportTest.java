@@ -25,9 +25,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class EadImportTest extends AbstractFixtureTest {
     @Test
     public void testEadImport() throws Exception {

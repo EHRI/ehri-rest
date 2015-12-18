@@ -30,9 +30,7 @@ import static eu.ehri.project.commands.CmdEntryPoint.RetCode.BAD_DATA;
 import static eu.ehri.project.commands.CmdEntryPoint.RetCode.OK;
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class EntityAddTest extends AbstractFixtureTest {
     @Test
     public void testEntityAdd() throws Exception {

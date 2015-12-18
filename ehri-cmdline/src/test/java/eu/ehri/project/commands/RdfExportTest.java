@@ -29,9 +29,7 @@ import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class RdfExportTest extends AbstractFixtureTest {
     @Ignore("Ignored until SailGraph supports array properties (which we need). It doesn't as of Blueprints 2.5.0")
     @Test

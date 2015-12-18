@@ -32,8 +32,6 @@ import static org.junit.Assert.assertTrue;
  * Test for GraphML dump. NB: Unlike the {@link eu.ehri.project.commands.GraphSON}
  * command loading the dump file will not result in an unchanged graph due to
  * lack of support for array properties.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class GraphMLTest extends AbstractFixtureTest {
     @Test

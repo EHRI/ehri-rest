@@ -14,7 +14,7 @@ The few commands that are currently available are:
 
 	load-fixtures
 
-Load the fixtures into the specified DB. The fixtures are currently hard-coded as those used in the ehri-frames tests, but this will become more flexible.
+Load the fixtures into the specified DB. The fixtures are currently hard-coded as those used in the ehri-core tests, but this will become more flexible.
 
 	import-ead -user <user-id> -repo <repository-id> [-createuser] [-createrepo] <ead-file.xml>
 

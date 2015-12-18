@@ -23,8 +23,6 @@ import eu.ehri.project.importers.CsvConceptImporter;
 
 /**
  * Extension of ImportCsvCommand that uses the CsvConceptImporter.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class CsvConceptImport extends ImportCsvCommand {
 

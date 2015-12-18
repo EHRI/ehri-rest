@@ -31,9 +31,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Mike Bryant (http://github.com/mikesname)
- */
+
 public class RelationAddTest extends GraphTestBase {
 
     private Vertex mike;

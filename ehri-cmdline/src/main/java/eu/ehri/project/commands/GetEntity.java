@@ -29,9 +29,6 @@ import org.apache.commons.cli.CommandLine;
 
 /**
  * Fetch an item's serialized representation via the command line.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class GetEntity extends BaseCommand {
 

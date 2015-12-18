@@ -37,9 +37,6 @@ import org.apache.commons.cli.PosixParser;
  *     <li>Get usage</li>
  *     <li>Execute with options</li>
  * </ul>
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class BaseCommand implements Command {
 

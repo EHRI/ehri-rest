@@ -39,8 +39,6 @@ import java.util.Map;
 /**
  * Generic command for importing CSV files that uses an implementation of MapImporter
  * to manipulate the graph.
- *
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCsvCommand extends BaseCommand {
     Class<? extends MapImporter> importer;

@@ -27,9 +27,6 @@ import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
  * Import command for importing Dublin Core files.
- *
- * @author Mike Bryant (https://github.com/mikesname)
- * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DcImport extends ImportCommand {
 

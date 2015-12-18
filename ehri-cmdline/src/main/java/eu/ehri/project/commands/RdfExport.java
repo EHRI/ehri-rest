@@ -36,8 +36,6 @@ import java.io.OutputStream;
  * NB: This current has a problem with TP 2.4.0 which
  * causes a crash on array properties. It seems to have
  * been fixed on TP 2.5.0-SNAPSHOT.
- *
- * @author Mike Bryant (http://github.com/mikesname)
  */
 public class RdfExport extends BaseCommand {
 
