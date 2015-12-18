@@ -4,7 +4,7 @@
 ARGS="$@"
 
 mvn -Dexec.classpathScope=compile \
-    -pl ehri-cmdline \
+    -pl ehri-cli \
     -Dexec.mainClass="eu.ehri.project.commands.CmdEntryPoint" \
     -Dlog4j.rootLogger=WARN \
     -quiet \

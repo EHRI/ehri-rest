@@ -1,4 +1,4 @@
-ehri-cmdline
+ehri-cli
 ============
 As the name suggests, this module provides a limited (but expanding) command-line interface to the EHRI Neo4j database tools. There is currently no "installer", so it can only be run from the ehri-data project root directory, using the scripts/cmd shell wrapper.
 

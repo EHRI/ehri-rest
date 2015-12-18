@@ -69,7 +69,7 @@
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-cmdline</artifactId>
+            <artifactId>ehri-cli</artifactId>
             <version>0.11.2-SNAPSHOT</version>
         </dependency>
         <dependency>
