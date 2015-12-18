@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
@@ -27,8 +28,6 @@ import eu.ehri.project.views.EventViews;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.neo4j.function.Function;
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -41,6 +40,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -196,12 +196,12 @@ public class Ead2002Exporter implements EadExporter {
 
     // Sort the children by identifier. FIXME: This might be a bad assumption!
     private Iterable<DocumentaryUnit> getOrderedChildren(DocumentaryUnit unit) {
-        return Iterables.sort(unit.getChildren(), new Function<DocumentaryUnit, Comparable>() {
+        return Ordering.from(new Comparator<DocumentaryUnit>() {
             @Override
-            public Comparable apply(DocumentaryUnit unit) {
-                return unit.getIdentifier();
+            public int compare(DocumentaryUnit c1, DocumentaryUnit c2) {
+                return c1.getIdentifier().compareTo(c2.getIdentifier());
             }
-        });
+        }).sortedCopy(unit.getChildren());
     }
 
     private void addRevisionDesc(Document doc, Element eadHeaderElem, DocumentaryUnit unit) {
