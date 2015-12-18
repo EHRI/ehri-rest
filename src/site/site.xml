@@ -44,7 +44,7 @@
             <item href="ehri-core/index.html" name="Core Java API"/>
             <item href="ehri-ws/index.html" name="Web Service"/>
             <item href="ehri-io/index.html" name="Import Tools"/>
-            <item href="ehri-cmdline/index.html" name="Command Line Utilities"/>
+            <item href="ehri-cli/index.html" name="Command Line Utilities"/>
         </menu>
 
         <menu ref="reports"/>

@@ -106,7 +106,7 @@
         <module>ehri-core</module>
         <module>ehri-ws</module>
         <module>ehri-io</module>
-        <module>ehri-cmdline</module>
+        <module>ehri-cli</module>
         <module>ehri-definitions</module>
         <module>assembly</module>
     </modules>
