@@ -74,7 +74,7 @@
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-extension</artifactId>
+            <artifactId>ehri-ws</artifactId>
             <version>0.11.2-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -89,7 +89,7 @@
             <dependencies>
                 <dependency>
                     <groupId>ehri-project</groupId>
-                    <artifactId>ehri-extension-sparql</artifactId>
+                    <artifactId>ehri-ws-sparql</artifactId>
                     <version>0.11.2-SNAPSHOT</version>
                 </dependency>
             </dependencies>

@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ehri-extension-sparql</artifactId>
+    <artifactId>ehri-ws-sparql</artifactId>
     <version>0.11.2-SNAPSHOT</version>
 
     <name>Web Service SparQL Extension</name>
@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-extension</artifactId>
+            <artifactId>ehri-ws</artifactId>
             <version>0.11.2-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
@@ -115,7 +115,7 @@
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-extension</artifactId>
+            <artifactId>ehri-ws</artifactId>
             <version>0.11.2-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>compile</scope>

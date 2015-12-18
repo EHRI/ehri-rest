@@ -104,7 +104,7 @@
 
     <modules>
         <module>ehri-core</module>
-        <module>ehri-extension</module>
+        <module>ehri-ws</module>
         <module>ehri-io</module>
         <module>ehri-cmdline</module>
         <module>ehri-definitions</module>
@@ -220,7 +220,7 @@
         <profile>
             <id>sparql</id>
             <modules>
-                <module>ehri-extension-sparql</module>
+                <module>ehri-ws-sparql</module>
             </modules>
         </profile>
     </profiles>

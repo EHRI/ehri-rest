@@ -11,7 +11,7 @@
     <name>Web Service</name>
     <description>Web service layer exposed via a Neo4j extension.</description>
 
-    <artifactId>ehri-extension</artifactId>
+    <artifactId>ehri-ws</artifactId>
     <version>0.11.2-SNAPSHOT</version>
 
     <!-- TODO add license info and more -->

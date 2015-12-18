@@ -42,7 +42,7 @@
         <menu name="Modules">
             <item href="ehri-definitions/index.html" name="Data Definitions"/>
             <item href="ehri-core/index.html" name="Core Java API"/>
-            <item href="ehri-extension/index.html" name="Web Service"/>
+            <item href="ehri-ws/index.html" name="Web Service"/>
             <item href="ehri-io/index.html" name="Import Tools"/>
             <item href="ehri-cmdline/index.html" name="Command Line Utilities"/>
         </menu>
@@ -54,7 +54,7 @@
         </menu>
 
         <menu name="Web Service Docs">
-            <item href="ehri-extension/wsdocs/index.html" name="Web API"/>
+            <item href="ehri-ws/wsdocs/index.html" name="Web API"/>
         </menu>
 
         <menu ref="resources">
