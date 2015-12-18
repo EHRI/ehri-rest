@@ -6,13 +6,13 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.11.1-SNAPSHOT</version>
+        <version>0.11.2-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-frames</artifactId>
     <packaging>jar</packaging>
 
 
-    <version>0.11.1-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
 
     <name>EHRI Core API</name>
     <description>Java API for data access and permissions.</description>
@@ -56,7 +56,7 @@
         <plugins>
             <!--  use surefire instead of maven-jar-plugin 2.2
                   surfire plugin worked better with eclipse
-                  also used by ehri-importers project-->
+                  also used by ehri-io project-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>0.11.1-SNAPSHOT</version>
+            <version>0.11.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <repositories>

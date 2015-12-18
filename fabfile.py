@@ -133,7 +133,7 @@ def update_properties():
     dstpath = env.properties_location
     dstfile = os.path.join(dstpath, srcname)
 
-    with lcd("ehri-importers/src/main/resources/"):
+    with lcd("ehri-io/src/main/resources/"):
         local("tar -czf %s *.properties" % srcname)
 
         # upload the assembly gzip

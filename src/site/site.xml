@@ -43,7 +43,7 @@
             <item href="ehri-definitions/index.html" name="Data Definitions"/>
             <item href="ehri-frames/index.html" name="Core Java API"/>
             <item href="ehri-extension/index.html" name="Web Service"/>
-            <item href="ehri-importers/index.html" name="Import Tools"/>
+            <item href="ehri-io/index.html" name="Import Tools"/>
             <item href="ehri-cmdline/index.html" name="Command Line Utilities"/>
         </menu>
 

@@ -4,12 +4,12 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.11.1-SNAPSHOT</version>
+        <version>0.11.2-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-cmdline</artifactId>
     <name>Command Line Tools</name>
     <description>Command line tools for interacting with the backend graph DB.</description>
-    <version>0.11.1-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.11.1-SNAPSHOT</version>
+            <version>0.11.2-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-frames</artifactId>
-            <version>0.11.1-SNAPSHOT</version>
+            <version>0.11.2-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -97,8 +97,8 @@
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-importers</artifactId>
-            <version>0.11.1-SNAPSHOT</version>
+            <artifactId>ehri-io</artifactId>
+            <version>0.11.2-SNAPSHOT</version>
         </dependency>
 
         <!-- RDF export -->
