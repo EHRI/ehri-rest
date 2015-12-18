@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-frames</artifactId>
+            <artifactId>ehri-core</artifactId>
             <version>0.11.2-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
@@ -45,7 +45,7 @@
 
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-frames</artifactId>
+            <artifactId>ehri-core</artifactId>
             <version>0.11.2-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>

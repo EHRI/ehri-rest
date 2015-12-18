@@ -41,7 +41,7 @@
             to exclude the assembly module -->
         <menu name="Modules">
             <item href="ehri-definitions/index.html" name="Data Definitions"/>
-            <item href="ehri-frames/index.html" name="Core Java API"/>
+            <item href="ehri-core/index.html" name="Core Java API"/>
             <item href="ehri-extension/index.html" name="Web Service"/>
             <item href="ehri-io/index.html" name="Import Tools"/>
             <item href="ehri-cmdline/index.html" name="Command Line Utilities"/>

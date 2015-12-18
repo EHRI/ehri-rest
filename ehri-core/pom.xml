@@ -8,7 +8,7 @@
         <artifactId>ehri-data</artifactId>
         <version>0.11.2-SNAPSHOT</version>
     </parent>
-    <artifactId>ehri-frames</artifactId>
+    <artifactId>ehri-core</artifactId>
     <packaging>jar</packaging>
 
 

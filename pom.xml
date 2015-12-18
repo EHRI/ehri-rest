@@ -103,7 +103,7 @@
     </licenses>
 
     <modules>
-        <module>ehri-frames</module>
+        <module>ehri-core</module>
         <module>ehri-extension</module>
         <module>ehri-io</module>
         <module>ehri-cmdline</module>
