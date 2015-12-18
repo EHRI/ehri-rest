@@ -42,15 +42,6 @@ public interface GraphManager {
     FramedGraph<?> getGraph();
 
     /**
-     * Cast one frame to another.
-     *
-     * @param frame The given frame
-     * @param cls   The frame class to cast into
-     * @return The input frame cast as the output class
-     */
-    <T extends Frame> T cast(Frame frame, Class<T> cls);
-
-    /**
      * Get the id of a given vertex.
      *
      * @param vertex A vertex

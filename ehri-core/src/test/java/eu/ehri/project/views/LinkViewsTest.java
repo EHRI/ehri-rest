@@ -105,8 +105,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
         assertEquals(1L, Iterables.size(link.getLinkBodies()));
-        AccessPoint rel = manager.cast(link.getLinkBodies().iterator().next(),
-                AccessPoint.class);
+        AccessPoint rel = link.getLinkBodies().iterator().next().as(AccessPoint.class);
         assertEquals(rel.getName(), linkDesc);
         assertEquals(rel.getRelationshipType(), linkType);
         Description d = rel.getDescription();

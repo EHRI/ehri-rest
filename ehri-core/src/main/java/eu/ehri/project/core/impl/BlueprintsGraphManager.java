@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
- *
+ * <p/>
  * This class can be extended for when specific graph implementations (such
  * as Neo4j) can provide more efficient implementations of certain methods.
  */
@@ -65,11 +65,6 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     @Override
-    public <E extends Frame> E cast(Frame frame, Class<E> cls) {
-        return graph.frame(frame.asVertex(), cls);
-    }
-
-    @Override
     public String getId(Vertex vertex) {
         return vertex.getProperty(EntityType.ID_KEY);
     }
@@ -80,8 +75,8 @@ public class BlueprintsGraphManager<T extends IndexableGraph> implements GraphMa
     }
 
     @Override
-    public Map<String,Object> getProperties(Vertex vertex) {
-        Map<String,Object> props = Maps.newHashMap();
+    public Map<String, Object> getProperties(Vertex vertex) {
+        Map<String, Object> props = Maps.newHashMap();
         for (String key : vertex.getPropertyKeys()) {
             if (!key.startsWith(METADATA_PREFIX)) {
                 props.put(key, vertex.getProperty(key));

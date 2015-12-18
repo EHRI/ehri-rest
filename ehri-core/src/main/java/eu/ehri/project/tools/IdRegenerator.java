@@ -145,14 +145,14 @@ public class IdRegenerator {
                             String idBase = idgen.getIdBase(itemBundle);
                             Collection<String> descIdChain = Lists.newArrayList(idChain);
                             descIdChain.add(idBase);
-                            for (Description d : manager.cast(item, DescribedEntity.class).getDescriptions()) {
+                            for (Description d : item.as(DescribedEntity.class).getDescriptions()) {
                                 Bundle desc = depSerializer.vertexFrameToBundle(d);
                                 String newDescriptionId = desc.getType().getIdGen().generateId(descIdChain, desc);
                                 manager.renameVertex(d.asVertex(), d.getId(), newDescriptionId);
                             }
 
                             // Change the ID on any versions...
-                            for (Version v : manager.cast(item, VersionedEntity.class).getAllPriorVersions()) {
+                            for (Version v : item.as(VersionedEntity.class).getAllPriorVersions()) {
                                 manager.setProperty(v.asVertex(), Ontology.VERSION_ENTITY_ID, newId);
                             }
                         }

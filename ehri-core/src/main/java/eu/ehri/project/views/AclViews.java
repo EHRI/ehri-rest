@@ -99,11 +99,11 @@ public final class AclViews implements Scoped<AclViews> {
         boolean scoped = !scope.equals(SystemScope.INSTANCE);
         // Log the action...
         ActionManager.EventContext context = actionManager.newEventContext(
-                manager.cast(accessor, AccessibleEntity.class),
-                manager.cast(grantee, Actioner.class),
+                accessor.as(AccessibleEntity.class),
+                grantee.as(Actioner.class),
                 EventTypes.setGlobalPermissions);
         if (scoped) {
-            context.addSubjects(manager.cast(scope, AccessibleEntity.class));
+            context.addSubjects(scope.as(AccessibleEntity.class));
         }
         context.commit();
         return acl.getInheritedGlobalPermissions(accessor);
@@ -123,7 +123,7 @@ public final class AclViews implements Scoped<AclViews> {
         acl.setAccessors(entity, accessors);
         // Log the action...
         actionManager.newEventContext(
-                entity, manager.cast(user, Actioner.class), EventTypes.setVisibility)
+                entity, user.as(Actioner.class), EventTypes.setVisibility)
                 .commit();
     }
 
@@ -177,8 +177,8 @@ public final class AclViews implements Scoped<AclViews> {
         acl.setItemPermissions(item, accessor, permissionList);
         // Log the action...
         actionManager.newEventContext(item,
-                manager.cast(grantee, Actioner.class), EventTypes.setItemPermissions)
-                .addSubjects(manager.cast(accessor, AccessibleEntity.class))
+                grantee.as(Actioner.class), EventTypes.setItemPermissions)
+                .addSubjects(accessor.as(AccessibleEntity.class))
                 .commit();
     }
 
@@ -194,7 +194,7 @@ public final class AclViews implements Scoped<AclViews> {
                     break;
                 default:
                     helper.checkEntityPermission(
-                        manager.cast(tg, AccessibleEntity.class), user, PermissionType.GRANT);
+                        tg.as(AccessibleEntity.class), user, PermissionType.GRANT);
             }
         }
         acl.revokePermissionGrant(grant);
@@ -216,8 +216,8 @@ public final class AclViews implements Scoped<AclViews> {
         group.addMember(user);
         // Log the action...
         actionManager.newEventContext(group,
-                manager.cast(grantee, Actioner.class), EventTypes.addGroup)
-                .addSubjects(manager.cast(user, AccessibleEntity.class))
+                grantee.as(Actioner.class), EventTypes.addGroup)
+                .addSubjects(user.as(AccessibleEntity.class))
                 .commit();
     }
 
@@ -236,8 +236,8 @@ public final class AclViews implements Scoped<AclViews> {
         group.removeMember(user);
         // Log the action...
         actionManager.newEventContext(group,
-                manager.cast(grantee, Actioner.class), EventTypes.removeGroup)
-                .addSubjects(manager.cast(user, AccessibleEntity.class))
+                grantee.as(Actioner.class), EventTypes.removeGroup)
+                .addSubjects(user.as(AccessibleEntity.class))
                 .commit();
     }
 
@@ -260,7 +260,7 @@ public final class AclViews implements Scoped<AclViews> {
                         "Non-admin users cannot add other users to groups that they" +
                                 " do not themselves belong to.");
             }
-            helper.checkEntityPermission(manager.cast(user, AccessibleEntity.class),
+            helper.checkEntityPermission(user.as(AccessibleEntity.class),
                     grantee, PermissionType.GRANT);
             helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
         }

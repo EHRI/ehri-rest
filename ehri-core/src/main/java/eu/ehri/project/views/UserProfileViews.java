@@ -76,7 +76,7 @@ public class UserProfileViews {
             return Optional.absent();
         } else {
             ActionManager.EventContext ctx = actionManager
-                    .newEventContext(manager.cast(accessor, UserProfile.class), type);
+                    .newEventContext(accessor.as(UserProfile.class), type);
             for (String id : ids) {
                 ctx.addSubjects(manager.getFrame(id, AccessibleEntity.class));
             }

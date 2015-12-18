@@ -27,8 +27,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.util.Helpers;
@@ -72,7 +70,6 @@ public class Eac2010Exporter implements EacExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eac2010Exporter.class);
 
     protected final FramedGraph<?> framedGraph;
-    protected final GraphManager manager;
     protected final EventViews eventManager;
     protected final DocumentBuilder documentBuilder;
 
@@ -92,7 +89,6 @@ public class Eac2010Exporter implements EacExporter {
 
     public Eac2010Exporter(final FramedGraph<?> framedGraph) {
         this.framedGraph = framedGraph;
-        manager = GraphManagerFactory.getInstance(framedGraph);
         eventManager = new EventViews(framedGraph);
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -185,7 +181,7 @@ public class Eac2010Exporter implements EacExporter {
     }
 
     private void addDatesOfExistence(Document doc, Element descElem, Description desc) {
-        List<DatePeriod> allDates = Lists.newArrayList(manager.cast(desc, HistoricalAgentDescription.class)
+        List<DatePeriod> allDates = Lists.newArrayList(desc.as(HistoricalAgentDescription.class)
                 .getDatePeriods());
         List<DatePeriod> existence = Lists.newArrayList();
         for (DatePeriod datePeriod : allDates) {
@@ -501,7 +497,7 @@ public class Eac2010Exporter implements EacExporter {
         if (desc == null) {
             for (AccessibleEntity other : link.getLinkBodies()) {
                 if (other.getType().equals(Entities.ACCESS_POINT)) {
-                    AccessPoint ap = manager.cast(other, AccessPoint.class);
+                    AccessPoint ap = other.as(AccessPoint.class);
                     desc = ap.getProperty("description");
                 }
             }
@@ -519,7 +515,7 @@ public class Eac2010Exporter implements EacExporter {
             // if the access point is on the current entity (otherwise the
             // link will have the same name as our current item.)
             if (other.getType().equals(Entities.ACCESS_POINT)) {
-                AccessPoint ap = manager.cast(other, AccessPoint.class);
+                AccessPoint ap = other.as(AccessPoint.class);
                 for (AccessPoint outAp : description.getAccessPoints()) {
                     if (outAp.equals(ap)) {
                         return Optional.of(ap.getName());
@@ -529,7 +525,7 @@ public class Eac2010Exporter implements EacExporter {
         }
         for (AccessibleEntity other : link.getLinkTargets()) {
             if (!other.equals(entity)) {
-                return Optional.of(getEntityName(manager.cast(other, DescribedEntity.class), lang));
+                return Optional.of(getEntityName(other.as(DescribedEntity.class), lang));
             }
         }
 

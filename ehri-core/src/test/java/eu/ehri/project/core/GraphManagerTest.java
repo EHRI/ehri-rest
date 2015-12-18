@@ -258,8 +258,7 @@ public class GraphManagerTest {
         }
 
         @Test
-        public void testSelectiveIndexing() throws Exception,
-                IntegrityError {
+        public void testSelectiveIndexing() throws IntegrityError {
             // We need to create one first, sorry
             Map<String, ?> data = ImmutableMap.of(
                     "name", "joe",

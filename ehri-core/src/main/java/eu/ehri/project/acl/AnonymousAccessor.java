@@ -25,16 +25,28 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.utils.EmptyIterable;
 
 /**
  * Implementation of an anonymous user singleton.
  */
 public enum AnonymousAccessor implements Accessor {
-    
+
     INSTANCE;
 
-    AnonymousAccessor() {}
+    /**
+     * Obtain the shared instance of the Anonymous Accessor.
+     * There Can Be Only One.
+     */
+    public static Accessor getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public <T extends Frame> T as(Class<T> cls) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public boolean isAdmin() {
@@ -44,14 +56,6 @@ public enum AnonymousAccessor implements Accessor {
     @Override
     public boolean isAnonymous() {
         return true;
-    }
-
-    /**
-     * Obtain the shared instance of the Anonymous Accessor.
-     * There Can Be Only One.
-     */
-    public static Accessor getInstance() {
-        return INSTANCE;
     }
 
     @Override
@@ -66,7 +70,7 @@ public enum AnonymousAccessor implements Accessor {
 
     @Override
     public Vertex asVertex() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override

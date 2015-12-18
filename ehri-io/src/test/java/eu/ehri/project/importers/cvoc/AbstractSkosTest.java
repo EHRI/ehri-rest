@@ -47,7 +47,7 @@ public abstract class AbstractSkosTest extends AbstractFixtureTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        actioner = manager.cast(validUser, Actioner.class);
+        actioner = validUser.as(Actioner.class);
         vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
         actionManager = new ActionManager(graph);
     }

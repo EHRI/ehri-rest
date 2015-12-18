@@ -70,7 +70,7 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         AuthoritativeItem frame = mutation.getNode();
 
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
-            manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
+            permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
