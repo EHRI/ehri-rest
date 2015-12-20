@@ -88,7 +88,7 @@ public class AraEadImporter extends EadImporter {
         List<Map<String, Object>> extractedDates = extractDates(itemData);
         replaceDates(itemData, extractedDates);
 
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractedDates) {
@@ -207,7 +207,7 @@ public class AraEadImporter extends EadImporter {
                     public boolean remove(String relationLabel, Bundle bundle) {
                         String lang = bundle.getDataValue(Ontology.LANGUAGE);
                         String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
-                        return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                        return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                                 && (lang != null
                                 && lang.equals(languageOfDesc)
                                 && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId)));

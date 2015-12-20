@@ -179,7 +179,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
                         for (Link link : rel.getLinks()) {
                             boolean conceptFound = false;
                             for (LinkableEntity le : link.getLinkTargets()) {
-                                if (le.getType().equals("cvocConcept")) {
+                                if (le.getType().equals("CvocConcept")) {
                                     assertEquals(le, concept_716);
                                     conceptFound = true;
                                 }

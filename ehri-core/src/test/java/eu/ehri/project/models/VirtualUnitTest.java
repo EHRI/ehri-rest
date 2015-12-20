@@ -117,7 +117,7 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetVirtualDescriptions() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        DocumentDescription cd1 = manager.getFrame("vcd1", DocumentDescription.class);
+        DocumentaryUnitDescription cd1 = manager.getFrame("vcd1", DocumentaryUnitDescription.class);
         assertTrue(vc1.getVirtualDescriptions().iterator().hasNext());
         assertEquals(cd1, vc1.getVirtualDescriptions().iterator().next());
     }

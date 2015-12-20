@@ -25,7 +25,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
@@ -127,7 +127,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
 
 
     //test titles
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()){
             assertEquals("Collectie Bart de Kok en Jozef van Poppel", d.getName());
             for(DatePeriod p : d.getDatePeriods()){
                 assertEquals("1931-01-01", p.getStartDate());
@@ -146,7 +146,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
             assertTrue(hasScopeAndContent);
             assertTrue(hasLanguageOfMaterial);
         }
-        for(DocumentDescription desc : c1.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription desc : c1.getDocumentDescriptions()){
                 assertEquals("Documentaire foto's door Bart de Kok", desc.getName());
         }
     //test hierarchy
@@ -155,7 +155,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
             assertEquals(C01, d.getIdentifier());
         }
     //test level-of-desc
-        for(DocumentDescription d : c3_2.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()){
             assertEquals("file", d.getProperty("levelOfDescription"));
         }
     
@@ -168,7 +168,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest{
         }
         assertTrue(c3HasOtherIdentifier);
         boolean c3HasRef=false;
-        for(DocumentDescription d : c3.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : c3.getDocumentDescriptions()){
             for(String property : d.getPropertyKeys()){
                 if(property.equals("ref")){
                     assertEquals("http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/29",

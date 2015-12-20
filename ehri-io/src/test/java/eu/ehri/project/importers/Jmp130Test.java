@@ -23,7 +23,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -73,7 +73,7 @@ public class Jmp130Test extends AbstractImporterTest {
         /**
          * null: 2
          * relationship: 5
-         * documentaryUnit: 1
+         * DocumentaryUnit: 1
          * documentDescription: 1
          * maintenanceEvent: 1
          * systemEvent: 1
@@ -88,7 +88,7 @@ public class Jmp130Test extends AbstractImporterTest {
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
-        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             List<String> langs = d.getProperty("languageOfMaterial");
             assertTrue(langs.size() > 0);
             assertEquals("ces", langs.get(0));

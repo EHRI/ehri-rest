@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -127,7 +127,7 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
         // It shouldn't actually do anything by default...
         assertEquals(remap.get().get(1), doc.getId());
         // The descriptions should also be renamed...
-        DocumentDescription desc = Iterables.getFirst(doc.getDocumentDescriptions(), null);
+        DocumentaryUnitDescription desc = Iterables.getFirst(doc.getDocumentDescriptions(), null);
         assertNotNull(desc);
         String newDescId = String.format("%s%s%s%s%s",
                 doc.getId(),

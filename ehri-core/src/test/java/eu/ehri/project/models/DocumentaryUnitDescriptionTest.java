@@ -19,13 +19,17 @@
 
 package eu.ehri.project.models;
 
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.test.AbstractFixtureTest;
+import org.junit.Test;
 
-/**
- * Frame class representing the description of a document.
- */
-@EntityType(EntityClass.DOCUMENT_DESCRIPTION)
-public interface DocumentDescription extends TemporalEntity, Description {
+import static org.junit.Assert.assertEquals;
+
+
+public class DocumentaryUnitDescriptionTest extends AbstractFixtureTest {
+    @Test
+    public void testGetUnit() throws Exception {
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnitDescription cd1 = manager.getFrame("cd1", DocumentaryUnitDescription.class);
+        assertEquals(c1, cd1.getEntity());
+    }
 }

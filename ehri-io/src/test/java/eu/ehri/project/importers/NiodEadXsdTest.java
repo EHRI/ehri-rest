@@ -26,7 +26,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
 //        printGraph(graph);
        /*
         * null: 7
-        * documentaryUnit: 6
+        * DocumentaryUnit: 6
         * property: 1
         * documentDescription: 6
         * systemEvent: 1
@@ -126,7 +126,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
 
         //test ref
         boolean hasRef = false;
-        for(DocumentDescription d : c1.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : c1.getDocumentDescriptions()){
           for(String key: d.getPropertyKeys()){
             if(key.equals("ref")){
                 assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2"));
@@ -140,14 +140,14 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         assertTrue(hasRef);
 
     //test titles
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()){
             assertEquals("Caransa, A.", d.getName());
         }
         //test other identifiers
         assertNull(c1.getProperty(Ontology.OTHER_IDENTIFIERS));
         assertEquals("NL-AsdNIOD/809/2", c2_1.getProperty(Ontology.OTHER_IDENTIFIERS));
 
-        for(DocumentDescription desc : c1.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription desc : c1.getDocumentDescriptions()){
                 assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
         }
     //test hierarchy
@@ -155,7 +155,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         for(DocumentaryUnit d : archdesc.getChildren()){
             assertEquals(C01, d.getIdentifier());
         }
-        for(DocumentDescription d : c3_2.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()){
             //test level-of-desc
             assertEquals("file", d.getProperty("levelOfDescription"));
             
@@ -164,7 +164,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
             assertTrue(d.getProperty("notes").toString().contains("ONTWIKKELINGSSTADIUM"));
         }
     //test dates
-        for(DocumentDescription d : c2_1.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : c2_1.getDocumentDescriptions()){
         	// Single date is just a string
         	assertFalse(d.getPropertyKeys().contains("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){

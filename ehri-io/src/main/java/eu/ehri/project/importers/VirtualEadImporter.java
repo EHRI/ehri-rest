@@ -103,7 +103,7 @@ public class VirtualEadImporter extends EaImporter {
                         "Missing identifier " + Ontology.IDENTIFIER_KEY);
             }
             logger.debug("Imported item: " + itemData.get("name"));
-            Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+            Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
             // Add dates and descriptions to the bundle since they're @Dependent
             // relations.
             for (Map<String, Object> dpb : extractDates(itemData)) {

@@ -15,7 +15,7 @@ import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
@@ -346,7 +346,7 @@ public class Ead2002Exporter implements EadExporter {
         didElem.appendChild(unitTitleElem);
         unitTitleElem.setTextContent(desc.getName());
 
-        for (DatePeriod datePeriod : desc.as(DocumentDescription.class).getDatePeriods()) {
+        for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
             if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
                 String start = datePeriod.getStartDate();
                 String end = datePeriod.getEndDate();

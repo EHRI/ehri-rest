@@ -1,11 +1,11 @@
 - id: kcl
-  type: group
+  type: Group
   data:
     identifier: kcl-group
     name: KCL
 
 - id: mike
-  type: userProfile
+  type: UserProfile
   data:
     identifier: mike
     name: Mike

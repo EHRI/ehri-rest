@@ -1,6 +1,6 @@
 {
 
-  "type": "relationship",
+  "type": "AccessPoint",
   "data": {
     "type": "associative",
     "name": "Test Access Point"

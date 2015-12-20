@@ -359,7 +359,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
-        EntityClass[] types = {EntityClass.DOCUMENT_DESCRIPTION, EntityClass
+        EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
                 .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
                 .REPOSITORY_DESCRIPTION};
         Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
@@ -406,7 +406,7 @@ public class ToolsResource extends AbstractRestResource {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             long done = 0;
             for (Vertex v : graph.getVertices()) {
-                if ("eventLink".equals(v.getProperty("_debugType"))) {
+                if ("EventLink".equals(v.getProperty("_debugType"))) {
                     String id = v.getProperty(EntityType.ID_KEY);
                     if (id == null) {
                         UUID timeBasedUUID = GenericIdGenerator.getTimeBasedUUID();

@@ -25,7 +25,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -71,7 +71,7 @@ public class MemShoahTest extends AbstractImporterTest{
         /** 
          * relationship: 1
          * events: 2
-         * documentaryUnit: 1
+         * DocumentaryUnit: 1
          * documentDescription: 1
          * maintenanceEvent: 1
          * systemEvent: 1
@@ -85,14 +85,14 @@ public class MemShoahTest extends AbstractImporterTest{
                 getVertexByIdentifier(graph,ARCHDESC),
                 DocumentaryUnit.class);
         
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("Ambassade d'Allemagne (German Embassy)", d.getName());
             assertEquals("eng", d.getLanguageOfDescription());
         }
 
     
         //test MaintenanceEvent order
-        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()){
 
             boolean meFound = false;
             int countME=0;
@@ -111,7 +111,7 @@ public class MemShoahTest extends AbstractImporterTest{
         
         
         // Fonds has two dates with different types -> list
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()){
         	// start and end dates correctly parsed and setup
         	List<DatePeriod> dp = toList(d.getDatePeriods());
         	assertEquals(1, dp.size());

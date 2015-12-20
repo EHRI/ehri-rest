@@ -26,7 +26,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -112,9 +112,9 @@ public class VirtualEadTest extends AbstractImporterTest {
 
         VirtualUnit c1_vlevel = graph.frame(getVertexById(graph, toplevel.getId() + "-" + C01_VirtualLevel), VirtualUnit.class);
         assertEquals(toplevel, c1_vlevel.getParent());
-        Iterable<DocumentDescription> descriptions = c1_vlevel.getVirtualDescriptions();
+        Iterable<DocumentaryUnitDescription> descriptions = c1_vlevel.getVirtualDescriptions();
         assertTrue(descriptions.iterator().hasNext());
-        for (DocumentDescription d : descriptions) {
+        for (DocumentaryUnitDescription d : descriptions) {
             //the describedEntity of a VirtualLevel type VirtualUnit is the VirtualUnit itself
             assertEquals(c1_vlevel, d.getDescribedEntity());
         }
@@ -138,14 +138,14 @@ public class VirtualEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO2);
         Bundle documentaryUnit1Bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1);
-        Bundle documentDescription1Bundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle documentDescription1Bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT1 + "desc")
                 .withDataValue(Ontology.NAME_KEY, UNIT1 + "title")
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
 
         Bundle documentaryUnit2Bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2);
-        Bundle documentDescription2Bundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle documentDescription2Bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2 + "desc")
                 .withDataValue(Ontology.NAME_KEY, UNIT2 + "title")
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "cze");

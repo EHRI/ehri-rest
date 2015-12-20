@@ -30,7 +30,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
@@ -81,7 +81,7 @@ public class IfzTest extends AbstractImporterTest {
         /**
          * null: 6
          * relationship: 11
-         * documentaryUnit: 5
+         * DocumentaryUnit: 5
          * documentDescription: 5
          * maintenanceEvent: 6
          * systemEvent: 1
@@ -112,7 +112,7 @@ public class IfzTest extends AbstractImporterTest {
          * Test titles
          */
         // There should be one DocumentDescription for the <archdesc>
-        for (DocumentDescription dd : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertEquals("TO BE FILLED", dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
             List<String> s = Lists.newArrayList("TO BE FILLED with selection", "IfZ");
@@ -122,7 +122,7 @@ public class IfzTest extends AbstractImporterTest {
         }
 
         // There should be one DocumentDescription for the (only) <c01>
-        for (DocumentDescription dd : c1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription dd : c1.getDocumentDescriptions()) {
             assertEquals("Internationale u. ausländische Gerichtsorte", dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
             assertEquals("series", dd.getProperty("levelOfDescription"));
@@ -136,7 +136,7 @@ public class IfzTest extends AbstractImporterTest {
             assertEquals(C01, du.getIdentifier());
         }
         //test dates
-        for (DocumentDescription d : c3_2.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()) {
             // Single date is just a string 1945/1957
             assertFalse(d.getPropertyKeys().contains("unitDates"));
             for (DatePeriod dp : d.getDatePeriods()) {
@@ -146,7 +146,7 @@ public class IfzTest extends AbstractImporterTest {
         }
 
         // Fonds has two dates with different types -> list
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             // start and end dates correctly parsed and setup
             List<DatePeriod> dp = toList(d.getDatePeriods());
             assertEquals(0, dp.size());

@@ -1,18 +1,18 @@
 {
-  "type": "cvocConcept",
+  "type": "CvocConcept",
   "data": {
     "identifier": "fruit"
   },
   "relationships": {
       "narrower": [
         {
-          "type": "cvocConcept",
+          "type": "CvocConcept",
           "data": {
             "identifier": "apple"
           }
         },
         {
-          "type": "cvocConcept",
+          "type": "CvocConcept",
           "data": {
             "identifier": "banana"
           }

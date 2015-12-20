@@ -21,7 +21,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -72,7 +72,7 @@ public class DansEadImporterTest extends AbstractImporterTest{
          * 
          * null: 5
          * relationship: 6
-         * documentaryUnit: 4
+         * DocumentaryUnit: 4
          * documentDescription: 4
          * maintenanceEvent: 1
          * systemEvent: 1
@@ -82,10 +82,10 @@ public class DansEadImporterTest extends AbstractImporterTest{
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
-        Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
+        Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             assertEquals("nld", desc.getLanguageOfDescription());
             nrOfDesc++;

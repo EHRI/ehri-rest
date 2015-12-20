@@ -173,7 +173,7 @@ public class BundleUtilsTest extends AbstractFixtureTest {
             put("relationships", new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put("type", Entities.DOCUMENT_DESCRIPTION);
+                        put("type", Entities.DOCUMENTARY_UNIT_DESCRIPTION);
                         put("data", new HashMap<String, Object>() {{
                             put(Ontology.IDENTIFIER_KEY, "someid-01");
                             put("title", "A brand new item description");

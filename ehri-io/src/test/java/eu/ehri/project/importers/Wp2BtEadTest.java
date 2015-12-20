@@ -24,7 +24,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -110,7 +110,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
 
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
-        List<DocumentDescription> descriptions = Lists.newArrayList(fonds.getDocumentDescriptions());
+        List<DocumentaryUnitDescription> descriptions = Lists.newArrayList(fonds.getDocumentDescriptions());
         assertEquals(1, descriptions.size());
         assertEquals("mul", descriptions.get(0).getLanguageOfDescription());
 
@@ -159,7 +159,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(c1_b, c1_b_c2_b.getPermissionScope());
 
         // Check the author of the description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             assertEquals("EHRI", d.getProperty("processInfo"));
         }
 

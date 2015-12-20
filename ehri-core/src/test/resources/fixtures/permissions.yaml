@@ -6,13 +6,13 @@
 # Countries - these are at the top of the entity hierarchy and
 # 'hold' everything else.
 - id: gb
-  type: country
+  type: Country
   data:
     identifier: gb
 
 # Institutions
 - id: repo-gb
-  type: repository
+  type: Repository
   data:
     identifier: repo-gb
     name: Repository
@@ -21,7 +21,7 @@
     hasPermissionScope: gb
     describes:
       - id: rd1
-        type: repositoryDescription
+        type: RepositoryDescription
         data:
           name: Repository Name
           languageCode: en
@@ -30,21 +30,21 @@
 # Two groups
 
 - id: group1
-  type: group
+  type: Group
   data:
     identifier: group1
     name: Group 1
     description: Group 1
 
 - id: group2
-  type: group
+  type: Group
   data:
     identifier: group2
     name: Group 2
     description: Group 2
 
 - id: user1
-  type: userProfile
+  type: UserProfile
   data:
     identifier: user1
     name: User 1
@@ -52,7 +52,7 @@
     belongsTo: group1
 
 - id: user2
-  type: userProfile
+  type: UserProfile
   data:
     identifier: user2
     name: User 2
@@ -64,22 +64,22 @@
 
 # Allow CUD of repos and docs in GB
 - id: group1DocCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasAccessor: group1
     
 - id: group1DocUpdateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: update
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasAccessor: group1
 
 - id: group1DocDeleteGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: delete
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasAccessor: group1

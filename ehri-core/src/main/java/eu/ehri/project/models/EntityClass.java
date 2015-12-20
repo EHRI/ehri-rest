@@ -51,7 +51,7 @@ public enum EntityClass {
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, Concept.class, IdentifiableEntityIdGenerator.INSTANCE),
     VIRTUAL_UNIT(Entities.VIRTUAL_UNIT, VirtualUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
 
-    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, DocumentDescription.class, DescriptionIdGenerator.INSTANCE),
+    DOCUMENTARY_UNIT_DESCRIPTION(Entities.DOCUMENTARY_UNIT_DESCRIPTION, DocumentaryUnitDescription.class, DescriptionIdGenerator.INSTANCE),
     REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, RepositoryDescription.class, DescriptionIdGenerator.INSTANCE),
     HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, HistoricalAgentDescription.class, DescriptionIdGenerator.INSTANCE),
     CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, ConceptDescription.class, DescriptionIdGenerator.INSTANCE),

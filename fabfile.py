@@ -389,7 +389,7 @@ def update_db_test(local_dir):
 @task
 def reindex_users():
     "Run a partial reindex of Neo4j -> Solr data"
-    all_types = ["userProfile", "group"]
+    all_types = ["UserProfile", "Group"]
     indexer_cmd = [
        "java", "-jar", env.index_helper,
         "--index",
@@ -403,8 +403,8 @@ def reindex_users():
 @task
 def reindex_concepts():
     "Run a partial reindex of Neo4j -> Solr data"
-    all_types = ["historicalAgent", "cvocVocabulary", 
-                 "cvocConcept", "authoritativeSet"]
+    all_types = ["HistoricalAgent", "CvocVocabulary",
+                 "CvocConcept", "AuthoritativeSet"]
     indexer_cmd = [
        "java", "-jar", env.index_helper,
         "--index",
@@ -418,7 +418,7 @@ def reindex_concepts():
 @task
 def reindex_virtualcollections():
     "Run a partial reindex of Neo4j -> Solr data"
-    all_types = ["virtualUnit"]
+    all_types = ["VirtualUnit"]
     indexer_cmd = [
        "java", "-jar", env.index_helper,
         "--index",
@@ -448,10 +448,10 @@ def reindex_repository(repo_id):
 @task
 def reindex_all():
     "Run a full reindex of Neo4j -> Solr data"
-    all_types = ["documentaryUnit", "repository", "country",
-            "historicalAgent", "cvocVocabulary", "cvocConcept",
-            "authoritativeSet", "userProfile", "group",
-            "virtualUnit", "annotation", "link"]
+    all_types = ["DocumentaryUnit", "Repository", "Country",
+            "HistoricalAgent", "CvocVocabulary", "CvocConcept",
+            "AuthoritativeSet", "UserProfile", "Group",
+            "VirtualUnit", "Annotation", "Link"]
     indexer_cmd = [
         "java", "-jar", env.index_helper,
         "--clear-all",

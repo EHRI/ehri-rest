@@ -26,7 +26,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -244,7 +244,7 @@ public class EadHandler extends SaxXmlHandler {
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
                     //add the maintenanceEvents, but only to the DD that was just created
-                    for (DocumentDescription dd : current.getDocumentDescriptions()) {
+                    for (DocumentaryUnitDescription dd : current.getDocumentDescriptions()) {
                         if (getSourceFileId() == null || getSourceFileId().equals(dd.getProperty(Ontology.SOURCEFILE_KEY))) {
                             for (MaintenanceEvent me : maintenanceEvents) {
                                 dd.addMaintenanceEvent(me);

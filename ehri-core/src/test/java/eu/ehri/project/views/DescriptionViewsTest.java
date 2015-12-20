@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
@@ -70,8 +70,8 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.IDENTIFIER_KEY, "some-new-id");
 
-        DocumentDescription changedDesc = descViews.create(unit.getId(), descBundle,
-                DocumentDescription.class, validUser, Optional.<String>absent());
+        DocumentaryUnitDescription changedDesc = descViews.create(unit.getId(), descBundle,
+                DocumentaryUnitDescription.class, validUser, Optional.<String>absent());
         unit.addDescription(changedDesc);
 
         // The order in which items are serialized is undefined, so we just have to throw
@@ -100,7 +100,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
         descViews.create(unit.getId(), descBundle,
-                DocumentDescription.class, validUser, Optional.<String>absent());
+                DocumentaryUnitDescription.class, validUser, Optional.<String>absent());
         fail("Creating a dependent should have thrown a validation error");
     }
 
@@ -118,8 +118,8 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
 
-        DocumentDescription changedDesc = descViews.update(unit.getId(), descBundle,
-                DocumentDescription.class, validUser, Optional.<String>absent())
+        DocumentaryUnitDescription changedDesc = descViews.update(unit.getId(), descBundle,
+                DocumentaryUnitDescription.class, validUser, Optional.<String>absent())
                 .getNode();
         assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
         assertEquals("some-new-title", changedDesc.getName());
@@ -139,7 +139,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
         descViews.update(unit.getId(), descBundle,
-                DocumentDescription.class, validUser, Optional.<String>absent()).getNode();
+                DocumentaryUnitDescription.class, validUser, Optional.<String>absent()).getNode();
         fail("Updating a dependent should have thrown a validation error");
     }
 
@@ -154,7 +154,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
 
-        DocumentDescription d = Iterables.first(unit.getDocumentDescriptions());
+        DocumentaryUnitDescription d = Iterables.first(unit.getDocumentDescriptions());
         assertNotNull(d);
         int delCount = descViews.delete(unit.getId(), d.getId(),
                 validUser, Optional.<String>absent());

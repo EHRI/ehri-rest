@@ -23,7 +23,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -157,7 +157,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(c2, c3.getPermissionScope());
         
         // Check the author of the top level description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()){
             assertEquals("BT", d.getProperty("processInfo"));
         }
 

@@ -1,5 +1,5 @@
 {
-  "type": "virtualUnit",
+  "type": "VirtualUnit",
   "data": {
     "name": "a virtual documentary unit",
     "identifier": "some-id-supplied-by-frontend",

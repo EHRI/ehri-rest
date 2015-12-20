@@ -251,7 +251,7 @@ public class AclTest extends ModelTestBase {
         assertFalse(acl.belongsToAdmin(linda));
 
         GlobalPermissionSet cmap = acl.getGlobalPermissions(linda);
-        // linda has been granted CREATE access for documentaryUnits.
+        // linda has been granted CREATE access for DocumentaryUnits.
         assertTrue(cmap.get(ContentTypes.DOCUMENTARY_UNIT).contains(
                 PermissionType.CREATE));
     }

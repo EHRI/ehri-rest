@@ -10,18 +10,18 @@
 # Countries - these are at the top of the entity hierarchy and
 # 'hold' everything else.
 - id: gb
-  type: country
+  type: Country
   data:
     identifier: gb
 
 - id: nl
-  type: country
+  type: Country
   data:
     identifier: nl
 
 # Institutions
 - id: repo-gb
-  type: repository
+  type: Repository
   data:
     identifier: repo-gb
     name: Repository
@@ -30,14 +30,14 @@
     hasPermissionScope: gb
     describes:
       - id: rd1
-        type: repositoryDescription
+        type: RepositoryDescription
         data:
           name: Repository Name
           languageCode: en
         relationships:
 
 - id: repo-nl
-  type: repository
+  type: Repository
   data:
     identifier: repo-nl
     name: Repository
@@ -46,7 +46,7 @@
     hasPermissionScope: nl
     describes:
       - id: rd2
-        type: repositoryDescription
+        type: RepositoryDescription
         data:
           name: Repository Name
           languageCode: nl
@@ -55,14 +55,14 @@
 # Two groups
 
 - id: gb-users
-  type: group
+  type: Group
   data:
     identifier: gb-users
     name: GB Archivists
     description: Archivists who can write to stuff in country GB
 
 - id: nl-users
-  type: group
+  type: Group
   data:
     identifier: nl-users
     name: NL Archivists
@@ -70,7 +70,7 @@
 
 
 - id: gbuser
-  type: userProfile
+  type: UserProfile
   data:
     identifier: gbuser
     name: User GB
@@ -78,7 +78,7 @@
     belongsTo: gb-users
 
 - id: nluser
-  type: userProfile
+  type: UserProfile
   data:
     identifier: nluser
     name: User NL
@@ -90,50 +90,50 @@
 
 # Allow CUD of repos and docs in GB
 - id: gbDocCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: gb
     hasAccessor: gb-users
     
 - id: gbDocUpdateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: update
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: gb
     hasAccessor: gb-users
 
 - id: gbDocDeleteGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: delete
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: gb
     hasAccessor: gb-users
 
 - id: gbRepoCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: repository
+    hasTarget: Repository
     hasScope: gb
     hasAccessor: gb-users
     
 - id: gbRepoUpdateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: update
-    hasTarget: repository
+    hasTarget: Repository
     hasScope: gb
     hasAccessor: gb-users
 
 - id: gbRepoDeleteGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: delete
-    hasTarget: repository
+    hasTarget: Repository
     hasScope: gb
     hasAccessor: gb-users
 
@@ -141,50 +141,50 @@
 
 # Allow CUD of repos and docs in NL
 - id: nlDocCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: nl
     hasAccessor: nl-users
     
 - id: nlDocUpdateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: update
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: nl
     hasAccessor: nl-users
 
 - id: nlDocDeleteGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: delete
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: nl
     hasAccessor: nl-users
 
 - id: nlRepoCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: repository
+    hasTarget: Repository
     hasScope: nl
     hasAccessor: nl-users
     
 - id: nlRepoUpdateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: update
-    hasTarget: repository
+    hasTarget: Repository
     hasScope: nl
     hasAccessor: nl-users
 
 - id: nlRepoDeleteGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: delete
-    hasTarget: repository
+    hasTarget: Repository
     hasScope: nl
     hasAccessor: nl-users
 

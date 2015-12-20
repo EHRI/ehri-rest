@@ -89,7 +89,7 @@ public final class ActionManager {
 
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
     public static final String DEBUG_TYPE = "_debugType";
-    public static final String EVENT_LINK = "eventLink";
+    public static final String EVENT_LINK = "EventLink";
     public static final String LINK_TYPE = "_linkType";
 
     private final FramedGraph<?> graph;

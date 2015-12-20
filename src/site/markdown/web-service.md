@@ -82,7 +82,7 @@ Assuming that worked, lets go on and create the following:
  1. a `country` item (via the web service RESTful API)
  2. a `repository` item via [EAG](http://www.apex-project.eu/index.php/en/outcomes/standards/eag-2012) XML import
  .de/) XML import)
- 3. a `documentaryUnit` item via [EAD](http://www.loc.gov/ead/) XML import
+ 3. a `DocumentaryUnit` item via [EAD](http://www.loc.gov/ead/) XML import
 
 Items 1, 2, and 3 here have a hierarchical relationship, which means that we need to create them in order,
 since the documentary unit item will "belong" to the repository, and the repository to the country item.
@@ -374,7 +374,7 @@ Run this and again we get an import log like so:
 
     {"message":"Testing EAD import","updated":0,"created":1,"unchanged":0}
     
-Running `GET` on the `/ehri/documentaryUnit` method lists the units in the system, giving us this
+Running `GET` on the `/ehri/DocumentaryUnit` method lists the units in the system, giving us this
 rather verbose output:
 
     [
@@ -567,7 +567,7 @@ rather verbose output:
                     }
                 ]
             },
-            "type": "documentaryUnit"
+            "type": "DocumentaryUnit"
         }
     ]
     

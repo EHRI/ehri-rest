@@ -27,7 +27,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -93,7 +93,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         /**
          * null: 2
          * relationship: 4
-         * documentaryUnit: 1
+         * DocumentaryUnit: 1
          * link: 1
          * property: 1
          * documentDescription: 1
@@ -105,7 +105,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
 
         DocumentaryUnit archdesc = graph.frame(getVertexByIdentifier(graph, ARCHDESC), DocumentaryUnit.class);
         assertNotNull(archdesc);
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("More refugee children arrive from Germany - in time ...", d.getName());
             assertEquals("1505", d.getProperty("sourceFileId"));
             logger.debug("id:"+d.getId() + " - identifier:" + archdesc.getProperty("identifier"));
@@ -127,7 +127,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
                         for (Link link : rel.getLinks()) {
                             boolean conceptFound = false;
                             for (LinkableEntity le : link.getLinkTargets()) {
-                                if (le.getType().equals("cvocConcept")) {
+                                if (le.getType().equals("CvocConcept")) {
                                     assertEquals(le, concept_716);
                                     conceptFound = true;
                                 }

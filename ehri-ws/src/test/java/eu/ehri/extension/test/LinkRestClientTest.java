@@ -49,7 +49,7 @@ public class LinkRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateLink() throws Exception {
         // Create a link annotation between two objects
-        String jsonLinkTestString = "{\"type\": \"link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
+        String jsonLinkTestString = "{\"type\": \"Link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
                 "\"body\": \"test\", \"type\": \"associate\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.LINK, "c1", "c4")).entity(jsonLinkTestString)

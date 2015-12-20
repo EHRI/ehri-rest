@@ -27,7 +27,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -137,7 +137,7 @@ public class BundleDAOTest extends ModelTestBase {
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
+        DocumentaryUnitDescription cd1 = manager.getFrame("cd1", DocumentaryUnitDescription.class);
         Bundle bundle = new Serializer(graph).vertexFrameToBundle(cd1);
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
         assertEquals(2, Iterables.size(cd1.getDatePeriods()));
@@ -166,11 +166,11 @@ public class BundleDAOTest extends ModelTestBase {
 
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
 
-        for (DatePeriod dp : manager.getFrame("cd1", DocumentDescription.class)
+        for (DatePeriod dp : manager.getFrame("cd1", DocumentaryUnitDescription.class)
                 .getDatePeriods()) {
             System.out.println("Got dp: " + dp.getId());
         }
-        assertEquals(1, Iterables.size(manager.getFrame("cd1", DocumentDescription.class)
+        assertEquals(1, Iterables.size(manager.getFrame("cd1", DocumentaryUnitDescription.class)
                 .getDatePeriods()));
 
         // The second date period should be gone from the index
@@ -194,7 +194,7 @@ public class BundleDAOTest extends ModelTestBase {
     public void testDeletingWholeBundle() throws SerializationError,
             ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
+        DocumentaryUnitDescription cd1 = manager.getFrame("cd1", DocumentaryUnitDescription.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
         assertEquals(2, toList(cd1.getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(

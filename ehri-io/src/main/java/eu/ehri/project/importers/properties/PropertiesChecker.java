@@ -65,7 +65,7 @@ public class PropertiesChecker {
                 testresult=false;
             }
             if (!handler.contains(property)) {
-                if(nodeEntity.equals(EntityClass.DOCUMENT_DESCRIPTION) &&
+                if(nodeEntity.equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION) &&
                     property.endsWith(EadImporter.ACCESS_POINT)){
                     logger.debug(property.substring(0, property.indexOf(EadImporter.ACCESS_POINT)+6));
                  

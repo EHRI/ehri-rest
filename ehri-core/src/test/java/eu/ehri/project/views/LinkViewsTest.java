@@ -23,7 +23,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
@@ -94,7 +94,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
     public void testCreateAccessPointLink() throws Exception {
         DocumentaryUnit src = manager.getFrame("c1", DocumentaryUnit.class);
         HistoricalAgent dst = manager.getFrame("a1", HistoricalAgent.class);
-        DocumentDescription desc = manager.getFrame("cd1", DocumentDescription.class);
+        DocumentaryUnitDescription desc = manager.getFrame("cd1", DocumentaryUnitDescription.class);
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);

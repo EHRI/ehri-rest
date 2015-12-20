@@ -68,7 +68,7 @@ public class UkrainianUnitImporter extends MapImporter {
         if (lang.indexOf(", ") > 0) {
             String[] langs = lang.split(", ");
             for (String l : langs) {
-                Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, l));
+                Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, l));
                 descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
                 if (!unknowns.isEmpty()) {
                     descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
@@ -76,7 +76,7 @@ public class UkrainianUnitImporter extends MapImporter {
                 unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
             }
         } else {
-            Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, lang));
+            Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, lang));
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
             if (!unknowns.isEmpty()) {
                 descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));

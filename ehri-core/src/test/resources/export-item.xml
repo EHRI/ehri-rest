@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<item id="wiener-library-GB 1556 WL 502" type="documentaryUnit">
+<item id="wiener-library-GB 1556 WL 502" type="DocumentaryUnit">
   <data>
     <property name="identifier" type="xs:string">GB 1556 WL 502</property>
     <property name="name" type="xs:string">Comité voor Joodsche Vluechtlingen Papers</property>
   </data>
   <relationships>
-    <describes>
-      <item id="3d9b94aa-b516-4c6c-956c-5868f95580c3" type="documentDescription">
+    <relationship label="describes">
+      <item id="3d9b94aa-b516-4c6c-956c-5868f95580c3" type="DocumentaryUnitDescription">
         <data>
           <property name="systemOfArrangement" type="xs:string"/>
           <property name="physicalCharacteristics" type="xs:string"/>
@@ -34,27 +34,27 @@
           <property name="locationOfCopies" type="xs:string"/>
         </data>
         <relationships>
-          <hasDate>
-            <item id="ceaf89f0-75b6-4ab5-9d24-18083f7ae552" type="datePeriod">
+          <relationship label="hasDate">
+            <item id="ceaf89f0-75b6-4ab5-9d24-18083f7ae552" type="DatePeriod">
               <data>
                 <property name="startDate" type="xs:string">1933-01-01</property>
                 <property name="endDate" type="xs:string">1959-01-01</property>
               </data>
             </item>
-          </hasDate>
+          </relationship>
         </relationships>
       </item>
-    </describes>
-    <heldBy>
-      <item id="wiener-library" type="repository">
+    </relationship>
+    <relationship label="heldBy">
+      <item id="wiener-library" type="Repository">
         <data>
           <property name="publicationStatus" type="xs:string">Draft</property>
           <property name="name" type="xs:string">Wiener Library</property>
           <property name="identifier" type="xs:string">wiener-library</property>
         </data>
         <relationships>
-          <describes>
-            <item id="ba926203-72ea-461c-a98b-8f4a3320d552" type="repositoryDescription">
+          <relationship label="describes">
+            <item id="ba926203-72ea-461c-a98b-8f4a3320d552" type="RepositoryDescription">
               <data>
                 <property name="history" type="xs:string">The Wiener Library is one of the world's leading and most extensive archives on the Holocaust and Nazi era.  Formed in 1933, the Library's unique collection of over one million items includes published and unpublished works, press cuttings, photographs and eyewitness testimony.</property>
                 <propertySequence>
@@ -74,8 +74,8 @@
                 <property name="name" type="xs:string">The Wiener Library</property>
               </data>
               <relationships>
-                <hasAddress>
-                  <item id="09bcf488-9b2c-4736-b8c6-fadbbb6a3626" type="address">
+                <relationship label="hasAddress">
+                  <item id="09bcf488-9b2c-4736-b8c6-fadbbb6a3626" type="Address">
                     <data>
                       <property name="street" type="xs:string">29 Russell Square</property>
                       <property name="fax" type="xs:string">+44 (0) 20 7436 6428</property>
@@ -86,30 +86,30 @@
                       <property name="municipality" type="xs:string">London</property>
                     </data>
                   </item>
-                </hasAddress>
+                </relationship>
               </relationships>
             </item>
-          </describes>
+          </relationship>
         </relationships>
       </item>
-    </heldBy>
-    <lifecycleEvent>
-      <item id="be74385f-05b0-484f-bd2d-4a1b2be8b19e" type="systemEvent">
+    </relationship>
+    <relationship label="lifecycleEvent">
+      <item id="be74385f-05b0-484f-bd2d-4a1b2be8b19e" type="SystemEvent">
         <data>
           <property name="timestamp" type="xs:string">2013-02-13T14:13:38.257Z</property>
           <property name="identifier" type="xs:string">577cbb9e-6eee-4d92-8c7e-40ba91873083</property>
           <property name="logMessage" type="xs:string">Imported from command-line</property>
         </data>
         <relationships>
-          <hasActioner>
-            <item id="mike" type="userProfile">
+          <relationship label="hasActioner">
+            <item id="mike" type="UserProfile">
               <data>
                 <property name="name" type="xs:string">mike</property>
                 <property name="identifier" type="xs:string">mike</property>
               </data>
               <relationships>
                 <belongsTo>
-                  <item id="admin" type="group">
+                  <item id="admin" type="Group">
                     <data>
                       <property name="name" type="xs:string">Administrators</property>
                       <property name="identifier" type="xs:string">admin</property>
@@ -118,27 +118,27 @@
                 </belongsTo>
               </relationships>
             </item>
-          </hasActioner>
+          </relationship>
         </relationships>
       </item>
-    </lifecycleEvent>
-    <access>
-      <item id="mike" type="userProfile">
+    </relationship>
+    <relationship label="access">
+      <item id="mike" type="UserProfile">
         <data>
           <property name="name" type="xs:string">mike</property>
           <property name="identifier" type="xs:string">mike</property>
         </data>
         <relationships>
-          <belongsTo>
-            <item id="admin" type="group">
+          <relationship label="belongsTo">
+            <item id="admin" type="Group">
               <data>
                 <property name="name" type="xs:string">Administrators</property>
                 <property name="identifier" type="xs:string">admin</property>
               </data>
             </item>
-          </belongsTo>
+          </relationship>
         </relationships>
       </item>
-    </access>
+    </relationship>
   </relationships>
 </item>

@@ -27,7 +27,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
@@ -72,9 +72,9 @@ public class ActionViewsTest extends AbstractFixtureTest {
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUnit.getProperty("name"));
         assertTrue(changedUnit.getDescriptions().iterator().hasNext());
-        DocumentDescription desc = graph.frame(
+        DocumentaryUnitDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
-                DocumentDescription.class);
+                DocumentaryUnitDescription.class);
 
         // Check the nested item was created correctly
         DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
@@ -161,7 +161,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // FIXME: Surely there's a better way of doing this???
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
-            DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
+            DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
             shouldDelete += Iterables.count(d.getDatePeriods());
             shouldDelete += Iterables.count(d.getAccessPoints());
         }

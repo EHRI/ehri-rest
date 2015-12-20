@@ -53,7 +53,7 @@ public class TestData {
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put(Ontology.DESCRIPTION_FOR_ENTITY, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put(Bundle.TYPE_KEY, Entities.DOCUMENT_DESCRIPTION);
+                        put(Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(Ontology.IDENTIFIER_KEY, "someid-01");
                             put(Ontology.NAME_KEY, "A brand new item description");

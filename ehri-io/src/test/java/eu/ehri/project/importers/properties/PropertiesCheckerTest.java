@@ -37,15 +37,15 @@ public class PropertiesCheckerTest {
                 NodeProperties.HANDLERNAME + NodeProperties.SEP + 
                 NodeProperties.REQUIRED + NodeProperties.SEP + 
                 NodeProperties.MULTIVALUED);
-        pc.addRow("unit,identifier,objectIdentifier,1,");
-        pc.addRow("description,identifier,descriptionIdentifier,1,");
-        pc.addRow("description,languageCode,,1,");
-        pc.addRow("description,name,,1,");
-        pc.addRow("repositoryDescription,typeOfEntity,,,");
-        pc.addRow("repositoryDescription,otherFormsOfName,,,1");
-        pc.addRow("repositoryDescription,parallelFormsOfName,,,");
-        pc.addRow("repositoryDescription,history,,,");
-        pc.addRow("repositoryDescription,generalContext,,,");
+        pc.addRow("Unit,identifier,objectIdentifier,1,");
+        pc.addRow("Description,identifier,descriptionIdentifier,1,");
+        pc.addRow("Description,languageCode,,1,");
+        pc.addRow("Description,name,,1,");
+        pc.addRow("RepositoryDescription,typeOfEntity,,,");
+        pc.addRow("RepositoryDescription,otherFormsOfName,,,1");
+        pc.addRow("RepositoryDescription,parallelFormsOfName,,,");
+        pc.addRow("RepositoryDescription,history,,,");
+        pc.addRow("RepositoryDescription,generalContext,,,");
         p = new PropertiesChecker(pc);
     }
 

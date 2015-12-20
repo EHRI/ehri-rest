@@ -121,7 +121,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @return a iterable of document descriptions
      */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    Iterable<DocumentDescription> getDocumentDescriptions();
+    Iterable<DocumentaryUnitDescription> getDocumentDescriptions();
 
     /**
      * Implementation of complex methods.

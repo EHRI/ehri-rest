@@ -77,7 +77,7 @@ public class UtilitiesTest extends AbstractFixtureTest {
 
         // Illustrating what a sharp tool this is, the names of all documentary units
         // with the same thing...
-        long allDocs = findReplace.propertyValueRE(EntityClass.DOCUMENT_DESCRIPTION,
+        long allDocs = findReplace.propertyValueRE(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION,
                 "name", Pattern.compile(".*"), "allTheSameName!");
         assertEquals(7, allDocs);
     }

@@ -48,7 +48,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonUserProfileTestString = "{\"type\":\"userProfile\", \"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\"}}";
+    private String jsonUserProfileTestString = "{\"type\":\"UserProfile\", \"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\"}}";
 
     /**
      * CR(U)D cycle

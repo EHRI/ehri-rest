@@ -62,7 +62,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
         /*
          * null: 5
          * relationship: 4
-         * documentaryUnit: 4
+         * DocumentaryUnit: 4
          * documentDescription: 4
          * systemEvent: 1
          * datePeriod: 4

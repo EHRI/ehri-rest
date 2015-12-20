@@ -1,6 +1,6 @@
 {
 	"id" : null,
-	"type":"repository",
+	"type":"Repository",
 	"data": {
 		"identifier":"some-repository",
 		"name":"King's College London",
@@ -10,7 +10,7 @@
 		"describes":[
 			{
 				"id":null,
-				"type":"repositoryDescription",
+				"type":"RepositoryDescription",
 				"data":{
 					"buildings":null,
 					"generalContext":null,
@@ -29,7 +29,7 @@
 					"hasAddress":[
 						{
 							"id":null,
-							"type":"address",
+							"type":"Address",
 							"data":{
 								"city":"London",
 								"name":"An Address",
