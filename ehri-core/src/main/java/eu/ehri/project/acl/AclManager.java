@@ -62,7 +62,7 @@ public final class AclManager {
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final PermissionScope scope;
-    private final HashSet<PermissionScope> scopes;
+    private final Set<PermissionScope> scopes;
 
     // Lookups to convert between the enum and node representations
     // of content and permission types.
@@ -238,7 +238,7 @@ public final class AclManager {
      *
      * @param accessor The user/group
      * @return List of permission maps for the given accessor and his group
-     *         parents.
+     * parents.
      */
     public InheritedGlobalPermissionSet getInheritedGlobalPermissions(
             Accessor accessor) {
@@ -543,7 +543,7 @@ public final class AclManager {
      *
      * @param accessor The user/group
      * @return List of permission names for the given accessor on the given
-     *         target
+     * target
      */
     private List<PermissionType> getItemPermissions(Accessor accessor,
             AccessibleEntity entity) {
@@ -558,7 +558,7 @@ public final class AclManager {
             // documentary units there might be quite a few.
             HashSet<PermissionScope> scopes = Sets.newHashSet(entity.getPermissionScopes());
 
-            PermissionGrantTarget target = manager.cast(entity, PermissionGrantTarget.class);
+            PermissionGrantTarget target = entity.as(PermissionGrantTarget.class);
 
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
                 if (Iterables.contains(grant.getTargets(), target)) {
@@ -581,9 +581,8 @@ public final class AclManager {
      */
     private Optional<PermissionGrant> findPermission(PermissionGrantTarget entity,
             PermissionType permType, Accessor accessor) {
-        PermissionGrantTarget target = manager.cast(entity,
-                PermissionGrantTarget.class);
 
+        PermissionGrantTarget target = entity.as(PermissionGrantTarget.class);
         Permission perm = enumPermissionMap.getUnchecked(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (isInScope(grant)
@@ -665,7 +664,7 @@ public final class AclManager {
             if (scope == null || scopes.contains(scope)) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (manager.getEntityClass(target).equals(EntityClass.CONTENT_TYPE)) {
-                        ContentType contentType = manager.cast(target, ContentType.class);
+                        ContentType contentType = target.as(ContentType.class);
                         Permission permission = grant.getPermission();
                         if (permission != null) {
                             builder.set(
@@ -697,7 +696,7 @@ public final class AclManager {
      * Pipe filter function that passes through all items.
      *
      * @return A no-op PipeFunction for filtering a list of vertices as an admin
-     *         user
+     * user
      */
     private static PipeFunction<Vertex, Boolean> noopFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {

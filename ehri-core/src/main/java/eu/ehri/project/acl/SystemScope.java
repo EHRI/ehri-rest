@@ -25,6 +25,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
 
@@ -35,38 +36,44 @@ import java.util.Collection;
  * permissions and ID namespaces.
  */
 public enum SystemScope implements PermissionScope {
-    
+
     INSTANCE;
 
     /**
      * Obtain the shared instance of SystemScope.
+     *
      * @return The global SystemScope instance
      */
     public static PermissionScope getInstance() {
         return INSTANCE;
     }
-    
+
+    @Override
+    public <T extends Frame> T as(Class<T> cls) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getId() {
         return Entities.SYSTEM;
     }
 
+    @Override
     public String getType() {
         return Entities.SYSTEM;
     }
 
+    @Override
     public String getIdentifier() {
         return Entities.SYSTEM;
     }
 
+    @Override
     public Vertex asVertex() {
-        // TODO: Determine if there's a better approach to this.
-        // Since PermissionScope can be implemented by several
-        // types of node, comparing them by vertex is the only
-        // reliable approach. ReRally, this operation should
-        // throw an UnsupportedOperationException().
         return null;
     }
 
+    @Override
     public Iterable<PermissionGrant> getPermissionGrants() {
         return new EmptyIterable<>();
     }

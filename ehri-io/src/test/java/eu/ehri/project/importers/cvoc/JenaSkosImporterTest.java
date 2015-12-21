@@ -46,7 +46,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
                 .importFile(ClassLoader.getSystemResourceAsStream("cvoc/ehri-skos.rdf"), "ehri-skos");
         assertEquals(877, importLog.getCreated());
         AccessibleEntity concept = actionManager.getLatestGlobalEvent().getFirstSubject();
-        assertEquals("deu", manager.cast(concept, Concept.class)
+        assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
     }
 
@@ -59,7 +59,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         assertEquals(1, importLog.getCreated());
         AccessibleEntity concept = actionManager.getLatestGlobalEvent().getFirstSubject();
-        assertEquals("deu", manager.cast(concept, Concept.class)
+        assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
     }
 

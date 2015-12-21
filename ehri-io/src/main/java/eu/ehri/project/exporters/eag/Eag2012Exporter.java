@@ -8,8 +8,6 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.util.Helpers;
 import eu.ehri.project.models.Address;
@@ -53,7 +51,6 @@ public class Eag2012Exporter implements EagExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eag2012Exporter.class);
 
     protected final FramedGraph<?> framedGraph;
-    protected final GraphManager manager;
     protected final EventViews eventManager;
     private final DocumentBuilder documentBuilder;
 
@@ -69,7 +66,6 @@ public class Eag2012Exporter implements EagExporter {
 
     public Eag2012Exporter(final FramedGraph<?> framedGraph) {
         this.framedGraph = framedGraph;
-        manager = GraphManagerFactory.getInstance(framedGraph);
         eventManager = new EventViews(framedGraph);
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -130,7 +126,7 @@ public class Eag2012Exporter implements EagExporter {
                     .or("Europe")); // FIXME: Default???
             repoElem.appendChild(geogAreaElem);
 
-            for (Address address : (manager.cast(desc, RepositoryDescription.class))
+            for (Address address : (desc.as(RepositoryDescription.class))
                     .getAddresses()) {
                 Element locationElem = doc.createElement("location");
                 locationElem.setAttribute("localType", "postal address");

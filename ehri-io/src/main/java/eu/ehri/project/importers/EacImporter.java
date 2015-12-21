@@ -127,7 +127,7 @@ public class EacImporter extends EaImporter {
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())
                 && mutation.created()) {
-            manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
+            permissionScope.as(AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 
@@ -227,7 +227,7 @@ public class EacImporter extends EaImporter {
                                     Bundle linkBundle = new Bundle(EntityClass.LINK)
                                             .withDataValue(Ontology.LINK_HAS_TYPE, linkType)
                                             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
-                                    UserProfile user = manager.cast(log.getActioner(), UserProfile.class);
+                                    UserProfile user = log.getActioner().as(UserProfile.class);
                                     Link link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
                                     unit.addLink(link);
                                     concept.addLink(link);

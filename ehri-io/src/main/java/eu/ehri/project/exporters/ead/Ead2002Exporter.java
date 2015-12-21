@@ -9,8 +9,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
@@ -56,7 +54,6 @@ public class Ead2002Exporter implements EadExporter {
     protected static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
 
     protected final FramedGraph<?> framedGraph;
-    protected final GraphManager manager;
     protected final EventViews eventManager;
     private final DocumentBuilder documentBuilder;
 
@@ -107,7 +104,6 @@ public class Ead2002Exporter implements EadExporter {
 
     public Ead2002Exporter(final FramedGraph<?> framedGraph) {
         this.framedGraph = framedGraph;
-        manager = GraphManagerFactory.getInstance(framedGraph);
         eventManager = new EventViews(framedGraph);
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -253,7 +249,7 @@ public class Ead2002Exporter implements EadExporter {
         profDescElem.appendChild(creationElem);
         creationElem.setTextContent(
                 Resources.toString(Resources.getResource("export-boilerplate.txt"),
-                StandardCharsets.UTF_8));
+                        StandardCharsets.UTF_8));
         Element creationDateElem = doc.createElement("date");
         creationElem.appendChild(creationDateElem);
         DateTime now = DateTime.now();
@@ -286,7 +282,7 @@ public class Ead2002Exporter implements EadExporter {
             Element publisherElem = doc.createElement("publisher");
             publisherElem.setTextContent(repoDesc.getName());
             pubStmtElem.appendChild(publisherElem);
-            for (Address address : manager.cast(repoDesc, RepositoryDescription.class).getAddresses()) {
+            for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
                 Element addrElem = doc.createElement("address");
                 pubStmtElem.appendChild(addrElem);
                 for (String key : addressKeys) {
@@ -351,7 +347,7 @@ public class Ead2002Exporter implements EadExporter {
         didElem.appendChild(unitTitleElem);
         unitTitleElem.setTextContent(desc.getName());
 
-        for (DatePeriod datePeriod : manager.cast(desc, DocumentDescription.class).getDatePeriods()) {
+        for (DatePeriod datePeriod : desc.as(DocumentDescription.class).getDatePeriods()) {
             if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
                 String start = datePeriod.getStartDate();
                 String end = datePeriod.getEndDate();

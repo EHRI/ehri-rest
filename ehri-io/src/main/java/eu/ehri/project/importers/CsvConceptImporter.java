@@ -61,7 +61,7 @@ public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
         Concept frame = mutation.getNode();
 
         if (!permissionScope.equals(SystemScope.getInstance()) && mutation.created()) {
-            manager.cast(permissionScope, Vocabulary.class).addItem(frame);
+            permissionScope.as(Vocabulary.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 

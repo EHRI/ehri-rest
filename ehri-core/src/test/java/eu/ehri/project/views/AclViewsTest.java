@@ -194,9 +194,9 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor grantee = invalidUser;
         // Grant the user specific permissions to update the group
         aclManager.grantPermission(
-                manager.cast(user, PermissionGrantTarget.class), PermissionType.GRANT, grantee);
+                user.as(PermissionGrantTarget.class), PermissionType.GRANT, grantee);
         aclManager.grantPermission(
-                manager.cast(group, PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
+                group.as(PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
         try {
             // This should still fail, because the user doesn't belong
             // to the group himself...
@@ -233,7 +233,7 @@ public class AclViewsTest extends AbstractFixtureTest {
         }
         // Grant UPDATE permissions on the Group
         aclManager.grantPermission(
-                manager.cast(group, PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
+                group.as(PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
         aclViews.addAccessorToGroup(group, user, grantee);
     }
 }

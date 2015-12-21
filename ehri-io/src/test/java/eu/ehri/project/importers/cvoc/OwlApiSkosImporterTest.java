@@ -47,7 +47,7 @@ public class OwlApiSkosImporterTest extends AbstractSkosTest {
         SystemEvent ev = actionManager.getLatestGlobalEvent();
         assertEquals(1, importLog.getCreated());
         AccessibleEntity concept = ev.getFirstSubject();
-        assertEquals("deu", manager.cast(concept, Concept.class)
+        assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
     }
 

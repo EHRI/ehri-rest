@@ -313,7 +313,7 @@ public class EventViews {
     public Iterable<List<SystemEvent>> aggregateByUser(UserProfile byUser, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
-                manager.cast(byUser, Actioner.class).getActions());
+                byUser.as(Actioner.class).getActions());
 
         // Add additional generic filters
         GremlinPipeline<SystemEvent, SystemEvent> acl = applyAclFilter(filterEvents(pipe), accessor);
@@ -330,7 +330,7 @@ public class EventViews {
     public Iterable<SystemEvent> listByUser(UserProfile byUser, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
-                manager.cast(byUser, Actioner.class).getActions());
+                byUser.as(Actioner.class).getActions());
 
         // Add additional generic filters
         return setPipelineRange(applyAclFilter(filterEvents(pipe), accessor));

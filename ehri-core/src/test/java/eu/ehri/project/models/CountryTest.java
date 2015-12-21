@@ -68,7 +68,7 @@ public class CountryTest extends AbstractFixtureTest {
         // increments the country count...
         repo.setCountry(country);
         // 2 nl repositories in the fixtures, plus the one we just made...
-        assertEquals(3L, (long) country.getChildCount());
+        assertEquals(3L, country.getChildCount());
     }
 
 
