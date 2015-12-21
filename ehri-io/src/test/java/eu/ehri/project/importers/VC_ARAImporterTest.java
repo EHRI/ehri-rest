@@ -21,18 +21,18 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import java.io.InputStream;
-import java.util.List;
 import org.junit.Test;
 
+import java.io.InputStream;
+import java.util.List;
 
-public class VC_ARAImporterTest extends AbstractImporterTest{
-    
-       protected final String SINGLE_EAD = "araEad.xml";
-       protected final String VC_EAD = "araVcEad.xml";
+public class VC_ARAImporterTest extends AbstractImporterTest {
 
-       // Depends on fixtures
-    protected final String TEST_REPO ="r1";
+    protected final String SINGLE_EAD = "araEad.xml";
+    protected final String VC_EAD = "araVcEad.xml";
+
+    // Depends on fixtures
+    protected final String TEST_REPO = "r1";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -44,26 +44,24 @@ public class VC_ARAImporterTest extends AbstractImporterTest{
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("ara.properties"))
                 .setTolerant(Boolean.TRUE);
-        
-                 // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importManager.importFile(ios, logMessage);
-        printGraph(graph);
-        
- // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
 
-        
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
+        importManager.importFile(ios, logMessage);
         printGraph(graph);
-       
+
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+
+
+        printGraph(graph);
+
         InputStream ios_vc = ClassLoader.getSystemResourceAsStream(VC_EAD);
         importManager = new SaxImportManager(graph, repository, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc_ara.properties"))
                 .setTolerant(Boolean.TRUE);
 
-ImportLog log_vc = importManager.importFile(ios_vc, logMessage);
-        
+        importManager.importFile(ios_vc, logMessage);
     }
-
 }

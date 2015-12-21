@@ -26,14 +26,16 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
-import java.io.InputStream;
-import java.util.List;
-
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
+
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class Wp2JmpEadTest extends AbstractImporterTest {
@@ -57,12 +59,11 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-        
+
         importManager.setTolerant(Boolean.TRUE);
-        
+
         ImportLog log = importManager.importFile(ios, logMessage);
 
-//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 7 more DocumentaryUnits fonds C1 C2 C3 4,5,6
         // - 7 more DocumentDescription
@@ -73,8 +74,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         // - 0 Annotation as resolved relationship 
         // - 1 unknownProperty
 
-
-        int newCount = count + 27 ;
+        int newCount = count + 27;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -102,24 +102,12 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         SystemEvent ev = actionManager.getLatestGlobalEvent();
         assertEquals(logMessage, ev.getLogMessage());
 
-//        //assert keywords are matched to cvocs
-//        assertTrue(toList(c6.getLinks()).size() > 0);
-//        for(Link a : c6.getLinks()){
-//            logger.debug(a.getLinkType());
-//        }
-        
-//        languages
-        for(DocumentDescription d : c2.getDocumentDescriptions()){
-            for(String key : d.getPropertyKeys()){
-                System.out.println(key);
-            }
+        // languages
+        for (DocumentDescription d : c2.getDocumentDescriptions()) {
             assertEquals("deu", d.getProperty("languageOfMaterial").toString());
         }
 
         List<AccessibleEntity> subjects = toList(ev.getSubjects());
-        for (AccessibleEntity subject : subjects) {
-            logger.info("identifier: " + subject.getId());
-        }
 
         assertEquals(7, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
@@ -129,16 +117,15 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         assertEquals(fonds, c1.getPermissionScope());
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c3.getPermissionScope());
-        
+
         // Check the author of the description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
             assertEquals("Shoah History Department, Jewish Museum in Prague", d.getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent
         ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(7, log2.getUnchanged());
-        //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));
     }
 }

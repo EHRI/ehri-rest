@@ -27,12 +27,15 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
-import java.io.InputStream;
-import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
+
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class Jmp130Test extends AbstractImporterTest {
@@ -49,23 +52,23 @@ public class Jmp130Test extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
-        
+
         final String logMessage = "Importing JMP EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("jmp.properties"));
-        
+
         importManager.setTolerant(Boolean.TRUE);
-        
+
         List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = importManager.importFile(ios, logMessage);
         printGraph(graph);
-        
- // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
 
         /**
          * null: 2
@@ -76,30 +79,22 @@ public class Jmp130Test extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 1
          */
-       
-
 
         printGraph(graph);
-        int newCount = count + 12 ;
+        int newCount = count + 12;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
-        for(DocumentDescription d : fonds.getDocumentDescriptions()){
-            for(String key : d.getPropertyKeys()){
-                System.out.println(key);
-            }
-            System.out.println(d.getProperty("languageOfMaterial"));
-            assertTrue(d.getProperty("languageOfMaterial").toString().startsWith("[ces"));
+        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+            List<String> langs = d.getProperty("languageOfMaterial");
+            assertTrue(langs.size() > 0);
+            assertEquals("ces", langs.get(0));
         }
 
         List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
-        for (AccessibleEntity subject : subjects) {
-            logger.info("identifier: " + subject.getId());
-        }
-
         assertEquals(1, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
 

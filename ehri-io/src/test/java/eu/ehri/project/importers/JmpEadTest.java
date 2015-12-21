@@ -27,12 +27,15 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
-import java.io.InputStream;
-import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
+
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class JmpEadTest extends AbstractImporterTest {
@@ -49,18 +52,17 @@ public class JmpEadTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
-        
+
         final String logMessage = "Importing JMP EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-        
+
         importManager.setTolerant(Boolean.TRUE);
-        
+
         ImportLog log = importManager.importFile(ios, logMessage);
 
-//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits fonds C1 C2 C3 4,5,6
         // - 1 more DocumentDescription
@@ -71,27 +73,21 @@ public class JmpEadTest extends AbstractImporterTest {
         // - 0 Annotation as resolved relationship 
         // - 1 unknownProperty
 
-
         printGraph(graph);
-        int newCount = count + 12 ;
+        int newCount = count + 12;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
-        for(DocumentDescription d : fonds.getDocumentDescriptions()){
-            for(String key : d.getPropertyKeys()){
-                System.out.println(key);
-            }
-            System.out.println(d.getProperty("languageOfMaterial"));
-            assertTrue(d.getProperty("languageOfMaterial").toString().startsWith("[deu"));
+        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+            List<String> langs = d.getProperty("languageOfMaterial");
+            assertTrue(langs.size() > 0);
+            assertEquals("deu", langs.get(0));
         }
 
         List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
-        for (AccessibleEntity subject : subjects) {
-            logger.info("identifier: " + subject.getId());
-        }
 
         //huh, should be 7?
         assertEquals(1, subjects.size());

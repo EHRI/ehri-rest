@@ -23,18 +23,17 @@ import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import java.io.InputStream;
-
 import org.junit.Test;
-import static org.junit.Assert.*;
-
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 
-public class Wp2PersonalitiesImporterTest extends AbstractImporterTest{
-    
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class Wp2PersonalitiesImporterTest extends AbstractImporterTest {
+
     private static final Logger logger = LoggerFactory.getLogger(Wp2PersonalitiesImporterTest.class);
     protected final String SINGLE_EAD = "wp2_persons_bare.csv";
 
@@ -44,18 +43,17 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest{
         int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
         assertEquals(2, voccount);
         logger.debug("number of items: " + voccount);
-        
+
         final String logMessage = "Importing some WP2 Personalities records";
         XmlImportProperties p = new XmlImportProperties("wp2personalities.properties");
         assertTrue(p.containsProperty("id"));
-//        assertTrue(p.containsProperty("dateOfBirth"));
         assertTrue(p.containsProperty("name"));
-        
+
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
-        System.out.println(Iterables.toList(authoritativeSet.getAuthoritativeItems()));
+        new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
+
         /*
          * 16 HistAgent
          * 16 HistAgentDesc
@@ -64,7 +62,7 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest{
          * 1 more import Event
          */
         printGraph(graph);
-        assertEquals(count+50, getNodeCount(graph));
+        assertEquals(count + 50, getNodeCount(graph));
         assertEquals(voccount + 16, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.

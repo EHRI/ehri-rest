@@ -19,8 +19,6 @@
 
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -28,6 +26,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -43,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
 public class ItsTest extends AbstractImporterTest {
@@ -54,7 +54,7 @@ public class ItsTest extends AbstractImporterTest {
     protected final String GESTAPO_WHOLE = "its-gestapo-whole.xml"; //provenance
     protected final String IMPORTED_ITEM_ID = "DE ITS [OuS 1.1.7]";
 
-    DocumentaryUnit archdesc, c1, c2, c7_1, c7_2;
+    DocumentaryUnit archdesc, c1, c2;
 
     @Test
     public void testUnitdate() throws Exception {
@@ -85,18 +85,15 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
         ImportLog log_en = importManager.importFile(ios, logMessage);
         ImportLog log_de = importManager.importFile(ios2, logMessage);
 
-
-// After...
+        // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         printGraph(graph);
         diff.printDebug(System.out);
-
 
         /**
          * relationship: 2
@@ -122,20 +119,13 @@ public class ItsTest extends AbstractImporterTest {
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
 
         assertEquals("nl-r1-de_its_ous_1_1_7", unit.getId());
-        // The arch has 1 c01 direct child (and 2 c02 "grandchildren", but these are not counted)
-        for (DocumentaryUnit d : unit.getChildren()) {
-            logger.debug("Child: " + d.getIdentifier());
-        }
 
         assertEquals(1L, unit.getChildCount());
 
         for (Description d : unit.getDocumentDescriptions()) {
-            boolean hasDate = false;
-            for (Edge e : d.asVertex().getEdges(Direction.OUT)) {
-                if (e.getLabel().equals("hasDate"))
-                    hasDate = true;
-            }
-            assertTrue(hasDate);
+            Iterable<DatePeriod> datePeriods = d.as(DocumentDescription.class).getDatePeriods();
+            assertTrue(datePeriods.iterator().hasNext());
+
             logger.debug("Description language: " + d.getLanguageOfDescription());
             if (d.getLanguageOfDescription().equals("eng")) {
                 assertEquals("Concentration Camp Esterwegen", d.getName());
@@ -146,16 +136,14 @@ public class ItsTest extends AbstractImporterTest {
             } else if (d.getLanguageOfDescription().equals("deu")) {
                 assertEquals("Konzentrationslager Esterwegen", d.getName());
             } else {
-                fail();
+                fail("Unexpected language: " + d.getLanguageOfDescription());
             }
 
         }
 
 
         SystemEvent event = unit.getLatestEvent();
-        if (event != null) {
-            logger.debug("event: " + event.getLogMessage());
-        }
+        assertNotNull(event);
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // we did two imports, so two actions
@@ -181,14 +169,12 @@ public class ItsTest extends AbstractImporterTest {
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"))
 
                 .setTolerant(Boolean.TRUE);
-        ImportLog log_en = importManager.importFile(ios, logMessage);
+        importManager.importFile(ios, logMessage);
 
-// After...
+        // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-
-//               printGraph(graph);
 
         /* null: 9
          * relationship: 23
@@ -199,26 +185,21 @@ public class ItsTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 6
          */
-//               printGraph(graph);
+
         int createCount = origCount + 63;
         assertEquals(createCount, getNodeCount(graph));
 
         DocumentaryUnit u = graph.frame(
                 getVertexByIdentifier(graph, "R 2"), DocumentaryUnit.class);
 
-        boolean foundOtherIdentifier = false;
-        for (String s : (List<String>) u.getProperty("otherIdentifiers")) {
-            if (s.equals("Folder 0143"))
-                foundOtherIdentifier = true;
-        }
-        assertTrue(foundOtherIdentifier);
+        List<String> otherIdentifiers = u.getProperty("otherIdentifiers");
+        assertThat(otherIdentifiers, hasItem("Folder 0143"));
 
-        boolean foundDoc = false;
-        for (DocumentDescription d : u.getDocumentDescriptions()) {
+        Iterable<DocumentDescription> descriptions = u.getDocumentDescriptions();
+        assertTrue(descriptions.iterator().hasNext());
+        for (DocumentDescription d : descriptions) {
             assertEquals("R 2 Geheime Staatspolizei (Gestapo).ead#DEU", d.getProperty("sourceFileId"));
-
             assertTrue((d.getProperty("processInfo")).equals("ITS employee"));
-            foundDoc = true;
 
             int countRevised_ME = 0;
             int countCreated_ME = 0;
@@ -236,15 +217,10 @@ public class ItsTest extends AbstractImporterTest {
                     assertEquals(MaintenanceEventType.created.toString(), me.getProperty(Ontology.MAINTENANCE_EVENT_TYPE));
                     countCreated_ME++;
                 }
-
-
             }
             assertEquals(3, countRevised_ME);
             assertEquals(1, countCreated_ME);
         }
-        assertTrue(foundDoc);
-
-
     }
 
     @Test
@@ -259,18 +235,14 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties")).setTolerant(Boolean.TRUE);
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"))
+        importManager.importFile(ios, logMessage);
 
-                .setTolerant(Boolean.TRUE);
-        ImportLog log_en = importManager.importFile(ios, logMessage);
-
-// After...
+        // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-
-//               printGraph(graph);
 
         /* null: 21
          * documentaryUnit: 20
@@ -282,7 +254,6 @@ public class ItsTest extends AbstractImporterTest {
          */
         int createCount = origCount + 91;
         assertEquals(createCount, getNodeCount(graph));
-
     }
 
     @Test
@@ -296,12 +267,13 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties"))
-
+        importManager = new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class,
+                new XmlImportProperties("its-pertinence.properties"))
                 .setTolerant(Boolean.TRUE);
-        ImportLog log_en = importManager.importFile(ios, logMessage);
+        importManager.importFile(ios, logMessage);
 
-// After...
+        // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         printGraph(graph);
@@ -320,6 +292,5 @@ public class ItsTest extends AbstractImporterTest {
 
         int createCount = origCount + 21;
         assertEquals(createCount, getNodeCount(graph));
-
     }
 }
