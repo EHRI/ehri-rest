@@ -20,7 +20,6 @@
 package eu.ehri.project.core.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -39,7 +38,6 @@ import org.neo4j.graphdb.schema.Schema;
 import org.slf4j.Logger;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -89,25 +87,13 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
-        Neo4j2Vertex node = (Neo4j2Vertex) super.createVertex(id, type, data, keys);
-        node.addLabel(BASE_LABEL);
-        node.addLabel(type.getName());
-        return node;
+        return setLabels(super.createVertex(id, type, data, keys));
     }
 
     @Override
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
-        Neo4j2Vertex node = (Neo4j2Vertex) super.updateVertex(id, type, data, keys);
-        List<String> labels = Lists.newArrayList(node.getLabels());
-        if (!(labels.size() == 1 && labels.get(0).equals(type.getName()))) {
-            for (String label : labels) {
-                node.removeLabel(label);
-            }
-            node.addLabel(BASE_LABEL);
-            node.addLabel(type.getName());
-        }
-        return node;
+        return setLabels(super.updateVertex(id, type, data, keys));
     }
 
     @Override
@@ -118,6 +104,23 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     @Override
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
         return graph.getBaseGraph().getVerticesByLabel(type.getName());
+    }
+
+    /**
+     * Set labels on a Neo4j-based vertex.
+     *
+     * @param vertex the vertex
+     * @return a vertex with labels set
+     */
+    public Vertex setLabels(Vertex vertex) {
+        Neo4j2Vertex node = (Neo4j2Vertex) vertex;
+        for (String label : node.getLabels()) {
+            node.removeLabel(label);
+        }
+        node.addLabel(BASE_LABEL);
+        String type = getType(vertex);
+        node.addLabel(type);
+        return node;
     }
 
     /**

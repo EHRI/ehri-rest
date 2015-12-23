@@ -20,15 +20,12 @@
 package eu.ehri.extension;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
-import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -37,16 +34,14 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.tools.DbVersionUpgrader1to2;
+import eu.ehri.project.tools.DbUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
@@ -63,7 +58,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -413,33 +407,6 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_setIdsOnEventLinks")
-    public String setIdsOnEventLinks()
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            long done = 0;
-            for (Vertex v : graph.getVertices()) {
-                if ("EventLink".equals(v.getProperty("_debugType"))) {
-                    String id = v.getProperty(EntityType.ID_KEY);
-                    if (id == null) {
-                        UUID timeBasedUUID = GenericIdGenerator.getTimeBasedUUID();
-                        v.setProperty(EntityType.ID_KEY, timeBasedUUID.toString());
-                        v.setProperty(EntityType.TYPE_KEY, Entities.EVENT_LINK);
-                        done++;
-
-                        if (done % 10000 == 0) {
-                            graph.getBaseGraph().commit();
-                        }
-                    }
-                }
-            }
-            tx.success();
-            return String.valueOf(done);
-        }
-    }
-
-    @POST
-    @Produces("text/plain")
     @Path("/_setLabels")
     public String setLabels()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
@@ -447,22 +414,14 @@ public class ToolsResource extends AbstractRestResource {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             for (Vertex v : graph.getVertices()) {
                 try {
-                    Neo4j2Vertex neo4j2Vertex = (Neo4j2Vertex) v;
-                    List<String> labels = Lists.newArrayList(neo4j2Vertex.getLabels());
-                    for (String label : labels) {
-                        neo4j2Vertex.removeLabel(label);
-                    }
-                    String type = neo4j2Vertex.getProperty(EntityType.TYPE_KEY);
-                    if (type != null) {
-                        neo4j2Vertex.addLabel(Neo4jGraphManager.BASE_LABEL);
-                        neo4j2Vertex.addLabel(type);
-                        done++;
-                    }
+                    ((Neo4jGraphManager) manager).setLabels(v);
+                    done++;
                 } catch (org.neo4j.graphdb.ConstraintViolationException e) {
+                    logger.error("Error setting labels on {} ({})", manager.getId(v), v.getId());
                     e.printStackTrace();
                 }
 
-                if (done % 10000 == 0) {
+                if (done % 100000 == 0) {
                     graph.getBaseGraph().commit();
                 }
             }
@@ -477,6 +436,7 @@ public class ToolsResource extends AbstractRestResource {
     @Path("/_setConstraints")
     public String setConstraints() {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            logger.info("Initializing graph schema...");
             manager.initialize();
             tx.success();
         }
@@ -485,54 +445,48 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_renameIdsAndTypeKeys")
-    public String renameIdsAndTypeKeys1to2(
-            @QueryParam("oldIdKey") @DefaultValue("__ID__") String oldIdKey,
-            @QueryParam("oldTypeKey") @DefaultValue("__ISA__") String oldTypeKey) {
+    @Path("/_upgrade1to2")
+    public String upgradeDb1to2() throws IOException {
+        final AtomicInteger done = new AtomicInteger();
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            int done = 0;
-            for (Vertex v : graph.getVertices()) {
-                Object oldId = v.getProperty(oldIdKey);
-                if (oldId != null) {
-                    v.setProperty(EntityType.ID_KEY, oldId);
-                    v.removeProperty(oldIdKey);
-                    done++;
+            logger.info("Upgrading DB schema...");
+            DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
+                @Override
+                public void changed() {
+                    if (done.getAndIncrement() % 100000 == 0) {
+                        graph.getBaseGraph().commit();
+                    }
                 }
-                Object oldType = v.getProperty(oldTypeKey);
-                if (oldType != null) {
-                    v.setProperty(EntityType.TYPE_KEY, oldType);
-                    v.removeProperty(oldTypeKey);
-                }
-
-                if (done % 10000 == 0) {
-                    graph.getBaseGraph().commit();
-                }
-            }
+            });
+            upgrader1to2
+                    .upgradeIdAndTypeKeys()
+                    .upgradeTypeValues()
+                    .setIdAndTypeOnEventLinks();
             tx.success();
-            return "done";
+            logger.info("Changed {} items", done.get());
+            return String.valueOf(done.get());
         }
     }
 
     @POST
     @Produces("text/plain")
-    @Path("/_upgradeVersions")
-    public String upgradeDbVersions1to2() throws IOException {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final AtomicInteger done = new AtomicInteger();
-            DbVersionUpgrader1to2 upgrader1to2 = new DbVersionUpgrader1to2(graph);
-            upgrader1to2.runUpgrade(new Function<Integer, Integer>() {
+    @Path("/_fullUpgrade1to2")
+    public String fullUpgradeDb1to2()
+            throws IOException, IdRegenerator.IdCollisionError, ItemNotFound {
+        upgradeDb1to2();
+        setLabels();
+        setConstraints();
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
                 @Override
-                public Integer apply(Integer integer) {
-                    if (done.get() % 10000 == 0) {
-                        graph.getBaseGraph().commit();
-                    }
-                    return done.getAndIncrement();
+                public void changed() {
                 }
-            });
+            }).setDbSchemaVersion();
             tx.success();
-            return String.valueOf(done.get());
         }
+        return "ok";
     }
+
 
     // Helpers
 
