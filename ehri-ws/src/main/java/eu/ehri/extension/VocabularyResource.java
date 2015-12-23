@@ -21,6 +21,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.hp.hpl.jena.rdf.model.Model;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -37,7 +38,6 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
-import eu.ehri.project.exporters.cvoc.SkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
@@ -234,21 +234,20 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor user = getRequesterUserProfile();
             final Vocabulary vocabulary = views.detail(id, user);
-            final SkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary)
+            final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary)
                     .setFormat(format);
+            final Model model = skosImporter.export(base);
+            tx.success();
             return Response.ok(new StreamingOutput() {
                 @Override
                 public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                    skosImporter.export(outputStream, base);
+                    model.getWriter().write(model, outputStream, format);
                 }
             }).type(mediaType + "; charset=utf-8").build();
-        } catch (Exception e) {
-            tx.close();
-            throw e;
         }
     }
 

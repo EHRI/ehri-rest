@@ -68,7 +68,13 @@ public class JenaSkosExporter implements SkosExporter {
                 framedGraph, vocabulary, format);
     }
 
+    @Override
     public void export(OutputStream outputStream, String base) throws IOException {
+        Model model = export(base);
+        model.getWriter(format).write(model, outputStream, null);
+    }
+
+    public Model export(String base) throws IOException {
 
         String baseUri = base == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : base;
         Iterable<Concept> concepts = vocabulary.getConcepts();
@@ -143,7 +149,7 @@ public class JenaSkosExporter implements SkosExporter {
                 model.add(resource, model.createProperty(SkosRDFVocabulary.RELATED.getURI().toString()), otherResource);
             }
         }
-        model.getWriter(format).write(model, outputStream, null);
+        return model;
     }
 
     private void writeProperty(Model model, Resource resource, String key, Object property, String lang) {
