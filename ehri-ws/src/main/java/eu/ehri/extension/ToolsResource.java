@@ -20,14 +20,20 @@
 package eu.ehri.extension;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
@@ -40,18 +46,25 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.tools.DbVersionUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -131,7 +144,7 @@ public class ToolsResource extends AbstractRestResource {
      * if an Address has a property with name &quot;url&quot; and value &quot;www.foo.com/bar&quot;,
      * providing a regex value <code>^www</code> and replacement <code>http://www</code> will
      * give the property a value of &quot;http://www.foo.com/bar&quot;.
-     * <p>
+     * <p/>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -160,7 +173,7 @@ public class ToolsResource extends AbstractRestResource {
 
     /**
      * Change a property key name across an entire entity class.
-     * <p>
+     * <p/>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -189,7 +202,7 @@ public class ToolsResource extends AbstractRestResource {
      * Find an replace a property value across an entire entity class, e.g.
      * if a DocumentaryUnit has a property with name &quot;foo&quot; and value &quot;bar&quot;,
      * change the value to &quot;baz&quot; on all items.
-     * <p>
+     * <p/>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -218,12 +231,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for a given item, optionally
      * renaming it.
-     * <p>
+     * <p/>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     * <p>
+     * <p/>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param id         the item's existing ID
@@ -261,12 +274,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID all items of a given
      * type.
-     * <p>
+     * <p/>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     * <p>
+     * <p/>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param type       the item type
@@ -306,12 +319,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for all items within the
      * permission scope and lower levels.
-     * <p>
+     * <p/>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     * <p>
+     * <p/>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param scopeId    the scope item's ID
@@ -430,18 +443,23 @@ public class ToolsResource extends AbstractRestResource {
     @Path("/_setLabels")
     public String setLabels()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        long done = 0;
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            long done = 0;
             for (Vertex v : graph.getVertices()) {
-                Neo4j2Vertex neo4j2Vertex = (Neo4j2Vertex)v;
-                List<String> labels = Lists.newArrayList(neo4j2Vertex.getLabels());
-                for (String label : labels) {
-                    neo4j2Vertex.removeLabel(label);
-                }
-                String type = neo4j2Vertex.getProperty(EntityType.TYPE_KEY);
-                if (type != null) {
-                    neo4j2Vertex.addLabel(type);
-                    done++;
+                try {
+                    Neo4j2Vertex neo4j2Vertex = (Neo4j2Vertex) v;
+                    List<String> labels = Lists.newArrayList(neo4j2Vertex.getLabels());
+                    for (String label : labels) {
+                        neo4j2Vertex.removeLabel(label);
+                    }
+                    String type = neo4j2Vertex.getProperty(EntityType.TYPE_KEY);
+                    if (type != null) {
+                        neo4j2Vertex.addLabel(Neo4jGraphManager.BASE_LABEL);
+                        neo4j2Vertex.addLabel(type);
+                        done++;
+                    }
+                } catch (org.neo4j.graphdb.ConstraintViolationException e) {
+                    e.printStackTrace();
                 }
 
                 if (done % 10000 == 0) {
@@ -449,7 +467,42 @@ public class ToolsResource extends AbstractRestResource {
                 }
             }
             tx.success();
-            return String.valueOf(done);
+        }
+
+        return String.valueOf(done);
+    }
+
+    @POST
+    @Produces("text/plain")
+    @Path("/_setConstraints")
+    public String setConstraints()
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            manager.initialize();
+            tx.success();
+        }
+        return "done";
+    }
+
+    @POST
+    @Produces("text/plain")
+    @Path("/_upgradeVersions")
+    public String upgradeDbVersions1to2()
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            final AtomicInteger done = new AtomicInteger();
+            DbVersionUpgrader1to2 upgrader1to2 = new DbVersionUpgrader1to2(graph);
+            upgrader1to2.runUpgrade(new Function<Integer, Integer>() {
+                @Override
+                public Integer apply(Integer integer) {
+                    if (done.get() % 10000 == 0) {
+                        graph.getBaseGraph().commit();
+                    }
+                    return done.getAndIncrement();
+                }
+            });
+            tx.success();
+            return String.valueOf(done.get());
         }
     }
 

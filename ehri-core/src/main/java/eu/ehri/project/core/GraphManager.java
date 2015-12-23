@@ -254,4 +254,9 @@ public interface GraphManager {
      * Rebuild the internal graph index.
      */
     void rebuildIndex();
+
+    /*
+     * Run graph-specific initialization code.
+     */
+    void initialize();
 }

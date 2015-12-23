@@ -79,6 +79,7 @@ public class GraphSON extends BaseCommand {
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(new Option("d", true, "Output or input a dump"));
+        options.addOption(new Option("b", true, "Buffer size"));
     }
 
     @Override
@@ -134,8 +135,13 @@ public class GraphSON extends BaseCommand {
         InputStream readStream = filepath.toLowerCase().endsWith(".gz")
                 ? new GZIPInputStream(inputStream)
                 : inputStream;
+
+        int bufferSize = cmdLine.hasOption('b')
+            ? Integer.parseInt(cmdLine.getOptionValue('b'))
+            : 1000;
+
         try {
-            reader.inputGraph(readStream, 1000);
+            reader.inputGraph(readStream, bufferSize);
             GraphManagerFactory.getInstance(graph).rebuildIndex();
         } finally {
             inputStream.close();

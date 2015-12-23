@@ -21,6 +21,7 @@ package eu.ehri.project.utils.fixtures.impl;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.TxGraph;
 import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
@@ -29,8 +30,10 @@ import org.junit.Test;
 
 import java.io.InputStream;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -48,7 +51,6 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
     @Test
     public void testWithInitializationError() throws Exception {
         try {
-            // NB: An initialized Neo4j 1.9 graph has a root node
             assertEquals(0, getNodeCount(testGraph));
             new GraphInitializer(testGraph).initialize();
             FixtureLoader loader = new YamlFixtureLoader(testGraph);
@@ -56,7 +58,7 @@ public class YamlFixtureLoaderTest extends GraphTestBase {
             fail("Loading fixtures on an initialized graph should have" +
                     " thrown an integrity error");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Integrity error"));
+            assertThat(e.getMessage(), containsString("Integrity error"));
         }
     }
 

@@ -19,39 +19,32 @@
 
 package eu.ehri.project.test.utils;
 
-import com.tinkerpop.blueprints.Element;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 
 /**
  * Deletes all nodes and indices from a Neo4j graph. Use with care.
- * 
+ * <p/>
  * Note: This does NOT reset the Neo4j node auto-increment id.
- *
- * 
  */
-public class GraphCleaner<T extends IndexableGraph> {
-        
+public class GraphCleaner<T extends Graph> {
+
     private FramedGraph<T> graph;
-    
+
     /**
      * Constructor.
-     * 
+     *
      * @param graph the framed graph
      */
     public GraphCleaner(FramedGraph<T> graph) {
         this.graph = graph;
     }
-    
+
     /**
      * Delete all nodes and indices from the graph.
      */
     public void clean() {
-        for (Index<? extends Element> idx : graph.getBaseGraph().getIndices()) {
-            graph.getBaseGraph().dropIndex(idx.getIndexName());
-        }
         for (Vertex v : graph.getVertices()) {
             v.remove();
         }

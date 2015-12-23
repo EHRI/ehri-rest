@@ -1,11 +1,9 @@
 package eu.ehri.project.core;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.TransactionalGraph;
 
 
-public interface TxGraph extends TransactionalGraph, IndexableGraph {
+public interface TxGraph extends TransactionalGraph {
     /**
      * Obtain a wrapped transaction object.
      *

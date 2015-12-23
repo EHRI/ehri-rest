@@ -25,6 +25,7 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Country;

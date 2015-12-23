@@ -14,6 +14,7 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
 /**
@@ -36,8 +37,9 @@ public class Neo4jGraphManagerTest {
     public void testCreateVertex() throws Exception {
         Neo4j2Vertex vertex = createTestVertex("foo", EntityClass.DOCUMENTARY_UNIT);
         List<String> labels = Lists.newArrayList(vertex.getLabels());
-        assertEquals(1, labels.size());
-        assertEquals(EntityClass.DOCUMENTARY_UNIT.getName(), labels.get(0));
+        assertEquals(2, labels.size());
+        assertThat(labels, hasItem(Neo4jGraphManager.BASE_LABEL));
+        assertThat(labels, hasItem(EntityClass.DOCUMENTARY_UNIT.toString()));
     }
 
     @Test
@@ -47,8 +49,9 @@ public class Neo4jGraphManagerTest {
         Neo4j2Vertex updated = (Neo4j2Vertex)manager.updateVertex(testId, EntityClass.REPOSITORY,
                 Maps.<String,Object>newHashMap());
         List<String> updatedLabels = Lists.newArrayList(updated.getLabels());
-        assertEquals(1, updatedLabels.size());
-        assertEquals(EntityClass.REPOSITORY.getName(), updatedLabels.get(0));
+        assertEquals(2, updatedLabels.size());
+        assertThat(updatedLabels, hasItem(Neo4jGraphManager.BASE_LABEL));
+        assertThat(updatedLabels, hasItem(EntityClass.REPOSITORY.toString()));
     }
 
     private Neo4j2Vertex createTestVertex(String id, EntityClass type) throws Exception {

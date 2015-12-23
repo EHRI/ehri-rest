@@ -26,15 +26,17 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
-import eu.ehri.project.core.impl.neo4j.Neo4j2VertexIterable;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import org.apache.lucene.queryParser.QueryParser;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.index.IndexManager;
+import eu.ehri.project.models.utils.ClassUtils;
+import org.neo4j.graphdb.DynamicLabel;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.schema.ConstraintDefinition;
+import org.neo4j.graphdb.schema.IndexDefinition;
+import org.neo4j.graphdb.schema.Schema;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,46 +49,48 @@ import java.util.NoSuchElementException;
  */
 public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> {
 
+    private final static Logger logger = org.slf4j.LoggerFactory.getLogger(Neo4jGraphManager.class);
+
     public Neo4jGraphManager(FramedGraph<T> graph) {
         super(graph);
     }
 
+    public static final String BASE_LABEL = "_Entity";
+
     @Override
-    public Vertex getVertex(String id, EntityClass type) throws ItemNotFound {
+    public boolean exists(String id) {
+        Preconditions.checkNotNull(id,
+                "attempt determine existence of a vertex with a null id");
+        try (CloseableIterable<Vertex> q = graph.getBaseGraph()
+                .getVerticesByLabelKeyValue(BASE_LABEL, EntityType.ID_KEY, id)) {
+            return q.iterator().hasNext();
+        }
+    }
+
+    @Override
+    public Vertex getVertex(String id) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
-        String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
-        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement
-        // other than return null.
-        try (IndexHits<Node> rawQuery = getRawIndex().query(queryStr)) {
-            return new Neo4j2Vertex(rawQuery.iterator().next(),
-                    graph.getBaseGraph());
+        try (CloseableIterable<Vertex> q = graph.getBaseGraph()
+                .getVerticesByLabelKeyValue(BASE_LABEL, EntityType.ID_KEY, id)) {
+            return q.iterator().next();
         } catch (NoSuchElementException e) {
             throw new ItemNotFound(id);
         }
     }
 
-    // NB: It's safe to do an unsafe cast here because we know that
-    // Neo4j2Vertex extends Vertex.
     @Override
-    @SuppressWarnings("unchecked")
     public CloseableIterable<Vertex> getVertices(String key, Object value,
             EntityClass type) {
-        String queryStr = getLuceneQuery(key, value, type.getName());
-        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return (CloseableIterable<Vertex>) new Neo4j2VertexIterable(rawQuery,
-                graph.getBaseGraph());
-    }
-
-    private org.neo4j.graphdb.index.Index<Node> getRawIndex() {
-        IndexManager index = graph.getBaseGraph().getRawGraph().index();
-        return index.forNodes(INDEX_NAME);
+        return graph.getBaseGraph().getVerticesByLabelKeyValue(type.getName(),
+                key, value);
     }
 
     @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
-        Neo4j2Vertex node = (Neo4j2Vertex)super.createVertex(id, type, data, keys);
+        Neo4j2Vertex node = (Neo4j2Vertex) super.createVertex(id, type, data, keys);
+        node.addLabel(BASE_LABEL);
         node.addLabel(type.getName());
         return node;
     }
@@ -94,22 +98,67 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     @Override
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
-        Neo4j2Vertex node = (Neo4j2Vertex)super.updateVertex(id, type, data, keys);
+        Neo4j2Vertex node = (Neo4j2Vertex) super.updateVertex(id, type, data, keys);
         List<String> labels = Lists.newArrayList(node.getLabels());
         if (!(labels.size() == 1 && labels.get(0).equals(type.getName()))) {
-            for (String label: labels) {
+            for (String label : labels) {
                 node.removeLabel(label);
             }
+            node.addLabel(BASE_LABEL);
             node.addLabel(type.getName());
         }
         return node;
     }
 
-    private String getLuceneQuery(String key, Object value, String type) {
-        return String.format("%s:\"%s\" AND %s:\"%s\"",
-                QueryParser.escape(key),
-                QueryParser.escape(String.valueOf(value)),
-                QueryParser.escape(EntityType.TYPE_KEY),
-                QueryParser.escape(type));
+    @Override
+    public void initialize() {
+        createIndicesAndConstraints(graph.getBaseGraph().getRawGraph());
+    }
+
+    @Override
+    public CloseableIterable<Vertex> getVertices(EntityClass type) {
+        return graph.getBaseGraph().getVerticesByLabel(type.getName());
+    }
+
+    /**
+     * Create
+     */
+    public static void createIndicesAndConstraints(GraphDatabaseService graph) {
+        Schema schema = graph.schema();
+        for (ConstraintDefinition constraintDefinition : schema.getConstraints()) {
+            constraintDefinition.drop();
+        }
+        for (IndexDefinition indexDefinition : schema.getIndexes()) {
+            indexDefinition.drop();
+        }
+
+        schema.constraintFor(DynamicLabel.label(BASE_LABEL))
+                .assertPropertyIsUnique(EntityType.ID_KEY)
+                .create();
+        schema.indexFor(DynamicLabel.label(BASE_LABEL))
+                .on(EntityType.TYPE_KEY)
+                .create();
+
+        // Create an index on each mandatory property and
+        // a unique constraint on unique properties.
+        for (EntityClass cls : EntityClass.values()) {
+            Collection<String> mandPropertyKeys = ClassUtils.getMandatoryPropertyKeys(cls.getJavaClass());
+            for (String prop : mandPropertyKeys) {
+                logger.trace("Creating index on mandatory property: {} -> {}",
+                        cls.getName(), prop);
+                schema.indexFor(DynamicLabel.label(cls.getName()))
+                        .on(prop)
+                        .create();
+            }
+
+            Collection<String> uniquePropertyKeys = ClassUtils.getUniquePropertyKeys(cls.getJavaClass());
+            for (String unique : uniquePropertyKeys) {
+                logger.trace("Creating constraint on unique property: {} -> {}",
+                        cls.getName(), unique);
+                schema.constraintFor(DynamicLabel.label(cls.getName()))
+                        .assertPropertyIsUnique(unique)
+                        .create();
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@
 
 package eu.ehri.extension.test.helpers;
 
-import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
@@ -58,7 +58,7 @@ public class ServerRunner {
 
     private FramedGraph<? extends TxGraph> framedGraph;
     private static FixtureLoader fixtureLoader = null;
-    private static GraphCleaner<? extends IndexableGraph> graphCleaner = null;
+    private static GraphCleaner<? extends Graph> graphCleaner = null;
 
     private final static Logger sunLogger = Logger.getLogger("com.sun.jersey");
     private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");

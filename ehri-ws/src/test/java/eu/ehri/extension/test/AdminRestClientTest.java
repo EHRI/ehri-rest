@@ -72,13 +72,6 @@ public class AdminRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testReindexInternal() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_reindexInternal"));
-        ClientResponse response = resource.post(ClientResponse.class);
-        assertStatus(OK, response);
-    }
-
-    @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
         WebResource resource = client.resource(ehriUri(ENDPOINT, "createDefaultUserProfile"));

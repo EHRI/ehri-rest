@@ -36,6 +36,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -86,7 +87,8 @@ public class GraphManagerTest {
         public void run() throws Throwable {
             for (Method method : this.getClass().getDeclaredMethods()) {
                 Test annotation = method.getAnnotation(Test.class);
-                if (annotation != null) {
+                Ignore ignore = method.getAnnotation(Ignore.class);
+                if (annotation != null && ignore == null) {
                     Class<? extends Throwable> expected = annotation.expected();
                     System.err.println(" --- " + cls.getSimpleName() + " invoking test: " + method.getName());
                     try {
@@ -257,6 +259,9 @@ public class GraphManagerTest {
             manager.setProperty(vertex, EntityType.ID_KEY, "foo");
         }
 
+        @Ignore("Ignored because semantics of indexing changed so getting" +
+                " vertices by property value should fall back to non-indexed" +
+                " behaviour.")
         @Test
         public void testSelectiveIndexing() throws IntegrityError {
             // We need to create one first, sorry

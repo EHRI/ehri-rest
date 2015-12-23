@@ -30,11 +30,13 @@ import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -94,6 +96,10 @@ public abstract class GraphTestBase {
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() {
         GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                 .newGraphDatabase();
+        try (Transaction tx = rawGraph.beginTx()){
+            Neo4jGraphManager.createIndicesAndConstraints(rawGraph);
+            tx.success();
+        }
         return graphFactory.create(new Neo4j2Graph(rawGraph));
     }
 
