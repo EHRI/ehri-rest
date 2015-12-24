@@ -238,14 +238,13 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Accessor user = getRequesterUserProfile();
             final Vocabulary vocabulary = views.detail(id, user);
-            final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary)
-                    .setFormat(format);
+            final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary);
             final Model model = skosImporter.export(base);
             tx.success();
             return Response.ok(new StreamingOutput() {
                 @Override
                 public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                    model.getWriter().write(model, outputStream, format);
+                    model.getWriter(rdfFormat).write(model, outputStream, base);
                 }
             }).type(mediaType + "; charset=utf-8").build();
         }
