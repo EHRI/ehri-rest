@@ -7,8 +7,8 @@ PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 # Select all the userProfile nodes and their name properties...
 SELECT ?id ?u WHERE {
    ?u a pgm:Vertex ;
-      prop:__ISA__  "userProfile" ;
-      prop:__ID__     ?id .
+      prop:__type  "UserProfile" ;
+      prop:__id     ?id .
 }
 
 ORDER BY ?id

@@ -475,8 +475,7 @@ public class ToolsResource extends AbstractRestResource {
     @POST
     @Produces("text/plain")
     @Path("/_setConstraints")
-    public String setConstraints()
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+    public String setConstraints() {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             manager.initialize();
             tx.success();
@@ -486,9 +485,38 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
+    @Path("/_renameIdsAndTypeKeys")
+    public String renameIdsAndTypeKeys1to2(
+            @QueryParam("oldIdKey") @DefaultValue("__ID__") String oldIdKey,
+            @QueryParam("oldTypeKey") @DefaultValue("__ISA__") String oldTypeKey) {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            int done = 0;
+            for (Vertex v : graph.getVertices()) {
+                Object oldId = v.getProperty(oldIdKey);
+                if (oldId != null) {
+                    v.setProperty(EntityType.ID_KEY, oldId);
+                    v.removeProperty(oldIdKey);
+                    done++;
+                }
+                Object oldType = v.getProperty(oldTypeKey);
+                if (oldType != null) {
+                    v.setProperty(EntityType.TYPE_KEY, oldType);
+                    v.removeProperty(oldTypeKey);
+                }
+
+                if (done % 10000 == 0) {
+                    graph.getBaseGraph().commit();
+                }
+            }
+            tx.success();
+            return "done";
+        }
+    }
+
+    @POST
+    @Produces("text/plain")
     @Path("/_upgradeVersions")
-    public String upgradeDbVersions1to2()
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+    public String upgradeDbVersions1to2() throws IOException {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final AtomicInteger done = new AtomicInteger();
             DbVersionUpgrader1to2 upgrader1to2 = new DbVersionUpgrader1to2(graph);

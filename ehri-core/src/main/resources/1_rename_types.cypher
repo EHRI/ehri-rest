@@ -4,142 +4,142 @@
 // re-sync the global legacy index.
 
 MATCH (n:historicalAgentDescription)
-          SET n.__ISA__ = "HistoricalAgentDescription"
+          SET n.__type = "HistoricalAgentDescription"
           REMOVE n:historicalAgentDescription
           SET n:HistoricalAgentDescription;
 
 MATCH (n:documentaryUnit)
-          SET n.__ISA__ = "DocumentaryUnit"
+          SET n.__type = "DocumentaryUnit"
           REMOVE n:documentaryUnit
           SET n:DocumentaryUnit;
 
 MATCH (n:virtualUnit)
-          SET n.__ISA__ = "VirtualUnit"
+          SET n.__type = "VirtualUnit"
           REMOVE n:virtualUnit
           SET n:VirtualUnit;
 
 MATCH (n:cvocVocabulary)
-          SET n.__ISA__ = "CvocVocabulary"
+          SET n.__type = "CvocVocabulary"
           REMOVE n:cvocVocabulary
           SET n:CvocVocabulary;
 
 MATCH (n:contentType)
-          SET n.__ISA__ = "ContentType"
+          SET n.__type = "ContentType"
           REMOVE n:contentType
           SET n:ContentType;
 
 MATCH (n:datePeriod)
-          SET n.__ISA__ = "DatePeriod"
+          SET n.__type = "DatePeriod"
           REMOVE n:datePeriod
           SET n:DatePeriod;
 
 MATCH (n:repository)
-          SET n.__ISA__ = "Repository"
+          SET n.__type = "Repository"
           REMOVE n:repository
           SET n:Repository;
 
 MATCH (n:maintenanceEvent)
-          SET n.__ISA__ = "MaintenanceEvent"
+          SET n.__type = "MaintenanceEvent"
           REMOVE n:maintenanceEvent
           SET n:MaintenanceEvent;
 
 MATCH (n:cvocConceptDescription)
-          SET n.__ISA__ = "CvocConceptDescription"
+          SET n.__type = "CvocConceptDescription"
           REMOVE n:cvocConceptDescription
           SET n:CvocConceptDescription;
 
 MATCH (n:address)
-          SET n.__ISA__ = "Address"
+          SET n.__type = "Address"
           REMOVE n:address
           SET n:Address;
 
 MATCH (n:documentDescription)
-          SET n.__ISA__ = "DocumentaryUnitDescription"
+          SET n.__type = "DocumentaryUnitDescription"
           REMOVE n:documentDescription
           SET n:DocumentaryUnitDescription;
 
 MATCH (n:repositoryDescription)
-          SET n.__ISA__ = "RepositoryDescription"
+          SET n.__type = "RepositoryDescription"
           REMOVE n:repositoryDescription
           SET n:RepositoryDescription;
 
 MATCH (n:systemEvent)
-          SET n.__ISA__ = "SystemEvent"
+          SET n.__type = "SystemEvent"
           REMOVE n:systemEvent
           SET n:SystemEvent;
 
 MATCH (n:link)
-          SET n.__ISA__ = "Link"
+          SET n.__type = "Link"
           REMOVE n:link
           SET n:Link;
 
 MATCH (n:authoritativeSet)
-          SET n.__ISA__ = "AuthoritativeSet"
+          SET n.__type = "AuthoritativeSet"
           REMOVE n:authoritativeSet
           SET n:AuthoritativeSet;
 
 MATCH (n:annotation)
-          SET n.__ISA__ = "Annotation"
+          SET n.__type = "Annotation"
           REMOVE n:annotation
           SET n:Annotation;
 
 MATCH (n:historicalAgent)
-          SET n.__ISA__ = "HistoricalAgent"
+          SET n.__type = "HistoricalAgent"
           REMOVE n:historicalAgent
           SET n:HistoricalAgent;
 
 MATCH (n:eventLink)
-          SET n.__ISA__ = "EventLink"
+          SET n.__type = "EventLink"
           REMOVE n:eventLink
           SET n:EventLink;
 
 MATCH (n:group)
-          SET n.__ISA__ = "Group"
+          SET n.__type = "Group"
           REMOVE n:group
           SET n:Group;
 
 MATCH (n:relationship)
-          SET n.__ISA__ = "AccessPoint"
+          SET n.__type = "AccessPoint"
           REMOVE n:relationship
           SET n:AccessPoint;
 
 MATCH (n:country)
-          SET n.__ISA__ = "Country"
+          SET n.__type = "Country"
           REMOVE n:country
           SET n:Country;
 
 MATCH (n:permission)
-          SET n.__ISA__ = "Permission"
+          SET n.__type = "Permission"
           REMOVE n:permission
           SET n:Permission;
 
 MATCH (n:system)
-          SET n.__ISA__ = "System"
+          SET n.__type = "System"
           REMOVE n:system
           SET n:System;
 
 MATCH (n:version)
-          SET n.__ISA__ = "Version"
+          SET n.__type = "Version"
           REMOVE n:version
           SET n:Version;
 
 MATCH (n:cvocConcept)
-          SET n.__ISA__ = "CvocConcept"
+          SET n.__type = "CvocConcept"
           REMOVE n:cvocConcept
           SET n:CvocConcept;
 
 MATCH (n:permissionGrant)
-          SET n.__ISA__ = "PermissionGrant"
+          SET n.__type = "PermissionGrant"
           REMOVE n:permissionGrant
           SET n:PermissionGrant;
 
 MATCH (n:property)
-          SET n.__ISA__ = "UnknownProperty"
+          SET n.__type = "UnknownProperty"
           REMOVE n:property
           SET n:UnknownProperty;
 
 MATCH (n:userProfile)
-          SET n.__ISA__ = "UserProfile"
+          SET n.__type = "UserProfile"
           REMOVE n:userProfile
           SET n:UserProfile;
 
@@ -148,4 +148,4 @@ MATCH (n:userProfile)
 // This simply entails upper casing the first letter, since
 // we're not renaming any content types.
 MATCH (ct:ContentType)
-    SET ct.__ID__ = upper(substring(ct.__ID__, 0, 1)) + substring(ct.__ID__, 1);
+    SET ct.__id = upper(substring(ct.__id, 0, 1)) + substring(ct.__id, 1);

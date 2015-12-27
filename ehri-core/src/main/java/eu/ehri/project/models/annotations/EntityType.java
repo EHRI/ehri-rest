@@ -29,8 +29,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EntityType {
-    String TYPE_KEY = "__ISA__";
-    String ID_KEY = "__ID__";
+    String TYPE_KEY = "__type";
+    String ID_KEY = "__id";
 
     EntityClass value();
 }

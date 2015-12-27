@@ -18,7 +18,7 @@ module Ehri
         parent = Graph.frame(desc.get_entity.as_vertex, Java::EuEhriProjectModelsBase::PermissionScope.java_class)
         newid = cls.get_idgen.generate_id(parent, bundle)
         puts "New ID: #{newid}"
-        desc.as_vertex.set_property("__ID__", newid)
+        desc.as_vertex.set_property("__id", newid)
         @total += 1
       end
     end
