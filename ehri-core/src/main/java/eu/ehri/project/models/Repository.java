@@ -90,7 +90,7 @@ public interface Repository extends DescribedEntity,
      */
     @Fetch(Ontology.REPOSITORY_HAS_COUNTRY)
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
-    Iterable<Country> getCountry();
+    Country getCountry();
 
     /**
      * The the country in which this repository resides.

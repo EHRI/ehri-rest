@@ -89,7 +89,7 @@ public class Eag2012Exporter implements EagExporter {
                 Resources.getResource("export-boilerplate.txt"), StandardCharsets.UTF_8));
         doc.appendChild(boilerplateComment);
 
-        Country country = repository.getCountry().iterator().next(); // FIXME
+        Country country = repository.getCountry();
 
         Element rootElem = doc.createElement("eag");
         rootElem.setAttribute("audience", "external");

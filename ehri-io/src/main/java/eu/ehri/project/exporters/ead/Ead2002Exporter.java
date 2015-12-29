@@ -297,12 +297,11 @@ public class Ead2002Exporter implements EadExporter {
                         }
                     }
                 }
-                for (Country country : repository.getCountry()) {
-                    Element lineElem = doc.createElement("addressline");
-                    addrElem.appendChild(lineElem);
-                    lineElem.setTextContent(new java.util.Locale(Locale.ENGLISH.getLanguage(), country.getCode())
-                            .getDisplayCountry());
-                }
+                Country country = repository.getCountry();
+                Element lineElem = doc.createElement("addressline");
+                addrElem.appendChild(lineElem);
+                lineElem.setTextContent(new java.util.Locale(Locale.ENGLISH.getLanguage(), country.getCode())
+                        .getDisplayCountry());
             }
         }
     }
