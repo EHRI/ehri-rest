@@ -22,6 +22,7 @@ package eu.ehri.extension;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.hp.hpl.jena.rdf.model.Model;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;

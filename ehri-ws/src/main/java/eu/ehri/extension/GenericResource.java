@@ -26,6 +26,7 @@ import com.google.common.collect.FluentIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.AccessDenied;

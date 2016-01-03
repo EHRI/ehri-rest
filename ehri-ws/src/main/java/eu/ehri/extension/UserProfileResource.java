@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;

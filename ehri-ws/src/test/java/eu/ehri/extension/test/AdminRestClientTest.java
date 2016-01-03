@@ -30,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.AbstractRestResource.AUTH_HEADER_NAME;
+import static eu.ehri.extension.base.AbstractRestResource.AUTH_HEADER_NAME;
 import static eu.ehri.extension.AdminResource.ENDPOINT;
 import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 import static org.junit.Assert.*;

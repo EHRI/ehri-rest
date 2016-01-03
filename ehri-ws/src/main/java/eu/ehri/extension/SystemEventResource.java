@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;

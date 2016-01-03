@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.exceptions.DeserializationError;

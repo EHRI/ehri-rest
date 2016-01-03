@@ -21,7 +21,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.SystemEventResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.views.EventViews;
@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.AbstractRestResource.ID_PARAM;
+import static eu.ehri.extension.base.AbstractRestResource.ID_PARAM;
 import static eu.ehri.extension.UserProfileResource.FOLLOWING;
 import static eu.ehri.extension.UserProfileResource.WATCHING;
 import static org.junit.Assert.assertEquals;

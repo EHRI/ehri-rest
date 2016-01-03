@@ -19,9 +19,7 @@
 
 package eu.ehri.extension.test;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.VocabularyResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;

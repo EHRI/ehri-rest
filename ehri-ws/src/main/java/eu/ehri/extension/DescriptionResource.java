@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.base.Charsets;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;

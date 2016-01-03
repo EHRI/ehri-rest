@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.extension;
+package eu.ehri.extension.base;
 
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
@@ -50,8 +50,7 @@ import java.util.Set;
  * @param <E> the specific Accessible derived class
 
  */
-public class AbstractAccessibleResource<E extends Accessible>
-        extends AbstractRestResource {
+public class AbstractAccessibleResource<E extends Accessible> extends AbstractRestResource {
 
     protected final LoggingCrudViews<E> views;
     protected final AclManager aclManager;
