@@ -43,7 +43,7 @@ import java.util.List;
  */
 @Path(Entities.CVOC_CONCEPT)
 public class CvocConceptResource
-        extends AbstractAccessibleEntityResource<Concept>
+        extends AbstractAccessibleResource<Concept>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
     public CvocConceptResource(@Context GraphDatabaseService database) {

@@ -42,45 +42,45 @@ public class PermissionScopeTest extends AbstractFixtureTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        doc = manager.getFrame("c2", DocumentaryUnit.class);
+        doc = manager.getEntity("c2", DocumentaryUnit.class);
     }
 
     @Test
     public void testGetPermissionScopes() throws Exception {
         List<PermissionScope> scopes = Lists.newArrayList(
-                manager.getFrame("c1", PermissionScope.class),
-                manager.getFrame("r1", PermissionScope.class),
-                manager.getFrame("nl", PermissionScope.class));
+                manager.getEntity("c1", PermissionScope.class),
+                manager.getEntity("r1", PermissionScope.class),
+                manager.getEntity("nl", PermissionScope.class));
         assertEquals(scopes, Iterables.toList(doc.getPermissionScopes()));
     }
 
     @Test
     public void testContainedItems() throws Exception {
-        PermissionScope c1 = manager.getFrame("c1", PermissionScope.class);
-        PermissionScope c2 = manager.getFrame("c2", PermissionScope.class);
-        Iterable<AccessibleEntity> containedItems = c1.getContainedItems();
+        PermissionScope c1 = manager.getEntity("c1", PermissionScope.class);
+        PermissionScope c2 = manager.getEntity("c2", PermissionScope.class);
+        Iterable<Accessible> containedItems = c1.getContainedItems();
         assertEquals(1L, Iterables.count(containedItems));
         assertEquals(c2, containedItems.iterator().next());
     }
 
     @Test
     public void testAllContainedItems() throws Exception {
-        PermissionScope r1 = manager.getFrame("r1", PermissionScope.class);
-        PermissionScope c1 = manager.getFrame("c1", PermissionScope.class);
-        PermissionScope c2 = manager.getFrame("c2", PermissionScope.class);
-        PermissionScope c3 = manager.getFrame("c3", PermissionScope.class);
-        PermissionScope c4 = manager.getFrame("c4", PermissionScope.class);
-        List<AccessibleEntity> r1contained = Lists.newArrayList(r1.getAllContainedItems());
+        PermissionScope r1 = manager.getEntity("r1", PermissionScope.class);
+        PermissionScope c1 = manager.getEntity("c1", PermissionScope.class);
+        PermissionScope c2 = manager.getEntity("c2", PermissionScope.class);
+        PermissionScope c3 = manager.getEntity("c3", PermissionScope.class);
+        PermissionScope c4 = manager.getEntity("c4", PermissionScope.class);
+        List<Accessible> r1contained = Lists.newArrayList(r1.getAllContainedItems());
         assertEquals(5L, r1contained.size());
-        assertTrue(r1contained.contains(c1.as(AccessibleEntity.class)));
-        assertTrue(r1contained.contains(c2.as(AccessibleEntity.class)));
-        assertTrue(r1contained.contains(c3.as(AccessibleEntity.class)));
-        assertTrue(r1contained.contains(c4.as(AccessibleEntity.class)));
+        assertTrue(r1contained.contains(c1.as(Accessible.class)));
+        assertTrue(r1contained.contains(c2.as(Accessible.class)));
+        assertTrue(r1contained.contains(c3.as(Accessible.class)));
+        assertTrue(r1contained.contains(c4.as(Accessible.class)));
 
-        List<AccessibleEntity> c1contained = Lists.newArrayList(c1.getAllContainedItems());
+        List<Accessible> c1contained = Lists.newArrayList(c1.getAllContainedItems());
         assertEquals(2L, c1contained.size());
-        assertTrue(c1contained.contains(c2.as(AccessibleEntity.class)));
-        assertTrue(c1contained.contains(c3.as(AccessibleEntity.class)));
+        assertTrue(c1contained.contains(c2.as(Accessible.class)));
+        assertTrue(c1contained.contains(c3.as(Accessible.class)));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
     public void testIdentifierIdRelationships() throws Exception {
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
-        Repository repo = manager.getFrame("r1", Repository.class);
+        Repository repo = manager.getEntity("r1", Repository.class);
         BundleDAO dao = new BundleDAO(graph, repo.idPath());
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
         assertEquals("nl-r1-someid_01", doc.getId());

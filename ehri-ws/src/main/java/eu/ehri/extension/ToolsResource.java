@@ -34,8 +34,8 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -116,8 +116,8 @@ public class ToolsResource extends AbstractRestResource {
             PermissionDenied, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
-            Repository repository = manager.getFrame(repositoryId, Repository.class);
-            Vocabulary vocabulary = manager.getFrame(vocabularyId, Vocabulary.class);
+            Repository repository = manager.getEntity(repositoryId, Repository.class);
+            Vocabulary vocabulary = manager.getEntity(vocabularyId, Vocabulary.class);
 
             long linkCount = linker
                     .withAccessPointTypes(accessPointTypes)
@@ -254,7 +254,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
+            Accessible item = manager.getEntity(id, Accessible.class);
             Optional<List<String>> remap = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .collisionMode(collisions)
@@ -297,8 +297,8 @@ public class ToolsResource extends AbstractRestResource {
             throws IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             EntityClass entityClass = EntityClass.withName(type);
-            try (CloseableIterable<AccessibleEntity> frames = manager
-                    .getFrames(entityClass, AccessibleEntity.class)) {
+            try (CloseableIterable<Accessible> frames = manager
+                    .getEntities(entityClass, Accessible.class)) {
                 List<List<String>> lists = new IdRegenerator(graph)
                         .withActualRename(commit)
                         .collisionMode(collisions)
@@ -342,7 +342,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
             List<List<String>> lists = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .skippingCollisions(tolerant)
@@ -373,16 +373,16 @@ public class ToolsResource extends AbstractRestResource {
         int done = 0;
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             for (EntityClass entityClass : types) {
-                try (CloseableIterable<Description> descriptions = manager.getFrames(entityClass, Description.class)) {
+                try (CloseableIterable<Description> descriptions = manager.getEntities(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
-                        DescribedEntity entity = desc.getEntity();
+                        Described entity = desc.getEntity();
                         if (entity != null) {
                             PermissionScope scope = entity.getPermissionScope();
                             List<String> idPath = scope != null
                                     ? Lists.newArrayList(scope.idPath())
                                     : Lists.<String>newArrayList();
                             idPath.add(entity.getIdentifier());
-                            Bundle descBundle = depSerializer.vertexFrameToBundle(desc);
+                            Bundle descBundle = depSerializer.entityToBundle(desc);
                             String newId = entityClass.getIdGen().generateId(idPath, descBundle);
                             if (!newId.equals(desc.getId()) && commit) {
                                 manager.renameVertex(desc.asVertex(), desc.getId(), newId);

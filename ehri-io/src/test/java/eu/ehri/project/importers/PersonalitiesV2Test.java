@@ -78,7 +78,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         */
         assertEquals(count+7, getNodeCount(graph));
         printGraph(graph);
-        HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
+        HistoricalAgent person = manager.getEntity("ehri_pers_000051", HistoricalAgent.class);
         assertEquals(2, ((List)person.getProperty(Ontology.OTHER_IDENTIFIERS)).size());
         
         for(Description d : person.getDescriptions()){
@@ -118,7 +118,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         */
         assertEquals(count+7, getNodeCount(graph));
         printGraph(graph);
-        HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
+        HistoricalAgent person = manager.getEntity("ehri_pers_000051", HistoricalAgent.class);
         for(Description d : person.getDescriptions()){
             assertEquals("deu", d.getLanguageOfDescription());
             assertTrue(d.getProperty("otherFormsOfName") instanceof List);
@@ -141,7 +141,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
         
         
-        Vocabulary vocabularyTest = manager.getFrame("fast_keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getEntity("fast_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         
@@ -170,7 +170,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         */
         assertEquals(count+8, getNodeCount(graph));
 //        printGraph(graph);
-        HistoricalAgent person = manager.getFrame("ehri_pers_000051", HistoricalAgent.class);
+        HistoricalAgent person = manager.getEntity("ehri_pers_000051", HistoricalAgent.class);
         for (Description d : person.getDescriptions()) {
             for (AccessPoint rel : d.getAccessPoints()) {
                 if (rel.getRelationshipType().equals("subjectAccess")) {
@@ -178,7 +178,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
                         assertEquals(1, toList(rel.getLinks()).size());
                         for (Link link : rel.getLinks()) {
                             boolean conceptFound = false;
-                            for (LinkableEntity le : link.getLinkTargets()) {
+                            for (Linkable le : link.getLinkTargets()) {
                                 if (le.getType().equals("CvocConcept")) {
                                     assertEquals(le, concept_716);
                                     conceptFound = true;

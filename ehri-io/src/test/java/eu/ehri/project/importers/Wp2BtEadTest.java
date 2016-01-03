@@ -29,7 +29,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
@@ -64,7 +64,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
@@ -76,7 +76,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
 
 
-        Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getEntity("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         final String logMessage = "Importing Beit Terezin EAD";
@@ -142,8 +142,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             logger.debug(a.getLinkType());
         }
 
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
-        for (AccessibleEntity subject : subjects) {
+        List<Accessible> subjects = toList(ev.getSubjects());
+        for (Accessible subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }
 

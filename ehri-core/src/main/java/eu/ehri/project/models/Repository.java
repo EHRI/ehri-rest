@@ -29,11 +29,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -43,7 +40,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * items.
  */
 @EntityType(EntityClass.REPOSITORY)
-public interface Repository extends DescribedEntity,
+public interface Repository extends Described,
         ItemHolder, Watchable {
 
     /**

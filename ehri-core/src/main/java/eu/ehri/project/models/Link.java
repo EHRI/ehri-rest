@@ -25,19 +25,18 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.Promotable;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.Temporal;
 
 /**
  * Links two items together with a given body, with may either be
  * a text property or some other entity.
  */
 @EntityType(EntityClass.LINK)
-public interface Link extends Promotable, TemporalEntity {
+public interface Link extends Promotable, Temporal {
 
     @Fetch(value = Ontology.LINK_HAS_LINKER, numLevels = 0)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
@@ -48,17 +47,17 @@ public interface Link extends Promotable, TemporalEntity {
 
     @Fetch(value = Ontology.LINK_HAS_TARGET, ifLevel = 0, numLevels = 1)
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
-    Iterable<LinkableEntity> getLinkTargets();
+    Iterable<Linkable> getLinkTargets();
 
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
-    void addLinkTarget(LinkableEntity entity);
+    void addLinkTarget(Linkable entity);
 
     @Fetch(Ontology.LINK_HAS_BODY)
     @Adjacency(label = Ontology.LINK_HAS_BODY)
-    Iterable<AccessibleEntity> getLinkBodies();
+    Iterable<Accessible> getLinkBodies();
 
     @Adjacency(label = Ontology.LINK_HAS_BODY)
-    void addLinkBody(AccessibleEntity entity);
+    void addLinkBody(Accessible entity);
 
     @Mandatory
     @Property(Ontology.LINK_HAS_TYPE)

@@ -30,23 +30,23 @@ import static org.junit.Assert.assertTrue;
 public class LinkTest extends AbstractFixtureTest {
     @Test
     public void testGetLinker() throws Exception {
-        Link link = manager.getFrame("link1", Link.class);
+        Link link = manager.getEntity("link1", Link.class);
         assertEquals(validUser, link.getLinker());
     }
 
     @Test
     public void testGetLinkTargets() throws Exception {
-        Link link = manager.getFrame("link1", Link.class);
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        Link link = manager.getEntity("link1", Link.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
         assertTrue(Iterables.contains(link.getLinkTargets(), c1));
         assertTrue(Iterables.contains(link.getLinkTargets(), c4));
     }
 
     @Test
     public void testGetLinkBodies() throws Exception {
-        Link link = manager.getFrame("link2", Link.class);
-        AccessPoint ur1 = manager.getFrame("ur1", AccessPoint.class);
+        Link link = manager.getEntity("link2", Link.class);
+        AccessPoint ur1 = manager.getEntity("ur1", AccessPoint.class);
         assertTrue(Iterables.contains(link.getLinkBodies(), ur1));
     }
 }

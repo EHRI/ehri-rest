@@ -63,7 +63,7 @@ public class IpnTest extends AbstractImporterTest {
     @Test
     @Ignore
     public void polishVirtualCollectionTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the IPN Virtual Collection";
 
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
@@ -100,7 +100,7 @@ public class IpnTest extends AbstractImporterTest {
 
     public void polishBranch_1_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
 
         origCount = getNodeCount(graph);
@@ -194,7 +194,7 @@ public class IpnTest extends AbstractImporterTest {
     @Ignore
     public void polishBranch_2_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
 
         origCount = getNodeCount(graph);

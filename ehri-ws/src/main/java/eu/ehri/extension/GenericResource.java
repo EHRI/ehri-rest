@@ -32,7 +32,7 @@ import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -48,12 +48,12 @@ import java.util.List;
  * regardless of their specific type.
  */
 @Path(GenericResource.ENDPOINT)
-public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {
+public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "entities";
 
     public GenericResource(@Context GraphDatabaseService database) {
-        super(database, AccessibleEntity.class);
+        super(database, Accessible.class);
     }
 
     /**

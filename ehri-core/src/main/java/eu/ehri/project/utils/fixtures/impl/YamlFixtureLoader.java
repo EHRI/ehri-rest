@@ -34,7 +34,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
@@ -242,7 +242,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         Bundle entityBundle = createBundle(id, isa, nodeData,
                 getDependentRelations(nodeRels));
         logger.trace("Creating node with id: {}", id);
-        Mutation<Frame> frame = dao.createOrUpdate(entityBundle, Frame.class);
+        Mutation<Entity> frame = dao.createOrUpdate(entityBundle, Entity.class);
 
         Multimap<String, String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {

@@ -25,7 +25,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
@@ -78,9 +78,9 @@ public class PermissionsResource extends AbstractRestResource {
     public Response listPermissionGrants(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = manager.getFrame(id, Accessor.class);
+            Accessor user = manager.getEntity(id, Accessor.class);
             Accessor accessor = getRequesterUserProfile();
-            return streamingPage(getQuery(AccessibleEntity.class)
+            return streamingPage(getQuery(Accessible.class)
                     .page(user.getPermissionGrants(), accessor,
                             PermissionGrant.class), tx);
         } catch (Exception e) {
@@ -103,10 +103,10 @@ public class PermissionsResource extends AbstractRestResource {
             throws PermissionDenied, ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            PermissionGrantTarget target = manager.getFrame(id,
+            PermissionGrantTarget target = manager.getEntity(id,
                     PermissionGrantTarget.class);
             Accessor accessor = getRequesterUserProfile();
-            return streamingPage(getQuery(AccessibleEntity.class)
+            return streamingPage(getQuery(Accessible.class)
                     .page(target.getPermissionGrants(), accessor, PermissionGrant.class), tx);
         } catch (Exception e) {
             tx.close();
@@ -126,9 +126,9 @@ public class PermissionsResource extends AbstractRestResource {
     public Response listPermissionGrantsForScope(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+            PermissionScope scope = manager.getEntity(id, PermissionScope.class);
             Accessor accessor = getRequesterUserProfile();
-            return streamingPage(getQuery(AccessibleEntity.class)
+            return streamingPage(getQuery(Accessible.class)
                     .page(scope.getPermissionGrants(), accessor,
                             PermissionGrant.class), tx);
         } catch (Exception e) {
@@ -170,7 +170,7 @@ public class PermissionsResource extends AbstractRestResource {
     public InheritedGlobalPermissionSet getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
             InheritedGlobalPermissionSet set = aclManager.getInheritedGlobalPermissions(accessor);
             tx.success();
             return set;
@@ -194,7 +194,7 @@ public class PermissionsResource extends AbstractRestResource {
             @PathParam("userId") String userId,
             GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
             Accessor grantee = getRequesterUserProfile();
             InheritedGlobalPermissionSet newPerms
                     = aclViews.setGlobalPermissionMatrix(accessor, globals, grantee);
@@ -219,8 +219,8 @@ public class PermissionsResource extends AbstractRestResource {
             @PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
-            AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
+            Accessible entity = manager.getEntity(id, Accessible.class);
             AclManager acl = aclManager.withScope(entity.getPermissionScope());
             InheritedItemPermissionSet set = acl.getInheritedItemPermissions(entity, accessor);
             tx.success();
@@ -242,8 +242,8 @@ public class PermissionsResource extends AbstractRestResource {
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userId") String userId,
                                                         @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
-            PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
+            PermissionScope scope = manager.getEntity(id, PermissionScope.class);
             AclManager acl = aclManager.withScope(scope);
             InheritedGlobalPermissionSet set = acl.getInheritedGlobalPermissions(accessor);
             tx.success();
@@ -270,8 +270,8 @@ public class PermissionsResource extends AbstractRestResource {
             @PathParam("id") String id,
             GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
-            PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
+            PermissionScope scope = manager.getEntity(id, PermissionScope.class);
             Accessor grantee = getRequesterUserProfile();
             AclViews acl = aclViews.withScope(scope);
             InheritedGlobalPermissionSet matrix = acl.setGlobalPermissionMatrix(accessor, globals, grantee);
@@ -298,8 +298,8 @@ public class PermissionsResource extends AbstractRestResource {
             @PathParam("id") String id,
             ItemPermissionSet itemPerms) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
-            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
+            Accessible item = manager.getEntity(id, Accessible.class);
             Accessor grantee = getRequesterUserProfile();
             aclViews.setItemPermissions(item, accessor, itemPerms.asSet(), grantee);
             InheritedItemPermissionSet set = aclManager.getInheritedItemPermissions(item, accessor);

@@ -20,7 +20,7 @@
 package eu.ehri.project.views;
 
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.views.impl.CrudViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
@@ -30,12 +30,12 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
  */
 public class ViewFactory {
 
-    public static <E extends AccessibleEntity> Crud<E> getCrudNoLogging(FramedGraph<?> graph,
+    public static <E extends Accessible> Crud<E> getCrudNoLogging(FramedGraph<?> graph,
             Class<E> cls) {
         return new CrudViews<>(graph, cls);
     }
 
-    public static <E extends AccessibleEntity> Crud<E> getCrudWithLogging(FramedGraph<?> graph,
+    public static <E extends Accessible> Crud<E> getCrudWithLogging(FramedGraph<?> graph,
             Class<E> cls) {
         return new LoggingCrudViews<>(graph, cls);
     }

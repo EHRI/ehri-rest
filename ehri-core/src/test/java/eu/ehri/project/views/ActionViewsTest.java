@@ -135,7 +135,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(changedUser.asVertex(), events.get(1)
                 .getSubjects().iterator().next().asVertex());
         try {
-            System.out.println(new Serializer(graph).vertexFrameToBundle(events.get(0)));
+            System.out.println(new Serializer(graph).entityToBundle(events.get(0)));
         } catch (SerializationError serializationError) {
             serializationError.printStackTrace();
         }

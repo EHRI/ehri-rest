@@ -46,7 +46,7 @@ public class UshmmTest extends AbstractImporterTest{
 
     @Test
     public void testImportItemsT() throws Exception {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by UshmmTest";
 
         int origCount = getNodeCount(graph);

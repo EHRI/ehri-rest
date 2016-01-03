@@ -91,7 +91,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
-        Repository scope = manager.getFrame("r1", Repository.class);
+        Repository scope = manager.getEntity("r1", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         assertNotNull(views.setScope(SystemScope.getInstance()).create(
@@ -101,7 +101,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test
     public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
-        Repository scope = manager.getFrame("r1", Repository.class);
+        Repository scope = manager.getEntity("r1", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         assertNotNull(views.setScope(scope).create(
@@ -112,7 +112,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithGoodNestedScopedPerms()
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
-        Repository scope = manager.getFrame("r1", Repository.class);
+        Repository scope = manager.getEntity("r1", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         DocumentaryUnit c1 = views.setScope(scope).create(
@@ -130,7 +130,7 @@ public class PermissionsTest extends AbstractFixtureTest {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
         // Same as above, but with the repository as the scope instead of the item.
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         new AclManager(graph, r1).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         views.setScope(r1).create(
@@ -147,8 +147,8 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithDifferentScopedPerms()
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
-        Repository scope = manager.getFrame("r1", Repository.class);
-        Repository badScope = manager.getFrame("r2", Repository.class);
+        Repository scope = manager.getEntity("r1", Repository.class);
+        Repository badScope = manager.getEntity("r2", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         assertNotNull(views.setScope(badScope).create(
@@ -273,7 +273,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testSetScopedPermissionMatrix() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
             SerializationError, ItemNotFound {
-        Repository scope = manager.getFrame("r1", Repository.class);
+        Repository scope = manager.getEntity("r1", Repository.class);
 
         GlobalPermissionSet matrix = GlobalPermissionSet.newBuilder()
                 .set(ContentTypes.DOCUMENTARY_UNIT, CREATE, DELETE)

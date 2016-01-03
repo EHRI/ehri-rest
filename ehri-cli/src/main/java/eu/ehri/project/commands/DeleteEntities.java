@@ -30,7 +30,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.views.impl.CrudViews;
@@ -81,13 +81,13 @@ public class DeleteEntities extends BaseCommand {
             logMessage = cmdLine.getOptionValue("log");
         }
 
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
+        if (!Accessible.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
         // Find the user
-        UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
+        UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                 UserProfile.class);
 
         new ActionManager(graph).newEventContext(user,
@@ -101,9 +101,9 @@ public class DeleteEntities extends BaseCommand {
 
     private void deleteIds(FramedGraph<?> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
-        CrudViews<AccessibleEntity> views = new CrudViews<>(graph, AccessibleEntity.class);
-        try (CloseableIterable<AccessibleEntity> items = manager.getFrames(type, AccessibleEntity.class)) {
-            for (AccessibleEntity acc : items) {
+        CrudViews<Accessible> views = new CrudViews<>(graph, Accessible.class);
+        try (CloseableIterable<Accessible> items = manager.getEntities(type, Accessible.class)) {
+            for (Accessible acc : items) {
                 System.out.println(acc.getId());
                 views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
             }

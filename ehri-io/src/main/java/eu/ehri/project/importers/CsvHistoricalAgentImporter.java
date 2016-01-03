@@ -29,7 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
@@ -49,7 +49,7 @@ public class CsvHistoricalAgentImporter extends CsvAuthoritativeItemImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = getPersister();
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,

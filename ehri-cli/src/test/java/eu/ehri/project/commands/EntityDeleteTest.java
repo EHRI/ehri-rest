@@ -36,6 +36,6 @@ public class EntityDeleteTest extends AbstractFixtureTest {
         EntityDelete del = new EntityDelete();
         CommandLine cmdLine = del.getCmdLine(args);
         assertEquals(0, del.execWithOptions(graph, cmdLine));
-        manager.getFrame("reto", UserProfile.class);
+        manager.getEntity("reto", UserProfile.class);
     }
 }

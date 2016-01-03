@@ -37,13 +37,13 @@ import java.io.InputStream;
 public class Eac2010ExporterTest extends XmlExporterTest {
     @Test
     public void testExport1() throws Exception {
-        HistoricalAgent agent = manager.getFrame("a1", HistoricalAgent.class);
+        HistoricalAgent agent = manager.getEntity("a1", HistoricalAgent.class);
         testExport(agent, "eng");
     }
 
     @Test
     public void testImportExport1() throws Exception {
-        AuthoritativeSet auths = manager.getFrame("auths", AuthoritativeSet.class);
+        AuthoritativeSet auths = manager.getEntity("auths", AuthoritativeSet.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream("abwehr.xml");
         SaxImportManager importManager = new SaxImportManager(graph, auths, validUser, EacImporter.class, EacHandler
                 .class);
@@ -58,7 +58,7 @@ public class Eac2010ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExportWithComprehensiveFixture() throws Exception {
-        HistoricalAgent test = manager.getFrame("auths-000001", HistoricalAgent.class);
+        HistoricalAgent test = manager.getEntity("auths-000001", HistoricalAgent.class);
         Document doc = parseDocument(testExport(test, "eng"));
         assertXPath(doc, "auths-000001", "//eac-cpf/control/recordId");
         assertXPath(doc, "000001", "//eac-cpf/control/otherRecordId");

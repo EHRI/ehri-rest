@@ -26,7 +26,7 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
@@ -34,7 +34,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * there Will Be Only One.
  */
 @EntityType(EntityClass.SYSTEM)
-public interface SystemEventQueue extends Frame {
+public interface SystemEventQueue extends Entity {
 
     String STREAM_START = Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream";
 

@@ -42,7 +42,7 @@ public class GhettosImporterTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();

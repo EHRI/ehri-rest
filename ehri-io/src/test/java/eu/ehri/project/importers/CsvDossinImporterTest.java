@@ -43,7 +43,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest{
     @Test
     public void testImportItemsT() throws Exception {
         
-        PermissionScope ps = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope ps = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing some Dossin records";
         XmlImportProperties p = new XmlImportProperties("dossin.properties");
 //        assertTrue(p.containsProperty("Creator"));

@@ -33,7 +33,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -83,7 +83,7 @@ public final class ViewHelper {
      * @param permissionType The permission type
      * @throws PermissionDenied
      */
-    public void checkEntityPermission(AccessibleEntity entity,
+    public void checkEntityPermission(Accessible entity,
             Accessor accessor, PermissionType permissionType) throws PermissionDenied {
         if (!acl.hasPermission(entity, permissionType, accessor)) {
             throw new PermissionDenied(accessor.getId(), entity.getId(),
@@ -98,7 +98,7 @@ public final class ViewHelper {
      * @param accessor The accessor/group
      * @throws AccessDenied
      */
-    public void checkReadAccess(AccessibleEntity entity, Accessor accessor)
+    public void checkReadAccess(Accessible entity, Accessor accessor)
             throws AccessDenied {
         if (!acl.canAccess(entity, accessor)) {
             // Using 'fake' permission 'read'
@@ -114,7 +114,7 @@ public final class ViewHelper {
      */
     public ContentType getContentTypeNode(EntityClass entityClass) {
         try {
-            return manager.getFrame(entityClass.getName(), ContentType.class);
+            return manager.getEntity(entityClass.getName(), ContentType.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(
                     String.format("No content entityClass node found for entityClass: '%s'",

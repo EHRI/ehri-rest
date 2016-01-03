@@ -24,7 +24,7 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.managers.CsvImportManager;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
@@ -44,7 +44,7 @@ public class CsvAuthItemImporterTest extends AbstractImporterTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        AuthoritativeSet authoritativeSet = manager.getFrame("auths", AuthoritativeSet.class);
+        AuthoritativeSet authoritativeSet = manager.getEntity("auths", AuthoritativeSet.class);
         int vocCount = toList(authoritativeSet.getAuthoritativeItems()).size();
         assertEquals(2, vocCount);
         logger.debug("number of items: " + vocCount);
@@ -75,7 +75,7 @@ public class CsvAuthItemImporterTest extends AbstractImporterTest {
         assertEquals(vocCount + 9, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
-        for (AccessibleEntity subject : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible subject : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(authoritativeSet, subject.getPermissionScope());
         }
     }

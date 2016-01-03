@@ -122,9 +122,9 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Check we're not admin
-        Accessor accessor = manager.getFrame("reto", Accessor.class);
+        Accessor accessor = manager.getEntity("reto", Accessor.class);
         DocumentaryUnit cantRead = manager
-                .getFrame("c1", DocumentaryUnit.class);
+                .getEntity("c1", DocumentaryUnit.class);
         assertFalse(AclManager.belongsToAdmin(accessor));
 
         List<DocumentaryUnit> list = toList(query.page(accessor));

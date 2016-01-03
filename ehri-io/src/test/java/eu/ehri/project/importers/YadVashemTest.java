@@ -61,7 +61,7 @@ public class YadVashemTest extends AbstractImporterTest{
     @Test
     public void testWithExistingDescription() throws Exception {
         final String logMessage = "Importing a single EAD";
-        DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
+        DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
         
         assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());
@@ -104,7 +104,7 @@ public class YadVashemTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         System.out.println(count);
-        DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
+        DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
         
         assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());

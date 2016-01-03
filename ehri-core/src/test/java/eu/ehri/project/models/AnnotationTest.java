@@ -21,7 +21,7 @@ package eu.ehri.project.models;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testUserHasAnnotation() throws ItemNotFound {
-        UserProfile mike = manager.getFrame("mike", UserProfile.class);
+        UserProfile mike = manager.getEntity("mike", UserProfile.class);
         assertTrue(mike.getAnnotations().iterator().hasNext());
         assertEquals(mike.getAnnotations().iterator().next().getBody(),
                 TEST_ANNOTATION_BODY);
@@ -46,8 +46,8 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testUserHasAnnotationWithTarget() throws ItemNotFound {
-        UserProfile mike = manager.getFrame("mike", UserProfile.class);
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        UserProfile mike = manager.getEntity("mike", UserProfile.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         Annotation annotation = mike.getAnnotations().iterator().next();
         assertTrue(Iterables.contains(mike.getAnnotations(), annotation));
         assertTrue(Iterables.contains(c1.getAnnotations(), annotation));
@@ -55,9 +55,9 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testAnnotationAnnotation() throws ItemNotFound {
-        AnnotatableEntity ann1 = manager.getFrame("ann1",
-                AnnotatableEntity.class);
-        Annotation ann2 = manager.getFrame("ann2", Annotation.class);
+        Annotatable ann1 = manager.getEntity("ann1",
+                Annotatable.class);
+        Annotation ann2 = manager.getEntity("ann2", Annotation.class);
 
         assertEquals(ann2.getTargets().iterator().next(), ann1);
         assertEquals(ann1.getAnnotations().iterator().next().getBody(),

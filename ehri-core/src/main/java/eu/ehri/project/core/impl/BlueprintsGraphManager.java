@@ -33,7 +33,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,9 +88,9 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
-    public EntityClass getEntityClass(Frame frame) {
-        Preconditions.checkNotNull(frame);
-        return EntityClass.withName(frame.getType());
+    public EntityClass getEntityClass(Entity entity) {
+        Preconditions.checkNotNull(entity);
+        return EntityClass.withName(entity.getType());
     }
 
     @Override
@@ -101,18 +101,18 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
-    public <E> E getFrame(String id, Class<E> cls) throws ItemNotFound {
+    public <E> E getEntity(String id, Class<E> cls) throws ItemNotFound {
         return graph.frame(getVertex(id), cls);
     }
 
     @Override
-    public <E> E getFrame(String id, EntityClass type, Class<E> cls)
+    public <E> E getEntity(String id, EntityClass type, Class<E> cls)
             throws ItemNotFound {
         return graph.frame(getVertex(id, type), cls);
     }
 
     @Override
-    public <E> CloseableIterable<E> getFrames(EntityClass type, Class<E> cls) {
+    public <E> CloseableIterable<E> getEntities(EntityClass type, Class<E> cls) {
         return new WrappingCloseableIterable<>(
                 graph.frameVertices(getVertices(type), cls));
     }

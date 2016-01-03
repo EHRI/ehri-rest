@@ -1,14 +1,11 @@
 package eu.ehri.project.exporters.eag;
 
-import com.google.common.io.Resources;
 import eu.ehri.project.exporters.test.XmlExporterTest;
 import eu.ehri.project.importers.EagHandler;
 import eu.ehri.project.importers.EagImporter;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.utils.fixtures.impl.YamlFixtureLoader;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -16,20 +13,19 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
 
 public class Eag2012ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExport1() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         testExport(r1, "eng");
     }
 
     @Test
     public void testImportExport1() throws Exception {
-        Country nl = manager.getFrame("nl", Country.class);
+        Country nl = manager.getEntity("nl", Country.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml");
         SaxImportManager importManager = new SaxImportManager(graph, nl, validUser, EagImporter.class, EagHandler
                 .class);
@@ -40,7 +36,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExportWithComprehensiveFixture() throws Exception {
-        Repository test = manager.getFrame("nl-000001", Repository.class);
+        Repository test = manager.getEntity("nl-000001", Repository.class);
         Document doc = parseDocument(testExport(test, "eng"));
         assertXPath(doc, "NL-000001", "//eag/control/recordId");
         assertXPath(doc, "nl-000001", "//eag/control/otherRecordId");

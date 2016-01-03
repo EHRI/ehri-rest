@@ -137,14 +137,14 @@ public class AdminResource extends AbstractRestResource {
                     .build();
 
             // NB: This assumes that admin's ID is the same as its identifier.
-            Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
+            Accessor accessor = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
             Crud<UserProfile> view = ViewFactory.getCrudWithLogging(graph, UserProfile.class);
             UserProfile user = view.create(bundle, accessor);
 
             // add to the groups
             for (String groupId : groups) {
-                Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+                Group group = manager.getEntity(groupId, EntityClass.GROUP, Group.class);
                 group.addMember(user);
             }
 

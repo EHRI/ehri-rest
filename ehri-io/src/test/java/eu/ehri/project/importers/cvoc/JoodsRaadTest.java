@@ -25,8 +25,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
@@ -52,7 +52,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
     public void testRelatedWithinScheme() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
@@ -92,10 +92,10 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
         // Check permission scopes
-        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
-        Concept term698 = manager.getFrame("cvoc1-698", Concept.class);
+        Concept term698 = manager.getEntity("cvoc1-698", Concept.class);
         boolean found = false;
         for (Concept rel : term698.getRelatedConcepts()) {
             found = true;
@@ -108,7 +108,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
     public void testCloseMatchOutsideScheme() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
-        Vocabulary cvoc1 = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1);
         importer.setTolerant(true);
@@ -118,7 +118,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         assertNotNull(ios);
 
-        Vocabulary cvoc2 = manager.getFrame("cvoc2", Vocabulary.class);
+        Vocabulary cvoc2 = manager.getEntity("cvoc2", Vocabulary.class);
         InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM);
         assertNotNull(niod_ios);
         SkosImporter niod_importer = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc2);
@@ -145,7 +145,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         assertEquals(count + 6, getNodeCount(graph));
         assertEquals(voccount + 1, toList(cvoc2.getConcepts()).size());
 
-        Concept term698 = manager.getFrame("cvoc1-698", Concept.class);
+        Concept term698 = manager.getEntity("cvoc1-698", Concept.class);
         boolean found = false;
         for (Concept rel : term698.getRelatedConcepts()) {
             found = true;
@@ -153,7 +153,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         }
         assertTrue(found);
 
-        Concept termJR = manager.getFrame("cvoc2-joodse_raad", Concept.class);
+        Concept termJR = manager.getEntity("cvoc2-joodse_raad", Concept.class);
 
         for (Link desc : termJR.getLinks()) {
             assertTrue(desc.getPropertyKeys().contains("type"));
@@ -162,12 +162,12 @@ public class JoodsRaadTest extends AbstractImporterTest {
             assertEquals("exactMatch", desc.getProperty("skos"));
         }
 
-        Concept concept698 = manager.getFrame("cvoc1-698", Concept.class);
+        Concept concept698 = manager.getEntity("cvoc1-698", Concept.class);
         found = false;
         for (Edge e : concept698.asVertex().getEdges(Direction.IN, "hasLinkTarget")) {
             Link l = graph.frame(e.getVertex(Direction.OUT), Link.class);
             boolean bothTargetsFound = false;
-            for (LinkableEntity entity : l.getLinkTargets()) {
+            for (Linkable entity : l.getLinkTargets()) {
                 if (entity.equals(termJR))
                     bothTargetsFound = true;
             }

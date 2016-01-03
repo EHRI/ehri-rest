@@ -61,7 +61,7 @@ public class IfzTest extends AbstractImporterTest {
     @Test
     public void ifzTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Ifz EAD";
 
         origCount = getNodeCount(graph);

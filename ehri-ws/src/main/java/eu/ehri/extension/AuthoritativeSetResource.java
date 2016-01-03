@@ -45,7 +45,7 @@ import java.util.List;
  */
 @Path(Entities.AUTHORITATIVE_SET)
 public class AuthoritativeSetResource extends
-        AbstractAccessibleEntityResource<AuthoritativeSet>
+        AbstractAccessibleResource<AuthoritativeSet>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
     public AuthoritativeSetResource(@Context GraphDatabaseService database) {

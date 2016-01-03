@@ -83,11 +83,11 @@ public abstract class ImportCsvCommand extends BaseCommand {
             // Find the agent
             PermissionScope scope = SystemScope.getInstance();
             if (cmdLine.hasOption("scope")) {
-                scope = manager.getFrame(cmdLine.getOptionValue("scope"), PermissionScope.class);
+                scope = manager.getEntity(cmdLine.getOptionValue("scope"), PermissionScope.class);
             }
 
             // Find the user
-            UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
+            UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
             ImportLog log = new CsvImportManager(graph, scope, user, importer)

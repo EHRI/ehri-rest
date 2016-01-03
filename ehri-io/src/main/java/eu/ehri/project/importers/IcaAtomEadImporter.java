@@ -29,7 +29,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -91,7 +91,7 @@ public class IcaAtomEadImporter extends EaImporter {
         for (Map<String, Object> dpb : extractDates(data)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(data)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
+        for (Map<String, Object> rel : extractRelations(data)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
             logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
         }
@@ -168,7 +168,7 @@ public class IcaAtomEadImporter extends EaImporter {
             try {
                 //read the current item’s bundle
                 Bundle oldBundle = mergeSerializer
-                        .vertexFrameToBundle(manager.getVertex(withIds.getId()));
+                        .vertexToBundle(manager.getVertex(withIds.getId()));
 
                 //filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
@@ -226,7 +226,7 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

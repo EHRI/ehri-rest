@@ -54,8 +54,8 @@ public class EventViewsTest extends AbstractFixtureTest {
     public void setUp() throws Exception {
         super.setUp();
         eventViews = new EventViews(graph);
-        user1 = manager.getFrame("mike", UserProfile.class);
-        user2 = manager.getFrame("tim", UserProfile.class);
+        user1 = manager.getEntity("mike", UserProfile.class);
+        user2 = manager.getEntity("tim", UserProfile.class);
     }
 
     @Test
@@ -279,7 +279,7 @@ public class EventViewsTest extends AbstractFixtureTest {
     private DocumentaryUnit updateItem(DocumentaryUnit item, String key, String value, UserProfile user) throws
             Exception {
         Bundle bundle = new Serializer.Builder(graph).dependentOnly().build()
-                .vertexFrameToBundle(item);
+                .entityToBundle(item);
         Bundle bundle1 = bundle.withDataValue(key, value);
         Mutation<DocumentaryUnit> update = new LoggingCrudViews<>(graph, DocumentaryUnit.class)
                 .update(bundle1, user);

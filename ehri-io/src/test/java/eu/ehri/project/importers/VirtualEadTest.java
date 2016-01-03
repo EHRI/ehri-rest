@@ -77,7 +77,7 @@ public class VirtualEadTest extends AbstractImporterTest {
 
         setStage();
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an EAD as a Virtual collection";
 
         origCount = getNodeCount(graph);
@@ -105,7 +105,7 @@ public class VirtualEadTest extends AbstractImporterTest {
         assertEquals("ehri terezin research guide", toplevel.getIdentifier());
         assertEquals(1, toList(toplevel.getIncludedUnits()).size());
 
-        DocumentaryUnit c1_vreferrer = manager.getFrame(UNIT1, DocumentaryUnit.class);
+        DocumentaryUnit c1_vreferrer = manager.getEntity(UNIT1, DocumentaryUnit.class);
         for (AbstractUnit d : toplevel.getIncludedUnits()) {
             assertEquals(c1_vreferrer, d);
         }

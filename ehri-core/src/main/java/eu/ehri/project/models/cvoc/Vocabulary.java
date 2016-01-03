@@ -24,10 +24,6 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
-import eu.ehri.project.models.base.PermissionScope;
 
 /**
  * A collection of 'related' concepts, or maybe a bit like the SKOS Concept Scheme

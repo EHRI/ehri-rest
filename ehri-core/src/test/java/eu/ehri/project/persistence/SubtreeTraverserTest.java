@@ -19,7 +19,7 @@
 
 package eu.ehri.project.persistence;
 
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
@@ -40,7 +40,7 @@ public class SubtreeTraverserTest extends AbstractFixtureTest {
         final Counter counter = new Counter();
         new Serializer.Builder(graph).dependentOnly().build()
                 .traverseSubtree(item, new TraversalCallback() {
-            public void process(Frame vertexFrame, int depth, String rname, int rnum) {
+            public void process(Entity vertexFrame, int depth, String rname, int rnum) {
                 counter.count++;
             }
         });

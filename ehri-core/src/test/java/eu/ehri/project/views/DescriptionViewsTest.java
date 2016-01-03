@@ -27,7 +27,7 @@ import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
@@ -77,7 +77,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         // The order in which items are serialized is undefined, so we just have to throw
         // an error if we don't fine the right item...
         for (Bundle b : new Serializer(graph)
-                .vertexFrameToBundle(unit).getRelations(Ontology
+                .entityToBundle(unit).getRelations(Ontology
                         .DESCRIPTION_FOR_ENTITY)) {
             if (b.getDataValue(Ontology.IDENTIFIER_KEY).equals("some-new-id")) {
                 return;
@@ -114,7 +114,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
-        Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
+        Bundle descBundle = new Serializer(graph).entityToBundle(unit)
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
 
@@ -134,7 +134,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
-        Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
+        Bundle descBundle = new Serializer(graph).entityToBundle(unit)
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
@@ -188,10 +188,10 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testUpdateDependentLogging() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         DescriptionViews<Repository> lcv = getView(Repository.class);
         Description description = r1.getDescriptions().iterator().next();
-        Bundle desc = depSerializer.vertexFrameToBundle(description);
+        Bundle desc = depSerializer.entityToBundle(description);
         Mutation<RepositoryDescription> cou = lcv.update(
                 "r1", desc.withDataValue("name", "changed"),
                 RepositoryDescription.class, validUser, Optional.<String>absent());
@@ -200,12 +200,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(desc, old);
-        assertNotSame(depSerializer.vertexFrameToBundle(description), old);
+        assertNotSame(depSerializer.entityToBundle(description), old);
     }
 
     @Test
     public void testCreateDependentLogging() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         Bundle desc = Bundle.fromData(TestData.getTestAgentBundle())
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
         DescriptionViews<Repository> lcv = getView(Repository.class);
@@ -217,10 +217,10 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testDeleteDependentLogging() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         DescriptionViews<Repository> lcv = getView(Repository.class);
         Description description = r1.getDescriptions().iterator().next();
-        Bundle desc = depSerializer.vertexFrameToBundle(description);
+        Bundle desc = depSerializer.entityToBundle(description);
         lcv.delete("r1", description.getId(), validUser, Optional.<String>absent());
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(event.getPriorVersions().iterator().hasNext());
@@ -228,7 +228,7 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         assertEquals(desc, old);
     }
 
-    private <T  extends DescribedEntity> DescriptionViews<T> getView(Class<T> cls) {
+    private <T  extends Described> DescriptionViews<T> getView(Class<T> cls) {
         return new DescriptionViews<>(graph, cls);
     }
 }

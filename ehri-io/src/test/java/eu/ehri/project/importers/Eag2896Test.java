@@ -26,7 +26,7 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 
@@ -52,7 +52,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        Country country = manager.getFrame(TEST_COUNTRY, Country.class);
+        Country country = manager.getEntity(TEST_COUNTRY, Country.class);
         final String logMessage = "Importing a single EAG";
 
         int count = getNodeCount(graph);
@@ -112,7 +112,7 @@ public class Eag2896Test extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
 
         // Ensure the import action has the right number of subjects.
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
+        List<Accessible> subjects = toList(ev.getSubjects());
         assertEquals(1, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
 

@@ -33,7 +33,7 @@ import java.util.Set;
  *
 
  */
-public interface Frame extends VertexFrame {
+public interface Entity extends VertexFrame {
 
     /**
      * Cast this frame to another type.
@@ -43,7 +43,7 @@ public interface Frame extends VertexFrame {
      * @return the framed item as the new class
      */
     @JavaHandler
-    <T extends Frame> T as(Class<T> cls);
+    <T extends Entity> T as(Class<T> cls);
 
     /**
      * Get the unique item id.
@@ -76,9 +76,9 @@ public interface Frame extends VertexFrame {
     @JavaHandler
     Set<String> getPropertyKeys();
 
-    abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
+    abstract class Impl implements JavaHandlerContext<Vertex>, Accessible {
 
-        public <T extends Frame> T as(Class<T> cls) {
+        public <T extends Entity> T as(Class<T> cls) {
             return frame(it(), cls);
         }
 

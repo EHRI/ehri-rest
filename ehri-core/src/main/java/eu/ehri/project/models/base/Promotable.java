@@ -33,7 +33,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 /**
  * An entity that can be promoted and demoted.
  */
-public interface Promotable extends AccessibleEntity {
+public interface Promotable extends Accessible {
     String PROMOTION_SCORE = "_promotionScore";
 
     @Fetch(value = Ontology.PROMOTED_BY, numLevels = 1)

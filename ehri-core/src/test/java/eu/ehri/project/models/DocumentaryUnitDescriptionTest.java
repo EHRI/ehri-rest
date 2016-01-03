@@ -28,8 +28,8 @@ import static org.junit.Assert.assertEquals;
 public class DocumentaryUnitDescriptionTest extends AbstractFixtureTest {
     @Test
     public void testGetUnit() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnitDescription cd1 = manager.getFrame("cd1", DocumentaryUnitDescription.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnitDescription cd1 = manager.getEntity("cd1", DocumentaryUnitDescription.class);
         assertEquals(c1, cd1.getEntity());
     }
 }

@@ -25,30 +25,29 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
-
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addSingleRelationship;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
 
 /**
  * An entity that can be accessed by specific {@link Accessor}s.
- *
-
  */
-public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity, AnnotatableEntity {
+public interface Accessible extends PermissionGrantTarget, Versioned, Annotatable {
 
     @Fetch(value = Ontology.IS_ACCESSIBLE_TO, ifBelowLevel = 1)
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
     Iterable<Accessor> getAccessors();
 
     /**
-     * only Accessor accessor can access this AccessibleEntity.
+     * only Accessor accessor can access this Accessible item.
      * This is NOT the way to add an Accessor to a Group, use Group.addMember()
-     * @param accessor 
+     *
+     * @param accessor an accessor that can access the current item
      */
     @JavaHandler
     void addAccessor(Accessor accessor);
@@ -67,8 +66,8 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
 
     /**
      * Fetch a list of Actions for this entity in order.
-     * 
-     * @return
+     *
+     * @return a list of system event frames
      */
     @JavaHandler
     Iterable<SystemEvent> getHistory();
@@ -83,7 +82,7 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
+    abstract class Impl implements JavaHandlerContext<Vertex>, Accessible {
 
         public void addAccessor(Accessor accessor) {
             addUniqueRelationship(it(), accessor.asVertex(),
@@ -99,7 +98,7 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
             GremlinPipeline<Vertex, Vertex> out = gremlin()
                     .out(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .out(Ontology.ENTITY_HAS_EVENT);
-            return (SystemEvent)(out.hasNext() ? frame(out.next()) : null);
+            return (SystemEvent) (out.hasNext() ? frame(out.next()) : null);
         }
 
         public Iterable<PermissionScope> getPermissionScopes() {

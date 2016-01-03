@@ -20,7 +20,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.views.EventViews;
 import org.joda.time.DateTime;
@@ -426,7 +426,7 @@ public class Ead2002Exporter implements EadExporter {
         }
     }
 
-    private void addPropertyValues(Document doc, Element base, Frame item) throws IOException {
+    private void addPropertyValues(Document doc, Element base, Entity item) throws IOException {
         Set<String> available = item.getPropertyKeys();
 
         for (Map.Entry<String, String> pair : multiValueTextMappings.entrySet()) {

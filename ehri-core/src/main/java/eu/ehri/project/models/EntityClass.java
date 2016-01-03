@@ -20,7 +20,7 @@
 package eu.ehri.project.models;
 
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
@@ -88,7 +88,7 @@ public enum EntityClass {
      *
      * @return the Java model class associated with the type
      */
-    public Class<? extends Frame> getJavaClass() {
+    public Class<? extends Entity> getJavaClass() {
         return cls;
     }
 
@@ -110,16 +110,16 @@ public enum EntityClass {
     }
 
     private final String name;
-    private final Class<? extends Frame> cls;
+    private final Class<? extends Entity> cls;
     private final IdGenerator idGen;
 
-    EntityClass(String name, Class<? extends Frame> cls, IdGenerator idGen) {
+    EntityClass(String name, Class<? extends Entity> cls, IdGenerator idGen) {
         this.name = name;
         this.cls = cls;
         this.idGen = idGen;
     }
 
-    EntityClass(String name, Class<? extends Frame> cls) {
+    EntityClass(String name, Class<? extends Entity> cls) {
         this(name, cls, GenericIdGenerator.INSTANCE);
     }
 

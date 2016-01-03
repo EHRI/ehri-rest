@@ -73,7 +73,7 @@ import java.util.List;
  * containers for Concepts.
  */
 @Path(Entities.CVOC_VOCABULARY)
-public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabulary>
+public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
     public VocabularyResource(@Context GraphDatabaseService database) {

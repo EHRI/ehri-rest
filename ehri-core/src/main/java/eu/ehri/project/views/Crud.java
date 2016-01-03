@@ -24,7 +24,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -32,11 +32,11 @@ import eu.ehri.project.persistence.Mutation;
 
 /**
  * Interface for CRUD operations on types that derive
- * from {@link AccessibleEntity}.
+ * from {@link Accessible}.
  *
  * @param <E>
  */
-public interface Crud<E extends AccessibleEntity> {
+public interface Crud<E extends Accessible> {
     Crud<E> setScope(PermissionScope scope);
     
     E detail(String id, Accessor user) throws ItemNotFound;

@@ -25,17 +25,17 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.models.base.Named;
 
 /**
  * Holds the information on a relationship specified in some Description,
  * but without the target-end of the relationship being determined.
  */
 @EntityType(EntityClass.ACCESS_POINT)
-public interface AccessPoint extends AccessibleEntity, NamedEntity, Annotator {
+public interface AccessPoint extends Accessible, Named, Annotator {
 
     /**
      * Fetch the description to which this UR belongs.

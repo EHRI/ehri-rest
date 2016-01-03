@@ -30,12 +30,10 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotator;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.models.base.Watchable;
 
 import static eu.ehri.project.definitions.Ontology.ACCESSOR_BELONGS_TO_GROUP;
@@ -47,7 +45,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
  * A frame class representing a user within the database.
  */
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, AccessibleEntity,
+public interface UserProfile extends Accessor, Accessible,
         Annotator, Actioner {
 
     String FOLLOWER_COUNT = "followers";

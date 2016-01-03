@@ -23,7 +23,7 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -41,12 +41,12 @@ import java.util.Set;
  */
 @Path(AccessResource.ENDPOINT)
 public class AccessResource extends
-        AbstractAccessibleEntityResource<AccessibleEntity> {
+        AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "access";
 
     public AccessResource(@Context GraphDatabaseService database) {
-        super(database, AccessibleEntity.class);
+        super(database, Accessible.class);
     }
 
     /**
@@ -65,7 +65,7 @@ public class AccessResource extends
                                   @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
+            Accessible item = manager.getEntity(id, Accessible.class);
             Accessor current = getRequesterUserProfile();
             Set<Accessor> accessors = getAccessors(accessorIds, current);
             aclViews.setAccessors(item, accessors, current);

@@ -21,11 +21,11 @@ package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.Temporal;
 
 /**
  * Frame class representing the description of a document.
  */
 @EntityType(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-public interface DocumentaryUnitDescription extends TemporalEntity, Description {
+public interface DocumentaryUnitDescription extends Temporal, Description {
 }

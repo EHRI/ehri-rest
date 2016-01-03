@@ -17,7 +17,7 @@ import eu.ehri.project.models.MaintenanceEventAgentType;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.views.EventViews;
@@ -261,7 +261,7 @@ public class Eag2012Exporter implements EagExporter {
     }
 
     private void addRevisionDesc(Document doc, Element controlElem,
-            DescribedEntity entity, Description desc) {
+            Described entity, Description desc) {
 
         // NB: We could share all this horrible code with the EAC exporter
         // if the SCHEMAS DIDN'T HAVE THE ELEMENTS IN AN ARBITRARILY

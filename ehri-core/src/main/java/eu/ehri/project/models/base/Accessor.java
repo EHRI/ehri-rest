@@ -34,7 +34,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  *
 
  */
-public interface Accessor extends IdentifiableEntity {
+public interface Accessor extends Identifiable {
 
     @JavaHandler
     boolean isAdmin();

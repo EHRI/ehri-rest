@@ -62,7 +62,7 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateOrUpdate() throws Exception {
-        Bundle before = depSerializer.vertexFrameToBundle(manager.getFrame("r1", Repository.class));
+        Bundle before = depSerializer.entityToBundle(manager.getEntity("r1", Repository.class));
         Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle())
                 .withId("r1");
@@ -78,7 +78,7 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testUpdate() throws Exception {
-        Bundle before = depSerializer.vertexFrameToBundle(manager.getFrame("r1", Repository.class));
+        Bundle before = depSerializer.entityToBundle(manager.getEntity("r1", Repository.class));
         Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
         Mutation<Repository> cou = lcv.update(before.withDataValue("identifier", "new-id"), validUser);
         assertTrue(cou.updated());
@@ -91,8 +91,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testDelete() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
-        Bundle before = depSerializer.vertexFrameToBundle(r1);
+        Repository r1 = manager.getEntity("r1", Repository.class);
+        Bundle before = depSerializer.entityToBundle(r1);
         Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
         lcv.delete("r1", validUser);
         SystemEvent event = am.getLatestGlobalEvent();

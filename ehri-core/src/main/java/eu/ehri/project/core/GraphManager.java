@@ -25,7 +25,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 
 import java.util.Map;
 
@@ -75,10 +75,10 @@ public interface GraphManager {
     /**
      * Get the type of an arbitrary framed vertex.
      *
-     * @param frame A framed vertex
-     * @return The frame's entity class
+     * @param entity A framed vertex
+     * @return The entity's entity class
      */
-    EntityClass getEntityClass(Frame frame);
+    EntityClass getEntityClass(Entity entity);
 
     /**
      * Check if a node with the given ID exists or not.
@@ -112,7 +112,7 @@ public interface GraphManager {
      * @param cls The desired frame class
      * @return The framed vertex
      */
-    <T> T getFrame(String id, Class<T> cls) throws ItemNotFound;
+    <T> T getEntity(String id, Class<T> cls) throws ItemNotFound;
 
     /**
      * Get a node with the given ID and type, framing it with the given
@@ -123,7 +123,7 @@ public interface GraphManager {
      * @param cls  The desired frame class
      * @return The framed vertex
      */
-    <T> T getFrame(String id, EntityClass type, Class<T> cls)
+    <T> T getEntity(String id, EntityClass type, Class<T> cls)
             throws ItemNotFound;
 
     /**
@@ -159,7 +159,7 @@ public interface GraphManager {
      * @param type The entity type
      * @return An iterable of framed vertices with the given framed class.
      */
-    <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls);
+    <T> CloseableIterable<T> getEntities(EntityClass type, Class<T> cls);
 
     // CRUD functions
 

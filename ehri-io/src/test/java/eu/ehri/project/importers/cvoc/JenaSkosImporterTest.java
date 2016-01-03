@@ -20,7 +20,7 @@
 package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         ImportLog importLog = importer.setDefaultLang("de")
                 .importFile(ClassLoader.getSystemResourceAsStream("cvoc/ehri-skos.rdf"), "ehri-skos");
         assertEquals(877, importLog.getCreated());
-        AccessibleEntity concept = actionManager.getLatestGlobalEvent().getFirstSubject();
+        Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
         assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
     }
@@ -58,7 +58,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         ImportLog importLog = importer.setDefaultLang("de")
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         assertEquals(1, importLog.getCreated());
-        AccessibleEntity concept = actionManager.getLatestGlobalEvent().getFirstSubject();
+        Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
         assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
     }

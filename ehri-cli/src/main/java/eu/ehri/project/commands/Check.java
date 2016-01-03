@@ -30,9 +30,9 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import org.apache.commons.cli.CommandLine;
@@ -102,9 +102,9 @@ public class Check extends BaseCommand {
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
         for (EntityClass entityClass : types) {
-            try (CloseableIterable<? extends Frame> items = manager.getFrames(entityClass, entityClass.getJavaClass())) {
-                for (Frame item : items) {
-                    AccessibleEntity entity = graph.frame(item.asVertex(), AccessibleEntity.class);
+            try (CloseableIterable<? extends Entity> items = manager.getEntities(entityClass, entityClass.getJavaClass())) {
+                for (Entity item : items) {
+                    Accessible entity = item.as(Accessible.class);
                     PermissionScope scope = entity.getPermissionScope();
                     if (scope == null) {
                         System.err.println("Missing scope: " + entity.getId() + " (" + entity.asVertex().getId() + ")");
@@ -124,7 +124,7 @@ public class Check extends BaseCommand {
         }
     }
 
-    private void checkIdGeneration(IdentifiableEntity doc, PermissionScope scope) {
+    private void checkIdGeneration(Identifiable doc, PermissionScope scope) {
         if (scope != null) {
             String ident = doc.getIdentifier();
             List<String> path = Lists.newArrayList(Iterables.concat(scope.idPath(), Lists.newArrayList(ident)));
@@ -138,10 +138,10 @@ public class Check extends BaseCommand {
 
     private void checkOwnerPermGrantsHaveNoScope(GraphManager manager) throws Exception {
         try (CloseableIterable<PermissionGrant> items = manager
-                .getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
+                .getEntities(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
             for (PermissionGrant grant : items) {
-                Frame scope = grant.getScope();
-                Frame perm = grant.getPermission();
+                Entity scope = grant.getScope();
+                Entity perm = grant.getPermission();
                 if (scope != null && perm != null && perm.getId().equals(PermissionType.OWNER.getName())) {
                     System.err.println(
                             String.format("Owner permission grant with scope: %s", grant.asVertex().getId()));

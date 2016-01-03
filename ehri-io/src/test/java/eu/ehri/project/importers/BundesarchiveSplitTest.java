@@ -51,7 +51,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
     @Test
     public void bundesarchiveTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the Split Bundesarchive EAD";
 
         int origCount = getNodeCount(graph);

@@ -21,12 +21,12 @@ package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.Temporal;
 
 /**
  * Frame class representing the description of a historical
  * agent.
  */
 @EntityType(EntityClass.HISTORICAL_AGENT_DESCRIPTION)
-public interface HistoricalAgentDescription extends Description, TemporalEntity {
+public interface HistoricalAgentDescription extends Description, Temporal {
 }

@@ -50,15 +50,15 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        promoter = manager.getFrame("tim", UserProfile.class);
-        viewer = manager.getFrame("reto", UserProfile.class);
+        promoter = manager.getEntity("tim", UserProfile.class);
+        viewer = manager.getEntity("reto", UserProfile.class);
         acl = new AclManager(graph);
         promotionViews = new PromotionViews(graph);
     }
 
     @Test(expected = PromotionViews.NotPromotableError.class)
     public void testPromotingUnpromotableItemThrowsAnError() throws Exception {
-        Annotation ann = manager.getFrame("ann3", Annotation.class);
+        Annotation ann = manager.getEntity("ann3", Annotation.class);
         assertFalse(acl.canAccess(ann, viewer));
         promotionViews.upVote(ann, promoter);
         assertTrue(acl.canAccess(ann, viewer));
@@ -66,7 +66,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testDemoteItem() throws Exception {
-        Annotation ann = manager.getFrame("ann4", Annotation.class);
+        Annotation ann = manager.getEntity("ann4", Annotation.class);
         assertTrue(acl.canAccess(ann, viewer));
         promotionViews.removeUpVote(ann, promoter);
         assertFalse(acl.canAccess(ann, viewer));
@@ -74,8 +74,8 @@ public class PromotionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testDemoteItemByOtherUser() throws Exception {
-        UserProfile promoter2 = manager.getFrame("mike", UserProfile.class);
-        Annotation ann = manager.getFrame("ann4", Annotation.class);
+        UserProfile promoter2 = manager.getEntity("mike", UserProfile.class);
+        Annotation ann = manager.getEntity("ann4", Annotation.class);
         assertTrue(acl.canAccess(ann, viewer));
         promotionViews.removeDownVote(ann, promoter2);
         // Item is *still* promoted by an other user
@@ -85,7 +85,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testPromoteItem() throws Exception {
-        Annotation ann = manager.getFrame("ann5", Annotation.class);
+        Annotation ann = manager.getEntity("ann5", Annotation.class);
         assertFalse(acl.canAccess(ann, viewer));
         promotionViews.upVote(ann, promoter);
         assertTrue(acl.canAccess(ann, viewer));
@@ -93,7 +93,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testIsPromoted() throws Exception {
-        Annotation ann = manager.getFrame("ann6", Annotation.class);
+        Annotation ann = manager.getEntity("ann6", Annotation.class);
         assertFalse(ann.isPromoted());
         assertTrue(Iterables.contains(ann.getPromoters(), promoter));
         assertTrue(ann.isPromotedBy(promoter));

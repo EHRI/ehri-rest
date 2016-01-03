@@ -110,7 +110,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         } catch (PermissionDenied e) {
             // We expected that permission denied... now explicitly add
             // permissions.
-            PermissionGrantTarget target = manager.getFrame(
+            PermissionGrantTarget target = manager.getEntity(
                     ContentTypes.DOCUMENTARY_UNIT.getName(),
                     PermissionGrantTarget.class);
             new AclManager(graph).grantPermission(target, PermissionType.CREATE, invalidUser
@@ -123,7 +123,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreateWithScope() throws Exception {
         Crud<DocumentaryUnit> docViews = new LoggingCrudViews<>(
-                graph, DocumentaryUnit.class, manager.getFrame("r1",
+                graph, DocumentaryUnit.class, manager.getEntity("r1",
                 Repository.class));
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         // In the fixtures, 'reto' should have a grant for 'CREATE'

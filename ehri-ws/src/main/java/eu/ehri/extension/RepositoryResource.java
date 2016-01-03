@@ -64,7 +64,7 @@ import java.util.List;
  * Provides a web service interface for the Repository.
  */
 @Path(Entities.REPOSITORY)
-public class RepositoryResource extends AbstractAccessibleEntityResource<Repository>
+public class RepositoryResource extends AbstractAccessibleResource<Repository>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
     public RepositoryResource(@Context GraphDatabaseService database) {

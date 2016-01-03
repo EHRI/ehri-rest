@@ -29,8 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
@@ -40,7 +39,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * be represented by an ISO3166 Alpha 2 code, lower cased.
  */
 @EntityType(EntityClass.COUNTRY)
-public interface Country extends AccessibleEntity,
+public interface Country extends Accessible,
         PermissionScope, ItemHolder {
 
     String COUNTRY_CODE = Ontology.IDENTIFIER_KEY;

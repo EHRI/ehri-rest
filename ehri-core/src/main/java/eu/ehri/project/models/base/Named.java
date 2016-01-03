@@ -28,7 +28,7 @@ import eu.ehri.project.models.annotations.Mandatory;
  *
 
  */
-public interface NamedEntity extends Frame {
+public interface Named extends Entity {
 
     @Mandatory
     @Property(Ontology.NAME_KEY)

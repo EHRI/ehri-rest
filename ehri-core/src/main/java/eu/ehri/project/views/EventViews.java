@@ -32,10 +32,10 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
@@ -284,7 +284,7 @@ public class EventViews {
     /**
      * List an item's events.
      */
-    public Iterable<SystemEvent> listForItem(AccessibleEntity item, Accessor accessor) {
+    public Iterable<SystemEvent> listForItem(Accessible item, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
         // Add additional generic filters
@@ -295,7 +295,7 @@ public class EventViews {
     /**
      * Aggregate an item's events.
      */
-    public Iterable<List<SystemEvent>> aggregateForItem(AccessibleEntity item, Accessor accessor) {
+    public Iterable<List<SystemEvent>> aggregateForItem(Accessible item, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
         // Add additional generic filters
@@ -346,11 +346,11 @@ public class EventViews {
         return pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
             @Override
             public Boolean compute(SystemEvent event) {
-                Frame eventScope = event.getEventScope();
+                Entity eventScope = event.getEventScope();
                 if (eventScope != null && !aclFilterTest.compute(eventScope.asVertex())) {
                     return false;
                 }
-                for (AccessibleEntity e : event.getSubjects()) {
+                for (Accessible e : event.getSubjects()) {
                     if (!aclFilterTest.compute(e.asVertex())) {
                         return false;
                     }
@@ -376,7 +376,7 @@ public class EventViews {
             pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
                 @Override
                 public Boolean compute(SystemEvent event) {
-                    for (AccessibleEntity e : event.getSubjects()) {
+                    for (Accessible e : event.getSubjects()) {
                         if (ids.contains(e.getId())) {
                             return true;
                         }
@@ -390,7 +390,7 @@ public class EventViews {
             pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
                 @Override
                 public Boolean compute(SystemEvent event) {
-                    for (AccessibleEntity e : event.getSubjects()) {
+                    for (Accessible e : event.getSubjects()) {
                         if (entityTypes.contains(manager.getEntityClass(e))) {
                             return true;
                         }
@@ -455,7 +455,7 @@ public class EventViews {
             pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
                 @Override
                 public Boolean compute(SystemEvent event) {
-                    for (AccessibleEntity e : event.getSubjects()) {
+                    for (Accessible e : event.getSubjects()) {
                         if (watching.contains(e.getId())) {
                             return true;
                         }

@@ -36,7 +36,7 @@ public class CountryTest extends AbstractFixtureTest {
 
     @Test
     public void testGetChildCount() throws Exception {
-        Country country = manager.getFrame("nl", Country.class);
+        Country country = manager.getEntity("nl", Country.class);
         Repository repo = new BundleDAO(graph)
                 .create(Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         country.addRepository(repo);
@@ -46,8 +46,8 @@ public class CountryTest extends AbstractFixtureTest {
 
     @Test
     public void testGetChildCountOnDeletion() throws Exception {
-        Country country = manager.getFrame("nl", Country.class);
-        Repository repo = manager.getFrame("r1", Repository.class);
+        Country country = manager.getEntity("nl", Country.class);
+        Repository repo = manager.getEntity("r1", Repository.class);
         assertEquals(2L, country.getChildCount());
         ViewFactory.getCrudNoLogging(graph, Repository.class).delete("r1", validUser);
         assertEquals(1L, country.getChildCount());
@@ -55,13 +55,13 @@ public class CountryTest extends AbstractFixtureTest {
 
     @Test
     public void testGetRepositories() throws Exception {
-        Country country = manager.getFrame("nl", Country.class);
+        Country country = manager.getEntity("nl", Country.class);
         assertEquals(2L, Iterables.size(country.getRepositories()));
     }
 
     @Test
     public void testAddRepository() throws Exception {
-        Country country = manager.getFrame("nl", Country.class);
+        Country country = manager.getEntity("nl", Country.class);
         Repository repo = new BundleDAO(graph)
                 .create(Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         // Test setting country on repo delegates correctly and

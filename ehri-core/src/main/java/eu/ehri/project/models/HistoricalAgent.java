@@ -20,10 +20,7 @@
 package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 
@@ -32,5 +29,5 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
  */
 @EntityType(EntityClass.HISTORICAL_AGENT)
 public interface HistoricalAgent extends AuthoritativeItem,
-        DescribedEntity, Watchable {
+        Described, Watchable {
 }

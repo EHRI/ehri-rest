@@ -26,7 +26,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class AclTest extends ModelTestBase {
 
     @Test
     public void testTheAdminGroup() throws ItemNotFound {
-        Group admin = manager.getFrame("admin", Group.class);
+        Group admin = manager.getEntity("admin", Group.class);
         // check we have some users
         assertTrue(admin.getMembers().iterator().hasNext());
     }
@@ -74,9 +74,9 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testAdminRead() throws ItemNotFound {
-        Group admin = manager.getFrame("admin", Group.class);
-        UserProfile reto = manager.getFrame("reto", UserProfile.class);
-        DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
+        Group admin = manager.getEntity("admin", Group.class);
+        UserProfile reto = manager.getEntity("reto", UserProfile.class);
+        DocumentaryUnit c3 = manager.getEntity("c3", DocumentaryUnit.class);
         assertTrue(acl.canAccess(c3, admin));
         assertFalse(acl.canAccess(c3, reto));
     }
@@ -88,12 +88,12 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testNiodGroup() throws ItemNotFound {
-        Group kcl = manager.getFrame("kcl", Group.class);
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        Group kcl = manager.getEntity("kcl", Group.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         assertFalse(acl.canAccess(c1, kcl));
 
         // but we should have read-only access to items with no specified perms.
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
         assertTrue(acl.canAccess(c4, kcl));
     }
 
@@ -104,8 +104,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserGroupPermOverride() throws ItemNotFound {
-        Accessor tim = manager.getFrame("tim", Accessor.class);
-        AccessibleEntity c3 = manager.getFrame("c3", AccessibleEntity.class);
+        Accessor tim = manager.getEntity("tim", Accessor.class);
+        Accessible c3 = manager.getEntity("c3", Accessible.class);
         assertTrue(acl.canAccess(c3, tim));
     }
 
@@ -116,9 +116,9 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserCanAccessOwnProfile() throws ItemNotFound {
-        Accessor reto = manager.getFrame("reto", Accessor.class);
-        AccessibleEntity prof = manager
-                .getFrame("reto", AccessibleEntity.class);
+        Accessor reto = manager.getEntity("reto", Accessor.class);
+        Accessible prof = manager
+                .getEntity("reto", Accessible.class);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
         assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.canAccess(prof, reto));
@@ -131,8 +131,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testSetUserPermissionsWithScope() throws Exception {
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
-        Repository scope = manager.getFrame("r1", Repository.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
+        Repository scope = manager.getEntity("r1", Repository.class);
         assertFalse(acl.withScope(scope)
                 .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.UPDATE, user));
         assertFalse(acl.withScope(scope)
@@ -162,8 +162,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserCannotWriteOtherProfile() throws ItemNotFound {
-        Accessor reto = manager.getFrame("reto", Accessor.class);
-        AccessibleEntity tim = manager.getFrame("tim", AccessibleEntity.class);
+        Accessor reto = manager.getEntity("reto", Accessor.class);
+        Accessible tim = manager.getEntity("tim", Accessible.class);
         assertTrue(acl.canAccess(tim, reto));
     }
 
@@ -174,7 +174,7 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserAccessAsAnonymous() throws ItemNotFound {
-        AccessibleEntity tim = manager.getFrame("tim", AccessibleEntity.class);
+        Accessible tim = manager.getEntity("tim", Accessible.class);
         assertTrue(acl.canAccess(tim, AnonymousAccessor.getInstance()));
     }
 
@@ -186,8 +186,8 @@ public class AclTest extends ModelTestBase {
     @Test
     public void testUserCannotChangeGroupJustByBeingAMemberOfIt()
             throws ItemNotFound {
-        Accessor reto = manager.getFrame("reto", Accessor.class);
-        AccessibleEntity kcl = manager.getFrame("kcl", AccessibleEntity.class);
+        Accessor reto = manager.getEntity("reto", Accessor.class);
+        Accessible kcl = manager.getEntity("kcl", Accessible.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.canAccess(kcl, reto));
@@ -202,8 +202,8 @@ public class AclTest extends ModelTestBase {
     @Test
     public void testChangingItemAccessibility() throws PermissionDenied,
             ItemNotFound {
-        Accessor reto = manager.getFrame("reto", Accessor.class);
-        AccessibleEntity kcl = manager.getFrame("kcl", AccessibleEntity.class);
+        Accessor reto = manager.getEntity("reto", Accessor.class);
+        Accessible kcl = manager.getEntity("kcl", Accessible.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.canAccess(kcl, reto));
@@ -222,8 +222,8 @@ public class AclTest extends ModelTestBase {
     @Test
     public void testRemovingItemAccessibility() throws PermissionDenied,
             ItemNotFound {
-        Accessor reto = manager.getFrame("reto", Accessor.class);
-        AccessibleEntity kcl = manager.getFrame("kcl", AccessibleEntity.class);
+        Accessor reto = manager.getEntity("reto", Accessor.class);
+        Accessible kcl = manager.getEntity("kcl", Accessible.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.canAccess(kcl, reto));
@@ -246,7 +246,7 @@ public class AclTest extends ModelTestBase {
     @Test
     public void testGlobalPermissionMatrix() throws PermissionDenied,
             ItemNotFound {
-        Accessor linda = manager.getFrame("linda", Accessor.class);
+        Accessor linda = manager.getEntity("linda", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(linda));
 
@@ -271,7 +271,7 @@ public class AclTest extends ModelTestBase {
         }
         GlobalPermissionSet set = builder.build();
 
-        Accessor accessor = manager.getFrame("reto", Accessor.class);
+        Accessor accessor = manager.getEntity("reto", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(accessor));
 
@@ -308,7 +308,7 @@ public class AclTest extends ModelTestBase {
         GlobalPermissionSet set = GlobalPermissionSet.newBuilder()
                 .set(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE).build();
 
-        Accessor accessor = manager.getFrame("admin", Accessor.class);
+        Accessor accessor = manager.getEntity("admin", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertTrue(acl.belongsToAdmin(accessor));
 

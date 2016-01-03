@@ -26,7 +26,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class JmpEadTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
 
         final String logMessage = "Importing JMP EAD";
 
@@ -87,7 +87,7 @@ public class JmpEadTest extends AbstractImporterTest {
             assertEquals("deu", langs.get(0));
         }
 
-        List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
+        List<Accessible> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
 
         //huh, should be 7?
         assertEquals(1, subjects.size());

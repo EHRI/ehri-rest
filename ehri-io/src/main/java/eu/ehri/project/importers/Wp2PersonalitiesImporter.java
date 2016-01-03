@@ -29,7 +29,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
@@ -58,7 +58,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -80,7 +80,7 @@ public abstract class Wp2PersonalitiesImporter extends MapImporter {
         return frame;
     }
 
-    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 

@@ -253,7 +253,7 @@ public final class JenaSkosImporter implements SkosImporter {
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
                         .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
-                UserProfile user = manager.getFrame(actioner.getId(), UserProfile.class);
+                UserProfile user = manager.getEntity(actioner.getId(), UserProfile.class);
                 Link link;
                 link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
                 unit.addLink(link);
@@ -303,7 +303,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 AuthoritativeSet referredSet;
                 try {
                     GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
-                    referredSet = manager.getFrame(cvocId, AuthoritativeSet.class);
+                    referredSet = manager.getEntity(cvocId, AuthoritativeSet.class);
                     for (AuthoritativeItem authItem : referredSet.getAuthoritativeItems()) {
                         if (authItem.getIdentifier().equals(conceptId)) {
                             return Optional.of(authItem);

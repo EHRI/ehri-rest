@@ -29,7 +29,7 @@ import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -56,7 +56,7 @@ public class UkrainianUnitImporter extends MapImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
@@ -111,7 +111,7 @@ public class UkrainianUnitImporter extends MapImporter {
 
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData, List<String> scopeIds) throws
+    public Accessible importItem(Map<String, Object> itemData, List<String> scopeIds) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }

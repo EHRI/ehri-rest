@@ -20,7 +20,7 @@
 package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class OwlApiSkosImporterTest extends AbstractSkosTest {
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         SystemEvent ev = actionManager.getLatestGlobalEvent();
         assertEquals(1, importLog.getCreated());
-        AccessibleEntity concept = ev.getFirstSubject();
+        Accessible concept = ev.getFirstSubject();
         assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
     }

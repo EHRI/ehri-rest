@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNull;
 public class DescriptionTest extends AbstractFixtureTest {
     @Test
     public void testGetCreationProcess() throws Exception {
-        Description d1 = manager.getFrame("cd1", Description.class);
+        Description d1 = manager.getEntity("cd1", Description.class);
         assertNull(d1.getCreationProcess());
     }
 }

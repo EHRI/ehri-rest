@@ -43,9 +43,9 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -213,7 +213,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param <T> the generic type of the query object
      * @return a query object
      */
-    protected <T extends AccessibleEntity> Query<T> getQuery(Class<T> cls) {
+    protected <T extends Accessible> Query<T> getQuery(Class<T> cls) {
         return new Query<>(graph, cls)
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
                 .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
@@ -234,7 +234,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
             return AnonymousAccessor.getInstance();
         } else {
             try {
-                return manager.getFrame(id.get(), Accessor.class);
+                return manager.getEntity(id.get(), Accessor.class);
             } catch (ItemNotFound e) {
                 throw new BadRequester(id.get());
             }
@@ -325,7 +325,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return a serialized representation, with location and cache control
      * headers.
      */
-    protected <T extends Frame> Response single(T item) {
+    protected <T extends Entity> Response single(T item) {
         try {
             return Response.status(Response.Status.OK)
                     .entity(getRepresentation(item).getBytes(Charsets.UTF_8))
@@ -360,7 +360,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx   the current transaction
      * @return A streaming response
      */
-    protected <T extends Frame> Response streamingPage(Query.Page<T> page, Tx tx) {
+    protected <T extends Entity> Response streamingPage(Query.Page<T> page, Tx tx) {
         return streamingPage(page, getSerializer(), tx);
     }
 
@@ -432,7 +432,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx         the current transaction
      * @return A streaming response
      */
-    protected <T extends Frame> Response streamingPage(
+    protected <T extends Entity> Response streamingPage(
             final Query.Page<T> page, final Serializer serializer, final Tx tx) {
         TransactionalStreamWrapper tos = MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getStreamingXmlOutput(page, serializer, tx)
@@ -440,7 +440,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return tos.getResponse();
     }
 
-    private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
+    private <T extends Entity> TransactionalStreamWrapper getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
                                                                                final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
@@ -455,7 +455,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                         try {
                             stream.write(header.getBytes(utf8));
                             for (T item : page.getIterable()) {
-                                stream.write(serializer.vertexFrameToXmlString(item)
+                                stream.write(serializer.entityToXmlString(item)
                                         .getBytes(utf8));
                             }
                             stream.write(tail.getBytes(utf8));
@@ -473,7 +473,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         };
     }
 
-    private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
+    private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
                                                                                 final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
@@ -485,7 +485,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                         try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
                             g.writeStartArray();
                             for (T item : page.getIterable()) {
-                                jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                                jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
                                 g.writeRaw('\n');
                             }
                             g.writeEndArray();
@@ -509,7 +509,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param list A list of framed items
      * @return A streaming response
      */
-    protected <T extends Frame> Response streamingList(
+    protected <T extends Entity> Response streamingList(
             Iterable<T> list, Tx tx) {
         return streamingList(list, getSerializer(), tx);
     }
@@ -521,7 +521,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx    the transaction
      * @return a streaming response
      */
-    protected <T extends Frame> Response streamingListOfLists(
+    protected <T extends Entity> Response streamingListOfLists(
             Iterable<? extends Collection<T>> lists, Tx tx) {
         return getStreamingJsonGroupOutput(lists, getSerializer(), tx);
     }
@@ -533,7 +533,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param list A list of framed items
      * @return A streaming response
      */
-    protected <T extends Frame> Response streamingList(
+    protected <T extends Entity> Response streamingList(
             Iterable<T> list, Serializer serializer, Tx tx) {
         TransactionalStreamWrapper tos = MediaType.TEXT_XML_TYPE.equals(checkMediaType())
                 ? getStreamingXmlOutput(list, serializer, tx)
@@ -541,7 +541,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return tos.getResponse();
     }
 
-    private <T extends Frame> TransactionalStreamWrapper getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
+    private <T extends Entity> TransactionalStreamWrapper getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
                                                                                final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
@@ -555,7 +555,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                         try {
                             os.write(header.getBytes(utf8));
                             for (T item : list) {
-                                os.write(serializer.vertexFrameToXmlString(item)
+                                os.write(serializer.entityToXmlString(item)
                                         .getBytes(utf8));
                             }
                             os.write(tail.getBytes(utf8));
@@ -573,7 +573,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         };
     }
 
-    private <T extends Frame> TransactionalStreamWrapper getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
+    private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
                                                                                 final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
@@ -586,7 +586,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                             g.writeStartArray();
                             for (T item : list) {
                                 g.writeRaw('\n');
-                                jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                                jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
                             }
                             g.writeEndArray();
 
@@ -604,7 +604,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         };
     }
 
-    private <T extends Frame> Response getStreamingJsonGroupOutput(
+    private <T extends Entity> Response getStreamingJsonGroupOutput(
             final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
@@ -618,7 +618,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                             for (Collection<T> collect : list) {
                                 g.writeStartArray();
                                 for (T item : collect) {
-                                    jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                                    jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
                                 }
                                 g.writeEndArray();
                                 g.writeRaw('\n');
@@ -683,7 +683,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param item The item
      * @return The resource URI for that item.
      */
-    protected URI getItemUri(Frame item) {
+    protected URI getItemUri(Entity item) {
         return uriInfo.getBaseUriBuilder()
                 .path(item.getType())
                 .path(item.getId()).build();
@@ -696,7 +696,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return A 201 response.
      * @throws SerializationError
      */
-    protected Response creationResponse(Frame frame) throws SerializationError {
+    protected Response creationResponse(Entity frame) throws SerializationError {
         return Response.status(Response.Status.CREATED).location(getItemUri(frame))
                 .entity(getRepresentation(frame))
                 .build();
@@ -720,10 +720,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param frame A framed item
      * @return The string representation, according to media type
      */
-    protected String getRepresentation(Frame frame) throws SerializationError {
+    protected String getRepresentation(Entity frame) throws SerializationError {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getSerializer().vertexFrameToXmlString(frame)
-                : getSerializer().vertexFrameToJson(frame);
+                ? getSerializer().entityToXmlString(frame)
+                : getSerializer().entityToJson(frame);
     }
 
     /**
@@ -734,10 +734,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param item The item
      * @return A cache control object.
      */
-    protected <T extends Frame> CacheControl getCacheControl(T item) {
+    protected <T extends Entity> CacheControl getCacheControl(T item) {
         CacheControl cc = new CacheControl();
-        if (!(item instanceof AccessibleEntity)
-                || !(((AccessibleEntity) item).hasAccessRestriction())) {
+        if (!(item instanceof Accessible)
+                || !(((Accessible) item).hasAccessRestriction())) {
             cc.setMaxAge(ITEM_CACHE_TIME);
         } else {
             cc.setNoStore(true);

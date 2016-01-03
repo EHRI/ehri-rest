@@ -32,7 +32,7 @@ import static eu.ehri.project.definitions.Ontology.USER_WATCHING_ITEM;
 /**
  * An entity that can be watched by users.
  */
-public interface Watchable extends AccessibleEntity {
+public interface Watchable extends Accessible {
     String WATCHED_COUNT = "watchedBy";
 
     @Adjacency(label = USER_WATCHING_ITEM, direction = Direction.IN)

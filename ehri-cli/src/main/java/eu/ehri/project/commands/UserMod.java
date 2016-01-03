@@ -78,7 +78,7 @@ public class UserMod extends BaseCommand {
             throw new RuntimeException(getHelp());
 
         // Fetch the admin accessor, who's going to do the work.
-        Actioner admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
+        Actioner admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
                 Actioner.class);
 
         String userId = (String) cmdLine.getArgList().get(0);
@@ -88,7 +88,7 @@ public class UserMod extends BaseCommand {
             groups = cmdLine.getOptionValues("group");
         }
 
-        UserProfile user = manager.getFrame(userId,
+        UserProfile user = manager.getEntity(userId,
                 EntityClass.USER_PROFILE, UserProfile.class);
 
         EventContext actionCtx = new ActionManager(graph).newEventContext(
@@ -96,7 +96,7 @@ public class UserMod extends BaseCommand {
                 getLogMessage(logMessage));
 
         for (String groupId : groups) {
-            Group group = manager.getFrame(groupId, EntityClass.GROUP,
+            Group group = manager.getEntity(groupId, EntityClass.GROUP,
                     Group.class);
             group.addMember(user);
             actionCtx.addSubjects(group);

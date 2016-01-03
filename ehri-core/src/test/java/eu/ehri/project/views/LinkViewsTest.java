@@ -30,7 +30,7 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -57,17 +57,17 @@ public class LinkViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testLinks() throws Exception {
-        Link link1 = manager.getFrame("link1", Link.class);
-        List<LinkableEntity> targets = Lists.newArrayList(link1.getLinkTargets());
-        assertTrue(targets.contains(manager.getFrame("c1", LinkableEntity.class)));
-        assertTrue(targets.contains(manager.getFrame("c4", LinkableEntity.class)));
+        Link link1 = manager.getEntity("link1", Link.class);
+        List<Linkable> targets = Lists.newArrayList(link1.getLinkTargets());
+        assertTrue(targets.contains(manager.getEntity("c1", Linkable.class)));
+        assertTrue(targets.contains(manager.getEntity("c4", Linkable.class)));
     }
 
     @Test
     public void testCreateLink() throws Exception {
-        DocumentaryUnit src = manager.getFrame("c1", DocumentaryUnit.class);
-        HistoricalAgent dst = manager.getFrame("a1", HistoricalAgent.class);
-        AccessPoint rel = manager.getFrame("ur1", AccessPoint.class);
+        DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
+        HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
+        AccessPoint rel = manager.getEntity("ur1", AccessPoint.class);
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
@@ -92,9 +92,9 @@ public class LinkViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateAccessPointLink() throws Exception {
-        DocumentaryUnit src = manager.getFrame("c1", DocumentaryUnit.class);
-        HistoricalAgent dst = manager.getFrame("a1", HistoricalAgent.class);
-        DocumentaryUnitDescription desc = manager.getFrame("cd1", DocumentaryUnitDescription.class);
+        DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
+        HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
+        DocumentaryUnitDescription desc = manager.getEntity("cd1", DocumentaryUnitDescription.class);
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);

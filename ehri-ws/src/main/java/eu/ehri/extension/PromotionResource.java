@@ -62,7 +62,7 @@ public class PromotionResource extends AbstractRestResource {
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getFrame(id, Promotable.class);
+            Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.upVote(item, currentUser);
             tx.success();
@@ -86,7 +86,7 @@ public class PromotionResource extends AbstractRestResource {
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getFrame(id, Promotable.class);
+            Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeUpVote(item, currentUser);
             tx.success();
@@ -107,7 +107,7 @@ public class PromotionResource extends AbstractRestResource {
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getFrame(id, Promotable.class);
+            Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.downVote(item, currentUser);
             tx.success();
@@ -131,7 +131,7 @@ public class PromotionResource extends AbstractRestResource {
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getFrame(id, Promotable.class);
+            Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeDownVote(item, currentUser);
             tx.success();

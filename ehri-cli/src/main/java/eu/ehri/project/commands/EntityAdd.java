@@ -29,7 +29,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -95,11 +95,11 @@ public class EntityAdd extends BaseCommand {
         // Find the agent
         PermissionScope scope = SystemScope.getInstance();
         if (cmdLine.hasOption("scope")) {
-            scope = manager.getFrame(cmdLine.getOptionValue("scope"), PermissionScope.class);
+            scope = manager.getEntity(cmdLine.getOptionValue("scope"), PermissionScope.class);
         }
 
         // Find the user
-        UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
+        UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                 UserProfile.class);
 
         String typeName = (String) cmdLine.getArgList().get(0);
@@ -137,7 +137,7 @@ public class EntityAdd extends BaseCommand {
             PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
             ValidationError, PermissionDenied {
 
-        if (!AccessibleEntity.class.isAssignableFrom(bundle.getBundleJavaClass())) {
+        if (!Accessible.class.isAssignableFrom(bundle.getBundleJavaClass())) {
             throw new DeserializationError("Item class: " + bundle.getBundleJavaClass().getSimpleName() +
                     " is not a first-class database item");
         }

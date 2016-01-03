@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 public class RepositoryTest extends AbstractFixtureTest {
     @Test
     public void testGetCollections() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         assertEquals(3L, Iterables.size(r1.getCollections()));
 
         // Check the cached size
@@ -40,7 +40,7 @@ public class RepositoryTest extends AbstractFixtureTest {
 
     @Test
     public void testRepositoryCanGetAllCollections() throws ItemNotFound {
-        Repository agent = manager.getFrame("r1", Repository.class);
+        Repository agent = manager.getEntity("r1", Repository.class);
         assertEquals(3, Iterables.size(agent.getCollections()));
         assertEquals(5, Iterables.size(agent.getAllCollections()));
 
@@ -48,8 +48,8 @@ public class RepositoryTest extends AbstractFixtureTest {
 
     @Test
     public void testRepositoryDescription() throws ItemNotFound {
-        RepositoryDescription rd1 = manager.getFrame("rd1", RepositoryDescription.class);
-        Address ar1 = manager.getFrame("ar1", Address.class);
+        RepositoryDescription rd1 = manager.getEntity("rd1", RepositoryDescription.class);
+        Address ar1 = manager.getEntity("ar1", Address.class);
         // check we have an address
         assertTrue(toList(rd1.getAddresses()).contains(ar1));
     }

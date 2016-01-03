@@ -94,7 +94,7 @@ public class AraEadImporter extends EadImporter {
         for (Map<String, Object> dpb : extractedDates) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
+        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
             logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
             for (String s : rel.keySet()) {
                 logger.debug(s);
@@ -181,7 +181,7 @@ public class AraEadImporter extends EadImporter {
             try {
                 //read the current item’s bundle
                 Bundle oldBundle = mergeSerializer
-                        .vertexFrameToBundle(manager.getVertex(withIds.getId()));
+                        .vertexToBundle(manager.getVertex(withIds.getId()));
 
                 //determine if previous existing DocUnit had 'otherIdentifiers', if so, add to existing withIds
                 if (oldBundle.getData().keySet().contains(Ontology.OTHER_IDENTIFIERS)) {
@@ -223,7 +223,7 @@ public class AraEadImporter extends EadImporter {
                     descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
                 } else if (manager.exists(defaultDescIdentifier)) {
                     Bundle oldDescBundle = mergeSerializer
-                            .vertexFrameToBundle(manager.getVertex(defaultDescIdentifier));
+                            .vertexToBundle(manager.getVertex(defaultDescIdentifier));
                     //if the previous had NO sourcefile_key OR it was different:
                     if (oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
                             || !thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())) {

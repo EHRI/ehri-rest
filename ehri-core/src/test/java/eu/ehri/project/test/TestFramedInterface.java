@@ -20,11 +20,11 @@
 package eu.ehri.project.test;
 
 import com.tinkerpop.frames.Property;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 
 import java.util.List;
 
-public interface TestFramedInterface extends Frame {
+public interface TestFramedInterface extends Entity {
 
     @Property("list")
     List<String> getList();

@@ -20,7 +20,7 @@
 package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 
 /**
  * Frame class representing a type of permission. These
@@ -28,5 +28,5 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * enum.
  */
 @EntityType(EntityClass.PERMISSION)
-public interface Permission extends AccessibleEntity {
+public interface Permission extends Accessible {
 }

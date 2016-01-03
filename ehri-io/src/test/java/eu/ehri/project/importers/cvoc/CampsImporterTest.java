@@ -22,7 +22,7 @@ package eu.ehri.project.importers.cvoc;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
@@ -43,7 +43,7 @@ public class CampsImporterTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
@@ -76,7 +76,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
         // Check permission scopes
-        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
     }
@@ -84,7 +84,7 @@ public class CampsImporterTest extends AbstractImporterTest {
     @Test
     public void testImportItemsVersion2() throws Exception {
 
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
@@ -114,7 +114,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
         // Check permission scopes
-        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
 

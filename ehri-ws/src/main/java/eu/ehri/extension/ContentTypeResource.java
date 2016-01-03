@@ -40,7 +40,7 @@ import javax.ws.rs.core.Response;
  * here.
  */
 @Path(Entities.CONTENT_TYPE)
-public class ContentTypeResource extends AbstractAccessibleEntityResource<ContentType>
+public class ContentTypeResource extends AbstractAccessibleResource<ContentType>
         implements GetResource, ListResource {
 
     public ContentTypeResource(@Context GraphDatabaseService database) {

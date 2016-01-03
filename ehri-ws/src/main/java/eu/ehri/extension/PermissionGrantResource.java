@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response.Status;
 /**
  * Provides a web service interface for the PermissionGrant model.
  * <p>
- * FIXME: PermissionGrant is not currently an AccessibleEntity so
+ * FIXME: PermissionGrant is not currently an Accessible so
  * handling it is complicated. We need to re-architect the REST views
  * to handle more than just the initially-envisaged scenarios.
  */
@@ -63,7 +63,7 @@ public class PermissionGrantResource extends AbstractRestResource {
     public Response getPermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            PermissionGrant grant = manager.getFrame(id,
+            PermissionGrant grant = manager.getEntity(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class);
             Response response = single(grant);
             tx.success();
@@ -83,7 +83,7 @@ public class PermissionGrantResource extends AbstractRestResource {
     public Response revokePermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
+            new AclViews(graph).revokePermissionGrant(manager.getEntity(id,
                             EntityClass.PERMISSION_GRANT, PermissionGrant.class),
                     getRequesterUserProfile());
             tx.success();

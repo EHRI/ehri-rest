@@ -32,7 +32,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import static org.junit.Assert.assertEquals;
@@ -141,8 +141,8 @@ public class WienerLibraryTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
 
 
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
-        for(AccessibleEntity subject  : subjects)
+        List<Accessible> subjects = toList(ev.getSubjects());
+        for(Accessible subject  : subjects)
             logger.info("identifier: " + subject.getId());
         
         assertEquals(5, subjects.size());

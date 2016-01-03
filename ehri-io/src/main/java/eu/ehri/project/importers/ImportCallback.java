@@ -19,7 +19,7 @@
 
 package eu.ehri.project.importers;
 
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Mutation;
 
 /**
@@ -27,5 +27,5 @@ import eu.ehri.project.persistence.Mutation;
  * a mutation ('created', 'updated', 'unchanged').
  */
 public interface ImportCallback {
-    void itemImported(Mutation<? extends AccessibleEntity> mutation);
+    void itemImported(Mutation<? extends Accessible> mutation);
 }

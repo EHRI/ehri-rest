@@ -33,7 +33,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -59,7 +59,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
     @Test
     public void bbwo2Test() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied, IntegrityError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example BBWO2 DC";
         
         //id="joodse-raad" source="niod-trefwoorden" term="Kinderen"
@@ -73,7 +73,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
         
         
-        Vocabulary vocabularyTest = manager.getFrame("niod_trefwoorden", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getEntity("niod_trefwoorden", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         
@@ -118,7 +118,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         }
         
         boolean passTest = false;
-        DocumentaryUnit person = manager.getFrame("nl-r1-1505", DocumentaryUnit.class);
+        DocumentaryUnit person = manager.getEntity("nl-r1-1505", DocumentaryUnit.class);
         for (Description d : person.getDescriptions()) {
             for (AccessPoint rel : d.getAccessPoints()) {
                 if (rel.getRelationshipType().equals("subjectAccess")) {
@@ -126,7 +126,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
                         assertEquals(1, toList(rel.getLinks()).size());
                         for (Link link : rel.getLinks()) {
                             boolean conceptFound = false;
-                            for (LinkableEntity le : link.getLinkTargets()) {
+                            for (Linkable le : link.getLinkTargets()) {
                                 if (le.getType().equals("CvocConcept")) {
                                     assertEquals(le, concept_716);
                                     conceptFound = true;

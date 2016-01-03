@@ -32,7 +32,7 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -51,7 +51,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     @Test
     public void importAllEvents() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/allEhriEvents.rdf");
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
               // Before...
@@ -77,7 +77,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
 
         int count = getNodeCount(graph);
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
 //        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
@@ -104,18 +104,18 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         printGraph(graph);
 
         
-        Concept bloodForGoods = manager.getFrame("cvoc1-1", Concept.class);
+        Concept bloodForGoods = manager.getEntity("cvoc1-1", Concept.class);
         for(Description desc : bloodForGoods.getDescriptions()){
             assertTrue(desc.getPropertyKeys().contains(Ontology.CONCEPT_SCOPENOTE));
         }
-        Concept teheranChildren = manager.getFrame("cvoc1-2", Concept.class);
+        Concept teheranChildren = manager.getEntity("cvoc1-2", Concept.class);
         for(Description desc : teheranChildren.getDescriptions()){
 //            for(String k : desc.getPropertyKeys())
 //                System.out.println(k+"-"+desc.getProperty(k));
             assertTrue(desc.getPropertyKeys().contains("personAccess"));
         }
         
-        AuthoritativeItem ad1 = manager.getFrame("ad1", AuthoritativeItem.class);
+        AuthoritativeItem ad1 = manager.getEntity("ad1", AuthoritativeItem.class);
         boolean found=false;
         for(Link desc : teheranChildren.getLinks()){
             found=true;
@@ -123,7 +123,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
             assertEquals("associate", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("sem"));
             assertEquals("personAccess", desc.getProperty("sem"));
-            for(LinkableEntity e : desc.getLinkTargets()){
+            for(Linkable e : desc.getLinkTargets()){
                 assertTrue(e.getId().equals("cvoc1-2") || e.getId().equals("a1"));
             }
         }
@@ -133,14 +133,14 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     
     @Test 
     public void withOutsideScheme() throws ItemNotFound, IOException, InputParseError, ValidationError{
-        Vocabulary cvoc1 = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
         SkosImporter importer1 = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1);
         importer1.setTolerant(true);
         ImportLog log1 = importer1.importFile(ios1, logMessage);
 
            int count = getNodeCount(graph);
-        Vocabulary vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
@@ -166,7 +166,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         assertEquals(count + 13, getNodeCount(graph));
 //        printGraph(graph);   
         
-        Concept termJR = manager.getFrame("cvoc1-tema_866", Concept.class);
+        Concept termJR = manager.getEntity("cvoc1-tema_866", Concept.class);
         
         boolean found=false;
         for(Link desc : termJR.getLinks()){

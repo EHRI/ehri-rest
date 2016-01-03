@@ -33,12 +33,12 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Annotator;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
@@ -85,7 +85,7 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
      * Create an annotation for a dependent node of an item. The entity and the
      * dependent item can be the same.
      *
-     * @param id           the identifier of the AccessibleEntity this annotation is attached to, as a target
+     * @param id           the identifier of the Accessible this annotation is attached to, as a target
      * @param did          the identifier of the dependent item
      * @param bundle       the annotation itself
      * @param user         the user creating the annotation
@@ -98,8 +98,8 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
      */
     public Annotation createFor(String id, String did, Bundle bundle, Accessor user, Collection<Accessor> accessibleTo)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound {
-        AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
-        AnnotatableEntity dep = manager.getFrame(did, AnnotatableEntity.class);
+        Accessible entity = manager.getEntity(id, Accessible.class);
+        Annotatable dep = manager.getEntity(did, Annotatable.class);
         helper.checkEntityPermission(entity, user, PermissionType.ANNOTATE);
         helper.checkReadAccess(entity, user);
 
@@ -126,12 +126,12 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
         return annotation;
     }
 
-    private boolean isInSubtree(Frame parent, Frame child) {
+    private boolean isInSubtree(Entity parent, Entity child) {
         // Check dependent is within item's subtree!
         final Set<String> deps = Sets.newHashSet();
         new Serializer(graph).traverseSubtree(parent, new TraversalCallback() {
             @Override
-            public void process(Frame vertexFrame, int depth,
+            public void process(Entity vertexFrame, int depth,
                     String relation, int relationIndex) {
                 deps.add(vertexFrame.getId());
             }

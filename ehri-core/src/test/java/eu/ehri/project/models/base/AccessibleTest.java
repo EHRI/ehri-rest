@@ -37,11 +37,11 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 
-public class AccessibleEntityTest extends AbstractFixtureTest {
+public class AccessibleTest extends AbstractFixtureTest {
     @Test
     public void testGetAccessors() throws Exception {
-        AccessibleEntity c1 = manager.getFrame("c1", AccessibleEntity.class);
-        AccessibleEntity admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, AccessibleEntity.class);
+        Accessible c1 = manager.getEntity("c1", Accessible.class);
+        Accessible admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessible.class);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
         assertEquals(2L, accessors.size());
         assertTrue(accessors.contains(validUser)); // mike
@@ -50,8 +50,8 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testAddAccessor() throws Exception {
-        AccessibleEntity c1 = manager.getFrame("c1", AccessibleEntity.class);
-        Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
+        Accessible c1 = manager.getEntity("c1", Accessible.class);
+        Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
         assertEquals(2L, accessors.size());
         c1.addAccessor(admin);
@@ -62,8 +62,8 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testRemoveAccessor() throws Exception {
-        AccessibleEntity c1 = manager.getFrame("c1", AccessibleEntity.class);
-        Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
+        Accessible c1 = manager.getEntity("c1", Accessible.class);
+        Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
         c1.removeAccessor(admin);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
         assertEquals(1L, accessors.size());
@@ -72,16 +72,16 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testGetPermissionScope() throws Exception {
-        AccessibleEntity c1 = manager.getFrame("c1", AccessibleEntity.class);
-        PermissionScope r1 = manager.getFrame("r1", PermissionScope.class);
+        Accessible c1 = manager.getEntity("c1", Accessible.class);
+        PermissionScope r1 = manager.getEntity("r1", PermissionScope.class);
         assertEquals(r1, c1.getPermissionScope());
     }
 
     @Test
     public void testSetPermissionScope() throws Exception {
-        AccessibleEntity c1 = manager.getFrame("c1", AccessibleEntity.class);
-        PermissionScope r1 = manager.getFrame("r1", PermissionScope.class);
-        PermissionScope r2 = manager.getFrame("r2", PermissionScope.class);
+        Accessible c1 = manager.getEntity("c1", Accessible.class);
+        PermissionScope r1 = manager.getEntity("r1", PermissionScope.class);
+        PermissionScope r2 = manager.getEntity("r2", PermissionScope.class);
         assertEquals(r1, c1.getPermissionScope());
         c1.setPermissionScope(r2);
         assertEquals(r2, c1.getPermissionScope());
@@ -89,10 +89,10 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testGetPermissionScopes() throws Exception {
-        AccessibleEntity c1 = manager.getFrame("c1", AccessibleEntity.class);
-        AccessibleEntity c2 = manager.getFrame("c2", AccessibleEntity.class);
-        PermissionScope r1 = manager.getFrame("r1", PermissionScope.class);
-        PermissionScope nl = manager.getFrame("nl", PermissionScope.class);
+        Accessible c1 = manager.getEntity("c1", Accessible.class);
+        Accessible c2 = manager.getEntity("c2", Accessible.class);
+        PermissionScope r1 = manager.getEntity("r1", PermissionScope.class);
+        PermissionScope nl = manager.getEntity("nl", PermissionScope.class);
         assertEquals(r1, c1.getPermissionScope());
         List<PermissionScope> scopes = Lists.newArrayList(c2.getPermissionScopes());
         assertEquals(3L, scopes.size());
@@ -103,7 +103,7 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testGetHistory() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         Mutation<DocumentaryUnit> update = doUpdate(c1);
         assertTrue(update.updated());
         Iterable<SystemEvent> history = c1.getHistory();
@@ -112,7 +112,7 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testGetLatestEvent() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         assertNull(c1.getLatestEvent());
         doUpdate(c1);
         assertNotNull(c1.getLatestEvent());
@@ -120,15 +120,15 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
 
     @Test
     public void testHasAccessRestrictions() throws Exception {
-        AccessibleEntity ann3 = manager.getFrame("ann3", AccessibleEntity.class);
+        Accessible ann3 = manager.getEntity("ann3", Accessible.class);
         // Because ann4 is promoted, access is unrestricted.
-        AccessibleEntity ann4 = manager.getFrame("ann4", AccessibleEntity.class);
+        Accessible ann4 = manager.getEntity("ann4", Accessible.class);
         assertTrue(ann3.hasAccessRestriction());
         assertFalse(ann4.hasAccessRestriction());
     }
 
     private Mutation<DocumentaryUnit> doUpdate(DocumentaryUnit unit) throws Exception {
-        Bundle doc = new Serializer(graph).vertexFrameToBundle(unit)
+        Bundle doc = new Serializer(graph).entityToBundle(unit)
                 .withDataValue("somekey", "someval");
         Crud<DocumentaryUnit> crud = ViewFactory.getCrudWithLogging(graph, DocumentaryUnit.class);
         return crud.update(doc, validUser);

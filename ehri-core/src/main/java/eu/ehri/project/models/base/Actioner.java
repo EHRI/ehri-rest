@@ -31,7 +31,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  *
 
  */
-public interface Actioner extends NamedEntity {
+public interface Actioner extends Named {
     /**
      * Fetch a list of Actions for this user in newest-first order.
      * 

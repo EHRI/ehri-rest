@@ -20,25 +20,25 @@ public class Ead2002ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExport1() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         testExport(c1, "eng");
     }
 
     @Test
     public void testExport2() throws Exception {
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
         testExport(c4, "eng");
     }
 
     @Test
     public void testImportExport1() throws Exception {
-        Repository repo = manager.getFrame("r1", Repository.class);
+        Repository repo = manager.getEntity("r1", Repository.class);
         testImportExport(repo, "hierarchical-ead.xml", "Ctop level fonds", "eng");
     }
 
     @Test
     public void testImportExport2() throws Exception {
-        Repository repo = manager.getFrame("r1", Repository.class);
+        Repository repo = manager.getEntity("r1", Repository.class);
         String xml = testImportExport(repo, "comprehensive-ead.xml",
                 "Resource (call) |||.Ident (num) |||", "eng");
         //System.out.println(xml);
@@ -62,7 +62,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExportWithComprehensiveFixture() throws Exception {
-        DocumentaryUnit test = manager.getFrame("nl-000001-1", DocumentaryUnit.class);
+        DocumentaryUnit test = manager.getEntity("nl-000001-1", DocumentaryUnit.class);
         String xml = testExport(test, "eng");
         //System.out.println(xml);
         Document doc = parseDocument(xml);

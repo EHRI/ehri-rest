@@ -35,7 +35,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
@@ -99,11 +99,11 @@ public final class AclViews implements Scoped<AclViews> {
         boolean scoped = !scope.equals(SystemScope.INSTANCE);
         // Log the action...
         ActionManager.EventContext context = actionManager.newEventContext(
-                accessor.as(AccessibleEntity.class),
+                accessor.as(Accessible.class),
                 grantee.as(Actioner.class),
                 EventTypes.setGlobalPermissions);
         if (scoped) {
-            context.addSubjects(scope.as(AccessibleEntity.class));
+            context.addSubjects(scope.as(Accessible.class));
         }
         context.commit();
         return acl.getInheritedGlobalPermissions(accessor);
@@ -117,7 +117,7 @@ public final class AclViews implements Scoped<AclViews> {
      * @param accessors The list of users/groups who can access the item
      * @param user The user making the change
      */
-    public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
+    public void setAccessors(Accessible entity, Set<Accessor> accessors,
             Accessor user) throws PermissionDenied {
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         acl.setAccessors(entity, accessors);
@@ -143,7 +143,7 @@ public final class AclViews implements Scoped<AclViews> {
         // Check we have grant permissions for the requested content types
         if (!AclManager.belongsToAdmin(accessor)) {
             try {
-                Permission grantPerm = manager.getFrame(
+                Permission grantPerm = manager.getEntity(
                         PermissionType.GRANT.getName(), Permission.class);
                 for (ContentTypes ctype : permissionMap.keySet()) {
                     if (!acl.hasPermission(ctype, PermissionType.GRANT, accessor)) {
@@ -170,7 +170,7 @@ public final class AclViews implements Scoped<AclViews> {
      * 
      * @throws PermissionDenied
      */
-    public void setItemPermissions(AccessibleEntity item, Accessor accessor,
+    public void setItemPermissions(Accessible item, Accessor accessor,
             Set<PermissionType> permissionList, Accessor grantee)
             throws PermissionDenied {
         helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
@@ -178,7 +178,7 @@ public final class AclViews implements Scoped<AclViews> {
         // Log the action...
         actionManager.newEventContext(item,
                 grantee.as(Actioner.class), EventTypes.setItemPermissions)
-                .addSubjects(accessor.as(AccessibleEntity.class))
+                .addSubjects(accessor.as(Accessible.class))
                 .commit();
     }
 
@@ -194,7 +194,7 @@ public final class AclViews implements Scoped<AclViews> {
                     break;
                 default:
                     helper.checkEntityPermission(
-                        tg.as(AccessibleEntity.class), user, PermissionType.GRANT);
+                        tg.as(Accessible.class), user, PermissionType.GRANT);
             }
         }
         acl.revokePermissionGrant(grant);
@@ -217,7 +217,7 @@ public final class AclViews implements Scoped<AclViews> {
         // Log the action...
         actionManager.newEventContext(group,
                 grantee.as(Actioner.class), EventTypes.addGroup)
-                .addSubjects(user.as(AccessibleEntity.class))
+                .addSubjects(user.as(Accessible.class))
                 .commit();
     }
 
@@ -237,7 +237,7 @@ public final class AclViews implements Scoped<AclViews> {
         // Log the action...
         actionManager.newEventContext(group,
                 grantee.as(Actioner.class), EventTypes.removeGroup)
-                .addSubjects(user.as(AccessibleEntity.class))
+                .addSubjects(user.as(Accessible.class))
                 .commit();
     }
 
@@ -260,7 +260,7 @@ public final class AclViews implements Scoped<AclViews> {
                         "Non-admin users cannot add other users to groups that they" +
                                 " do not themselves belong to.");
             }
-            helper.checkEntityPermission(user.as(AccessibleEntity.class),
+            helper.checkEntityPermission(user.as(Accessible.class),
                     grantee, PermissionType.GRANT);
             helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
         }

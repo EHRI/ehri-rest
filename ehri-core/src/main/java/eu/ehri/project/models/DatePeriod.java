@@ -24,14 +24,14 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.Annotatable;
+import eu.ehri.project.models.base.Temporal;
 
 /**
  * Frame class representing a date period.
  */
 @EntityType(EntityClass.DATE_PERIOD)
-public interface DatePeriod extends AnnotatableEntity {
+public interface DatePeriod extends Annotatable {
 
     enum DatePeriodType {
         creation, existence
@@ -67,5 +67,5 @@ public interface DatePeriod extends AnnotatableEntity {
      * @return a temporal item
      */
     @Adjacency(label = Ontology.ENTITY_HAS_DATE, direction = Direction.IN)
-    TemporalEntity getEntity();
+    Temporal getEntity();
 }
