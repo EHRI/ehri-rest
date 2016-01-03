@@ -19,6 +19,7 @@
 
 package eu.ehri.extension.test.helpers;
 
+import com.google.common.collect.ImmutableMap;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
@@ -35,6 +36,7 @@ import org.neo4j.server.helpers.CommunityServerBuilder;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,8 +53,7 @@ public class ServerRunner {
     final static FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
     private final int port;
-    private final String jaxRxPackage;
-    private final String mountPoint;
+    private final Map<String, String> packageMountPoints;
 
     private Level logLevel = Level.OFF;
 
@@ -63,21 +64,31 @@ public class ServerRunner {
     private final static Logger sunLogger = Logger.getLogger("com.sun.jersey");
     private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");
     private final static ch.qos.logback.classic.Logger graphLogger =
-            (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(TxNeo4jGraph.class);
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TxNeo4jGraph.class);
 
     private CommunityNeoServer neoServer;
 
-    private ServerRunner(int port, String jaxRxPackage, String mountPoint) {
+    private ServerRunner(int port, Map<String, String> packageMountPoints) {
         this.port = port;
-        this.jaxRxPackage = jaxRxPackage;
-        this.mountPoint = mountPoint;
+        this.packageMountPoints = packageMountPoints;
+    }
+
+    /**
+     * Get an instance of the server runner.
+     *
+     * @param port               the port
+     * @param packageMountPoints a set of package-name to mount-point mappings
+     * @return a new server runner
+     */
+    public static ServerRunner getInstance(int port, Map<String, String> packageMountPoints) {
+        if (INSTANCE == null) {
+            INSTANCE = new ServerRunner(port, packageMountPoints);
+        }
+        return INSTANCE;
     }
 
     public static ServerRunner getInstance(int port, String jaxRxPackage, String mountPoint) {
-        if (INSTANCE == null) {
-            INSTANCE = new ServerRunner(port, jaxRxPackage, mountPoint);
-        }
-        return INSTANCE;
+        return getInstance(port, ImmutableMap.of(jaxRxPackage, mountPoint));
     }
 
     public void start() throws IOException {
@@ -99,10 +110,15 @@ public class ServerRunner {
         org.eclipse.jetty.util.log.StdErrLog.setProperties(p);
 
         System.setProperty("org.eclipse.jetty.LEVEL", "DEBUG");
-        neoServer = CommunityServerBuilder.server()
-                .onPort(port)
-                .withThirdPartyJaxRsPackage(jaxRxPackage, "/" + mountPoint)
-                .build();
+        CommunityServerBuilder serverBuilder = CommunityServerBuilder.server()
+                .onPort(port);
+        for (Map.Entry<String, String> entry : packageMountPoints.entrySet()) {
+            String mountPoint = entry.getValue().startsWith("/")
+                    ? entry.getValue() : "/" + entry.getValue();
+            serverBuilder = serverBuilder
+                    .withThirdPartyJaxRsPackage(entry.getKey(), mountPoint);
+        }
+        neoServer = serverBuilder.build();
         neoServer.start();
 
         TxGraph graph = new TxNeo4jGraph(neoServer.getDatabase().getGraph());
