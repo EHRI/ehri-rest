@@ -17,20 +17,15 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models.base;
+package eu.ehri.project.models;
 
-import com.tinkerpop.frames.Property;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Temporal;
 
 /**
- * An entity that has a name.
- *
-
+ * Frame class representing the description of a document.
  */
-public interface NamedEntity extends Frame {
-
-    @Mandatory
-    @Property(Ontology.NAME_KEY)
-    String getName();
+@EntityType(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+public interface DocumentaryUnitDescription extends Temporal, Description {
 }

@@ -19,11 +19,10 @@
 
 package eu.ehri.project.models.events;
 
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 
 @EntityType(EntityClass.EVENT_LINK)
-public interface EventLink extends Frame {
+public interface EventLink extends Entity {
 }

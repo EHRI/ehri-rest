@@ -21,7 +21,7 @@ package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 
@@ -43,7 +43,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
@@ -82,7 +82,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         assertTrue(found847);
         
         // Check permission scopes
-        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
     }

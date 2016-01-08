@@ -149,8 +149,8 @@ public class NodeProperties {
             }
         }
         if (nodetype.endsWith("Description")) {
-            referencedrows.addAll(p.get("unit"));
-            referencedrows.addAll(p.get("description"));
+            referencedrows.addAll(p.get("Unit"));
+            referencedrows.addAll(p.get("Description"));
         }
         return referencedrows;
     }

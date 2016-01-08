@@ -1,5 +1,5 @@
 {
-  "type": "documentaryUnit",
+  "type": "DocumentaryUnit",
   "data": {
     "name": "a collection",
     "identifier": "some-id"
@@ -7,7 +7,7 @@
   "relationships": {
     "describes": [
       {
-        "type": "documentDescription",
+        "type": "DocumentaryUnitDescription",
         "data": {
           "languageCode": "en",
           "name": "a description",
@@ -16,7 +16,7 @@
         "relationships": {
           "hasDate": [
             {
-              "type": "datePeriod",
+              "type": "DatePeriod",
               "data": {
                 "startDate": "1940-01-01T00:00:00Z",
                 "endDate": "1945-01-01T00:00:00Z"

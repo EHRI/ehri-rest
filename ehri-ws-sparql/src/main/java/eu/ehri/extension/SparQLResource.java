@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.oupls.sail.pg.PropertyGraphSail;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.core.Tx;
 import info.aduna.iteration.CloseableIteration;
 import org.neo4j.graphdb.GraphDatabaseService;

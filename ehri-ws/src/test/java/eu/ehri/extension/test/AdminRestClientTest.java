@@ -30,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.AbstractRestResource.AUTH_HEADER_NAME;
+import static eu.ehri.extension.base.AbstractRestResource.AUTH_HEADER_NAME;
 import static eu.ehri.extension.AdminResource.ENDPOINT;
 import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 import static org.junit.Assert.*;
@@ -68,13 +68,6 @@ public class AdminRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
                 .get(ClientResponse.class);
         String data = response.getEntity(String.class);
-        assertStatus(OK, response);
-    }
-
-    @Test
-    public void testReindexInternal() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_reindexInternal"));
-        ClientResponse response = resource.post(ClientResponse.class);
         assertStatus(OK, response);
     }
 

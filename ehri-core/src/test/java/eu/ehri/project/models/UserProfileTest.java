@@ -43,15 +43,15 @@ public class UserProfileTest extends AbstractFixtureTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        reto = manager.getFrame("reto", UserProfile.class);
-        mike = manager.getFrame("mike", UserProfile.class);
-        linda = manager.getFrame("linda", UserProfile.class);
+        reto = manager.getEntity("reto", UserProfile.class);
+        mike = manager.getEntity("mike", UserProfile.class);
+        linda = manager.getEntity("linda", UserProfile.class);
     }
 
     @Test
     public void testGetGroups() throws Exception {
         assertTrue(mike.getGroups().iterator().hasNext());
-        Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+        Group admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         assertTrue(Iterables.contains(mike.getGroups(), admin));
     }
 
@@ -60,7 +60,7 @@ public class UserProfileTest extends AbstractFixtureTest {
         // mike is in groups kcl and admin. reto is in
         // group kcl and veerle in admin. Therefore mike's
         // co-group members are reto and veerle...
-        UserProfile veerle = manager.getFrame("veerle", UserProfile.class);
+        UserProfile veerle = manager.getEntity("veerle", UserProfile.class);
         List<UserProfile> profiles = Lists.newArrayList(mike.coGroupMembers());
         assertEquals(2, profiles.size());
         assertTrue(profiles.contains(reto));
@@ -119,8 +119,8 @@ public class UserProfileTest extends AbstractFixtureTest {
 
     @Test
     public void testWatching() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
         assertFalse(mike.isWatching(c1));
         mike.addWatching(c1);
         assertTrue(mike.isWatching(c1));

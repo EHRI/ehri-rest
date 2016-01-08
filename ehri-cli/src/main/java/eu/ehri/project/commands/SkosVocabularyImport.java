@@ -85,10 +85,10 @@ public class SkosVocabularyImport extends BaseCommand {
 
         try {
 
-            Vocabulary vocabulary = manager.getFrame(
+            Vocabulary vocabulary = manager.getEntity(
                     cmdLine.getOptionValue("scope"), Vocabulary.class);
             // Find the user
-            UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
+            UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
             // FIXME: Casting the graph shouldn't be necessary here, but it is

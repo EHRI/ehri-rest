@@ -7,7 +7,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.events.SystemEvent;
@@ -30,42 +30,42 @@ public class UserProfileViews {
 
     public void addWatching(UserProfile user, List<String> ids, Accessor accessor) throws ItemNotFound {
         for (String id : ids) {
-            user.addWatching(manager.getFrame(id, Watchable.class));
+            user.addWatching(manager.getEntity(id, Watchable.class));
         }
         log(accessor, ids, EventTypes.watch);
     }
 
     public void removeWatching(UserProfile user, List<String> ids, Accessor accessor) throws ItemNotFound {
         for (String id : ids) {
-            user.removeWatching(manager.getFrame(id, Watchable.class));
+            user.removeWatching(manager.getEntity(id, Watchable.class));
         }
         log(accessor, ids, EventTypes.unwatch);
     }
 
     public void addFollowers(UserProfile user, List<String> ids, Accessor accessor) throws ItemNotFound {
         for (String id : ids) {
-            user.addFollowing(manager.getFrame(id, UserProfile.class));
+            user.addFollowing(manager.getEntity(id, UserProfile.class));
         }
         log(accessor, ids, EventTypes.follow);
     }
 
     public void removeFollowers(UserProfile user, List<String> ids, Accessor accessor) throws ItemNotFound {
         for (String id : ids) {
-            user.removeFollowing(manager.getFrame(id, UserProfile.class));
+            user.removeFollowing(manager.getEntity(id, UserProfile.class));
         }
         log(accessor, ids, EventTypes.unfollow);
     }
 
     public void addBlocked(UserProfile user, List<String> ids, Accessor accessor) throws ItemNotFound {
         for (String id : ids) {
-            user.addBlocked(manager.getFrame(id, UserProfile.class));
+            user.addBlocked(manager.getEntity(id, UserProfile.class));
         }
         log(accessor, ids, EventTypes.block);
     }
 
     public void removeBlocked(UserProfile user, List<String> ids, Accessor accessor) throws ItemNotFound {
         for (String id : ids) {
-            user.removeBlocked(manager.getFrame(id, UserProfile.class));
+            user.removeBlocked(manager.getEntity(id, UserProfile.class));
         }
         log(accessor, ids, EventTypes.unblock);
     }
@@ -78,7 +78,7 @@ public class UserProfileViews {
             ActionManager.EventContext ctx = actionManager
                     .newEventContext(accessor.as(UserProfile.class), type);
             for (String id : ids) {
-                ctx.addSubjects(manager.getFrame(id, AccessibleEntity.class));
+                ctx.addSubjects(manager.getEntity(id, Accessible.class));
             }
             return Optional.of(ctx.commit());
         }

@@ -23,7 +23,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by IcaAtomEadSingleEad";
 
         int origCount = getNodeCount(graph);
@@ -109,7 +109,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         assertEquals(0, log2.getUpdated());
 
         // Check permission scopes
-        for (AccessibleEntity e : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(agent, e.getPermissionScope());
         }
     }

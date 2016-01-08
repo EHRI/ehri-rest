@@ -50,7 +50,7 @@ public class BundleTest {
         bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
-                        new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                        new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                                 .withDataValue(Ontology.LANGUAGE, "en"));
     }
@@ -185,7 +185,7 @@ public class BundleTest {
             @Override
             public boolean remove(String relationLabel, Bundle bundle) {
                 String lang = bundle.getDataValue(Ontology.LANGUAGE);
-                return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                         && (lang != null
                             && lang.equals("en"));
             }
@@ -203,7 +203,7 @@ public class BundleTest {
 
     @Test
     public void testReplaceRelations() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Multimap<String,Bundle> rels = ImmutableListMultimap
@@ -215,7 +215,7 @@ public class BundleTest {
 
     @Test
     public void testWithRelationsMap() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Multimap<String,Bundle> rels = ImmutableListMultimap
@@ -227,7 +227,7 @@ public class BundleTest {
 
     @Test
     public void testWithRelations() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = bundle.withRelations(
@@ -238,7 +238,7 @@ public class BundleTest {
 
     @Test
     public void testWithRelation() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
@@ -248,7 +248,7 @@ public class BundleTest {
 
     @Test
     public void testWithMetaData() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = newDesc.withMetaDataValue("key", "val");

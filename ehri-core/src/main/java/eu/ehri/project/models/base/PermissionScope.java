@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * The scope of permissions granted to users. A permission scope always has an identifier.
  */
-public interface PermissionScope extends IdentifiableEntity {
+public interface PermissionScope extends Identifiable {
 
     /**
      * Get all permission grants that apply directly to this scope.
@@ -61,7 +61,7 @@ public interface PermissionScope extends IdentifiableEntity {
      * @return an iterable of lower scoped items
      */
     @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE, direction = Direction.IN)
-    Iterable<AccessibleEntity> getContainedItems();
+    Iterable<Accessible> getContainedItems();
 
     /**
      * Get an iterable of all items within this scope, recursively down
@@ -70,7 +70,7 @@ public interface PermissionScope extends IdentifiableEntity {
      * @return an iterable of lower scoped items to all depths
      */
     @JavaHandler
-    Iterable<AccessibleEntity> getAllContainedItems();
+    Iterable<Accessible> getAllContainedItems();
 
     /**
      * Get the path of the permission scope as an ordered collection of strings.
@@ -80,7 +80,7 @@ public interface PermissionScope extends IdentifiableEntity {
     Collection<String> idPath();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, PermissionScope {
-        public Iterable<AccessibleEntity> getAllContainedItems() {
+        public Iterable<Accessible> getAllContainedItems() {
             return frameVertices(gremlin().as("n")
                     .in(Ontology.HAS_PERMISSION_SCOPE)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc));

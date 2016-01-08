@@ -29,10 +29,9 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -747,7 +746,7 @@ public final class XmlSkosImporter implements SkosImporter {
         }
     }
 
-    protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation,
+    protected void handleCallbacks(Mutation<? extends Accessible> mutation,
             ImportLog manifest) {
         switch (mutation.getState()) {
             case CREATED:

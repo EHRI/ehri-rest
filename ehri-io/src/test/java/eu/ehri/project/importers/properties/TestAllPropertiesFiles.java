@@ -81,20 +81,20 @@ public class TestAllPropertiesFiles {
     public void testDansEadProperties() {
         String propfile = "dansead.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     @Test
     @Ignore //not used anymore
     public void testEadXmlProperties() {
          String propfile = "icaatom.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     @Test
     public void testWp2EadXmlProperties() {
         String propfile = "wp2ead.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
 
     @Test
@@ -106,14 +106,14 @@ public class TestAllPropertiesFiles {
     public void testNiodXmlProperties() {
         String propfile = "niod.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     
     @Test
     public void testNiodEadXmlProperties() {
         String propfile = "niodead.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
         XmlImportProperties prop = new XmlImportProperties(propfile);
         assertEquals("xref", prop.getAttributeProperty("href"));
     }
@@ -122,68 +122,68 @@ public class TestAllPropertiesFiles {
     public void testUshmmXmlProperties() {
         String propfile = "ushmm.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
   @Test
     public void testDcEuropeanaProperties() {
         String propfile = "dceuropeana.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     @Test
     @Ignore //not used anymore
     public void testUkrainianDescXmlProperties() {
         String propfile = "ukraine.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     
     @Test
     public void testBundesarchiveProperties() {
         String propfile = "bundesarchive.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
 
     @Test
     public void testItsFindingaidsProperties() {
         String propfile = "its-provenance.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
 
     @Test
     public void testItsHoldingguidesProperties() {
         String propfile = "its-pertinence.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
 
     @Test
     public void testCegesomaAAProperties() {
         String propfile = "cegesomaAA.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
 
     @Test
     public void testCegesomaABProperties() {
         String propfile = "cegesomaAB.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     
     @Test
     public void testCegesomaCAProperties() {
         String propfile = "cegesomaCA.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
     @Test
     public void testGenericProperties() {
         String propfile = "generic.properties";
         logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
 
     @Test

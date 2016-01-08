@@ -22,7 +22,7 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.GroupResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
@@ -52,7 +52,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateGroup() throws Exception {
         // Create
-        String jsonGroupTestString = "{\"type\": \"group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
+        String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.GROUP)).entity(jsonGroupTestString)
                 .post(ClientResponse.class);
@@ -68,7 +68,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateGroupWithMembers() throws Exception {
         // Create
-        String jsonGroupTestString = "{\"type\": \"group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
+        String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
         URI uri = UriBuilder.fromPath(getExtensionEntryPointUri()).segment(Entities.GROUP)
                 .queryParam(GroupResource.MEMBER_PARAM, "linda").build();
         ClientResponse response = client.resource(uri)

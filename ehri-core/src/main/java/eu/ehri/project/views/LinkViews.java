@@ -33,11 +33,11 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
@@ -79,7 +79,7 @@ public final class LinkViews implements Scoped<LinkViews> {
     /**
      * Create a link between two items.
      *
-     * @param targetId1 the identifier of a AccessibleEntity target of this Annotation
+     * @param targetId1 the identifier of a Accessible target of this Annotation
      * @param targetId2 the identifier of a Annotator source of this Annotation
      * @param bundle    the annotation itself
      * @param user the current user
@@ -93,8 +93,8 @@ public final class LinkViews implements Scoped<LinkViews> {
      */
     public Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
             Accessor user) throws ItemNotFound, ValidationError, PermissionDenied {
-        LinkableEntity t1 = manager.getFrame(targetId1, LinkableEntity.class);
-        LinkableEntity t2 = manager.getFrame(targetId2, LinkableEntity.class);
+        Linkable t1 = manager.getEntity(targetId1, Linkable.class);
+        Linkable t2 = manager.getEntity(targetId2, Linkable.class);
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
         // TODO: Should this require perms to link another item???
         //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
@@ -108,7 +108,7 @@ public final class LinkViews implements Scoped<LinkViews> {
                 .addSubjects(link)
                 .addSubjects(t2);
         for (String body : bodies) {
-            AccessibleEntity item = manager.getFrame(body, AccessibleEntity.class);
+            Accessible item = manager.getEntity(body, Accessible.class);
             link.addLinkBody(item);
             eventContext.addSubjects(item);
         }
@@ -119,7 +119,7 @@ public final class LinkViews implements Scoped<LinkViews> {
     /**
      * Create a link between two items, along with an access point on the given description.
      *
-     * @param targetId1       the identifier of a AccessibleEntity target of this Annotation
+     * @param targetId1       the identifier of a Accessible target of this Annotation
      * @param targetId2 the identifier of a Annotator source of this Annotation
      * @param bundle   the annotation itself
      * @param user The current user
@@ -130,9 +130,9 @@ public final class LinkViews implements Scoped<LinkViews> {
      */
     public Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
             String bodyType, Bundle bundle, Accessor user) throws ItemNotFound, ValidationError, PermissionDenied {
-        LinkableEntity t1 = manager.getFrame(targetId1, LinkableEntity.class);
-        LinkableEntity t2 = manager.getFrame(targetId2, LinkableEntity.class);
-        Description description = manager.getFrame(descriptionId, Description.class);
+        Linkable t1 = manager.getEntity(targetId1, Linkable.class);
+        Linkable t2 = manager.getEntity(targetId2, Linkable.class);
+        Description description = manager.getEntity(descriptionId, Description.class);
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
         // TODO: Should this require perms to link another item???
         //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);

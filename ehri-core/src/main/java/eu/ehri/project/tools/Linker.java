@@ -28,7 +28,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -121,7 +121,7 @@ public class Linker {
         Map<String, Integer> identifierCount = Maps.newHashMap();
 
         for (DocumentaryUnit doc : repository.getAllCollections()) {
-            for (DocumentDescription description : doc.getDocumentDescriptions()) {
+            for (DocumentaryUnitDescription description : doc.getDocumentDescriptions()) {
                 for (AccessPoint relationship : description.getAccessPoints()) {
                     if (accessPointTypes.isEmpty() || accessPointTypes
                             .contains(relationship.getRelationshipType())) {
@@ -208,7 +208,7 @@ public class Linker {
 
         long linkCount = 0L;
         for (DocumentaryUnit doc : repository.getAllCollections()) {
-            for (DocumentDescription description : doc.getDocumentDescriptions()) {
+            for (DocumentaryUnitDescription description : doc.getDocumentDescriptions()) {
                 for (AccessPoint relationship : description.getAccessPoints()) {
                     if (accessPointTypes.isEmpty() || accessPointTypes
                             .contains(relationship.getRelationshipType())) {

@@ -23,9 +23,9 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -103,11 +103,11 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
 
         // languages
-        for (DocumentDescription d : c2.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c2.getDocumentDescriptions()) {
             assertEquals("deu", d.getProperty("languageOfMaterial").toString());
         }
 
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
+        List<Accessible> subjects = toList(ev.getSubjects());
 
         assertEquals(7, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
@@ -119,7 +119,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         assertEquals(c2, c3.getPermissionScope());
 
         // Check the author of the description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             assertEquals("Shoah History Department, Jewish Museum in Prague", d.getProperty("processInfo"));
         }
 

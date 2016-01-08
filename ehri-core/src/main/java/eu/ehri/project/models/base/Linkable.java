@@ -19,17 +19,20 @@
 
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.frames.Property;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.Link;
 
 /**
- * Base interface for entities that have an identifier property (other than the
- * internally assigned node ID).
- */
-public interface IdentifiableEntity extends Frame {
+ * An entity that can hold incoming links.
+ *
 
-    @Mandatory
-    @Property(Ontology.IDENTIFIER_KEY)
-    String getIdentifier();
+ */
+public interface Linkable extends Accessible {
+    @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
+    Iterable<Link> getLinks();
+
+    @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
+    void addLink(Link link);
 }

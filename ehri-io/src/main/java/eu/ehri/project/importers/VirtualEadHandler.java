@@ -30,7 +30,7 @@ import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -49,8 +49,8 @@ public class VirtualEadHandler extends SaxXmlHandler {
     public static final String AUTHOR = "authors",
             SOURCEFILEID = "sourceFileId";
     final List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
-    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes = ImmutableMap.<String, Class<?
-            extends Frame>>of("maintenanceEvent", MaintenanceEvent.class);
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap.<String, Class<?
+            extends Entity>>of("maintenanceEvent", MaintenanceEvent.class);
 
     private static final Logger logger = LoggerFactory
             .getLogger(VirtualEadHandler.class);

@@ -41,7 +41,7 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);

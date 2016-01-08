@@ -27,7 +27,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
     @Test
     public void bundesarchiveTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the Split Bundesarchive EAD";
 
         int origCount = getNodeCount(graph);
@@ -95,11 +95,11 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         assertEquals(agent, archUnit.getPermissionScope());
 
         //test titles
-        for (DocumentDescription d : archUnit.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archUnit.getDocumentDescriptions()) {
             assertEquals("Reichsschatzmeister der NSDAP", d.getName());
         }
         //test dates
-        for (DocumentDescription d : archUnit.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archUnit.getDocumentDescriptions()) {
             // Single date is just a string
             assertFalse(d.getPropertyKeys().contains("unitDates"));
             List<DatePeriod> datePeriods = Lists.newArrayList(d.getDatePeriods());

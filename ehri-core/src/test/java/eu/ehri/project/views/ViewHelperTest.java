@@ -54,7 +54,7 @@ public class ViewHelperTest extends AbstractFixtureTest {
 
     @Test
     public void testCheckContentPermissionWithScope() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         viewHelper.setScope(r1).checkContentPermission(invalidUser,
                 ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE);
     }
@@ -62,40 +62,40 @@ public class ViewHelperTest extends AbstractFixtureTest {
     @Test
     public void testCheckContentPermission() throws Exception {
         // Linda has a global doc unit write grant
-        UserProfile user = manager.getFrame("linda", UserProfile.class);
+        UserProfile user = manager.getEntity("linda", UserProfile.class);
         viewHelper.checkContentPermission(user,
                 ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE);
     }
 
     @Test
     public void testCheckEntityPermission() throws Exception {
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
-        Repository r2 = manager.getFrame("r2", Repository.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
+        Repository r2 = manager.getEntity("r2", Repository.class);
         viewHelper.checkEntityPermission(r2, user, PermissionType.UPDATE);
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCheckEntityPermissionThrows() throws Exception {
-        UserProfile user = manager.getFrame("linda", UserProfile.class);
-        Repository r2 = manager.getFrame("r2", Repository.class);
+        UserProfile user = manager.getEntity("linda", UserProfile.class);
+        Repository r2 = manager.getEntity("r2", Repository.class);
         viewHelper.checkEntityPermission(r2, user, PermissionType.UPDATE);
     }
 
     @Test
     public void testCheckReadAccess() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         viewHelper.checkReadAccess(c1, validUser);
     }
 
     @Test(expected = AccessDenied.class)
     public void testCheckReadAccessThrows() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         viewHelper.checkReadAccess(c1, invalidUser);
     }
 
     @Test
     public void testGetContentTypeNodeFromEntityType() throws Exception {
-        assertEquals(manager.getFrame(Entities.REPOSITORY, ContentType.class),
+        assertEquals(manager.getEntity(Entities.REPOSITORY, ContentType.class),
                 viewHelper.getContentTypeNode(EntityClass.REPOSITORY));
     }
 

@@ -10,13 +10,13 @@
 # Countries - these are at the top of the entity hierarchy and
 # 'hold' everything else.
 - id: gb
-  type: country
+  type: Country
   data:
     identifier: gb
 
 # Institution
 - id: repo
-  type: repository
+  type: Repository
   data:
     identifier: repo
     name: Repository
@@ -25,7 +25,7 @@
     hasPermissionScope: gb
     describes:
       - id: rd1
-        type: repositoryDescription
+        type: RepositoryDescription
         data:
           name: Repository Name
           languageCode: en
@@ -34,21 +34,21 @@
 # Two groups
 
 - id: head-archivists
-  type: group
+  type: Group
   data:
     identifier: head-archivists
     name: Head Archivists
     description: The head archivists, with permission to modify all items.
 
 - id: archivists
-  type: group
+  type: Group
   data:
     identifier: archivisits
     name: Archivists
     description: Archivists, who cannot alter each other's items.
 
 - id: hauser
-  type: userProfile
+  type: UserProfile
   data:
     identifier: hauser
     name: Head Archivist User
@@ -59,7 +59,7 @@
      - archivists
 
 - id: auser1
-  type: userProfile
+  type: UserProfile
   data:
     identifier: auser1
     name: Archivist User 1
@@ -69,7 +69,7 @@
      - archivists
 
 - id: auser2
-  type: userProfile
+  type: UserProfile
   data:
     identifier: auser2
     name: Archivist User 1
@@ -83,26 +83,26 @@
 
 # Allow head archivist to create, update, delete all docs within repo scope
 - id: haCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: repo
     hasAccessor: head-archivists
     
 - id: haUpdateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: update
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: repo
     hasAccessor: head-archivists
 
 - id: haDeleteGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: delete
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: repo
     hasAccessor: head-archivists
 
@@ -110,9 +110,9 @@
 # to modify their own docs via implicit owner perm.
 
 - id: aCreateGrant
-  type: permissionGrant
+  type: PermissionGrant
   relationships:
     hasPermission: create
-    hasTarget: documentaryUnit
+    hasTarget: DocumentaryUnit
     hasScope: repo
     hasAccessor: archivists

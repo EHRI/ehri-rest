@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -138,7 +139,7 @@ public class ImportResource extends AbstractRestResource {
             // Get the current user from the Authorization header and the scope
             // from the query params...
             UserProfile user = getCurrentUser();
-            Vocabulary scope = manager.getFrame(scopeId, Vocabulary.class);
+            Vocabulary scope = manager.getEntity(scopeId, Vocabulary.class);
             SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope);
 
             ImportLog log = importer
@@ -227,7 +228,7 @@ public class ImportResource extends AbstractRestResource {
             // Get the current user from the Authorization header and the scope
             // from the query params...
             UserProfile user = getCurrentUser();
-            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
             String message = getLogMessage(logMessage).orNull();
@@ -316,7 +317,7 @@ public class ImportResource extends AbstractRestResource {
             // Get the current user from the Authorization header and the scope
             // from the query params...
             UserProfile user = getCurrentUser();
-            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
             String message = getLogMessage(logMessage).orNull();

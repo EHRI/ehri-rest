@@ -42,12 +42,12 @@ public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
         UserProfile user = validUser; //graph.frame(graph.getVertex(validUserId), UserProfile.class);
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_REPO), Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_REPO), Repository.class);
 
         final String logMessage = "Importing a single skos: " + SINGLE_SKOS;
 
         int count = getNodeCount(graph);
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_SKOS);
 //        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);

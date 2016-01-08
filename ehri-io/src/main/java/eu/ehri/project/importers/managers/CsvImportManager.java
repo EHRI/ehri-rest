@@ -28,7 +28,7 @@ import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.util.Helpers;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
@@ -44,7 +44,7 @@ import java.util.Map;
 
 /**
  * Import manager to use with CSV files.
- * When used to import documentaryUnits, make sure to have a 'sourceFileId' column as well.
+ * When used to import DocumentaryUnits, make sure to have a 'sourceFileId' column as well.
  */
 public class CsvImportManager extends AbstractImportManager {
 
@@ -77,7 +77,7 @@ public class CsvImportManager extends AbstractImportManager {
             logger.debug("importer of class " + importer.getClass());
 
             importer.addCallback(new ImportCallback() {
-                public void itemImported(Mutation<? extends AccessibleEntity> mutation) {
+                public void itemImported(Mutation<? extends Accessible> mutation) {
                     switch (mutation.getState()) {
                         case CREATED:
                             logger.info("Item created: {}", mutation.getNode().getId());

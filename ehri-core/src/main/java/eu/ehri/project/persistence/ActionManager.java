@@ -34,9 +34,9 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.events.EventLink;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
@@ -89,12 +89,12 @@ public final class ActionManager {
 
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
     public static final String DEBUG_TYPE = "_debugType";
-    public static final String EVENT_LINK = "eventLink";
+    public static final String EVENT_LINK = "EventLink";
     public static final String LINK_TYPE = "_linkType";
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
-    private final Frame scope;
+    private final Entity scope;
     private final Serializer versionSerializer;
     private final BundleDAO dao;
 
@@ -103,7 +103,7 @@ public final class ActionManager {
      *
      * @param graph The framed graph
      */
-    public ActionManager(FramedGraph<?> graph, Frame scope) {
+    public ActionManager(FramedGraph<?> graph, Entity scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
@@ -130,9 +130,9 @@ public final class ActionManager {
         private final Actioner actioner;
         private final EventTypes actionType;
         private final Optional<String> logMessage;
-        private final Optional<Frame> versionFrame;
+        private final Optional<Entity> versionFrame;
         private final Optional<Bundle> versionBundle;
-        private final Set<AccessibleEntity> subjects;
+        private final Set<Accessible> subjects;
         private final String timestamp;
 
         /**
@@ -146,7 +146,7 @@ public final class ActionManager {
                 Actioner actioner,
                 EventTypes type,
                 String timestamp, Optional<String> logMessage,
-                Optional<Frame> versionFrame,
+                Optional<Entity> versionFrame,
                 Optional<Bundle> versionBundle) {
             this.actionManager = actionManager;
             this.actionType = type;
@@ -181,7 +181,7 @@ public final class ActionManager {
          *
          * @return a set of subjects
          */
-        public Set<AccessibleEntity> getSubjects() {
+        public Set<Accessible> getSubjects() {
             return subjects;
         }
 
@@ -191,9 +191,9 @@ public final class ActionManager {
          * @param frame The subject node
          * @return This event context
          */
-        public EventContext createVersion(Frame frame) {
+        public EventContext createVersion(Entity frame) {
             try {
-                Bundle bundle = versionSerializer.vertexFrameToBundle(frame);
+                Bundle bundle = versionSerializer.entityToBundle(frame);
                 return createVersion(frame, bundle);
             } catch (SerializationError serializationError) {
                 throw new RuntimeException(serializationError);
@@ -209,7 +209,7 @@ public final class ActionManager {
          * @param bundle A bundle of the node's data
          * @return This event context
          */
-        public EventContext createVersion(Frame frame, Bundle bundle) {
+        public EventContext createVersion(Entity frame, Bundle bundle) {
             Bundle version = Bundle.Builder.withClass(EntityClass.VERSION)
                     .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
                     .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
@@ -218,7 +218,7 @@ public final class ActionManager {
             EventContext ctx = new EventContext(actionManager, actioner,
                     actionType, timestamp, logMessage,
                     Optional.of(frame), Optional.of(version));
-            for (AccessibleEntity subject : subjects) {
+            for (Accessible subject : subjects) {
                 ctx.addSubjects(subject);
             }
             return ctx;
@@ -230,8 +230,8 @@ public final class ActionManager {
          * @param entities A set of event subjects
          * @return This event context
          */
-        public EventContext addSubjects(AccessibleEntity... entities) {
-            for (AccessibleEntity entity : entities) {
+        public EventContext addSubjects(Accessible... entities) {
+            for (Accessible entity : entities) {
                 if (!subjects.contains(entity)) {
                     subjects.add(entity);
                 }
@@ -259,7 +259,7 @@ public final class ActionManager {
             SystemEvent systemEvent = createGlobalEvent(timestamp, actionType, logMessage);
             addActionerLink(systemEvent.asVertex(), vertex);
 
-            for (Frame entity : subjects) {
+            for (Entity entity : subjects) {
                 Vertex subjectVertex = getLinkNode(
                         Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
                 replaceAtHead(entity.asVertex(), subjectVertex,
@@ -271,7 +271,7 @@ public final class ActionManager {
             // Create the version.
             if (versionBundle.isPresent() && versionFrame.isPresent()) {
                 try {
-                    Frame subject = versionFrame.get();
+                    Entity subject = versionFrame.get();
                     Bundle version = versionBundle.get();
                     Version ev = dao.create(version, Version.class);
                     replaceAtHead(subject.asVertex(), ev.asVertex(),
@@ -295,7 +295,7 @@ public final class ActionManager {
      */
     public SystemEvent getLatestGlobalEvent() {
         try {
-            SystemEventQueue sys = manager.getFrame(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
+            SystemEventQueue sys = manager.getEntity(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
             Iterable<SystemEvent> latest = sys.getSystemEvents();
             return latest.iterator().hasNext() ? latest.iterator().next() : null;
         } catch (ItemNotFound itemNotFound) {
@@ -311,7 +311,7 @@ public final class ActionManager {
      */
     public Iterable<SystemEvent> getLatestGlobalEvents() {
         try {
-            SystemEventQueue queue = manager.getFrame(
+            SystemEventQueue queue = manager.getEntity(
                     GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
             return queue.getSystemEvents();
         } catch (ItemNotFound itemNotFound) {
@@ -329,7 +329,7 @@ public final class ActionManager {
      */
     public EventContext newEventContext(Actioner user, EventTypes type, Optional<String> logMessage) {
         return new EventContext(this, user, type, getTimestamp(), logMessage,
-                Optional.<Frame>absent(), Optional.<Bundle>absent());
+                Optional.<Entity>absent(), Optional.<Bundle>absent());
     }
 
     /**
@@ -341,7 +341,7 @@ public final class ActionManager {
      */
     public EventContext newEventContext(Actioner user, EventTypes type) {
         return new EventContext(this, user, type, getTimestamp(), Optional.<String>absent(),
-                Optional.<Frame>absent(), Optional.<Bundle>absent());
+                Optional.<Entity>absent(), Optional.<Bundle>absent());
     }
 
     /**
@@ -352,7 +352,7 @@ public final class ActionManager {
      * @param type    The event type
      * @return An EventContext object
      */
-    public EventContext newEventContext(AccessibleEntity subject, Actioner user,
+    public EventContext newEventContext(Accessible subject, Actioner user,
             EventTypes type) {
         return newEventContext(subject, user, type, Optional.<String>absent());
     }
@@ -366,7 +366,7 @@ public final class ActionManager {
      * @param logMessage A log message
      * @return An EventContext object
      */
-    public EventContext newEventContext(AccessibleEntity subject, Actioner user,
+    public EventContext newEventContext(Accessible subject, Actioner user,
             EventTypes type, Optional<String> logMessage) {
         EventContext context = newEventContext(user, type, logMessage);
         context.addSubjects(subject);
@@ -379,7 +379,7 @@ public final class ActionManager {
      * @param frame The current permission scope
      * @return A new ActionManager instance.
      */
-    public ActionManager setScope(Frame frame) {
+    public ActionManager setScope(Entity frame) {
         return new ActionManager(graph,
                 Optional.fromNullable(frame).or(SystemScope.getInstance()));
     }
@@ -430,14 +430,14 @@ public final class ActionManager {
             }
         }
 
-        Frame eventScope1 = event1.getEventScope();
-        Frame eventScope2 = event2.getEventScope();
+        Entity eventScope1 = event1.getEventScope();
+        Entity eventScope2 = event2.getEventScope();
         if (eventScope1 != null && eventScope2 != null && !eventScope1.equals(eventScope2)) {
             return false;
         }
 
-        AccessibleEntity entity1 = event1.getFirstSubject();
-        AccessibleEntity entity2 = event2.getFirstSubject();
+        Accessible entity1 = event1.getFirstSubject();
+        Accessible entity2 = event2.getFirstSubject();
         if (entity1 != null && entity2 != null && !entity1.equals(entity2)) {
             return false;
         }

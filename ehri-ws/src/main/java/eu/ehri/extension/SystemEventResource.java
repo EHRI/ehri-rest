@@ -19,13 +19,14 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Serializer;
@@ -79,7 +80,7 @@ import java.util.List;
  * Standard paging parameters apply to all end-points.
  */
 @Path(Entities.SYSTEM_EVENT)
-public class SystemEventResource extends AbstractAccessibleEntityResource<SystemEvent>
+public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
         implements GetResource {
 
     public final static String ITEM_TYPE_PARAM = "type";
@@ -151,7 +152,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
-            UserProfile user = manager.getFrame(userId, UserProfile.class);
+            UserProfile user = manager.getEntity(userId, UserProfile.class);
             EventViews eventViews = getEventViewsBuilder().build();
             return streamingList(eventViews.listByUser(user, accessor), tx);
         } catch (Exception e) {
@@ -180,7 +181,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
-            UserProfile user = manager.getFrame(userId, UserProfile.class);
+            UserProfile user = manager.getEntity(userId, UserProfile.class);
             EventViews eventViews = getEventViewsBuilder()
                     .withAggregation(aggregation)
                     .build();
@@ -206,7 +207,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            UserProfile asUser = manager.getFrame(userId, UserProfile.class);
+            UserProfile asUser = manager.getEntity(userId, UserProfile.class);
             EventViews eventViews = getEventViewsBuilder().build();
             return streamingList(eventViews.listAsUser(asUser, user), tx);
         } catch (Exception e) {
@@ -234,7 +235,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            UserProfile asUser = manager.getFrame(userId, UserProfile.class);
+            UserProfile asUser = manager.getEntity(userId, UserProfile.class);
             EventViews eventViews = getEventViewsBuilder()
                     .withAggregation(aggregation)
                     .build();
@@ -261,8 +262,8 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
-            AccessibleEntity item = views
-                    .setClass(AccessibleEntity.class).detail(id, accessor);
+            Accessible item = views
+                    .setClass(Accessible.class).detail(id, accessor);
             EventViews eventViews = getEventViewsBuilder().build();
             return streamingList(eventViews.listForItem(item, accessor), tx);
         } catch (Exception e) {
@@ -289,8 +290,8 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = getRequesterUserProfile();
-            AccessibleEntity item = views
-                    .setClass(AccessibleEntity.class).detail(id, accessor);
+            Accessible item = views
+                    .setClass(Accessible.class).detail(id, accessor);
             EventViews eventViews = getEventViewsBuilder()
                     .withAggregation(aggregation)
                     .build();
@@ -318,7 +319,7 @@ public class SystemEventResource extends AbstractAccessibleEntityResource<System
         try {
             Accessor user = getRequesterUserProfile();
             SystemEvent event = views.detail(id, user);
-            return streamingPage(getQuery(AccessibleEntity.class)
+            return streamingPage(getQuery(Accessible.class)
                     .page(event.getSubjects(), user), subjectSerializer.withCache(), tx);
         } catch (Exception e) {
             tx.close();

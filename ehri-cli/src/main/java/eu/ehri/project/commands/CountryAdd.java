@@ -78,7 +78,7 @@ public class CountryAdd extends BaseCommand {
             throw new RuntimeException(getHelp());
 
         // Fetch the admin accessor, who's going to do the work.
-        Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
+        Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
                 Accessor.class);
 
         String countryId = (String) cmdLine.getArgList().get(0);

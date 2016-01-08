@@ -2,7 +2,7 @@
 
 # Institution
 - id: nl-000001
-  type: repository
+  type: Repository
   data:
     identifier: !!str 000001
     name: Institution Example
@@ -11,7 +11,7 @@
     hasPermissionScope: nl
     describes:
       - id: nl-000001.eng
-        type: repositoryDescription
+        type: RepositoryDescription
         data:
           languageCode: eng
           name: Institution Example
@@ -71,14 +71,14 @@
         relationships:
           maintenance:
             - id: example-maintenance-event-1
-              type: maintenanceEvent
+              type: MaintenanceEvent
               data:
                 maintenanceEvent/date: !!str 2013-09-09
                 maintenanceEvent/source: Exported from ICA-AtoM
                 eventType: updated
           hasAddress:
             - id: example-address-1
-              type: address
+              type: Address
               data:
                 name: An Address
                 street: 1 Example Street
@@ -96,7 +96,7 @@
 
 # Historical Agent
 - id: auths-000001
-  type: historicalAgent
+  type: HistoricalAgent
   data:
     identifier: !!str 000001
     name: Historical Agent Example
@@ -105,7 +105,7 @@
     hasPermissionScope: auths
     describes:
       - id: auths-000001.eng
-        type: historicalAgentDescription
+        type: HistoricalAgentDescription
         data:
           languageCode: eng
           name: Historical Agent Example
@@ -150,14 +150,14 @@
         relationships:
           maintenance:
             - id: example-maintenance-event-2
-              type: maintenanceEvent
+              type: MaintenanceEvent
               data:
                 maintenanceEvent/date: !!str 2013-09-09
                 maintenanceEvent/source: Exported from ICA-AtoM
                 eventType: updated
           hasDate:
             - id: example-date-1
-              type: datePeriod
+              type: DatePeriod
               data:
                 startDate: !!str 1940-01-01
                 endDate: !!str 1945-01-01
@@ -165,13 +165,13 @@
 
 # Documentary Units
 - id: nl-000001-1
-  type: documentaryUnit
+  type: DocumentaryUnit
   data:
     identifier: !!str 1
   relationships:
     describes:
       - id: nl-000001-1.eng
-        type: documentDescription
+        type: DocumentaryUnitDescription
         data:
           name: Example Documentary Unit 1
           languageCode: eng
@@ -220,24 +220,24 @@
         relationships:
           hasDate:
             - id: example-date-2
-              type: datePeriod
+              type: DatePeriod
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
             - id: example-date-3
-              type: datePeriod
+              type: DatePeriod
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
           relatesTo:
             - id: example-access-point-1
-              type: relationship
+              type: AccessPoint
               data:
                 name: Example Subject 1
                 type: subjectAccess
                 description: test description
             - id: example-access-point-2
-              type: relationship
+              type: AccessPoint
               data:
                 name: Example Person 1
                 type: personAccess
@@ -247,13 +247,13 @@
 
 # C2 is also held by NIOD, and is a child item of C1
 - id: nl-000001-1-a
-  type: documentaryUnit
+  type: DocumentaryUnit
   data:
     identifier: a
   relationships:
     describes:
       - id: nl-000001-1-a.eng
-        type: documentDescription
+        type: DocumentaryUnitDescription
         data:
           name: Example Documentary Unit Child 1
           languageCode: eng
@@ -264,7 +264,7 @@
         relationships:
           hasDate:
             - id: example-date-4
-              type: datePeriod
+              type: DatePeriod
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
@@ -273,13 +273,13 @@
 
 # C3 is also held by NIOD, and is a child item of C2
 - id: nl-000001-1-a-i
-  type: documentaryUnit
+  type: DocumentaryUnit
   data:
     identifier: i
   relationships:
     describes:
       - id: nl-000001-1-a-i.eng
-        type: documentDescription
+        type: DocumentaryUnitDescription
         data:
           name: Example Documentary Unit Child 2
           languageCode: eng
@@ -290,7 +290,7 @@
         relationships:
           hasDate:
             - id: example-date-5
-              type: datePeriod
+              type: DatePeriod
               data:
                 type: creation
                 startDate: !!str 1939-01-01

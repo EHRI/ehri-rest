@@ -49,9 +49,9 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         super.setUp();
         acl = new AclManager(graph);
         av = new AnnotationViews(graph);
-        admin = manager.getFrame("mike", UserProfile.class);
-        user = manager.getFrame("reto", UserProfile.class);
-        canAnnotate = manager.getFrame("portal", Group.class);
+        admin = manager.getEntity("mike", UserProfile.class);
+        user = manager.getEntity("reto", UserProfile.class);
+        canAnnotate = manager.getEntity("portal", Group.class);
     }
 
     @Test(expected = PermissionDenied.class)

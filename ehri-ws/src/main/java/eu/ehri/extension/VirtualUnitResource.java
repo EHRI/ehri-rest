@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -51,7 +52,7 @@ import java.util.List;
  */
 @Path(Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends
-        AbstractAccessibleEntityResource<VirtualUnit>
+        AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public static final String INCLUDED = "includes";
@@ -86,7 +87,7 @@ public final class VirtualUnitResource extends
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            VirtualUnit parent = manager.getEntity(id, VirtualUnit.class);
             Iterable<VirtualUnit> units = all
                     ? parent.getAllChildren()
                     : parent.getChildren();
@@ -104,7 +105,7 @@ public final class VirtualUnitResource extends
             @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            VirtualUnit parent = manager.getEntity(id, VirtualUnit.class);
             return streamingPage(getQuery(DocumentaryUnit.class)
                     .page(parent.getIncludedUnits(), getRequesterUserProfile()), tx);
         } catch (Exception e) {
@@ -253,7 +254,7 @@ public final class VirtualUnitResource extends
             throws AccessDenied, ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
             Accessor currentUser = getRequesterUserProfile();
             Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
             return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);

@@ -34,7 +34,7 @@ public class VersionRestClientTest extends BaseRestClientTest {
     @Test
     public void testGetVersionsForItem() throws Exception {
         // Create an item
-        String jsonAgentTestString = "{\"type\": \"repository\", \"data\":{\"identifier\": \"jmp\"}}";
+        String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.REPOSITORY, "r1"))
                 .entity(jsonAgentTestString)

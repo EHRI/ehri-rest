@@ -20,12 +20,12 @@
 package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 
 /**
  * Frame class representing a type of content in the
  * graph.
  */
 @EntityType(EntityClass.CONTENT_TYPE)
-public interface ContentType extends AccessibleEntity {
+public interface ContentType extends Accessible {
 }

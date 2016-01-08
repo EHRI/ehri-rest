@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -27,7 +28,7 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AnnotationViews;
@@ -46,7 +47,7 @@ import java.util.List;
  */
 @Path(Entities.ANNOTATION)
 public class AnnotationResource
-        extends AbstractAccessibleEntityResource<Annotation>
+        extends AbstractAccessibleResource<Annotation>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     private final AnnotationViews annotationViews;
@@ -151,7 +152,7 @@ public class AnnotationResource
             @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            AccessibleEntity item = new CrudViews<>(graph, AccessibleEntity.class)
+            Accessible item = new CrudViews<>(graph, Accessible.class)
                     .detail(id, getRequesterUserProfile());
             Query<Annotation> query = getQuery(Annotation.class)
                     .setStream(isStreaming());

@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -64,7 +65,7 @@ import java.util.List;
  */
 @Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource
-        extends AbstractAccessibleEntityResource<DocumentaryUnit>
+        extends AbstractAccessibleResource<DocumentaryUnit>
         implements GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
 
     public DocumentaryUnitResource(@Context GraphDatabaseService database) {
@@ -95,7 +96,7 @@ public class DocumentaryUnitResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+            DocumentaryUnit parent = manager.getEntity(id, DocumentaryUnit.class);
             Iterable<DocumentaryUnit> units = all
                     ? parent.getAllChildren()
                     : parent.getChildren();

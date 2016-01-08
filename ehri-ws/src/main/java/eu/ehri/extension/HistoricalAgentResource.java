@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -62,7 +63,7 @@ import java.util.List;
  * Provides a web service interface for the HistoricalAgent model.
  */
 @Path(Entities.HISTORICAL_AGENT)
-public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent>
+public class HistoricalAgentResource extends AbstractAccessibleResource<HistoricalAgent>
         implements GetResource, ListResource, CreateResource, UpdateResource, DeleteResource {
 
     public HistoricalAgentResource(@Context GraphDatabaseService database) {

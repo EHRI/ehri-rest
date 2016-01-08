@@ -101,7 +101,7 @@ public class ToolsRestClientTest extends BaseRestClientTest {
     @Test
     public void testRegenerateIdsForType() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT,
-                "_regenerateIdsForType", "documentaryUnit"))
+                "_regenerateIdsForType", Entities.DOCUMENTARY_UNIT))
                 .queryParam("commit", "true");
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);

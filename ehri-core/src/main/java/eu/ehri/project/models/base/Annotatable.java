@@ -19,19 +19,24 @@
 
 package eu.ehri.project.models.base;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.Address;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.Annotation;
 
 /**
- * An entity that can have {@link Address}es.
- */
-public interface AddressableEntity {
+ * An entity that can be annotated.
+ *
 
-    @Dependent
-    @Fetch(value = Ontology.ENTITY_HAS_ADDRESS, whenNotLite = true)
-    @Adjacency(label = Ontology.ENTITY_HAS_ADDRESS)
-    Iterable<Address> getAddresses();
+ */
+public interface Annotatable extends Entity {
+    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
+    Iterable<Annotation> getAnnotations();
+
+    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
+    void addAnnotation(Annotation annotation);
+
+    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART, direction = Direction.IN)
+    void addAnnotationPart(Annotation annotation);
+
 }

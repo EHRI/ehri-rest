@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -49,18 +50,18 @@ import java.util.List;
  * Provides a web service interface for creating/reading item links.
  */
 @Path(Entities.LINK)
-public class LinkResource extends AbstractAccessibleEntityResource<Link>
+public class LinkResource extends AbstractAccessibleResource<Link>
         implements GetResource, ListResource, DeleteResource, UpdateResource {
 
     public static final String BODY_PARAM = "body";
 
     private final LinkViews linkViews;
-    private final DescriptionViews<DescribedEntity> descriptionViews;
+    private final DescriptionViews<Described> descriptionViews;
 
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
         linkViews = new LinkViews(graph);
-        descriptionViews = new DescriptionViews<>(graph, DescribedEntity.class);
+        descriptionViews = new DescriptionViews<>(graph, Described.class);
     }
 
     @GET
@@ -139,12 +140,12 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor userProfile = getRequesterUserProfile();
-            AccessPoint rel = manager.getFrame(id, AccessPoint.class);
+            AccessPoint rel = manager.getEntity(id, AccessPoint.class);
             Description description = rel.getDescription();
             if (description == null) {
                 throw new ItemNotFound(id);
             }
-            DescribedEntity item = description.getEntity();
+            Described item = description.getEntity();
             if (item == null) {
                 throw new ItemNotFound(id);
             }
@@ -166,7 +167,7 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
             Query<Link> linkQuery = new Query<>(graph, Link.class)
                     .setStream(isStreaming());
             return streamingPage(linkQuery.setStream(isStreaming()).page(
-                    manager.getFrame(id, LinkableEntity.class).getLinks(),
+                    manager.getEntity(id, Linkable.class).getLinks(),
                     getRequesterUserProfile()), tx);
         } catch (Exception e) {
             tx.close();
@@ -183,10 +184,10 @@ public class LinkResource extends AbstractAccessibleEntityResource<Link>
     public Response deleteLinkForItem(@PathParam("id") String id, @PathParam("linkId") String linkId)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            helper.checkEntityPermission(manager.getFrame(id, AccessibleEntity.class),
+            helper.checkEntityPermission(manager.getEntity(id, Accessible.class),
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
             Actioner actioner = getRequesterUserProfile().as(Actioner.class);
-            Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
+            Link link = manager.getEntity(linkId, EntityClass.LINK, Link.class);
             actionManager.newEventContext(link, actioner, EventTypes.deletion).commit();
             manager.deleteVertex(link.asVertex());
             tx.success();

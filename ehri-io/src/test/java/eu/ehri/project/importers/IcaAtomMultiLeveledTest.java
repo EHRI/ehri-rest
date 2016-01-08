@@ -46,7 +46,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 
     @Test
     public void testImportItemsT() throws Exception {
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a multileveled EAD by IcaAtomMultiLeveled";
 
         int origCount = getNodeCount(graph);

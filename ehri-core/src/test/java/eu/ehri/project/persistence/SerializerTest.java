@@ -37,10 +37,10 @@ public class SerializerTest extends AbstractFixtureTest {
 
     @Test
     public void testNonLiteSerialization() throws Exception {
-        DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
 
         Bundle serialized = new Serializer(graph)
-                .vertexFrameToBundle(doc);
+                .entityToBundle(doc);
 
         // Name of repository should be serialized
         assertEquals("Documentary Unit 1",
@@ -61,10 +61,10 @@ public class SerializerTest extends AbstractFixtureTest {
 
     @Test
     public void testLiteSerialization() throws Exception {
-        DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
 
         Bundle serialized = new Serializer.Builder(graph).withLiteMode(true).build()
-                .vertexFrameToBundle(doc);
+                .entityToBundle(doc);
 
         // Name of vu1 and repository should be serialized
         assertEquals("Documentary Unit 1",
@@ -78,10 +78,10 @@ public class SerializerTest extends AbstractFixtureTest {
 
     @Test
     public void testFullSerialization() throws Exception {
-        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        VirtualUnit vu1 = manager.getEntity("vu1", VirtualUnit.class);
 
         Bundle serialized = new Serializer.Builder(graph).build()
-                .vertexFrameToBundle(vu1);
+                .entityToBundle(vu1);
         
         System.out.println(serialized);
         assertEquals("vc1",
@@ -91,9 +91,9 @@ public class SerializerTest extends AbstractFixtureTest {
 //        assertNull(BundleUtils.get(serialized, "includesUnit[0]/name"));
         
         //if it has its own description, that should be serialized:
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc1 = manager.getEntity("vc1", VirtualUnit.class);
         Bundle serializedVc1 = new Serializer.Builder(graph).build()
-                .vertexFrameToBundle(vc1);
+                .entityToBundle(vc1);
         
         assertEquals("vcd1",
                 BundleUtils.get(serializedVc1, "describes[0]/identifier"));
@@ -102,9 +102,9 @@ public class SerializerTest extends AbstractFixtureTest {
 
     @Test
     public void testMaxFetchDepth() throws Exception {
-        Link link1 = manager.getFrame("link3", Link.class);
+        Link link1 = manager.getEntity("link3", Link.class);
         Serializer serializer = new Serializer.Builder(graph).build();
-        Bundle serialized = serializer.vertexFrameToBundle(link1);
+        Bundle serialized = serializer.entityToBundle(link1);
         Bundle target0 = BundleUtils.getBundle(serialized, "hasLinkTarget[0]");
         assertEquals(1, target0.depth());
         String t1 = BundleUtils.get(serialized, "hasLinkTarget[0]/identifier");
@@ -122,10 +122,10 @@ public class SerializerTest extends AbstractFixtureTest {
 
     @Test
     public void testIncludedProperties() throws Exception {
-        DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
 
         Serializer serializer = new Serializer.Builder(graph).withLiteMode(true).build();
-        Bundle serialized = serializer.vertexFrameToBundle(doc);
+        Bundle serialized = serializer.entityToBundle(doc);
 
         // Name of vu1 and repository should be serialized
         assertEquals("Documentary Unit 1", BundleUtils.get(serialized, "describes[0]/name"));
@@ -134,7 +134,7 @@ public class SerializerTest extends AbstractFixtureTest {
 
         Serializer withProps = serializer.withIncludedProperties(Lists.newArrayList("scopeAndContent"));
         Bundle serialized2 = withProps
-                .vertexFrameToBundle(doc);
+                .entityToBundle(doc);
         assertNotNull(BundleUtils.get(serialized2, "describes[0]/scopeAndContent"));
 
         // Ensure `withCache` preserves includedProperties (#31)
@@ -142,7 +142,7 @@ public class SerializerTest extends AbstractFixtureTest {
         assertEquals(Lists.newArrayList("scopeAndContent"),
                 withPropsAndCache.getIncludedProperties());
         Bundle serialized3 = withPropsAndCache
-                .vertexFrameToBundle(doc);
+                .entityToBundle(doc);
         assertNotNull(BundleUtils.get(serialized3, "describes[0]/scopeAndContent"));
     }
 }

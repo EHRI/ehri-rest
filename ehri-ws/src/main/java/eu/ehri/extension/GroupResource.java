@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -33,7 +34,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AclViews;
@@ -52,7 +53,7 @@ import java.util.Set;
  */
 @Path(Entities.GROUP)
 public class GroupResource
-        extends AbstractAccessibleEntityResource<Group>
+        extends AbstractAccessibleResource<Group>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public static final String MEMBER_PARAM = "member";
@@ -88,7 +89,7 @@ public class GroupResource
             final UserProfile currentUser = getCurrentUser();
             final Set<Accessor> groupMembers = Sets.newHashSet();
             for (String member : members) {
-                groupMembers.add(manager.getFrame(member, Accessor.class));
+                groupMembers.add(manager.getEntity(member, Accessor.class));
             }
             Response item = createItem(bundle, accessors, new Handler<Group>() {
                 @Override
@@ -129,8 +130,8 @@ public class GroupResource
                               @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-            Accessor accessor = manager.getFrame(aid, Accessor.class);
+            Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
+            Accessor accessor = manager.getEntity(aid, Accessor.class);
             aclViews.addAccessorToGroup(group, accessor, getRequesterUserProfile());
             Response response = Response.status(Status.OK).location(getItemUri(accessor)).build();
             tx.success();
@@ -147,8 +148,8 @@ public class GroupResource
                                  @PathParam("aid") String aid) throws PermissionDenied,
             ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-            Accessor accessor = manager.getFrame(aid, Accessor.class);
+            Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
+            Accessor accessor = manager.getEntity(aid, Accessor.class);
 
             new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
             Response response = Response.status(Status.OK).location(getItemUri(accessor)).build();
@@ -169,11 +170,11 @@ public class GroupResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-            Iterable<AccessibleEntity> members = all
+            Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
+            Iterable<Accessible> members = all
                     ? group.getAllUserProfileMembers()
                     : group.getMembersAsEntities();
-            return streamingPage(getQuery(AccessibleEntity.class)
+            return streamingPage(getQuery(Accessible.class)
                     .page(members, getRequesterUserProfile()), tx);
         } catch (Exception e) {
             tx.close();
@@ -189,10 +190,10 @@ public class GroupResource
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
             Group group = views.detail(id, user);
-            Iterable<AccessibleEntity> members = all
+            Iterable<Accessible> members = all
                     ? group.getAllUserProfileMembers()
                     : group.getMembersAsEntities();
-            long count = getQuery(AccessibleEntity.class)
+            long count = getQuery(Accessible.class)
                     .count(members);
             tx.success();
             return count;

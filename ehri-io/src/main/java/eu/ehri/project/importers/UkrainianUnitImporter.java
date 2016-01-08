@@ -29,7 +29,7 @@ import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -56,7 +56,7 @@ public class UkrainianUnitImporter extends MapImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
@@ -68,7 +68,7 @@ public class UkrainianUnitImporter extends MapImporter {
         if (lang.indexOf(", ") > 0) {
             String[] langs = lang.split(", ");
             for (String l : langs) {
-                Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, l));
+                Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, l));
                 descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
                 if (!unknowns.isEmpty()) {
                     descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
@@ -76,7 +76,7 @@ public class UkrainianUnitImporter extends MapImporter {
                 unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
             }
         } else {
-            Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, lang));
+            Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, lang));
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
             if (!unknowns.isEmpty()) {
                 descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
@@ -111,7 +111,7 @@ public class UkrainianUnitImporter extends MapImporter {
 
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData, List<String> scopeIds) throws
+    public Accessible importItem(Map<String, Object> itemData, List<String> scopeIds) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }

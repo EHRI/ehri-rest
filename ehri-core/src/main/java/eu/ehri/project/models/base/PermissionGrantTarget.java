@@ -29,7 +29,7 @@ import eu.ehri.project.models.PermissionGrant;
  *
 
  */
-public interface PermissionGrantTarget extends Frame {
+public interface PermissionGrantTarget extends Entity {
     @Adjacency(label= Ontology.PERMISSION_GRANT_HAS_TARGET, direction=Direction.IN)
     Iterable<PermissionGrant> getPermissionGrants();
 }

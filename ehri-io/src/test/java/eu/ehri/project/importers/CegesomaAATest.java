@@ -27,7 +27,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -61,7 +61,7 @@ public class CegesomaAATest extends AbstractImporterTest{
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
         
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
         origCount = getNodeCount(graph);
@@ -81,7 +81,7 @@ public class CegesomaAATest extends AbstractImporterTest{
         /** 
          * event links: 6
          * relationship: 34
-         * documentaryUnit: 5
+         * DocumentaryUnit: 5
          * documentDescription: 5
          * systemEvent: 1
          * datePeriod: 4
@@ -112,7 +112,7 @@ public class CegesomaAATest extends AbstractImporterTest{
          * Test titles
          */
         // There should be one DocumentDescription for the <archdesc>
-        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("In het Frans", dd.getProperty("languageOfMaterial"));
@@ -130,7 +130,7 @@ public class CegesomaAATest extends AbstractImporterTest{
         }
         
         // There should be one DocumentDescription for the (only) <c01>
-        for(DocumentDescription dd : c1.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : c1.getDocumentDescriptions()){
             assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
@@ -139,7 +139,7 @@ public class CegesomaAATest extends AbstractImporterTest{
         }
 
         // There should be one DocumentDescription for the (second) <c02>
-        for(DocumentDescription dd : c2_2.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : c2_2.getDocumentDescriptions()){
             assertEquals("Wetteksten (U.) S.R.A.", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("item", dd.getProperty("levelOfDescription"));
@@ -153,7 +153,7 @@ public class CegesomaAATest extends AbstractImporterTest{
             assertEquals(C01, du.getIdentifier());
         }
     //test dates
-        for (DocumentDescription d : c2_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c2_1.getDocumentDescriptions()) {
             // Single date is just a string
             assertFalse(d.getPropertyKeys().contains("unitDates"));
             for (DatePeriod dp : d.getDatePeriods()) {
@@ -167,7 +167,7 @@ public class CegesomaAATest extends AbstractImporterTest{
         }
         
         // Fonds has two dates with different types -> list
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             // start and end dates correctly parsed and setup
             
             assertFalse(d.getPropertyKeys().contains("unitDates"));

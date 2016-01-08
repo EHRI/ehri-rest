@@ -69,7 +69,7 @@ public class SystemEventTest extends AbstractFixtureTest {
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.deletion);
         ctx2.commit();
-        bundleDAO.delete(serializer.vertexFrameToBundle(user));
+        bundleDAO.delete(serializer.entityToBundle(user));
 
         // First event should now have 0 subjects, since it's
         // been deleted.

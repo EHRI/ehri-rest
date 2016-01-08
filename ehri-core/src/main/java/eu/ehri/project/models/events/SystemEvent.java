@@ -36,9 +36,9 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -47,7 +47,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * graph.
  */
 @EntityType(EntityClass.SYSTEM_EVENT)
-public interface SystemEvent extends AccessibleEntity {
+public interface SystemEvent extends Accessible {
 
     @Meta(ItemHolder.CHILD_COUNT)
     @JavaHandler
@@ -94,7 +94,7 @@ public interface SystemEvent extends AccessibleEntity {
      * @return an iterable of frame items
      */
     @JavaHandler
-    Iterable<AccessibleEntity> getSubjects();
+    Iterable<Accessible> getSubjects();
 
     /**
      * If new versions have been created, fetch the prior versions
@@ -114,7 +114,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Fetch(value = Ontology.EVENT_HAS_FIRST_SUBJECT, ifLevel = 0)
     @JavaHandler
-    AccessibleEntity getFirstSubject();
+    Accessible getFirstSubject();
 
     /**
      * Fetch the "scope" of this event, or the context in which a
@@ -124,7 +124,7 @@ public interface SystemEvent extends AccessibleEntity {
      */
     @Fetch(value = Ontology.EVENT_HAS_SCOPE, ifLevel = 0)
     @Adjacency(label = Ontology.EVENT_HAS_SCOPE, direction = Direction.OUT)
-    Frame getEventScope();
+    Entity getEventScope();
 
     /**
      * Set the scope of this event.
@@ -132,7 +132,7 @@ public interface SystemEvent extends AccessibleEntity {
      * @param frame a scope item
      */
     @Adjacency(label = Ontology.EVENT_HAS_SCOPE, direction = Direction.OUT)
-    void setEventScope(Frame frame);
+    void setEventScope(Entity frame);
 
     /**
      * Implementation of complex methods.
@@ -145,7 +145,7 @@ public interface SystemEvent extends AccessibleEntity {
         }
 
         @Override
-        public Iterable<AccessibleEntity> getSubjects() {
+        public Iterable<Accessible> getSubjects() {
             return frameVertices(gremlin().in(Ontology.ENTITY_HAS_EVENT)
                     .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
@@ -158,7 +158,7 @@ public interface SystemEvent extends AccessibleEntity {
         }
 
         @Override
-        public AccessibleEntity getFirstSubject() {
+        public Accessible getFirstSubject() {
             // Ugh: horrible code duplication is horrible - unfortunately
             // just calling getSubjects() fails for an obscure reason to do
             // with Frames not being thinking it has an iterable???
@@ -171,7 +171,7 @@ public interface SystemEvent extends AccessibleEntity {
                                     Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
                         }
                     });
-            return (AccessibleEntity) (subjects.iterator().hasNext()
+            return (Accessible) (subjects.iterator().hasNext()
                     ? frame(subjects.iterator().next())
                     : null);
         }

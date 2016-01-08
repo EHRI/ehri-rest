@@ -24,34 +24,42 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.core.Tx;
-import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.tools.DbUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -109,8 +117,8 @@ public class ToolsResource extends AbstractRestResource {
             PermissionDenied, DeserializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
-            Repository repository = manager.getFrame(repositoryId, Repository.class);
-            Vocabulary vocabulary = manager.getFrame(vocabularyId, Vocabulary.class);
+            Repository repository = manager.getEntity(repositoryId, Repository.class);
+            Vocabulary vocabulary = manager.getEntity(vocabularyId, Vocabulary.class);
 
             long linkCount = linker
                     .withAccessPointTypes(accessPointTypes)
@@ -131,7 +139,7 @@ public class ToolsResource extends AbstractRestResource {
      * if an Address has a property with name &quot;url&quot; and value &quot;www.foo.com/bar&quot;,
      * providing a regex value <code>^www</code> and replacement <code>http://www</code> will
      * give the property a value of &quot;http://www.foo.com/bar&quot;.
-     * <p>
+     * <p/>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -160,7 +168,7 @@ public class ToolsResource extends AbstractRestResource {
 
     /**
      * Change a property key name across an entire entity class.
-     * <p>
+     * <p/>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -189,7 +197,7 @@ public class ToolsResource extends AbstractRestResource {
      * Find an replace a property value across an entire entity class, e.g.
      * if a DocumentaryUnit has a property with name &quot;foo&quot; and value &quot;bar&quot;,
      * change the value to &quot;baz&quot; on all items.
-     * <p>
+     * <p/>
      * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
      *
      * @param entityType The type of entity
@@ -218,12 +226,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for a given item, optionally
      * renaming it.
-     * <p>
+     * <p/>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     * <p>
+     * <p/>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param id         the item's existing ID
@@ -247,7 +255,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
+            Accessible item = manager.getEntity(id, Accessible.class);
             Optional<List<String>> remap = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .collisionMode(collisions)
@@ -261,12 +269,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID all items of a given
      * type.
-     * <p>
+     * <p/>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     * <p>
+     * <p/>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param type       the item type
@@ -290,8 +298,8 @@ public class ToolsResource extends AbstractRestResource {
             throws IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             EntityClass entityClass = EntityClass.withName(type);
-            try (CloseableIterable<AccessibleEntity> frames = manager
-                    .getFrames(entityClass, AccessibleEntity.class)) {
+            try (CloseableIterable<Accessible> frames = manager
+                    .getEntities(entityClass, Accessible.class)) {
                 List<List<String>> lists = new IdRegenerator(graph)
                         .withActualRename(commit)
                         .collisionMode(collisions)
@@ -306,12 +314,12 @@ public class ToolsResource extends AbstractRestResource {
     /**
      * Regenerate the hierarchical graph ID for all items within the
      * permission scope and lower levels.
-     * <p>
+     * <p/>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
      * output items that would cause collisions if renamed, whereas {@code tolerant}
      * mode will skip them altogether.
-     * <p>
+     * <p/>
      * The {@code commit} flag will cause renaming to take place.
      *
      * @param scopeId    the scope item's ID
@@ -335,7 +343,7 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            PermissionScope scope = manager.getFrame(scopeId, PermissionScope.class);
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
             List<List<String>> lists = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .skippingCollisions(tolerant)
@@ -359,23 +367,23 @@ public class ToolsResource extends AbstractRestResource {
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
-        EntityClass[] types = {EntityClass.DOCUMENT_DESCRIPTION, EntityClass
+        EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
                 .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
                 .REPOSITORY_DESCRIPTION};
         Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
         int done = 0;
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             for (EntityClass entityClass : types) {
-                try (CloseableIterable<Description> descriptions = manager.getFrames(entityClass, Description.class)) {
+                try (CloseableIterable<Description> descriptions = manager.getEntities(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
-                        DescribedEntity entity = desc.getEntity();
+                        Described entity = desc.getEntity();
                         if (entity != null) {
                             PermissionScope scope = entity.getPermissionScope();
                             List<String> idPath = scope != null
                                     ? Lists.newArrayList(scope.idPath())
                                     : Lists.<String>newArrayList();
                             idPath.add(entity.getIdentifier());
-                            Bundle descBundle = depSerializer.vertexFrameToBundle(desc);
+                            Bundle descBundle = depSerializer.entityToBundle(desc);
                             String newId = entityClass.getIdGen().generateId(idPath, descBundle);
                             if (!newId.equals(desc.getId()) && commit) {
                                 manager.renameVertex(desc.asVertex(), desc.getId(), newId);
@@ -400,58 +408,86 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_setIdsOnEventLinks")
-    public String setIdsOnEventLinks()
+    @Path("/_setLabels")
+    public String setLabels()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        long done = 0;
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            long done = 0;
             for (Vertex v : graph.getVertices()) {
-                if ("eventLink".equals(v.getProperty("_debugType"))) {
-                    String id = v.getProperty(EntityType.ID_KEY);
-                    if (id == null) {
-                        UUID timeBasedUUID = GenericIdGenerator.getTimeBasedUUID();
-                        v.setProperty(EntityType.ID_KEY, timeBasedUUID.toString());
-                        v.setProperty(EntityType.TYPE_KEY, Entities.EVENT_LINK);
-                        done++;
+                try {
+                    ((Neo4jGraphManager) manager).setLabels(v);
+                    done++;
+                } catch (org.neo4j.graphdb.ConstraintViolationException e) {
+                    logger.error("Error setting labels on {} ({})", manager.getId(v), v.getId());
+                    e.printStackTrace();
+                }
 
-                        if (done % 10000 == 0) {
-                            graph.getBaseGraph().commit();
-                        }
-                    }
+                if (done % 100000 == 0) {
+                    graph.getBaseGraph().commit();
                 }
             }
             tx.success();
-            return String.valueOf(done);
+        }
+
+        return String.valueOf(done);
+    }
+
+    @POST
+    @Produces("text/plain")
+    @Path("/_setConstraints")
+    public String setConstraints() {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            logger.info("Initializing graph schema...");
+            manager.initialize();
+            tx.success();
+        }
+        return "done";
+    }
+
+    @POST
+    @Produces("text/plain")
+    @Path("/_upgrade1to2")
+    public String upgradeDb1to2() throws IOException {
+        final AtomicInteger done = new AtomicInteger();
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            logger.info("Upgrading DB schema...");
+            DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
+                @Override
+                public void changed() {
+                    if (done.getAndIncrement() % 100000 == 0) {
+                        graph.getBaseGraph().commit();
+                    }
+                }
+            });
+            upgrader1to2
+                    .upgradeIdAndTypeKeys()
+                    .upgradeTypeValues()
+                    .setIdAndTypeOnEventLinks();
+            tx.success();
+            logger.info("Changed {} items", done.get());
+            return String.valueOf(done.get());
         }
     }
 
     @POST
     @Produces("text/plain")
-    @Path("/_setLabels")
-    public String setLabels()
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            long done = 0;
-            for (Vertex v : graph.getVertices()) {
-                Neo4j2Vertex neo4j2Vertex = (Neo4j2Vertex)v;
-                List<String> labels = Lists.newArrayList(neo4j2Vertex.getLabels());
-                for (String label : labels) {
-                    neo4j2Vertex.removeLabel(label);
+    @Path("/_fullUpgrade1to2")
+    public String fullUpgradeDb1to2()
+            throws IOException, IdRegenerator.IdCollisionError, ItemNotFound {
+        upgradeDb1to2();
+        setLabels();
+        setConstraints();
+        try (Tx tx = graph.getBaseGraph().beginTx()) {
+            new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
+                @Override
+                public void changed() {
                 }
-                String type = neo4j2Vertex.getProperty(EntityType.TYPE_KEY);
-                if (type != null) {
-                    neo4j2Vertex.addLabel(type);
-                    done++;
-                }
-
-                if (done % 10000 == 0) {
-                    graph.getBaseGraph().commit();
-                }
-            }
+            }).setDbSchemaVersion();
             tx.success();
-            return String.valueOf(done);
         }
+        return "ok";
     }
+
 
     // Helpers
 

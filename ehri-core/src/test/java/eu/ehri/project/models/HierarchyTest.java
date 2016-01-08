@@ -37,8 +37,8 @@ public class HierarchyTest extends ModelTestBase {
 
     @Test
     public void testCollectionHierarchy() throws ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
         assertTrue(toList(c1.getChildren()).contains(c2));
 
         // check reverse
@@ -47,9 +47,9 @@ public class HierarchyTest extends ModelTestBase {
 
     @Test
     public void testCollectionAncestry() throws ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
-        DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getEntity("c3", DocumentaryUnit.class);
         // should be the first ancestor of c2
         assertEquals(toList(c2.getAncestors()).get(0), (c1));
 
@@ -59,9 +59,9 @@ public class HierarchyTest extends ModelTestBase {
 
     @Test
     public void testFullAncestry() throws ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
-        DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getEntity("c3", DocumentaryUnit.class);
 
         List<DocumentaryUnit> ancestors = toList(c3.getAncestors());
         assertEquals(2, ancestors.size());

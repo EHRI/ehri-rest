@@ -23,15 +23,15 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Temporal;
 
 /**
  * Frame class representing a pre-ingest event that took place
  * upon some documentary unit item.
  */
 @EntityType(EntityClass.MAINTENANCE_EVENT)
-public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity {
+public interface MaintenanceEvent extends Temporal, Accessible {
 
     @Mandatory
     @Property(Ontology.MAINTENANCE_EVENT_TYPE)

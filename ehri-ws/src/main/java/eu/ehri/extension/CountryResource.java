@@ -44,7 +44,7 @@ import java.util.List;
  */
 @Path(Entities.COUNTRY)
 public class CountryResource
-        extends AbstractAccessibleEntityResource<Country>
+        extends AbstractAccessibleResource<Country>
         implements CreateResource, GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
 
     public CountryResource(@Context GraphDatabaseService database) {

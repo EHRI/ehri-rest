@@ -23,7 +23,7 @@ import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
-import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -61,7 +61,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonDocumentaryUnitTestStr = readResourceFileAsString("documentaryUnit.json");
+        jsonDocumentaryUnitTestStr = readResourceFileAsString("DocumentaryUnit.json");
         invalidJsonDocumentaryUnitTestStr = readResourceFileAsString("invalidDocumentaryUnit.json");
         partialJsonDocumentaryUnitTestStr = readResourceFileAsString("partialDocumentaryUnit.json");
     }

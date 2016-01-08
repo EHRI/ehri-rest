@@ -39,9 +39,9 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ import java.util.SortedMap;
  *
  * @param <E>
  */
-public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
+public final class Query<E extends Accessible> implements Scoped<Query> {
 
     private static final int DEFAULT_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 20;
@@ -207,7 +207,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      *
      * @param <T>
      */
-    public static class FramedVertexIterableAdaptor<T extends Frame>
+    public static class FramedVertexIterableAdaptor<T extends Entity>
             implements Iterable<Vertex> {
         final Iterable<T> iterable;
 
@@ -247,7 +247,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * for the given page/count.
      */
     public Page<E> page(EntityClass type, Accessor user) {
-        return page(manager.getFrames(type, cls), user);
+        return page(manager.getEntities(type, cls), user);
     }
 
     /**
@@ -262,7 +262,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
      */
-    public <T extends Frame> Page<T> page(Iterable<T> vertices,
+    public <T extends Entity> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
                 .getAclFilterFunction(user);

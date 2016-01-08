@@ -27,10 +27,9 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.models.base.Named;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -40,8 +39,8 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * historical agents.
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
-public interface AuthoritativeSet extends AccessibleEntity,
-        PermissionScope, ItemHolder, NamedEntity {
+public interface AuthoritativeSet extends Accessible,
+        PermissionScope, ItemHolder, Named {
 
     /**
      * Fetch all items within this set.

@@ -28,7 +28,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -43,7 +43,7 @@ import eu.ehri.project.views.Crud;
  *
  * @param <E>
  */
-public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
+public class LoggingCrudViews<E extends Accessible> implements Crud<E> {
 
     private final ActionManager actionManager;
     private final CrudViews<E> views;
@@ -272,7 +272,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param <T> The generic type of the given class
      * @return A new view object
      */
-    public <T extends AccessibleEntity> LoggingCrudViews<T> setClass(Class<T> cls) {
+    public <T extends Accessible> LoggingCrudViews<T> setClass(Class<T> cls) {
         return new LoggingCrudViews<>(graph, cls, scope);
     }
 }

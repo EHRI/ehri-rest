@@ -19,12 +19,12 @@
 
 package eu.ehri.project.persistence;
 
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 
 /**
  * Class representing a callback that is triggered when some
  * traversal condition is met.
  */
 public interface TraversalCallback {
-    void process(Frame vertexFrame, int depth, String relation, int relationIndex);
+    void process(Entity vertexFrame, int depth, String relation, int relationIndex);
 }

@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.project.definitions.Entities;
@@ -40,7 +41,7 @@ import javax.ws.rs.core.Response;
  * here.
  */
 @Path(Entities.CONTENT_TYPE)
-public class ContentTypeResource extends AbstractAccessibleEntityResource<ContentType>
+public class ContentTypeResource extends AbstractAccessibleResource<ContentType>
         implements GetResource, ListResource {
 
     public ContentTypeResource(@Context GraphDatabaseService database) {

@@ -56,7 +56,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonDocumentaryUnitTestStr = readResourceFileAsString("documentaryUnit.json");
+        jsonDocumentaryUnitTestStr = readResourceFileAsString("DocumentaryUnit.json");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         System.out.println("DATA: " + data);
 
         List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(data);
-        // Check we don't ALREADY have documentaryUnit -> create/delete perms
+        // Check we don't ALREADY have DocumentaryUnit -> create/delete perms
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME)
                 .get(ContentTypes.DOCUMENTARY_UNIT.getName()));
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME)
@@ -95,7 +95,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         data = response.getEntity(String.class);
         List<Map<String, Map<String, List<String>>>> newMatrix = getInheritedMatrix(data);
 
-        // Check we don't ALREADY have documentaryUnit -> create/delete perms
+        // Check we don't ALREADY have DocumentaryUnit -> create/delete perms
         assertTrue(newMatrix.get(0).get(LIMITED_USER_NAME)
                 .get(ContentTypes.DOCUMENTARY_UNIT.getName())
                 .contains(PermissionType.CREATE.getName()));
@@ -189,7 +189,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Now grant the user permissions to create just within
         // the scope of r2
-        String permData = "{\"documentaryUnit\": [\"create\"]}";
+        String permData = "{\"DocumentaryUnit\": [\"create\"]}";
 
         URI grantUri = ehriUri(Entities.PERMISSION, LIMITED_USER_NAME, "scope", r2);
 
@@ -215,7 +215,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // And the user himself should not be able to grant
         // others the ability to create within that scope.
         String otherUserName = "linda";
-        String grantPermData = "{\"documentaryUnit\": [\"grant\"]}";
+        String grantPermData = "{\"DocumentaryUnit\": [\"grant\"]}";
         URI otherGrantUri = ehriUri(Entities.PERMISSION, otherUserName, "scope", r2);
 
         response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri).entity(grantPermData)

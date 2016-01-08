@@ -46,8 +46,8 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        agentTestData = readResourceFileAsString("repository.json");
-        docTestData = readResourceFileAsString("documentaryUnit.json");
+        agentTestData = readResourceFileAsString("Repository.json");
+        docTestData = readResourceFileAsString("DocumentaryUnit.json");
     }
 
     @Test
@@ -156,7 +156,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
 
         // Now grant the user permissions to create just within
         // the scope of r2
-        String permData = "{\"documentaryUnit\": [\"create\"]}";
+        String permData = "{\"DocumentaryUnit\": [\"create\"]}";
 
         URI grantUri = ehriUri(Entities.PERMISSION, LIMITED_USER_NAME, "scope", "r2");
 
@@ -182,7 +182,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
         // And the user himself should not be able to grant
         // others the ability to create within that scope.
         String otherUserName = "linda";
-        String grantPermData = "{\"documentaryUnit\": [\"grant\"]}";
+        String grantPermData = "{\"DocumentaryUnit\": [\"grant\"]}";
         URI otherGrantUri = ehriUri(Entities.PERMISSION, otherUserName, "scope", "r2");
 
         response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri)

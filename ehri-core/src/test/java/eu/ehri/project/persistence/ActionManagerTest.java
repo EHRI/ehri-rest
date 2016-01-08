@@ -93,7 +93,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
     @Test
     public void testEventsHaveCorrectScope() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         ActionManager am = new ActionManager(graph, r1);
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
@@ -130,7 +130,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
     @Test
     public void testCreatingVersions() throws Exception {
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         ActionManager am = new ActionManager(graph, r1);
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());

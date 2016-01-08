@@ -23,10 +23,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.wrapper.AclGraph;
@@ -42,7 +43,13 @@ import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -71,7 +78,7 @@ public class AdminResource extends AbstractRestResource {
     /**
      * Export the DB as a stream of JSON in
      * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
-     * <p>
+     * <p/>
      * The mode used is EXTENDED.
      */
     @GET
@@ -83,7 +90,7 @@ public class AdminResource extends AbstractRestResource {
             public void write(OutputStream stream) throws IOException, WebApplicationException {
                 try (final Tx tx = graph.getBaseGraph().beginTx()) {
                     Accessor accessor = getRequesterUserProfile();
-                    AclGraph<?> aclGraph = new AclGraph<IndexableGraph>(graph.getBaseGraph(), accessor);
+                    AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
                     GraphSONWriter.outputGraph(aclGraph, stream, GraphSONMode.EXTENDED);
                     tx.success();
                 }
@@ -100,32 +107,12 @@ public class AdminResource extends AbstractRestResource {
             public void write(OutputStream stream) throws IOException, WebApplicationException {
                 try (final Tx tx = graph.getBaseGraph().beginTx()) {
                     Accessor accessor = getRequesterUserProfile();
-                    AclGraph<?> aclGraph = new AclGraph<IndexableGraph>(graph.getBaseGraph(), accessor);
+                    AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
                     JsonDataExporter.outputGraph(aclGraph, stream);
                     tx.success();
                 }
             }
         }).build();
-    }
-
-    /**
-     * Re-build the graph's internal lucene index.
-     * <p>
-     * NB: This takes a lot of memory for large graphs. Do
-     * not use willy-nilly and increase the heap size as
-     * necessary. TODO: Add incremental buffered commit.
-     *
-     * @throws java.lang.Exception
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/_reindexInternal")
-    public Response reindexInternal() throws Exception {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            manager.rebuildIndex();
-            tx.success();
-            return Response.ok().build();
-        }
     }
 
     /**
@@ -141,7 +128,7 @@ public class AdminResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile(String jsonData,
-                                             @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
+            @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             String ident = getNextDefaultUserId();
             Bundle bundle = Bundle.Builder.withClass(EntityClass.USER_PROFILE)
@@ -151,14 +138,14 @@ public class AdminResource extends AbstractRestResource {
                     .build();
 
             // NB: This assumes that admin's ID is the same as its identifier.
-            Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
+            Accessor accessor = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
             Crud<UserProfile> view = ViewFactory.getCrudWithLogging(graph, UserProfile.class);
             UserProfile user = view.create(bundle, accessor);
 
             // add to the groups
             for (String groupId : groups) {
-                Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+                Group group = manager.getEntity(groupId, EntityClass.GROUP, Group.class);
                 group.addMember(user);
             }
 
@@ -186,8 +173,8 @@ public class AdminResource extends AbstractRestResource {
             return Maps.newHashMap();
         } else {
             TypeReference<HashMap<String, Object>> typeRef = new TypeReference<
-                                HashMap<String, Object>
-                                >() {
+                    HashMap<String, Object>
+                    >() {
             };
             return jsonMapper.readValue(json, typeRef);
         }

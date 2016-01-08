@@ -28,7 +28,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -56,7 +56,7 @@ public class CegesomaABTest extends AbstractImporterTest{
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
         
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
         origCount = getNodeCount(graph);
@@ -76,7 +76,7 @@ public class CegesomaABTest extends AbstractImporterTest{
         /** 
          * event links: 2
          * relationship: 3
-         * documentaryUnit: 1
+         * DocumentaryUnit: 1
          * documentDescription: 1
          * unknown property: 1
          * systemEvent: 1
@@ -91,7 +91,7 @@ public class CegesomaABTest extends AbstractImporterTest{
                 DocumentaryUnit.class);
         
         //José Gotovitch
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             boolean hasPersonAccess = false;
             for (Vertex relation : d.asVertex().getVertices(Direction.OUT, Ontology.HAS_ACCESS_POINT)) {
                 Link link = graph.frame(relation, Link.class);
@@ -104,7 +104,7 @@ public class CegesomaABTest extends AbstractImporterTest{
         }
 
         // There should be one DocumentDescription for the <archdesc>
-        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("Liste des objets, documents et témoignages rassemblés pour l'exposition : (\"Résister à la solution finale\")", dd.getName());
             assertEquals("fra", dd.getLanguageOfDescription());
             assertEquals("Cege Soma", dd.getProperty("processInfo"));
@@ -112,7 +112,7 @@ public class CegesomaABTest extends AbstractImporterTest{
         }
         
         //test MaintenanceEvent order
-        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()){
 
             boolean meFound = false;
             for(MaintenanceEvent me : dd.getMaintenanceEvents()){
@@ -128,7 +128,7 @@ public class CegesomaABTest extends AbstractImporterTest{
         
         
         // Fonds has two dates with different types -> list
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()){
         	// start and end dates correctly parsed and setup
         	List<DatePeriod> dp = toList(d.getDatePeriods());
         	assertEquals(1, dp.size());

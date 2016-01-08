@@ -82,25 +82,25 @@ public class AclManagerTest extends GraphTestBase {
 
     @Test
     public void testIsAdmin() throws Exception {
-        Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+        Group admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         assertTrue(new AclManager(graph).belongsToAdmin(admin));
     }
 
     @Test
     public void testBelongsToAdmin() throws Exception {
         loader.loadTestData();
-        UserProfile mike = manager.getFrame("mike", UserProfile.class);
+        UserProfile mike = manager.getEntity("mike", UserProfile.class);
         assertTrue(new AclManager(graph).belongsToAdmin(mike));
 
         // Test a user not directly in admin, but belonging to a group that is,
         // is also an admin user.
-        UserProfile tim = manager.getFrame("tim", UserProfile.class);
+        UserProfile tim = manager.getEntity("tim", UserProfile.class);
         assertTrue(new AclManager(graph).belongsToAdmin(tim));
     }
 
     @Test
     public void testIsAnonymous() throws Exception {
-        Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+        Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         Accessor anon = AnonymousAccessor.getInstance();
         AclManager acl = new AclManager(graph);
         assertFalse(acl.belongsToAdmin(anon));
@@ -111,9 +111,9 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testGetAccessControl() throws Exception {
         loader.loadTestData();
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        UserProfile user1 = manager.getFrame("mike", UserProfile.class);
-        UserProfile user2 = manager.getFrame("reto", UserProfile.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        UserProfile user1 = manager.getEntity("mike", UserProfile.class);
+        UserProfile user2 = manager.getEntity("reto", UserProfile.class);
         AclManager acl = new AclManager(graph);
         assertTrue(acl.canAccess(c1, user1));
         assertFalse(acl.canAccess(c1, user2));
@@ -122,8 +122,8 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testRemoveAccessControl() throws Exception {
         loader.loadTestData();
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        UserProfile user1 = manager.getFrame("mike", UserProfile.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        UserProfile user1 = manager.getEntity("mike", UserProfile.class);
         AclManager acl = new AclManager(graph);
         assertTrue(Iterables.contains(c1.getAccessors(), user1));
         acl.removeAccessControl(c1, user1);
@@ -133,9 +133,9 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testSetAccessors() throws Exception {
         loader.loadTestData();
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        UserProfile user1 = manager.getFrame("mike", UserProfile.class);
-        UserProfile user2 = manager.getFrame("reto", UserProfile.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        UserProfile user1 = manager.getEntity("mike", UserProfile.class);
+        UserProfile user2 = manager.getEntity("reto", UserProfile.class);
         AclManager acl = new AclManager(graph);
         assertTrue(acl.canAccess(c1, user1));
         assertFalse(acl.canAccess(c1, user2));
@@ -148,8 +148,8 @@ public class AclManagerTest extends GraphTestBase {
     public void testGetInheritedEntityPermissions() throws Exception {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
 
         // ? Because we can create docs within this scope (r1), we
         // can also create CHILD docs of docs within that scope.
@@ -167,8 +167,8 @@ public class AclManagerTest extends GraphTestBase {
     public void testSetEntityPermissions() throws Exception {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
 
         // ? Because we can create docs within this scope (r1), we
         // can also create CHILD docs of docs within that scope.
@@ -193,7 +193,7 @@ public class AclManagerTest extends GraphTestBase {
     public void testSetPermissionMatrix() throws Exception {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
 
         GlobalPermissionSet permissions = acl.getGlobalPermissions(user);
         assertFalse(permissions.has(COUNTRY, CREATE));
@@ -205,8 +205,8 @@ public class AclManagerTest extends GraphTestBase {
     public void testGrantPermission() throws Exception {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
         PermissionGrant grant = acl.grantPermission(c4, OWNER, user);
@@ -241,10 +241,10 @@ public class AclManagerTest extends GraphTestBase {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
 
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
 
-        Annotation ann3v = manager.getFrame("ann3", Annotation.class); // hidden from user
-        Annotation ann4v = manager.getFrame("ann4", Annotation.class); // promoted, thus visible
+        Annotation ann3v = manager.getEntity("ann3", Annotation.class); // hidden from user
+        Annotation ann4v = manager.getEntity("ann4", Annotation.class); // promoted, thus visible
         assertFalse(acl.canAccess(ann3v, user));
         assertTrue(acl.canAccess(ann4v, user));
 
@@ -260,8 +260,8 @@ public class AclManagerTest extends GraphTestBase {
 
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
-        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
         acl.grantPermission(c4, OWNER, user);
@@ -274,10 +274,10 @@ public class AclManagerTest extends GraphTestBase {
     public void testRevokePermissionGrant() throws Exception {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        UserProfile user = manager.getFrame("reto", UserProfile.class);
-        Repository r1 = manager.getFrame("r1", Repository.class);
+        UserProfile user = manager.getEntity("reto", UserProfile.class);
+        Repository r1 = manager.getEntity("r1", Repository.class);
         PermissionGrant grant
-                = manager.getFrame("retoKclWriteGrant", PermissionGrant.class);
+                = manager.getEntity("retoKclWriteGrant", PermissionGrant.class);
         assertFalse(acl.hasPermission(DOCUMENTARY_UNIT, CREATE, user));
         assertTrue(acl.withScope(r1).hasPermission(DOCUMENTARY_UNIT, CREATE, user));
         acl.revokePermissionGrant(grant);
@@ -288,7 +288,7 @@ public class AclManagerTest extends GraphTestBase {
     public void testGetAdminPermissions() throws Exception {
         loader.loadTestData();
         AclManager acl = new AclManager(graph);
-        Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
+        Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
         GlobalPermissionSet permissionSet = acl.getGlobalPermissions(admin);
         // Admin should have ALL the permissions!
         for (ContentTypes contentType : ContentTypes.values()) {
@@ -301,8 +301,8 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testGetInheritedGlobalPermissions() throws Exception {
         loader.loadTestData("permissions.yaml");
-        Group group1 = manager.getFrame("group1", Group.class);
-        UserProfile user1 = manager.getFrame("user1", UserProfile.class);
+        Group group1 = manager.getEntity("group1", Group.class);
+        UserProfile user1 = manager.getEntity("user1", UserProfile.class);
 
         AclManager acl = new AclManager(graph);
         List<Map<String, GlobalPermissionSet>> getPerms
@@ -317,8 +317,8 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testGetGlobalPermissions() throws Exception {
         loader.loadTestData("permissions.yaml");
-        Group group1 = manager.getFrame("group1", Group.class);
-        UserProfile user1 = manager.getFrame("user1", UserProfile.class);
+        Group group1 = manager.getEntity("group1", Group.class);
+        UserProfile user1 = manager.getEntity("user1", UserProfile.class);
 
         // Group1 should have create/update/delete for documentaryUnits
         GlobalPermissionSet hasPerms = GlobalPermissionSet.newBuilder()
@@ -337,10 +337,10 @@ public class AclManagerTest extends GraphTestBase {
     public void testCountryScopeScenario() throws Exception {
         loader.loadTestData("country-permissions.yaml");
 
-        Country gb = manager.getFrame("gb", Country.class);
-        Country nl = manager.getFrame("nl", Country.class);
-        UserProfile gbuser = manager.getFrame("gbuser", UserProfile.class);
-        UserProfile nluser = manager.getFrame("nluser", UserProfile.class);
+        Country gb = manager.getEntity("gb", Country.class);
+        Country nl = manager.getEntity("nl", Country.class);
+        UserProfile gbuser = manager.getEntity("gbuser", UserProfile.class);
+        UserProfile nluser = manager.getEntity("nluser", UserProfile.class);
 
         AclManager acl = new AclManager(graph);
 
@@ -368,12 +368,12 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testCreateOwnerScenario() throws Exception {
         loader.loadTestData("archivist-permissions.yaml");
-        UserProfile headUser = manager.getFrame("hauser", UserProfile.class);
-        UserProfile user1 = manager.getFrame("auser1", UserProfile.class);
-        UserProfile user2 = manager.getFrame("auser2", UserProfile.class);
-        Group headArchivists = manager.getFrame("head-archivists", Group.class);
-        Group archivists = manager.getFrame("archivists", Group.class);
-        Repository repo = manager.getFrame("repo", Repository.class);
+        UserProfile headUser = manager.getEntity("hauser", UserProfile.class);
+        UserProfile user1 = manager.getEntity("auser1", UserProfile.class);
+        UserProfile user2 = manager.getEntity("auser2", UserProfile.class);
+        Group headArchivists = manager.getEntity("head-archivists", Group.class);
+        Group archivists = manager.getEntity("archivists", Group.class);
+        Repository repo = manager.getEntity("repo", Repository.class);
 
         AclManager acl = new AclManager(graph, repo);
         // The grants in the permissions should give these particular

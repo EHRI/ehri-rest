@@ -25,7 +25,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
@@ -47,7 +47,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest{
 
     @Test
     public void testImportItemsT() throws Exception {
-        AuthoritativeSet authoritativeSet = manager.getFrame("auths", AuthoritativeSet.class);
+        AuthoritativeSet authoritativeSet = manager.getEntity("auths", AuthoritativeSet.class);
         int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
         assertEquals(2, voccount);
         logger.debug("number of items: " + voccount);
@@ -73,10 +73,10 @@ public class CsvConceptImporterTest extends AbstractImporterTest{
         assertEquals(voccount + 18, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
-        for (AccessibleEntity subject : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible subject : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(authoritativeSet, subject.getPermissionScope());
         }
-        Concept antisemitism = manager.getFrame("auths-fst810769", Concept.class);
+        Concept antisemitism = manager.getEntity("auths-fst810769", Concept.class);
         assertNotNull(antisemitism);
         for(Description d :  antisemitism.getDescriptions()){
             assertEquals("Antisemitism",d.getName());

@@ -37,13 +37,13 @@ public class FixtureTest extends ModelTestBase {
 
     @Test
     public void testTheGraphContainsGroups() throws ItemNotFound {
-        Iterable<Group> frames = manager.getFrames(EntityClass.GROUP,
+        Iterable<Group> frames = manager.getEntities(EntityClass.GROUP,
                 Group.class);
         List<Group> groups = toList(frames);
         assertFalse(groups.isEmpty());
 
         // Check the admin group has some members
-        List<Accessor> users = toList(manager.getFrame("admin", Group.class)
+        List<Accessor> users = toList(manager.getEntity("admin", Group.class)
                 .getMembers());
         assertFalse(users.isEmpty());
     }

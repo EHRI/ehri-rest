@@ -32,11 +32,10 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.models.base.Named;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -45,8 +44,8 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * that can be assigned permissions.
  */
 @EntityType(EntityClass.GROUP)
-public interface Group extends Accessor, AccessibleEntity,
-        PermissionScope, NamedEntity, ItemHolder {
+public interface Group extends Accessor, Accessible,
+        PermissionScope, Named, ItemHolder {
     
     String ADMIN_GROUP_IDENTIFIER = "admin";
     String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
@@ -65,7 +64,7 @@ public interface Group extends Accessor, AccessibleEntity,
      * TODO FIXME use this in case we need AccesibleEnity's instead of Accessors, 
      */
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
-    Iterable<AccessibleEntity> getMembersAsEntities();
+    Iterable<Accessible> getMembersAsEntities();
 
     /**
      * Get members of this group.
@@ -107,7 +106,7 @@ public interface Group extends Accessor, AccessibleEntity,
      * @return an iterable of user or group frames
      */
     @JavaHandler
-    Iterable<AccessibleEntity> getAllUserProfileMembers();
+    Iterable<Accessible> getAllUserProfileMembers();
 
     /**
      * Implementation of complex methods.
@@ -128,7 +127,7 @@ public interface Group extends Accessor, AccessibleEntity,
                     it(), Ontology.ACCESSOR_BELONGS_TO_GROUP);
         }
 
-        public Iterable<AccessibleEntity> getAllUserProfileMembers() {
+        public Iterable<Accessible> getAllUserProfileMembers() {
             GremlinPipeline<Vertex,Vertex> pipe = gremlin().as("n").in(Ontology.ACCESSOR_BELONGS_TO_GROUP)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override

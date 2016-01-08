@@ -44,8 +44,8 @@ public class LinkerTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateConceptsForRepository() throws Exception {
-        Repository repository = manager.getFrame("r1", Repository.class);
-        Vocabulary vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
+        Repository repository = manager.getEntity("r1", Repository.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         int eventCount = Iterables.size(actionManager.getLatestGlobalEvents());
         // The doc c1 contains two access point nodes which should be made
         // into links
@@ -62,8 +62,8 @@ public class LinkerTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateConceptsForRepositoryWithBadAccessPointTypes() throws Exception {
-        Repository repository = manager.getFrame("r1", Repository.class);
-        Vocabulary vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
+        Repository repository = manager.getEntity("r1", Repository.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         int eventCount = Iterables.size(actionManager.getLatestGlobalEvents());
 
         // This won't create any links because the access point type
@@ -80,8 +80,8 @@ public class LinkerTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateConceptsForRepositoryExcludingSingles() throws Exception {
-        Repository repository = manager.getFrame("r1", Repository.class);
-        Vocabulary vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
+        Repository repository = manager.getEntity("r1", Repository.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         int eventCount = Iterables.size(actionManager.getLatestGlobalEvents());
 
         // This won't create any links because all of the access points only point

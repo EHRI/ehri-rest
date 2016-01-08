@@ -27,7 +27,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -42,8 +42,8 @@ import java.util.Map;
  */
 public class EacHandler extends EaHandler {
 
-    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Frame>>builder()
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Entity>>builder()
             .put("maintenanceEvent", MaintenanceEvent.class)
             .put("relation", Annotation.class)
             .put("book", Annotation.class)

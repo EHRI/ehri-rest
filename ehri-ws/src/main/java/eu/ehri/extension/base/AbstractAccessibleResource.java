@@ -17,13 +17,13 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.extension;
+package eu.ehri.extension.base;
 
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
@@ -43,15 +43,14 @@ import java.util.Set;
 
 
 /**
- * Handle CRUD operations on AccessibleEntity's by using the
+ * Handle CRUD operations on Accessible's by using the
  * eu.ehri.project.views.Views class generic code. Resources for specific
  * entities can extend this class.
  *
- * @param <E> the specific AccessibleEntity derived class
+ * @param <E> the specific Accessible derived class
 
  */
-public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
-        extends AbstractRestResource {
+public class AbstractAccessibleResource<E extends Accessible> extends AbstractRestResource {
 
     protected final LoggingCrudViews<E> views;
     protected final AclManager aclManager;
@@ -65,16 +64,16 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Functor used to post-process items.
      */
-    public interface Handler<E extends AccessibleEntity> {
+    public interface Handler<E extends Accessible> {
         void process(E frame) throws PermissionDenied;
     }
 
     /**
      * Implementation of a Handler that does nothing.
      *
-     * @param <E> the specific AccessibleEntity derived class
+     * @param <E> the specific Accessible derived class
      */
-    public static class NoOpHandler<E extends AccessibleEntity> implements Handler<E> {
+    public static class NoOpHandler<E extends Accessible> implements Handler<E> {
         @Override
         public void process(E frame) {
         }
@@ -88,7 +87,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param database the injected neo4j database
      * @param cls      the entity Java class
      */
-    public AbstractAccessibleEntityResource(
+    public AbstractAccessibleResource(
             @Context GraphDatabaseService database, Class<E> cls) {
         super(database);
         this.cls = cls;
@@ -134,7 +133,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws DeserializationError
      */
-    public <T extends AccessibleEntity> Response createItem(Bundle entityBundle, List<String> accessorIds,
+    public <T extends Accessible> Response createItem(Bundle entityBundle, List<String> accessorIds,
                                                             Handler<T> handler, LoggingCrudViews<T> views)
             throws PermissionDenied, ValidationError, DeserializationError {
         try {
@@ -237,7 +236,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             E entity = views.detail(id, getRequesterUserProfile());
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
-                Bundle existing = depSerializer.vertexFrameToBundle(entity);
+                Bundle existing = depSerializer.entityToBundle(entity);
                 return updateItem(existing.mergeDataWith(rawBundle));
             } else {
                 return updateItem(rawBundle.withId(entity.getId()));
@@ -298,7 +297,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         Set<Accessor> accessors = Sets.newHashSet();
         for (String id : accessorIds) {
             try {
-                Accessor av = manager.getFrame(id, Accessor.class);
+                Accessor av = manager.getEntity(id, Accessor.class);
                 accessors.add(av);
             } catch (ItemNotFound e) {
                 logger.warn("Invalid accessor given: {}", id);

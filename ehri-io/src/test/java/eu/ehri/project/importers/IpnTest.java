@@ -25,7 +25,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.PermissionScope;
@@ -63,7 +63,7 @@ public class IpnTest extends AbstractImporterTest {
     @Test
     @Ignore
     public void polishVirtualCollectionTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the IPN Virtual Collection";
 
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
@@ -100,7 +100,7 @@ public class IpnTest extends AbstractImporterTest {
 
     public void polishBranch_1_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
 
         origCount = getNodeCount(graph);
@@ -118,18 +118,18 @@ public class IpnTest extends AbstractImporterTest {
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
-        /**
-         * null: 4
-         * relationship: 4
-         * documentaryUnit: 3
-         * property: 1
-         * documentDescription: 3
-         * maintenanceEvent: 1
-         * systemEvent: 1
-         * datePeriod: 2
-         */
+       /**
+        * null: 4
+        * relationship: 4
+        * documentaryUnit: 3
+        * property: 1
+        * documentDescription: 3
+        * maintenanceEvent: 1
+        * systemEvent: 1
+        * datePeriod: 2
+        */
 
-        int newCount = origCount + 19;
+        int newCount = origCount + 19; 
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(
@@ -153,7 +153,7 @@ public class IpnTest extends AbstractImporterTest {
 
 
         //test titles
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("Collections from Oddział Instytutu Pamięci Narodowej we Wrocławiu", d.getName());
             boolean hasProvenance = false;
             for (String property : d.getPropertyKeys()) {
@@ -165,7 +165,7 @@ public class IpnTest extends AbstractImporterTest {
             }
             assertTrue(hasProvenance);
         }
-        for (DocumentDescription desc : c1_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription desc : c1_1.getDocumentDescriptions()) {
             for (String p : desc.getPropertyKeys()) {
                 System.out.println(p + " --> " + desc.getProperty(p));
             }
@@ -176,12 +176,12 @@ public class IpnTest extends AbstractImporterTest {
         assertEquals(2L, archdesc.getChildCount());
 
         //test level-of-desc
-        for (DocumentDescription d : c1_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {
             assertEquals("collection", d.getProperty("levelOfDescription"));
         }
         // test dates
         boolean hasDates = false;
-        for (DocumentDescription d : c1_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {
             for (DatePeriod p : d.getDatePeriods()) {
                 hasDates = true;
             }
@@ -194,7 +194,7 @@ public class IpnTest extends AbstractImporterTest {
     @Ignore
     public void polishBranch_2_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
 
         origCount = getNodeCount(graph);
@@ -212,18 +212,18 @@ public class IpnTest extends AbstractImporterTest {
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
-        /**
-         * null: 4
-         * relationship: 5
-         * documentaryUnit: 3
-         * documentDescription: 3
-         * property: 1
-         * maintenanceEvent: 1
-         * systemEvent: 1
-         * datePeriod: 2
-         */
+       /**
+        * null: 4
+        * relationship: 5
+        * documentaryUnit: 3
+        * documentDescription: 3
+        * property: 1
+        * maintenanceEvent: 1
+        * systemEvent: 1
+        * datePeriod: 2
+        */
 
-        int newCount = origCount + 20;
+        int newCount = origCount + 20; 
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(
@@ -247,27 +247,27 @@ public class IpnTest extends AbstractImporterTest {
 
 
         //test titles
-        Iterable<DocumentDescription> descriptions = archdesc.getDocumentDescriptions();
+        Iterable<DocumentaryUnitDescription> descriptions = archdesc.getDocumentDescriptions();
         assertTrue(descriptions.iterator().hasNext());
-        for (DocumentDescription d : descriptions) {
+        for (DocumentaryUnitDescription d : descriptions) {
             assertEquals("Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie", d.getName());
             List<String> provenance = d.getProperty("processInfo");
             assertTrue(provenance.size() > 0);
             assertThat(provenance.get(0), startsWith("This selection has been "));
         }
-        for (DocumentDescription desc : c1_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription desc : c1_1.getDocumentDescriptions()) {
             assertEquals("Areszt Śledczy Sądowy w Poznaniu [Untersuchungshaftanstalt Posen]", desc.getName());
         }
         //test hierarchy
         assertEquals(2L, archdesc.getChildCount());
 
         //test level-of-desc
-        for (DocumentDescription d : c1_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {
             assertEquals("collection", d.getProperty("levelOfDescription"));
         }
         // test dates
         boolean hasDates = false;
-        for (DocumentDescription d : c1_1.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {
             for (DatePeriod p : d.getDatePeriods()) {
                 hasDates = true;
                 assertEquals("1940-01-01", p.getStartDate());

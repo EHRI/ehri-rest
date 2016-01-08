@@ -72,7 +72,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     public void setUp() throws Exception {
         super.setUp();
         actionManager = new ActionManager(graph);
-        repository = manager.getFrame(TEST_REPO, Repository.class);
+        repository = manager.getEntity(TEST_REPO, Repository.class);
     }
 
     /**

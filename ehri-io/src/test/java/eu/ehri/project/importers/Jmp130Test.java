@@ -23,10 +23,10 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class Jmp130Test extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
 
         final String logMessage = "Importing JMP EAD";
 
@@ -73,7 +73,7 @@ public class Jmp130Test extends AbstractImporterTest {
         /**
          * null: 2
          * relationship: 5
-         * documentaryUnit: 1
+         * DocumentaryUnit: 1
          * documentDescription: 1
          * maintenanceEvent: 1
          * systemEvent: 1
@@ -88,13 +88,13 @@ public class Jmp130Test extends AbstractImporterTest {
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
-        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             List<String> langs = d.getProperty("languageOfMaterial");
             assertTrue(langs.size() > 0);
             assertEquals("ces", langs.get(0));
         }
 
-        List<AccessibleEntity> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
+        List<Accessible> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
         assertEquals(1, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
 

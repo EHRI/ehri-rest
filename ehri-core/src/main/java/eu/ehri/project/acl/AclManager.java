@@ -42,7 +42,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
@@ -70,14 +70,14 @@ public final class AclManager {
             .build(new CacheLoader<PermissionType, Permission>() {
                 @Override
                 public Permission load(PermissionType permissionType) throws Exception {
-                    return manager.getFrame(permissionType.getName(), Permission.class);
+                    return manager.getEntity(permissionType.getName(), Permission.class);
                 }
             });
     private final LoadingCache<ContentTypes, ContentType> enumContentTypeMap = CacheBuilder.newBuilder()
             .build(new CacheLoader<ContentTypes, ContentType>() {
                 @Override
                 public ContentType load(ContentTypes contentTypes) throws Exception {
-                    return manager.getFrame(contentTypes.getName(), ContentType.class);
+                    return manager.getEntity(contentTypes.getName(), ContentType.class);
                 }
             });
     private final LoadingCache<Permission, PermissionType> permissionEnumMap = CacheBuilder.newBuilder()
@@ -156,7 +156,7 @@ public final class AclManager {
      * @param accessor The user/group
      * @return Whether or not the given accessor can access the entity
      */
-    public boolean canAccess(AccessibleEntity entity, Accessor accessor) {
+    public boolean canAccess(Accessible entity, Accessor accessor) {
         Preconditions.checkNotNull(entity, "Entity is null");
         Preconditions.checkNotNull(accessor, "Accessor is null");
         return getAclFilterFunction(accessor).compute(entity.asVertex());
@@ -168,7 +168,7 @@ public final class AclManager {
      * @param entity   The item
      * @param accessor A user/group from whom to revoke access
      */
-    public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
+    public void removeAccessControl(Accessible entity, Accessor accessor) {
         entity.removeAccessor(accessor);
     }
 
@@ -178,7 +178,7 @@ public final class AclManager {
      * @param entity    The item
      * @param accessors A set of users/groups who can access the item
      */
-    public void setAccessors(AccessibleEntity entity,
+    public void setAccessors(Accessible entity,
             Collection<Accessor> accessors) {
         Set<Accessor> accessorVertices = Sets.newHashSet(accessors);
         Set<Accessor> remove = Sets.newHashSet();
@@ -203,7 +203,7 @@ public final class AclManager {
      * @return An inherited item permission set.
      */
     public InheritedItemPermissionSet getInheritedItemPermissions(
-            AccessibleEntity entity, Accessor accessor) {
+            Accessible entity, Accessor accessor) {
         InheritedItemPermissionSet.Builder builder
                 = new InheritedItemPermissionSet
                 .Builder(accessor.getId(), getItemPermissions(accessor, entity));
@@ -221,7 +221,7 @@ public final class AclManager {
      * @param permissionSet A set of permissions
      * @throws PermissionDenied
      */
-    public void setItemPermissions(AccessibleEntity item, Accessor accessor,
+    public void setItemPermissions(Accessible item, Accessor accessor,
             Set<PermissionType> permissionSet) throws PermissionDenied {
         checkNoGrantOnAdminOrAnon(accessor);
         for (PermissionType t : PermissionType.values()) {
@@ -326,7 +326,7 @@ public final class AclManager {
      * @param permType The permission type
      * @param accessor The user/group
      */
-    public void revokePermission(AccessibleEntity entity, PermissionType permType,
+    public void revokePermission(Accessible entity, PermissionType permType,
             Accessor accessor) {
         Optional<PermissionGrant> maybeGrant = findPermission(entity, permType, accessor);
         if (maybeGrant.isPresent()) {
@@ -419,7 +419,7 @@ public final class AclManager {
      * @param accessor       The user
      * @return If the user has the permission on the given item
      */
-    public boolean hasPermission(AccessibleEntity entity, PermissionType permissionType, Accessor accessor) {
+    public boolean hasPermission(Accessible entity, PermissionType permissionType, Accessor accessor) {
         // Get a list of our current context scopes, plus
         // the parent scopes of the item.
         Set<PermissionScope> allScopes = Sets.newHashSet(scopes);
@@ -546,7 +546,7 @@ public final class AclManager {
      * target
      */
     private List<PermissionType> getItemPermissions(Accessor accessor,
-            AccessibleEntity entity) {
+            Accessible entity) {
         // If we're admin, add it regardless.
         if (belongsToAdmin(accessor)) {
             return Lists.newArrayList(PermissionType.values());

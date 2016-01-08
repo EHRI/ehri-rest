@@ -29,7 +29,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
@@ -71,7 +71,7 @@ public abstract class AbstractImporter<T> {
      *
      * @param mutation the Mutation to handle callbacks for
      */
-    protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation) {
+    protected void handleCallbacks(Mutation<? extends Accessible> mutation) {
         for (ImportCallback callback : callbacks) {
             callback.itemImported(mutation);
         }
@@ -120,7 +120,7 @@ public abstract class AbstractImporter<T> {
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    public abstract AccessibleEntity importItem(T itemData) throws ValidationError;
+    public abstract Accessible importItem(T itemData) throws ValidationError;
 
     /**
      * Import an item representation into the graph at a certain depth, and return the Node.
@@ -131,7 +131,7 @@ public abstract class AbstractImporter<T> {
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    public abstract AccessibleEntity importItem(T itemData,
+    public abstract Accessible importItem(T itemData,
             List<String> scopeIds) throws ValidationError;
 
     /**

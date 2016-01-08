@@ -24,7 +24,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.views.Query;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -67,16 +67,16 @@ public class UserListEntities extends BaseCommand {
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         Class<?> cls = type.getJavaClass();
 
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
+        if (!Accessible.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
-        UserProfile user = manager.getFrame(
+        UserProfile user = manager.getEntity(
                 cmdLine.getOptionValue("user"), UserProfile.class);
 
         @SuppressWarnings("unchecked")
-        Query<AccessibleEntity> query = new Query<>(graph,
-                (Class<AccessibleEntity>) cls);
-        for (AccessibleEntity acc : query.page(user)) {
+        Query<Accessible> query = new Query<>(graph,
+                (Class<Accessible>) cls);
+        for (Accessible acc : query.page(user)) {
             System.out.println(acc.getId());
         }
 

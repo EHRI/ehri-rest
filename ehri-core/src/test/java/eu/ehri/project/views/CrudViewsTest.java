@@ -26,7 +26,7 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Repository;
@@ -110,7 +110,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         } catch (PermissionDenied e) {
             // We expected that permission denied... now explicitly add
             // permissions.
-            PermissionGrantTarget target = manager.getFrame(
+            PermissionGrantTarget target = manager.getEntity(
                     ContentTypes.DOCUMENTARY_UNIT.getName(),
                     PermissionGrantTarget.class);
             new AclManager(graph).grantPermission(target, PermissionType.CREATE, invalidUser
@@ -123,7 +123,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreateWithScope() throws Exception {
         Crud<DocumentaryUnit> docViews = new LoggingCrudViews<>(
-                graph, DocumentaryUnit.class, manager.getFrame("r1",
+                graph, DocumentaryUnit.class, manager.getEntity("r1",
                 Repository.class));
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         // In the fixtures, 'reto' should have a grant for 'CREATE'
@@ -153,9 +153,9 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUnit.getProperty("name"));
-        DocumentDescription desc = graph.frame(
+        DocumentaryUnitDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
-                DocumentDescription.class);
+                DocumentaryUnitDescription.class);
 
         // Check the nested item was created correctly
         DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
@@ -219,7 +219,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         // FIXME: Surely there's a better way of doing this???
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
-            DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
+            DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
             for (DatePeriod ignored : d.getDatePeriods()) shouldDelete++;
             for (AccessPoint ignored : d.getAccessPoints()) shouldDelete++;
         }

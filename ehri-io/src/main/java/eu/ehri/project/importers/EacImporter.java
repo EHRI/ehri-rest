@@ -218,7 +218,7 @@ public class EacImporter extends EaImporter {
                     String conceptId = relationVertex.getProperty(LINK_TARGET);
                     logger.debug("{} -> {}", cvocId, conceptId);
                     try {
-                        Vocabulary vocabulary = manager.getFrame(cvocId, Vocabulary.class);
+                        Vocabulary vocabulary = manager.getEntity(cvocId, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
                             logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
                             if (concept.getIdentifier().equals(conceptId)) {

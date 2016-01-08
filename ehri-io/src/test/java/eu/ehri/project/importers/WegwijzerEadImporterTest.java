@@ -57,7 +57,7 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest{
        /**
         * null: 7
         * relationship: 27
-        * documentaryUnit: 6
+        * DocumentaryUnit: 6
         * documentDescription: 6
         * maintenanceEvent: 1
         * systemEvent: 1

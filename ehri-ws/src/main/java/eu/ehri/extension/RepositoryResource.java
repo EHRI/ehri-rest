@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -64,7 +65,7 @@ import java.util.List;
  * Provides a web service interface for the Repository.
  */
 @Path(Entities.REPOSITORY)
-public class RepositoryResource extends AbstractAccessibleEntityResource<Repository>
+public class RepositoryResource extends AbstractAccessibleResource<Repository>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
     public RepositoryResource(@Context GraphDatabaseService database) {

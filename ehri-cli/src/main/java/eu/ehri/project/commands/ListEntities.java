@@ -20,12 +20,13 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
@@ -54,11 +55,11 @@ public class ListEntities extends BaseCommand {
     @SuppressWarnings("static-access")
     protected void setCustomOptions(Options options) {
         options.addOption(OptionBuilder
-           .withType(String.class)
-           .withLongOpt("format").isRequired(false)
-           .hasArg(true).withArgName("f")
-           .withDescription("Format for output data, which defaults to just the id. " +
-                   "If provided can be one of: xml, json").create("f"));
+                .withType(String.class)
+                .withLongOpt("format").isRequired(false)
+                .hasArg(true).withArgName("f")
+                .withDescription("Format for output data, which defaults to just the id. " +
+                        "If provided can be one of: xml, json").create("f"));
         options.addOption(OptionBuilder
                 .withType(String.class)
                 .withLongOpt("root-node").isRequired(false)
@@ -83,10 +84,6 @@ public class ListEntities extends BaseCommand {
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getJavaClass();
-
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         Serializer serializer = new Serializer(graph);
@@ -127,8 +124,8 @@ public class ListEntities extends BaseCommand {
     }
 
     private void printIds(GraphManager manager, EntityClass type) {
-        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            System.out.println(acc.getId());
+        for (Vertex acc : manager.getVertices(type)) {
+            System.out.println(manager.getId(acc));
         }
     }
 
@@ -139,8 +136,8 @@ public class ListEntities extends BaseCommand {
         System.out.print("[\n");
 
         int cnt = 0;
-        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            String jsonString = serializer.vertexFrameToJson(acc);
+        for (Vertex acc : manager.getVertices(type)) {
+            String jsonString = serializer.vertexToJson(acc);
             if (cnt != 0) System.out.print(",\n");
             System.out.println(jsonString);
             cnt++;
@@ -151,11 +148,11 @@ public class ListEntities extends BaseCommand {
 
     private void printXml(GraphManager manager, Serializer serializer, EntityClass type,
             Transformer transformer, String rootName)
-                throws UnsupportedEncodingException, SerializationError, TransformerException {
+            throws UnsupportedEncodingException, SerializationError, TransformerException {
         System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         System.out.print("<" + rootName + ">\n"); // root element
-        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            transformer.transform(new DOMSource(serializer.vertexFrameToXml(acc)),
+        for (Vertex acc : manager.getVertices(type)) {
+            transformer.transform(new DOMSource(serializer.vertexToXml(acc)),
                     new StreamResult(new OutputStreamWriter(System.out, "UTF-8")));
         }
         System.out.print("</" + rootName + ">\n"); // root element

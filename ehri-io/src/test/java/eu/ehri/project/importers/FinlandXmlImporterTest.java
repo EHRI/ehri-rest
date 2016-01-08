@@ -21,7 +21,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -62,7 +62,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         int count_fin = getNodeCount(graph);
         /**
          * null: 8
-         * documentaryUnit: 7
+         * DocumentaryUnit: 7
          * documentDescription: 7
          * property: 1
          * maintenanceEvent: 1
@@ -72,10 +72,10 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         assertEquals(count+30, count_fin);
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
-        Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
+        Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             assertEquals("VAKKA-326611.KA#FIN", desc.getProperty("sourceFileId"));
             assertEquals("fin", desc.getLanguageOfDescription());
@@ -83,7 +83,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         }
         assertEquals(1, nrOfDesc);
         
-        for(DocumentDescription dd : c2.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription dd : c2.getDocumentDescriptions()){
             assertEquals("VAKKA-326611.KA#FIN", dd.getProperty("sourceFileId"));
         }
  // Before...
@@ -108,7 +108,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         i = c1.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             
             //sourceFileId with added languagetag:
@@ -125,7 +125,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         i = c2.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             nrOfDesc++;
         }

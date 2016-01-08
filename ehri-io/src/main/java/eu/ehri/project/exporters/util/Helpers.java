@@ -3,7 +3,7 @@ package eu.ehri.project.exporters.util;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
@@ -314,7 +314,7 @@ public class Helpers {
      * @param langCode     a 3-letter language code.
      * @return the best matching description found
      */
-    public static Optional<Description> getBestDescription(DescribedEntity item, Optional<Description> priorDescOpt, String langCode) {
+    public static Optional<Description> getBestDescription(Described item, Optional<Description> priorDescOpt, String langCode) {
         List<Description> descriptions = Lists.newArrayList(item.getDescriptions());
         Collections.sort(descriptions, new Comparator<Description>() {
             @Override
@@ -346,7 +346,7 @@ public class Helpers {
         return Optional.fromNullable(fallBack);
     }
 
-    public static Optional<Description> getBestDescription(DescribedEntity item, String langCode) {
+    public static Optional<Description> getBestDescription(Described item, String langCode) {
         return getBestDescription(item , Optional.<Description>absent(), langCode);
     }
 }

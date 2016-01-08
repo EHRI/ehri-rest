@@ -1,5 +1,5 @@
 {
-  "type": "virtualUnit",
+  "type": "VirtualUnit",
   "data": {
     "description": "Changing the description"
   }

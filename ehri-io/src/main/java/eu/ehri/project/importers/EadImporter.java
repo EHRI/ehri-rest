@@ -35,7 +35,7 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
@@ -102,13 +102,13 @@ public class EadImporter extends EaImporter {
         List<Map<String, Object>> extractedDates = extractDates(itemData);
         replaceDates(itemData, extractedDates);
 
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractedDates) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
+        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
             logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
             for (String s : rel.keySet()) {
                 logger.debug(s);
@@ -198,7 +198,7 @@ public class EadImporter extends EaImporter {
             try {
                 // read the current item’s bundle
                 Bundle oldBundle = mergeSerializer
-                        .vertexFrameToBundle(manager.getVertex(unitWithIds.getId()));
+                        .vertexToBundle(manager.getVertex(unitWithIds.getId()));
 
                 // filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
@@ -206,7 +206,7 @@ public class EadImporter extends EaImporter {
                     public boolean remove(String relationLabel, Bundle bundle) {
                         String lang = bundle.getDataValue(Ontology.LANGUAGE);
                         String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
-                        return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                        return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                                 && (lang != null
                                 && lang.equals(languageOfDesc)
                                 && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId))
@@ -232,7 +232,7 @@ public class EadImporter extends EaImporter {
                     logger.debug("merging: new desc ID exists, new generated ID = {}", anotherGeneratedId);
                 } else if (manager.exists(defaultDescIdentifier)) {
                     Bundle oldDescBundle = mergeSerializer
-                            .vertexFrameToBundle(manager.getVertex(defaultDescIdentifier));
+                            .vertexToBundle(manager.getVertex(defaultDescIdentifier));
                     //if the previous had NO sourcefile_key OR it was different:
                     if (oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
                             || !thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())) {
@@ -294,7 +294,7 @@ public class EadImporter extends EaImporter {
                     logger.debug("cvoc:" + cvoc_id + "  concept:" + concept_id);
                     Vocabulary vocabulary;
                     try {
-                        vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                        vocabulary = manager.getEntity(cvoc_id, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
                             logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
                             if (concept.getIdentifier().equalsIgnoreCase(concept_id)) {
@@ -302,7 +302,7 @@ public class EadImporter extends EaImporter {
                                     Bundle linkBundle = new Bundle(EntityClass.LINK)
                                             .withDataValue(Ontology.LINK_HAS_TYPE, rel.getProperty("type").toString())
                                             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
-                                    UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
+                                    UserProfile user = manager.getEntity(this.log.getActioner().getId(), UserProfile.class);
                                     Link link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
                                     unit.addLink(link);
                                     concept.addLink(link);
@@ -460,7 +460,7 @@ public class EadImporter extends EaImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
         return importItem(itemData, new Stack<String>());
     }
 }

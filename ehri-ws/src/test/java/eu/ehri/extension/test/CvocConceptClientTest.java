@@ -22,7 +22,7 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,8 +80,8 @@ public class CvocConceptClientTest extends BaseRestClientTest {
      */
     @Test
     public void testNarrowerCvocConcepts() throws Exception {
-        String jsonFruitTestStr = "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"fruit\"}}";
-        String jsonAppleTestStr = "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
+        String jsonFruitTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"fruit\"}}";
+        String jsonAppleTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
 
         // Create fruit
         ClientResponse response = testCreateConcept(jsonFruitTestStr);
@@ -117,7 +117,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
         // check if apple's broader is fruit
         // get apple's broader concepts
-        response = testGet(ehriUri("cvocConcept", appleIdStr, "broader", "list"));
+        response = testGet(ehriUri(Entities.CVOC_CONCEPT, appleIdStr, "broader", "list"));
         // check if fruit is in there
         assertTrue(containsIdentifier(response, "fruit"));
 
@@ -131,7 +131,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // apple should still exist
-        response = testGet(ehriUri("cvocConcept", appleIdStr));
+        response = testGet(ehriUri(Entities.CVOC_CONCEPT, appleIdStr));
         assertStatus(OK, response);
 
         // but not as a narrower of fruit!
@@ -148,8 +148,8 @@ public class CvocConceptClientTest extends BaseRestClientTest {
      */
     @Test
     public void testRelatedCvocConcepts() throws Exception {
-        String jsonTreeTestStr = "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"tree\"}}";
-        String jsonAppleTestStr = "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
+        String jsonTreeTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"tree\"}}";
+        String jsonAppleTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
 
         ClientResponse response;
 
@@ -187,8 +187,8 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
         // check if apple's relatedBy is tree
         // get apple's broader concepts
-        response = testGet(getExtensionEntryPointUri() + "/cvocConcept/"
-                + appleIdStr + "/relatedBy/list");
+        response = testGet(ehriUri(Entities.CVOC_CONCEPT,
+                appleIdStr, "relatedBy", "list"));
         // check if tree is in there
         assertTrue(containsIdentifier(response, "tree"));
 

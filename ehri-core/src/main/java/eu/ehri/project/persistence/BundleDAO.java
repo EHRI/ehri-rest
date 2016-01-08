@@ -31,7 +31,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public final class BundleDAO {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    public <T extends Frame> Mutation<T> update(Bundle bundle, Class<T> cls)
+    public <T extends Entity> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
         Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> mutation = updateInner(bundleWithIds);
@@ -101,7 +101,7 @@ public final class BundleDAO {
      * @return A framed vertex
      * @throws ValidationError
      */
-    public <T extends Frame> T create(Bundle bundle, Class<T> cls)
+    public <T extends Entity> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {
         Bundle bundleWithIds = validator.validateForCreate(bundle);
         return graph.frame(createInner(bundleWithIds), cls);
@@ -115,7 +115,7 @@ public final class BundleDAO {
      * @return A frame mutation
      * @throws ValidationError
      */
-    public <T extends Frame> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
+    public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
         Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
@@ -201,7 +201,7 @@ public final class BundleDAO {
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
         Vertex node = manager.getVertex(bundle.getId());
         try {
-            Bundle nodeBundle = serializer.vertexFrameToBundle(node);
+            Bundle nodeBundle = serializer.vertexToBundle(node);
             if (!nodeBundle.equals(bundle)) {
                 logger.trace("Bundles differ\nnew:\n{}\nold:\n{}", bundle.toJson(), nodeBundle.toJson());
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
@@ -310,7 +310,7 @@ public final class BundleDAO {
                     relEntry.getKey(), relEntry.getValue())) {
                 if (!updating.contains(manager.getId(v))) {
                     try {
-                        delete(serializer.vertexFrameToBundle(graph.frame(v,
+                        delete(serializer.entityToBundle(graph.frame(v,
                                 manager.getEntityClass(v).getJavaClass())));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);

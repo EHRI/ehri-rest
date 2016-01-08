@@ -19,20 +19,28 @@
 
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.Link;
+import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.Fetch;
 
 /**
- * An entity that can hold incoming links.
+ * An entity that can have one or more date periods attached.
  *
 
  */
-public interface LinkableEntity extends AccessibleEntity {
-    @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
-    Iterable<Link> getLinks();
+public interface Temporal extends Entity {
 
-    @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
-    void addLink(Link link);
+    @Dependent
+    @Fetch(value = Ontology.ENTITY_HAS_DATE, whenNotLite = true)
+    @Adjacency(label = Ontology.ENTITY_HAS_DATE)
+    Iterable<DatePeriod> getDatePeriods();
+
+    @Adjacency(label = Ontology.ENTITY_HAS_DATE)
+    void setDatePeriods(Iterable<DatePeriod> datePeriods);
+
+    @Adjacency(label = Ontology.ENTITY_HAS_DATE)
+    void addDatePeriod(DatePeriod period);
+
 }

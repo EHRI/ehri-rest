@@ -21,7 +21,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -34,7 +34,7 @@ public class AnnotationRestClientTest extends BaseRestClientTest {
     @Test
     public void testGetAnnotations() throws Exception {
         // Fetch annotations for an item.
-        WebResource resource = client.resource(ehriUri("annotation", "for", "c1"));
+        WebResource resource = client.resource(ehriUri("Annotation", "for", "c1"));
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -47,8 +47,8 @@ public class AnnotationRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateAnnotation() throws Exception {
         // Create a link annotation between two objects
-        WebResource resource = client.resource(ehriUri("annotation", "c1"));
-        String jsonAnnotationTestString = "{\"type\": \"annotation\", " +
+        WebResource resource = client.resource(ehriUri("Annotation", "c1"));
+        String jsonAnnotationTestString = "{\"type\": \"Annotation\", " +
                 "\"data\":{\"identifier\": \"39dj28dhs\", \"body\": \"test\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)

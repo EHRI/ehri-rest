@@ -20,7 +20,7 @@
 package eu.ehri.project.models;
 
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
@@ -51,7 +51,7 @@ public enum EntityClass {
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, Concept.class, IdentifiableEntityIdGenerator.INSTANCE),
     VIRTUAL_UNIT(Entities.VIRTUAL_UNIT, VirtualUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
 
-    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, DocumentDescription.class, DescriptionIdGenerator.INSTANCE),
+    DOCUMENTARY_UNIT_DESCRIPTION(Entities.DOCUMENTARY_UNIT_DESCRIPTION, DocumentaryUnitDescription.class, DescriptionIdGenerator.INSTANCE),
     REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, RepositoryDescription.class, DescriptionIdGenerator.INSTANCE),
     HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, HistoricalAgentDescription.class, DescriptionIdGenerator.INSTANCE),
     CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, ConceptDescription.class, DescriptionIdGenerator.INSTANCE),
@@ -88,7 +88,7 @@ public enum EntityClass {
      *
      * @return the Java model class associated with the type
      */
-    public Class<? extends Frame> getJavaClass() {
+    public Class<? extends Entity> getJavaClass() {
         return cls;
     }
 
@@ -110,16 +110,16 @@ public enum EntityClass {
     }
 
     private final String name;
-    private final Class<? extends Frame> cls;
+    private final Class<? extends Entity> cls;
     private final IdGenerator idGen;
 
-    EntityClass(String name, Class<? extends Frame> cls, IdGenerator idGen) {
+    EntityClass(String name, Class<? extends Entity> cls, IdGenerator idGen) {
         this.name = name;
         this.cls = cls;
         this.idGen = idGen;
     }
 
-    EntityClass(String name, Class<? extends Frame> cls) {
+    EntityClass(String name, Class<? extends Entity> cls) {
         this(name, cls, GenericIdGenerator.INSTANCE);
     }
 

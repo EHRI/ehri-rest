@@ -24,8 +24,8 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
 
@@ -49,7 +49,7 @@ public enum SystemScope implements PermissionScope {
     }
 
     @Override
-    public <T extends Frame> T as(Class<T> cls) {
+    public <T extends Entity> T as(Class<T> cls) {
         throw new UnsupportedOperationException();
     }
 
@@ -83,12 +83,12 @@ public enum SystemScope implements PermissionScope {
     }
 
     @Override
-    public Iterable<AccessibleEntity> getContainedItems() {
+    public Iterable<Accessible> getContainedItems() {
         return new EmptyIterable<>();
     }
 
     @Override
-    public Iterable<AccessibleEntity> getAllContainedItems() {
+    public Iterable<Accessible> getAllContainedItems() {
         return new EmptyIterable<>();
     }
 

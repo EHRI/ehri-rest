@@ -25,7 +25,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -40,8 +40,8 @@ import java.util.Stack;
 public class DcEuropeanaHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DcEuropeanaHandler.class);
-private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Frame>>builder()
+private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Entity>>builder()
                 .put("relation", Annotation.class).build();
     public DcEuropeanaHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);

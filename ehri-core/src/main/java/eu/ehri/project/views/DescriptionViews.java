@@ -30,11 +30,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Described;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
@@ -46,7 +46,7 @@ import eu.ehri.project.persistence.TraversalCallback;
 import java.util.Set;
 
 
-public class DescriptionViews <E extends DescribedEntity> {
+public class DescriptionViews <E extends Described> {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
@@ -67,7 +67,7 @@ public class DescriptionViews <E extends DescribedEntity> {
     public int delete(String parentId, String id, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError {
         E parent = crud.detail(parentId, user);
-        AccessibleEntity dependentItem = manager.getFrame(id, AccessibleEntity.class);
+        Accessible dependentItem = manager.getEntity(id, Accessible.class);
         if (!itemsInSubtree(parent).contains(dependentItem)) {
             throw new PermissionDenied("Given description does not belong to its parent item");
         }
@@ -77,10 +77,10 @@ public class DescriptionViews <E extends DescribedEntity> {
                 .createVersion(dependentItem)
                 .commit();
         return getPersister(parent)
-                .delete(serializer.vertexFrameToBundle(dependentItem));
+                .delete(serializer.entityToBundle(dependentItem));
     }
 
-    public <T extends AccessibleEntity> T create(String parentId, Bundle data,
+    public <T extends Accessible> T create(String parentId, Bundle data,
             Class<T> descriptionClass, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError {
         E parent = crud.detail(parentId, user);
@@ -92,7 +92,7 @@ public class DescriptionViews <E extends DescribedEntity> {
         return out;
     }
 
-    public <T extends AccessibleEntity> Mutation<T> update(String parentId, Bundle data,
+    public <T extends Accessible> Mutation<T> update(String parentId, Bundle data,
                 Class<T> descriptionClass, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError {
         E parent = crud.detail(parentId, user);
@@ -113,11 +113,11 @@ public class DescriptionViews <E extends DescribedEntity> {
         return new BundleDAO(graph, scope.idPath());
     }
 
-    private Set<Frame> itemsInSubtree(Frame topLevel) {
-        final Set<Frame> items = Sets.newHashSet();
+    private Set<Entity> itemsInSubtree(Entity topLevel) {
+        final Set<Entity> items = Sets.newHashSet();
         serializer.traverseSubtree(topLevel, new TraversalCallback() {
             @Override
-            public void process(Frame frame, int depth, String relation, int relationIndex) {
+            public void process(Entity frame, int depth, String relation, int relationIndex) {
                 items.add(frame);
             }
         });

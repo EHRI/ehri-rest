@@ -25,7 +25,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -38,8 +38,8 @@ import java.util.Map;
  */
 public class EagHandler extends SaxXmlHandler {
 
-    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Frame>>builder().put(
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Entity>>builder().put(
             "maintenanceEvent", MaintenanceEvent.class).build();
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 

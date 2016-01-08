@@ -8,7 +8,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 
@@ -35,14 +34,14 @@ public class AclGraphTest extends AbstractFixtureTest {
 
     @Test
     public void testGetVertexAsValidUser() throws Exception {
-        Vertex vertex = manager.getFrame("c1", DocumentaryUnit.class).asVertex();
+        Vertex vertex = manager.getEntity("c1", DocumentaryUnit.class).asVertex();
         Vertex validUserVertex = validUserGraph.getVertex(vertex.getId());
         assertEquals(validUserVertex.getId(), vertex.getId());
     }
 
     @Test
     public void testGetVertexAsInvalidUser() throws Exception {
-        Vertex vertex = manager.getFrame("c1", DocumentaryUnit.class).asVertex();
+        Vertex vertex = manager.getEntity("c1", DocumentaryUnit.class).asVertex();
         Vertex invalidUserVertex = invalidUserGraph.getVertex(vertex.getId());
         assertNull(invalidUserVertex);
     }
@@ -63,7 +62,7 @@ public class AclGraphTest extends AbstractFixtureTest {
 
     @Test
     public void testTraversalAsInvalidUser() throws Exception {
-        Vertex vertex = manager.getFrame("r1", Repository.class).asVertex();
+        Vertex vertex = manager.getEntity("r1", Repository.class).asVertex();
         Vertex invalidUserVertex = invalidUserGraph.getVertex(vertex.getId());
         // Invalid user can see repository r1
         assertNotNull(invalidUserVertex);

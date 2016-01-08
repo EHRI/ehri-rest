@@ -35,7 +35,7 @@ import eu.ehri.project.models.annotations.Mandatory;
  *
 
  */
-public interface Description extends NamedEntity, AccessibleEntity {
+public interface Description extends Named, Accessible {
 
     /**
      * Process by which this description was created. Currently supported
@@ -46,7 +46,7 @@ public interface Description extends NamedEntity, AccessibleEntity {
     }
 
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
-    DescribedEntity getEntity();
+    Described getEntity();
 
     @Mandatory
     @Property(Ontology.LANGUAGE_OF_DESCRIPTION)
@@ -65,7 +65,7 @@ public interface Description extends NamedEntity, AccessibleEntity {
      */
     @Fetch(value = Ontology.DESCRIPTION_FOR_ENTITY, ifLevel =0)
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
-    DescribedEntity getDescribedEntity();
+    Described getDescribedEntity();
 
     @Dependent
     @Fetch(value = Ontology.HAS_MAINTENANCE_EVENT, whenNotLite = true)

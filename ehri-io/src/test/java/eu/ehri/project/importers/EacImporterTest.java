@@ -27,7 +27,7 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.UnknownProperty;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
@@ -74,7 +74,7 @@ public class EacImporterTest extends AbstractImporterTest {
          **/
         assertEquals(count + 8, getNodeCount(graph));
 
-        HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
+        HistoricalAgent abwehr = manager.getEntity("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertNotNull(abwehr);
@@ -149,7 +149,7 @@ public class EacImporterTest extends AbstractImporterTest {
         assertEquals(logMessage, ev.getLogMessage());
 
         // Ensure the import action has the right number of subjects.
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
+        List<Accessible> subjects = toList(ev.getSubjects());
         assertEquals(1, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
     }

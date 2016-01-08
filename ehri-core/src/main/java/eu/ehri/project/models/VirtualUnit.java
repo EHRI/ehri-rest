@@ -159,7 +159,7 @@ public interface VirtualUnit extends AbstractUnit {
      * @return an iterable of documentary unit description frames
      */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    Iterable<DocumentDescription> getVirtualDescriptions();
+    Iterable<DocumentaryUnitDescription> getVirtualDescriptions();
 
     /**
      * Implementation of complex methods.

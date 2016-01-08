@@ -19,30 +19,18 @@
 
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 
 /**
- * An entity that can have descriptions.
+ * An entity that has a name.
  *
 
  */
-public interface DescribedEntity extends PermissionScope, LinkableEntity {
+public interface Named extends Entity {
 
-    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    void addDescription(Description description);
-
-    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    void setDescriptions(Iterable<Description> descriptions);
-
-    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    void removeDescription(Description description);
-
-    @Fetch(Ontology.DESCRIPTION_FOR_ENTITY)
-    @Dependent
-    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    Iterable<Description> getDescriptions();
+    @Mandatory
+    @Property(Ontology.NAME_KEY)
+    String getName();
 }

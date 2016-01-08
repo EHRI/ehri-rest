@@ -80,7 +80,7 @@ public class UserAdd extends BaseCommand {
             throw new RuntimeException(getHelp());
 
         // Fetch the admin accessor, who's going to do the work.
-        Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
+        Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
                 Accessor.class);
 
         String userId = (String) cmdLine.getArgList().get(0);
@@ -102,7 +102,7 @@ public class UserAdd extends BaseCommand {
                 graph, UserProfile.class);
         UserProfile newUser = view.create(bundle, admin, getLogMessage(logMessage));
         for (String groupId : groups) {
-            Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+            Group group = manager.getEntity(groupId, EntityClass.GROUP, Group.class);
             group.addMember(newUser);
         }
 

@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -48,7 +49,7 @@ import java.util.Set;
  * Provides a web service interface for the UserProfile.
  */
 @Path(Entities.USER_PROFILE)
-public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile>
+public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public static final String FOLLOWING = "following";
@@ -91,7 +92,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             final UserProfile currentUser = getCurrentUser();
             final Set<Group> groups = Sets.newHashSet();
             for (String groupId : groupIds) {
-                groups.add(manager.getFrame(groupId, Group.class));
+                groups.add(manager.getEntity(groupId, Group.class));
             }
             Response item = createItem(bundle, accessors, new Handler<UserProfile>() {
                 @Override
@@ -178,7 +179,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             boolean following = user.isFollowing(
-                    manager.getFrame(otherId, UserProfile.class));
+                    manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return following;
         }
@@ -194,7 +195,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
-            boolean follower = user.isFollower(manager.getFrame(otherId, UserProfile.class));
+            boolean follower = user.isFollower(manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return follower;
         }
@@ -210,7 +211,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
-                user.addFollowing(manager.getFrame(id, UserProfile.class));
+                user.addFollowing(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -227,7 +228,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
-                user.removeFollowing(manager.getFrame(id, UserProfile.class));
+                user.removeFollowing(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -260,7 +261,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
-            boolean blocking = user.isBlocking(manager.getFrame(otherId, UserProfile.class));
+            boolean blocking = user.isBlocking(manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return blocking;
         }
@@ -276,7 +277,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
-                user.addBlocked(manager.getFrame(id, UserProfile.class));
+                user.addBlocked(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -293,7 +294,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
-                user.removeBlocked(manager.getFrame(id, UserProfile.class));
+                user.removeBlocked(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -326,7 +327,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
-                user.addWatching(manager.getFrame(id, Watchable.class));
+                user.addWatching(manager.getEntity(id, Watchable.class));
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -343,7 +344,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
-                user.removeWatching(manager.getFrame(id, Watchable.class));
+                user.removeWatching(manager.getEntity(id, Watchable.class));
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -360,7 +361,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor accessor = getRequesterUserProfile();
             UserProfile user = views.detail(userId, accessor);
-            boolean watching = user.isWatching(manager.getFrame(otherId, Watchable.class));
+            boolean watching = user.isWatching(manager.getEntity(otherId, Watchable.class));
             tx.success();
             return watching;
         }

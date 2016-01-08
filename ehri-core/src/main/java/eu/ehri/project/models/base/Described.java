@@ -22,21 +22,27 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.Fetch;
 
 /**
- * An entity that can be annotated.
+ * An entity that can have descriptions.
  *
 
  */
-public interface AnnotatableEntity extends Frame {
-    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
-    Iterable<Annotation> getAnnotations();
+public interface Described extends PermissionScope, Linkable {
 
-    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
-    void addAnnotation(Annotation annotation);
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
+    void addDescription(Description description);
 
-    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART, direction = Direction.IN)
-    void addAnnotationPart(Annotation annotation);
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
+    void setDescriptions(Iterable<Description> descriptions);
 
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
+    void removeDescription(Description description);
+
+    @Fetch(Ontology.DESCRIPTION_FOR_ENTITY)
+    @Dependent
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
+    Iterable<Description> getDescriptions();
 }

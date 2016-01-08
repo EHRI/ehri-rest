@@ -37,7 +37,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import java.util.List;
@@ -108,7 +108,7 @@ public class VirtualUnitViews {
      * @param accessor The current user
      * @return A set of top-level virtual units
      */
-    public Iterable<VirtualUnit> getVirtualCollections(Frame item, Accessor accessor) {
+    public Iterable<VirtualUnit> getVirtualCollections(Entity item, Accessor accessor) {
 
         // This is a relatively complicated traversal. We want to go from the item,
         // then to any descriptions, from those descriptions to any virtual units
@@ -155,7 +155,7 @@ public class VirtualUnitViews {
      * @param accessor The current user
      * @return A set of top-level virtual units
      */
-    public Iterable<VirtualUnit> getVirtualCollectionsForUser(Frame user, Accessor accessor) {
+    public Iterable<VirtualUnit> getVirtualCollectionsForUser(Entity user, Accessor accessor) {
         GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<>();
         Pipeline<Vertex, Vertex> filtered = pipe.start(user.asVertex())
                 .in(Ontology.VC_HAS_AUTHOR)

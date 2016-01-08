@@ -24,7 +24,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
@@ -33,7 +33,7 @@ import eu.ehri.project.models.base.PermissionScope;
  * to a user.
  */
 @EntityType(EntityClass.PERMISSION_GRANT)
-public interface PermissionGrant extends Frame {
+public interface PermissionGrant extends Entity {
 
     @Fetch(value = Ontology.PERMISSION_GRANT_HAS_SUBJECT, ifBelowLevel = 1, numLevels = 1)
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SUBJECT)

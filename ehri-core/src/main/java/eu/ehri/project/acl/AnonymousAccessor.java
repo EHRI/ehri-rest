@@ -25,7 +25,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.EmptyIterable;
 
 /**
@@ -44,7 +44,7 @@ public enum AnonymousAccessor implements Accessor {
     }
 
     @Override
-    public <T extends Frame> T as(Class<T> cls) {
+    public <T extends Entity> T as(Class<T> cls) {
         throw new UnsupportedOperationException();
     }
 

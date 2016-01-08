@@ -38,8 +38,8 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventAgentType;
 import eu.ehri.project.models.MaintenanceEventType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.views.EventViews;
@@ -388,7 +388,7 @@ public class Eac2010Exporter implements EacExporter {
     }
 
 
-    private void addRevisionDesc(Document doc, Element controlElem, DescribedEntity entity, Description desc) {
+    private void addRevisionDesc(Document doc, Element controlElem, Described entity, Description desc) {
 
         Element mainHistElem = doc.createElement("maintenanceHistory");
         controlElem.appendChild(mainHistElem);
@@ -495,7 +495,7 @@ public class Eac2010Exporter implements EacExporter {
     protected Optional<String> getLinkDescription(Link link) {
         String desc = link.getDescription();
         if (desc == null) {
-            for (AccessibleEntity other : link.getLinkBodies()) {
+            for (Accessible other : link.getLinkBodies()) {
                 if (other.getType().equals(Entities.ACCESS_POINT)) {
                     AccessPoint ap = other.as(AccessPoint.class);
                     desc = ap.getProperty("description");
@@ -508,9 +508,9 @@ public class Eac2010Exporter implements EacExporter {
         return Optional.absent();
     }
 
-    protected Optional<String> getLinkName(DescribedEntity entity,
+    protected Optional<String> getLinkName(Described entity,
             Description description, Link link, String lang) {
-        for (AccessibleEntity other : link.getLinkBodies()) {
+        for (Accessible other : link.getLinkBodies()) {
             // We only use an access point body for the name of this link
             // if the access point is on the current entity (otherwise the
             // link will have the same name as our current item.)
@@ -523,17 +523,17 @@ public class Eac2010Exporter implements EacExporter {
                 }
             }
         }
-        for (AccessibleEntity other : link.getLinkTargets()) {
+        for (Accessible other : link.getLinkTargets()) {
             if (!other.equals(entity)) {
-                return Optional.of(getEntityName(other.as(DescribedEntity.class), lang));
+                return Optional.of(getEntityName(other.as(Described.class), lang));
             }
         }
 
         return Optional.absent();
     }
 
-    protected Optional<String> getLinkEntityId(DescribedEntity entity, Link link) {
-        for (AccessibleEntity other : link.getLinkTargets()) {
+    protected Optional<String> getLinkEntityId(Described entity, Link link) {
+        for (Accessible other : link.getLinkTargets()) {
             if (!other.equals(entity)) {
                 return Optional.of(other.getId());
             }
@@ -541,7 +541,7 @@ public class Eac2010Exporter implements EacExporter {
         return Optional.absent();
     }
 
-    protected String getEntityName(DescribedEntity entity, String lang) {
+    protected String getEntityName(Described entity, String lang) {
         return Helpers.getBestDescription(entity, lang).transform(new Function<Description, String>() {
             @Override
             public String apply(Description description) {

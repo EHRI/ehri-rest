@@ -31,7 +31,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,9 +202,9 @@ public final class Serializer {
      * @return A map of data
      * @throws SerializationError
      */
-    public <T extends Frame> Map<String, Object> vertexFrameToData(T item)
+    public <T extends Entity> Map<String, Object> entityToData(T item)
             throws SerializationError {
-        return vertexFrameToBundle(item).toData();
+        return entityToBundle(item).toData();
     }
 
     /**
@@ -216,31 +216,31 @@ public final class Serializer {
      */
     public Map<String, Object> vertexToData(Vertex item)
             throws SerializationError {
-        return vertexFrameToBundle(item).toData();
+        return vertexToBundle(item).toData();
     }
 
     /**
-     * Convert a Frame into an EntityBundle that includes its @Fetch'd
+     * Convert an Entity into a Bundle that includes its @Fetch'd
      * relations.
      *
      * @param item The framed item
      * @return A data bundle
      * @throws SerializationError
      */
-    public <T extends Frame> Bundle vertexFrameToBundle(T item)
+    public <T extends Entity> Bundle entityToBundle(T item)
             throws SerializationError {
         return vertexToBundle(item.asVertex(), 0, maxTraversals, false);
     }
 
     /**
-     * Convert a Vertex into an EntityBundle that includes its @Fetch'd
+     * Convert a Vertex into a Bundle that includes its @Fetch'd
      * relations.
      *
      * @param item The item vertex
      * @return A data bundle
      * @throws SerializationError
      */
-    public Bundle vertexFrameToBundle(Vertex item)
+    public Bundle vertexToBundle(Vertex item)
             throws SerializationError {
         return vertexToBundle(item, 0, maxTraversals, false);
     }
@@ -252,9 +252,9 @@ public final class Serializer {
      * @return A JSON string
      * @throws SerializationError
      */
-    public <T extends Frame> String vertexFrameToJson(T item)
+    public <T extends Entity> String entityToJson(T item)
             throws SerializationError {
-        return DataConverter.bundleToJson(vertexFrameToBundle(item));
+        return DataConverter.bundleToJson(entityToBundle(item));
     }
 
     /**
@@ -266,7 +266,7 @@ public final class Serializer {
      */
     public String vertexToJson(Vertex item)
             throws SerializationError {
-        return DataConverter.bundleToJson(vertexFrameToBundle(item));
+        return DataConverter.bundleToJson(vertexToBundle(item));
     }
 
     /**
@@ -276,21 +276,9 @@ public final class Serializer {
      * @return An XML document
      * @throws SerializationError
      */
-    public Document vertexFrameToXml(Vertex item)
+    public Document vertexToXml(Vertex item)
             throws SerializationError {
-        return DataConverter.bundleToXml(vertexFrameToBundle(item));
-    }
-
-    /**
-     * Serialise a vertex frame to XML.
-     *
-     * @param item A framed item
-     * @return An XML document
-     * @throws SerializationError
-     */
-    public <T extends Frame> Document vertexFrameToXml(T item)
-            throws SerializationError {
-        return vertexFrameToXml(item.asVertex());
+        return DataConverter.bundleToXml(vertexToBundle(item));
     }
 
     /**
@@ -302,7 +290,7 @@ public final class Serializer {
      */
     public String vertexToXmlString(Vertex item)
             throws SerializationError {
-        return DataConverter.bundleToXmlString(vertexFrameToBundle(item));
+        return DataConverter.bundleToXmlString(vertexToBundle(item));
     }
 
     /**
@@ -312,9 +300,9 @@ public final class Serializer {
      * @return An XML document string
      * @throws SerializationError
      */
-    public <T extends Frame> String vertexFrameToXmlString(T item)
+    public <T extends Entity> String entityToXmlString(T item)
             throws SerializationError {
-        return DataConverter.bundleToXmlString(vertexFrameToBundle(item));
+        return DataConverter.bundleToXmlString(entityToBundle(item));
     }
 
     /**
@@ -324,13 +312,13 @@ public final class Serializer {
      * @param item The item
      * @param cb   A callback object
      */
-    public <T extends Frame> void traverseSubtree(T item,
+    public <T extends Entity> void traverseSubtree(T item,
             TraversalCallback cb) {
         traverseSubtree(item, 0, cb);
     }
 
     /**
-     * Convert a Frame into an EntityBundle that includes its @Fetch'd
+     * Convert a vertex into a Bundle that includes its @Fetch'd
      * relations.
      *
      * @param item  The item vertex
@@ -346,7 +334,7 @@ public final class Serializer {
             String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
 
-            Class<? extends Frame> cls = type.getJavaClass();
+            Class<? extends Entity> cls = type.getJavaClass();
             Bundle.Builder builder = Bundle.Builder.withClass(type)
                     .setId(id)
                     .addData(getVertexData(item, type, lite))
@@ -364,7 +352,7 @@ public final class Serializer {
         }
     }
 
-    private Bundle fetch(Frame frame, int depth, int maxDepth, boolean isLite) throws SerializationError {
+    private Bundle fetch(Entity frame, int depth, int maxDepth, boolean isLite) throws SerializationError {
         if (cache != null) {
             String key = frame.getId() + depth + isLite;
             if (cache.containsKey(key))
@@ -406,13 +394,13 @@ public final class Serializer {
                         // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
-                                relations.put(relationName, fetch((Frame) d, nextDepth, nextMaxDepth, isLite));
+                                relations.put(relationName, fetch((Entity) d, nextDepth, nextMaxDepth, isLite));
                             }
                         } else {
                             // This relationship could be NULL if, e.g. a
                             // collection has no holder.
                             if (result != null) {
-                                relations.put(relationName, fetch((Frame) result, nextDepth, nextMaxDepth, isLite));
+                                relations.put(relationName, fetch((Entity) result, nextDepth, nextMaxDepth, isLite));
                             }
                         }
                     } catch (Exception e) {
@@ -563,7 +551,7 @@ public final class Serializer {
      * Run a callback every time a node in a subtree is encountered, excepting
      * the top-level node.
      */
-    private <T extends Frame> void traverseSubtree(T item, int depth,
+    private <T extends Entity> void traverseSubtree(T item, int depth,
             TraversalCallback cb) {
 
         if (depth < maxTraversals) {
@@ -581,16 +569,16 @@ public final class Serializer {
                         if (result instanceof Iterable<?>) {
                             int rnum = 0;
                             for (Object d : (Iterable<?>) result) {
-                                cb.process((Frame) d, depth,
+                                cb.process((Entity) d, depth,
                                         entry.getKey(), rnum);
-                                traverseSubtree((Frame) d, depth + 1, cb);
+                                traverseSubtree((Entity) d, depth + 1, cb);
                                 rnum++;
                             }
                         } else {
                             if (result != null) {
-                                cb.process((Frame) result, depth,
+                                cb.process((Entity) result, depth,
                                         entry.getKey(), 0);
-                                traverseSubtree((Frame) result,
+                                traverseSubtree((Entity) result,
                                         depth + 1, cb);
                             }
                         }

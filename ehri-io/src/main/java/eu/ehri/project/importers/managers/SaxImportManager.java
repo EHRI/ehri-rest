@@ -30,7 +30,7 @@ import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
@@ -148,7 +148,7 @@ public class SaxImportManager extends AbstractImportManager {
 
             // Add housekeeping callbacks for the log object...
             importer.addCallback(new ImportCallback() {
-                public void itemImported(Mutation<? extends AccessibleEntity> mutation) {
+                public void itemImported(Mutation<? extends Accessible> mutation) {
                     switch (mutation.getState()) {
                         case CREATED:
                             logger.info("Item created: {}", mutation.getNode().getId());

@@ -21,7 +21,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        AuthoritativeSet authoritativeSet = manager.getFrame("auths", AuthoritativeSet.class);
+        AuthoritativeSet authoritativeSet = manager.getEntity("auths", AuthoritativeSet.class);
         int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
         assertEquals(2, voccount);
         logger.debug("number of items: " + voccount);
@@ -66,7 +66,7 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest {
         assertEquals(voccount + 16, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
-        for (AccessibleEntity subject : actionManager.getLatestGlobalEvent().getSubjects()) {
+        for (Accessible subject : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(authoritativeSet, subject.getPermissionScope());
         }
     }

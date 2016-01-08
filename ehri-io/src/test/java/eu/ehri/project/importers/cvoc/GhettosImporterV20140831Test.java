@@ -43,7 +43,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
-        Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
+        Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
@@ -72,7 +72,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         List<Concept> list = toList(query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
-        Concept ghetto0 = manager.getFrame("cvoc1-0", Concept.class);
+        Concept ghetto0 = manager.getEntity("cvoc1-0", Concept.class);
         //  <geo:lat>52.43333333333333</geo:lat>
         //	<geo:long>20.716666666666665</geo:long>
         Iterable<Description> ghetto0desc = ghetto0.getDescriptions();
@@ -109,7 +109,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
        assertEquals(origCount + (11-8), getNodeCount(graph));
         printGraph(graph);
         
-        Concept ghetto0v2 = manager.getFrame("cvoc1-0", Concept.class);
+        Concept ghetto0v2 = manager.getEntity("cvoc1-0", Concept.class);
         assertEquals(ghetto0, ghetto0v2);
         
         for(Description d : ghetto0v2.getDescriptions()){

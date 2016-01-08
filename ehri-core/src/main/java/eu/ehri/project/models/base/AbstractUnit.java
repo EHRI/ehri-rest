@@ -22,6 +22,6 @@ package eu.ehri.project.models.base;
 /**
  * An abstract entity that has the features that documentary units need.
  */
-public interface AbstractUnit extends DescribedEntity,
+public interface AbstractUnit extends Described,
         ItemHolder, Watchable {
 }

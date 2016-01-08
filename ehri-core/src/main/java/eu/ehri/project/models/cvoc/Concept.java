@@ -29,9 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -50,7 +48,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
 public interface Concept extends
-        DescribedEntity, AuthoritativeItem, ItemHolder {
+        Described, AuthoritativeItem, ItemHolder {
 
     // NB: As an AuthoritativeItem the set will be @Fetched automatically
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)

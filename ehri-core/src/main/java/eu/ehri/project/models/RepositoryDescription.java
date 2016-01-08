@@ -20,13 +20,13 @@
 package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AddressableEntity;
+import eu.ehri.project.models.base.Addressable;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.Temporal;
 
 /**
  * Frame class representing the description of a repository.
  */
 @EntityType(EntityClass.REPOSITORY_DESCRIPTION)
-public interface RepositoryDescription extends Description, AddressableEntity, TemporalEntity {
+public interface RepositoryDescription extends Description, Addressable, Temporal {
 }

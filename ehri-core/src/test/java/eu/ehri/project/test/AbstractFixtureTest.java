@@ -42,9 +42,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     public void setUp() throws Exception {
         super.setUp();
         try {
-            item = manager.getFrame("c1", DocumentaryUnit.class);
-            validUser = manager.getFrame("mike", UserProfile.class);
-            invalidUser = manager.getFrame("reto", UserProfile.class);
+            item = manager.getEntity("c1", DocumentaryUnit.class);
+            validUser = manager.getEntity("mike", UserProfile.class);
+            invalidUser = manager.getEntity("reto", UserProfile.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(e);
         }

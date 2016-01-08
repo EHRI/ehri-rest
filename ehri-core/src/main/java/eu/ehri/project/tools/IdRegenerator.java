@@ -28,12 +28,12 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.VersionedEntity;
+import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistence.Bundle;
@@ -82,10 +82,10 @@ public class IdRegenerator {
         this.collisionMode = collisionMode;
     }
 
-    public List<List<String>> reGenerateIds(PermissionScope scope, Iterable<? extends Frame> items) throws
+    public List<List<String>> reGenerateIds(PermissionScope scope, Iterable<? extends Entity> items) throws
             IdCollisionError {
         List<List<String>> remaps = Lists.newArrayList();
-        for (Frame item: items) {
+        for (Entity item: items) {
             Optional<List<String>> optionalRemap = reGenerateId(scope, item);
             if (optionalRemap.isPresent()) {
                 remaps.add(optionalRemap.get());
@@ -94,9 +94,9 @@ public class IdRegenerator {
         return remaps;
     }
 
-    public List<List<String>> reGenerateIds(Iterable<? extends AccessibleEntity> items) throws IdCollisionError {
+    public List<List<String>> reGenerateIds(Iterable<? extends Accessible> items) throws IdCollisionError {
         List<List<String>> remaps = Lists.newArrayList();
-        for (AccessibleEntity item: items) {
+        for (Accessible item: items) {
             Optional<List<String>> optionalRemap = reGenerateId(item);
             if (optionalRemap.isPresent()) {
                 remaps.add(optionalRemap.get());
@@ -105,11 +105,11 @@ public class IdRegenerator {
         return remaps;
     }
 
-    public Optional<List<String>> reGenerateId(AccessibleEntity item) throws IdCollisionError {
+    public Optional<List<String>> reGenerateId(Accessible item) throws IdCollisionError {
         return reGenerateId(item.getPermissionScope(), item);
     }
 
-    public Optional<List<String>> reGenerateId(PermissionScope permissionScope, Frame item)
+    public Optional<List<String>> reGenerateId(PermissionScope permissionScope, Entity item)
             throws IdCollisionError {
         String currentId = item.getId();
         Collection<String> idChain = Lists.newArrayList();
@@ -120,7 +120,7 @@ public class IdRegenerator {
         EntityClass entityClass = manager.getEntityClass(item);
         try {
             IdGenerator idgen = entityClass.getIdGen();
-            Bundle itemBundle = depSerializer.vertexFrameToBundle(item);
+            Bundle itemBundle = depSerializer.entityToBundle(item);
             String newId = idgen.generateId(idChain, itemBundle);
             if (collisionMode) {
                 if (!newId.equals(currentId) && manager.exists(newId)) {
@@ -145,14 +145,14 @@ public class IdRegenerator {
                             String idBase = idgen.getIdBase(itemBundle);
                             Collection<String> descIdChain = Lists.newArrayList(idChain);
                             descIdChain.add(idBase);
-                            for (Description d : item.as(DescribedEntity.class).getDescriptions()) {
-                                Bundle desc = depSerializer.vertexFrameToBundle(d);
+                            for (Description d : item.as(Described.class).getDescriptions()) {
+                                Bundle desc = depSerializer.entityToBundle(d);
                                 String newDescriptionId = desc.getType().getIdGen().generateId(descIdChain, desc);
                                 manager.renameVertex(d.asVertex(), d.getId(), newDescriptionId);
                             }
 
                             // Change the ID on any versions...
-                            for (Version v : item.as(VersionedEntity.class).getAllPriorVersions()) {
+                            for (Version v : item.as(Versioned.class).getAllPriorVersions()) {
                                 manager.setProperty(v.asVertex(), Ontology.VERSION_ENTITY_ID, newId);
                             }
                         }

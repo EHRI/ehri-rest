@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -54,7 +54,7 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
         // It just so happens for this test that, for convenience reasons,
         // the fixtures do not have the IDs that their IdGenerators would
         // produce. So it's easy to test this.
-        DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
         Optional<List<String>> remap = idRegenerator.reGenerateId(doc);
         assertTrue(remap.isPresent());
         List<String> beforeAfter = remap.get();
@@ -67,8 +67,8 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
 
     @Test(expected = IdRegenerator.IdCollisionError.class)
     public void testReGenerateIdWithCollision() throws Exception {
-        DocumentaryUnit doc1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit doc2 = manager.getFrame("c4", DocumentaryUnit.class);
+        DocumentaryUnit doc1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc2 = manager.getEntity("c4", DocumentaryUnit.class);
         // Give c4 its "natural" ID
         Optional<List<String>> regen = idRegenerator
                 .withActualRename(true).reGenerateId(doc2);
@@ -80,8 +80,8 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
 
     @Test
     public void testCollisionMode() throws Exception {
-        DocumentaryUnit doc1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit doc2 = manager.getFrame("c4", DocumentaryUnit.class);
+        DocumentaryUnit doc1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc2 = manager.getEntity("c4", DocumentaryUnit.class);
         // Give c4 its "natural" ID
         Optional<List<String>> regen = idRegenerator
                 .withActualRename(true).reGenerateId(doc2);
@@ -96,8 +96,8 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
 
     @Test
     public void testReGenerateIdWSkippingCollisions() throws Exception {
-        DocumentaryUnit doc1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit doc2 = manager.getFrame("c4", DocumentaryUnit.class);
+        DocumentaryUnit doc1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc2 = manager.getEntity("c4", DocumentaryUnit.class);
         // Give c4 its "natural" ID
         Optional<List<String>> regen = idRegenerator
                 .withActualRename(true)
@@ -111,15 +111,15 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
 
     @Test
     public void testReGenerateIdWithExplicitScope() throws Exception {
-        DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
-        Repository fakeScope = manager.getFrame("r2", Repository.class);
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
+        Repository fakeScope = manager.getEntity("r2", Repository.class);
         Optional<List<String>> remap = idRegenerator.reGenerateId(fakeScope, doc);
         assertEquals("gb-r2-c1", remap.get().get(1));
     }
 
     @Test
     public void testReGenerateIdWithRename() throws Exception {
-        DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit doc = manager.getEntity("c1", DocumentaryUnit.class);
         Optional<List<String>> remap = idRegenerator.withActualRename(true).reGenerateId(doc);
         assertEquals("nl-r1-c1", remap.get().get(1));
         assertFalse(manager.exists("c1"));
@@ -127,7 +127,7 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
         // It shouldn't actually do anything by default...
         assertEquals(remap.get().get(1), doc.getId());
         // The descriptions should also be renamed...
-        DocumentDescription desc = Iterables.getFirst(doc.getDocumentDescriptions(), null);
+        DocumentaryUnitDescription desc = Iterables.getFirst(doc.getDocumentDescriptions(), null);
         assertNotNull(desc);
         String newDescId = String.format("%s%s%s%s%s",
                 doc.getId(),
@@ -143,7 +143,7 @@ public class IdRegeneratorTest extends AbstractFixtureTest {
 
     @Test
     public void testReGenerateIds() throws Exception {
-        Iterable<DocumentaryUnit> docs = manager.getFrames(EntityClass.DOCUMENTARY_UNIT,
+        Iterable<DocumentaryUnit> docs = manager.getEntities(EntityClass.DOCUMENTARY_UNIT,
                 DocumentaryUnit.class);
         List<List<String>> remaps = idRegenerator.reGenerateIds(docs);
         assertEquals(4, remaps.size());

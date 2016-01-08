@@ -33,7 +33,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
@@ -41,7 +41,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * some other node.
  */
 @EntityType(EntityClass.VERSION)
-public interface Version extends AccessibleEntity {
+public interface Version extends Accessible {
 
     /**
      * Fetch the class of the entity that this version pertains to.
@@ -86,13 +86,13 @@ public interface Version extends AccessibleEntity {
      * @return the entity to which this version refers.
      */
     @JavaHandler
-    AccessibleEntity getEntity();
+    Accessible getEntity();
 
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Version {
-        public AccessibleEntity getEntity() {
+        public Accessible getEntity() {
             Pipeline<Vertex,Vertex> out =  gremlin().as("n").in(Ontology.ENTITY_HAS_PRIOR_VERSION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
@@ -101,7 +101,7 @@ public interface Version extends AccessibleEntity {
                                     Ontology.ENTITY_HAS_PRIOR_VERSION).iterator().hasNext();
                         }
                     });
-            return (AccessibleEntity)(out.hasNext() ? frame(out.next()) : null);
+            return (Accessible)(out.hasNext() ? frame(out.next()) : null);
         }
     }
 }

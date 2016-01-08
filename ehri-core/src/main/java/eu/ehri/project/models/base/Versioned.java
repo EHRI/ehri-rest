@@ -33,14 +33,14 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  *
 
  */
-public interface VersionedEntity extends Frame {
+public interface Versioned extends Entity {
     @Adjacency(label = Ontology.ENTITY_HAS_PRIOR_VERSION, direction = Direction.OUT)
     Version getPriorVersion();
 
     @JavaHandler
     Iterable<Version> getAllPriorVersions();
 
-    abstract class Impl implements JavaHandlerContext<Vertex>, VersionedEntity {
+    abstract class Impl implements JavaHandlerContext<Vertex>, Versioned {
 
         /**
          * Loops up through the chain of hasPriorVersion until the end, until it

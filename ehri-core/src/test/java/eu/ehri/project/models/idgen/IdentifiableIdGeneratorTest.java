@@ -35,7 +35,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 
-public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
+public class IdentifiableIdGeneratorTest extends AbstractFixtureTest {
 
     private IdGenerator instance;
     private List<String> scopes;

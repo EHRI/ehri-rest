@@ -27,7 +27,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -66,7 +66,7 @@ public class ItsTest extends AbstractImporterTest {
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                 DocumentaryUnit.class);
 
-        for (DocumentDescription desc : unit.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription desc : unit.getDocumentDescriptions()) {
             for (String k : desc.getPropertyKeys()) {
                 System.out.println(k + " - " + desc.getProperty(k));
             }
@@ -98,7 +98,7 @@ public class ItsTest extends AbstractImporterTest {
         /**
          * relationship: 2
          * null: 10 
-         * documentaryUnit: 4 
+         * DocumentaryUnit: 4
          * documentDescription: 8 
          * maintenanceEvent: 8 (1+3)*2 
          * systemEvent: 2
@@ -123,7 +123,7 @@ public class ItsTest extends AbstractImporterTest {
         assertEquals(1L, unit.getChildCount());
 
         for (Description d : unit.getDocumentDescriptions()) {
-            Iterable<DatePeriod> datePeriods = d.as(DocumentDescription.class).getDatePeriods();
+            Iterable<DatePeriod> datePeriods = d.as(DocumentaryUnitDescription.class).getDatePeriods();
             assertTrue(datePeriods.iterator().hasNext());
 
             logger.debug("Description language: " + d.getLanguageOfDescription());
@@ -178,7 +178,7 @@ public class ItsTest extends AbstractImporterTest {
 
         /* null: 9
          * relationship: 23
-         * documentaryUnit: 8
+         * DocumentaryUnit: 8
          * property: 4
          * documentDescription: 8
          * maintenanceEvent: 4 (3 Revision + 1 Creation)
@@ -195,9 +195,9 @@ public class ItsTest extends AbstractImporterTest {
         List<String> otherIdentifiers = u.getProperty("otherIdentifiers");
         assertThat(otherIdentifiers, hasItem("Folder 0143"));
 
-        Iterable<DocumentDescription> descriptions = u.getDocumentDescriptions();
+        Iterable<DocumentaryUnitDescription> descriptions = u.getDocumentDescriptions();
         assertTrue(descriptions.iterator().hasNext());
-        for (DocumentDescription d : descriptions) {
+        for (DocumentaryUnitDescription d : descriptions) {
             assertEquals("R 2 Geheime Staatspolizei (Gestapo).ead#DEU", d.getProperty("sourceFileId"));
             assertTrue((d.getProperty("processInfo")).equals("ITS employee"));
 
@@ -245,7 +245,7 @@ public class ItsTest extends AbstractImporterTest {
         diff.printDebug(System.out);
 
         /* null: 21
-         * documentaryUnit: 20
+         * DocumentaryUnit: 20
          * property: 20
          * documentDescription: 20
          * maintenanceEvent: 3
@@ -282,7 +282,7 @@ public class ItsTest extends AbstractImporterTest {
         /*
          * relationship: 1
          * null: 5
-         * documentaryUnit: 4
+         * DocumentaryUnit: 4
          * documentDescription: 4
          * property: 1
          * maintenanceEvent: 4

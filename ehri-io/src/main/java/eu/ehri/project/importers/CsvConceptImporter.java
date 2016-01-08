@@ -28,7 +28,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -49,7 +49,7 @@ public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = getPersister();
         Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION,

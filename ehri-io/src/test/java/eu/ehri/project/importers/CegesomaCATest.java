@@ -25,7 +25,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class CegesomaCATest extends AbstractImporterTest {
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
         origCount = getNodeCount(graph);
@@ -86,14 +86,14 @@ public class CegesomaCATest extends AbstractImporterTest {
          * Test titles
          */
         // There should be one DocumentDescription for the <archdesc>
-        for (DocumentDescription dd : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertTrue(dd.getName().startsWith("Dessin caricatural d'un juif ayant "));
             assertEquals("fra", dd.getLanguageOfDescription());
         }
 
 
         // Fonds has two dates with different types -> list
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             // unitDates still around?
             assertFalse(d.getPropertyKeys().contains("unitDates"));
 

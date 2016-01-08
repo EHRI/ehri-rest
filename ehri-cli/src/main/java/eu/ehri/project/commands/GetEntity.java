@@ -23,7 +23,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
 
@@ -60,13 +59,8 @@ public class GetEntity extends BaseCommand {
 
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         String id = cmdLine.getArgs()[1];
-        Class<?> cls = type.getJavaClass();
 
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
-
-        System.out.println(serializer.vertexFrameToJson(manager.getFrame(id,
-                type, (Class<AccessibleEntity>)cls)));
+        System.out.println(serializer.vertexToJson(manager.getVertex(id, type)));
         return 0;
     }
 }

@@ -1,12 +1,12 @@
 {
-  "type": "cvocConcept",
+  "type": "CvocConcept",
   "data": {
     "identifier": "apple"
   },
   "relationships": {
     "describes": [
       {
-        "type": "cvocConceptDescription",
+        "type": "CvocConceptDescription",
         "data": {
           "languageCode": "en",
           "name": "apples",
@@ -16,7 +16,7 @@
         }
       },
       {
-        "type": "cvocConceptDescription",
+        "type": "CvocConceptDescription",
         "data": {
           "languageCode": "nl",
           "name": "appel",

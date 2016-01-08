@@ -26,7 +26,7 @@
                         <field name="{$propertyName}"><xsl:value-of select="." /></field>
                     </xsl:for-each>
                     <xsl:for-each select="relationships/hasDate">
-                        <field name="datePeriod"><xsl:value-of select="." /></field>
+                        <field name="DatePeriod"><xsl:value-of select="." /></field>
                     </xsl:for-each>
                 </xsl:for-each>
                 <xsl:for-each select="relationships/access/item">

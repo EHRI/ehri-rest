@@ -30,7 +30,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -40,7 +40,7 @@ import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
 
-public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
+public final class CrudViews<E extends Accessible> implements Crud<E> {
     private final FramedGraph<?> graph;
     private final Class<E> cls;
     private final ViewHelper helper;
@@ -86,7 +86,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ItemNotFound
      */
     public E detail(String id, Accessor user) throws ItemNotFound {
-        E item = manager.getFrame(id, cls);
+        E item = manager.getEntity(id, cls);
         if (!acl.canAccess(item, user)) {
             throw new ItemNotFound(id);
         }
@@ -174,9 +174,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(String id, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError, ItemNotFound {
-        E item = manager.getFrame(id, cls);
+        E item = manager.getEntity(id, cls);
         helper.checkEntityPermission(item, user, PermissionType.DELETE);
-        return getPersister(scope).delete(serializer.vertexFrameToBundle(item));
+        return getPersister(scope).delete(serializer.entityToBundle(item));
     }
 
     /**

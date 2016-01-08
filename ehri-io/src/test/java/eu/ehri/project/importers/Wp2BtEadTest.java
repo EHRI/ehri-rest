@@ -24,12 +24,12 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
@@ -64,7 +64,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
@@ -76,7 +76,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
 
 
-        Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getEntity("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         final String logMessage = "Importing Beit Terezin EAD";
@@ -110,7 +110,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
 
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
-        List<DocumentDescription> descriptions = Lists.newArrayList(fonds.getDocumentDescriptions());
+        List<DocumentaryUnitDescription> descriptions = Lists.newArrayList(fonds.getDocumentDescriptions());
         assertEquals(1, descriptions.size());
         assertEquals("mul", descriptions.get(0).getLanguageOfDescription());
 
@@ -142,8 +142,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             logger.debug(a.getLinkType());
         }
 
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
-        for (AccessibleEntity subject : subjects) {
+        List<Accessible> subjects = toList(ev.getSubjects());
+        for (Accessible subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }
 
@@ -159,7 +159,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(c1_b, c1_b_c2_b.getPermissionScope());
 
         // Check the author of the description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             assertEquals("EHRI", d.getProperty("processInfo"));
         }
 

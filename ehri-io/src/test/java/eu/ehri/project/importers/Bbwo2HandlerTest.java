@@ -27,13 +27,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -59,7 +59,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
     @Test
     public void bbwo2Test() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied, IntegrityError {
 
-        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
+        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example BBWO2 DC";
         
         //id="joodse-raad" source="niod-trefwoorden" term="Kinderen"
@@ -73,7 +73,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         vocabulary.addItem(concept_716);
         
         
-        Vocabulary vocabularyTest = manager.getFrame("niod_trefwoorden", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getEntity("niod_trefwoorden", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         
@@ -93,7 +93,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         /**
          * null: 2
          * relationship: 4
-         * documentaryUnit: 1
+         * DocumentaryUnit: 1
          * link: 1
          * property: 1
          * documentDescription: 1
@@ -105,7 +105,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
 
         DocumentaryUnit archdesc = graph.frame(getVertexByIdentifier(graph, ARCHDESC), DocumentaryUnit.class);
         assertNotNull(archdesc);
-        for (DocumentDescription d : archdesc.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("More refugee children arrive from Germany - in time ...", d.getName());
             assertEquals("1505", d.getProperty("sourceFileId"));
             logger.debug("id:"+d.getId() + " - identifier:" + archdesc.getProperty("identifier"));
@@ -118,7 +118,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         }
         
         boolean passTest = false;
-        DocumentaryUnit person = manager.getFrame("nl-r1-1505", DocumentaryUnit.class);
+        DocumentaryUnit person = manager.getEntity("nl-r1-1505", DocumentaryUnit.class);
         for (Description d : person.getDescriptions()) {
             for (AccessPoint rel : d.getAccessPoints()) {
                 if (rel.getRelationshipType().equals("subjectAccess")) {
@@ -126,8 +126,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
                         assertEquals(1, toList(rel.getLinks()).size());
                         for (Link link : rel.getLinks()) {
                             boolean conceptFound = false;
-                            for (LinkableEntity le : link.getLinkTargets()) {
-                                if (le.getType().equals("cvocConcept")) {
+                            for (Linkable le : link.getLinkTargets()) {
+                                if (le.getType().equals("CvocConcept")) {
                                     assertEquals(le, concept_716);
                                     conceptFound = true;
                                 }

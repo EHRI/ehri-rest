@@ -25,7 +25,7 @@ import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 
@@ -53,7 +53,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
     @Test
     public void testImportItemsT() throws Exception {
 
-         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
@@ -114,8 +114,8 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         assertEquals(logMessage, ev.getLogMessage());
 
 
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
-        for(AccessibleEntity subject  : subjects)
+        List<Accessible> subjects = toList(ev.getSubjects());
+        for(Accessible subject  : subjects)
             logger.info("identifier: " + subject.getId());
         
         assertEquals(5, subjects.size());

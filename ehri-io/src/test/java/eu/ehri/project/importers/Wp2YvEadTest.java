@@ -23,11 +23,11 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
@@ -69,7 +69,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         Concept concept_288 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_288);
 
-        Vocabulary vocabularyTest = manager.getFrame("wp2_keywords", Vocabulary.class);
+        Vocabulary vocabularyTest = manager.getEntity("wp2_keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
 
         final String logMessage = "Importing Yad Vashem EAD";
@@ -132,16 +132,16 @@ public class Wp2YvEadTest extends AbstractImporterTest {
             logger.debug(a.getLinkType() + " " + a.getDescription());
             assertEquals("subjectAccess", a.getLinkType());
             int hasBody = 0;
-            for(AccessibleEntity body : a.getLinkBodies()){
+            for(Accessible body : a.getLinkBodies()){
                 hasBody++;
 //                logger.debug("body: "+ body.getId() + " " + body.getType());
             }
             assertEquals(1, hasBody);
         }
 
-        List<AccessibleEntity> subjects = toList(ev.getSubjects());
+        List<Accessible> subjects = toList(ev.getSubjects());
         int countSubject=0;
-        for (AccessibleEntity subject : subjects) {
+        for (Accessible subject : subjects) {
             logger.info("identifier: " + subject.getId());
             countSubject++;
         }
@@ -157,7 +157,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(c2, c3.getPermissionScope());
         
         // Check the author of the top level description
-        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()){
             assertEquals("BT", d.getProperty("processInfo"));
         }
 

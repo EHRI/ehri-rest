@@ -34,7 +34,7 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
 
     @Test
     public void testCollectionHelpByRepo() throws ItemNotFound {
-        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
         assertNotNull(unit.getRepository());
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
@@ -42,8 +42,8 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
 
     @Test
     public void testChildDocsCanAccessTheirAgent() throws ItemNotFound {
-        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit child = manager.getFrame("c3", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit child = manager.getEntity("c3", DocumentaryUnit.class);
         assertNotNull(child.getRepository());
         assertNotNull(unit.getRepository());
         assertEquals(unit.getRepository(), child.getRepository());
@@ -51,8 +51,8 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
 
     @Test
     public void testCannotAddChildOfRelationshipTwice() throws Exception {
-        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit child = manager.getFrame("c2", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit child = manager.getEntity("c2", DocumentaryUnit.class);
         assertEquals(unit, child.getParent());
         assertEquals(1L, unit.getChildCount());
         unit.addChild(child);
@@ -61,7 +61,7 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
 
     @Test
     public void testCannotAddSelfAsChild() throws Exception {
-        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
         assertEquals(1L, unit.getChildCount());
         unit.addChild(unit);
         assertEquals(1L, unit.getChildCount());
@@ -69,9 +69,9 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
 
     @Test
     public void testParentChildRelationship() throws ItemNotFound {
-        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit child = manager.getFrame("c2", DocumentaryUnit.class);
-        DocumentaryUnit child2 = manager.getFrame("c3", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit child = manager.getEntity("c2", DocumentaryUnit.class);
+        DocumentaryUnit child2 = manager.getEntity("c3", DocumentaryUnit.class);
         assertEquals(unit, child.getParent());
         assertEquals(child, child2.getParent());
         assertTrue(Iterables.contains(unit.getChildren(), child));

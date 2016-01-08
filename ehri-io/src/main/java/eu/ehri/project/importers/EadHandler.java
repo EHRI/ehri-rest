@@ -26,11 +26,11 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
-import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -60,8 +60,8 @@ public class EadHandler extends SaxXmlHandler {
     final List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
     int maintenanceOrder;
 
-    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Frame>>builder().put(
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Entity>>builder().put(
             "maintenanceEvent", MaintenanceEvent.class).build();
 
     private static final Logger logger = LoggerFactory
@@ -244,7 +244,7 @@ public class EadHandler extends SaxXmlHandler {
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
                     //add the maintenanceEvents, but only to the DD that was just created
-                    for (DocumentDescription dd : current.getDocumentDescriptions()) {
+                    for (DocumentaryUnitDescription dd : current.getDocumentDescriptions()) {
                         if (getSourceFileId() == null || getSourceFileId().equals(dd.getProperty(Ontology.SOURCEFILE_KEY))) {
                             for (MaintenanceEvent me : maintenanceEvents) {
                                 dd.addMaintenanceEvent(me);

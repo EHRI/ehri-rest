@@ -26,7 +26,7 @@ package eu.ehri.project.importers;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -61,7 +61,7 @@ public class YadVashemTest extends AbstractImporterTest{
     @Test
     public void testWithExistingDescription() throws Exception {
         final String logMessage = "Importing a single EAD";
-        DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
+        DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
         
         assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());
@@ -83,7 +83,7 @@ public class YadVashemTest extends AbstractImporterTest{
        /**
         * null: 4
         * relationship: 4
-        * documentaryUnit: 2
+        * DocumentaryUnit: 2
         * documentDescription: 3
         * systemEvent: 1
         * datePeriod: 1
@@ -91,7 +91,7 @@ public class YadVashemTest extends AbstractImporterTest{
 
         assertEquals(count + 15, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
-        for (DocumentDescription desc : m19.getDocumentDescriptions()) {
+        for (DocumentaryUnitDescription desc : m19.getDocumentDescriptions()) {
             logger.debug("Document description graph ID: {}", desc.getId());
             assertTrue(desc.getId().equals("nl-r1-m19.eng") || desc.getId().equals("nl-r1-m19.eng-c1_eng"));
         }
@@ -104,7 +104,7 @@ public class YadVashemTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         System.out.println(count);
-        DocumentaryUnit m19 = manager.getFrame("nl-r1-m19", DocumentaryUnit.class);
+        DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
         
         assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());
@@ -123,7 +123,7 @@ public class YadVashemTest extends AbstractImporterTest{
        /*
         * null: 4
         * relationship: 5 (2 creator, 1 place, 1 subject, 1 geog)
-        * documentaryUnit: 2
+        * DocumentaryUnit: 2
         * documentDescription: 3
         * property: 1
         * systemEvent: 1
@@ -134,10 +134,10 @@ public class YadVashemTest extends AbstractImporterTest{
 assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
-        Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
+        Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             assertEquals("eng", desc.getLanguageOfDescription());
             nrOfDesc++;
@@ -150,14 +150,14 @@ assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
         logger.debug("size: "+ toList(m19.getDocumentDescriptions()).size());
-        for(DocumentDescription m19desc : m19.getDocumentDescriptions()){
+        for(DocumentaryUnitDescription m19desc : m19.getDocumentDescriptions()){
             logger.debug(m19desc.getId() + ":" + m19desc.getLanguageOfDescription() + ":" + m19desc.getProperty(Ontology.SOURCEFILE_KEY));
         }
         
         i = c1.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             //assertEquals("fin", desc.getLanguageOfDescription());
             nrOfDesc++;
@@ -167,7 +167,7 @@ assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         i = c2.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while(i.hasNext()){
-            DocumentDescription desc = i.next();
+            DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             nrOfDesc++;
         }

@@ -154,7 +154,7 @@ public class CvocConceptTest extends ModelTestBase {
 
     @Test
     public void testCreateConceptWithDescription() throws Exception {
-        UserProfile validUser = manager.getFrame("mike", UserProfile.class);
+        UserProfile validUser = manager.getEntity("mike", UserProfile.class);
         Crud<Concept> conceptViews = new CrudViews<>(graph,
                 Concept.class);
         Bundle bundle = Bundle.fromData(getAppleTestBundle());
@@ -190,7 +190,7 @@ public class CvocConceptTest extends ModelTestBase {
 	@SuppressWarnings("serial")
     @Test
 	public void testAddConceptToVocabulary() throws Exception {
-		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
+		UserProfile validUser = manager.getEntity("mike", UserProfile.class);
 
 		Map<String, Object> data = new HashMap<String, Object>() {{put(Ontology.IDENTIFIER_KEY, "testVocabulary");}};
 		Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);

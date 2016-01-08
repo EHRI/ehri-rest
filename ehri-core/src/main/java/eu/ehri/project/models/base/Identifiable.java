@@ -17,19 +17,19 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models;
+package eu.ehri.project.models.base;
 
-import eu.ehri.project.test.AbstractFixtureTest;
-import org.junit.Test;
+import com.tinkerpop.frames.Property;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.annotations.Mandatory;
 
-import static org.junit.Assert.assertEquals;
+/**
+ * Base interface for entities that have an identifier property (other than the
+ * internally assigned node ID).
+ */
+public interface Identifiable extends Entity {
 
-
-public class DocumentDescriptionTest extends AbstractFixtureTest {
-    @Test
-    public void testGetUnit() throws Exception {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
-        assertEquals(c1, cd1.getEntity());
-    }
+    @Mandatory
+    @Property(Ontology.IDENTIFIER_KEY)
+    String getIdentifier();
 }

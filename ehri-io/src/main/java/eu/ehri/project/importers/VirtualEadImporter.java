@@ -31,7 +31,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -103,13 +103,13 @@ public class VirtualEadImporter extends EaImporter {
                         "Missing identifier " + Ontology.IDENTIFIER_KEY);
             }
             logger.debug("Imported item: " + itemData.get("name"));
-            Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+            Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
             // Add dates and descriptions to the bundle since they're @Dependent
             // relations.
             for (Map<String, Object> dpb : extractDates(itemData)) {
                 descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
             }
-            for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
+            for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
                 logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
                 descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
             }
@@ -229,7 +229,7 @@ public class VirtualEadImporter extends EaImporter {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -245,7 +245,7 @@ public class VirtualEadImporter extends EaImporter {
         if (itemData.containsKey(REPOID) && itemData.containsKey(UNITID)) {
             String repositoryid = itemData.get(REPOID).toString();
             String unitid = itemData.get(UNITID).toString();
-            Repository repository = manager.getFrame(repositoryid, Repository.class);
+            Repository repository = manager.getEntity(repositoryid, Repository.class);
             for (DocumentaryUnit unit : repository.getAllCollections()) {
                 logger.debug(unit.getIdentifier() + " " + unit.getId() + " " + unitid);
                 if (unit.getIdentifier().equals(unitid)) {

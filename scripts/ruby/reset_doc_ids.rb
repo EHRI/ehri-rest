@@ -48,7 +48,7 @@ module Ehri
         newid = idgen.generate_id(scope.id_path, bundle)
         if newid != doc.get_id
           puts "ID diff: #{doc.get_id} -> #{newid}"
-          doc.as_vertex.set_property("__ID__", newid)
+          doc.as_vertex.set_property("__id", newid)
         end
       rescue Exception => msg
         puts "ERROR #{msg}"
