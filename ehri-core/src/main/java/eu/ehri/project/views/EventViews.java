@@ -20,6 +20,7 @@
 package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
@@ -30,6 +31,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
@@ -44,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -138,7 +141,7 @@ public class EventViews {
         }
 
         public Builder withEntityTypes(String... entities) {
-            for (String entity: entities) {
+            for (String entity : entities) {
                 try {
                     this.entityTypes.add(EntityClass.withName(entity));
                 } catch (NoSuchElementException e) {
@@ -149,7 +152,7 @@ public class EventViews {
         }
 
         public Builder withEventTypes(String... eventTypes) {
-            for (String eventType: eventTypes) {
+            for (String eventType : eventTypes) {
                 try {
                     this.eventTypes.add(EventTypes.valueOf(eventType));
                 } catch (IllegalArgumentException e) {
@@ -170,7 +173,7 @@ public class EventViews {
         }
 
         public Builder withShowType(String... showTypes) {
-            for (String showType: showTypes) {
+            for (String showType : showTypes) {
                 try {
                     this.showType.add(ShowType.valueOf(showType));
                 } catch (NoSuchElementException e) {
@@ -246,8 +249,7 @@ public class EventViews {
 
     public Iterable<SystemEvent> list(Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
-                actionManager.getLatestGlobalEvents());
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(initStream());
 
         // Add additional generic filters
         return setPipelineRange(applyAclFilter(filterEvents(pipe), accessor));
@@ -255,8 +257,7 @@ public class EventViews {
 
     public Iterable<List<SystemEvent>> aggregate(Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
-                actionManager.getLatestGlobalEvents());
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(initStream());
 
         // Add additional generic filters
         GremlinPipeline<SystemEvent, SystemEvent> aclFiltered =
@@ -286,7 +287,7 @@ public class EventViews {
      */
     public Iterable<SystemEvent> listForItem(Accessible item, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
         // Add additional generic filters
         GremlinPipeline<SystemEvent, SystemEvent> acl = applyAclFilter(filterEvents(pipe), accessor);
         return setPipelineRange(acl);
@@ -297,7 +298,7 @@ public class EventViews {
      */
     public Iterable<List<SystemEvent>> aggregateForItem(Accessible item, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
         // Add additional generic filters
         GremlinPipeline<SystemEvent, SystemEvent> acl = applyAclFilter(filterEvents(pipe), accessor);
         return setPipelineRange(aggregateFilter(acl));
@@ -312,7 +313,7 @@ public class EventViews {
      */
     public Iterable<List<SystemEvent>> aggregateByUser(UserProfile byUser, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
                 byUser.as(Actioner.class).getActions());
 
         // Add additional generic filters
@@ -329,11 +330,40 @@ public class EventViews {
      */
     public Iterable<SystemEvent> listByUser(UserProfile byUser, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
                 byUser.as(Actioner.class).getActions());
 
         // Add additional generic filters
         return setPipelineRange(applyAclFilter(filterEvents(pipe), accessor));
+    }
+
+    // Helpers
+
+    private Iterable<SystemEvent> initStream() {
+        // If we're filtering the list for specific user's actions
+        // it's much more efficient to aggregate the user(s) event
+        // streams directly via than scanning the global one, even
+        // though we then have to sort the events to combine them
+        // into a newest-first stream.
+        if (users.isEmpty()) {
+            return actionManager.getLatestGlobalEvents();
+        } else {
+            List<Iterable<SystemEvent>> pipes = Lists.newArrayList();
+            for (String userId : users) {
+                try {
+                    Actioner entity = manager.getEntity(userId, UserProfile.class);
+                    pipes.add(entity.getActions());
+                } catch (ItemNotFound itemNotFound) {
+                    logger.warn("Invalid user: " + userId);
+                }
+            }
+            return Iterables.mergeSorted(pipes, new Comparator<SystemEvent>() {
+                @Override
+                public int compare(SystemEvent event1, SystemEvent event2) {
+                    return event2.getTimestamp().compareTo(event1.getTimestamp());
+                }
+            });
+        }
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> applyAclFilter(GremlinPipeline<SystemEvent, SystemEvent> pipe,
@@ -436,7 +466,7 @@ public class EventViews {
 
     private GremlinPipeline<SystemEvent, SystemEvent> getPersonalisedEvents(UserProfile asUser, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<>(
+        GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
                 actionManager.getLatestGlobalEvents());
 
         // Add additional generic filters
