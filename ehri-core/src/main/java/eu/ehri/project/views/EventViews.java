@@ -345,25 +345,44 @@ public class EventViews {
         // streams directly via than scanning the global one, even
         // though we then have to sort the events to combine them
         // into a newest-first stream.
-        if (users.isEmpty()) {
+        if (users.isEmpty() && ids.isEmpty()) {
+            // No item/user filter: scan the global queue...
+            System.out.println("GLOBAL QUEUE");
             return actionManager.getLatestGlobalEvents();
-        } else {
-            List<Iterable<SystemEvent>> pipes = Lists.newArrayList();
-            for (String userId : users) {
-                try {
-                    Actioner entity = manager.getEntity(userId, UserProfile.class);
-                    pipes.add(entity.getActions());
-                } catch (ItemNotFound itemNotFound) {
-                    logger.warn("Invalid user: " + userId);
+        } else  {
+            List<Actioner> actioners = getItems(users, Actioner.class);
+            List<Accessible> entities = getItems(ids, Accessible.class);
+            if (actioners.size() == 1) {
+                // Single user: return user's action queue
+                return actioners.get(0).getActions();
+            } else if (entities.size() == 1) {
+                // Single item: return item's history queue
+                return entities.get(0).getHistory();
+            } else if (actioners.size() > 1) {
+                // Merge multiple user action queues
+                List<Iterable<SystemEvent>> actions = Lists.newArrayList();
+                for (Actioner actioner : actioners) {
+                    actions.add(actioner.getActions());
                 }
+                return mergeEventQueues(actions);
+            } else {
+                // Merge multiple item history queues
+                List<Iterable<SystemEvent>> histories = Lists.newArrayList();
+                for (Accessible entity : entities) {
+                    histories.add(entity.getHistory());
+                }
+                return mergeEventQueues(histories);
             }
-            return Iterables.mergeSorted(pipes, new Comparator<SystemEvent>() {
-                @Override
-                public int compare(SystemEvent event1, SystemEvent event2) {
-                    return event2.getTimestamp().compareTo(event1.getTimestamp());
-                }
-            });
         }
+    }
+
+    private Iterable<SystemEvent> mergeEventQueues(List<Iterable<SystemEvent>> queues) {
+        return Iterables.mergeSorted(queues, new Comparator<SystemEvent>() {
+            @Override
+            public int compare(SystemEvent event1, SystemEvent event2) {
+                return event2.getTimestamp().compareTo(event1.getTimestamp());
+            }
+        });
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> applyAclFilter(GremlinPipeline<SystemEvent, SystemEvent> pipe,
@@ -671,5 +690,17 @@ public class EventViews {
             // NB: The high range is inclusive, oddly.
             return filter.range(low, low + (limit - 1));
         }
+    }
+
+    private <T> List<T> getItems(Collection<String> itemIds, Class<T> cls) {
+        List<T> items = Lists.newArrayList();
+        for (String itemId : itemIds) {
+            try {
+                items.add(manager.getEntity(itemId, cls));
+            } catch (ItemNotFound itemNotFound) {
+                logger.warn("Invalid event filter item: " + itemId);
+            }
+        }
+        return items;
     }
 }
