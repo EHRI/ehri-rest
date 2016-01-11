@@ -32,8 +32,6 @@ module Ehri
       puts "ERROR - #{msg}"
     end
 
-    Core::GraphReindexer.new(Graph).reindex("entities")
-
     Graph.get_base_graph.commit
     puts "Committed: #{@total}"
     Graph.get_base_graph.shutdown
