@@ -45,27 +45,45 @@ public class SkosVocabularyImport extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("scope", true, "Identifier of scope to import into, i.e. the Vocabulary"));
-        options.addOption(new Option("user", true, "Identifier of user to import as"));
-        options.addOption(new Option("tolerant", false, "Don't error if a file is not valid."));
-        options.addOption(new Option("log", true,
-                "Log message for import action."));
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: skos-import [OPTIONS] -user <user-id> -scope <vocabulary-id> <skos.rdf>";
+        options.addOption(Option.builder()
+                .longOpt("scope")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .desc("Identifier of scope to import into, i.e. repository")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .desc("Identifier of user to import as")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("tolerant")
+                .desc("Don't error if a file is not valid.")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for action.")
+                .build());
     }
 
     @Override
     public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import a Skos file into the graph database, using the specified"
-                + sep + "Vocabulary and User.";
+        return NAME + " [OPTIONS] -user <user-id> -scope <vocabulary-id> <skos.rdf>";
+    }
+
+    @Override
+    public String getHelp() {
+        return "Import a Skos file into the graph database, using the specified " +
+                "Vocabulary and User.";
     }
 
     public int execWithOptions(FramedGraph<?> graph,
-                               CommandLine cmdLine) throws Exception {
+            CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         String logMessage = "Imported from command-line";
@@ -75,13 +93,13 @@ public class SkosVocabularyImport extends BaseCommand {
 
         // at least one file specufied
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         if (!cmdLine.hasOption("scope")) {
             throw new RuntimeException("No scope (vocabulary) given for SKOS import");
         }
 
-        String filePath = (String) cmdLine.getArgList().get(0);
+        String filePath = cmdLine.getArgList().get(0);
 
         try {
 

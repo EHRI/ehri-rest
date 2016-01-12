@@ -58,22 +58,23 @@ public class Check extends BaseCommand {
     
 	@Override
 	public String getHelp() {
-        return "perform various checks on the graph structure" +
-        		"\n" + getUsage();
+        return "Perform various checks on the graph structure";
 	}
 	
     @Override
     public String getUsage() {
-		return "Usage: check [OPTIONS]";
+		return NAME + " [OPTIONS]";
     }
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("q", "quick", false, "Quick checks only"));
+        options.addOption(Option.builder()
+                .longOpt("quick")
+                .desc("Quick checks only")
+                .build());
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -97,7 +98,7 @@ public class Check extends BaseCommand {
      * @throws Exception
      */
     public void checkPermissionScopes(FramedGraph<?> graph,
-            GraphManager manager) throws Exception {
+            GraphManager manager) {
 
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
@@ -136,7 +137,7 @@ public class Check extends BaseCommand {
         }
     }
 
-    private void checkOwnerPermGrantsHaveNoScope(GraphManager manager) throws Exception {
+    private void checkOwnerPermGrantsHaveNoScope(GraphManager manager) {
         try (CloseableIterable<PermissionGrant> items = manager
                 .getEntities(EntityClass.PERMISSION_GRANT, PermissionGrant.class)) {
             for (PermissionGrant grant : items) {

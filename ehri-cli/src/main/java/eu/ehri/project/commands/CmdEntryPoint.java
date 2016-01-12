@@ -33,6 +33,7 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -111,18 +112,23 @@ public class CmdEntryPoint extends BaseCommand {
 
     @Override
     public String getHelp() {
-        String sep = System.getProperty("line.separator");
-        StringBuilder buffer = new StringBuilder(String.format(
-                "Command line interface for the EHRI graph database.%n%n " +
-                        "The following commands are available:%n%n"));
-        for (String key : Ordering.natural().sortedCopy(COMMANDS.keySet())) {
-            buffer.append("  ");
-            buffer.append(key);
+        try {
+            String sep = System.getProperty("line.separator");
+            StringBuilder buffer = new StringBuilder(String.format(
+                    "Command line interface for the EHRI graph database.%n%n " +
+                            "The following commands are available:%n%n"));
+            for (String key : Ordering.natural().sortedCopy(COMMANDS.keySet())) {
+                Command cmd = COMMANDS.get(key).getConstructor().newInstance();
+                buffer.append(String.format("  %-20s %s", key, cmd.getHelp()));
+                buffer.append(sep);
+            }
             buffer.append(sep);
+            buffer.append("Use 'help <command>' for usage details.");
+            return buffer.toString();
+        } catch (NoSuchMethodException|IllegalAccessException|InvocationTargetException
+                |InstantiationException e) {
+            throw new RuntimeException(e);
         }
-        buffer.append(sep);
-        buffer.append("Use 'help <command>' for usage details.");
-        return buffer.toString();
     }
 
     @Override
@@ -143,7 +149,7 @@ public class CmdEntryPoint extends BaseCommand {
         } else if (args[1].equals("help")) {
             if (args.length > 2 && COMMANDS.containsKey(args[2])) {
                 Command cmd = COMMANDS.get(args[2]).getConstructor().newInstance();
-                System.err.println(cmd.getHelp());
+                System.err.println(cmd.getDetailedHelp());
                 return RetCode.BAD_ARGS.getCode();
             } else {
                 return new CmdEntryPoint().exec(null, args);

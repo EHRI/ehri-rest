@@ -49,19 +49,34 @@ public class UserMod extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("group", true,
-                "A group to add the user to"));
-        options.addOption(new Option("c", "comment", false,
-                "Log message for create action action."));
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: usermod [OPTIONS] <user-identifier>";
+        options.addOption(Option.builder()
+                .longOpt("group")
+                .hasArg()
+                .type(String.class)
+                .desc("A group to add the user to")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .hasArg().desc("Identifier of user taking action")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for update action.")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s [OPTIONS] <user-identifier>", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "Add an existing user to a group";
     }
 
@@ -75,13 +90,12 @@ public class UserMod extends BaseCommand {
                 "Adding user to groups");
 
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         // Fetch the admin accessor, who's going to do the work.
-        Actioner admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
-                Actioner.class);
+        Actioner admin = manager.getEntity(cmdLine.getOptionValue("user"), Actioner.class);
 
-        String userId = (String) cmdLine.getArgList().get(0);
+        String userId = cmdLine.getArgList().get(0);
 
         String[] groups = {};
         if (cmdLine.hasOption("group")) {

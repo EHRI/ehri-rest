@@ -66,7 +66,6 @@ public interface Version extends Accessible {
      *
      * @return JSON data representing a sub-graph
      */
-    @Mandatory
     @Property(Ontology.VERSION_ENTITY_DATA)
     String getEntityData();
 

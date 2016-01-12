@@ -48,23 +48,26 @@ public class GraphViz extends BaseCommand {
     }
 
     @Override
-    public String getHelp() {
-        return "Usage: graphviz [OPTIONS] <type> <identifier>";
+    public String getUsage() {
+        return String.format("%s [OPTIONS] <type> <identifier>", NAME);
     }
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("r", "relationship", true,
-                "A relationship to include in the graph"));
+        options.addOption(Option.builder("r")
+                .longOpt("relationship")
+                .hasArg()
+                .type(String.class)
+                .desc("A relationship to include in the graph")
+                .build());
     }
 
     @Override
-    public String getUsage() {
+    public String getHelp() {
         return "Dump a dot file.";
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -74,7 +77,7 @@ public class GraphViz extends BaseCommand {
         // Cmdline arguments should be a node and a list of relationship types
         // to traverse.
         if (cmdLine.getArgList().size() < 2)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         List<Node> nodes = Lists.newArrayList();
         for (int i = 0; i < cmdLine.getArgs().length; i++) {

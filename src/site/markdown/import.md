@@ -12,7 +12,7 @@ To import some vocabulary terms you first need to create a vocabulary to which t
 generic "add" command:
 
 ```bash
-./scripts/cmd add cvocVocabulary -Pidentifier=ehri-terms --user $USER --log "Creating vocabulary for ehri terms."
+./scripts/cmd add CvocVocabulary -Pidentifier=ehri-terms --user $USER --log "Creating vocabulary for ehri terms."
 ```
 
 The `id` handle of the created vocabulary will be derived from the "identifier" field. Since there is no enclosing
@@ -34,7 +34,7 @@ command:
 To create a country item we can use the generic "add" command. The following creates a country identified by the ISO3166 two-letter country-code "gb" (the United Kingdom):
 
 ```
-./scripts/cmd add country -Pidentifier=gb --user $USER --log "Creating United Kingdom country item."
+./scripts/cmd add Country -Pidentifier=gb --user $USER --log "Creating United Kingdom country item."
 ```
 
 ### Creating the "Wiener Library" Repository
@@ -42,7 +42,7 @@ To create a country item we can use the generic "add" command. The following cre
 Creating a repository would normally be done via importing an EAG (Encoded Archival Guide) file, but for now we will use the "add" command to create a bare-bones entry (with no descriptive data):
 
 ```
-./scripts/cmd add repository -Pidentifier=wiener-library --user $USER --scope gb --log "Creating repository."
+./scripts/cmd add Repository -Pidentifier=wiener-library --user $USER --scope gb --log "Creating repository."
 ```
 
 (Note the --scope takes the identifier we gave the country as an argument.)

@@ -59,7 +59,7 @@ public class GraphSONTest extends GraphTestBase {
         assertEquals(0L, temp.length());
 
         String filePath = temp.getAbsolutePath();
-        String[] outArgs = new String[]{"-d", "out", filePath};
+        String[] outArgs = new String[]{"--dump", filePath};
 
         GraphSON graphSON = new GraphSON();
         CommandLine outCmdLine = graphSON.getCmdLine(outArgs);
@@ -72,7 +72,7 @@ public class GraphSONTest extends GraphTestBase {
 
         FramedGraph<? extends TransactionalGraph> graph2 = getFramedGraph();
 
-        String[] inArgs = new String[]{"-d", "in", filePath};
+        String[] inArgs = new String[]{"--load", filePath};
         CommandLine inCmdLine = graphSON.getCmdLine(inArgs);
         assertEquals(0, graphSON.execWithOptions(graph2, inCmdLine));
 

@@ -47,14 +47,13 @@ public class DcImport extends ImportCommand {
     }
 
     @Override
-    public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
+    public String getUsage() {
+        return NAME + " [OPTIONS] -user <user-id> -scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
     }
 
     @Override
-    public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import an DC file into the graph database, using the specified"
-                + sep + "Repository and User.";
+    public String getHelp() {
+        return "Import an DC file into the graph database, using the specified " +
+                "repository and user.";
     }
 }

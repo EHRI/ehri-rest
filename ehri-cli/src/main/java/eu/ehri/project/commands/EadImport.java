@@ -46,15 +46,14 @@ public class EadImport extends ImportCommand {
     }
 
     @Override
-    public String getHelp() {
-        return String.format("Usage: %s [OPTIONS] -user <user-id> " +
+    public String getUsage() {
+        return String.format("%s [OPTIONS] -user <user-id> " +
                 "-scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>", NAME);
     }
 
     @Override
-    public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import an EAD file into the graph database, using the specified"
-                + sep + "Repository and User.";
+    public String getHelp() {
+        return "Import an EAD file into the graph database, using the specified " +
+                "repository and user.";
     }
 }

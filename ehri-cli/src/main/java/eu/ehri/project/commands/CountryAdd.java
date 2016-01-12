@@ -51,18 +51,33 @@ public class CountryAdd extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("n", "name", true, "Country's full name"));
-        options.addOption(new Option("c", "comment", false,
-                "Log message for create action action."));
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: countryadd <country-identifier> [-n <full country name>] [-c <log comment>]";
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .type(String.class)
+                .desc("Identifier of user to import as")
+                .build());
+        options.addOption(Option.builder("n")
+                .longOpt("name")
+                .hasArg()
+                .type(String.class)
+                .desc("Country's full name")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for create action.")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s <country-identifier> [-n <full country name>] [-c <log comment>]", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "Create a new country";
     }
 
@@ -75,13 +90,13 @@ public class CountryAdd extends BaseCommand {
                 "Created via command-line");
 
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         // Fetch the admin accessor, who's going to do the work.
         Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
                 Accessor.class);
 
-        String countryId = (String) cmdLine.getArgList().get(0);
+        String countryId = cmdLine.getArgList().get(0);
         String countryName = cmdLine.getOptionValue("n", countryId);
 
         Bundle bundle = new Bundle(EntityClass.COUNTRY,

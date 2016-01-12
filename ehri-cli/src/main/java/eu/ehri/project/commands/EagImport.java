@@ -34,14 +34,12 @@ public class EagImport  extends ImportCommand {
     }
     
     @Override
-    public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <agent-id> <neo4j-graph-dir> <eag1.xml> <eag2.xml> ... <eagN.xml>";
+    public String getUsage() {
+        return NAME + " [OPTIONS] -user <user-id> -scope <agent-id> <neo4j-graph-dir> <eag1.xml> <eag2.xml> ... <eagN.xml>";
     }
 
     @Override
-    public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import an EAG file into the graph database, using the specified"
-                + sep + "Repository and User.";
+    public String getHelp() {
+        return "Import an EAG file into the graph database, using the specified repository and user.";
     }
 }

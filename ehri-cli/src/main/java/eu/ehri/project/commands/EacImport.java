@@ -34,14 +34,13 @@ public class EacImport extends ImportCommand {
     }
 
     @Override
-    public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -repo <agent-id> <eac1.xml> <eac2.xml> ... <eacN.xml>";
+    public String getUsage() {
+        return NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -repo <agent-id> <eac1.xml> <eac2.xml> ... <eacN.xml>";
     }
 
     @Override
-    public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import an EAC file into the graph database, using the specified"
-                + sep + "Repository and User.";
+    public String getHelp() {
+        return "Import an EAC file into the graph database, using the specified " +
+                "repository and user.";
     }
 }

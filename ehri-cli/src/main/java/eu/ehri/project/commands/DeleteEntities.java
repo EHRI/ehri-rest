@@ -50,19 +50,28 @@ public class DeleteEntities extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("user", true,
-           "Identifier of user to import as"));
-        options.addOption(new Option("log", true,
-                "Log message for import action."));
-    }
-
-    @Override
-    public String getHelp() {
-        return String.format("Usage: %s [OPTIONS] <type>", NAME);
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .hasArg().desc("Identifier of user taking action")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for delete action.")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s [OPTIONS] <type>", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "Delete ALL entities of a given type.";
     }
 
@@ -72,7 +81,7 @@ public class DeleteEntities extends BaseCommand {
 
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         Class<?> cls = type.getJavaClass();
 

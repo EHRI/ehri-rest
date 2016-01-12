@@ -41,19 +41,23 @@ public class RelationAdd extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("s", "single", false,
-           "Ensure the out entity only has one relationship of this type by removing any others"));
-        options.addOption(new Option("d", "allow-duplicates", false,
-                "Allow creating multiple edges with the same label between the same two nodes"));
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: add-rel [OPTIONS] <source> <rel-name> <target>";
+        options.addOption(Option.builder("s")
+                .longOpt("single")
+                .desc("Ensure the out entity only has one relationship of this type by removing any others")
+                .build());
+        options.addOption(Option.builder("d")
+                .longOpt("allow-duplicates")
+                .desc("Allow creating multiple edges with the same label between the same two nodes")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return "Usage: add-rel [OPTIONS] <source> <rel-name> <target>";
+    }
+
+    @Override
+    public String getHelp() {
         return "Create a relationship between a source and a target";
     }
 
@@ -64,11 +68,11 @@ public class RelationAdd extends BaseCommand {
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
         if (cmdLine.getArgList().size() < 3)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
-        String src = (String)cmdLine.getArgList().get(0);
-        String label = (String)cmdLine.getArgList().get(1);
-        String dst = (String)cmdLine.getArgList().get(2);
+        String src = cmdLine.getArgList().get(0);
+        String label = cmdLine.getArgList().get(1);
+        String dst = cmdLine.getArgList().get(2);
 
         Vertex source = manager.getVertex(src);
         Vertex target = manager.getVertex(dst);
@@ -79,7 +83,7 @@ public class RelationAdd extends BaseCommand {
             if (!JavaHandlerUtils.addUniqueRelationship(source, target, label)) {
                 System.err.println("Relationship already exists");
             }
-        } else  {
+        } else {
             if (!JavaHandlerUtils.addSingleRelationship(source, target, label)) {
                 System.err.println("Relationship already exists");
             }

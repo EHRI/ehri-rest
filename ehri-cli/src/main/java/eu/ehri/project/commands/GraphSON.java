@@ -19,16 +19,16 @@
 
 package eu.ehri.project.commands;
 
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +39,7 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Dump the complete graph as graphSON file, or import such a dump
- * <p>
+ * <p/>
  * Example usage:
  * <pre>
  *     <code>
@@ -68,18 +68,35 @@ public class GraphSON extends BaseCommand {
 
     @Override
     public String getHelp() {
-        return "export or import a GraphSON file.\n" + getUsage();
+        return "Load or dump GraphSON data.";
+    }
+
+    public String getHelpFooter() {
+        return "Default is to dump to stdout";
     }
 
     @Override
     public String getUsage() {
-        return "Usage: graphson -d [out|in] <filename>";
+        return String.format("%s [OPTIONS] [--load <filename>|--dump <filename>]", NAME);
     }
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("d", true, "Output or input a dump"));
-        options.addOption(new Option("b", true, "Buffer size"));
+        options.addOption(Option.builder("l")
+                .hasArg().type(String.class)
+                .longOpt("load")
+                .desc("Load a dump file").build());
+        options.addOption(Option.builder("d")
+                .hasArg().type(String.class)
+                .longOpt("dump")
+                .desc("Save a dump file").build());
+        options.addOption(Option.builder("b")
+                .hasArg().type(Integer.class)
+                .longOpt("buffer-size")
+                .desc("Transaction buffer size").build());
+        options.addOption(Option.builder()
+                .longOpt("skip-setting-labels")
+                .desc("Initialize indices after load").build());
     }
 
     @Override
@@ -87,64 +104,70 @@ public class GraphSON extends BaseCommand {
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
-        if (cmdLine.getArgList().size() < 1) {
-            throw new MissingArgumentException("Graph file path missing");
-        }
-
-        String dumpMode = "out"; //defaults might also be handled by the parser?
-
-        if (cmdLine.hasOption("d")) {
-            dumpMode = cmdLine.getOptionValue("d");
-        }
-
         // check if option is useful, otherwise print the help and bail out
-        if (dumpMode.contentEquals("out")) {
-            saveDump(graph, cmdLine);
-        } else if (dumpMode.contentEquals("in")) {
-            loadDump(graph, cmdLine);
+        if (cmdLine.hasOption("dump")) {
+            saveDump(graph, cmdLine.getOptionValue("dump"), cmdLine);
+        } else if (cmdLine.hasOption("load")) {
+            loadDump(graph, cmdLine.getOptionValue("load"), cmdLine);
         } else {
-            throw new UnrecognizedOptionException("Unrecognised dump mode: '" + dumpMode + "'");
+            saveDump(graph, "-", cmdLine);
         }
 
         return 0;
     }
 
     public void saveDump(FramedGraph<?> graph,
-            CommandLine cmdLine) throws IOException {
-
-        String filepath = (String) cmdLine.getArgList().get(0);
+            String filePath, CommandLine cmdLine) throws IOException {
 
         // if the file is '-' that means we do standard out
-        if (filepath.contentEquals("-")) {
+        if (filePath.contentEquals("-")) {
             // to stdout
             GraphSONWriter.outputGraph(graph, System.out, GraphSONMode.EXTENDED);
         } else {
             // try to open or create the file for writing
-            OutputStream out = new FileOutputStream(filepath);
+            OutputStream out = new FileOutputStream(filePath);
             GraphSONWriter.outputGraph(graph, out, GraphSONMode.EXTENDED);
             out.close();
         }
     }
 
     public void loadDump(FramedGraph<?> graph,
-            CommandLine cmdLine) throws IOException {
+            String filePath, CommandLine cmdLine) throws Exception {
         GraphSONReader reader = new GraphSONReader(graph);
-        String filepath = (String) cmdLine.getArgList().get(0);
 
-        InputStream inputStream = new FileInputStream(filepath);
-        InputStream readStream = filepath.toLowerCase().endsWith(".gz")
-                ? new GZIPInputStream(inputStream)
-                : inputStream;
+        InputStream readStream = System.in;
+        if (!filePath.equals("-")) {
+            InputStream inputStream = new FileInputStream(filePath);
+            readStream = filePath.toLowerCase().endsWith(".gz")
+                    ? new GZIPInputStream(inputStream)
+                    : inputStream;
+        }
 
-        int bufferSize = cmdLine.hasOption('b')
-            ? Integer.parseInt(cmdLine.getOptionValue('b'))
-            : 1000;
+        int bufferSize = cmdLine.hasOption("buffer-size")
+                ? Integer.parseInt(cmdLine.getOptionValue("buffer-size"))
+                : 1000;
 
         try {
             reader.inputGraph(readStream, bufferSize);
-            GraphManagerFactory.getInstance(graph).rebuildIndex();
+            if (!cmdLine.hasOption("skip-setting-labels")) {
+                if (graph.getBaseGraph() instanceof Neo4j2Graph) {
+                    // safe, due to the above instanceof
+                    @SuppressWarnings("unchecked")
+                    FramedGraph<Neo4j2Graph> neo4j2Graph = ((FramedGraph<Neo4j2Graph>) graph);
+                    Neo4jGraphManager manager = new Neo4jGraphManager<>(neo4j2Graph);
+                    int i = 0;
+                    for (Vertex v : graph.getVertices()) {
+                        manager.setLabels(v);
+                        i++;
+                        if (i % 10000 == 0) {
+                            neo4j2Graph.getBaseGraph().commit();
+                        }
+                    }
+                    System.err.println("Labelled " + i + " vertices");
+                }
+            }
         } finally {
-            inputStream.close();
+            readStream.close();
         }
     }
 }
