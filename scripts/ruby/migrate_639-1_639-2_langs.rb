@@ -59,8 +59,6 @@ module Ehri
       end
     end
 
-    Core::GraphReindexer.new(Graph).reindex("entities")
-
     Graph.get_base_graph.commit
     puts "Committed: #{@total} , errors: #{@errors}"    
     Graph.get_base_graph.shutdown

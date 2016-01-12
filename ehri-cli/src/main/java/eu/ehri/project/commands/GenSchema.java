@@ -19,20 +19,23 @@
 
 package eu.ehri.project.commands;
 
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 /**
- * Command for recreating the internal graph index.
+ * Command for generating the (Neo4j) graph schema.
  */
-public class Reindex extends BaseCommand {
+public class GenSchema extends BaseCommand {
 
-    final static String NAME = "reindex";
+    final static String NAME = "gen-schema";
 
 
-    public Reindex() {
+    public GenSchema() {
     }
 
     @Override
@@ -41,18 +44,23 @@ public class Reindex extends BaseCommand {
 
     @Override
     public String getHelp() {
-        return "Usage: reindex";
+        return "Usage: " + NAME;
     }
 
     @Override
     public String getUsage() {
-        return "Drop and rebuild the (internal) graph index.";
+        return "Drop and regenerate the (internal) graph schema and indices.";
     }
 
 
     @Override
     public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
-        GraphManagerFactory.getInstance(graph).rebuildIndex();
+        Graph baseGraph = graph.getBaseGraph();
+        if (baseGraph instanceof Neo4j2Graph) {
+            Neo4jGraphManager.createIndicesAndConstraints(((Neo4j2Graph) baseGraph).getRawGraph());
+        } else {
+            logger.warn("Cannot generate schema on a non-Neo4j2 graph");
+        }
         return 0;
     }
 }

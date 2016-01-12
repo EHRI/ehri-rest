@@ -57,9 +57,6 @@ module Ehri
     end
     if errors == 0
         Graph.get_base_graph.commit
-        puts "Reindexing..."
-        reindexer.reindex("entities")
-        Graph.get_base_graph.commit
         puts "Committed..."
     else
         Graph.get_base_graph.rollback

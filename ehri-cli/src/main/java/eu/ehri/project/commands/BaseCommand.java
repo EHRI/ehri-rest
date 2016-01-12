@@ -26,6 +26,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.slf4j.Logger;
 
 /**
  * Abstract base class for commands. Provides the main
@@ -40,6 +41,7 @@ import org.apache.commons.cli.PosixParser;
  */
 public abstract class BaseCommand implements Command {
 
+    protected static final Logger logger = org.slf4j.LoggerFactory.getLogger(Command.class);
     private Options options = new Options();
     private CommandLineParser parser = new PosixParser();
 
