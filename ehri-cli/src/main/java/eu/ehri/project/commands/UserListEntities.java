@@ -41,19 +41,23 @@ public class UserListEntities extends BaseCommand {
     }
 
     @Override
-    public String getHelp() {
-        return "Usage: user-list [OPTIONS] <type>";
+    public String getUsage() {
+        return String.format("%s [OPTIONS] <type>", NAME);
     }
 
     @Override
-    public String getUsage() {
+    public String getHelp() {
         return "List entities of a given type as a given user.";
     }
     
     @Override
     public void setCustomOptions(Options options) {
-        options.addOption(new Option("user", true,
-                "Identifier of user to list items as"));
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .type(String.class)
+                .hasArg().desc("Identifier of user to list items as")
+                .build());
     }
 
     @Override
@@ -61,7 +65,7 @@ public class UserListEntities extends BaseCommand {
             CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);

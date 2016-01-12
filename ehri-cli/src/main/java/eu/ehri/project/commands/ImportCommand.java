@@ -29,8 +29,8 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
@@ -50,31 +50,55 @@ import java.util.Map;
  * Superclass of all import command-line tools.
  */
 public abstract class ImportCommand extends BaseCommand {
-    protected Class<? extends SaxXmlHandler> handler;
-    protected Class<? extends AbstractImporter> importer;
-    
-    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer){
+    protected final Class<? extends SaxXmlHandler> handler;
+    protected final Class<? extends AbstractImporter> importer;
+
+    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
         this.handler = handler;
         this.importer = importer;
     }
-    
+
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("scope", true,
-           "Identifier of scope to import into, i.e. repository"));
-        options.addOption(new Option("F", "files-from", true,
-           "Read list of input files from another file (or standard input, if given '-')"));
-        options.addOption(new Option("user", true,
-           "Identifier of user to import as"));
-        options.addOption(new Option("tolerant", false,
-           "Don't error if a file is not valid."));
-        options.addOption(new Option("log", true,
-           "Log message for action."));
-        options.addOption(new Option("properties", true,
-                "Provide another property file (default depends on HandlerClass)"));
+        options.addOption(Option.builder()
+                .longOpt("scope")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .desc("Identifier of scope to import into, i.e. repository")
+                .build());
+        options.addOption(Option.builder("F")
+                .longOpt("files-from")
+                .hasArg()
+                .type(String.class)
+                .desc("Read list of input files from another file (or standard input, if given '-')")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .desc("Identifier of user to import as")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("tolerant")
+                .desc("Don't error if a file is not valid.")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for action.")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("properties")
+                .hasArg()
+                .type(String.class)
+                .desc("Provide another property file (default depends on HandlerClass)")
+                .build());
     }
-    
-     @Override
+
+    @Override
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -86,10 +110,10 @@ public abstract class ImportCommand extends BaseCommand {
             getPathsFromFile(cmdLine.getOptionValue("files-from"), filePaths);
         } else if (!cmdLine.getArgList().isEmpty()) {
             for (int i = 0; i < cmdLine.getArgList().size(); i++) {
-                filePaths.add((String) cmdLine.getArgList().get(i));
+                filePaths.add(cmdLine.getArgList().get(i));
             }
         } else {
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
         }
 
         String logMessage = "Imported from command-line";
@@ -108,7 +132,7 @@ public abstract class ImportCommand extends BaseCommand {
             // Find the user
             UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
-            
+
             Optional<XmlImportProperties> optionalProperties = Optional.absent();
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
@@ -144,7 +168,8 @@ public abstract class ImportCommand extends BaseCommand {
     /**
      * Read a set of file paths from an input, either a file or standard in
      * if given the path '-'.
-     * @param listFile A path to a local file
+     *
+     * @param listFile  A path to a local file
      * @param filePaths An output parameter for file paths contained in
      *                  the given file.
      * @throws Exception

@@ -12,14 +12,14 @@ Verify that everything's working by fetching your user profile using the followi
 (for these examples I'll be using my own `$USER`, which is `mike`):
 
 ```bash
-curl http://localhost:7474/ehri/userProfile/mike
+curl http://localhost:7474/ehri/UserProfile/mike
 ```
 
 If all goes well you should see something like:
 
     {
       "id" : "mike",
-      "type" : "userProfile",
+      "type" : "UserProfile",
       "data" : {
         "identifier" : "mike",
         "name" : "Mike Bryant"
@@ -42,7 +42,7 @@ If all goes well you should see something like:
                 "following" : 0
               },
               "id" : "admin",
-              "type" : "group"
+              "type" : "Group"
             } ]
           },
           "data" : {
@@ -53,7 +53,7 @@ If all goes well you should see something like:
             "childCount" : 1
           },
           "id" : "a2035f24-6845-11e5-92aa-ed4cb7d1dda8",
-          "type" : "systemEvent"
+          "type" : "SystemEvent"
         } ],
         "belongsTo" : [ {
           "relationships" : { },
@@ -65,7 +65,7 @@ If all goes well you should see something like:
             "childCount" : 1
           },
           "id" : "admin",
-          "type" : "group"
+          "type" : "Group"
         } ]
       }
     }
@@ -73,14 +73,14 @@ If all goes well you should see something like:
 This JSON data is a type of graph. It says that:
 
  - The user profile has global ID `mike`, which is the same as the local (non-hierarchical) identifier `mike`
- - The profile is of type `userProfile`
- - It has a `belongsTo` relationship to a `group` item with ID `admin`
- - There was a `systemEvent` of type `creation`, "actioned" (or initiated) by `admin`.
+ - The profile is of type `UserProfile`
+ - It has a `belongsTo` relationship to a `Group` item with ID `admin`
+ - There was a `SystemEvent` of type `creation`, "actioned" (or initiated) by `admin`.
 
 Assuming that worked, lets go on and create the following:
 
- 1. a `country` item (via the web service RESTful API)
- 2. a `repository` item via [EAG](http://www.apex-project.eu/index.php/en/outcomes/standards/eag-2012) XML import
+ 1. a `Country` item (via the web service RESTful API)
+ 2. a `Repository` item via [EAG](http://www.apex-project.eu/index.php/en/outcomes/standards/eag-2012) XML import
  .de/) XML import)
  3. a `DocumentaryUnit` item via [EAD](http://www.loc.gov/ead/) XML import
 
@@ -96,7 +96,7 @@ permissions (obviously, it's the responsibility of the client application to ver
 are, but the web service does not handle authentication, only authorisation.)
 
 We also use the `X-LogMessage` header when we want to tell the system what we're doing. This will end up as the
- `logMessage` property on the `systemEvent` item associated with the change.
+ `logMessage` property on the `SystemEvent` item associated with the change.
 
 ## Creating the country
 
@@ -114,20 +114,20 @@ For a country, we just need `type`, and `data`, and the only attribute that need
 is the `identifier` property containing our two-letter code. So the JSON data we'll send looks like this:
 
     {
-      "type": "country",
+      "type": "Country",
       "data": {
         "identifier": "nl"
       }
     }
     
-Let's send that via CURL to the `/ehri/country` endpoint, using `application/json` as the content type:
+Let's send that via CURL to the `/ehri/Country` endpoint, using `application/json` as the content type:
 
 ```bash
 curl -X POST \
      -H "X-User: mike" \
      -H "Content-type: application/json" \
-     --data '{"type": "country", "data": {"identifier": "nl"}}' \
-     http://localhost:7474/ehri/country
+     --data '{"type": "Country", "data": {"identifier": "nl"}}' \
+     http://localhost:7474/ehri/Country
 ```
 
 We should recieve the newly-create item as the response, with more system-created metadata:
@@ -137,7 +137,7 @@ We should recieve the newly-create item as the response, with more system-create
       "data" : {
         "identifier" : "nl"
       },
-      "type" : "country",
+      "type" : "Country",
       "relationships" : {
         "lifecycleEvent" : [ {
           "id" : "1faabf00-6903-11e5-a63f-d32c8c516fe2",
@@ -145,7 +145,7 @@ We should recieve the newly-create item as the response, with more system-create
             "timestamp" : "2015-10-02T13:43:04.105+01:00",
             "eventType" : "creation"
           },
-          "type" : "systemEvent",
+          "type" : "SystemEvent",
           "relationships" : {
             "hasActioner" : [ {
               "id" : "mike",
@@ -153,7 +153,7 @@ We should recieve the newly-create item as the response, with more system-create
                 "name" : "mike",
                 "identifier" : "mike"
               },
-              "type" : "userProfile",
+              "type" : "UserProfile",
               "relationships" : { },
               "meta" : {
                 "following" : 0,
@@ -182,7 +182,7 @@ A few things to note:
 Since the global ID is `nl`, we can fetch the item from the web service specifically using:
 
 ```bash
-curl http://localhost:7474/ehri/country/nl
+curl http://localhost:7474/ehri/Country/nl
 ```
 
 This should give the same result as when we created it.
@@ -217,7 +217,7 @@ Unfortunately, the import methods don't tell us much about the actual items we'v
 all the repositories and see what we see there:
 
 ```bash
-curl http://localhost:7474/ehri/repository
+curl http://localhost:7474/ehri/Repository
 ```
 
 This gives us the somewhat more extensive data:
@@ -271,7 +271,7 @@ This gives us the somewhat more extensive data:
                                         "gid": 33
                                     },
                                     "relationships": {},
-                                    "type": "address"
+                                    "type": "Address"
                                 }
                             ],
                             "hasUnknownProperty": [
@@ -286,11 +286,11 @@ This gives us the somewhat more extensive data:
                                         "gid": 32
                                     },
                                     "relationships": {},
-                                    "type": "property"
+                                    "type": "UnknownProperty"
                                 }
                             ]
                         },
-                        "type": "repositoryDescription"
+                        "type": "RepositoryDescription"
                     }
                 ],
                 "hasCountry": [
@@ -303,7 +303,7 @@ This gives us the somewhat more extensive data:
                             "childCount": 1
                         },
                         "relationships": {},
-                        "type": "country"
+                        "type": "Country"
                     }
                 ],
                 "lifecycleEvent": [
@@ -330,15 +330,15 @@ This gives us the somewhat more extensive data:
                                         "watching": 0
                                     },
                                     "relationships": {},
-                                    "type": "userProfile"
+                                    "type": "UserProfile"
                                 }
                             ]
                         },
-                        "type": "systemEvent"
+                        "type": "SystemEvent"
                     }
                 ]
             },
-            "type": "repository"
+            "type": "Repository"
         }
     ]
 
@@ -346,14 +346,14 @@ We have a JSON list with one item (as expected, since we've only created one rep
 
  - this time the `lifecycleEvent` is `ingest`, again with `hasActioner` "mike".
  - there is a `hasCountry` relationship pointing to our `nl` country
- - there is a `describes` relationship to a `repositoryDescription` item with (default)
+ - there is a `describes` relationship to a `RepositoryDescription` item with (default)
    `languageCode` value `eng`, that contains the bulk of the data in our EAG file.
  - the system ID is `nl-test_repository`, and the identifier value is `test_repository`.
  
 We can fetch the item directly using its ID via:
  
 ```bash
-curl http://localhost:7474/ehri/repository/nl-test_repository
+curl http://localhost:7474/ehri/Repository/nl-test_repository
 ```
 
 ## Importing a documentary unit via EAD
@@ -425,7 +425,7 @@ rather verbose output:
                                         "gid": 42
                                     },
                                     "relationships": {},
-                                    "type": "datePeriod"
+                                    "type": "DatePeriod"
                                 },
                                 {
                                     "data": {
@@ -438,7 +438,7 @@ rather verbose output:
                                         "gid": 43
                                     },
                                     "relationships": {},
-                                    "type": "datePeriod"
+                                    "type": "DatePeriod"
                                 }
                             ],
                             "hasUnknownProperty": [
@@ -463,7 +463,7 @@ rather verbose output:
                                         "gid": 41
                                     },
                                     "relationships": {},
-                                    "type": "property"
+                                    "type": "UnknownProperty"
                                 }
                             ],
                             "relatesTo": [
@@ -477,7 +477,7 @@ rather verbose output:
                                         "gid": 40
                                     },
                                     "relationships": {},
-                                    "type": "relationship"
+                                    "type": "AccessPoint"
                                 },
                                 {
                                     "data": {
@@ -489,11 +489,11 @@ rather verbose output:
                                         "gid": 39
                                     },
                                     "relationships": {},
-                                    "type": "relationship"
+                                    "type": "AccessPoint"
                                 }
                             ]
                         },
-                        "type": "documentDescription"
+                        "type": "DocumentaryUnitDescription"
                     }
                 ],
                 "heldBy": [
@@ -515,7 +515,7 @@ rather verbose output:
                                     },
                                     "id": "nl-test_repository.eng-test_repository_desc",
                                     "relationships": {},
-                                    "type": "repositoryDescription"
+                                    "type": "RepositoryDescription"
                                 }
                             ],
                             "hasCountry": [
@@ -528,11 +528,11 @@ rather verbose output:
                                         "childCount": 1
                                     },
                                     "relationships": {},
-                                    "type": "country"
+                                    "type": "Country"
                                 }
                             ]
                         },
-                        "type": "repository"
+                        "type": "Repository"
                     }
                 ],
                 "lifecycleEvent": [
@@ -559,11 +559,11 @@ rather verbose output:
                                         "watching": 0
                                     },
                                     "relationships": {},
-                                    "type": "userProfile"
+                                    "type": "UserProfile"
                                 }
                             ]
                         },
-                        "type": "systemEvent"
+                        "type": "SystemEvent"
                     }
                 ]
             },

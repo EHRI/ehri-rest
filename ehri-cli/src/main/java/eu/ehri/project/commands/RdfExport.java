@@ -32,7 +32,7 @@ import java.io.OutputStream;
 
 /**
  * Export to RDF.
- *
+ * <p/>
  * NB: This current has a problem with TP 2.4.0 which
  * causes a crash on array properties. It seems to have
  * been fixed on TP 2.5.0-SNAPSHOT.
@@ -50,10 +50,13 @@ public class RdfExport extends BaseCommand {
 
     @Override
     public String getUsage() {
+        return String.format("%s -f [format] <filename>", NAME);
+    }
+
+    public String getHelpFooter() {
         String sep = System.getProperty("line.separator");
-        StringBuilder buffer = new StringBuilder(String.format(
-                "Usage: %s -f [format] <filename>%n%n " +
-                        "Accepted formats are: %n%n", NAME));
+        StringBuilder buffer = new StringBuilder(
+                "Accepted formats are: %n%n");
         for (String fmt : SailGraph.formats.keySet()) {
             buffer.append("  ");
             buffer.append(fmt);
@@ -66,7 +69,10 @@ public class RdfExport extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("format", "f", true, "RDF format"));
+        options.addOption(Option.builder("f")
+                .longOpt("format")
+                .hasArg().desc("RDF format")
+                .build());
     }
 
     @Override
@@ -79,7 +85,7 @@ public class RdfExport extends BaseCommand {
 
         PropertyGraphSail propertyGraphSail = new PropertyGraphSail(graph.getBaseGraph(), false);
         SailGraph sailGraph = new SailGraph(propertyGraphSail);
-        try (OutputStream outputStream = new FileOutputStream((String) cmdLine.getArgList().get(0))) {
+        try (OutputStream outputStream = new FileOutputStream(cmdLine.getArgList().get(0))) {
             sailGraph.saveRDF(outputStream, fmt);
         }
 

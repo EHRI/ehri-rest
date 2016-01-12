@@ -37,17 +37,16 @@ public class GetEntity extends BaseCommand {
     }
 
     @Override
-    public String getHelp() {
-        return "Usage: get [OPTIONS] <type> <identifier>";
+    public String getUsage() {
+        return String.format("%s [OPTIONS] <type> <identifier>", NAME);
     }
 
     @Override
-    public String getUsage() {
+    public String getHelp() {
         return "Get an entity by its identifier.";
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -55,7 +54,7 @@ public class GetEntity extends BaseCommand {
         Serializer serializer = new Serializer(graph);
 
         if (cmdLine.getArgList().size() < 2)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         String id = cmdLine.getArgs()[1];

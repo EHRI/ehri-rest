@@ -36,16 +36,12 @@ public class Initialize extends BaseCommand {
     }
 
     @Override
-    protected void setCustomOptions(Options options) {
+    public String getUsage() {
+        return NAME;
     }
 
     @Override
     public String getHelp() {
-        return "Usage: initialize";
-    }
-
-    @Override
-    public String getUsage() {
         return "Initialize graph DB with minimal nodes (admin account, permissions, types).";
     }
 

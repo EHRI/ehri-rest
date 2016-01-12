@@ -41,17 +41,19 @@ public class LoadFixtures extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("init",
-                "Initialize graph before loading fixtures"));
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: load-fixtures";
+        options.addOption(Option.builder()
+                .longOpt("init")
+                .desc("Initialize graph before loading fixtures")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s [OPTIONS]", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "Load the fixtures into the database.";
     }
 

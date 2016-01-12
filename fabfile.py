@@ -20,6 +20,7 @@ env.service_name = 'neo4j-service'
 env.prod = False
 env.path = '/opt/webapps/' + env.project_name
 env.neo4j_install = '/opt/webapps/' + 'neo4j-version'
+env.data_dir = '/opt/webapps/data'
 env.index_helper = "/opt/webapps/docview/bin/indexer.jar"
 env.properties_location = '/opt/webapps/data/import-data/properties/'
 env.user = os.getenv("USER")
@@ -286,7 +287,7 @@ def copy_db(local_dir):
     if confirm("Stop Neo4j server?"):
         stop()
 
-        remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+        remote_db_dir = "%(data_dir)s/graph.db" % env
         temp_file = our_temp_file = run("mktemp")
         if not os.path.exists(local_dir):
             os.mkdir(local_dir)
@@ -309,7 +310,7 @@ def copy_db_test(local_dir):
     """
     
 
-    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    remote_db_dir = "%(data_dir)s/graph.db" % env
     temp_file = our_temp_file = run("mktemp")
     run("mv %s %s" % (temp_file, temp_file + ".tgz"))
     if not os.path.exists(local_dir):
@@ -336,7 +337,7 @@ def update_db(local_dir):
     if not os.path.exists(os.path.join(local_dir, "index.db")):
         raise Exception("This doesn't look like a Neo4j DB folder!: " + local_dir)
 
-    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    remote_db_dir = "%(data_dir)s/graph.db" % env
     timestamp = get_timestamp()
     import tempfile
     tf = tempfile.NamedTemporaryFile(suffix=".tgz")
@@ -368,7 +369,7 @@ def update_db_test(local_dir):
     if not os.path.exists(os.path.join(local_dir, "index.db")):
         raise Exception("This doesn't look like a Neo4j DB folder!: " + local_dir)
 
-    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    remote_db_dir = "%(data_dir)s/graph.db" % env
     timestamp = get_timestamp()
     import tempfile
     tf = tempfile.NamedTemporaryFile(suffix=".tgz")

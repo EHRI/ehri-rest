@@ -57,7 +57,7 @@ public class LoadFixturesTest extends GraphTestBase {
         // Check some nodes have been added...
         List<VertexProxy> after = getGraphState(testGraph);
         GraphDiff graphDiff = diffGraph(before, after);
-        assertTrue(graphDiff.added.size() > 0);
-        assertFalse(graphDiff.removed.size() > 0);
+        assertFalse(graphDiff.added.isEmpty());
+        assertTrue(graphDiff.removed.isEmpty());
     }
 }

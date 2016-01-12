@@ -23,44 +23,42 @@ import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.slf4j.Logger;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Abstract base class for commands. Provides the main
  * entry points for interaction:
- * <p>
+ * <p/>
  * <ul>
- *     <li>Set options</li>
- *     <li>Get help</li>
- *     <li>Get usage</li>
- *     <li>Execute with options</li>
+ * <li>Set options</li>
+ * <li>Get help</li>
+ * <li>Get usage</li>
+ * <li>Execute with options</li>
  * </ul>
  */
 public abstract class BaseCommand implements Command {
 
     protected static final Logger logger = org.slf4j.LoggerFactory.getLogger(Command.class);
-    private Options options = new Options();
-    private CommandLineParser parser = new PosixParser();
+    protected final Options options = new Options();
+    private final CommandLineParser parser = new DefaultParser();
 
     protected void setCustomOptions(Options options) {
     }
 
-    /**
-     * Get help for this command.
-     *
-     * @return a contextual help string
-     */
     public abstract String getHelp();
 
-    /**
-     * Get usage info.
-     *
-     * @return a brief usage output
-     */
     public abstract String getUsage();
+
+    private String getHelpFooter() {
+        return "";
+    }
 
     /**
      * Execute this command with the given database and un-parsed
@@ -75,6 +73,18 @@ public abstract class BaseCommand implements Command {
         setCustomOptions(options);
         return execWithOptions(graph, parser.parse(options, args));
     }
+
+    @Override
+    public String getDetailedHelp() {
+        HelpFormatter formatter = new HelpFormatter();
+        setCustomOptions(options);
+        StringWriter out = new StringWriter();
+        formatter.printHelp(
+                new PrintWriter(out), 80, getUsage(), "\n" + getHelp() + "\n\n",
+                options, 5, 0, "\n" + getHelpFooter());
+        return out.toString();
+    }
+
 
     /**
      * Execute this command with the given database and parsed command

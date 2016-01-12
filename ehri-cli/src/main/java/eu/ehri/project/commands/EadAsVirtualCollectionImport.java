@@ -46,14 +46,13 @@ public class EadAsVirtualCollectionImport extends ImportCommand {
     }
 
     @Override
-    public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <importing-user-id> -scope <responsible-user-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
+    public String getUsage() {
+        return NAME + " [OPTIONS] -user <importing-user-id> -scope <responsible-user-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
     }
 
     @Override
-    public String getUsage() {
-        String sep = System.getProperty("line.separator");
-        return "Import an EAD file into the graph database as a tree of VirtualUnits, using the specified"
-                + sep + "responsible User and importing User.";
+    public String getHelp() {
+        return "Import an EAD file into the graph database as a tree of VirtualUnits, " +
+                "using the specified responsible user and importing User.";
     }
 }

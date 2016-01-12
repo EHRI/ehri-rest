@@ -35,7 +35,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import java.util.Properties;
@@ -51,30 +50,45 @@ public class EntityAdd extends BaseCommand {
     }
 
     @Override
-    @SuppressWarnings("static-access")
     protected void setCustomOptions(Options options) {
-        options.addOption(OptionBuilder.withArgName("property=value")
-           .hasArgs(2)
-           .withValueSeparator()
-           .withDescription("Add a property with the given value")
-           .create("P"));
-        options.addOption(new Option("scope", true,
-           "Identifier of scope to create item in, i.e. a repository"));
-        options.addOption(new Option("u", "update", false,
-           "Update item if it already exists"));
-        options.addOption(new Option("user", true,
-           "Identifier of user to import as"));
-        options.addOption(new Option("log", true,
-                "Log message for create action."));
-    }
-
-    @Override
-    public String getHelp() {
-        return String.format("Usage: %s <type> [OPTIONS] [-Pkey=value]", NAME);
+        options.addOption(Option.builder("P")
+                .argName("property=value")
+                .numberOfArgs(2)
+                .valueSeparator()
+                .desc("Add a property with the given value")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .hasArg().desc("Identifier of user taking action")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for delete action.")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("scope")
+                .hasArg()
+                .type(String.class)
+                .desc("Identifier of scope to import into, i.e. repository")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("update")
+                .desc("Update item if it already exists")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s <type> [OPTIONS] [-Pkey=value]", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "Create a new entity with the given id and properties";
     }
 
@@ -85,7 +99,7 @@ public class EntityAdd extends BaseCommand {
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         String logMessage = "Imported from command-line";
         if (cmdLine.hasOption("log")) {
@@ -102,7 +116,7 @@ public class EntityAdd extends BaseCommand {
         UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                 UserProfile.class);
 
-        String typeName = (String) cmdLine.getArgList().get(0);
+        String typeName = cmdLine.getArgList().get(0);
         EntityClass entityClass = EntityClass.withName(typeName);
         Properties properties = cmdLine.getOptionProperties("P");
 

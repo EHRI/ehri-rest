@@ -41,7 +41,7 @@ import java.util.Map;
  * to manipulate the graph.
  */
 public abstract class ImportCsvCommand extends BaseCommand {
-    Class<? extends MapImporter> importer;
+    final Class<? extends MapImporter> importer;
 
     public ImportCsvCommand(Class<? extends MapImporter> importer) {
         this.importer = importer;
@@ -49,14 +49,30 @@ public abstract class ImportCsvCommand extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("scope", true,
-                "Identifier of scope to import into, i.e. AuthoritativeSet"));
-        options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
-        options.addOption(new Option("tolerant", false,
-                "Don't fail on individual row errors."));
-        options.addOption(new Option("log", true,
-                "Log message for import action."));
+        options.addOption(Option.builder()
+                .longOpt("scope")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .desc("Identifier of scope to import into, i.e. repository")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .required()
+                .type(String.class)
+                .desc("Identifier of user to import as")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("tolerant")
+                .desc("Don't error if a file is not valid.")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for action.")
+                .build());
     }
 
     @Override
@@ -72,11 +88,11 @@ public abstract class ImportCsvCommand extends BaseCommand {
         boolean tolerant = cmdLine.hasOption("tolerant");
 
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
 
         List<String> filePaths = Lists.newLinkedList();
         for (int i = 0; i < cmdLine.getArgList().size(); i++) {
-            filePaths.add((String) cmdLine.getArgList().get(i));
+            filePaths.add(cmdLine.getArgList().get(i));
         }
 
         try {

@@ -42,19 +42,27 @@ public class EntityDelete extends BaseCommand {
 
     @Override
     protected void setCustomOptions(Options options) {
-        options.addOption(new Option("user", true,
-           "Identifier of user to import as"));
-        options.addOption(new Option("log", true,
-                "Log message for import action."));
-    }
-
-    @Override
-    public String getHelp() {
-        return String.format("Usage: %s --user <user> [OPTIONS] <id>", NAME);
+        options.addOption(Option.builder()
+                .longOpt("user")
+                .hasArg()
+                .type(String.class)
+                .desc("Identifier of user to import as")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("log")
+                .hasArg()
+                .type(String.class)
+                .desc("Log message for import action.")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s --user <user> [OPTIONS] <id>", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "Delete an item by ID.";
     }
 
@@ -64,7 +72,7 @@ public class EntityDelete extends BaseCommand {
 
         // the first argument is the item ID, and that must be specified
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
         String id = cmdLine.getArgs()[0];
 
         String logMessage = "Deleting item " + id + " via the command-line";

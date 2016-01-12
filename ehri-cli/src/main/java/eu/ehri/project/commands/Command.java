@@ -36,12 +36,18 @@ public interface Command {
     String getHelp();
 
     /**
-     * Get information about the usage of the command, including
-     * required and/or optional parameters.
+     * Get a short hint about the usage of the command.
      *
      * @return a usage text
      */
     String getUsage();
+
+    /**
+     * Get the formatted help blurb, including options.
+     *
+     * @return a help string.
+     */
+    String getDetailedHelp();
 
     /**
      * Execute this command with the given command line options.

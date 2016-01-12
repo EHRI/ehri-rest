@@ -46,5 +46,5 @@ So you can do stuff within the system, you need to make a yser profile for yours
 You should now be able to verify that the new account exists with the command:
 
 ```bash
-./scripts/cmd list userProfile
+./scripts/cmd list UserProfile
 ```

@@ -26,10 +26,9 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import javax.xml.transform.OutputKeys;
@@ -52,28 +51,31 @@ public class ListEntities extends BaseCommand {
     final static String NAME = "list";
 
     @Override
-    @SuppressWarnings("static-access")
     protected void setCustomOptions(Options options) {
-        options.addOption(OptionBuilder
-                .withType(String.class)
-                .withLongOpt("format").isRequired(false)
-                .hasArg(true).withArgName("f")
-                .withDescription("Format for output data, which defaults to just the id. " +
-                        "If provided can be one of: xml, json").create("f"));
-        options.addOption(OptionBuilder
-                .withType(String.class)
-                .withLongOpt("root-node").isRequired(false)
-                .hasArg(true).withArgName("r")
-                .withDescription("Name of the root node (default: '" + NAME + "')").create("r"));
-    }
-
-    @Override
-    public String getHelp() {
-        return "Usage: list [OPTIONS] <type>";
+        options.addOption(Option.builder("f")
+                .type(String.class)
+                .longOpt("format")
+                .required(false)
+                .hasArg(true)
+                .desc("Format for output data, which defaults to just the id. " +
+                        "If provided can be one of: xml, json")
+                .build());
+        options.addOption(Option.builder("r")
+                .type(String.class)
+                .longOpt("root-node")
+                .required(false)
+                .hasArg(true)
+                .desc("Name of the root node (default: '" + NAME + "')")
+                .build());
     }
 
     @Override
     public String getUsage() {
+        return String.format("%s [OPTIONS] <type>", NAME);
+    }
+
+    @Override
+    public String getHelp() {
         return "List entities of a given type.";
     }
 
@@ -82,7 +84,7 @@ public class ListEntities extends BaseCommand {
 
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
+            throw new RuntimeException(getUsage());
         EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -158,7 +160,7 @@ public class ListEntities extends BaseCommand {
         System.out.print("</" + rootName + ">\n"); // root element
     }
 
-    private static Transformer getTransformer(Optional<InputStream> xsltOpt) throws IOException, TransformerException {
+    private static Transformer getTransformer(Optional<InputStream> xsltOpt) throws TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = xsltOpt.isPresent()
                 ? tf.newTransformer(new StreamSource(xsltOpt.get()))
