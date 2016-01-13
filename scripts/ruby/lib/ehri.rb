@@ -18,7 +18,7 @@ module Ehri
   java_import "eu.ehri.project.core.GraphManagerFactory"
   java_import "eu.ehri.project.core.impl.TxNeo4jGraph"
   java_import "eu.ehri.project.models.EntityClass"
-  java_import "eu.ehri.project.models.base.Frame"
+  java_import "eu.ehri.project.models.base.Entity"
   java_import "eu.ehri.project.definitions.EventTypes"
   java_import "com.google.common.base.Optional"
 
@@ -29,6 +29,10 @@ module Ehri
 
   module Importers
     include_package "eu.ehri.project.importers"
+  end
+
+  module Managers
+    include_package "eu.ehri.project.importers.managers"
   end
 
   module Persistence

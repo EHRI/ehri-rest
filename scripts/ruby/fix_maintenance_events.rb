@@ -11,7 +11,7 @@ module Ehri
     # This script restores maintenance event nodes capturing provenance information
     # that we erroneously being lost when repositories were updated.
     total = 0
-    Manager.get_frames(EntityClass::REPOSITORY_DESCRIPTION, Models::RepositoryDescription.java_class).each do |repodesc|
+    Manager.get_entities(EntityClass::REPOSITORY_DESCRIPTION, Models::RepositoryDescription.java_class).each do |repodesc|
       begin
         notes = repodesc.as_vertex.get_property("maintenanceNotes")
         if notes =~ /ICA-AtoM identifier/ and not repodesc.get_maintenance_events.iterator.has_next

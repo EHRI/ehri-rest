@@ -7,7 +7,7 @@ require "#{File.join(File.dirname(__FILE__), "ruby", "lib", "ehri")}"
 module Ehri
   module Fixer
     include Ehri
-    Manager.get_frames(EntityClass::REPOSITORY_DESCRIPTION, Models::RepositoryDescription.java_class).each do |repodesc|
+    Manager.get_entities(EntityClass::REPOSITORY_DESCRIPTION, Models::RepositoryDescription.java_class).each do |repodesc|
       begin
         main = repodesc.as_vertex.get_property("maintenanceNotes")
         if main =~ /Description sources: (.+)/

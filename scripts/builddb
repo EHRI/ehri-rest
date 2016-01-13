@@ -13,6 +13,12 @@ end
 require "ehriutils"
 require "fileutils"
 
+# Turn down debug logging...
+java.lang.System.set_property(
+    "logback.configurationFile",
+    "ehri-io/src/test/resources/logback-test.xml"
+)
+
 USER_ID = ARGV.shift || ENV["USER"]
 DROPBOX = "#{ENV["HOME"]}/Dropbox/EHRI-WP19-20/TestData"
 EAG_DATA_DIR = "data/icaatom_eag"
@@ -84,6 +90,11 @@ class DbBuilder
     Commands::Initialize.new.exec(Graph, [].to_java(:string))
   end
 
+  def create_schema
+    puts "Creating schema..."
+    Commands::GenSchema.new.exec(Graph, [].to_java(:string))
+  end
+
   def create_users
     puts "Importing users from YAML..."
     Commands::LoadFixtures.new.exec(Graph, [USER_FIXTURES].to_java(:string))
@@ -102,7 +113,7 @@ class DbBuilder
   def import_corporate_bodies 
     puts "Creating Corporate body set..."
     Commands::EntityAdd.new.exec(Graph, [
-      "authoritativeSet",
+      "AuthoritativeSet",
       "--update",
       "-Pidentifier=ehri_cb",
       '-Pname=Ehri Corporate Bodies',
@@ -122,7 +133,7 @@ class DbBuilder
   def import_personalities
     puts "Creating Personalities set..."
     Commands::EntityAdd.new.exec(Graph, [
-      "authoritativeSet",
+      "AuthoritativeSet",
       "--update",
       "-Pidentifier=ehri-pers",
       '-Pname=Ehri Personalities',
@@ -162,7 +173,7 @@ class DbBuilder
   def import_thesaurus
     puts "Creating thesaurus set..."
     Commands::EntityAdd.new.exec(Graph, [
-      "cvocVocabulary",
+      "CvocVocabulary",
       "--update",
       "-Pidentifier=ehri_skos",
       '-Pname=EHRI Skos',
@@ -181,7 +192,7 @@ class DbBuilder
   def import_camps
     puts "Creating camps set..."
     Commands::EntityAdd.new.exec(Graph, [
-      "cvocVocabulary",
+      "CvocVocabulary",
       "--update",
       "-Pidentifier=ehri_camps",
       '-Pname=EHRI Camps',
@@ -200,7 +211,7 @@ class DbBuilder
   def import_ghettos
     puts "Creating ghettos set..."
     Commands::EntityAdd.new.exec(Graph, [
-      "cvocVocabulary",
+      "CvocVocabulary",
       "--update",
       "-Pidentifier=ehri_ghettos",
       '-Pname=EHRI Ghettos',
@@ -217,9 +228,16 @@ class DbBuilder
   end
 end
 
-tx = Graph.get_base_graph.begin_tx
-start = Time.now
 builder = DbBuilder.new
+start = Time.now
+if not opts[:update] then
+  tx = Graph.get_base_graph.begin_tx
+  builder.create_schema
+  tx.success
+  tx.close
+end
+
+tx = Graph.get_base_graph.begin_tx
 if not opts[:update] then
   builder.init_db
   builder.create_users

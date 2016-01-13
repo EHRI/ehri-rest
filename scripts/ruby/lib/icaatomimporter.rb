@@ -1,4 +1,4 @@
-#
+
 # Importer for an ICA-Atom EAD export. Individual EAD XML
 # files reside in a directory named with their repository
 # id. The EAD files are potentially hierarchical, so there
@@ -21,12 +21,12 @@ module Ehri
       def import_repo_data(dir, user)
 
         repo_id = File.basename(dir)
-        repo = Manager.get_frame(repo_id, Models::Repository.java_class)
+        repo = Manager.get_entity(repo_id, Models::Repository.java_class)
         ead_files = Dir.glob("#{dir}/*.xml")
 
         msg = "Importing ICA-Atom EAD for repository #{repo_id}"
 
-        manager = Importers::SaxImportManager.new(
+        manager = Managers::SaxImportManager.new(
           Graph, repo, user,
           Importers::IcaAtomEadImporter.java_class,
           Importers::IcaAtomEadHandler.java_class)
@@ -39,7 +39,7 @@ unchanged: #{log.get_unchanged}"
       def import
 
         # lookup USHMM
-        user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
+        user = Manager.get_entity(@user_id, Models::UserProfile.java_class)
 
         # We basically need recursive behaviour here
         Dir.glob("#{@data_dir}/??-??????").sort.each do |dir|

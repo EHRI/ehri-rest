@@ -17,7 +17,7 @@ module Ehri
 
     # Set a _childCount property on system events for how many subjects they have
     total = 0
-    Manager.get_frames(EntityClass::SYSTEM_EVENT, Events::SystemEvent.java_class).each do |evt|
+    Manager.get_entities(EntityClass::SYSTEM_EVENT, Events::SystemEvent.java_class).each do |evt|
       begin
         count = evt.get_subjects.iterator.count
         evt.as_vertex.set_property(ModelsBase::ItemHolder::CHILD_COUNT, count)

@@ -47,16 +47,16 @@ manager = GraphManagerFactory.get_instance graph
 # Test the serializer. Note that the CamelCase Java methods
 # can be converted to the snake_case Ruby style automatically.
 serializer = Serializer.new graph
-ba = manager.get_frame "ba", Frame.java_class
+ba = manager.get_entity "ba", Frame.java_class
 puts serializer.vertex_frame_to_bundle ba
 
 # List a bunch of repositories...
-manager.get_frames(EntityClass::REPOSITORY, EhriModels::Repository.java_class).each { |i|    
+manager.get_entities(EntityClass::REPOSITORY, EhriModels::Repository.java_class).each { |i|    
   puts i.get_id
 }
 
 # List the types of events and their log message...
-manager.get_frames(EntityClass::SYSTEM_EVENT, SystemEvent.java_class).each { |i|    
+manager.get_entities(EntityClass::SYSTEM_EVENT, SystemEvent.java_class).each { |i|    
   bundle = serializer.vertex_frame_to_bundle(i)
   type = i.action_type
   msg = i.log_message

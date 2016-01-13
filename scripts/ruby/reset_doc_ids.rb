@@ -23,7 +23,7 @@ module Ehri
     serializer = Persistence::Serializer.new(Graph)
     reindexer = Core::GraphReindexer.new(Graph)
 
-    Manager.get_frames(EntityClass::REPOSITORY, Models::Repository.java_class).each do |repo|
+    Manager.get_entities(EntityClass::REPOSITORY, Models::Repository.java_class).each do |repo|
       begin
         country = repo.get_country.iterator.next
         scope = repo.get_permission_scope
@@ -39,7 +39,7 @@ module Ehri
 
     errors = 0
 
-    Manager.get_frames(EntityClass::DOCUMENTARY_UNIT, Models::DocumentaryUnit.java_class).each do |doc|
+    Manager.get_entities(EntityClass::DOCUMENTARY_UNIT, Models::DocumentaryUnit.java_class).each do |doc|
       begin
         cls = EntityClass::DOCUMENTARY_UNIT
         idgen = cls.getIdgen

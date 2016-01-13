@@ -35,6 +35,7 @@
             <item href="validation.html" name="Validation"/>
             <item href="identifiers.html" name="Identifiers"/>
             <item href="web-service.html" name="Web Service Usage"/>
+            <item href="loaddump.html" name="Dumping and Loading JSON backups"/>
         </menu>
 
         <!-- Doing this manually instead of using ref="modules" because we want
