@@ -38,7 +38,7 @@ module Ehri
 
     # Check the event hierarchy
 
-    Manager.get_frames(EntityClass::SYSTEM_EVENT, Events::SystemEvent.java_class).each do |event|
+    Manager.get_entities(EntityClass::SYSTEM_EVENT, Events::SystemEvent.java_class).each do |event|
         vertex = event.as_vertex
         vertex.get_vertices(Direction::IN, Ontology::ENTITY_HAS_EVENT).each do |link|
             puts "Stamping #{link}"

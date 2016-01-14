@@ -74,8 +74,8 @@ module Ehri
       def import
         begin
           # lookup USHMM
-          ushmm = Manager.get_frame(@repo_id, Models::Repository.java_class)
-          user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
+          ushmm = Manager.get_entity(@repo_id, Models::Repository.java_class)
+          user = Manager.get_entity(@user_id, Models::UserProfile.java_class)
 
           # Start an action!
           ctx = Persistence::ActionManager.new(

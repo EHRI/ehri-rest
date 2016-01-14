@@ -17,7 +17,7 @@ module Ehri
     include Ehri
 
     total = 0
-    Manager.get_frames(EntityClass::PERMISSION_GRANT, Models::PermissionGrant.java_class).each do |pg|
+    Manager.get_entities(EntityClass::PERMISSION_GRANT, Models::PermissionGrant.java_class).each do |pg|
       begin
         scope = pg.get_scope
         targets = pg.get_targets.iterator.to_a

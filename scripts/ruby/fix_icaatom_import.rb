@@ -20,7 +20,7 @@ module Ehri
 
     data = Hash.new
 
-    user = Manager.get_frame(USER, Models::UserProfile.java_class)
+    user = Manager.get_entity(USER, Models::UserProfile.java_class)
 
     # Note gotcah on char!
     csv = CSVReader.new(Java::JavaIo::FileReader.new(CSV), ","[0].ord.to_java(:char))
@@ -37,7 +37,7 @@ module Ehri
     matched = 0
     errors = 0
 
-    Manager.get_frames(EntityClass::DOCUMENTARY_UNIT, Models::DocumentaryUnit.java_class).each do |doc|
+    Manager.get_entities(EntityClass::DOCUMENTARY_UNIT, Models::DocumentaryUnit.java_class).each do |doc|
       begin
         desc = doc.get_descriptions().iterator().next()
         if data.has_key?(doc.get_identifier)

@@ -39,7 +39,7 @@ serializer = Serializer.new graph
 # the log message. Nasty, but effective.
 tx = graph.get_base_graph.get_raw_graph.begin_tx
 begin
-  manager.get_frames(EntityClass::SYSTEM_EVENT, SystemEvent.java_class).each do |event|
+  manager.get_entities(EntityClass::SYSTEM_EVENT, SystemEvent.java_class).each do |event|
     begin    
       if event.get_event_type.nil? then
         type = case event.get_log_message

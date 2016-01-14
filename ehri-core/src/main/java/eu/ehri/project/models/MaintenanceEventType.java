@@ -30,7 +30,7 @@ public enum MaintenanceEventType {
 
     // Old values before alignment with EAC-CPF
     private enum OldValues {
-        create, update, delete
+        create, creation, update, delete
     }
 
     public static MaintenanceEventType withName(String name) {
@@ -39,6 +39,7 @@ public enum MaintenanceEventType {
         } catch (IllegalArgumentException e) {
             OldValues compatVal = OldValues.valueOf(name);
             switch (compatVal) {
+                case creation:
                 case create:
                     return MaintenanceEventType.created;
                 case delete:

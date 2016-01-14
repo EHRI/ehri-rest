@@ -45,7 +45,7 @@ module Ehri
             
             # Let this throw a fatal error if the repo can't be found - they
             # should ensure all the data refers to valid repositories.
-            repo = Manager.get_frame(repo_code, Models::Repository.java_class)
+            repo = Manager.get_entity(repo_code, Models::Repository.java_class)
             @repolookup[repo_code] = repo
 
             importer = Importers::UkrainianUnitImporter.new(Graph, repo, log)
@@ -85,7 +85,7 @@ module Ehri
         begin
 
           # lookup user
-          user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
+          user = Manager.get_entity(@user_id, Models::UserProfile.java_class)
           log = import_csv(user)
           log.print_report
         rescue Java::JavaLang::Exception => e

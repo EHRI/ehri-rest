@@ -22,7 +22,7 @@ module Ehri
 
       def get_or_create_country(code, name, user)
         if Manager.exists(code)
-          Manager.get_frame(code, Models::Country.java_class)
+          Manager.get_entity(code, Models::Country.java_class)
         else
           bundle = Persistence::Bundle.new(EntityClass::COUNTRY)
           .with_data_value("identifier", code)
@@ -43,7 +43,7 @@ module Ehri
 
         msg = "Importing EAG for country #{countryname}"
 
-        manager = Importers::SaxImportManager.new(Graph, country, user, 
+        manager = Managers::SaxImportManager.new(Graph, country, user, 
                                                   Importers::EagImporter.java_class,
                                                   Importers::EagHandler.java_class)
         log = manager.import_files(repos, msg)
@@ -54,7 +54,7 @@ module Ehri
 
       def import
         # lookup USHMM
-        user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
+        user = Manager.get_entity(@user_id, Models::UserProfile.java_class)
 
         changed = 0
         # We basically need recursive behaviour here

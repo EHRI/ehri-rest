@@ -22,7 +22,7 @@ module Ehri
     # Set a _childCount property on system events for how many subjects they have
     total = 0
     begin
-      Manager.get_frames(EntityClass::COUNTRY, Models::Country.java_class).each do |ct|
+      Manager.get_entities(EntityClass::COUNTRY, Models::Country.java_class).each do |ct|
         id = ct.get_id
         files = Dir.glob("#{DIR}/#{id}_???.md")
         if not files.empty?

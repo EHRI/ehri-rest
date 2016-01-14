@@ -26,7 +26,7 @@ module Ehri
       values = []
 
       types.each do |t, c|
-        Manager.get_frames(t, c).each do |item|
+        Manager.get_entities(t, c).each do |item|
           if rand(0..rand_choose) == rand_choose
             values << [item.as_vertex.get_id, item.get_id]
           end

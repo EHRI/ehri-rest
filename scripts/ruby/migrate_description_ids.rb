@@ -13,7 +13,7 @@ module Ehri
 
     def self.fix_type(cls, java_cls)
       serializer = Persistence::Serializer.new(Graph)
-      Manager.get_frames(cls, java_cls).each do |desc|
+      Manager.get_entities(cls, java_cls).each do |desc|
         bundle = serializer.vertex_frame_to_bundle(desc)
         parent = Graph.frame(desc.get_entity.as_vertex, Java::EuEhriProjectModelsBase::PermissionScope.java_class)
         newid = cls.get_idgen.generate_id(parent, bundle)
