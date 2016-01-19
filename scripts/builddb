@@ -135,7 +135,7 @@ class DbBuilder
     Commands::EntityAdd.new.exec(Graph, [
       "AuthoritativeSet",
       "--update",
-      "-Pidentifier=ehri-pers",
+      "-Pidentifier=ehri_pers",
       '-Pname=Ehri Personalities',
       "--user", USER_ID,
       "--log", "Adding authoritative set for EHRI personalities"].to_java(:string))
@@ -143,7 +143,7 @@ class DbBuilder
     puts "Importing Personalities CSV..."
     Commands::PersonalitiesImport.new.exec(Graph, [
       "--user", USER_ID,
-      "--scope", "ehri-pers",
+      "--scope", "ehri_pers",
       "--log", "Importing EHRI personalities from CSV",
       PERS_CSV].to_java(:string))
   end

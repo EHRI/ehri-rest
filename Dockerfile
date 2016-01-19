@@ -1,7 +1,7 @@
 # Docker file for EHRI backend web service
 FROM dockerfile/java:oracle-java8
 
-ENV NEO4J_VERSION 2.2.2
+ENV NEO4J_VERSION 2.3.2
 ENV NEO4J_HOME /opt/webapps/neo4j-community-$NEO4J_VERSION
 
 # Jax-RS classes we need to configure Neo4j server
