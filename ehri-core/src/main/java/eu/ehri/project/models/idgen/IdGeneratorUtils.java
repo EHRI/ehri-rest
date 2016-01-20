@@ -23,19 +23,16 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.utils.Slugify;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -72,10 +69,11 @@ public class IdGeneratorUtils {
      * @param ident  the item's identifier
      */
     public static String generateId(PermissionScope scope, Bundle bundle, String ident) {
-        LinkedList<String> scopeIds = Lists.newLinkedList();
+        List<String> scopeIds = Lists.newArrayList();
         if (scope != null && !scope.equals(SystemScope.getInstance())) {
-            for (PermissionScope s : scope.getPermissionScopes())
-                scopeIds.addFirst(s.getIdentifier());
+            for (PermissionScope s : scope.getPermissionScopes()) {
+                scopeIds.add(0, s.getIdentifier());
+            }
             scopeIds.add(scope.getIdentifier());
         }
         return generateId(scopeIds, bundle, ident);

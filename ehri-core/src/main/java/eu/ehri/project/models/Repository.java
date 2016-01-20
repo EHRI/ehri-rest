@@ -28,6 +28,7 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
@@ -40,8 +41,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * items.
  */
 @EntityType(EntityClass.REPOSITORY)
-public interface Repository extends Described,
-        ItemHolder, Watchable {
+public interface Repository extends Described, ItemHolder, Watchable {
 
     /**
      * Count the number of top-level documentary unit items within
@@ -85,6 +85,7 @@ public interface Repository extends Described,
      *
      * @return a country frame
      */
+    @Mandatory
     @Fetch(Ontology.REPOSITORY_HAS_COUNTRY)
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
     Country getCountry();

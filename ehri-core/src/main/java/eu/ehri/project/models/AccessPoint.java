@@ -42,6 +42,7 @@ public interface AccessPoint extends Accessible, Named, Annotator {
      *
      * @return a description frame
      */
+    @Mandatory
     @Adjacency(label = Ontology.HAS_ACCESS_POINT, direction = Direction.IN)
     Description getDescription();
 

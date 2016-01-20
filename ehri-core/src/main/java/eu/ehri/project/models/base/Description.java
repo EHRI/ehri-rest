@@ -45,6 +45,7 @@ public interface Description extends Named, Accessible {
         MANUAL, IMPORT
     }
 
+    @Mandatory
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
     Described getEntity();
 

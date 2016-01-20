@@ -117,6 +117,14 @@ public interface SystemEvent extends Accessible {
     Accessible getFirstSubject();
 
     /**
+     * Fetch the event chronologically prior to this one.
+     *
+     * @return an event item
+     */
+    @Adjacency(label = Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
+    SystemEvent getPriorEvent();
+
+    /**
      * Fetch the "scope" of this event, or the context in which a
      * given creation/modification/deletion event is happening.
      *

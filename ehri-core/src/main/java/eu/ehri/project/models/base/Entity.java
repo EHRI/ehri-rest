@@ -25,13 +25,12 @@ import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Mandatory;
 
 import java.util.Set;
 
 /**
  * Base interface for all EHRI framed vertex types.
- *
-
  */
 public interface Entity extends VertexFrame {
 
@@ -47,15 +46,19 @@ public interface Entity extends VertexFrame {
 
     /**
      * Get the unique item id.
+     *
      * @return id
      */
+    @Mandatory
     @Property(EntityType.ID_KEY)
     String getId();
 
     /**
      * Get the type key for this frame.
+     *
      * @return type
      */
+    @Mandatory
     @Property(EntityType.TYPE_KEY)
     String getType();
 
@@ -78,10 +81,12 @@ public interface Entity extends VertexFrame {
 
     abstract class Impl implements JavaHandlerContext<Vertex>, Accessible {
 
+        @Override
         public <T extends Entity> T as(Class<T> cls) {
             return frame(it(), cls);
         }
 
+        @Override
         public <T> T getProperty(String key) {
             return it().getProperty(key);
         }

@@ -27,6 +27,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -46,6 +47,8 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
         DocumentaryUnit child = manager.getEntity("c3", DocumentaryUnit.class);
         assertNotNull(child.getRepository());
         assertNotNull(unit.getRepository());
+        assertNotNull(unit.getRepositoryIfTopLevel());
+        assertNull(child.getRepositoryIfTopLevel());
         assertEquals(unit.getRepository(), child.getRepository());
     }
 

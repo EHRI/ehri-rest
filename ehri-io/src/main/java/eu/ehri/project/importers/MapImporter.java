@@ -124,7 +124,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      */
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> data) {
-        List<Map<String, Object>> extractedDates = Lists.newLinkedList();
+        List<Map<String, Object>> extractedDates = Lists.newArrayList();
         Map<String, String> dateValues = returnDatesAsString(data, dates);
         for (String s : dateValues.keySet()) {
             try {

@@ -24,6 +24,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -31,7 +33,6 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.extension.base.TxCheckedResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.core.GraphManager;
@@ -52,7 +53,15 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Variant;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -76,8 +85,20 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = new JsonFactory();
 
-    protected static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractRestResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
+
+    /**
+     * RDF Mimetypes and formatting mappings
+     */
+    public final static String TURTLE_MIMETYPE = "text/turtle";
+    public final static String RDF_XML_MIMETYPE = "application/rdf+xml";
+    public final static String N3_MIMETYPE = "application/n-triples";
+    public final BiMap<String, String> RDF_MIMETYPE_FORMATS = ImmutableBiMap.of(
+            N3_MIMETYPE, "N3",
+            TURTLE_MIMETYPE, "TTL",
+            RDF_XML_MIMETYPE, "RDF/XML"
+    );
 
     /**
      * Query arguments.
@@ -110,9 +131,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * With each request the headers of that request are injected into the
      * requestHeaders parameter.
      */
-    @Context protected HttpHeaders requestHeaders;
+    @Context
+    protected HttpHeaders requestHeaders;
 
-    @Context protected Request request;
+    @Context
+    protected Request request;
 
     /**
      * Fetch the media type of the incoming request.
@@ -164,7 +187,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     /**
      * Get a serializer according to passed-in serialization config.
-     * <p>
+     * <p/>
      * Currently the only parameter is <code>_ip=[propertyName]</code> which
      * ensures a given property is always included in the output.
      *
@@ -367,7 +390,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * An abstraction class that handles streaming responses that
      * need to manage a transaction.
-     * <p>
+     * <p/>
      * We cannot just return a regular StreamingResponse here
      * because then HEAD requests will leak the transaction.
      */
@@ -441,7 +464,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer,
-                                                                               final Tx tx) {
+            final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -474,7 +497,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer,
-                                                                                final Tx tx) {
+            final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {
@@ -542,7 +565,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer,
-                                                                               final Tx tx) {
+            final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -574,7 +597,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer,
-                                                                                final Tx tx) {
+            final Tx tx) {
         return new TransactionalStreamWrapper(request, tx) {
             @Override
             StreamingOutput getStreamingOutput() {
@@ -744,5 +767,26 @@ public abstract class AbstractRestResource implements TxCheckedResource {
             cc.setNoCache(true);
         }
         return cc;
+    }
+
+    /**
+     * Get an RDF format for content-negotiation form
+     *
+     * @param format        a format string, possibly null
+     * @param defaultFormat a default format
+     * @return an RDF format
+     */
+    protected String getRdfFormat(String format, String defaultFormat) {
+        if (format == null) {
+            for (String mimeValue : RDF_MIMETYPE_FORMATS.keySet()) {
+                MediaType mime = MediaType.valueOf(mimeValue);
+                if (requestHeaders.getAcceptableMediaTypes().contains(mime)) {
+                    return RDF_MIMETYPE_FORMATS.get(mimeValue);
+                }
+            }
+            return defaultFormat;
+        } else {
+            return RDF_MIMETYPE_FORMATS.containsValue(format) ? format : defaultFormat;
+        }
     }
 }

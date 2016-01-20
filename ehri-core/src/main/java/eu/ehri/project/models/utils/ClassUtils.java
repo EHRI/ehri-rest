@@ -233,8 +233,10 @@ public class ClassUtils {
             Mandatory mandatory = method.getAnnotation(Mandatory.class);
             if (mandatory != null) {
                 Property ann = method.getAnnotation(Property.class);
-                if (ann != null)
+                // Ignore structural properties, beginning with '__'
+                if (ann != null && !ann.value().startsWith("__")) {
                     out.add(ann.value());
+                }
             }
 
         }

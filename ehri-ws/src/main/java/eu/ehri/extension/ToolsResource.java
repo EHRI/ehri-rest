@@ -34,6 +34,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
@@ -51,14 +52,19 @@ import eu.ehri.project.tools.Linker;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -84,6 +90,32 @@ public class ToolsResource extends AbstractRestResource {
         super(database);
         findReplace = new FindReplace(graph);
         linker = new Linker(graph);
+    }
+
+    /**
+     * Export an RDFS+OWL representation of the model schema.
+     *
+     * @param format the RDF format
+     * @param baseUri the RDF base URI
+     * @return a streaming response
+     * @throws IOException
+     */
+    @GET
+    @Path("schema")
+    @Produces({TURTLE_MIMETYPE, RDF_XML_MIMETYPE, N3_MIMETYPE})
+    public Response exportSchema(
+            final @QueryParam("format") String format,
+            final @QueryParam("baseUri") String baseUri) throws IOException {
+        final String rdfFormat = getRdfFormat(format, "TTL");
+        final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
+                .inverse().get(rdfFormat));
+        final SchemaExporter schemaExporter = new SchemaExporter(rdfFormat);
+        return Response.ok(new StreamingOutput() {
+            @Override
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                schemaExporter.dumpSchema(outputStream, baseUri);
+            }
+        }).type(mediaType + "; charset=utf-8").build();
     }
 
     /**

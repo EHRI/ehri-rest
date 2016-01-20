@@ -49,11 +49,20 @@ public interface DocumentaryUnit extends AbstractUnit {
     /**
      * Get the repository that holds this documentary unit.
      *
-     * @return the Repository that holds this DocumentaryUnit
+     * @return the repository that holds this DocumentaryUnit
      */
     @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
     @JavaHandler
     Repository getRepository();
+
+    /**
+     * Get the repository if this item is at the top of its hierarchy.
+     * Otherwise, return null.
+     *
+     * @return the repository, or null.
+     */
+    @Adjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, direction = Direction.OUT)
+    Repository getRepositoryIfTopLevel();
 
     /**
      * Set the repository that holds this documentary unit.

@@ -29,6 +29,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.InverseOf;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
@@ -47,10 +49,10 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * http://www.willpowerinfo.co.uk/glossary.htm
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-public interface Concept extends
-        Described, AuthoritativeItem, ItemHolder {
+public interface Concept extends Described, AuthoritativeItem, ItemHolder {
 
     // NB: As an AuthoritativeItem the set will be @Fetched automatically
+    @Mandatory
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     Vocabulary getVocabulary();
 
@@ -69,6 +71,7 @@ public interface Concept extends
 
     // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
     @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.OUT)
+    @InverseOf(Ontology.CONCEPT_HAS_BROADER)
     Iterable<Concept> getNarrowerConcepts();
 
     @JavaHandler
