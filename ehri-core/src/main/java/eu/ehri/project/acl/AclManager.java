@@ -384,7 +384,7 @@ public final class AclManager {
                 if (!verts.iterator().hasNext()) {
                     return true;
                 }
-                // If it's promoted it's publically accessible
+                // If it's promoted it's publicly accessible
                 if (isPromoted(v)) {
                     return true;
                 }

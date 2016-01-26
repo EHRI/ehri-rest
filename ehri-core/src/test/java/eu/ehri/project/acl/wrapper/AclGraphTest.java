@@ -1,7 +1,15 @@
 package eu.ehri.project.acl.wrapper;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
+import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -10,6 +18,10 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -29,7 +41,7 @@ public class AclGraphTest extends AbstractFixtureTest {
     public void setUp() throws Exception {
         super.setUp();
         validUserGraph = new AclGraph(graph.getBaseGraph(), validUser);
-        invalidUserGraph =  new AclGraph(graph.getBaseGraph(), invalidUser);
+        invalidUserGraph = new AclGraph(graph.getBaseGraph(), invalidUser);
     }
 
     @Test
@@ -61,6 +73,13 @@ public class AclGraphTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testGetEdgesAttachedToInvisibleNodes() throws Exception {
+        List<Edge> edges1 = Lists.newArrayList(validUserGraph.getEdges());
+        List<Edge> edges2 = Lists.newArrayList(invalidUserGraph.getEdges());
+        assertEquals(edges2.size() + 34, edges1.size());
+    }
+
+    @Test
     public void testTraversalAsInvalidUser() throws Exception {
         Vertex vertex = manager.getEntity("r1", Repository.class).asVertex();
         Vertex invalidUserVertex = invalidUserGraph.getVertex(vertex.getId());
@@ -70,9 +89,24 @@ public class AclGraphTest extends AbstractFixtureTest {
         // should only get one node (c4) when we traverse 'heldBy'
         Iterable<Vertex> docs = invalidUserVertex
                 .getVertices(Direction.IN, Ontology.DOC_HELD_BY_REPOSITORY);
-        for (Vertex doc: docs) {
+        for (Vertex doc : docs) {
             System.out.println(doc.getProperty(EntityType.ID_KEY));
         }
         assertEquals(3L, Iterables.count(docs));
+    }
+
+    @Test
+    public void testDumpAndLoad() throws Exception {
+        int vCount = Iterators.size(invalidUserGraph.getVertices().iterator());
+        int eCount = Iterators.size(invalidUserGraph.getEdges().iterator());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GraphSONWriter.outputGraph(invalidUserGraph, baos, GraphSONMode.EXTENDED);
+
+        FramedGraph<? extends TransactionalGraph> newGraph = getFramedGraph();
+        ByteArrayInputStream ios = new ByteArrayInputStream(baos.toByteArray());
+        GraphSONReader.inputGraph(newGraph, ios);
+        newGraph.getBaseGraph().commit();
+        assertEquals(vCount, Iterators.size(newGraph.getVertices().iterator()));
+        assertEquals(eCount, Iterators.size(newGraph.getEdges().iterator()));
     }
 }

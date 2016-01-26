@@ -15,12 +15,12 @@ public class AclVertex extends AclElement implements Vertex {
 
     @Override
     public Iterable<Edge> getEdges(Direction direction, String... strings) {
-        return new AclEdgeIterable(((Vertex)this.baseElement).getEdges(direction, strings), this.graph);
+        return new AclEdgeIterable(((Vertex) this.baseElement).getEdges(direction, strings), this.graph);
     }
 
     @Override
     public Iterable<Vertex> getVertices(Direction direction, String... strings) {
-        return new AclVertexIterable(((Vertex)this.baseElement).getVertices(direction, strings), this.graph);
+        return new AclVertexIterable(((Vertex) this.baseElement).getVertices(direction, strings), this.graph);
     }
 
     @Override
