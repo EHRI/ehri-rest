@@ -8,17 +8,30 @@ import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.base.Accessor;
 
-
+/**
+ * A wrapper graph that hides vertices which are not accessible to the
+ * given accessor.
+ *
+ * @param <T> the underlying graph
+ */
 public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
 
     protected final T baseGraph;
     private final Accessor accessor;
-    private final PipeFunction<Vertex,Boolean> aclFilter;
+    private final PipeFunction<Vertex,Boolean> aclVertexFilter;
+    private final PipeFunction<Edge,Boolean> aclEdgeFilter;
 
     public AclGraph(T graph, Accessor accessor) {
         this.baseGraph = graph;
         this.accessor = accessor;
-        this.aclFilter = AclManager.getAclFilterFunction(accessor);
+        this.aclVertexFilter = AclManager.getAclFilterFunction(accessor);
+        this.aclEdgeFilter = new PipeFunction<Edge, Boolean>() {
+            @Override
+            public Boolean compute(Edge edge) {
+                return aclVertexFilter.compute(edge.getVertex(Direction.OUT))
+                        && aclVertexFilter.compute(edge.getVertex(Direction.IN));
+            }
+        };
     }
 
     @Override
@@ -35,7 +48,7 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
     public Vertex getVertex(Object o) {
         Vertex vertex = baseGraph.getVertex(o);
         return vertex != null
-                ? (aclFilter.compute(vertex) ? vertex : null)
+                ? (aclVertexFilter.compute(vertex) ? vertex : null)
                 : null;
     }
 
@@ -47,14 +60,14 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
     @Override
     public Iterable<Vertex> getVertices() {
         return new GremlinPipeline<Vertex, Vertex>(
-                baseGraph.getVertices()).filter(aclFilter);
+                baseGraph.getVertices()).filter(aclVertexFilter);
 
     }
 
     @Override
     public Iterable<Vertex> getVertices(String s, Object o) {
         return new GremlinPipeline<Vertex, Vertex>(
-                baseGraph.getVertices(s, o)).filter(aclFilter);
+                baseGraph.getVertices(s, o)).filter(aclVertexFilter);
     }
 
     @Override
@@ -64,7 +77,10 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
 
     @Override
     public Edge getEdge(Object o) {
-        return baseGraph.getEdge(o);
+        Edge edge = baseGraph.getEdge(o);
+        return edge != null
+                ? (aclEdgeFilter.compute(edge) ? edge : null)
+                : null;
     }
 
     @Override
@@ -74,12 +90,14 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
 
     @Override
     public Iterable<Edge> getEdges() {
-        return baseGraph.getEdges();
+        return new GremlinPipeline<Edge, Edge>(
+                baseGraph.getEdges()).filter(aclEdgeFilter);
     }
 
     @Override
     public Iterable<Edge> getEdges(String s, Object o) {
-        return baseGraph.getEdges(s, o);
+        return new GremlinPipeline<Edge, Edge>(
+                baseGraph.getEdges(s, o)).filter(aclEdgeFilter);
     }
 
     @Override

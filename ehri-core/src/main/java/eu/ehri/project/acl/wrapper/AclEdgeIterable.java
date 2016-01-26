@@ -1,7 +1,11 @@
 package eu.ehri.project.acl.wrapper;
 
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.project.acl.AclManager;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -11,12 +15,21 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
 
     private final Iterable<Edge> iterable;
     private final AclGraph<?> graph;
+    private final PipeFunction<Vertex, Boolean> aclVertexFilter;
+    private final PipeFunction<Edge, Boolean> aclEdgeFilter;
 
     public AclEdgeIterable(Iterable<Edge> iterable, AclGraph<?> graph) {
         this.iterable = iterable;
         this.graph = graph;
+        this.aclVertexFilter = AclManager.getAclFilterFunction(graph.getAccessor());
+        this.aclEdgeFilter = new PipeFunction<Edge, Boolean>() {
+            @Override
+            public Boolean compute(Edge edge) {
+                return aclVertexFilter.compute(edge.getVertex(Direction.OUT))
+                        && aclVertexFilter.compute(edge.getVertex(Direction.IN));
+            }
+        };
     }
-
 
     @Override
     public void close() {
@@ -41,8 +54,10 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
                 }
                 while (this.itty.hasNext()) {
                     Edge edge = this.itty.next();
-                    nextEdge = new AclEdge(edge, graph);
-                    return true;
+                    if (aclEdgeFilter.compute(edge)) {
+                        nextEdge = new AclEdge(edge, graph);
+                        return true;
+                    }
                 }
                 return false;
 
@@ -56,7 +71,9 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
                 } else {
                     while (this.itty.hasNext()) {
                         Edge edge = this.itty.next();
-                        return new AclEdge(edge, graph);
+                        if (aclEdgeFilter.compute(edge)) {
+                            return new AclEdge(edge, graph);
+                        }
                     }
                     throw new NoSuchElementException();
                 }
