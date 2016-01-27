@@ -2,8 +2,6 @@ package eu.ehri.project.acl.wrapper;
 
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.acl.AclManager;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -11,13 +9,11 @@ import java.util.NoSuchElementException;
 
 public class AclVertexIterable implements CloseableIterable<Vertex> {
     private final Iterable<Vertex> iterable;
-    private final AclGraph<?> graph;
-    private final PipeFunction<Vertex,Boolean> aclFilter;
+    private final AclGraph<?> aclGraph;
 
-    public AclVertexIterable(Iterable<Vertex> iterable, AclGraph<?> graph) {
+    public AclVertexIterable(Iterable<Vertex> iterable, AclGraph<?> aclGraph) {
         this.iterable = iterable;
-        this.graph = graph;
-        this.aclFilter = AclManager.getAclFilterFunction(graph.getAccessor());
+        this.aclGraph = aclGraph;
     }
 
     @Override
@@ -40,8 +36,8 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
                 }
                 while (this.itty.hasNext()) {
                     Vertex vertex = this.itty.next();
-                    if (aclFilter.compute(vertex)) {
-                        this.nextVertex = new AclVertex(vertex, graph);
+                    if (aclGraph.evaluateVertex(vertex)) {
+                        this.nextVertex = new AclVertex(vertex, aclGraph);
                         return true;
                     }
                 }
@@ -58,8 +54,8 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
                 } else {
                     while (this.itty.hasNext()) {
                         Vertex vertex = this.itty.next();
-                        if (aclFilter.compute(vertex)) {
-                            return new AclVertex(vertex, graph);
+                        if (aclGraph.evaluateVertex(vertex)) {
+                            return new AclVertex(vertex, aclGraph);
                         }
                     }
                     throw new NoSuchElementException();

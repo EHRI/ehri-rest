@@ -347,7 +347,6 @@ public class EventViews {
         // into a newest-first stream.
         if (users.isEmpty() && ids.isEmpty()) {
             // No item/user filter: scan the global queue...
-            System.out.println("GLOBAL QUEUE");
             return actionManager.getLatestGlobalEvents();
         } else  {
             List<Actioner> actioners = getItems(users, Actioner.class);
