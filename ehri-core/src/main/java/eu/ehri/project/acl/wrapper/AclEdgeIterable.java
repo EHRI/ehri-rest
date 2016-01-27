@@ -1,11 +1,7 @@
 package eu.ehri.project.acl.wrapper;
 
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.acl.AclManager;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -14,21 +10,12 @@ import java.util.NoSuchElementException;
 public class AclEdgeIterable implements CloseableIterable<Edge> {
 
     private final Iterable<Edge> iterable;
-    private final AclGraph<?> graph;
-    private final PipeFunction<Vertex, Boolean> aclVertexFilter;
-    private final PipeFunction<Edge, Boolean> aclEdgeFilter;
+    private final AclGraph<?> aclGraph;
 
-    public AclEdgeIterable(Iterable<Edge> iterable, AclGraph<?> graph) {
+    public AclEdgeIterable(Iterable<Edge> iterable,
+            AclGraph<?> aclGraph) {
         this.iterable = iterable;
-        this.graph = graph;
-        this.aclVertexFilter = AclManager.getAclFilterFunction(graph.getAccessor());
-        this.aclEdgeFilter = new PipeFunction<Edge, Boolean>() {
-            @Override
-            public Boolean compute(Edge edge) {
-                return aclVertexFilter.compute(edge.getVertex(Direction.OUT))
-                        && aclVertexFilter.compute(edge.getVertex(Direction.IN));
-            }
-        };
+        this.aclGraph = aclGraph;
     }
 
     @Override
@@ -54,8 +41,8 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
                 }
                 while (this.itty.hasNext()) {
                     Edge edge = this.itty.next();
-                    if (aclEdgeFilter.compute(edge)) {
-                        nextEdge = new AclEdge(edge, graph);
+                    if (aclGraph.evaluateEdge(edge)) {
+                        nextEdge = new AclEdge(edge, aclGraph);
                         return true;
                     }
                 }
@@ -71,8 +58,8 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
                 } else {
                     while (this.itty.hasNext()) {
                         Edge edge = this.itty.next();
-                        if (aclEdgeFilter.compute(edge)) {
-                            return new AclEdge(edge, graph);
+                        if (aclGraph.evaluateEdge(edge)) {
+                            return new AclEdge(edge, aclGraph);
                         }
                     }
                     throw new NoSuchElementException();

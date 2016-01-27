@@ -13,7 +13,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,13 +85,10 @@ public class AclGraphTest extends AbstractFixtureTest {
         // Invalid user can see repository r1
         assertNotNull(invalidUserVertex);
         // Because three of r1's doc unit nodes are restricted visibility, we
-        // should only get one node (c4) when we traverse 'heldBy'
+        // should only get two nodes (c4 and nl-r1-m19) when we traverse 'heldBy'
         Iterable<Vertex> docs = invalidUserVertex
                 .getVertices(Direction.IN, Ontology.DOC_HELD_BY_REPOSITORY);
-        for (Vertex doc : docs) {
-            System.out.println(doc.getProperty(EntityType.ID_KEY));
-        }
-        assertEquals(3L, Iterables.count(docs));
+        assertEquals(2, Iterables.count(docs));
     }
 
     @Test
