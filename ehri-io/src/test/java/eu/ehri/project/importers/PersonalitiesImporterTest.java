@@ -23,19 +23,20 @@ import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import java.io.InputStream;
-
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 
-public class PersonalitiesImporterTest extends AbstractImporterTest{
-    
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+
+public class PersonalitiesImporterTest extends AbstractImporterTest {
+
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporterTest.class);
     protected final String SINGLE_EAD = "Personalities_small.csv";
 
@@ -45,19 +46,18 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
         int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
         assertEquals(2, voccount);
         logger.debug("number of items: " + voccount);
-        
+
         final String logMessage = "Importing some WP18 Personalities records";
         XmlImportProperties p = new XmlImportProperties("personalities.properties");
         assertTrue(p.containsProperty("Othernames"));
         assertTrue(p.containsProperty("DateofbirthYYYY-MM-DD"));
         assertTrue(p.containsProperty("Pseudonyms"));
-        
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
+        new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
         SystemEvent ev = actionManager.getLatestGlobalEvent();
-        System.out.println(Iterables.toList(authoritativeSet.getAuthoritativeItems()));
+
         /*
          * 8 HistAgent
          * 8 HistAgentDesc
@@ -65,7 +65,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
          * 9 more import Event links (1 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        assertEquals(count+34, getNodeCount(graph));
+        assertEquals(count + 34, getNodeCount(graph));
         assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.

@@ -19,7 +19,10 @@
 
 package eu.ehri.project.importers.managers;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
@@ -70,10 +73,10 @@ public class CsvImportManager extends AbstractImportManager {
     protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
 
-        CSVReader reader = null;
         try {
-            AbstractImporter importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
-                    ImportLog.class).newInstance(framedGraph, permissionScope, log);
+            AbstractImporter importer = importerClass
+                    .getConstructor(FramedGraph.class, PermissionScope.class, ImportLog.class)
+                    .newInstance(framedGraph, permissionScope, log);
             logger.debug("importer of class " + importer.getClass());
 
             importer.addCallback(new ImportCallback() {
@@ -95,39 +98,32 @@ public class CsvImportManager extends AbstractImportManager {
                 }
             });
 
-            reader = new CSVReader(new InputStreamReader(ios, "UTF-8"), VALUE_DELIMITER);
-            String[] headers = reader.readNext();
-            if (headers == null) {
-                throw new InputParseError("no content found");
-            } else {
-                for (int i = 0; i < headers.length; i++) {
-                    headers[i] = headers[i].replaceAll("\\s", "");
-                }
-            }
+            CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(VALUE_DELIMITER).withHeader();
+            ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
 
-            String[] data;
-            while ((data = reader.readNext()) != null) {
-                Map<String, Object> dataMap = Maps.newHashMap();
-                for (int i = 0; i < data.length; i++) {
-                    Helpers.putPropertyInGraph(dataMap, headers[i], data[i]);
-                }
-                try {
-                    importer.importItem(dataMap);
-                } catch (ValidationError e) {
-                    if (isTolerant()) {
-                        logger.error("Validation error importing item: {}", e);
-                    } else {
-                        throw e;
+            try (MappingIterator<Map<String, String>> valueIterator = reader
+                    .readValues(new InputStreamReader(ios, "UTF-8"))) {
+                while (valueIterator.hasNext()) {
+                    Map<String, String> rawData = valueIterator.next();
+                    Map<String, Object> dataMap = Maps.newHashMap();
+                    for (Map.Entry<String, String> entry : rawData.entrySet()) {
+                        Helpers.putPropertyInGraph(dataMap,
+                                entry.getKey().replaceAll("\\s", ""), entry.getValue());
+                    }
+                    try {
+                        importer.importItem(dataMap);
+                    } catch (ValidationError e) {
+                        if (isTolerant()) {
+                            logger.error("Validation error importing item: {}", e);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             }
         } catch (IllegalAccessException | InvocationTargetException |
                 InstantiationException | NoSuchMethodException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
     }
 }
