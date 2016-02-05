@@ -19,7 +19,9 @@
 
 package eu.ehri.extension;
 
-import au.com.bytecode.opencsv.CSVWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -57,7 +59,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -492,13 +493,9 @@ public class ToolsResource extends AbstractRestResource {
     // Helpers
 
     private String makeCsv(List<List<String>> rows) throws IOException {
-        StringWriter writer = new StringWriter();
-        CSVWriter csvWriter = new CSVWriter(writer, '\t', CSVWriter.NO_QUOTE_CHARACTER);
-        for (List<String> remap : rows) {
-            String[] strings = remap.toArray(new String[2]);
-            csvWriter.writeNext(strings);
-        }
-        csvWriter.close();
-        return writer.toString();
+        CsvMapper mapper = new CsvMapper()
+                .enable(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING);
+        CsvSchema schema = mapper.schemaFor(List.class).withoutHeader();
+        return mapper.writer(schema).writeValueAsString(rows);
     }
 }
