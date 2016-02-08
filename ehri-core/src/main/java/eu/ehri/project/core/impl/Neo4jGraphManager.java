@@ -86,14 +86,14 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
 
     @Override
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
-        return setLabels(super.createVertex(id, type, data, keys));
+            Map<String, ?> data) throws IntegrityError {
+        return setLabels(super.createVertex(id, type, data));
     }
 
     @Override
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
-        return setLabels(super.updateVertex(id, type, data, keys));
+            Map<String, ?> data) throws ItemNotFound {
+        return setLabels(super.updateVertex(id, type, data));
     }
 
     @Override

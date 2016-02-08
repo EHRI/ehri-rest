@@ -180,7 +180,7 @@ public final class BundleManager {
     private Vertex createInner(Bundle bundle) {
         try {
             Vertex node = manager.createVertex(bundle.getId(), bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys());
+                    bundle.getData());
             createDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
             return node;
         } catch (IntegrityError e) {
@@ -205,7 +205,7 @@ public final class BundleManager {
             if (!nodeBundle.equals(bundle)) {
                 logger.trace("Bundles differ\nnew:\n{}\nold:\n{}", bundle.toJson(), nodeBundle.toJson());
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                        bundle.getData(), bundle.getPropertyKeys());
+                        bundle.getData());
                 updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(node, MutationState.UPDATED, nodeBundle);
             } else {

@@ -19,10 +19,8 @@
 
 package eu.ehri.extension.providers;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.GlobalPermissionSet;
 import eu.ehri.project.acl.PermissionType;
@@ -46,10 +44,7 @@ import java.util.List;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
-public class GlobalPermissionSetProvider implements MessageBodyReader<GlobalPermissionSet> {
-
-    private static final JsonFactory factory = new JsonFactory();
-    private static final ObjectMapper mapper = new ObjectMapper(factory);
+public class GlobalPermissionSetProvider implements MessageBodyReader<GlobalPermissionSet>, JsonMessageBodyHandler {
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -58,7 +53,7 @@ public class GlobalPermissionSetProvider implements MessageBodyReader<GlobalPerm
 
     @Override
     public GlobalPermissionSet readFrom(Class<GlobalPermissionSet> bundleClass, Type type, Annotation[] annotations,
-                                        MediaType mediaType, MultivaluedMap<String,
+            MediaType mediaType, MultivaluedMap<String,
             String> headers, InputStream stream) throws IOException, WebApplicationException {
 
         try {

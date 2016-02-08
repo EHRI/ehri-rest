@@ -19,8 +19,6 @@
 
 package eu.ehri.extension.providers;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
 
@@ -36,13 +34,10 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
-public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<InheritedGlobalPermissionSet> {
-
-    private static final JsonFactory factory = new JsonFactory();
-    private static final ObjectMapper mapper = new ObjectMapper(factory);
+public class InheritedGlobalPermissionSetProvider
+        implements MessageBodyWriter<InheritedGlobalPermissionSet>, JsonMessageBodyHandler {
 
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -51,15 +46,15 @@ public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<I
 
     @Override
     public long getSize(InheritedGlobalPermissionSet globalPermissionSet, Class<?> aClass, Type type, Annotation[] annotations,
-                        MediaType mediaType) {
+            MediaType mediaType) {
         return -1L;
     }
 
     @Override
     public void writeTo(InheritedGlobalPermissionSet globalPermissionSet,
-                        Class<?> aClass, Type type, Annotation[] annotations,
-                        MediaType mediaType, MultivaluedMap<String, Object> headers,
-                        OutputStream outputStream) throws IOException, WebApplicationException {
+            Class<?> aClass, Type type, Annotation[] annotations,
+            MediaType mediaType, MultivaluedMap<String, Object> headers,
+            OutputStream outputStream) throws IOException, WebApplicationException {
         headers.putSingle(HttpHeaders.CACHE_CONTROL,
                 PermissionsResource.getCacheControl().toString());
         mapper.writeValue(outputStream, globalPermissionSet.serialize());

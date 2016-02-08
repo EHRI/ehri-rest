@@ -1,0 +1,18 @@
+[
+  {
+    "id": "item1",
+    "type": "UnknownProperty",
+    "data": {
+      "key1": "test1",
+      "key2": "test2"
+    }
+  },
+  {
+    "id": "item2",
+    "type": "UnknownProperty",
+    "data": {
+      "key1": "test1",
+      "key2": "test2"
+    }
+  }
+]

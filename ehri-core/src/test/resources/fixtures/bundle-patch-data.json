@@ -1,0 +1,47 @@
+{
+  "id": "1",
+  "type": "DocumentaryUnit",
+  "data": {
+    "identifier": "some-id"
+  },
+  "relationships": {
+    "describes": [
+      {
+        "id": "2",
+        "type": "DocumentaryUnitDescription",
+        "data": {
+        },
+        "relationships": {
+          "hasDate": [
+            {
+              "id": "3",
+              "type": "DatePeriod",
+              "data": {
+                "endDate": "1945-01-01T00:00:00Z"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "4",
+        "type": "DocumentaryUnitDescription",
+        "data": {
+          "name": "un description UPDATED"
+        },
+        "relationships": {
+          "hasDate": [
+            {
+              "id": "5",
+              "type": "DatePeriod",
+              "data": {
+                "endDate": "1945-01-01T00:00:00Z",
+                "randomArray": ["one", "two"]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

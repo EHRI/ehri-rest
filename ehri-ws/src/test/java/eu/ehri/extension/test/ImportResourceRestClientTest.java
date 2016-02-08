@@ -264,6 +264,30 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         assertEquals(logText, rootNode.path("message").asText());
     }
 
+    @Test
+    public void testJsonPatch() throws Exception {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("import-patch-test.json");
+        System.out.println(payloadStream);
+        String logText = "Testing patch update";
+        URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "json")
+                .queryParam(LOG_PARAM, logText).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
+                .header("Content-Type", "application/json")
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        String output = response.getEntity(String.class);
+        System.out.println(output);
+        assertStatus(ClientResponse.Status.OK, response);
+
+        JsonNode rootNode = jsonMapper.readTree(output);
+        assertEquals(0, rootNode.path("created").asInt());
+        assertEquals(1, rootNode.path("updated").asInt());
+        assertEquals(1, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
+    }
+
     private UriBuilder getImportUrl(String endPoint, String scopeId, String log, boolean tolerant) {
         return ehriUriBuilder(ImportResource.ENDPOINT, endPoint)
                 .queryParam(LOG_PARAM, log)

@@ -144,7 +144,7 @@ public interface GraphManager {
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given
-     * key/value indexed property.
+     * key/value property.
      *
      * @param type The entity type
      * @return An iterable of vertices with the given key/value properties
@@ -176,21 +176,6 @@ public interface GraphManager {
             Map<String, ?> data) throws IntegrityError;
 
     /**
-     * Create a vertex with the given id, type, and data, specifying which
-     * property keys should be indexed.
-     *
-     * @param id   The vertex's string ID
-     * @param type The entity type
-     * @param data The data map
-     * @param keys A set of keys to be indexed
-     * @return The new vertex
-     * @throws IntegrityError
-     */
-    Vertex createVertex(String id, EntityClass type,
-            Map<String, ?> data, Iterable<String> keys)
-            throws IntegrityError;
-
-    /**
      * Create a vertex with the given id, type, and data.
      *
      * @param id   The vertex's string ID
@@ -201,20 +186,6 @@ public interface GraphManager {
      */
     Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data) throws ItemNotFound;
-
-    /**
-     * Create a vertex with the given id, type, and data, specifying which
-     * property keys should be indexed.
-     *
-     * @param id   The vertex's string ID
-     * @param type The entity type
-     * @param data The data map
-     * @param keys A set of keys to be indexed
-     * @return The updated vertex
-     * @throws ItemNotFound
-     */
-    Vertex updateVertex(String id, EntityClass type,
-            Map<String, ?> data, Iterable<String> keys) throws ItemNotFound;
 
     /**
      * Set a property on a vertex.
@@ -249,11 +220,6 @@ public interface GraphManager {
      * @param vertex The vertex to delete
      */
     void deleteVertex(Vertex vertex);
-
-    /**
-     * Rebuild the internal graph index.
-     */
-    void rebuildIndex();
 
     /*
      * Run graph-specific initialization code.

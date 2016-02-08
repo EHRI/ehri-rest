@@ -19,13 +19,23 @@
 
 package eu.ehri.project.persistence;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
@@ -45,17 +55,40 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 class DataConverter {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final JsonFactory factory = new JsonFactory();
+    private static final ObjectMapper mapper = new ObjectMapper(factory);
     private static final ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+
+    public static class BundleDeserializer extends JsonDeserializer<Bundle> {
+        private static TypeReference<Map<String, Object>> tref = new TypeReference<Map<String, Object>>() {
+        };
+
+        @Override
+        public Bundle deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            try {
+                return dataToBundle(parser.readValueAs(tref));
+            } catch (DeserializationError deserializationError) {
+                throw new IOException(deserializationError);
+            }
+        }
+    }
+
+    static {
+        SimpleModule bundleModule = new SimpleModule();
+        bundleModule.addDeserializer(Bundle.class, new BundleDeserializer());
+        mapper.registerModule(bundleModule);
+    }
 
     /**
      * Convert an error set to a generic data structure.
@@ -147,10 +180,42 @@ class DataConverter {
      */
     public static Bundle streamToBundle(InputStream inputStream) throws DeserializationError {
         try {
-            return dataToBundle(mapper.readValue(inputStream, Map.class));
+            return mapper.readValue(inputStream, Bundle.class);
         } catch (IOException e) {
             e.printStackTrace();
             throw new DeserializationError("Error decoding JSON", e);
+        }
+    }
+
+    public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
+        Preconditions.checkNotNull(inputStream);
+        try {
+            final JsonParser parser = factory
+                    .createParser(new InputStreamReader(inputStream, "UTF-8"));
+            JsonToken jsonToken = parser.nextValue();
+            if (!parser.isExpectedStartArrayToken()) {
+                throw new DeserializationError("Stream should be an array of objects, was: " + jsonToken);
+            }
+            final Iterator<Bundle> iterator = parser.nextValue() == JsonToken.END_ARRAY
+                    ? Iterators.<Bundle>emptyIterator()
+                    : parser.readValuesAs(Bundle.class);
+            return new CloseableIterable<Bundle>() {
+                @Override
+                public void close() {
+                    try {
+                        parser.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public Iterator<Bundle> iterator() {
+                    return iterator;
+                }
+            };
+        } catch (IOException e) {
+            throw new DeserializationError("Error reading JSON", e);
         }
     }
 
@@ -163,9 +228,7 @@ class DataConverter {
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
         try {
-            return dataToBundle(mapper.readValue(json, Map.class));
-        } catch (DeserializationError e) {
-            throw e;
+            return mapper.readValue(json, Bundle.class);
         } catch (Exception e) {
             e.printStackTrace();
             throw new DeserializationError("Error decoding JSON", e);
@@ -237,11 +300,16 @@ class DataConverter {
     private static Map<String, Object> getSanitisedProperties(Map<?, ?> data)
             throws DeserializationError {
         Object props = data.get(Bundle.DATA_KEY);
-        if (props != null && props instanceof Map) {
-            return sanitiseProperties((Map<?, ?>) props);
+        if (props != null) {
+            if (props instanceof Map) {
+                return sanitiseProperties((Map<?, ?>) props);
+            } else {
+                throw new DeserializationError(
+                        "Data value not a map type! " + props.getClass().getSimpleName());
+            }
+        } else {
+            return Maps.newHashMap();
         }
-        throw new DeserializationError(
-                "No item data map found or data value not a map type.");
     }
 
     /**

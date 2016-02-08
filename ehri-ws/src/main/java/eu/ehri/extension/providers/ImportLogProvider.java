@@ -19,12 +19,10 @@
 
 package eu.ehri.extension.providers;
 
-import eu.ehri.extension.PermissionsResource;
-import eu.ehri.project.acl.InheritedItemPermissionSet;
+import eu.ehri.project.importers.ImportLog;
 
-import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -35,28 +33,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
-public class InheritedItemPermissionSetProvider
-        implements MessageBodyWriter<InheritedItemPermissionSet>, JsonMessageBodyHandler {
-
+@Consumes(MediaType.APPLICATION_JSON)
+public class ImportLogProvider implements MessageBodyWriter<ImportLog>, JsonMessageBodyHandler {
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return InheritedItemPermissionSet.class.equals(aClass);
+        return aClass == ImportLog.class;
     }
 
     @Override
-    public long getSize(InheritedItemPermissionSet permissionSet, Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType) {
+    public long getSize(ImportLog importLog, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
         return -1L;
     }
 
     @Override
-    public void writeTo(InheritedItemPermissionSet itemPermissionSet,
-            Class<?> aClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> headers,
-            OutputStream outputStream) throws IOException, WebApplicationException {
-        headers.putSingle(HttpHeaders.CACHE_CONTROL,
-                PermissionsResource.getCacheControl().toString());
-        mapper.writeValue(outputStream, itemPermissionSet.serialize());
+    public void writeTo(ImportLog importLog, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
+        mapper.writeValue(outputStream, importLog);
     }
 }

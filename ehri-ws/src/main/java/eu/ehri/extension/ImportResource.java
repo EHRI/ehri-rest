@@ -23,29 +23,41 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
+import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.managers.CsvImportManager;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.eac.EacHandler;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
-import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.SaxXmlHandler;
-import eu.ehri.project.importers.cvoc.SkosImporter;
-import eu.ehri.project.importers.cvoc.SkosImporterFactory;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -101,9 +113,9 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
-     * <p>
+     * <p/>
      * Example:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      * curl -X POST \
@@ -166,9 +178,9 @@ public class ImportResource extends AbstractRestResource {
      * The Content-Type header is used to distinguish the contents.
      * <br>
      * <b>Note:</b> The archive does not currently support compression.
-     * <p>
+     * <p/>
      * The way you would run with would typically be:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      *     curl -X POST \
@@ -180,9 +192,9 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p>
+     * <p/>
      * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
-     * <p>
+     * <p/>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
@@ -207,7 +219,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("ead")
-    public Response importEad(
+    public ImportLog importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -238,7 +250,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
             tx.success();
-            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+            return log;
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException | InputParseError | ArchiveException e) {
@@ -254,7 +266,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("eag")
-    public Response importEag(
+    public ImportLog importEag(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -276,7 +288,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("eac")
-    public Response importEac(
+    public ImportLog importEac(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -294,7 +306,7 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of CSV files. See EAD handler for options and
      * defaults but substitute text/csv for the input mimetype when
      * a single file is POSTed.
-     * <p>
+     * <p/>
      * Additional note: no handler class is required.
      */
     @POST
@@ -302,7 +314,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("csv")
-    public Response importCsv(
+    public ImportLog importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
@@ -325,13 +337,51 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             tx.success();
-            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+            return log;
         } catch (InputParseError ex) {
             throw new DeserializationError("ParseError: " + ex.getMessage());
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException | ArchiveException e) {
             throw new DeserializationError(e.getMessage());
+        }
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("json")
+    public ImportLog bulkUpdate(@QueryParam(LOG_PARAM) String logMessage, InputStream inputStream)
+            throws IOException, ItemNotFound, ValidationError,
+            DeserializationError, SerializationError {
+        try (final Tx tx = graph.getBaseGraph().beginTx();
+             CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
+            Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
+            ActionManager am = new ActionManager(graph);
+            BundleDAO dao = new BundleDAO(graph);
+            Accessor user = getRequesterUserProfile();
+            ActionManager.EventContext ctx = am.newEventContext(user.as(Actioner.class),
+                    EventTypes.modification, getLogMessage(logMessage));
+            ImportLog log = new ImportLog(ctx);
+            for (Bundle bundle : bundleIter) {
+                Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
+                Bundle oldBundle = depSerializer.entityToBundle(entity);
+                Bundle newBundle = oldBundle.mergeDataWith(bundle);
+                Mutation<Entity> update = dao.update(newBundle, Entity.class);
+                switch (update.getState()) {
+                    case UNCHANGED:
+                        log.addUnchanged();
+                        break;
+                    case UPDATED:
+                        log.addUpdated();
+                        ctx.addSubjects(entity.as(Accessible.class));
+                        break;
+                    default:
+                }
+            }
+            ctx.commit();
+            tx.success();
+            return log;
         }
     }
 
