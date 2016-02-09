@@ -23,13 +23,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
-import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.core.Tx;
-import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportLog;
@@ -43,21 +40,15 @@ import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -352,34 +343,11 @@ public class ImportResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("json")
     public ImportLog bulkUpdate(@QueryParam(LOG_PARAM) String logMessage, InputStream inputStream)
-            throws IOException, ItemNotFound, ValidationError,
-            DeserializationError, SerializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx();
-             CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
-            Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
-            ActionManager am = new ActionManager(graph);
-            BundleDAO dao = new BundleDAO(graph);
-            Accessor user = getRequesterUserProfile();
-            ActionManager.EventContext ctx = am.newEventContext(user.as(Actioner.class),
-                    EventTypes.modification, getLogMessage(logMessage));
-            ImportLog log = new ImportLog(ctx);
-            for (Bundle bundle : bundleIter) {
-                Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
-                Bundle oldBundle = depSerializer.entityToBundle(entity);
-                Bundle newBundle = oldBundle.mergeDataWith(bundle);
-                Mutation<Entity> update = dao.update(newBundle, Entity.class);
-                switch (update.getState()) {
-                    case UNCHANGED:
-                        log.addUnchanged();
-                        break;
-                    case UPDATED:
-                        log.addUpdated();
-                        ctx.addSubjects(entity.as(Accessible.class));
-                        break;
-                    default:
-                }
-            }
-            ctx.commit();
+            throws IOException, ItemNotFound, ValidationError, DeserializationError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor accessor = getRequesterUserProfile();
+            ImportLog log = new BatchOperations(graph).batchUpdate(inputStream,
+                    accessor.as(Actioner.class), getLogMessage(logMessage));
             tx.success();
             return log;
         }

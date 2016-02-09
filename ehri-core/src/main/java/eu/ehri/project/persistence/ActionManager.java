@@ -41,12 +41,15 @@ import eu.ehri.project.models.events.EventLink;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -126,34 +129,27 @@ public final class ActionManager {
      *
      */
     public class EventContext {
-        private final ActionManager actionManager;
         private final Actioner actioner;
         private final EventTypes actionType;
         private final Optional<String> logMessage;
-        private final Optional<Entity> versionFrame;
-        private final Optional<Bundle> versionBundle;
+        private final Set<Pair<Entity, Bundle>> toVersion;
         private final Set<Accessible> subjects;
         private final String timestamp;
 
         /**
          * Create a new event context.
-         *  @param actionManager The action manager instance
          * @param actioner      The actioner
          * @param type          The event type
          * @param logMessage    An optional log message
          */
-        EventContext(ActionManager actionManager,
-                Actioner actioner,
+        EventContext(Actioner actioner,
                 EventTypes type,
                 String timestamp, Optional<String> logMessage,
-                Optional<Entity> versionFrame,
-                Optional<Bundle> versionBundle) {
-            this.actionManager = actionManager;
+                Set<Pair<Entity, Bundle>> toVersion) {
             this.actionType = type;
             this.actioner = actioner;
             this.logMessage = logMessage;
-            this.versionFrame = versionFrame;
-            this.versionBundle = versionBundle;
+            this.toVersion = toVersion;
             this.subjects = Sets.newHashSet();
             this.timestamp = timestamp;
         }
@@ -210,18 +206,13 @@ public final class ActionManager {
          * @return This event context
          */
         public EventContext createVersion(Entity frame, Bundle bundle) {
-            Bundle version = Bundle.Builder.withClass(EntityClass.VERSION)
+            Bundle versionBundle = Bundle.Builder.withClass(EntityClass.VERSION)
                     .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
                     .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
                     .addDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson())
                     .build();
-            EventContext ctx = new EventContext(actionManager, actioner,
-                    actionType, timestamp, logMessage,
-                    Optional.of(frame), Optional.of(version));
-            for (Accessible subject : subjects) {
-                ctx.addSubjects(subject);
-            }
-            return ctx;
+            toVersion.add(new ImmutablePair<>(frame, versionBundle));
+            return this;
         }
 
         /**
@@ -231,11 +222,7 @@ public final class ActionManager {
          * @return This event context
          */
         public EventContext addSubjects(Accessible... entities) {
-            for (Accessible entity : entities) {
-                if (!subjects.contains(entity)) {
-                    subjects.add(entity);
-                }
-            }
+            Collections.addAll(subjects, entities);
             return this;
         }
 
@@ -269,16 +256,18 @@ public final class ActionManager {
             }
 
             // Create the version.
-            if (versionBundle.isPresent() && versionFrame.isPresent()) {
+            if (!toVersion.isEmpty()) {
                 try {
-                    Entity subject = versionFrame.get();
-                    Bundle version = versionBundle.get();
-                    Version ev = dao.create(version, Version.class);
-                    replaceAtHead(subject.asVertex(), ev.asVertex(),
-                            Ontology.ENTITY_HAS_PRIOR_VERSION,
-                            Ontology.ENTITY_HAS_PRIOR_VERSION, Direction.OUT);
-                    graph.addEdge(null, ev.asVertex(),
-                            systemEvent.asVertex(), Ontology.VERSION_HAS_EVENT);
+                    for (Pair<Entity, Bundle> entityBundle : toVersion) {
+                        Entity subject = entityBundle.getKey();
+                        Bundle version = entityBundle.getValue();
+                        Version ev = dao.create(version, Version.class);
+                        replaceAtHead(subject.asVertex(), ev.asVertex(),
+                                Ontology.ENTITY_HAS_PRIOR_VERSION,
+                                Ontology.ENTITY_HAS_PRIOR_VERSION, Direction.OUT);
+                        graph.addEdge(null, ev.asVertex(),
+                                systemEvent.asVertex(), Ontology.VERSION_HAS_EVENT);
+                    }
                 } catch (ValidationError validationError) {
                     throw new RuntimeException(validationError);
                 }
@@ -328,8 +317,8 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type, Optional<String> logMessage) {
-        return new EventContext(this, user, type, getTimestamp(), logMessage,
-                Optional.<Entity>absent(), Optional.<Bundle>absent());
+        return new EventContext(user, type, getTimestamp(), logMessage,
+                Sets.<Pair<Entity, Bundle>>newHashSet());
     }
 
     /**
@@ -340,8 +329,8 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type) {
-        return new EventContext(this, user, type, getTimestamp(), Optional.<String>absent(),
-                Optional.<Entity>absent(), Optional.<Bundle>absent());
+        return new EventContext(user, type, getTimestamp(), Optional.<String>absent(),
+                Sets.<Pair<Entity, Bundle>>newHashSet());
     }
 
     /**
@@ -464,10 +453,10 @@ public final class ActionManager {
         Vertex firstVertex = first.asVertex();
         Vertex secondVertex = second.asVertex();
 
-        for (Vertex flink : firstVertex.getVertices(Direction.IN, Ontology.ACTION_HAS_EVENT)) {
-            for (Vertex slink : secondVertex.getVertices(Direction.IN, Ontology.ACTION_HAS_EVENT)) {
-                for (Edge chain : slink.getEdges(Direction.OUT, Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)) {
-                    return chain.getVertex(Direction.IN).equals(flink);
+        for (Vertex link1 : firstVertex.getVertices(Direction.IN, Ontology.ACTION_HAS_EVENT)) {
+            for (Vertex link2 : secondVertex.getVertices(Direction.IN, Ontology.ACTION_HAS_EVENT)) {
+                for (Edge chain : link2.getEdges(Direction.OUT, Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)) {
+                    return chain.getVertex(Direction.IN).equals(link1);
                 }
             }
         }

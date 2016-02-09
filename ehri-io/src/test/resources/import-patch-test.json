@@ -1,0 +1,34 @@
+[
+  {
+    "id": "c1",
+    "type": "DocumentaryUnit",
+    "data": {},
+    "relationships": {
+      "describes": [
+        {
+          "id": "cd1",
+          "type": "DocumentaryUnitDescription",
+          "data": {
+            "name": "Documentary Unit 1 CHANGED"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "c2",
+    "type": "DocumentaryUnit",
+    "data": {},
+    "relationships": {
+      "describes": [
+        {
+          "id": "cd2",
+          "type": "DocumentaryUnitDescription",
+          "data": {
+            "name": "Documentary Unit 2"
+          }
+        }
+      ]
+    }
+  }
+]

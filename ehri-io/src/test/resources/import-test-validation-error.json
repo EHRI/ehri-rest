@@ -1,0 +1,17 @@
+[
+  {
+    "type": "DocumentaryUnit",
+    "data": {},
+    "relationships": {
+      "describes": [
+        {
+          "type": "DocumentaryUnitDescription",
+          "data": {
+            "name": "Won't work without identifier",
+            "languageCode": "eng"
+          }
+        }
+      ]
+    }
+  }
+]

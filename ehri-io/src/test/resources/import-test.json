@@ -1,0 +1,19 @@
+[
+  {
+    "type": "DocumentaryUnit",
+    "data": {
+      "identifier": "test"
+    },
+    "relationships": {
+      "describes": [
+        {
+          "type": "DocumentaryUnitDescription",
+          "data": {
+            "name": "New Documentary Unit",
+            "languageCode": "eng"
+          }
+        }
+      ]
+    }
+  }
+]
