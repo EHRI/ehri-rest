@@ -19,8 +19,8 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.EacHandler;
-import eu.ehri.project.importers.EacImporter;
+import eu.ehri.project.importers.eac.EacHandler;
+import eu.ehri.project.importers.eac.EacImporter;
 
 /**
  * Import EAC-CPF files.

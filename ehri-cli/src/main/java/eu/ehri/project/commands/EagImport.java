@@ -19,8 +19,8 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.EagHandler;
-import eu.ehri.project.importers.EagImporter;
+import eu.ehri.project.importers.eag.EagHandler;
+import eu.ehri.project.importers.eag.EagImporter;
 
 /**
  * Import EAG files.

@@ -1,8 +1,8 @@
 package eu.ehri.project.exporters.ead;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
-import eu.ehri.project.importers.IcaAtomEadHandler;
-import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.ead.IcaAtomEadHandler;
+import eu.ehri.project.importers.ead.IcaAtomEadImporter;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;

@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.ImportResource;
-import eu.ehri.project.importers.IcaAtomEadHandler;
+import eu.ehri.project.importers.ead.IcaAtomEadHandler;
 import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;

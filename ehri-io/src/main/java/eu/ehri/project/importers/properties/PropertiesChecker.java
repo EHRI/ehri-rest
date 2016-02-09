@@ -19,7 +19,7 @@
 
 package eu.ehri.project.importers.properties;
 
-import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.models.EntityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
