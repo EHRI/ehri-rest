@@ -21,8 +21,8 @@ package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
-import eu.ehri.project.importers.VirtualEadHandler;
-import eu.ehri.project.importers.VirtualEadImporter;
+import eu.ehri.project.importers.ead.VirtualEadHandler;
+import eu.ehri.project.importers.ead.VirtualEadImporter;
 
 /**
  * Import EAD from the command line as a virtual collection.

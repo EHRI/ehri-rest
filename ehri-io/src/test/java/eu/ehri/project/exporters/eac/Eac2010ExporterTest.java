@@ -20,8 +20,8 @@
 package eu.ehri.project.exporters.eac;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
-import eu.ehri.project.importers.EacHandler;
-import eu.ehri.project.importers.EacImporter;
+import eu.ehri.project.importers.eac.EacHandler;
+import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;

@@ -19,7 +19,7 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.ead.EadImporter;
 
 /**
  * Specialisation of ImportCsvCommand that is used for importing EAD-like CSV files.

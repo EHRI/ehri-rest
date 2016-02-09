@@ -19,8 +19,8 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.EadImporter;
-import eu.ehri.project.importers.UshmmHandler;
+import eu.ehri.project.importers.ead.EadImporter;
+import eu.ehri.project.importers.ead.UshmmHandler;
 
 /**
  * Import command for USHMM EAD files. 

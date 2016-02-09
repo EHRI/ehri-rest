@@ -20,8 +20,8 @@
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.EadHandler;
-import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.ead.EadHandler;
+import eu.ehri.project.importers.ead.IcaAtomEadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**

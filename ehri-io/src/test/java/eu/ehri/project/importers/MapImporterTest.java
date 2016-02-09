@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Before;

@@ -1,8 +1,8 @@
 package eu.ehri.project.exporters.eag;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
-import eu.ehri.project.importers.EagHandler;
-import eu.ehri.project.importers.EagImporter;
+import eu.ehri.project.importers.eag.EagHandler;
+import eu.ehri.project.importers.eag.EagImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;

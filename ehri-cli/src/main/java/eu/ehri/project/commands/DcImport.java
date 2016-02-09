@@ -21,8 +21,8 @@ package eu.ehri.project.commands;
 
 
 import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.DcEuropeanaHandler;
-import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.xml.DcEuropeanaHandler;
+import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**

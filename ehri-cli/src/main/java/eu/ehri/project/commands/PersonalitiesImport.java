@@ -19,7 +19,7 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.PersonalitiesImporter;
+import eu.ehri.project.importers.csv.PersonalitiesImporter;
 
 /**
  * Specialisation of {@link ImportCsvCommand} for importing personalities

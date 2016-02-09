@@ -19,7 +19,7 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.CsvConceptImporter;
+import eu.ehri.project.importers.csv.CsvConceptImporter;
 
 /**
  * Extension of ImportCsvCommand that uses the CsvConceptImporter.
