@@ -175,7 +175,7 @@ public class CvocConceptTest extends ModelTestBase {
 		// that is the frames way of doning things
 		
 		ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);		
-		assertEquals("pref1", descr.getPrefLabel());
+		assertEquals("pref1", descr.getName());
 		// etc. etc.
 		
 		//String[] altLabels = descr.getAltLabels();		

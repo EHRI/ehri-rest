@@ -20,6 +20,7 @@
 package eu.ehri.project.models.events;
 
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
@@ -38,6 +39,19 @@ public interface SystemEventQueue extends Entity {
 
     String STREAM_START = Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream";
 
+    /**
+     * Fetch the latest global event.
+     *
+     * @return a system event frame
+     */
+    @Adjacency(label = SystemEventQueue.STREAM_START)
+    SystemEvent getLatestEvent();
+
+    /**
+     * Get a stream of system events, latest first.
+     *
+     * @return an iterable of event frames
+     */
     @JavaHandler
     Iterable<SystemEvent> getSystemEvents();
 

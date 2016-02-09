@@ -17,16 +17,24 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models;
+package eu.ehri.project.models.annotations;
 
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Described;
-import eu.ehri.project.models.base.Watchable;
-import eu.ehri.project.models.cvoc.AuthoritativeItem;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * A frame class representing a historical agent item.
+ * Indicates an adjacency that is the logical inverse of
+ * another, and the label that should be used.
  */
-@EntityType(EntityClass.HISTORICAL_AGENT)
-public interface HistoricalAgent extends AuthoritativeItem, Described, Watchable {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface InverseOf {
+    /**
+     * The label used for the inverse relationship.
+     *
+     * @return the relation name
+     */
+    String value();
 }

@@ -205,15 +205,6 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         }
     }
 
-    public final static String TURTLE_MIMETYPE = "text/turtle";
-    public final static String RDF_XML_MIMETYPE = "application/rdf+xml";
-    public final static String N3_MIMETYPE = "application/n-triples";
-    public final BiMap<String, String> RDF_MIMETYPE_FORMATS = ImmutableBiMap.of(
-            N3_MIMETYPE, "N3",
-            TURTLE_MIMETYPE, "TTL",
-            RDF_XML_MIMETYPE, "RDF/XML"
-    );
-
     /**
      * Export the given vocabulary as SKOS.
      *
@@ -248,20 +239,6 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                     model.getWriter(rdfFormat).write(model, outputStream, base);
                 }
             }).type(mediaType + "; charset=utf-8").build();
-        }
-    }
-
-    private String getRdfFormat(String format, String defaultFormat) {
-        if (format == null) {
-            for (String mimeValue : RDF_MIMETYPE_FORMATS.keySet()) {
-                MediaType mime = MediaType.valueOf(mimeValue);
-                if (requestHeaders.getAcceptableMediaTypes().contains(mime)) {
-                    return RDF_MIMETYPE_FORMATS.get(mimeValue);
-                }
-            }
-            return defaultFormat;
-        } else {
-            return RDF_MIMETYPE_FORMATS.containsValue(format) ? format : defaultFormat;
         }
     }
 }

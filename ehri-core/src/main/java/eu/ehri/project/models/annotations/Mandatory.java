@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *   }
  * </pre>
  * 
- * Indicates that a property is mandatory.
+ * Indicates that a property or adjacency is mandatory.
  */
 public @interface Mandatory {
 

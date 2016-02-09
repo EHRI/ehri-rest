@@ -24,6 +24,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Temporal;
 
@@ -66,6 +67,7 @@ public interface DatePeriod extends Annotatable {
      *
      * @return a temporal item
      */
+    @Mandatory
     @Adjacency(label = Ontology.ENTITY_HAS_DATE, direction = Direction.IN)
     Temporal getEntity();
 }

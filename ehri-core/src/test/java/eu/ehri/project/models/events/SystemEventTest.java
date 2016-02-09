@@ -104,6 +104,8 @@ public class SystemEventTest extends AbstractFixtureTest {
                 EventTypes.deletion);
         SystemEvent forth = ctx3.commit();
 
+        assertEquals(third, forth.getPriorEvent());
+
         // creation and modification are different
         assertFalse(sameAs(first, second));
 

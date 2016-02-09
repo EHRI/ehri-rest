@@ -22,6 +22,7 @@ package eu.ehri.project.models.cvoc;
 import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.base.Linkable;
 
@@ -29,6 +30,7 @@ import eu.ehri.project.models.base.Linkable;
  * An item that belongs in some authoritative set.
  */
 public interface AuthoritativeItem extends Linkable, Identifiable {
+    @Mandatory
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     AuthoritativeSet getAuthoritativeSet();

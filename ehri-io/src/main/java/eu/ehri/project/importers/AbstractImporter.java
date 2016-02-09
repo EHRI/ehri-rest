@@ -62,7 +62,7 @@ public abstract class AbstractImporter<T> {
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
-    protected final List<ImportCallback> callbacks = Lists.newLinkedList();
+    protected final List<ImportCallback> callbacks = Lists.newArrayList();
 
     private NodeProperties pc;
 
