@@ -486,7 +486,7 @@ public final class ActionManager {
         // *type* Stream.
         try {
             logger.trace("Creating global event root");
-            Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
+            Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT);
             Bundle ge = Bundle.Builder.withClass(EntityClass.SYSTEM_EVENT)
                     .addDataValue(Ontology.EVENT_TYPE, type.toString())
                     .addDataValue(Ontology.EVENT_TIMESTAMP, timestamp)

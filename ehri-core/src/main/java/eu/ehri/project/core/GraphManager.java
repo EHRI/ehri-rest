@@ -97,14 +97,6 @@ public interface GraphManager {
     Vertex getVertex(String id) throws ItemNotFound;
 
     /**
-     * Get a node with the given ID and type.
-     *
-     * @param id The vertex's string ID
-     * @return The vertex
-     */
-    Vertex getVertex(String id, EntityClass type) throws ItemNotFound;
-
-    /**
      * Get a node with the given ID, and frame it with the given interface
      * class.
      *
