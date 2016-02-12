@@ -135,7 +135,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
      * Delete an access point.
      */
     @DELETE
-    @Path("/accessPoint/{id:.+}")
+    @Path("accessPoint/{id:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -160,7 +160,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/for/{id:.+}")
+    @Path("for/{id:.+}")
     public Response listRelatedItems(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -180,7 +180,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
      * the access point associated with the link will also be deleted.
      */
     @DELETE
-    @Path("/for/{id:.+}/{linkId:.+}")
+    @Path("for/{id:.+}/{linkId:.+}")
     public Response deleteLinkForItem(@PathParam("id") String id, @PathParam("linkId") String linkId)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

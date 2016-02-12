@@ -68,7 +68,7 @@ public class CountryResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/list")
+    @Path("{id:.+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
@@ -139,7 +139,7 @@ public class CountryResource
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/" + Entities.REPOSITORY)
+    @Path("{id:.+}/" + Entities.REPOSITORY)
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

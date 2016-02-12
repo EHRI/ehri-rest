@@ -105,7 +105,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -145,7 +145,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/byUser/{userId:.+}")
+    @Path("byUser/{userId:.+}")
     public Response listUserActions(
             @PathParam("userId") String userId) throws ItemNotFound {
 
@@ -173,7 +173,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/aggregateByUser/{userId:.+}")
+    @Path("aggregateByUser/{userId:.+}")
     public Response aggregateUserActions(
             @PathParam("userId") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation) throws ItemNotFound {
@@ -201,7 +201,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/forUser/{userId:.+}")
+    @Path("forUser/{userId:.+}")
     public Response listEventsForUser(
             @PathParam("userId") String userId) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -228,7 +228,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/aggregateForUser/{userId:.+}")
+    @Path("aggregateForUser/{userId:.+}")
     public Response aggregateEventsForUser(
             @PathParam("userId") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation) throws ItemNotFound {
@@ -255,7 +255,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/for/{id:.+}")
+    @Path("for/{id:.+}")
     public Response pageEventsForItem(
             @PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
@@ -282,7 +282,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/aggregateFor/{id:.+}")
+    @Path("aggregateFor/{id:.+}")
     public Response aggregateEventsForItem(
             @PathParam("id") String id,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
@@ -312,7 +312,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/subjects")
+    @Path("{id:.+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();

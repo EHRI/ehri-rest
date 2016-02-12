@@ -125,7 +125,7 @@ public class GroupResource
      * Add an accessor to a group.
      */
     @POST
-    @Path("/{id:[^/]+}/{aid:.+}")
+    @Path("{id:[^/]+}/{aid:.+}")
     public Response addMember(@PathParam("id") String id,
                               @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
@@ -143,7 +143,7 @@ public class GroupResource
      * Remove an accessor from a group.
      */
     @DELETE
-    @Path("/{id:[^/]+}/{aid:.+}")
+    @Path("{id:[^/]+}/{aid:.+}")
     public Response removeMember(@PathParam("id") String id,
                                  @PathParam("aid") String aid) throws PermissionDenied,
             ItemNotFound {
@@ -164,7 +164,7 @@ public class GroupResource
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:[^/]+}/list")
+    @Path("{id:[^/]+}/list")
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
@@ -184,7 +184,7 @@ public class GroupResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/count")
+    @Path("{id:.+}/count")
     public long countChildResources(@PathParam("id") String id,
                                     @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

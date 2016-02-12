@@ -109,7 +109,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Path("/listByGraphId")
+    @Path("listByGraphId")
     public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound {
         // This is ugly, but to return 404 on a bad item we have to
         // iterate the list first otherwise the streaming response will be
@@ -152,7 +152,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Path("/listByGraphId")
+    @Path("listByGraphId")
     public Response listByGidFromJson(String json) throws ItemNotFound,
             PermissionDenied, DeserializationError, IOException {
 
@@ -168,7 +168,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Path("/{id:.+}")
+    @Path("{id:.+}")
     public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Vertex item = manager.getVertex(id);

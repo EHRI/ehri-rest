@@ -81,7 +81,7 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/list")
+    @Path("{id:.+}/list")
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
@@ -100,7 +100,7 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/" + INCLUDED)
+    @Path("{id:.+}/" + INCLUDED)
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -115,7 +115,7 @@ public final class VirtualUnitResource extends
     }
 
     @POST
-    @Path("/{id:.+}/" + INCLUDED)
+    @Path("{id:.+}/" + INCLUDED)
     public Response addIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
@@ -130,7 +130,7 @@ public final class VirtualUnitResource extends
     }
 
     @DELETE
-    @Path("/{id:.+}/" + INCLUDED)
+    @Path("{id:.+}/" + INCLUDED)
     public Response removeIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
@@ -145,7 +145,7 @@ public final class VirtualUnitResource extends
     }
 
     @POST
-    @Path("/{from:.+}/" + INCLUDED + "/{to:.+}")
+    @Path("{from:.+}/" + INCLUDED + "/{to:.+}")
     public Response moveIncludedVirtualUnits(
             @PathParam("from") String fromId, @PathParam("to") String toId,
             @QueryParam(ID_PARAM) List<String> includedIds)
@@ -218,7 +218,7 @@ public final class VirtualUnitResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/" + Entities.VIRTUAL_UNIT)
+    @Path("{id:.+}/" + Entities.VIRTUAL_UNIT)
     public Response createChildVirtualUnit(@PathParam("id") String id,
                                            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
                                            @QueryParam(ID_PARAM) List<String> includedIds)
@@ -249,7 +249,7 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/forUser/{userId:.+}")
+    @Path("forUser/{userId:.+}")
     public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
             throws AccessDenied, ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
