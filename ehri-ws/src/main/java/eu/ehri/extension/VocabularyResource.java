@@ -157,7 +157,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     }
 
     @DELETE
-    @Path("/{id:.+}/all")
+    @Path("{id:.+}/all")
     public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -185,7 +185,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
+    @Path("{id:.+}/" + Entities.CVOC_CONCEPT)
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

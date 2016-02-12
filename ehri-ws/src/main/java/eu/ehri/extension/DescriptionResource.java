@@ -99,7 +99,7 @@ public class DescriptionResource extends AbstractAccessibleResource<Described> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/{did:.+}")
+    @Path("{id:.+}/{did:.+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
                                             @PathParam("did") String did, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
@@ -108,7 +108,7 @@ public class DescriptionResource extends AbstractAccessibleResource<Described> {
     }
 
     @DELETE
-    @Path("/{id:.+}/{did:.+}")
+    @Path("{id:.+}/{did:.+}")
     public Response deleteDescription(
             @PathParam("id") String id, @PathParam("did") String did)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
@@ -135,7 +135,7 @@ public class DescriptionResource extends AbstractAccessibleResource<Described> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/{did:.+}/" + Entities.ACCESS_POINT)
+    @Path("{id:.+}/{did:.+}/" + Entities.ACCESS_POINT)
     public Response createAccessPoint(@PathParam("id") String id,
                                       @PathParam("did") String did, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -157,7 +157,7 @@ public class DescriptionResource extends AbstractAccessibleResource<Described> {
 
     @SuppressWarnings("unused")
     @DELETE
-    @Path("/{id:.+}/{did:.+}/" + Entities.ACCESS_POINT + "/{apid:.+}")
+    @Path("{id:.+}/{did:.+}/" + Entities.ACCESS_POINT + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
                                       @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError,

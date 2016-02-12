@@ -147,7 +147,7 @@ public class AnnotationResource
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/for/{id:.+}")
+    @Path("for/{id:.+}")
     public Response listAnnotationsForSubtree(
             @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();

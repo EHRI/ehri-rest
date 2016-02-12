@@ -61,7 +61,7 @@ public class AccessResource extends
      * @throws ItemNotFound
      */
     @POST
-    @Path("/{id:[^/]+}")
+    @Path("{id:[^/]+}")
     public Response setVisibility(@PathParam("id") String id,
                                   @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {

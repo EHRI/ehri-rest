@@ -94,7 +94,7 @@ public class CvocConceptResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/list")
+    @Path("{id:.+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
@@ -113,7 +113,7 @@ public class CvocConceptResource
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
+    @Path("{id:.+}/" + Entities.CVOC_CONCEPT)
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -144,7 +144,7 @@ public class CvocConceptResource
      * @throws ItemNotFound
      */
     @POST
-    @Path("/{id:.+}/narrower/{idNarrower:.+}")
+    @Path("{id:.+}/narrower/{idNarrower:.+}")
     public Response addNarrowerCvocConcept(
             @PathParam("id") String id,
             @PathParam("idNarrower") String idNarrower)
@@ -170,7 +170,7 @@ public class CvocConceptResource
      * @throws ItemNotFound
      */
     @DELETE
-    @Path("/{id:.+}/narrower/{idNarrower:.+}")
+    @Path("{id:.+}/narrower/{idNarrower:.+}")
     public Response removeNarrowerCvocConcept(
             @PathParam("id") String id,
             @PathParam("idNarrower") String idNarrower)
@@ -197,7 +197,7 @@ public class CvocConceptResource
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/broader/list")
+    @Path("{id:.+}/broader/list")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -219,7 +219,7 @@ public class CvocConceptResource
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/related/list")
+    @Path("{id:.+}/related/list")
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -242,7 +242,7 @@ public class CvocConceptResource
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/relatedBy/list")
+    @Path("{id:.+}/relatedBy/list")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -265,7 +265,7 @@ public class CvocConceptResource
      * @throws ItemNotFound
      */
     @POST
-    @Path("/{id:.+}/related/{idRelated:.+}")
+    @Path("{id:.+}/related/{idRelated:.+}")
     public Response addRelatedCvocConcept(
             @PathParam("id") String id,
             @PathParam("idRelated") String idRelated)
@@ -294,7 +294,7 @@ public class CvocConceptResource
      * @throws ItemNotFound
      */
     @DELETE
-    @Path("/{id:.+}/related/{idRelated:.+}")
+    @Path("{id:.+}/related/{idRelated:.+}")
     public Response removeRelatedCvocConcept(
             @PathParam("id") String id,
             @PathParam("idRelated") String idRelated)

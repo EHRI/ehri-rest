@@ -46,7 +46,6 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
-import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -67,7 +66,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 /**
  * Miscellaneous additional functionality that doesn't
@@ -76,7 +74,6 @@ import java.util.regex.Pattern;
 @Path(ToolsResource.ENDPOINT)
 public class ToolsResource extends AbstractRestResource {
 
-    private final FindReplace findReplace;
     private final Linker linker;
 
     public static final String ENDPOINT = "tools";
@@ -88,14 +85,13 @@ public class ToolsResource extends AbstractRestResource {
 
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);
-        findReplace = new FindReplace(graph);
         linker = new Linker(graph);
     }
 
     /**
      * Export an RDFS+OWL representation of the model schema.
      *
-     * @param format the RDF format
+     * @param format  the RDF format
      * @param baseUri the RDF base URI
      * @return a streaming response
      * @throws IOException
@@ -138,7 +134,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/generateConcepts/{repositoryId:.+}/{vocabularyId:.+}")
+    @Path("generateConcepts/{repositoryId:.+}/{vocabularyId:.+}")
     public long autoLinkRepositoryDocs(
             @PathParam("repositoryId") String repositoryId,
             @PathParam("vocabularyId") String vocabularyId,
@@ -167,96 +163,6 @@ public class ToolsResource extends AbstractRestResource {
     }
 
     /**
-     * Find an replace a regex-specified substring of a property value
-     * across an entire entity class e.g.
-     * if an Address has a property with name &quot;url&quot; and value &quot;www.foo.com/bar&quot;,
-     * providing a regex value <code>^www</code> and replacement <code>http://www</code> will
-     * give the property a value of &quot;http://www.foo.com/bar&quot;.
-     * <p/>
-     * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
-     *
-     * @param entityType The type of entity
-     * @param propName   The name of the property to find and replace
-     * @param regex      A regex specifying a substring of the property value
-     * @param replace    A replacement substring
-     * @return How many items have been changed
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/_findReplacePropertyValueRE")
-    public long renamePropertyValueRE(
-            @QueryParam("type") String entityType,
-            @QueryParam("name") String propName,
-            @QueryParam("pattern") String regex,
-            @QueryParam("replace") String replace) throws Exception {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            EntityClass entityClass = EntityClass.withName(entityType);
-            Pattern pattern = Pattern.compile(regex);
-            long changes = findReplace
-                    .propertyValueRE(entityClass, propName, pattern, replace);
-            tx.success();
-            return changes;
-        }
-    }
-
-    /**
-     * Change a property key name across an entire entity class.
-     * <p/>
-     * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
-     *
-     * @param entityType The type of entity
-     * @param oldKeyName The existing property key name
-     * @param newKeyName The new property key name
-     * @return The number of items changed
-     * @throws Exception
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/_findReplacePropertyName")
-    public long renamePropertyName(
-            @QueryParam("type") String entityType,
-            @QueryParam("from") String oldKeyName,
-            @QueryParam("to") String newKeyName) throws Exception {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            EntityClass entityClass = EntityClass.withName(entityType);
-            long changes = findReplace
-                    .propertyName(entityClass, oldKeyName, newKeyName);
-            tx.success();
-            return changes;
-        }
-    }
-
-    /**
-     * Find an replace a property value across an entire entity class, e.g.
-     * if a DocumentaryUnit has a property with name &quot;foo&quot; and value &quot;bar&quot;,
-     * change the value to &quot;baz&quot; on all items.
-     * <p/>
-     * <strong>Warning: This is a sharp tool! Back up the whole database first!</strong>
-     *
-     * @param entityType The type of entity
-     * @param propName   The name of the property to find and replace
-     * @param oldValue   The property value to change
-     * @param newValue   The new value
-     * @return How many items have been changed
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/_findReplacePropertyValue")
-    public long renamePropertyValue(
-            @QueryParam("type") String entityType,
-            @QueryParam("name") String propName,
-            @QueryParam("from") String oldValue,
-            @QueryParam("to") String newValue) throws Exception {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            EntityClass entityClass = EntityClass.withName(entityType);
-            long changes = findReplace
-                    .propertyValue(entityClass, propName, oldValue, newValue);
-            tx.success();
-            return changes;
-        }
-    }
-
-    /**
      * Regenerate the hierarchical graph ID for a given item, optionally
      * renaming it.
      * <p/>
@@ -280,7 +186,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("/_regenerateId/{id:.+}")
+    @Path("_regenerateId/{id:.+}")
     public String regenerateId(
             @PathParam("id") String id,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -322,7 +228,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("/_regenerateIdsForType/{type:.+}")
+    @Path("_regenerateIdsForType/{type:.+}")
     public String regenerateIdsForType(
             @PathParam("type") String type,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -368,7 +274,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("/_regenerateIdsForScope/{scope:.+}")
+    @Path("_regenerateIdsForScope/{scope:.+}")
     public String regenerateIdsForScope(
             @PathParam("scope") String scopeId,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -395,7 +301,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/plain")
-    @Path("/_regenerateDescriptionIds")
+    @Path("_regenerateDescriptionIds")
     public String regenerateDescriptionIds(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
@@ -441,7 +347,7 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_setLabels")
+    @Path("_setLabels")
     public String setLabels()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         long done = 0;
@@ -467,7 +373,7 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_setConstraints")
+    @Path("_setConstraints")
     public String setConstraints() {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             logger.info("Initializing graph schema...");
@@ -479,7 +385,7 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_upgrade1to2")
+    @Path("_upgrade1to2")
     public String upgradeDb1to2() throws IOException {
         final AtomicInteger done = new AtomicInteger();
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -504,7 +410,7 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("/_fullUpgrade1to2")
+    @Path("_fullUpgrade1to2")
     public String fullUpgradeDb1to2()
             throws IOException, IdRegenerator.IdCollisionError, ItemNotFound {
         upgradeDb1to2();

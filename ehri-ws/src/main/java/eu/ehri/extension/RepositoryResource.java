@@ -89,7 +89,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/list")
+    @Path("{id:.+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -149,7 +149,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
+    @Path("{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

@@ -55,7 +55,7 @@ public class VersionResource extends
      * @throws AccessDenied
      */
     @GET
-    @Path("/{id:[^/]+}")
+    @Path("{id:[^/]+}")
     public Response getVersion(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
         return getItem(id);
@@ -70,7 +70,7 @@ public class VersionResource extends
      * @throws AccessDenied
      */
     @GET
-    @Path("/for/{id:.+}")
+    @Path("for/{id:.+}")
     public Response listFor(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
         Tx tx = graph.getBaseGraph().beginTx();

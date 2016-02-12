@@ -75,7 +75,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/list/{id:.+}")
+    @Path("list/{id:.+}")
     public Response listPermissionGrants(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -99,7 +99,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/listForItem/{id:.+}")
+    @Path("listForItem/{id:.+}")
     public Response listPermissionGrantsForItem(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -123,7 +123,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/listForScope/{id:.+}")
+    @Path("listForScope/{id:.+}")
     public Response listPermissionGrantsForScope(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
