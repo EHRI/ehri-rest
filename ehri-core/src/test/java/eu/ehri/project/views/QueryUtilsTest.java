@@ -31,10 +31,10 @@ import static org.junit.Assert.assertTrue;
 public class QueryUtilsTest {
     @Test
     public void testParseFilters() throws Exception {
-        SortedMap<String, Pair<Query.FilterPredicate, String>> filters
+        SortedMap<String, Pair<Query.FilterPredicate, Object>> filters
                 = QueryUtils.parseFilters(Lists.newArrayList("identifier__GT:c1"));
         assertTrue(filters.containsKey("identifier"));
-        Pair<Query.FilterPredicate, String> pair = filters.get("identifier");
+        Pair<Query.FilterPredicate, Object> pair = filters.get("identifier");
         assertEquals(Query.FilterPredicate.GT, pair.getA());
         assertEquals("c1", pair.getB());
     }
