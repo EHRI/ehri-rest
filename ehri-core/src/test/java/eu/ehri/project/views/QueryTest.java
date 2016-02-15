@@ -19,16 +19,12 @@
 
 package eu.ehri.project.views;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.views.Query.Page;
@@ -156,27 +152,6 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithDepthFilter() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
-
-        // Query for only top-level documentary units.
-        // The result should be c1 and c4
-        List<DocumentaryUnit> list = toList(query.depthFilter(
-                Ontology.DOC_IS_CHILD_OF, Direction.OUT, 0).page(
-                EntityClass.DOCUMENTARY_UNIT, validUser));
-        assertFalse(list.isEmpty());
-        assertEquals(3, list.size());
-
-        // The same query with a depth filter of 1 should get 3 items
-        list = toList(query.depthFilter(Ontology.DOC_IS_CHILD_OF,
-                Direction.OUT, 1).page(EntityClass.DOCUMENTARY_UNIT, validUser));
-        assertFalse(list.isEmpty());
-        assertEquals(4, list.size());
-
-    }
-
-    @Test
     public void testListWithPredicateFilter() throws Exception {
         Query<DocumentaryUnit> query = new Query<>(graph,
                 DocumentaryUnit.class);
@@ -248,46 +223,6 @@ public class QueryTest extends AbstractFixtureTest {
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser)).size());
 
     }
-
-    @Test
-    public void testListWithTraversalFilter() {
-        Query<DocumentaryUnit> query1 = new Query<>(graph,
-                DocumentaryUnit.class);
-        List<String> filters1 = ImmutableList.of(
-          "<-describes.identifier:c1-desc"
-        );
-        Iterable<DocumentaryUnit> list1 = query1
-                .filter(filters1).page(validUser);
-        assertEquals(1, Iterables.size(list1));
-
-        Query<Repository> query2 = new Query<>(graph,
-                Repository.class);
-        List<String> filters2 = ImmutableList.of(
-                "<-describes->hasAddress.municipality:Brussels"
-        );
-        Iterable<Repository> list2 = query2
-                .filter(filters2).page(validUser);
-        assertEquals(1, Iterables.size(list2));
-
-    }
-
-    @Test
-    public void testListWithTraversalOrder() {
-        Query<Repository> query1 = new Query<>(graph, Repository.class);
-        Iterable<Repository> out1 = query1
-                .orderBy(ImmutableList.of("<-describes.identifier"))
-                .page(validUser);
-        List<Repository> list1 = Lists.newLinkedList(out1);
-
-        Query<Repository> query2 = new Query<>(graph, Repository.class);
-        Iterable<Repository> out2 = query2
-                .orderBy(ImmutableList.of("<-describes.identifier__DESC"))
-                .page(validUser);
-        List<Repository> list2 = Lists.newLinkedList(out2);
-
-        assertEquals(list1, Lists.reverse(list2));
-    }
-
 
     @Test
     public void testListWithSort() throws Exception {
