@@ -26,7 +26,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Named;
 
@@ -35,7 +35,7 @@ import eu.ehri.project.models.base.Named;
  * but without the target-end of the relationship being determined.
  */
 @EntityType(EntityClass.ACCESS_POINT)
-public interface AccessPoint extends Accessible, Named, Annotator {
+public interface AccessPoint extends Accessible, Named {
 
     /**
      * Fetch the description to which this UR belongs.

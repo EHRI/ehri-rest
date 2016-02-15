@@ -26,6 +26,7 @@ import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class AnnotationTest extends ModelTestBase {
@@ -58,9 +59,16 @@ public class AnnotationTest extends ModelTestBase {
         Annotatable ann1 = manager.getEntity("ann1",
                 Annotatable.class);
         Annotation ann2 = manager.getEntity("ann2", Annotation.class);
-
         assertEquals(ann2.getTargets().iterator().next(), ann1);
+        assertEquals(TEST_ANNOTATION_ANNOTATION_BODY, ann2.getBody());
         assertEquals(ann1.getAnnotations().iterator().next().getBody(),
                 ann2.getBody());
+    }
+
+    @Test
+    public void testGetAnnotator() throws Exception {
+        UserProfile mike = manager.getEntity("mike", UserProfile.class);
+        Annotation ann1 = manager.getEntity("ann1", Annotation.class);
+        assertEquals(mike, ann1.getAnnotator());
     }
 }

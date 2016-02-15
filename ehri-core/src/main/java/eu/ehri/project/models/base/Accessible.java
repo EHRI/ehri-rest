@@ -39,6 +39,11 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
  */
 public interface Accessible extends PermissionGrantTarget, Versioned, Annotatable {
 
+    /**
+     * Fetch accessors to which this item is restricted.
+     *
+     * @return an iterable of accessor frames
+     */
     @Fetch(value = Ontology.IS_ACCESSIBLE_TO, ifBelowLevel = 1)
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
     Iterable<Accessor> getAccessors();
@@ -52,15 +57,36 @@ public interface Accessible extends PermissionGrantTarget, Versioned, Annotatabl
     @JavaHandler
     void addAccessor(Accessor accessor);
 
+    /**
+     * Remove an accessor from having access to this item.
+     *
+     * @param accessor an accessor frame
+     */
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
     void removeAccessor(Accessor accessor);
 
+    /**
+     * Fetch the permission scope to which this item belongs, if any.
+     *
+     * @return a permission scope frame, or null
+     */
     @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE)
     PermissionScope getPermissionScope();
 
+    /**
+     * Set this item's permission scope.
+     *
+     * @param scope a permission scope frame
+     */
     @JavaHandler
     void setPermissionScope(PermissionScope scope);
 
+    /**
+     * Get the full hierarchy of permission scopes to which this
+     * item belongs.
+     *
+     * @return an iterable of permission scope frames
+     */
     @JavaHandler
     Iterable<PermissionScope> getPermissionScopes();
 
@@ -72,10 +98,20 @@ public interface Accessible extends PermissionGrantTarget, Versioned, Annotatabl
     @JavaHandler
     Iterable<SystemEvent> getHistory();
 
+    /**
+     * Fetch the most recent event that affected this item.
+     *
+     * @return a system event frame, or null
+     */
     @Fetch(value = Ontology.ENTITY_HAS_LIFECYCLE_EVENT, ifLevel = 0)
     @JavaHandler
     SystemEvent getLatestEvent();
 
+    /**
+     * Determine if this item has access restrictions.
+     *
+     * @return true, if the item is restricted, otherwise false
+     */
     @JavaHandler
     boolean hasAccessRestriction();
 

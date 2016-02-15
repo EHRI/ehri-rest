@@ -32,6 +32,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.DescriptionViews;
@@ -114,15 +115,12 @@ public class LinkResource extends AbstractAccessibleResource<Link>
             @PathParam("sourceId") String sourceId, Bundle bundle,
             @QueryParam(BODY_PARAM) List<String> bodies,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            ItemNotFound, SerializationError {
-
+                throws PermissionDenied, ValidationError,
+                    DeserializationError, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Link link = linkViews.createLink(targetId,
-                    sourceId, bodies, bundle, user);
-            aclManager.setAccessors(link,
-                    getAccessors(accessors, user));
+            UserProfile user = getCurrentUser();
+            Link link = linkViews.create(targetId,
+                    sourceId, bodies, bundle, user, getAccessors(accessors, user));
             Response response = creationResponse(link);
             tx.success();
             return response;

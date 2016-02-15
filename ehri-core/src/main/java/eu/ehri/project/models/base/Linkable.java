@@ -26,13 +26,21 @@ import eu.ehri.project.models.Link;
 
 /**
  * An entity that can hold incoming links.
- *
-
  */
 public interface Linkable extends Accessible {
+    /**
+     * Fetch links attached to this item.
+     *
+     * @return an iterable of link frames
+     */
     @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
     Iterable<Link> getLinks();
 
+    /**
+     * Add a link to this item.
+     *
+     * @param link a link frame
+     */
     @Adjacency(label = Ontology.LINK_HAS_TARGET, direction = Direction.IN)
     void addLink(Link link);
 }

@@ -33,11 +33,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
@@ -96,7 +96,7 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    public Annotation createFor(String id, String did, Bundle bundle, Accessor user, Collection<Accessor> accessibleTo)
+    public Annotation create(String id, String did, Bundle bundle, UserProfile user, Collection<Accessor> accessibleTo)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound {
         Accessible entity = manager.getEntity(id, Accessible.class);
         Annotatable dep = manager.getEntity(did, Annotatable.class);
@@ -113,7 +113,7 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
         if (!entity.equals(dep)) {
             dep.addAnnotationPart(annotation);
         }
-        annotation.setAnnotator(graph.frame(user.asVertex(), Annotator.class));
+        annotation.setAnnotator(user);
         acl.setAccessors(annotation, accessibleTo);
         acl.withScope(SystemScope.INSTANCE)
                 .grantPermission(annotation, PermissionType.OWNER, user);

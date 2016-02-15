@@ -21,6 +21,7 @@ package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -33,6 +34,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
@@ -43,6 +45,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -52,6 +55,7 @@ public final class LinkViews implements Scoped<LinkViews> {
 
     private final FramedGraph<?> graph;
     private final ViewHelper helper;
+    private final AclManager acl;
     private final GraphManager manager;
 
     /**
@@ -63,7 +67,7 @@ public final class LinkViews implements Scoped<LinkViews> {
     public LinkViews(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
-        helper.getAclManager();
+        acl = helper.getAclManager();
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -91,8 +95,8 @@ public final class LinkViews implements Scoped<LinkViews> {
      * @throws eu.ehri.project.exceptions.PermissionDenied
      *
      */
-    public Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
-            Accessor user) throws ItemNotFound, ValidationError, PermissionDenied {
+    public Link create(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
+            UserProfile user, Collection<Accessor> accessibleTo) throws ItemNotFound, ValidationError, PermissionDenied {
         Linkable t1 = manager.getEntity(targetId1, Linkable.class);
         Linkable t2 = manager.getEntity(targetId2, Linkable.class);
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
@@ -102,6 +106,7 @@ public final class LinkViews implements Scoped<LinkViews> {
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
         link.setLinker(user);
+        acl.setAccessors(link, accessibleTo);
         ActionManager.EventContext eventContext = new ActionManager(graph, t1).newEventContext(
                 graph.frame(user.asVertex(), Actioner.class),
                 EventTypes.link, Optional.<String>absent())
@@ -129,7 +134,8 @@ public final class LinkViews implements Scoped<LinkViews> {
      * @throws PermissionDenied
      */
     public Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            String bodyType, Bundle bundle, Accessor user) throws ItemNotFound, ValidationError, PermissionDenied {
+            String bodyType, Bundle bundle,
+            UserProfile user, Collection<Accessor> accessibleTo) throws ItemNotFound, ValidationError, PermissionDenied {
         Linkable t1 = manager.getEntity(targetId1, Linkable.class);
         Linkable t2 = manager.getEntity(targetId2, Linkable.class);
         Description description = manager.getEntity(descriptionId, Description.class);
@@ -148,6 +154,7 @@ public final class LinkViews implements Scoped<LinkViews> {
         link.addLinkTarget(t2);
         link.setLinker(user);
         link.addLinkBody(rel);
+        acl.setAccessors(link, accessibleTo);
         ActionManager.EventContext eventContext = new ActionManager(graph).newEventContext(
                 t1, graph.frame(user.asVertex(), Actioner.class), EventTypes.link);
         eventContext.addSubjects(link).addSubjects(t2).addSubjects(rel);

@@ -33,7 +33,6 @@ import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.Watchable;
 
 import static eu.ehri.project.definitions.Ontology.ACCESSOR_BELONGS_TO_GROUP;
@@ -45,8 +44,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
  * A frame class representing a user within the database.
  */
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, Accessible,
-        Annotator, Actioner {
+public interface UserProfile extends Accessor, Accessible, Actioner {
 
     String FOLLOWER_COUNT = "followers";
     String FOLLOWING_COUNT = "following";
@@ -145,7 +143,6 @@ public interface UserProfile extends Accessor, Accessible,
      * @return an iterable of annotation frames
      */
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)
-    @Override
     Iterable<Annotation> getAnnotations();
 
     /**

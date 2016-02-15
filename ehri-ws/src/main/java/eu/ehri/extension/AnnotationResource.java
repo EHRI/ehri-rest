@@ -26,17 +26,30 @@ import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AnnotationViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -90,12 +103,12 @@ public class AnnotationResource
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     public Response createAnnotationFor(@PathParam("id") String id,
-                                        Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Annotation ann = annotationViews.createFor(id, id,
+            UserProfile user = getCurrentUser();
+            Annotation ann = annotationViews.create(id, id,
                     bundle, user, getAccessors(accessors, user));
             Response response = creationResponse(ann);
             tx.success();
@@ -128,8 +141,8 @@ public class AnnotationResource
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Annotation ann = annotationViews.createFor(id, did,
+            UserProfile user = getCurrentUser();
+            Annotation ann = annotationViews.create(id, did,
                     bundle, user, getAccessors(accessors, user));
             Response response = creationResponse(ann);
             tx.success();
