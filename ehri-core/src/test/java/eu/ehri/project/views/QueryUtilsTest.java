@@ -19,26 +19,34 @@
 
 package eu.ehri.project.views;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.tinkerpop.pipes.util.structures.Pair;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import java.util.SortedMap;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class QueryUtilsTest {
+    @Test
+    public void testParseFilters() throws Exception {
+        SortedMap<String, Pair<Query.FilterPredicate, String>> filters
+                = QueryUtils.parseFilters(Lists.newArrayList("identifier__GT:c1"));
+        assertTrue(filters.containsKey("identifier"));
+        Pair<Query.FilterPredicate, String> pair = filters.get("identifier");
+        assertEquals(Query.FilterPredicate.GT, pair.getA());
+        assertEquals("c1", pair.getB());
+    }
 
     @Test
-    public void testGetTraversalPath() throws Exception {
-        String notAPath = "imNotAPath";
-        Optional<QueryUtils.TraversalPath> traversalPath = QueryUtils.getTraversalPath(notAPath);
-        assertFalse(traversalPath.isPresent());
-
-        String validPath = "->foo<-bar.baz";
-        traversalPath = QueryUtils.getTraversalPath(validPath);
-        assertTrue(traversalPath.isPresent());
-
-        String badPath = "foo->bar.baz";
-        traversalPath = QueryUtils.getTraversalPath(badPath);
-        assertFalse(traversalPath.isPresent());
+    public void testParseOrderSpecs() throws Exception {
+        SortedMap<String, Query.Sort> orders = QueryUtils
+                .parseOrderSpecs(Lists.newArrayList("identifier__DESC", "name"));
+        assertTrue(orders.containsKey("identifier"));
+        Query.Sort sort = orders.get("identifier");
+        assertEquals(Query.Sort.DESC, sort);
+        Query.Sort nameSort = orders.get("name");
+        assertEquals(Query.Sort.ASC, nameSort);
     }
 }

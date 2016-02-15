@@ -27,20 +27,30 @@ import eu.ehri.project.models.annotations.Fetch;
 
 /**
  * An entity that can have descriptions.
- *
-
  */
 public interface Described extends PermissionScope, Linkable {
 
+    /**
+     * Add a description to this item.
+     *
+     * @param description a description frame
+     */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     void addDescription(Description description);
 
-    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    void setDescriptions(Iterable<Description> descriptions);
-
+    /**
+     * Remove a description from this item.
+     *
+     * @param description a description frame
+     */
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     void removeDescription(Description description);
 
+    /**
+     * Fetch this item's descriptions.
+     *
+     * @return an iterable of description frames
+     */
     @Fetch(Ontology.DESCRIPTION_FOR_ENTITY)
     @Dependent
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)

@@ -59,7 +59,7 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = av
-                .createFor("c4", "cd4", ann, user, Lists.<Accessor>newArrayList());
+                .create("c4", "cd4", ann, user, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 
@@ -69,7 +69,7 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = av
-                .createFor("c1", "cd1", ann, user, Lists.<Accessor>newArrayList());
+                .create("c1", "cd1", ann, user, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 
@@ -79,7 +79,7 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = av
-                .createFor("c4", "cd1", ann, user, Lists.<Accessor>newArrayList());
+                .create("c4", "cd1", ann, user, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 
@@ -89,7 +89,7 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = av
-                .createFor("c4", "cd4", ann, user, Lists.<Accessor>newArrayList());
+                .create("c4", "cd4", ann, user, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 }

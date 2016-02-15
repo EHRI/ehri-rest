@@ -27,7 +27,6 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.Promotable;
 
 /**
@@ -52,7 +51,7 @@ public interface Annotation extends Promotable {
      */
     @Fetch(value = Ontology.ANNOTATOR_HAS_ANNOTATION, numLevels = 0)
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
-    Annotator getAnnotator();
+    UserProfile getAnnotator();
 
     /**
      * Set the annotator of this annotation.
@@ -60,7 +59,7 @@ public interface Annotation extends Promotable {
      * @param annotator an annotator frame
      */
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
-    void setAnnotator(Annotator annotator);
+    void setAnnotator(UserProfile annotator);
 
     /**
      * Fetch all targets of this annotation, including sub-parts

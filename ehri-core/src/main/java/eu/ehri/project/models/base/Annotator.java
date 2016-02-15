@@ -24,11 +24,14 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Annotation;
 
 /**
- * An entity that can annotate {@link Annotatable}s.
- *
-
+ * An entity that can annotate {@link Annotatable} items.
  */
 public interface Annotator extends Entity {
+    /**
+     * Fetch annotations belonging to this item.
+     *
+     * @return an iterable of annotation frames
+     */
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)
     Iterable<Annotation> getAnnotations();
 }

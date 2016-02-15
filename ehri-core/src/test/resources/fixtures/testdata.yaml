@@ -447,6 +447,7 @@
     body: Test Annotation
     isPromotable: !!bool true
   relationships:
+    hasAnnotator: mike
     hasAnnotationTarget: c1
     
 - id: ann2

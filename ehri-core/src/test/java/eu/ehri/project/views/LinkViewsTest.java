@@ -29,6 +29,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.persistence.ActionManager;
@@ -71,8 +72,8 @@ public class LinkViewsTest extends AbstractFixtureTest {
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = linkViews.createLink("c1", "a1", Lists.newArrayList("ur1"),
-                linkBundle, validUser);
+        Link link = linkViews.create("c1", "a1", Lists.newArrayList("ur1"),
+                linkBundle, validUser, Lists.<Accessor>newArrayList());
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2L, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -86,8 +87,9 @@ public class LinkViewsTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateLinkWithoutPermission() throws Exception {
-        linkViews.createLink("c1", "a1", Lists.newArrayList("ur1"),
-                getLinkBundle("won't work!", "too bad!"), invalidUser);
+        linkViews.create("c1", "a1", Lists.newArrayList("ur1"),
+                getLinkBundle("won't work!", "too bad!"), invalidUser,
+                Lists.<Accessor>newArrayList());
     }
 
     @Test
@@ -99,7 +101,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
         Link link = linkViews.createAccessPointLink("c1", "a1", "cd1", linkDesc, linkType,
-                linkBundle, validUser);
+                linkBundle, validUser, Lists.<Accessor>newArrayList(validUser, invalidUser));
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2L, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -110,6 +112,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
         assertEquals(rel.getRelationshipType(), linkType);
         Description d = rel.getDescription();
         assertEquals(desc, d);
+        assertTrue(link.hasAccessRestriction());
         assertTrue(Lists.newArrayList(actionManager
                 .getLatestGlobalEvent().getSubjects()).contains(link));
     }
