@@ -48,7 +48,6 @@
                 <include>com.fasterxml.jackson.dataformat:*</include>
                 <include>com.google.guava:guava</include>
                 <include>commons-cli:commons-cli</include>
-                <include>net.sourceforge.owlapi:owlapi-distribution</include>
                 <include>org.apache.jena:*</include>
                 <include>xerces:xercesImpl</include>
                 <include>xml-apis:xml-apis</include>
