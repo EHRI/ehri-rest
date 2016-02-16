@@ -9,7 +9,7 @@ import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exporters.DocumentWriter;
-import eu.ehri.project.exporters.util.Helpers;
+import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -42,7 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static eu.ehri.project.exporters.util.Helpers.createCDataElement;
+import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 
 /**
  * Export EAG 2012 XML.
@@ -102,7 +102,7 @@ public class Eag2012Exporter implements EagExporter {
         doc.appendChild(rootElem);
 
 
-        for (Description desc : Helpers.getBestDescription(
+        for (Description desc : LanguageHelpers.getBestDescription(
                 repository, Optional.<Description>absent(), langCode).asSet()) {
 
             addControlSection(doc, rootElem, repository, country, desc);
@@ -122,7 +122,7 @@ public class Eag2012Exporter implements EagExporter {
             repositoriesElem.appendChild(repoElem);
 
             Element geogAreaElem = doc.createElement("geogarea");
-            geogAreaElem.setTextContent(Helpers.countryCodeToContinent(country.getCode())
+            geogAreaElem.setTextContent(LanguageHelpers.countryCodeToContinent(country.getCode())
                     .or("Europe")); // FIXME: Default???
             repoElem.appendChild(geogAreaElem);
 

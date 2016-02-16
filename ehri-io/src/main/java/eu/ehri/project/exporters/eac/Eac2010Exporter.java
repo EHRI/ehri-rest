@@ -29,7 +29,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exporters.DocumentWriter;
-import eu.ehri.project.exporters.util.Helpers;
+import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.HistoricalAgent;
@@ -61,7 +61,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static eu.ehri.project.exporters.util.Helpers.createCDataElement;
+import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 
 /**
  * Export EAC 2010 XML.
@@ -119,7 +119,7 @@ public class Eac2010Exporter implements EacExporter {
                 "urn:isbn:1-931666-33-4 http://eac.staatsbibliothek-berlin.de/schema/cpf.xsd");
         doc.appendChild(rootElem);
 
-        for (Description desc : Helpers.getBestDescription(
+        for (Description desc : LanguageHelpers.getBestDescription(
                 agent, Optional.<Description>absent(), langCode).asSet()) {
 
             addControlSection(agent, doc, rootElem, desc);
@@ -349,8 +349,7 @@ public class Eac2010Exporter implements EacExporter {
         controlElem.appendChild(langDecElem);
         Element lang = doc.createElement("language");
         lang.setAttribute("languageCode", desc.getLanguageOfDescription());
-        lang.setTextContent(eu.ehri.project.importers.util
-                .Helpers.codeToName(desc.getLanguageOfDescription()));
+        lang.setTextContent(LanguageHelpers.codeToName(desc.getLanguageOfDescription()));
         langDecElem.appendChild(lang);
 
         // Add a convention declaration for EHRI's name policy
@@ -542,7 +541,7 @@ public class Eac2010Exporter implements EacExporter {
     }
 
     protected String getEntityName(Described entity, String lang) {
-        return Helpers.getBestDescription(entity, lang).transform(new Function<Description, String>() {
+        return LanguageHelpers.getBestDescription(entity, lang).transform(new Function<Description, String>() {
             @Override
             public String apply(Description description) {
                 return description.getName();

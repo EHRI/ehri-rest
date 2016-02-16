@@ -27,11 +27,11 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
-import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.utils.LanguageHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +113,7 @@ public class JenaSkosExporter implements SkosExporter {
 
             for (Description description : concept.getDescriptions()) {
                 Vertex cdv = description.asVertex();
-                String lang = Helpers.iso639DashOneCode(description.getLanguageOfDescription());
+                String lang = LanguageHelpers.iso639DashOneCode(description.getLanguageOfDescription());
                 model.add(resource, prefLabelProp, description.getName(), lang);
                 for (String key : cdv.getPropertyKeys()) {
                     writeProperty(model, resource, key, cdv.getProperty(key), lang);

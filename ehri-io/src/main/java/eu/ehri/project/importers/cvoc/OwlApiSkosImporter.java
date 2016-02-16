@@ -29,7 +29,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
@@ -38,6 +37,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.utils.LanguageHelpers;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -108,7 +108,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
     public OwlApiSkosImporter setDefaultLang(String lang) {
         return new OwlApiSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, format,
-                Helpers.iso639DashTwoCode(lang));
+                LanguageHelpers.iso639DashTwoCode(lang));
     }
 
     public ImportLog importFile(String filePath, String logMessage)
@@ -297,7 +297,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
             OWLLiteral literalPrefName = (OWLLiteral) property.getValue();
             String languageCode = literalPrefName.hasLang()
-                    ? Helpers.iso639DashTwoCode(literalPrefName.getLang())
+                    ? LanguageHelpers.iso639DashTwoCode(literalPrefName.getLang())
                     : defaultLang;
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getLiteral())
@@ -322,7 +322,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
                     if (propVal.getProperty().equals(annotationProperty)) {
                         OWLLiteral literalProp = (OWLLiteral) propVal.getValue();
                         String propLanguageCode = literalProp.hasLang()
-                                ? Helpers.iso639DashTwoCode(literalProp.getLang())
+                                ? LanguageHelpers.iso639DashTwoCode(literalProp.getLang())
                                 : defaultLang;
                         if (propLanguageCode.equals(languageCode)) {
                             values.add(literalProp.getLiteral());

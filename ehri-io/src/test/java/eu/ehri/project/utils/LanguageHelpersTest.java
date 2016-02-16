@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.exporters.util;
+package eu.ehri.project.utils;
 
 import com.google.common.base.Optional;
 import org.junit.Test;
@@ -25,19 +25,19 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 
-public class HelpersTest {
+public class LanguageHelpersTest {
 
     @Test
     public void testCountryCodeToContinent() throws Exception {
-        Optional<String> c1 = Helpers.countryCodeToContinent("gb");
+        Optional<String> c1 = LanguageHelpers.countryCodeToContinent("gb");
         assertTrue(c1.isPresent());
         assertEquals("Europe", c1.get());
 
-        Optional<String> c2 = Helpers.countryCodeToContinent("us");
+        Optional<String> c2 = LanguageHelpers.countryCodeToContinent("us");
         assertTrue(c2.isPresent());
         assertEquals("North America", c2.get());
 
-        Optional<String> c3 = Helpers.countryCodeToContinent("nz");
+        Optional<String> c3 = LanguageHelpers.countryCodeToContinent("nz");
         assertTrue(c3.isPresent());
         assertEquals("Australia", c3.get());
     }

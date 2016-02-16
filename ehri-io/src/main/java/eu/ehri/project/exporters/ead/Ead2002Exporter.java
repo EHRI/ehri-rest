@@ -10,7 +10,6 @@ import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exporters.DocumentWriter;
-import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
@@ -22,6 +21,7 @@ import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.views.EventViews;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -44,7 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static eu.ehri.project.exporters.util.Helpers.createCDataElement;
+import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 
 /**
  * EAD 2002 Export.
@@ -142,7 +142,7 @@ public class Ead2002Exporter implements EadExporter {
         eadHeaderElem.appendChild(eadIdElem);
 
         Repository repository = unit.getRepository();
-        Optional<Description> descOpt = eu.ehri.project.exporters.util.Helpers.getBestDescription(
+        Optional<Description> descOpt = LanguageHelpers.getBestDescription(
                 unit, Optional.<Description>absent(), langCode);
 
         for (Description desc : descOpt.asSet()) {
@@ -165,7 +165,7 @@ public class Ead2002Exporter implements EadExporter {
             archDescElem.setAttribute("level", level);
             Element didElem = addDataSection(doc, archDescElem, unit, desc);
 
-            for (Description repoDesc : eu.ehri.project.exporters.util.Helpers.getBestDescription(repository,
+            for (Description repoDesc : LanguageHelpers.getBestDescription(repository,
                     Optional.<Description>absent(), langCode).asSet()) {
                 Element repoElem = doc.createElement("repository");
                 didElem.appendChild(repoElem);
@@ -261,7 +261,7 @@ public class Ead2002Exporter implements EadExporter {
         Element languageElem = doc.createElement("language");
         langUsageElem.appendChild(languageElem);
         languageElem.setAttribute("langcode", desc.getLanguageOfDescription());
-        languageElem.setTextContent(Helpers.codeToName(desc.getLanguageOfDescription()));
+        languageElem.setTextContent(LanguageHelpers.codeToName(desc.getLanguageOfDescription()));
 
         for (String value : Optional.fromNullable(
                 desc.<String>getProperty("rulesAndConventions")).asSet()) {
@@ -277,7 +277,7 @@ public class Ead2002Exporter implements EadExporter {
         Element pubStmtElem = doc.createElement("publicationstmt");
         fileDescElem.appendChild(pubStmtElem);
 
-        for (Description repoDesc : eu.ehri.project.exporters.util.Helpers.getBestDescription(repository,
+        for (Description repoDesc : LanguageHelpers.getBestDescription(repository,
                 Optional.<Description>absent(), langCode).asSet()) {
             Element publisherElem = doc.createElement("publisher");
             publisherElem.setTextContent(repoDesc.getName());
@@ -309,7 +309,7 @@ public class Ead2002Exporter implements EadExporter {
     public void addEadLevel(Document doc, Element base, int num, DocumentaryUnit subUnit,
             Optional<Description> priorDescOpt, String langCode) throws IOException {
         logger.trace("Adding EAD sublevel: c" + num + " -> " + base.getTagName());
-        Optional<Description> descOpt = eu.ehri.project.exporters.util.Helpers.getBestDescription(subUnit, priorDescOpt, langCode);
+        Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);
         Element levelElem = doc.createElement(levelTag);
         base.appendChild(levelElem);
@@ -390,7 +390,7 @@ public class Ead2002Exporter implements EadExporter {
                     ? (List) value : Lists.newArrayList(value);
             for (Object v : values) {
                 Element lang = doc.createElement("language");
-                lang.setTextContent(Helpers.codeToName(v.toString()));
+                lang.setTextContent(LanguageHelpers.codeToName(v.toString()));
                 // Only add the language if its a 3-letter string
                 if (v.toString().length() == 3) {
                     lang.setAttribute("langcode", v.toString());
