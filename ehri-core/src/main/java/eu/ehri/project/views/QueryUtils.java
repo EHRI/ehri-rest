@@ -46,8 +46,8 @@ public class QueryUtils {
      * @param filterList A list of filter spec strings
      * @return A map of filter specs
      */
-    static SortedMap<String, Pair<Query.FilterPredicate, String>> parseFilters(Collection<String> filterList) {
-        ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>> builder =
+    static SortedMap<String, Pair<Query.FilterPredicate, Object>> parseFilters(Collection<String> filterList) {
+        ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, Object>> builder =
                 new ImmutableSortedMap.Builder<>(Ordering.natural());
         Splitter psplit = Splitter.on("__");
         Splitter vsplit = Splitter.on(":");
@@ -59,10 +59,10 @@ public class QueryUtils {
                 List<String> pp = psplit.splitToList(ppred);
                 if (pp.size() == 1) {
                     builder.put(pp.get(0), new Pair<>(
-                            Query.FilterPredicate.EQUALS, value));
+                            Query.FilterPredicate.EQUALS, ((Object) value)));
                 } else if (pp.size() > 1) {
                     builder.put(pp.get(0), new Pair<>(
-                            Query.FilterPredicate.valueOf(pp.get(1)), value));
+                            Query.FilterPredicate.valueOf(pp.get(1)), (Object)value));
                 }
             }
         }

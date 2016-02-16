@@ -28,19 +28,36 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Described;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.DescriptionViews;
 import eu.ehri.project.views.LinkViews;
-import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -115,8 +132,8 @@ public class LinkResource extends AbstractAccessibleResource<Link>
             @PathParam("sourceId") String sourceId, Bundle bundle,
             @QueryParam(BODY_PARAM) List<String> bodies,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-                throws PermissionDenied, ValidationError,
-                    DeserializationError, ItemNotFound, SerializationError {
+            throws PermissionDenied, ValidationError,
+            DeserializationError, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
             Link link = linkViews.create(targetId,
@@ -162,9 +179,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     public Response listRelatedItems(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Query<Link> linkQuery = new Query<>(graph, Link.class)
-                    .setStream(isStreaming());
-            return streamingPage(linkQuery.setStream(isStreaming()).page(
+            return streamingPage(querier.setStream(isStreaming()).page(
                     manager.getEntity(id, Linkable.class).getLinks(),
                     getRequesterUserProfile()), tx);
         } catch (Exception e) {

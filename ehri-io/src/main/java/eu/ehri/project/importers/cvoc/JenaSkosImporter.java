@@ -43,7 +43,6 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EaImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
@@ -56,6 +55,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +133,7 @@ public final class JenaSkosImporter implements SkosImporter {
     public JenaSkosImporter setDefaultLang(String lang) {
         return new JenaSkosImporter(
                 framedGraph, actioner, vocabulary, tolerant, format,
-                Helpers.iso639DashTwoCode(lang));
+                LanguageHelpers.iso639DashTwoCode(lang));
     }
 
     /**
@@ -387,7 +387,7 @@ public final class JenaSkosImporter implements SkosImporter {
 
             Literal literalPrefName = property.asLiteral();
             String languageCode = isValidLanguageCode(literalPrefName.getLanguage())
-                    ? Helpers.iso639DashTwoCode(literalPrefName.getLanguage())
+                    ? LanguageHelpers.iso639DashTwoCode(literalPrefName.getLanguage())
                     : defaultLang;
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
@@ -418,7 +418,7 @@ public final class JenaSkosImporter implements SkosImporter {
                         if (target.isLiteral()) {
                             Literal literal = target.asLiteral();
                             String propLanguageCode = isValidLanguageCode(literal.getLanguage())
-                                    ? Helpers.iso639DashTwoCode(literal.getLanguage())
+                                    ? LanguageHelpers.iso639DashTwoCode(literal.getLanguage())
                                     : defaultLang;
                             if (propLanguageCode.equals(languageCode)) {
                                 values.add(literal.getString());

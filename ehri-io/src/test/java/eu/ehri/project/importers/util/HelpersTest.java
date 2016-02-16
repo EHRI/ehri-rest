@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.util;
 
+import eu.ehri.project.utils.LanguageHelpers;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
@@ -27,23 +28,23 @@ public class HelpersTest {
     @Test
     public void testIso639DashTwoCode() throws Exception {
         // two-to-three
-        assertEquals("sqi", Helpers.iso639DashTwoCode("sq"));
+        assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("sq"));
         // bibliographic to term
-        assertEquals("sqi", Helpers.iso639DashTwoCode("alb"));
+        assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("alb"));
         // name to code
         // FIXME fails when executed on a server with a Dutch locale
-        assertEquals("eng", Helpers.iso639DashTwoCode("English"));
+        assertEquals("eng", LanguageHelpers.iso639DashTwoCode("English"));
     }
 
     @Test
     public void testIso639DashOneCode() throws Exception {
-        assertEquals("en", Helpers.iso639DashOneCode("eng"));
-        assertEquals("cs", Helpers.iso639DashOneCode("ces"));
-        assertEquals("cs", Helpers.iso639DashOneCode("cze"));
-        assertEquals("sq", Helpers.iso639DashOneCode("sqi"));
-        assertEquals("en", Helpers.iso639DashOneCode("English"));
-        assertEquals("en-Latn", Helpers.iso639DashOneCode("eng-Latn"));
-        assertEquals("en", Helpers.iso639DashOneCode("eng-"));
-        assertEquals("---", Helpers.iso639DashOneCode("---"));
+        assertEquals("en", LanguageHelpers.iso639DashOneCode("eng"));
+        assertEquals("cs", LanguageHelpers.iso639DashOneCode("ces"));
+        assertEquals("cs", LanguageHelpers.iso639DashOneCode("cze"));
+        assertEquals("sq", LanguageHelpers.iso639DashOneCode("sqi"));
+        assertEquals("en", LanguageHelpers.iso639DashOneCode("English"));
+        assertEquals("en-Latn", LanguageHelpers.iso639DashOneCode("eng-Latn"));
+        assertEquals("en", LanguageHelpers.iso639DashOneCode("eng-"));
+        assertEquals("---", LanguageHelpers.iso639DashOneCode("---"));
     }
 }

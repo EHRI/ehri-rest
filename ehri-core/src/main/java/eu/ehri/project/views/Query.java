@@ -31,17 +31,13 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.util.structures.Pair;
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,32 +46,24 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 
 /**
- * Handles querying Accessible Entities, with ACL semantics.
- * <p/>
- * TODO: Possibly refactor more of the ACL logic into AclManager.
+ * Handles querying Accessible entities with ACL semantics.
  *
  * @param <E>
  */
-public final class Query<E extends Accessible> implements Scoped<Query> {
-
-    private static final int DEFAULT_OFFSET = 0;
-    private static final int DEFAULT_LIMIT = 20;
+public final class Query<E extends Accessible> {
+    public static final int DEFAULT_LIMIT = 20;
     private static final long NO_COUNT = -1L;
-
-
-    private static final Logger logger = LoggerFactory.getLogger(Query.class);
 
     private final int offset;
     private final int limit;
     private final SortedMap<String, Sort> sort;
     private final Optional<Pair<String, Sort>> defaultSort;
-    private final SortedMap<String, Pair<FilterPredicate, String>> filters;
+    private final SortedMap<String, Pair<FilterPredicate, Object>> filters;
     private final boolean stream;
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final Class<E> cls;
-    private final PermissionScope scope;
 
     /**
      * Directions for sort.
@@ -96,22 +84,19 @@ public final class Query<E extends Accessible> implements Scoped<Query> {
      */
     private Query(
             FramedGraph<?> graph, Class<E> cls,
-            PermissionScope scope,
             int offset,
             int limit,
             SortedMap<String, Sort> sort,
             Optional<Pair<String, Sort>> defSort,
-            SortedMap<String, Pair<FilterPredicate, String>> filters,
+            SortedMap<String, Pair<FilterPredicate, Object>> filters,
             boolean stream) {
         this.graph = graph;
         this.cls = cls;
-        this.scope = scope;
         this.offset = offset;
         this.limit = limit;
         this.sort = ImmutableSortedMap.copyOf(sort);
         this.defaultSort = defSort;
-        this.filters = ImmutableSortedMap
-                .copyOf(filters);
+        this.filters = ImmutableSortedMap.copyOf(filters);
         this.stream = stream;
         manager = GraphManagerFactory.getInstance(graph);
     }
@@ -120,22 +105,119 @@ public final class Query<E extends Accessible> implements Scoped<Query> {
      * Simple constructor.
      */
     public Query(FramedGraph<?> graph, Class<E> cls) {
-        this(graph, cls, SystemScope.getInstance(),
-                DEFAULT_OFFSET, DEFAULT_LIMIT,
+        this(graph, cls, 0, DEFAULT_LIMIT,
                 ImmutableSortedMap.<String, Sort>of(), Optional
                         .<Pair<String, Sort>>absent(), ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, String>>of(), false);
+                        .<String, Pair<FilterPredicate, Object>>of(), false);
     }
 
     /**
-     * Copy constructor.
+     * Query builder.
      */
-    public Query<E> copy(Query<E> other) {
-        return new Query<>(other.graph, other.cls, other.scope, other.offset,
-                other.limit, other.sort, other.defaultSort, other.filters,
-                other.stream);
+    public static class Builder<E extends Accessible> {
+        private FramedGraph<?> graph;
+        private Class<E> cls;
+        private int offset = 0;
+        private int limit = DEFAULT_LIMIT;
+        private SortedMap<String, Sort> sort = ImmutableSortedMap.of();
+        private Optional<Pair<String, Sort>> defSort = Optional.absent();
+        private SortedMap<String, Pair<FilterPredicate, Object>> filters = ImmutableSortedMap.of();
+        private boolean stream = false;
+
+        Builder<E> setSort(SortedMap<String, Sort> sort) {
+            this.sort = sort;
+            return this;
+        }
+
+        Builder(Query<E> query) {
+            this(query.graph, query.cls);
+            this.offset = query.offset;
+            this.limit = query.limit;
+            this.sort = query.sort;
+            this.defSort = query.defaultSort;
+            this.filters = query.filters;
+            this.stream = query.stream;
+        }
+
+        Builder<E> setFilters(SortedMap<String, Pair<FilterPredicate, Object>> filters) {
+            this.filters = filters;
+            return this;
+        }
+
+        public Builder(FramedGraph<?> graph, Class<E> cls) {
+            this.graph = graph;
+            this.cls = cls;
+        }
+
+        public Builder<E> setOffset(int offset) {
+            this.offset = offset;
+            return this;
+        }
+
+        public Builder<E> setLimit(int limit) {
+            this.limit = limit;
+            return this;
+        }
+
+        public Builder<E> setSort(Collection<String> orderSpecs) {
+            this.sort = QueryUtils.parseOrderSpecs(orderSpecs);
+            return this;
+        }
+
+        public Builder<E> setFilters(Collection<String> filters) {
+            this.filters = QueryUtils.parseFilters(filters);
+            return this;
+        }
+
+        public Builder<E> setStream(boolean stream) {
+            this.stream = stream;
+            return this;
+        }
+
+        public Query<E> build() {
+            return new Query<>(graph, cls, offset, limit, sort, defSort, filters, stream);
+        }
     }
 
+    public Query<E> setOffset(int offset) {
+        return new Builder<>(this).setOffset(offset).build();
+    }
+
+    public Query<E> setLimit(int limit) {
+        return new Builder<>(this).setLimit(limit).build();
+    }
+
+    public Query<E> filter(String key, FilterPredicate predicate, Object value) {
+        ImmutableSortedMap.Builder<String, Pair<FilterPredicate, Object>> m =
+                new ImmutableSortedMap.Builder<>(Ordering.natural());
+        m.putAll(filters);
+        m.put(key, new Pair<>(predicate, value));
+        return new Builder<>(this).setFilters(m.build()).build();
+    }
+
+    public Query<E> orderBy(String key, Sort order) {
+        ImmutableSortedMap.Builder<String, Sort> m =
+                new ImmutableSortedMap.Builder<>(Ordering.natural());
+        m.putAll(sort);
+        m.put(key, order);
+        return new Builder<>(this).setSort(m.build()).build();
+    }
+
+    public Query<E> clearFilters() {
+        return new Builder<>(this)
+                .setFilters(ImmutableSortedMap
+                        .<String, Pair<FilterPredicate, Object>>of()).build();
+    }
+
+    public Query<E> clearOrdering() {
+        return new Builder<>(this)
+                .setSort(ImmutableSortedMap
+                        .<String, Sort>of()).build();
+    }
+
+    public Query<E> setStream(boolean stream) {
+        return new Builder<>(this).setStream(stream).build();
+    }
 
     /**
      * Class representing a page of content.
@@ -317,143 +399,6 @@ public final class Query<E extends Accessible> implements Scoped<Query> {
         return count(manager.getVertices(type));
     }
 
-    /**
-     * Set the page applied to this query.
-     *
-     * @param offset An integer page to the stream.
-     */
-    public Query<E> setOffset(int offset) {
-        return new Query<>(graph, cls, scope, offset,
-                limit, sort, defaultSort, filters, stream);
-    }
-
-    /**
-     * Set the total applied to this query.
-     *
-     * @param limit An integer total, or -1 for an unbounded stream.
-     */
-    public Query<E> setLimit(int limit) {
-        return new Query<>(graph, cls, scope, offset,
-                limit, sort, defaultSort, filters, stream);
-    }
-
-    /**
-     * Indicate that we want a stream of results and therefore
-     * don't care about the item total (which will be -1 as a
-     * result).
-     *
-     * @param stream Whether to stream results lazily.
-     */
-    public Query<E> setStream(boolean stream) {
-        return new Query<>(graph, cls, scope, offset,
-                limit, sort, defaultSort, filters, stream);
-    }
-
-    /**
-     * Add an default order clause, to be used if no custom order is specified.
-     */
-    public Query<E> defaultOrderBy(String field, Sort order) {
-
-        return new Query<>(graph, cls, scope, offset, limit, sort,
-                Optional.of(new Pair<>(field, order)), filters, stream);
-    }
-
-    /**
-     * Add an order clause.
-     */
-    public Query<E> orderBy(String field, Sort order) {
-        SortedMap<String, Sort> tmp = new ImmutableSortedMap.Builder<String, Sort>(
-                Ordering.natural()).putAll(sort).put(field, order).build();
-        return new Query<>(graph, cls, scope, offset, limit, tmp, defaultSort,
-                filters, stream);
-    }
-
-    /**
-     * Add a set of string order clauses. Clauses must be of the form:
-     * <p/>
-     * property__DIRECTION
-     *
-     * @param orderSpecs list of orderSpecs
-     */
-    public Query<E> orderBy(Collection<String> orderSpecs) {
-        SortedMap<String, Sort> tmp = QueryUtils.parseOrderSpecs(orderSpecs);
-        Query<E> query = this;
-        for (Entry<String, Sort> entry : tmp.entrySet()) {
-            logger.debug("Adding property order: {}", entry.getKey());
-            query = query.orderBy(entry.getKey(), entry.getValue());
-        }
-        return query;
-    }
-
-    /**
-     * Clear the filter clauses from this query.
-     */
-    public Query<E> clearFilters() {
-        return new Query<>(
-                graph,
-                cls,
-                scope,
-                offset,
-                limit,
-                sort,
-                defaultSort,
-                ImmutableSortedMap.<String, Pair<FilterPredicate, String>>of(),
-                stream);
-    }
-
-    /**
-     * Clear the filter clauses from this query.
-     */
-    public Query<E> clearOrdering() {
-        return new Query<>(
-                graph,
-                cls,
-                scope,
-                offset,
-                limit,
-                ImmutableSortedMap.<String, Sort>of(),
-                defaultSort,
-                filters,
-                stream);
-    }
-
-    /**
-     * Add a filter clause.
-     */
-    public Query<E> filter(String property, FilterPredicate predicate, String value) {
-        ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>> builder
-                = new ImmutableSortedMap.Builder<>(
-                Ordering.natural());
-        for (Entry<String, Pair<FilterPredicate, String>> filter : filters.entrySet()) {
-            if (!filter.getKey().equals(property)) {
-                builder.put(filter.getKey(), filter.getValue());
-            }
-        }
-        builder.put(property, new Pair<>(predicate, value));
-
-        return new Query<>(graph, cls, scope, offset, limit, sort,
-                defaultSort, builder.build(), stream);
-    }
-
-    /**
-     * Add a set of unparsed filter clauses. Clauses must be of the format:
-     * property__PREDICATE:value
-     * <p/>
-     * If PREDICATE is omitted, EQUALS is the default.
-     *
-     * @param filters list of filters
-     * @return a new query object
-     */
-    public Query<E> filter(Collection<String> filters) {
-        SortedMap<String, Pair<FilterPredicate, String>> tmp = QueryUtils.parseFilters(filters);
-        Query<E> query = this;
-        for (Entry<String, Pair<FilterPredicate, String>> ft : tmp.entrySet()) {
-            logger.debug("Adding property filter: {}", ft.getKey());
-            query = query.filter(ft.getKey(), ft.getValue().getA(), ft.getValue().getB());
-        }
-        return query;
-    }
-
     // Helpers
 
     private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(
@@ -487,11 +432,8 @@ public final class Query<E extends Accessible> implements Scoped<Query> {
         return pipe.order(getOrderFunction(sort));
     }
 
-    private <EE> GremlinPipeline<EE, Vertex> setFilters(
-            GremlinPipeline<EE, Vertex> pipe) {
-        if (filters.isEmpty())
-            return pipe;
-        return pipe.filter(getFilterFunction());
+    private <EE> GremlinPipeline<EE, Vertex> setFilters(GremlinPipeline<EE, Vertex> pipe) {
+        return filters.isEmpty() ? pipe : pipe.filter(getFilterFunction());
     }
 
     /**
@@ -521,7 +463,7 @@ public final class Query<E extends Accessible> implements Scoped<Query> {
     private PipeFunction<Vertex, Boolean> getFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex vertex) {
-                for (Entry<String, Pair<FilterPredicate, String>> entry : filters
+                for (Entry<String, Pair<FilterPredicate, Object>> entry : filters
                         .entrySet()) {
                     String p = vertex.getProperty(entry.getKey());
                     if (p == null || !matches(p, entry.getValue()
@@ -537,47 +479,33 @@ public final class Query<E extends Accessible> implements Scoped<Query> {
     // FIXME: This has several limitations so far.
     // - only handles properties cast as strings
     // - doesn't do case-insensitive regexp matching.
-    private boolean matches(String a, String b, FilterPredicate predicate) {
+    private boolean matches(String a, Object b, FilterPredicate predicate) {
         switch (predicate) {
             case EQUALS:
                 return a.equals(b);
             case IEQUALS:
-                return a.equalsIgnoreCase(b);
+                return a.equalsIgnoreCase(b.toString());
             case STARTSWITH:
-                return a.startsWith(b);
+                return a.startsWith(b.toString());
             case ENDSWITH:
-                return a.endsWith(b);
+                return a.endsWith(b.toString());
             case CONTAINS:
-                return a.contains(b);
+                return a.contains(b.toString());
             case ICONTAINS:
-                return a.toLowerCase().contains(b.toLowerCase());
+                return a.toLowerCase().contains(b.toString().toLowerCase());
             case MATCHES:
-                return a.matches(b);
+                return a.matches(b.toString());
             case GT:
-                return a.compareTo(b) > 0;
+                return a.compareTo(b.toString()) > 0;
             case GTE:
-                return a.compareTo(b) >= 0;
+                return a.compareTo(b.toString()) >= 0;
             case LT:
-                return a.compareTo(b) < 0;
+                return a.compareTo(b.toString()) < 0;
             case LTE:
-                return a.compareTo(b) <= 0;
+                return a.compareTo(b.toString()) <= 0;
             default:
                 throw new RuntimeException("Unexpected filter predicate: "
                         + predicate);
         }
-    }
-
-    @Override
-    public Query withScope(PermissionScope scope) {
-        return new Query<>(
-                graph,
-                cls,
-                scope,
-                offset,
-                limit,
-                sort,
-                defaultSort,
-                filters,
-                stream);
     }
 }

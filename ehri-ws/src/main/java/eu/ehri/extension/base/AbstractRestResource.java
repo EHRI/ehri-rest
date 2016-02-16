@@ -79,7 +79,7 @@ import java.util.Map;
  */
 public abstract class AbstractRestResource implements TxCheckedResource {
 
-    public static final int DEFAULT_LIST_LIMIT = 20;
+    public static final int DEFAULT_LIST_LIMIT = Query.DEFAULT_LIMIT;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
@@ -237,12 +237,13 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return a query object
      */
     protected <T extends Accessible> Query<T> getQuery(Class<T> cls) {
-        return new Query<>(graph, cls)
+        return new Query.Builder<>(graph, cls)
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
                 .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
-                .filter(getStringListQueryParam(FILTER_PARAM))
-                .orderBy(getStringListQueryParam(SORT_PARAM))
-                .setStream(isStreaming());
+                .setFilters(getStringListQueryParam(FILTER_PARAM))
+                .setSort(getStringListQueryParam(SORT_PARAM))
+                .setStream(isStreaming())
+                .build();
     }
 
     /**

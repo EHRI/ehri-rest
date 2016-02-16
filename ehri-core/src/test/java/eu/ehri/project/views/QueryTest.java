@@ -19,7 +19,6 @@
 
 package eu.ehri.project.views;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
@@ -46,8 +45,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testAdminCanListEverything() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Check we're not admin
         assertTrue(AclManager.belongsToAdmin(validUser));
@@ -88,8 +86,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testPage() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Check we're not admin
         assertTrue(AclManager.belongsToAdmin(validUser));
@@ -114,8 +111,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testUserCannotListPrivate() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Check we're not admin
         Accessor accessor = manager.getEntity("reto", Accessor.class);
@@ -130,8 +126,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithFilter() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Query for document identifier c1.
         List<DocumentaryUnit> list = toList(query.setLimit(1).page(
@@ -142,8 +137,8 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithStreaming() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class).setStream(true);
+        Query<DocumentaryUnit> query = new Query.Builder<>(graph, DocumentaryUnit.class)
+                .setStream(true).build();
 
         // Query for document identifier c1.
         Page<DocumentaryUnit> list = query.setLimit(1).page(
@@ -153,8 +148,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithPredicateFilter() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Query for document identifier c1.
         List<DocumentaryUnit> list = toList(query.filter(
@@ -226,8 +220,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithSort() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Query for document identifier c1.
         Page<DocumentaryUnit> page = query.orderBy(
@@ -245,18 +238,16 @@ public class QueryTest extends AbstractFixtureTest {
         // NB: This will break if other collections are added to the
         // fixtures. Adjust as necessary.
         assertEquals("m19", toList(page.getIterable()).get(0).getIdentifier());
-//        assertEquals("c4", toList(page.getIterable()).get(1).getIdentifier());
         assertEquals("c1", toList(orderQuery
                 .clearOrdering()
-                .defaultOrderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)
+                .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser)
                 .getIterable()).get(0).getIdentifier());
     }
 
     @Test
     public void testListWithGlobFilter() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = manager
@@ -272,8 +263,7 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithFailFilter() throws Exception {
-        Query<DocumentaryUnit> query = new Query<>(graph,
-                DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<>(graph, DocumentaryUnit.class);
 
         // Do a query that won't match anything.
         List<DocumentaryUnit> list = toList(query.page(
