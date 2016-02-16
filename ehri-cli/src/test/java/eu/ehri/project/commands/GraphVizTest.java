@@ -21,29 +21,29 @@ package eu.ehri.project.commands;
 
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.apache.commons.cli.CommandLine;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 
-public class RdfExportTest extends AbstractFixtureTest {
-    @Ignore("Ignored until SailGraph supports array properties (which we need). It doesn't as of Blueprints 2.5.0")
+public class GraphVizTest extends AbstractFixtureTest {
+
     @Test
-    public void testExportTurtle() throws Exception {
-        File temp = File.createTempFile("temp-file-name", ".turtle");
-        temp.deleteOnExit();
-        assertEquals(0L, temp.length());
-
-        String filePath = temp.getAbsolutePath();
-        String[] outArgs = new String[]{"-f", "turtle", filePath};
-
-        RdfExport export = new RdfExport();
-        CommandLine outCmdLine = export.getCmdLine(outArgs);
-        assertEquals(0, export.execWithOptions(graph, outCmdLine));
-        assertTrue(temp.length() > 0L);
+    public void testEntityAdd() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        System.setOut(ps);
+        String[] args = new String[]{"c1", "r1", "nl",
+                "--relationship", "heldBy",
+                "--relationship", "hasCountry"};
+        GraphViz gv = new GraphViz();
+        CommandLine cmdLine = gv.getCmdLine(args);
+        assertEquals(0, gv.execWithOptions(graph, cmdLine));
+        assertThat(baos.toString("UTF-8"), containsString("heldBy"));
     }
 }
