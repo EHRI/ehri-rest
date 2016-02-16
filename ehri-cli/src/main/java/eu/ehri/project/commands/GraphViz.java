@@ -49,7 +49,7 @@ public class GraphViz extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return String.format("%s [OPTIONS] <type> <identifier>", NAME);
+        return String.format("%s [OPTIONS] <identifier> ...", NAME);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class GraphViz extends BaseCommand {
 
         // Cmdline arguments should be a node and a list of relationship types
         // to traverse.
-        if (cmdLine.getArgList().size() < 2)
+        if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getUsage());
 
         List<Node> nodes = Lists.newArrayList();

@@ -97,7 +97,6 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(EntityAdd.NAME, EntityAdd.class);
         mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
-        mmap.put(RdfExport.NAME, RdfExport.class);
         mmap.put(RelationAdd.NAME, RelationAdd.class);
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(CsvConceptImport.NAME, CsvConceptImport.class);
