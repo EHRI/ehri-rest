@@ -39,6 +39,7 @@ public abstract class AbstractSkosTest extends AbstractFixtureTest {
     public static final String FILE3 = "cvoc/repository-types.xml";
     public static final String FILE4 = "cvoc/camps.rdf";
     public static final String FILE5 = "cvoc/ghettos.rdf";
+    public static final String FILE6 = "cvoc/scriptcode.n3";
 
     protected Actioner actioner;
     protected ActionManager actionManager;

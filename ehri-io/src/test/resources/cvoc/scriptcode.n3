@@ -1,0 +1,9 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<http://www.example.com/#test> a skos:Concept ;
+    skos:prefLabel "test"@en-latn ;
+    skos:prefLabel "test"@en ;
+    skos:broader <http://www.example.com/#broader> ;
+    skos:definition """code"""@en-latn;
+    skos:definition """no code"""@en;
+    skos:scopeNote """Testing script code on language"""@en-latn .

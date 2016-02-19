@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.cvoc;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -74,6 +75,8 @@ import java.util.Map;
 public final class JenaSkosImporter implements SkosImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(JenaSkosImporter.class);
+    private static final Splitter codeSplitter = Splitter.on('-')
+            .omitEmptyStrings().trimResults().limit(2);
     private final FramedGraph<?> framedGraph;
     private final Actioner actioner;
     private final Vocabulary vocabulary;
@@ -386,12 +389,15 @@ public final class JenaSkosImporter implements SkosImporter {
             Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
             Literal literalPrefName = property.asLiteral();
-            String languageCode = isValidLanguageCode(literalPrefName.getLanguage())
-                    ? LanguageHelpers.iso639DashTwoCode(literalPrefName.getLanguage())
-                    : defaultLang;
+            String langCode2Letter = literalPrefName.getLanguage();
+            String langCode3Letter = getLanguageCode(langCode2Letter, defaultLang);
+            Optional<String> descCode = getScriptCode(langCode2Letter);
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
-                    .addDataValue(Ontology.LANGUAGE, languageCode);
+                    .addDataValue(Ontology.LANGUAGE, langCode3Letter);
+            for (String code : descCode.asSet()) {
+                builder.addDataValue(Ontology.IDENTIFIER_KEY, code);
+            }
 
             for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
@@ -417,10 +423,10 @@ public final class JenaSkosImporter implements SkosImporter {
                     for (RDFNode target : getObjectWithPredicate(item, uri)) {
                         if (target.isLiteral()) {
                             Literal literal = target.asLiteral();
-                            String propLanguageCode = isValidLanguageCode(literal.getLanguage())
-                                    ? LanguageHelpers.iso639DashTwoCode(literal.getLanguage())
-                                    : defaultLang;
-                            if (propLanguageCode.equals(languageCode)) {
+                            String propLang2Letter = literal.getLanguage();
+                            String propLanguageCode = getLanguageCode(propLang2Letter, defaultLang);
+                            Optional<String> propDescCode = getScriptCode(propLang2Letter);
+                            if (propLanguageCode.equals(langCode3Letter) && propDescCode.equals(descCode)) {
                                 values.add(literal.getString());
                             }
                         }
@@ -443,7 +449,24 @@ public final class JenaSkosImporter implements SkosImporter {
         return descriptions;
     }
 
-    private String getId(URI uri) {
+    private static String getLanguageCode(String langCode2Letter, String defaultLang) {
+        if (langCode2Letter == null || langCode2Letter.trim().isEmpty()) {
+            return defaultLang;
+        }
+        List<String> parts = codeSplitter.splitToList(langCode2Letter);
+        if (parts.isEmpty()) {
+            return defaultLang;
+        } else {
+            return LanguageHelpers.iso639DashTwoCode(parts.get(0));
+        }
+    }
+
+    private static Optional<String> getScriptCode(String langCode) {
+        List<String> parts = codeSplitter.splitToList(langCode);
+        return parts.size() > 1 ? Optional.of(parts.get(1)) : Optional.<String>absent();
+    }
+
+    private static String getId(URI uri) {
         return uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
                 + (uri.getQuery() != null ? uri.getQuery() : "")
                 + (uri.getFragment() != null ? uri.getFragment() : "");
@@ -452,9 +475,4 @@ public final class JenaSkosImporter implements SkosImporter {
     private Optional<String> getLogMessage(String msg) {
         return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
     }
-
-    private boolean isValidLanguageCode(String language) {
-        return !(language == null || language.isEmpty());
-    }
-
 }
