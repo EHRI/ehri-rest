@@ -19,15 +19,24 @@
 
 package eu.ehri.project.importers.cvoc;
 
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.persistence.Serializer;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Ignore;
+
+import java.util.Comparator;
+import java.util.List;
 
 
 public class JenaSkosImporterTest extends AbstractSkosTest {
@@ -39,17 +48,6 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         assertEquals(1, importLog.getCreated());
     }
     
-    @Test @Ignore
-    public void testEhriSkos() throws Exception {
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        ImportLog importLog = importer.setDefaultLang("de")
-                .importFile(ClassLoader.getSystemResourceAsStream("cvoc/ehri-skos.rdf"), "ehri-skos");
-        assertEquals(877, importLog.getCreated());
-        Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
-        assertEquals("deu", concept.as(Concept.class)
-                .getDescriptions().iterator().next().getLanguageOfDescription());
-    }
-
     @Test
     public void testSetDefaultLang() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
@@ -61,6 +59,35 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
         assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
+    }
+
+    @Test
+    public void testLangWithScriptCode() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        // Setting a two-letter language code should result in a description
+        // being created with the corresponding 3-letter code.
+        ImportLog importLog = importer
+                .setFormat("N3")
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE6), "lang test");
+        assertEquals(1, importLog.getCreated());
+        Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
+        List<Description> descriptions = Ordering.from(new Comparator<Description>() {
+            @Override
+            public int compare(Description d1, Description d2) {
+                return ComparisonChain.start()
+                        .compare(d1.getDescriptionCode(), d2.getDescriptionCode(),
+                                Ordering.natural().nullsLast())
+                        .result();
+            }
+        }).sortedCopy(concept.as(Concept.class).getDescriptions());
+        assertEquals(2, descriptions.size());
+        assertEquals("eng", descriptions.get(0).getLanguageOfDescription());
+        assertEquals("latn", descriptions.get(0).getDescriptionCode());
+        assertNull(descriptions.get(1).getDescriptionCode());
+        assertEquals("code", descriptions.get(0)
+                .<List<String>>getProperty("definition").get(0));
+        assertEquals("no code", descriptions.get(1)
+                .<List<String>>getProperty("definition").get(0));
     }
 
     @Test
