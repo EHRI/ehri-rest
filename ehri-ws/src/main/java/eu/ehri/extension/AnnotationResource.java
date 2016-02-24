@@ -34,11 +34,9 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AnnotationViews;
-import eu.ehri.project.views.Query;
-import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -165,11 +163,9 @@ public class AnnotationResource
             @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessible item = new CrudViews<>(graph, Accessible.class)
-                    .detail(id, getRequesterUserProfile());
-            Query<Annotation> query = getQuery(Annotation.class)
-                    .setStream(isStreaming());
-            return streamingPage(query.page(item.getAnnotations(), getRequesterUserProfile()), tx);
+            return streamingPage(getQuery(Annotation.class).page(
+                    manager.getEntity(id, Annotatable.class).getAnnotations(),
+                    getRequesterUserProfile()), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
