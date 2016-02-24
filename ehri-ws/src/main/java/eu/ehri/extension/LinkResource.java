@@ -179,7 +179,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     public Response listRelatedItems(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
         try {
-            return streamingPage(querier.setStream(isStreaming()).page(
+            return streamingPage(getQuery(cls).page(
                     manager.getEntity(id, Linkable.class).getLinks(),
                     getRequesterUserProfile()), tx);
         } catch (Exception e) {
