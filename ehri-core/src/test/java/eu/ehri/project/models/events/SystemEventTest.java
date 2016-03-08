@@ -25,7 +25,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
@@ -42,21 +42,21 @@ import static org.junit.Assert.assertTrue;
 public class SystemEventTest extends AbstractFixtureTest {
 
     private ActionManager actionManager;
-    private BundleDAO bundleDAO;
+    private BundleManager bundleManager;
     private Serializer serializer;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         actionManager = new ActionManager(graph);
-        bundleDAO = new BundleDAO(graph);
+        bundleManager = new BundleManager(graph);
         serializer = new Serializer(graph);
     }
 
     @Test
     public void testGetSubjects() throws Exception {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
+        UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
@@ -69,7 +69,7 @@ public class SystemEventTest extends AbstractFixtureTest {
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.deletion);
         ctx2.commit();
-        bundleDAO.delete(serializer.entityToBundle(user));
+        bundleManager.delete(serializer.entityToBundle(user));
 
         // First event should now have 0 subjects, since it's
         // been deleted.
@@ -81,7 +81,7 @@ public class SystemEventTest extends AbstractFixtureTest {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         Bundle userBundle2 = userBundle.withDataValue("foo", "bar1");
         Bundle userBundle3 = userBundle.withDataValue("foo", "bar2");
-        UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
+        UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
@@ -94,10 +94,10 @@ public class SystemEventTest extends AbstractFixtureTest {
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.modification);
         SystemEvent second = ctx2.commit();
-        bundleDAO.update(userBundle2, UserProfile.class);
+        bundleManager.update(userBundle2, UserProfile.class);
 
         SystemEvent third = ctx2.commit();
-        bundleDAO.update(userBundle3, UserProfile.class);
+        bundleManager.update(userBundle3, UserProfile.class);
 
         ActionManager.EventContext ctx3 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
@@ -116,7 +116,7 @@ public class SystemEventTest extends AbstractFixtureTest {
 
         // Check with another type
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
-        Repository repository = bundleDAO.create(repoBundle, Repository.class);
+        Repository repository = bundleManager.create(repoBundle, Repository.class);
 
         // Delete the user and log it
         ActionManager.EventContext ctx4 = actionManager.newEventContext(repository,
@@ -130,7 +130,7 @@ public class SystemEventTest extends AbstractFixtureTest {
     @Test
     public void testSameAsWithTimeDiff() throws Exception {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
+        UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx = actionManager.newEventContext(user,
                 validUser,

@@ -34,13 +34,13 @@ import static org.junit.Assert.*;
 
 public class VersionTest extends AbstractFixtureTest {
     private ActionManager actionManager;
-    private BundleDAO bundleDAO;
+    private BundleManager bundleManager;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         actionManager = new ActionManager(graph);
-        bundleDAO = new BundleDAO(graph);
+        bundleManager = new BundleManager(graph);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class VersionTest extends AbstractFixtureTest {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         Bundle userBundle2 = userBundle.withDataValue("foo", "bar1");
         Bundle userBundle3 = userBundle.withDataValue("foo", "bar2");
-        UserProfile user = bundleDAO.create(userBundle, UserProfile.class);
+        UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx1 = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
@@ -62,12 +62,12 @@ public class VersionTest extends AbstractFixtureTest {
                 EventTypes.modification)
                 .createVersion(user);
         SystemEvent second = ctx2.commit();
-        Mutation<UserProfile> update1 = bundleDAO
+        Mutation<UserProfile> update1 = bundleManager
                 .update(userBundle2, UserProfile.class);
         assertEquals(MutationState.UPDATED, update1.getState());
 
         SystemEvent third = ctx2.createVersion(user).commit();
-        bundleDAO.update(userBundle3, UserProfile.class);
+        bundleManager.update(userBundle3, UserProfile.class);
         assertEquals(MutationState.UPDATED, update1.getState());
 
         // Now compare the values in the versions

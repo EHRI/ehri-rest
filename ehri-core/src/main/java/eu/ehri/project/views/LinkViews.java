@@ -43,7 +43,7 @@ import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -102,7 +102,7 @@ public final class LinkViews implements Scoped<LinkViews> {
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
         // TODO: Should this require perms to link another item???
         //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
-        Link link = new BundleDAO(graph).create(bundle, Link.class);
+        Link link = new BundleManager(graph).create(bundle, Link.class);
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
         link.setLinker(user);
@@ -143,12 +143,12 @@ public final class LinkViews implements Scoped<LinkViews> {
         // TODO: Should this require perms to link another item???
         //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
         helper.checkEntityPermission(description.getEntity(), user, PermissionType.UPDATE);
-        Link link = new BundleDAO(graph).create(bundle, Link.class);
+        Link link = new BundleManager(graph).create(bundle, Link.class);
         Bundle relBundle = new Bundle(EntityClass.ACCESS_POINT)
                 .withDataValue(Ontology.NAME_KEY, bodyName)
                 .withDataValue(Ontology.ACCESS_POINT_TYPE, bodyType)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, link.getDescription());
-        AccessPoint rel = new BundleDAO(graph).create(relBundle, AccessPoint.class);
+        AccessPoint rel = new BundleManager(graph).create(relBundle, AccessPoint.class);
         description.addAccessPoint(rel);
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);

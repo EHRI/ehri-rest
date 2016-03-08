@@ -34,7 +34,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class IcaAtomEadImporter extends EaImporter {
     public DocumentaryUnit importItem(Map<String, Object> data, List<String> idPath) throws ValidationError {
 
 
-        BundleDAO persister = getPersister(idPath);
+        BundleManager persister = getPersister(idPath);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(data));
 
         // Check for missing identifier, throw an exception when there is no ID.

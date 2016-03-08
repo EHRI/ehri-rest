@@ -47,7 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class BundleDAOTest extends ModelTestBase {
+public class BundleManagerTest extends ModelTestBase {
 
     private static final String ID = "c1";
 
@@ -87,7 +87,7 @@ public class BundleDAOTest extends ModelTestBase {
         assertEquals(2, toList(c1.getDescriptions()).size());
 
         Bundle bundle = serializer.entityToBundle(c1);
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         Mutation<DocumentaryUnit> c1redux = persister.update(bundle,
                 DocumentaryUnit.class);
 
@@ -102,7 +102,7 @@ public class BundleDAOTest extends ModelTestBase {
         assertEquals(1, toList(r1.getDescriptions()).size());
 
         Bundle bundle = serializer.entityToBundle(r1);
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         Mutation<Repository> r1redux = persister.update(bundle, Repository.class);
 
         assertEquals(toList(r1.getDescriptions()),
@@ -126,7 +126,7 @@ public class BundleDAOTest extends ModelTestBase {
 
         // Restore the item from JSON
         Bundle bundle = Bundle.fromString(json);
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         persister.update(bundle, DocumentaryUnit.class);
 
         // Our deleted description should have come back...
@@ -158,7 +158,7 @@ public class BundleDAOTest extends ModelTestBase {
         Bundle newBundle = BundleUtils.deleteBundle(
                 bundle, deletePath);
         System.out.println("Delete bundle: " + newBundle);
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         Mutation<DocumentaryUnit> mutation
                 = persister.update(newBundle, DocumentaryUnit.class);
 
@@ -200,7 +200,7 @@ public class BundleDAOTest extends ModelTestBase {
         List<DatePeriod> dates = toList(manager.getEntities(
                 EntityClass.DATE_PERIOD, DatePeriod.class));
 
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         Integer numDeleted = persister.delete(bundle);
         assertTrue(numDeleted > 0);
         assertEquals(
@@ -220,7 +220,7 @@ public class BundleDAOTest extends ModelTestBase {
         Bundle desc = BundleUtils.getBundle(bundle, "describes[0]");
         Bundle newBundle = desc.removeDataValue(Ontology.NAME_KEY);
 
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         persister.update(newBundle, DocumentaryUnit.class);
         fail("Bundle with no description name did not throw a ValidationError");
     }
@@ -231,7 +231,7 @@ public class BundleDAOTest extends ModelTestBase {
         Bundle b1 = Bundle.fromData(TestData.getTestAgentBundle())
                 .removeDataValue(Ontology.IDENTIFIER_KEY);
 
-        BundleDAO persister = new BundleDAO(graph);
+        BundleManager persister = new BundleManager(graph);
         persister.update(b1, Repository.class);
         fail("Attempting to update a non-existent bundle did not throw an error");
     }
@@ -240,7 +240,7 @@ public class BundleDAOTest extends ModelTestBase {
     public void testCreationWithUnicodeIdentifier() throws Exception {
         Bundle b1 = Bundle.fromData(TestData.getTestDocBundle())
                 .withDataValue(Ontology.IDENTIFIER_KEY, "foo /?&% ארכיו bar");
-        DocumentaryUnit doc = new BundleDAO(graph).create(b1, DocumentaryUnit.class);
+        DocumentaryUnit doc = new BundleManager(graph).create(b1, DocumentaryUnit.class);
         assertEquals("foo_ארכיו_bar", doc.getId());
     }
 }

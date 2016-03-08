@@ -43,7 +43,7 @@ import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
@@ -85,7 +85,7 @@ public class EacImporter extends EaImporter {
     @Override
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
+        BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 

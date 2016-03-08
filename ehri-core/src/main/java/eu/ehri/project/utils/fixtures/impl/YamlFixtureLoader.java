@@ -36,7 +36,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
@@ -87,7 +87,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
-    private final BundleDAO dao;
+    private final BundleManager dao;
     private final boolean initialize;
     private GraphInitializer initializer;
 
@@ -101,7 +101,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         this.graph = graph;
         this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
-        dao = new BundleDAO(graph);
+        dao = new BundleManager(graph);
         initializer = new GraphInitializer(graph);
     }
 

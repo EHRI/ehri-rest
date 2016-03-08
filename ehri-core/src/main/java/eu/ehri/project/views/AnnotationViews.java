@@ -42,7 +42,7 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.persistence.TraversalCallback;
 
@@ -108,7 +108,7 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
             throw new PermissionDenied("Item is not covered by parent item's permissions");
         }
 
-        Annotation annotation = new BundleDAO(graph).create(bundle, Annotation.class);
+        Annotation annotation = new BundleManager(graph).create(bundle, Annotation.class);
         entity.addAnnotation(annotation);
         if (!entity.equals(dep)) {
             dep.addAnnotationPart(annotation);

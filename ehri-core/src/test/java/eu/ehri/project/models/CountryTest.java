@@ -21,7 +21,7 @@ package eu.ehri.project.models;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.views.ViewFactory;
@@ -34,7 +34,7 @@ public class CountryTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
-        Repository repo = new BundleDAO(graph)
+        Repository repo = new BundleManager(graph)
                 .create(Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         country.addRepository(repo);
         // 2 nl repositories in the fixtures, plus the one we just made...
@@ -59,7 +59,7 @@ public class CountryTest extends AbstractFixtureTest {
     @Test
     public void testAddRepository() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
-        Repository repo = new BundleDAO(graph)
+        Repository repo = new BundleManager(graph)
                 .create(Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         // Test setting country on repo delegates correctly and
         // increments the country count...

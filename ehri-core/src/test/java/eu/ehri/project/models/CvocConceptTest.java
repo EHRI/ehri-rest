@@ -28,7 +28,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.ModelTestBase;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
@@ -206,7 +206,7 @@ public class CvocConceptTest extends ModelTestBase {
         assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
 	}
 	
-	// test creation of a vocabulary using the BundleDAO
+	// test creation of a vocabulary using the BundleManager
 	@Test
 	public void testCreateVocabulary() throws Exception {
         String vocid = "voc-test-id";
@@ -215,7 +215,7 @@ public class CvocConceptTest extends ModelTestBase {
                 .addDataValue(Ontology.IDENTIFIER_KEY, vocid)
                 .addDataValue(Ontology.NAME_KEY, "Test Vocabulaey")
                 .build();
-         Vocabulary vocabulary = new BundleDAO(graph).create(bundle, Vocabulary.class);
+         Vocabulary vocabulary = new BundleManager(graph).create(bundle, Vocabulary.class);
          assertEquals(vocid, vocabulary.getIdentifier());
 	}
 }
