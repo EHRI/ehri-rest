@@ -21,6 +21,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -51,7 +52,7 @@ import java.util.Set;
 /**
  * Provides a web service interface for the Group model.
  */
-@Path(Entities.GROUP)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.GROUP)
 public class GroupResource
         extends AbstractAccessibleResource<Group>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
@@ -64,7 +65,7 @@ public class GroupResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -83,8 +84,7 @@ public class GroupResource
     public Response createGroup(Bundle bundle,
                                 @QueryParam(ACCESSOR_PARAM) List<String> accessors,
                                 @QueryParam(MEMBER_PARAM) List<String> members)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final UserProfile currentUser = getCurrentUser();
             final Set<Accessor> groupMembers = Sets.newHashSet();
@@ -109,11 +109,10 @@ public class GroupResource
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
@@ -125,7 +124,7 @@ public class GroupResource
      * Add an accessor to a group.
      */
     @POST
-    @Path("{id:[^/]+}/{aid:.+}")
+    @Path("{id:[^/]+}/{aid:[^/]+}")
     public Response addMember(@PathParam("id") String id,
                               @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
@@ -143,10 +142,10 @@ public class GroupResource
      * Remove an accessor from a group.
      */
     @DELETE
-    @Path("{id:[^/]+}/{aid:.+}")
+    @Path("{id:[^/]+}/{aid:[^/]+}")
     public Response removeMember(@PathParam("id") String id,
-                                 @PathParam("aid") String aid) throws PermissionDenied,
-            ItemNotFound {
+                                 @PathParam("aid") String aid)
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
@@ -182,29 +181,11 @@ public class GroupResource
         }
     }
 
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/count")
-    public long countChildResources(@PathParam("id") String id,
-                                    @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Group group = views.detail(id, user);
-            Iterable<Accessible> members = all
-                    ? group.getAllUserProfileMembers()
-                    : group.getMembersAsEntities();
-            long count = getQuery(Accessible.class)
-                    .count(members);
-            tx.success();
-            return count;
-        }
-    }
-
     /**
      * Delete a group with the given identifier string.
      */
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {

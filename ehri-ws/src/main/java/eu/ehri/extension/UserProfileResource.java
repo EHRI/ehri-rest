@@ -21,6 +21,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -31,13 +32,27 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.*;
+import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Link;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.views.EventViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -48,7 +63,7 @@ import java.util.Set;
 /**
  * Provides a web service interface for the UserProfile.
  */
-@Path(Entities.USER_PROFILE)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
@@ -60,6 +75,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public static final String IS_WATCHING = "isWatching";
     public static final String BLOCKED = "blocked";
     public static final String IS_BLOCKING = "isBlocking";
+    public static final String ACTIONS = "actions";
+    public static final String EVENTS = "events";
 
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);
@@ -67,7 +84,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -84,8 +101,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createUserProfile(Bundle bundle,
-                                      @QueryParam(GROUP_PARAM) List<String> groupIds,
-                                      @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
+            @QueryParam(GROUP_PARAM) List<String> groupIds,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -112,7 +129,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -125,7 +142,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -138,7 +155,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + FOLLOWERS)
+    @Path("{userId:[^/]+}/" + FOLLOWERS)
     public Response listFollowers(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -154,7 +171,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + FOLLOWING)
+    @Path("{userId:[^/]+}/" + FOLLOWING)
     public Response listFollowing(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -170,7 +187,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + IS_FOLLOWING + "/{otherId:.+}")
+    @Path("{userId:[^/]+}/" + IS_FOLLOWING + "/{otherId:[^/]+}")
     public boolean isFollowing(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
@@ -187,7 +204,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + IS_FOLLOWER + "/{otherId:.+}")
+    @Path("{userId:[^/]+}/" + IS_FOLLOWER + "/{otherId:[^/]+}")
     public boolean isFollower(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
@@ -202,7 +219,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{userId:.+}/" + FOLLOWING)
+    @Path("{userId:[^/]+}/" + FOLLOWING)
     public Response followUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -219,7 +236,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{userId:.+}/" + FOLLOWING)
+    @Path("{userId:[^/]+}/" + FOLLOWING)
     public Response unfollowUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -237,7 +254,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + BLOCKED)
+    @Path("{userId:[^/]+}/" + BLOCKED)
     public Response listBlocked(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -253,7 +270,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + IS_BLOCKING + "/{otherId:.+}")
+    @Path("{userId:[^/]+}/" + IS_BLOCKING + "/{otherId:[^/]+}")
     public boolean isBlocking(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
@@ -268,7 +285,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{userId:.+}/" + BLOCKED)
+    @Path("{userId:[^/]+}/" + BLOCKED)
     public Response blockUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -285,7 +302,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{userId:.+}/" + BLOCKED)
+    @Path("{userId:[^/]+}/" + BLOCKED)
     public Response unblockUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -303,7 +320,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + WATCHING)
+    @Path("{userId:[^/]+}/" + WATCHING)
     public Response listWatching(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -318,7 +335,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{userId:.+}/" + WATCHING)
+    @Path("{userId:[^/]+}/" + WATCHING)
     public Response watchItem(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -335,7 +352,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{userId:.+}/" + WATCHING)
+    @Path("{userId:[^/]+}/" + WATCHING)
     public Response unwatchItem(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -353,7 +370,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:.+}/" + IS_WATCHING + "/{otherId:.+}")
+    @Path("{userId:[^/]+}/" + IS_WATCHING + "/{otherId:[^/]+}")
     public boolean isWatching(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
@@ -369,7 +386,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + Entities.ANNOTATION)
+    @Path("{userId:[^/]+}/" + GenericResource.ANNOTATIONS)
     public Response listAnnotations(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -385,7 +402,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + Entities.LINK)
+    @Path("{userId:[^/]+}/" + GenericResource.LINKS)
     public Response pageLinks(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -401,7 +418,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{userId:.+}/" + Entities.VIRTUAL_UNIT)
+    @Path("{userId:[^/]+}/" + Entities.VIRTUAL_UNIT)
     public Response pageVirtualUnits(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
@@ -409,6 +426,69 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             UserProfile user = views.detail(userId, accessor);
             return streamingPage(getQuery(VirtualUnit.class)
                     .page(user.getVirtualUnits(), accessor), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
+    }
+
+    /**
+     * Fetch an aggregate list of a user's actions.
+     *
+     * @param userId      the user's ID
+     * @param aggregation the manner in which to aggregate the results, accepting
+     *                    "user", "strict" or "off" (no aggregation). Default is
+     *                    <b>strict</b>.
+     * @return a list of event ranges
+     * @throws ItemNotFound
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:[^/]+}/" + ACTIONS)
+    public Response aggregateUserActions(
+            @PathParam("userId") String userId,
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation)
+            throws ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = manager.getEntity(userId, UserProfile.class);
+            EventViews eventViews = getEventViewsBuilder()
+                    .withAggregation(aggregation)
+                    .build();
+            return streamingListOfLists(eventViews.aggregateUserActions(user, accessor), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
+    }
+
+    /**
+     * Aggregate actions that are relevant to a given user based on
+     * the other users that they follow and the items they watch.
+     *
+     * @param userId      the user's ID
+     * @param aggregation the manner in which to aggregate the results, accepting
+     *                    "user", "strict" or "off" (no aggregation). Default is
+     *                    <b>user</b>.
+     * @return a list of event ranges
+     * @throws ItemNotFound
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:[^/]+}/" + EVENTS)
+    public Response aggregateEventsForUser(
+            @PathParam("userId") String userId,
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
+            throws ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            UserProfile asUser = manager.getEntity(userId, UserProfile.class);
+            EventViews eventViews = getEventViewsBuilder()
+                    .withAggregation(aggregation)
+                    .build();
+            return streamingListOfLists(eventViews.aggregateAsUser(asUser, user), tx);
         } catch (Exception e) {
             tx.close();
             throw e;

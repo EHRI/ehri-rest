@@ -37,7 +37,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
 /**
  * An entity that can be accessed by specific {@link Accessor}s.
  */
-public interface Accessible extends PermissionGrantTarget, Versioned, Annotatable {
+public interface Accessible extends PermissionGrantTarget {
 
     /**
      * Fetch accessors to which this item is restricted.

@@ -41,6 +41,5 @@ public interface CreateResource {
      * @throws DeserializationError
      */
     Response create(Bundle bundle, List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError;
+            throws PermissionDenied, ValidationError, DeserializationError;
 }

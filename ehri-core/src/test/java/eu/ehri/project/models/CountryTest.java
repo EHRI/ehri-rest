@@ -29,11 +29,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * User: mikebryant
- */
-public class CountryTest extends AbstractFixtureTest {
 
+public class CountryTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
@@ -70,6 +67,4 @@ public class CountryTest extends AbstractFixtureTest {
         // 2 nl repositories in the fixtures, plus the one we just made...
         assertEquals(3L, country.getChildCount());
     }
-
-
 }

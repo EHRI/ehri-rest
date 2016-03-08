@@ -20,10 +20,15 @@
 package eu.ehri.project.models;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Annotatable;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,8 +61,7 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testAnnotationAnnotation() throws ItemNotFound {
-        Annotatable ann1 = manager.getEntity("ann1",
-                Annotatable.class);
+        Annotatable ann1 = manager.getEntity("ann1", Annotatable.class);
         Annotation ann2 = manager.getEntity("ann2", Annotation.class);
         assertEquals(ann2.getTargets().iterator().next(), ann1);
         assertEquals(TEST_ANNOTATION_ANNOTATION_BODY, ann2.getBody());
@@ -70,5 +74,13 @@ public class AnnotationTest extends ModelTestBase {
         UserProfile mike = manager.getEntity("mike", UserProfile.class);
         Annotation ann1 = manager.getEntity("ann1", Annotation.class);
         assertEquals(mike, ann1.getAnnotator());
+    }
+
+    @Test
+    public void testGetAnnotationTargetPart() throws Exception {
+        Annotation ann1 = manager.getEntity("ann1", Annotation.class);
+        List<Annotatable> parts = Lists.newArrayList(ann1.getTargetParts());
+        assertEquals(1, parts.size());
+        assertEquals(manager.getEntity("cd1", Description.class), parts.get(0));
     }
 }

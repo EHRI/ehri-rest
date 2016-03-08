@@ -32,32 +32,32 @@ import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.UserProfileResource.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class UserProfileRestClientTest extends BaseRestClientTest {
+public class UserProfileRestClientTest extends AbstractRestClientTest {
 
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String jsonUserProfileTestString = "{\"type\":\"UserProfile\", \"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\"}}";
 
-    /**
-     * CR(U)D cycle
-     */
     @Test
     public void testCreateDeleteUserProfile() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.USER_PROFILE))
+                entityUri(Entities.USER_PROFILE))
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -77,7 +77,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         queryParams.add("key", Ontology.IDENTIFIER_KEY);
         queryParams.add("value", FETCH_NAME);
 
-        WebResource resource = client.resource(ehriUri(Entities.USER_PROFILE))
+        WebResource resource = client.resource(entityUri(Entities.USER_PROFILE))
                 .queryParams(queryParams);
 
         ClientResponse response = resource
@@ -95,7 +95,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -create data for testing
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.USER_PROFILE))
+                entityUri(Entities.USER_PROFILE))
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -132,7 +132,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateUserProfileWithIntegrityErrir() throws Exception {
         // Create
-        URI uri = ehriUri(Entities.USER_PROFILE);
+        URI uri = entityUri(Entities.USER_PROFILE);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
         assertStatus(CREATED, response);
@@ -150,8 +150,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         final String GROUP_ID2 = "kcl";
 
         // Create
-        URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
+        URI uri = entityUriBuilder(Entities.USER_PROFILE)
                 .queryParam("group", GROUP_ID1)
                 .queryParam("group", GROUP_ID2)
                 .build();
@@ -191,8 +190,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         final String GROUP_ID_NONEXISTING = "non-existing-e6d86e97-5eb1-4030-9d21-3eabea6f57ca";
 
         // Create
-        URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
+        URI uri = entityUriBuilder(Entities.USER_PROFILE)
                 .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_EXISTING)
                 .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_NONEXISTING)
                 .build();
@@ -210,24 +208,18 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         String user2 = "mike";
         String user3 = "linda";
 
-        String followingUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + FOLLOWING;
+        URI followingUrl = entityUri(Entities.USER_PROFILE, user1, FOLLOWING);
         List<Map<String, Object>> followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
 
-        URI followUrl1 = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(FOLLOWING)
+        URI followUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
                 .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, followUrl1).post(ClientResponse.class);
         assertStatus(OK, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(1, followers.size());
 
-        URI followUrl2 = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(FOLLOWING)
+        URI followUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
                 .queryParam(ID_PARAM, user3).build();
         response = jsonCallAs(user1, followUrl2).post(ClientResponse.class);
         assertStatus(OK, response);
@@ -235,12 +227,12 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertEquals(2, followers.size());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isFollowingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_FOLLOWING, user2);
+        URI isFollowingUrl = entityUri(Entities.USER_PROFILE, user1, IS_FOLLOWING, user2);
         response = jsonCallAs(user1, isFollowingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        URI hasFollowerUrl = ehriUri(Entities.USER_PROFILE, user2, IS_FOLLOWER, user1);
+        URI hasFollowerUrl = entityUri(Entities.USER_PROFILE, user2, IS_FOLLOWER, user1);
         response = jsonCallAs(user2, hasFollowerUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
@@ -255,14 +247,11 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     public void testBlockAndUnblock() throws Exception {
         String user1 = getRegularUserProfileId();
         String user2 = getAdminUserProfileId();
-        String blockedUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + BLOCKED;
+        URI blockedUrl = entityUri(Entities.USER_PROFILE, user1, BLOCKED);
         List<Map<String, Object>> blocked = getItemList(blockedUrl, user1);
         assertTrue(blocked.isEmpty());
 
-        URI blockUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(BLOCKED)
+        URI blockUrl = entityUriBuilder(Entities.USER_PROFILE, user1, BLOCKED)
                 .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, blockUrl)
                 .post(ClientResponse.class);
@@ -271,7 +260,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertFalse(blocked.isEmpty());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isBlockingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_BLOCKING, user2);
+        URI isBlockingUrl = entityUri(Entities.USER_PROFILE, user1, IS_BLOCKING, user2);
         response = jsonCallAs(user1, isBlockingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
@@ -287,24 +276,18 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         String user1 = getAdminUserProfileId();
         String item1 = "c1";
         String item2 = "c2";
-        String watchersUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + WATCHING;
+        URI watchersUrl = entityUri(Entities.USER_PROFILE, user1, WATCHING);
         List<Map<String, Object>> watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
 
-        URI watchUrl1 = UriBuilder.fromPath(getExtensionEntryPointUri())
-            .segment(Entities.USER_PROFILE)
-            .segment(user1)
-            .segment(WATCHING)
-            .queryParam(ID_PARAM, item1).build();
+        URI watchUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)
+                .queryParam(ID_PARAM, item1).build();
         ClientResponse response = jsonCallAs(user1, watchUrl1).post(ClientResponse.class);
         assertStatus(OK, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(1, watching.size());
 
-        URI watchUrl2 = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(WATCHING)
+        URI watchUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)
                 .queryParam(ID_PARAM, item2).build();
         response = jsonCallAs(user1, watchUrl2).post(ClientResponse.class);
         assertStatus(OK, response);
@@ -312,7 +295,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertEquals(2, watching.size());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isWatchingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_WATCHING, item1);
+        URI isWatchingUrl = entityUri(Entities.USER_PROFILE, user1, IS_WATCHING, item1);
         response = jsonCallAs(user1, isWatchingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));

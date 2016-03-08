@@ -38,7 +38,7 @@ import static org.junit.Assert.*;
 /**
  * Test admin REST functions.
  */
-public class AdminRestClientTest extends BaseRestClientTest {
+public class AdminRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testExportGraphSONAsAnon() throws Exception {

@@ -23,6 +23,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.hp.hpl.jena.rdf.model.Model;
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -73,7 +74,7 @@ import java.util.List;
  * Provides a web service interface for the Vocabulary model. Vocabularies are
  * containers for Concepts.
  */
-@Path(Entities.CVOC_VOCABULARY)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
@@ -83,7 +84,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -98,7 +99,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -132,7 +133,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -145,7 +146,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -157,7 +158,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     }
 
     @DELETE
-    @Path("{id:.+}/all")
+    @Path("{id:[^/]+}/all")
     public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -185,7 +186,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.CVOC_CONCEPT)
+    @Path("{id:[^/]+}/" + Entities.CVOC_CONCEPT)
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -216,7 +217,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
      * @throws ItemNotFound
      */
     @GET
-    @Path("{id:.+}/export")
+    @Path("{id:[^/]+}/export")
     @Produces({TURTLE_MIMETYPE, RDF_XML_MIMETYPE, N3_MIMETYPE})
     public Response exportSkos(@PathParam("id") String id,
             final @QueryParam("format") String format,

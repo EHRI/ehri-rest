@@ -30,6 +30,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.EventViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -51,6 +52,15 @@ import java.util.Set;
 
  */
 public class AbstractAccessibleResource<E extends Accessible> extends AbstractRestResource {
+
+    public final static String ITEM_TYPE_PARAM = "type";
+    public final static String ITEM_ID_PARAM = "item";
+    public final static String EVENT_TYPE_PARAM = "et";
+    public final static String USER_PARAM = "user";
+    public final static String FROM_PARAM = "from";
+    public final static String TO_PARAM = "to";
+    public final static String SHOW_PARAM = "show"; // watched, follows
+    public final static String AGGREGATION_PARAM = "aggregation";
 
     protected final LoggingCrudViews<E> views;
     protected final AclManager aclManager;
@@ -133,24 +143,23 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @throws ValidationError
      * @throws DeserializationError
      */
-    public <T extends Accessible> Response createItem(Bundle entityBundle, List<String> accessorIds,
-                                                            Handler<T> handler, LoggingCrudViews<T> views)
+    public <T extends Accessible> Response createItem(
+                Bundle entityBundle,
+                List<String> accessorIds,
+                Handler<T> handler,
+                LoggingCrudViews<T> views)
             throws PermissionDenied, ValidationError, DeserializationError {
-        try {
-            Accessor user = getRequesterUserProfile();
-            T entity = views
-                    .create(entityBundle, user, getLogMessage());
-            if (!accessorIds.isEmpty()) {
-                aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
-            }
-
-            // run post-creation callbacks
-            handler.process(entity);
-
-            return creationResponse(entity);
-        } catch (SerializationError serializationError) {
-            throw new RuntimeException(serializationError);
+        Accessor user = getRequesterUserProfile();
+        T entity = views
+                .create(entityBundle, user, getLogMessage());
+        if (!accessorIds.isEmpty()) {
+            aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
         }
+
+        // run post-creation callbacks
+        handler.process(entity);
+
+        return creationResponse(entity);
     }
 
     /**
@@ -284,6 +293,31 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     }
 
     // Helpers
+
+    /**
+     * Get an event query builder object.
+     *
+     * @return a new event query builder
+     */
+    protected EventViews.Builder getEventViewsBuilder() {
+        List<String> eventTypes = getStringListQueryParam(EVENT_TYPE_PARAM);
+        List<String> entityClasses = getStringListQueryParam(ITEM_TYPE_PARAM);
+        List<String> showTypes = getStringListQueryParam(SHOW_PARAM);
+        List<String> fromStrings = getStringListQueryParam(FROM_PARAM);
+        List<String> toStrings = getStringListQueryParam(TO_PARAM);
+        List<String> users = getStringListQueryParam(USER_PARAM);
+        List<String> ids = getStringListQueryParam(ITEM_ID_PARAM);
+        return new EventViews.Builder(graph)
+                .withRange(getIntQueryParam(OFFSET_PARAM, 0),
+                        getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
+                .withEventTypes(eventTypes.toArray(new String[eventTypes.size()]))
+                .withEntityTypes(entityClasses.toArray(new String[entityClasses.size()]))
+                .from(fromStrings.isEmpty() ? null : fromStrings.get(0))
+                .to(toStrings.isEmpty() ? null : toStrings.get(0))
+                .withUsers(users.toArray(new String[users.size()]))
+                .withIds(ids.toArray(new String[ids.size()]))
+                .withShowType(showTypes.toArray(new String[showTypes.size()]));
+    }
 
     /**
      * Get a set of accessor frames given a list of names.

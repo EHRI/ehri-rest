@@ -43,7 +43,7 @@ import javax.ws.rs.core.Response.Status;
  * handling it is complicated. We need to re-architect the REST views
  * to handle more than just the initially-envisaged scenarios.
  */
-@Path(Entities.PERMISSION_GRANT)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.PERMISSION_GRANT)
 public class PermissionGrantResource extends AbstractRestResource {
 
     public PermissionGrantResource(@Context GraphDatabaseService database) {
@@ -60,7 +60,7 @@ public class PermissionGrantResource extends AbstractRestResource {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     public Response getPermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -80,7 +80,7 @@ public class PermissionGrantResource extends AbstractRestResource {
      * @throws PermissionDenied
      */
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     public Response revokePermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

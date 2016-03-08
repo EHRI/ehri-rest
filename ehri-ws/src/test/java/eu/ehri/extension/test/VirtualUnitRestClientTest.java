@@ -40,7 +40,7 @@ import java.util.Map;
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.*;
 
-public class VirtualUnitRestClientTest extends BaseRestClientTest {
+public class VirtualUnitRestClientTest extends AbstractRestClientTest {
 
     private String jsonVirtualUnitStr;
     private String partialJsonVirtualUnitTestStr;
@@ -48,8 +48,6 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     static final String PARTIAL_DESC = "Changing the description";
     static final String TEST_JSON_IDENTIFIER = "vc1";
     static final String FIRST_DOC_ID = "vc1";
-    // FIXME: This ID is temporaty and will break when we decide on a proper
-    // prefix ID scheme
     static final String CREATED_ID = "some-id-supplied-by-frontend";
 
     @Before
@@ -78,7 +76,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         // Ensure the user now owns that item:
         response = jsonCallAs(currentUserId,
-                ehriUri(Entities.VIRTUAL_UNIT, "forUser", currentUserId))
+                entityUri(Entities.VIRTUAL_UNIT, "forUser", currentUserId))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -91,7 +89,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
         // Create
         String currentUserId = getAdminUserProfileId();
         ClientResponse response = jsonCallAs(currentUserId,
-                ehriUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID, Entities.VIRTUAL_UNIT))
+                entityUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID, Entities.VIRTUAL_UNIT))
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -130,7 +128,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     public void testGetVirtualUnitByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
+                entityUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -147,7 +145,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
+                entityUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
                 .entity(jsonVirtualUnitStr)
                 .put(ClientResponse.class);
 
@@ -291,7 +289,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testPageVirtualUnitsForUser() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_UNIT, "forUser", "linda"))
+                entityUri(Entities.VIRTUAL_UNIT, "forUser", "linda"))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -299,6 +297,6 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     }
 
     private URI getCreationUri() {
-        return ehriUri(Entities.VIRTUAL_UNIT);
+        return entityUri(Entities.VIRTUAL_UNIT);
     }
 }

@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test admin REST functions.
  */
-public class ToolsRestClientTest extends BaseRestClientTest {
+public class ToolsRestClientTest extends AbstractRestClientTest {
     @Test
     public void testRegenerateId() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateId", "c1"))

@@ -311,7 +311,7 @@ public class EventViews {
      * @param accessor the current accessor
      * @return an event stream
      */
-    public Iterable<List<SystemEvent>> aggregateByUser(UserProfile byUser, Accessor accessor) {
+    public Iterable<List<SystemEvent>> aggregateUserActions(UserProfile byUser, Accessor accessor) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
                 byUser.as(Actioner.class).getActions());

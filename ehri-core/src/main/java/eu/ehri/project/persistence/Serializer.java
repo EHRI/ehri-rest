@@ -165,11 +165,22 @@ public final class Serializer {
     /**
      * Create a new serializer from this one, with extra included properties.
      *
-     * @param includeProps A set of properties to include.
-     * @return A new serializer.
+     * @param includeProps a set of properties to include.
+     * @return a new serializer.
      */
     public Serializer withIncludedProperties(List<String> includeProps) {
         return new Serializer(graph, dependentOnly, maxTraversals, liteMode,
+                includeProps, cache);
+    }
+
+    /**
+     * Create a new serializer from this one, with the given depth.
+     *
+     * @param depth the maximum depth of traversal
+     * @return a new serializer
+     */
+    public Serializer withDepth(int depth) {
+        return new Serializer(graph, dependentOnly, depth, liteMode,
                 includeProps, cache);
     }
 
@@ -184,6 +195,7 @@ public final class Serializer {
 
     /**
      * Return a serializer that caches recently-serialized items.
+     *
      * @return a new serializer
      */
     public Serializer withCache() {

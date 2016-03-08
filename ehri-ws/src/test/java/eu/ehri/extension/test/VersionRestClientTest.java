@@ -21,6 +21,7 @@ package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
+import eu.ehri.extension.GenericResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -29,20 +30,20 @@ import org.junit.Test;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertFalse;
 
-public class VersionRestClientTest extends BaseRestClientTest {
+public class VersionRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testGetVersionsForItem() throws Exception {
         // Create an item
         String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.REPOSITORY, "r1"))
+                entityUri(Entities.REPOSITORY, "r1"))
                 .entity(jsonAgentTestString)
                 .put(ClientResponse.class);
         assertStatus(OK, response);
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VERSION, "for", "r1"))
+                ehriUri(GenericResource.ENDPOINT, "r1", GenericResource.VERSIONS))
                 .get(ClientResponse.class);
 
         String json = response.getEntity(String.class);

@@ -98,10 +98,10 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
      */
     public Annotation create(String id, String did, Bundle bundle, UserProfile user, Collection<Accessor> accessibleTo)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound {
-        Accessible entity = manager.getEntity(id, Accessible.class);
+        Annotatable entity = manager.getEntity(id, Annotatable.class);
         Annotatable dep = manager.getEntity(did, Annotatable.class);
-        helper.checkEntityPermission(entity, user, PermissionType.ANNOTATE);
-        helper.checkReadAccess(entity, user);
+        helper.checkEntityPermission(entity.as(Accessible.class), user, PermissionType.ANNOTATE);
+        helper.checkReadAccess(entity.as(Accessible.class), user);
 
         if (!(entity.equals(dep) || isInSubtree(entity, dep))) {
             // FIXME: Better error message here...

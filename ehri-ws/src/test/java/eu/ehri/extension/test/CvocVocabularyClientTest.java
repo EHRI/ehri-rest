@@ -21,6 +21,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.VocabularyResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertEquals;
 
 
-public class CvocVocabularyClientTest extends BaseRestClientTest {
+public class CvocVocabularyClientTest extends AbstractRestClientTest {
     static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
 
     private String jsonTestVocabularyString = "{\"type\":\"" + Entities.CVOC_VOCABULARY +
@@ -53,7 +54,7 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
         String jsonTestString = jsonTestVocabularyString;
 
         // Create
-        ClientResponse response = testCreate(ehriUri(Entities.CVOC_VOCABULARY),
+        ClientResponse response = testCreate(entityUri(Entities.CVOC_VOCABULARY),
                 jsonTestString);
 
         // Get created entity via the response location?
@@ -71,7 +72,7 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
     @Test
     public void testCreateCvocConcept() throws Exception {
         // Create
-        ClientResponse response = testCreate(ehriUri(Entities.CVOC_VOCABULARY),
+        ClientResponse response = testCreate(entityUri(Entities.CVOC_VOCABULARY),
                 jsonTestVocabularyString);
 
         // Get created entity via the response location?
@@ -81,7 +82,7 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
         String vocIdStr = locationStr.substring(locationStr.lastIndexOf('/') + 1);
 
         response = testCreate(
-                ehriUri(Entities.CVOC_VOCABULARY, vocIdStr, Entities.CVOC_CONCEPT),
+                entityUri(Entities.CVOC_VOCABULARY, vocIdStr, Entities.CVOC_CONCEPT),
                 jsonApplesTestStr);
         location = response.getLocation();
 
@@ -94,12 +95,13 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
 
     @Test
     public void testGetVocabulary() throws Exception {
-        testGet(ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID));
+        testGet(entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID));
     }
 
     @Test
     public void testExportVocabulary() throws Exception {
-        UriBuilder uri = ehriUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "export");
+        UriBuilder uri = ehriUriBuilder(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX,
+                Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "export");
         ClientResponse response = client.resource(uri.build())
                 .get(ClientResponse.class);
         assertStatus(OK, response);
@@ -126,19 +128,19 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
 
     @Test
     public void testDeleteVocabularyTerms() throws Exception {
-        URI uri = ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all");
+        URI uri = entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all");
         testDelete(uri);
 
         // Check it's really gone...
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.CVOC_CONCEPT, "cvocc1"))
+                entityUri(Entities.CVOC_CONCEPT, "cvocc1"))
                 .get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }
 
     @Test
     public void testDeleteVocabulary() throws Exception {
-        URI uri = ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
+        URI uri = entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
         testDelete(uri);
 
         // Check it's really gone...

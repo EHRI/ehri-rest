@@ -134,7 +134,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("generateConcepts/{repositoryId:.+}/{vocabularyId:.+}")
+    @Path("generateConcepts/{repositoryId:[^/]+}/{vocabularyId:[^/]+}")
     public long autoLinkRepositoryDocs(
             @PathParam("repositoryId") String repositoryId,
             @PathParam("vocabularyId") String vocabularyId,
@@ -186,7 +186,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("_regenerateId/{id:.+}")
+    @Path("_regenerateId/{id:[^/]+}")
     public String regenerateId(
             @PathParam("id") String id,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -228,7 +228,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("_regenerateIdsForType/{type:.+}")
+    @Path("_regenerateIdsForType/{type:[^/]+}")
     public String regenerateIdsForType(
             @PathParam("type") String type,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -274,7 +274,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("_regenerateIdsForScope/{scope:.+}")
+    @Path("_regenerateIdsForScope/{scope:[^/]+}")
     public String regenerateIdsForScope(
             @PathParam("scope") String scopeId,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,

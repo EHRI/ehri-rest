@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -63,7 +64,7 @@ import java.util.List;
 /**
  * Provides a web service interface for the DocumentaryUnit model.
  */
-@Path(Entities.DOCUMENTARY_UNIT)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource
         extends AbstractAccessibleResource<DocumentaryUnit>
         implements GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
@@ -74,7 +75,7 @@ public class DocumentaryUnitResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -89,7 +90,7 @@ public class DocumentaryUnitResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -110,7 +111,7 @@ public class DocumentaryUnitResource
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id,
                            Bundle bundle) throws PermissionDenied,
@@ -123,7 +124,7 @@ public class DocumentaryUnitResource
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -137,7 +138,7 @@ public class DocumentaryUnitResource
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.DOCUMENTARY_UNIT)
+    @Path("{id:[^/]+}/" + Entities.DOCUMENTARY_UNIT)
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -168,7 +169,7 @@ public class DocumentaryUnitResource
      * @throws ItemNotFound
      */
     @GET
-    @Path("{id:.+}/ead")
+    @Path("{id:[^/]+}/ead")
     @Produces(MediaType.TEXT_XML)
     public Response exportEad(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)

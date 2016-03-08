@@ -45,7 +45,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
 
-public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
+public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
 
     private String jsonDocumentaryUnitTestStr;
     private String invalidJsonDocumentaryUnitTestStr;
@@ -55,8 +55,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
     static final String TEST_HOLDER_IDENTIFIER = "r1";
-    // FIXME: This ID is temporaty and will break when we decide on a proper
-    // prefix ID scheme
     static final String CREATED_ID = "some-id";
 
     @Before
@@ -88,7 +86,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void testNotFoundWithValidUrl() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, "r1"))
+                entityUri(Entities.DOCUMENTARY_UNIT, "r1"))
                 .get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }
@@ -97,7 +95,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void testCacheControl() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, "c1"))
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1"))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
         String c1cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
@@ -105,7 +103,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         assertThat(c1cc, containsString("no-store"));
         // C4 is unrestricted and thus has a max-age set
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, "c4"))
+                entityUri(Entities.DOCUMENTARY_UNIT, "c4"))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
         String c4cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
@@ -118,7 +116,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void testCreateDeleteChildDocumentaryUnit() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, Entities.DOCUMENTARY_UNIT))
+                entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, Entities.DOCUMENTARY_UNIT))
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -177,7 +175,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void testGetDocumentaryUnitByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
+                entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -194,7 +192,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
+                entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
                 .entity(jsonDocumentaryUnitTestStr)
                 .put(ClientResponse.class);
 
@@ -209,10 +207,10 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testListDocumentaryUnit() throws Exception {
-        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<String>();
+        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
         params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Map<String, Object>> data = getEntityList(
-                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
+                entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         assertTrue(!data.isEmpty());
         Collections.sort(data, dataSort);
         // Extract the first documentary unit. According to the fixtures this
@@ -226,7 +224,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testListDocumentaryUnitWithNotFound() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.DOCUMENTARY_UNIT, "BAD_ID", "list"))
+                entityUri(Entities.DOCUMENTARY_UNIT, "BAD_ID", "list"))
                 .get(ClientResponse.class);
         String s = response.getEntity(String.class);
         assertStatus(NOT_FOUND, response);
@@ -236,21 +234,20 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testListDocumentaryUnitWithBadRequester() throws Exception {
         ClientResponse response = jsonCallAs("invalidId",
-                ehriUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER, "list"))
+                entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER, "list"))
                 .get(ClientResponse.class);
-        String s = response.getEntity(String.class);
         assertStatus(INTERNAL_SERVER_ERROR, response);
     }
 
     @Test
     public void testListDocumentaryUnitWithOffset() throws Exception {
         // Fetch the second doc unit item (c2)
-        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<String>();
+        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
         params.add(AbstractRestResource.OFFSET_PARAM, "1");
         params.add(AbstractRestResource.LIMIT_PARAM, "1");
         params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Map<String, Object>> data = getEntityList(
-                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId(), params);
+                entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         System.out.println(data);
         assertEquals(1, data.size());
         Collections.sort(data, dataSort);
@@ -371,7 +368,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     private URI getCreationUri() {
-        return ehriUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER,
+                Entities.DOCUMENTARY_UNIT);
     }
 
     private Comparator<Map<String, Object>> dataSort = new Comparator<Map<String, Object>>() {

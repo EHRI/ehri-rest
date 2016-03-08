@@ -31,9 +31,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * User: mikebryant
- */
 public class UserProfileTest extends AbstractFixtureTest {
 
     private UserProfile mike;

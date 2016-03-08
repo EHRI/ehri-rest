@@ -30,28 +30,29 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * An entity that may have prior versions.
- *
-
  */
-public interface Versioned extends Entity {
+public interface Versioned extends Accessible {
+    /**
+     * Get the most recent version for this item, if one exists.
+     *
+     * @return a version frame, or null if there is no prior version
+     */
     @Adjacency(label = Ontology.ENTITY_HAS_PRIOR_VERSION, direction = Direction.OUT)
     Version getPriorVersion();
 
+    /**
+     * Loops through the chain of prior versions until the oldest existing version.
+     *
+     * @return an iterable of prior item versions
+     */
     @JavaHandler
     Iterable<Version> getAllPriorVersions();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, Versioned {
 
-        /**
-         * Loops up through the chain of hasPriorVersion until the end, until it
-         * has been deleted, will be a item.
-         * @return
-         */
         public Iterable<Version> getAllPriorVersions() {
             return frameVertices(gremlin().as("n").out(Ontology.ENTITY_HAS_PRIOR_VERSION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc));
         }
-
     }
-
 }

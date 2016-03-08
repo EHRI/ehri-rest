@@ -43,7 +43,7 @@ import java.util.List;
  * Authoritative Sets are containers for Historical Agents
  * (authority files.)
  */
-@Path(Entities.AUTHORITATIVE_SET)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.AUTHORITATIVE_SET)
 public class AuthoritativeSetResource extends
         AbstractAccessibleResource<AuthoritativeSet>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
@@ -54,7 +54,7 @@ public class AuthoritativeSetResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -69,7 +69,7 @@ public class AuthoritativeSetResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -103,7 +103,7 @@ public class AuthoritativeSetResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -116,7 +116,7 @@ public class AuthoritativeSetResource extends
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -128,7 +128,7 @@ public class AuthoritativeSetResource extends
     }
 
     @DELETE
-    @Path("{id:.+}/all")
+    @Path("{id:[^/]+}/all")
     public Response deleteAllAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
@@ -151,7 +151,7 @@ public class AuthoritativeSetResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.HISTORICAL_AGENT)
+    @Path("{id:[^/]+}/" + Entities.HISTORICAL_AGENT)
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

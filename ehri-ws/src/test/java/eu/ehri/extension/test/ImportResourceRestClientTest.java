@@ -19,6 +19,7 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -26,7 +27,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.ImportResource;
 import eu.ehri.project.importers.ead.IcaAtomEadHandler;
 import org.apache.commons.io.FileUtils;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
@@ -49,7 +49,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
-public class ImportResourceRestClientTest extends BaseRestClientTest {
+public class ImportResourceRestClientTest extends AbstractRestClientTest {
     // NB: This file is *copied* into the extension test resources because
     // I can't figure out how to refer to resources in another module...
     protected static final String SINGLE_EAD = "ead.xml";
@@ -283,19 +283,17 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
                 payloadText.getBytes("UTF-8"));
     }
 
-    private void createZip(File file, String... resources)
-            throws URISyntaxException, IOException {
-        FileOutputStream fos = new FileOutputStream(file);
-        ZipOutputStream zos = new ZipOutputStream(fos);
-        for (String resource : resources) {
-            URL url = Resources.getResource(resource);
-            String name = new File(url.toURI()).getAbsolutePath();
-            zos.putNextEntry(new ZipEntry(name));
-            Resources.copy(url, zos);
-            zos.closeEntry();
+    private void createZip(File file, String... resources) throws URISyntaxException, IOException {
+        try (FileOutputStream fos = new FileOutputStream(file);
+                ZipOutputStream zos = new ZipOutputStream(fos)) {
+            for (String resource : resources) {
+                URL url = Resources.getResource(resource);
+                String name = new File(url.toURI()).getAbsolutePath();
+                zos.putNextEntry(new ZipEntry(name));
+                Resources.copy(url, zos);
+                zos.closeEntry();
+            }
         }
-
-        zos.close();
     }
 
     private String getTestLogFilePath(String text) throws IOException {

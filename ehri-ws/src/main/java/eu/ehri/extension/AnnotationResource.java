@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -34,7 +35,6 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AnnotationViews;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -56,10 +56,12 @@ import java.util.List;
 /**
  * Web service interface for creating annotations.
  */
-@Path(Entities.ANNOTATION)
-public class AnnotationResource
-        extends AbstractAccessibleResource<Annotation>
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.ANNOTATION)
+public class AnnotationResource extends AbstractAccessibleResource<Annotation>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
+
+    public static final String TARGET_PARAM = "target";
+    public static final String BODY_PARAM = "body";
 
     private final AnnotationViews annotationViews;
 
@@ -70,7 +72,7 @@ public class AnnotationResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -87,6 +89,7 @@ public class AnnotationResource
      * Create an annotation for a particular item.
      *
      * @param id        the ID of the item being annotation
+     * @param did       the (optional) ID of the sub-item target, e.g. a description
      * @param bundle    the JSON representation of the annotation
      * @param accessors user IDs who can access the annotation
      * @return the annotation
@@ -99,81 +102,28 @@ public class AnnotationResource
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
-    public Response createAnnotationFor(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    public Response createAnnotation(
+            @QueryParam(TARGET_PARAM) String id,
+            @QueryParam(BODY_PARAM) String did,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                Bundle bundle)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            if (id == null) {
+                throw new DeserializationError("Target must be provided");
+            }
             UserProfile user = getCurrentUser();
-            Annotation ann = annotationViews.create(id, id,
+            Annotation ann = annotationViews.create(id, did == null ? id : did,
                     bundle, user, getAccessors(accessors, user));
             Response response = creationResponse(ann);
             tx.success();
             return response;
-        }
-    }
-
-    /**
-     * Create an annotation for a dependent node on a given item.
-     *
-     * @param id        the ID of the item being annotation
-     * @param did       the ID of the description being annotated
-     * @param bundle    the JSON representation of the annotation
-     * @param accessors user IDs who can access the annotation
-     * @return the annotation
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws SerializationError
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/{did:.+}")
-    public Response createAnnotationFor(
-            @PathParam("id") String id,
-            @PathParam("did") String did,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
-            ItemNotFound, SerializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = getCurrentUser();
-            Annotation ann = annotationViews.create(id, did,
-                    bundle, user, getAccessors(accessors, user));
-            Response response = creationResponse(ann);
-            tx.success();
-            return response;
-        }
-    }
-
-    /**
-     * Return a map of annotations for the subtree of the given item and its
-     * child items. Standard list parameters apply.
-     *
-     * @param id the item ID
-     * @return a list of annotations on the item and it's dependent children.
-     * @throws ItemNotFound
-     */
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("for/{id:.+}")
-    public Response listAnnotationsForSubtree(
-            @PathParam("id") String id) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            return streamingPage(getQuery(Annotation.class).page(
-                    manager.getEntity(id, Annotatable.class).getAnnotations(),
-                    getRequesterUserProfile()), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
         }
     }
 
     @PUT
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ItemNotFound, ValidationError, DeserializationError {
@@ -185,7 +135,7 @@ public class AnnotationResource
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {

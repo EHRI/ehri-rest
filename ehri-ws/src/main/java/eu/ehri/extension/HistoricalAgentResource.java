@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -62,7 +63,7 @@ import java.util.List;
 /**
  * Provides a web service interface for the HistoricalAgent model.
  */
-@Path(Entities.HISTORICAL_AGENT)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.HISTORICAL_AGENT)
 public class HistoricalAgentResource extends AbstractAccessibleResource<HistoricalAgent>
         implements GetResource, ListResource, CreateResource, UpdateResource, DeleteResource {
 
@@ -72,7 +73,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -103,7 +104,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -116,7 +117,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -137,7 +138,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
      * @throws ItemNotFound
      */
     @GET
-    @Path("{id:.+}/eac")
+    @Path("{id:[^/]+}/eac")
     @Produces(MediaType.TEXT_XML)
     public Response exportEac(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
