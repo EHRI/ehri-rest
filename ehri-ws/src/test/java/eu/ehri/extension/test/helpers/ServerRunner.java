@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 public class ServerRunner {
 
     public final static org.slf4j.Logger logger = LoggerFactory.getLogger(ServerRunner.class);
-    private static ServerRunner INSTANCE = null;
+    private static ServerRunner INSTANCE;
 
     // Graph factory.
     final static FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
@@ -58,8 +58,8 @@ public class ServerRunner {
     private Level logLevel = Level.OFF;
 
     private FramedGraph<? extends TxGraph> framedGraph;
-    private static FixtureLoader fixtureLoader = null;
-    private static GraphCleaner<? extends Graph> graphCleaner = null;
+    private static FixtureLoader fixtureLoader;
+    private static GraphCleaner<? extends Graph> graphCleaner;
 
     private final static Logger sunLogger = Logger.getLogger("com.sun.jersey");
     private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");

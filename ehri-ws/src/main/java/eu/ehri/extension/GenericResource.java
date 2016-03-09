@@ -389,7 +389,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
         }
     }
 
-
     /**
      * Returns a list of items linked to the given description.
      *
@@ -674,8 +673,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private static class IdSet {
-        public List<String> ids;
-        public List<Long> gids;
+        public final List<String> ids;
+        public final List<Long> gids;
 
         public IdSet(List<String> ids, List<Long> gids) {
             this.ids = ids;

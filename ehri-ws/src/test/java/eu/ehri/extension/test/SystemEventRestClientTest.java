@@ -46,7 +46,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
 
     static final String COUNTRY_CODE = "nl";
 
-    private String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
+    private static final String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
 
     @Test
     public void testListActions() throws Exception {

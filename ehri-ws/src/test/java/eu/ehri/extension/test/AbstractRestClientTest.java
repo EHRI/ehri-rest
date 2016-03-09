@@ -53,11 +53,11 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
  */
 public class AbstractRestClientTest extends RunningServerTest {
 
-    protected static Client client = Client.create();
+    protected static final Client client = Client.create();
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
 
-    protected static Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
+    protected static final Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
@@ -149,7 +149,7 @@ public class AbstractRestClientTest extends RunningServerTest {
         return null;
     }
 
-    protected Long getEntityCount(String entityType, String userId) throws Exception {
+    protected Long getEntityCount(String entityType, String userId) {
         WebResource resource = client.resource(entityUri(entityType));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

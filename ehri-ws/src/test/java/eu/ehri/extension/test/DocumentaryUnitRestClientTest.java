@@ -372,7 +372,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
                 Entities.DOCUMENTARY_UNIT);
     }
 
-    private Comparator<Map<String, Object>> dataSort = new Comparator<Map<String, Object>>() {
+    private final Comparator<Map<String, Object>> dataSort = new Comparator<Map<String, Object>>() {
         @Override
         public int compare(Map<String, Object> a, Map<String, Object> b) {
             return ((String) a.get("id")).compareTo((String) b.get("id"));

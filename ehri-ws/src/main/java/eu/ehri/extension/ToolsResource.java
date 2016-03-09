@@ -374,13 +374,12 @@ public class ToolsResource extends AbstractRestResource {
     @POST
     @Produces("text/plain")
     @Path("_setConstraints")
-    public String setConstraints() {
+    public void setConstraints() {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             logger.info("Initializing graph schema...");
             manager.initialize();
             tx.success();
         }
-        return "done";
     }
 
     @POST
@@ -411,7 +410,7 @@ public class ToolsResource extends AbstractRestResource {
     @POST
     @Produces("text/plain")
     @Path("_fullUpgrade1to2")
-    public String fullUpgradeDb1to2()
+    public void fullUpgradeDb1to2()
             throws IOException, IdRegenerator.IdCollisionError, ItemNotFound {
         upgradeDb1to2();
         setLabels();
@@ -424,7 +423,6 @@ public class ToolsResource extends AbstractRestResource {
             }).setDbSchemaVersion();
             tx.success();
         }
-        return "ok";
     }
 
 

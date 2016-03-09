@@ -51,7 +51,8 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonUserProfileTestString = "{\"type\":\"UserProfile\", \"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\"}}";
+    private static final String jsonUserProfileTestString = "{\"type\":\"UserProfile\", \"data\":{\"identifier\": " +
+            "\"test-user\", \"name\":\"testUserName1\"}}";
 
     @Test
     public void testCreateDeleteUserProfile() throws Exception {

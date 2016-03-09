@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class CvocVocabularyClientTest extends AbstractRestClientTest {
     static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
 
-    private String jsonTestVocabularyString = "{\"type\":\"" + Entities.CVOC_VOCABULARY +
+    private static final String jsonTestVocabularyString = "{\"type\":\"" + Entities.CVOC_VOCABULARY +
             "\",\"data\":{\"identifier\": \"plants\", \"name\": \"Plants\"}}";
     private String jsonApplesTestStr;
 

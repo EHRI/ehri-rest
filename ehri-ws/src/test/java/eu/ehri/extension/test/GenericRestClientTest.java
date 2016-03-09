@@ -119,14 +119,14 @@ public class GenericRestClientTest extends AbstractRestClientTest {
     }
 
     @Test
-    public void getCannotFetchNonContentTypes() throws IOException {
+    public void getCannotFetchNonContentTypes() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, BAD_ITEM)).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }
 
     @Test
-    public void listEntitiesByGidThrows404() throws IOException {
+    public void listEntitiesByGidThrows404() throws Exception {
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
                 .segment(ENDPOINT)
                 .queryParam("gid", -1L).build();
