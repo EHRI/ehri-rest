@@ -549,7 +549,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id  the item ID
      * @param did the description ID
-     * @return an empty 200 response
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
@@ -557,16 +556,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @DELETE
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}")
-    public Response deleteDescription(
+    public void deleteDescription(
             @PathParam("id") String id, @PathParam("did") String did)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Accessor user = getRequesterUserProfile();
-            Described item = views.setClass(Described.class).detail(id, user);
             dv.delete(id, did, user, getLogMessage());
-            Response response = Response.ok().location(getItemUri(item)).build();
             tx.success();
-            return response;
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
         }
@@ -640,7 +636,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id   the parent item's ID
      * @param did  the description's ID
      * @param apid the access point's ID
-     * @return an empty 200 response
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ValidationError
@@ -649,7 +644,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @DELETE
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}/" + ACCESS_POINTS + "/{apid:[^/]+}")
-    public Response deleteAccessPoint(@PathParam("id") String id,
+    public void deleteAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
@@ -657,7 +652,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             UserProfile user = getCurrentUser();
             dv.delete(id, apid, user, getLogMessage());
             tx.success();
-            return Response.ok().build();
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
         }

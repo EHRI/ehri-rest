@@ -56,7 +56,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Set;
 
@@ -144,12 +143,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @DELETE
     @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return item;
         }
     }
 
@@ -220,7 +218,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @POST
     @Path("{userId:[^/]+}/" + FOLLOWING)
-    public Response followUserProfile(
+    public void followUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
@@ -231,13 +229,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 user.addFollowing(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 
     @DELETE
     @Path("{userId:[^/]+}/" + FOLLOWING)
-    public Response unfollowUserProfile(
+    public void unfollowUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
@@ -248,7 +245,6 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 user.removeFollowing(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 
@@ -286,7 +282,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @POST
     @Path("{userId:[^/]+}/" + BLOCKED)
-    public Response blockUserProfile(
+    public void blockUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
@@ -297,13 +293,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 user.addBlocked(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 
     @DELETE
     @Path("{userId:[^/]+}/" + BLOCKED)
-    public Response unblockUserProfile(
+    public void unblockUserProfile(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
@@ -314,7 +309,6 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 user.removeBlocked(manager.getEntity(id, UserProfile.class));
             }
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 
@@ -336,7 +330,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @POST
     @Path("{userId:[^/]+}/" + WATCHING)
-    public Response watchItem(
+    public void watchItem(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
@@ -347,13 +341,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 user.addWatching(manager.getEntity(id, Watchable.class));
             }
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 
     @DELETE
     @Path("{userId:[^/]+}/" + WATCHING)
-    public Response unwatchItem(
+    public void unwatchItem(
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
@@ -364,7 +357,6 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 user.removeWatching(manager.getEntity(id, Watchable.class));
             }
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 

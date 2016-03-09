@@ -52,6 +52,7 @@ public class VersionResource extends AbstractAccessibleResource<Version> impleme
      */
     @GET
     @Path("{id:[^/]+}")
+    @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
     }

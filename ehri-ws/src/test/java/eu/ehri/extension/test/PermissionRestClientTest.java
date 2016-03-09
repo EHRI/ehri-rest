@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
 import static org.junit.Assert.assertNull;
@@ -169,8 +170,8 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
         response = jsonCallAs(LIMITED_USER_NAME,
                 response.getLocation()).delete(ClientResponse.class);
 
-        // Should get CREATED this time...
-        assertStatus(OK, response);
+        // Should get NO_CONTENT this time...
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
@@ -273,8 +274,8 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
         response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
                 .delete(ClientResponse.class);
 
-        // Should get CREATED this time...
-        assertStatus(OK, response);
+        // Should get NO_CONTENT this time...
+        assertStatus(NO_CONTENT, response);
     }
 
     private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(String json) throws IOException {

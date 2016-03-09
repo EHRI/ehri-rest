@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -102,7 +103,7 @@ public class GroupRestClientTest extends AbstractRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.GROUP, TEST_GROUP_NAME, NON_ADMIN_USER))
                 .post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
@@ -111,7 +112,7 @@ public class GroupRestClientTest extends AbstractRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER))
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test

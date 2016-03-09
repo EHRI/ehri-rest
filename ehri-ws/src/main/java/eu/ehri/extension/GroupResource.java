@@ -41,11 +41,19 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Set;
 
@@ -82,8 +90,8 @@ public class GroupResource
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createGroup(Bundle bundle,
-                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-                                @QueryParam(MEMBER_PARAM) List<String> members)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+            @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final UserProfile currentUser = getCurrentUser();
@@ -125,16 +133,14 @@ public class GroupResource
      */
     @POST
     @Path("{id:[^/]+}/{aid:[^/]+}")
-    public Response addMember(@PathParam("id") String id,
-                              @PathParam("aid") String aid)
+    public void addMember(@PathParam("id") String id,
+            @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
             aclViews.addAccessorToGroup(group, accessor, getRequesterUserProfile());
-            Response response = Response.status(Status.OK).location(getItemUri(accessor)).build();
             tx.success();
-            return response;
         }
     }
 
@@ -143,17 +149,14 @@ public class GroupResource
      */
     @DELETE
     @Path("{id:[^/]+}/{aid:[^/]+}")
-    public Response removeMember(@PathParam("id") String id,
-                                 @PathParam("aid") String aid)
+    public void removeMember(@PathParam("id") String id, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
 
             new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
-            Response response = Response.status(Status.OK).location(getItemUri(accessor)).build();
             tx.success();
-            return response;
         }
     }
 
@@ -181,18 +184,14 @@ public class GroupResource
         }
     }
 
-    /**
-     * Delete a group with the given identifier string.
-     */
     @DELETE
     @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return item;
         }
     }
 }

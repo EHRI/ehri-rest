@@ -83,12 +83,11 @@ public class CvocConceptResource
     @DELETE
     @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return item;
         }
     }
 

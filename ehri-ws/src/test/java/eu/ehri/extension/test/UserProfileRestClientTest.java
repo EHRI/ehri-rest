@@ -40,6 +40,7 @@ import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.UserProfileResource.*;
 import static org.junit.Assert.assertEquals;
@@ -216,14 +217,14 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         URI followUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
                 .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, followUrl1).post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(1, followers.size());
 
         URI followUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
                 .queryParam(ID_PARAM, user3).build();
         response = jsonCallAs(user1, followUrl2).post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(2, followers.size());
 
@@ -239,7 +240,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         assertEquals("true", response.getEntity(String.class));
 
         response = jsonCallAs(user1, followUrl1).delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(1, followers.size());
     }
@@ -256,7 +257,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
                 .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, blockUrl)
                 .post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         blocked = getItemList(blockedUrl, user1);
         assertFalse(blocked.isEmpty());
 
@@ -267,7 +268,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         assertEquals("true", response.getEntity(String.class));
 
         response = jsonCallAs(user1, blockUrl).delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         blocked = getItemList(blockedUrl, user1);
         assertTrue(blocked.isEmpty());
     }
@@ -284,14 +285,14 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         URI watchUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)
                 .queryParam(ID_PARAM, item1).build();
         ClientResponse response = jsonCallAs(user1, watchUrl1).post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(1, watching.size());
 
         URI watchUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)
                 .queryParam(ID_PARAM, item2).build();
         response = jsonCallAs(user1, watchUrl2).post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(2, watching.size());
 
@@ -302,7 +303,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         assertEquals("true", response.getEntity(String.class));
 
         response = jsonCallAs(user1, watchUrl1).delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(1, watching.size());
     }

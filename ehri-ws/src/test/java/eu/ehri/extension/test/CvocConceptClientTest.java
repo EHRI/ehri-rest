@@ -69,7 +69,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         // Where is my deletion test, I want to know if it works
         response = jsonCallAs(getAdminUserProfileId(), location)
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
 
     }
 
@@ -264,8 +264,9 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).delete(ClientResponse.class);
-        assertStatus(OK, response);
+                        getAdminUserProfileId())
+                .delete(ClientResponse.class);
+        assertStatus(NO_CONTENT, response);
 
         return response;
     }

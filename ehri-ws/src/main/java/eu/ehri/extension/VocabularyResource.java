@@ -19,8 +19,6 @@
 
 package eu.ehri.extension;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.hp.hpl.jena.rdf.model.Model;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
@@ -64,7 +62,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -148,18 +145,17 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @DELETE
     @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return item;
         }
     }
 
     @DELETE
     @Path("{id:[^/]+}/all")
-    public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
+    public void deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
@@ -177,7 +173,6 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                 }
             }
             tx.success();
-            return Response.status(Status.OK).build();
         } catch (SerializationError | ValidationError e) {
             throw new RuntimeException(e);
         }

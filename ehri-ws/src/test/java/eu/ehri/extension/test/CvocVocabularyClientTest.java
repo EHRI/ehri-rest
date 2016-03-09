@@ -64,7 +64,7 @@ public class CvocVocabularyClientTest extends AbstractRestClientTest {
         assertStatus(OK, response);
 
         response = testDelete(location);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     // Test adding a concept, 
@@ -90,7 +90,7 @@ public class CvocVocabularyClientTest extends AbstractRestClientTest {
         assertStatus(OK, response);
 
         response = testDelete(location);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
@@ -170,7 +170,7 @@ public class CvocVocabularyClientTest extends AbstractRestClientTest {
     public ClientResponse testDelete(URI uri) {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
 
         return response;
     }

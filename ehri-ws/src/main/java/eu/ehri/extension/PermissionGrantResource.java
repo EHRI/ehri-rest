@@ -20,31 +20,31 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
  * Provides a web service interface for the PermissionGrant model.
- * <p>
- * FIXME: PermissionGrant is not currently an Accessible so
- * handling it is complicated. We need to re-architect the REST views
- * to handle more than just the initially-envisaged scenarios.
  */
 @Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.PERMISSION_GRANT)
-public class PermissionGrantResource extends AbstractRestResource {
+public class PermissionGrantResource extends AbstractRestResource implements DeleteResource, GetResource {
 
     public PermissionGrantResource(@Context GraphDatabaseService database) {
         super(database);
@@ -56,13 +56,12 @@ public class PermissionGrantResource extends AbstractRestResource {
      * @param id The ID of the permission grant
      * @return The permission grant
      * @throws ItemNotFound
-     * @throws PermissionDenied
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:[^/]+}")
-    public Response getPermissionGrant(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, SerializationError {
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             PermissionGrant grant = manager.getEntity(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class);
@@ -81,14 +80,13 @@ public class PermissionGrantResource extends AbstractRestResource {
      */
     @DELETE
     @Path("{id:[^/]+}")
-    public Response revokePermissionGrant(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied {
+    @Override
+    public void delete(@PathParam("id") String id) throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             new AclViews(graph).revokePermissionGrant(manager.getEntity(id,
                             EntityClass.PERMISSION_GRANT, PermissionGrant.class),
                     getRequesterUserProfile());
             tx.success();
-            return Response.status(Status.OK).build();
         }
     }
 }

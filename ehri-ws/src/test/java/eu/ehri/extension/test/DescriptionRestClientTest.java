@@ -29,6 +29,7 @@ import org.junit.Test;
 import javax.ws.rs.core.Response;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.GenericResource.ENDPOINT;
 import static eu.ehri.extension.GenericResource.DESCRIPTIONS;
@@ -101,7 +102,7 @@ public class DescriptionRestClientTest extends AbstractRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, "c2", DESCRIPTIONS, "cd2"))
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
@@ -120,6 +121,6 @@ public class DescriptionRestClientTest extends AbstractRestClientTest {
                 ehriUri(ENDPOINT, "c2", DESCRIPTIONS, "cd2",
                         ACCESS_POINTS, value))
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 }

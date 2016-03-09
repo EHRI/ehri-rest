@@ -22,7 +22,11 @@ package eu.ehri.extension.base;
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
@@ -38,7 +42,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +52,6 @@ import java.util.Set;
  * entities can extend this class.
  *
  * @param <E> the specific Accessible derived class
-
  */
 public class AbstractAccessibleResource<E extends Accessible> extends AbstractRestResource {
 
@@ -144,10 +146,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @throws DeserializationError
      */
     public <T extends Accessible> Response createItem(
-                Bundle entityBundle,
-                List<String> accessorIds,
-                Handler<T> handler,
-                LoggingCrudViews<T> views)
+            Bundle entityBundle,
+            List<String> accessorIds,
+            Handler<T> handler,
+            LoggingCrudViews<T> views)
             throws PermissionDenied, ValidationError, DeserializationError {
         Accessor user = getRequesterUserProfile();
         T entity = views
@@ -226,7 +228,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     /**
      * Update (change) an instance of the 'entity' in the database
-     * <p>
+     * <p/>
      * If the Patch header is true top-level bundle data will be merged
      * instead of overwritten.
      *
@@ -261,18 +263,16 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param id         the item's ID
      * @param preProcess a handler to run before deleting the item
-     * @return the response of the delete request
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      */
-    protected Response deleteItem(String id, Handler<E> preProcess)
+    protected void deleteItem(String id, Handler<E> preProcess)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try {
             Accessor user = getRequesterUserProfile();
             preProcess.process(views.detail(id, user));
             views.delete(id, user, getLogMessage());
-            return Response.status(Status.OK).build();
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
         }
@@ -282,14 +282,13 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * Delete (remove) an instance of the 'entity' in the database
      *
      * @param id the item's ID
-     * @return the response of the delete request
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      */
-    protected Response deleteItem(String id)
+    protected void deleteItem(String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        return deleteItem(id, noOpHandler);
+        deleteItem(id, noOpHandler);
     }
 
     // Helpers

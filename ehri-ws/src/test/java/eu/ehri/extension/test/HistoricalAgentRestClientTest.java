@@ -106,8 +106,7 @@ public class HistoricalAgentRestClientTest extends AbstractRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 uri)
                 .delete(ClientResponse.class);
-
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);

@@ -31,11 +31,10 @@ public interface DeleteResource {
      * Delete a resource.
      *
      * @param id The resource ID.
-     * @return A response with 200 representing a successful deletion.
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      */
-    Response delete(String id)
+    void delete(String id)
             throws PermissionDenied, ItemNotFound, ValidationError;
 }
