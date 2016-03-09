@@ -12,7 +12,7 @@ Verify that everything's working by fetching your user profile using the followi
 (for these examples I'll be using my own `$USER`, which is `mike`):
 
 ```bash
-curl http://localhost:7474/ehri/UserProfile/mike
+curl http://localhost:7474/ehri/classes/UserProfile/mike
 ```
 
 If all goes well you should see something like:
@@ -120,7 +120,7 @@ is the `identifier` property containing our two-letter code. So the JSON data we
       }
     }
     
-Let's send that via CURL to the `/ehri/Country` endpoint, using `application/json` as the content type:
+Let's send that via CURL to the `/ehri/classes/Country` endpoint, using `application/json` as the content type:
 
 ```bash
 curl -X POST \
@@ -182,7 +182,7 @@ A few things to note:
 Since the global ID is `nl`, we can fetch the item from the web service specifically using:
 
 ```bash
-curl http://localhost:7474/ehri/Country/nl
+curl http://localhost:7474/ehri/classes/Country/nl
 ```
 
 This should give the same result as when we created it.
@@ -217,7 +217,7 @@ Unfortunately, the import methods don't tell us much about the actual items we'v
 all the repositories and see what we see there:
 
 ```bash
-curl http://localhost:7474/ehri/Repository
+curl http://localhost:7474/ehri/classes/Repository
 ```
 
 This gives us the somewhat more extensive data:
@@ -353,7 +353,7 @@ We have a JSON list with one item (as expected, since we've only created one rep
 We can fetch the item directly using its ID via:
  
 ```bash
-curl http://localhost:7474/ehri/Repository/nl-test_repository
+curl http://localhost:7474/ehri/classes/Repository/nl-test_repository
 ```
 
 ## Importing a documentary unit via EAD
@@ -374,7 +374,7 @@ Run this and again we get an import log like so:
 
     {"message":"Testing EAD import","updated":0,"created":1,"unchanged":0}
     
-Running `GET` on the `/ehri/DocumentaryUnit` method lists the units in the system, giving us this
+Running `GET` on the `/ehri/classes/DocumentaryUnit` method lists the units in the system, giving us this
 rather verbose output:
 
     [

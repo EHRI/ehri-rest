@@ -18,11 +18,11 @@ Neo4j typically runs on port 7474, so the remote instance will be available on p
 local machine.
 
 Now, make sure the local Neo4j instance is stopped and that the local `graph.db` directory is
-either non-existent or completely empty. We can then combine the `_exportGraphSON` web service
+either non-existent or completely empty. We can then combine the `export-graphson` web service
 method with the `graphson` command-line tool to pipe data from the (online) remote instance to
 the (offline) local one line so:
 
-    curl -H "X-User:admin" http://localhost:7777/ehri/admin/_exportGraphSON | ./scripts/cmd graphson --load - 
+    curl -H "X-User:admin" http://localhost:7777/ehri/admin/export-graphson | ./scripts/cmd graphson --load - 
     --buffer-size 100000 && ./scripts/cmd gen-schema
 
 The options are:
