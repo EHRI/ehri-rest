@@ -28,6 +28,7 @@ import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -41,6 +42,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.EventViews;
+import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -68,14 +70,15 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     public static final String FOLLOWING = "following";
     public static final String FOLLOWERS = "followers";
-    public static final String IS_FOLLOWING = "isFollowing";
-    public static final String IS_FOLLOWER = "isFollower";
+    public static final String IS_FOLLOWING = "is-following";
+    public static final String IS_FOLLOWER = "is-follower";
     public static final String WATCHING = "watching";
-    public static final String IS_WATCHING = "isWatching";
+    public static final String IS_WATCHING = "is-watching";
     public static final String BLOCKED = "blocked";
-    public static final String IS_BLOCKING = "isBlocking";
+    public static final String IS_BLOCKING = "is-blocking";
     public static final String ACTIONS = "actions";
     public static final String EVENTS = "events";
+    public static final String VIRTUAL_UNITS = "virtual-units";
 
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);
@@ -481,6 +484,25 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                     .withAggregation(aggregation)
                     .build();
             return streamingListOfLists(eventViews.aggregateAsUser(asUser, user), tx);
+        } catch (Exception e) {
+            tx.close();
+            throw e;
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:[^/]+}/" + VIRTUAL_UNITS)
+    public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
+            throws AccessDenied, ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            Accessor accessor = manager.getEntity(userId, Accessor.class);
+            Accessor currentUser = getRequesterUserProfile();
+            Iterable<VirtualUnit> units = new VirtualUnitViews(graph)
+                    .getVirtualCollectionsForUser(accessor, currentUser);
+            return streamingPage(getQuery(VirtualUnit.class)
+                    .page(units, currentUser), tx);
         } catch (Exception e) {
             tx.close();
             throw e;

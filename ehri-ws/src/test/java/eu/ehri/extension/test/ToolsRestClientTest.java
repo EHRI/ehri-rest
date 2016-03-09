@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class ToolsRestClientTest extends AbstractRestClientTest {
     @Test
     public void testRegenerateId() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateId", "c1"))
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-id", "c1"))
                 .queryParam("commit", "true");
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);
@@ -46,7 +46,7 @@ public class ToolsRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testRegenerateIdsForScope() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateIdsForScope", "r1"))
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-ids-for-scope", "r1"))
                 .queryParam("commit", "true");
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);
@@ -60,9 +60,8 @@ public class ToolsRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testRegenerateIdsForType() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT,
-                "_regenerateIdsForType", Entities.DOCUMENTARY_UNIT))
-                .queryParam("commit", "true");
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-ids-for-type",
+                Entities.DOCUMENTARY_UNIT)).queryParam("commit", "true");
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);
         assertStatus(OK, response);
@@ -75,7 +74,7 @@ public class ToolsRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testRegenerateDescriptionIds() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_regenerateDescriptionIds"))
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-description-ids"))
                 .queryParam("commit", "true");
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);

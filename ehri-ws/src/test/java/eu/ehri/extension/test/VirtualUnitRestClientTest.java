@@ -22,6 +22,8 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import eu.ehri.extension.GenericResource;
+import eu.ehri.extension.UserProfileResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
@@ -76,7 +78,8 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
 
         // Ensure the user now owns that item:
         response = jsonCallAs(currentUserId,
-                entityUri(Entities.VIRTUAL_UNIT, "forUser", currentUserId))
+                entityUri(Entities.USER_PROFILE, currentUserId,
+                        UserProfileResource.VIRTUAL_UNITS))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -289,7 +292,8 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
     @Test
     public void testPageVirtualUnitsForUser() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.VIRTUAL_UNIT, "forUser", "linda"))
+                entityUri(Entities.USER_PROFILE, "linda",
+                        UserProfileResource.VIRTUAL_UNITS))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);

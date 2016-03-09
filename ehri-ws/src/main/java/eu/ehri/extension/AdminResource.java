@@ -83,7 +83,7 @@ public class AdminResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("_exportGraphSON")
+    @Path("export-graphson")
     public Response getGraphSON() throws Exception {
         return Response.ok(new StreamingOutput() {
             @Override
@@ -100,7 +100,7 @@ public class AdminResource extends AbstractRestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("_exportJSON")
+    @Path("export-json")
     public Response exportNodes() throws Exception {
         return Response.ok(new StreamingOutput() {
             @Override
@@ -126,7 +126,7 @@ public class AdminResource extends AbstractRestResource {
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("createDefaultUserProfile")
+    @Path("create-default-user-profile")
     public Response createDefaultUserProfile(String jsonData,
             @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {

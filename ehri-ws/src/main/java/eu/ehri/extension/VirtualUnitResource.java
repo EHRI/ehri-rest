@@ -247,23 +247,6 @@ public final class VirtualUnitResource extends
         }
     }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("forUser/{userId:[^/]+}")
-    public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
-            throws AccessDenied, ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            Accessor accessor = manager.getEntity(userId, Accessor.class);
-            Accessor currentUser = getRequesterUserProfile();
-            Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
-            return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
-        }
-    }
-
     /**
      * Fetch a set of document descriptions from a list of description IDs.
      * We filter these for accessibility and content type (to ensure
