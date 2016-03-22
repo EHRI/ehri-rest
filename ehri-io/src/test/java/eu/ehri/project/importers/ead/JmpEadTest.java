@@ -25,13 +25,11 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
@@ -42,7 +40,6 @@ import static org.junit.Assert.assertTrue;
 
 public class JmpEadTest extends AbstractImporterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(JmpEadTest.class);
     protected final String SINGLE_EAD = "JMP20141117.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";

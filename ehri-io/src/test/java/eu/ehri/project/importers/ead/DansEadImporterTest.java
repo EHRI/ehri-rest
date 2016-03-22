@@ -20,33 +20,29 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.EadHandler;
-import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class DansEadImporterTest extends AbstractImporterTest {
-    
-       protected final String SINGLE_EAD = "dans_convertedead_part.xml";
 
-       // Depends on fixtures
-    protected final String TEST_REPO ="r1",
+    protected final String SINGLE_EAD = "dans_convertedead_part.xml";
+
+    // Depends on fixtures
+    protected final String TEST_REPO = "r1",
             ARCHDESC = "easy-collection:2",
             C1 = "urn:nbn:nl:ui:13-4i8-gpf",
-            SUBFONDS = "easy-collection:2:3",
             C2 = "urn:nbn:nl:ui:13-qa8-3r5";
-    
-    
-    
+
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -56,20 +52,21 @@ public class DansEadImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("dansead.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("dansead.properties"))
                 .setTolerant(Boolean.TRUE);
-        
-                 // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importManager.importFile(ios, logMessage);
-        printGraph(graph);
-        
- // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
 
-        
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
+        importManager.importFile(ios, logMessage);
+        printGraph(graph);
+
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+
+
         printGraph(graph);
         /*
          * we should have
@@ -84,20 +81,16 @@ public class DansEadImporterTest extends AbstractImporterTest {
          */
         int newCount = origCount + 29;
         assertEquals(newCount, getNodeCount(graph));
-        
+
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
-        while(i.hasNext()){
+        while (i.hasNext()) {
             DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             assertEquals("nld", desc.getLanguageOfDescription());
             nrOfDesc++;
         }
         assertEquals(1, nrOfDesc);
-
-
-        
     }
-
 }

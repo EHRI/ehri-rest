@@ -27,8 +27,8 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.VirtualUnit;
@@ -38,8 +38,6 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +47,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class VirtualEadTest extends AbstractImporterTest {
-    private static final Logger logger = LoggerFactory.getLogger(VirtualEadTest.class);
     protected final String TEST_REPO = "mike";
     protected final String XMLFILE = "wp2_virtualcollection.xml";
     private static final String REPO1 = "002777";
@@ -59,7 +56,6 @@ public class VirtualEadTest extends AbstractImporterTest {
 
     private static final String ARCHDESC = "ehri terezin research guide";
     private static final String C01_VirtualLevel = "vc_tm";
-    private static final String C02 = REPO2 + "-" + UNIT2;
 
     Repository repository1, repository2;
     DocumentaryUnit unit1, unit2;
@@ -129,7 +125,6 @@ public class VirtualEadTest extends AbstractImporterTest {
             }
         }
         assertEquals(1, countIncludedUnits);
-
     }
 
     private void setStage() throws PermissionDenied, ValidationError {

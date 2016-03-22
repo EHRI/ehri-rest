@@ -20,16 +20,12 @@
 package eu.ehri.project.importers.csv;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
@@ -40,7 +36,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class CsvDossinImporterTest extends AbstractImporterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(CsvDossinImporterTest.class);
     protected final String SINGLE_EAD = "dossin.csv";
     protected final String TEST_REPO = "r1";
 
@@ -49,16 +44,13 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
 
         PermissionScope ps = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing some Dossin records";
-        XmlImportProperties p = new XmlImportProperties("dossin.properties");
-//        assertTrue(p.containsProperty("Creator"));
-//        assertTrue(p.containsProperty("Language"));
 
         int count = getNodeCount(graph);
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, ps, validUser, EadImporter.class).importFile(ios, logMessage);
+        new CsvImportManager(graph, ps, validUser, EadImporter.class).importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

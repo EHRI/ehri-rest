@@ -168,8 +168,8 @@ public class ItsTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"))
-
+        importManager = new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"))
                 .setTolerant(Boolean.TRUE);
         importManager.importFile(ios, logMessage);
 
@@ -187,7 +187,6 @@ public class ItsTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 6
          */
-
         int createCount = origCount + 91;
         assertEquals(createCount, getNodeCount(graph));
 
@@ -291,7 +290,6 @@ public class ItsTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 2
          */
-
         int createCount = origCount + 33;
         assertEquals(createCount, getNodeCount(graph));
     }

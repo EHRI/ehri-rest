@@ -20,7 +20,6 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import org.junit.Test;
@@ -51,7 +50,7 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importManager.importFile(ios, logMessage);
+        importManager.importFile(ios, logMessage);
         printGraph(graph);
 
         // After...

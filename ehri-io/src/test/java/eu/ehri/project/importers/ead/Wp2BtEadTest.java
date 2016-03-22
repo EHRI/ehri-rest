@@ -20,14 +20,13 @@
 package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
@@ -109,8 +108,6 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         // - 1 Annotation as resolved relationship 
         int newCount = count + 45;
         assertEquals(newCount, getNodeCount(graph));
-
-        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
 
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
         List<DocumentaryUnitDescription> descriptions = Lists.newArrayList(fonds.getDocumentDescriptions());

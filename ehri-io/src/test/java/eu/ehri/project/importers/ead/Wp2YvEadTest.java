@@ -19,14 +19,15 @@
 
 package eu.ehri.project.importers.ead;
 
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Accessible;
@@ -35,13 +36,16 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
-import java.io.InputStream;
-import java.util.List;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
+
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class Wp2YvEadTest extends AbstractImporterTest {
@@ -61,10 +65,10 @@ public class Wp2YvEadTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
 
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
-                                .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
-                                .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
-                                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
         Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle,
                 validUser);
         logger.debug(vocabulary.getId());
@@ -77,19 +81,13 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         final String logMessage = "Importing Yad Vashem EAD";
 
         int count = getNodeCount(graph);
-// Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-
+        importManager = new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
         importManager.setTolerant(Boolean.TRUE);
 
         ImportLog log = importManager.importFile(ios, logMessage);
- // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
 
         //printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -102,7 +100,6 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         // - 1 more import Event
         // - 1 Link as resolved relationship 
 
-//printGraph(graph);
         int newCount = count + 31;
         assertEquals(newCount, getNodeCount(graph));
 
@@ -130,19 +127,14 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         //assert keywords are matched to cvocs
         assertTrue(!toList(c3.getLinks()).isEmpty());
-        for(Link a : c3.getLinks()){
+        for (Link a : c3.getLinks()) {
             logger.debug(a.getLinkType() + " " + a.getDescription());
             assertEquals("subjectAccess", a.getLinkType());
-            int hasBody = 0;
-            for(Accessible body : a.getLinkBodies()){
-                hasBody++;
-//                logger.debug("body: "+ body.getId() + " " + body.getType());
-            }
-            assertEquals(1, hasBody);
+            assertEquals(1, Iterables.size(a.getLinkBodies()));
         }
 
         List<Accessible> subjects = toList(ev.getSubjects());
-        int countSubject=0;
+        int countSubject = 0;
         for (Accessible subject : subjects) {
             logger.info("identifier: " + subject.getId());
             countSubject++;
@@ -157,9 +149,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(fonds, c1.getPermissionScope());
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c3.getPermissionScope());
-        
+
         // Check the author of the top level description
-        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             assertEquals("BT", d.getProperty("processInfo"));
         }
 

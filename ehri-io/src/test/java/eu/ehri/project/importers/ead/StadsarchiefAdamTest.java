@@ -22,26 +22,25 @@ package eu.ehri.project.importers.ead;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.base.PermissionScope;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.InputStream;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class StadsarchiefAdamTest extends AbstractImporterTest {
-    
-	private static final Logger logger = LoggerFactory.getLogger(StadsarchiefAdamTest.class);
+
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "stadsarchief30602.xml";
     // Identifiers of nodes in the imported documentary units
@@ -51,32 +50,25 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
             C02_1 = "NL-SAA-22730311",
             C03 = "NL-SAA-22752512",
             C03_2 = "NL-SAA-22752538";
-    int origCount=0;
+    int origCount = 0;
 
     @Test
     public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        
+
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a Stadsarchief EAD, with preprocessing done";
 
         origCount = getNodeCount(graph);
-        
- // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
+
+        // Before...
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class,
+        new SaxImportManager(graph, agent, validUser, EadImporter.class,
                 EadHandler.class, new XmlImportProperties("stadsarchief.properties")).importFile(ios, logMessage);
- // After...
-//       List<VertexProxy> graphState2 = getGraphState(graph);
-//       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
-       
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits (archdesc, 5 children)
-       	// - 6 more DocumentDescription
+        // - 6 more DocumentDescription
         // - 1 more DatePeriod
         // - 6 more UnknownProperties 
         // - 7 more import Event links (6 for every Unit, 1 for the User)
@@ -84,24 +76,24 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         // - 18 more MaintenanceEvents
         int newCount = origCount + 45;
         assertEquals(newCount, getNodeCount(graph));
-        
+
         DocumentaryUnit archdesc = graph.frame(
-                getVertexByIdentifier(graph,ARCHDESC),
+                getVertexByIdentifier(graph, ARCHDESC),
                 DocumentaryUnit.class);
         DocumentaryUnit c1 = graph.frame(
-                getVertexByIdentifier(graph,C01),
+                getVertexByIdentifier(graph, C01),
                 DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(
-                getVertexByIdentifier(graph,C02),
+                getVertexByIdentifier(graph, C02),
                 DocumentaryUnit.class);
         DocumentaryUnit c2_1 = graph.frame(
                 getVertexByIdentifier(graph, C02_1),
                 DocumentaryUnit.class);
         DocumentaryUnit c3 = graph.frame(
-                getVertexByIdentifier(graph,C03),
+                getVertexByIdentifier(graph, C03),
                 DocumentaryUnit.class);
         DocumentaryUnit c3_2 = graph.frame(
-                getVertexByIdentifier(graph,C03_2),
+                getVertexByIdentifier(graph, C03_2),
                 DocumentaryUnit.class);
 
         // Test correct ID generation
@@ -129,59 +121,59 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         assertEquals(c2_1, c3_2.getPermissionScope());
 
 
-    //test titles
-        for(DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()){
+        //test titles
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("Collectie Bart de Kok en Jozef van Poppel", d.getName());
-            for(DatePeriod p : d.getDatePeriods()){
+            for (DatePeriod p : d.getDatePeriods()) {
                 assertEquals("1931-01-01", p.getStartDate());
             }
-            boolean hasScopeAndContent=false;
-            boolean hasLanguageOfMaterial=false;
-            for(String property : d.getPropertyKeys()){
-                if(property.equals("scopeAndContent")){
-                    hasScopeAndContent=true;
+            boolean hasScopeAndContent = false;
+            boolean hasLanguageOfMaterial = false;
+            for (String property : d.getPropertyKeys()) {
+                if (property.equals("scopeAndContent")) {
+                    hasScopeAndContent = true;
                     assertTrue(d.getProperty(property).toString().startsWith("Inleiding"));
-                }else if(property.equals("languageOfMaterial")){
-                    hasLanguageOfMaterial=true;
+                } else if (property.equals("languageOfMaterial")) {
+                    hasLanguageOfMaterial = true;
                     assertEquals("nld", d.getProperty(property).toString());
                 }
             }
             assertTrue(hasScopeAndContent);
             assertTrue(hasLanguageOfMaterial);
         }
-        for(DocumentaryUnitDescription desc : c1.getDocumentDescriptions()){
-                assertEquals("Documentaire foto's door Bart de Kok", desc.getName());
+        for (DocumentaryUnitDescription desc : c1.getDocumentDescriptions()) {
+            assertEquals("Documentaire foto's door Bart de Kok", desc.getName());
         }
-    //test hierarchy
+        //test hierarchy
         assertEquals(1L, archdesc.getChildCount());
-        for(DocumentaryUnit d : archdesc.getChildren()){
+        for (DocumentaryUnit d : archdesc.getChildren()) {
             assertEquals(C01, d.getIdentifier());
         }
-    //test level-of-desc
-        for(DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()){
+        //test level-of-desc
+        for (DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()) {
             assertEquals("file", d.getProperty("levelOfDescription"));
         }
-    
-        boolean c3HasOtherIdentifier=false;
-        for(String property : c3.getPropertyKeys()){
-            if(property.equals("otherIdentifiers")){
+
+        boolean c3HasOtherIdentifier = false;
+        for (String property : c3.getPropertyKeys()) {
+            if (property.equals("otherIdentifiers")) {
                 assertEquals("29", c3.getProperty(property).toString());
-                c3HasOtherIdentifier=true;
+                c3HasOtherIdentifier = true;
             }
         }
         assertTrue(c3HasOtherIdentifier);
-        boolean c3HasRef=false;
-        for(DocumentaryUnitDescription d : c3.getDocumentDescriptions()){
-            for(String property : d.getPropertyKeys()){
-                if(property.equals("ref")){
+        boolean c3HasRef = false;
+        for (DocumentaryUnitDescription d : c3.getDocumentDescriptions()) {
+            for (String property : d.getPropertyKeys()) {
+                if (property.equals("ref")) {
                     assertEquals("http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/29",
-                        d.getProperty(property).toString() );
-                    c3HasRef=true;
+                            d.getProperty(property).toString());
+                    c3HasRef = true;
                 }
             }
         }
         assertTrue(c3HasRef);
-        
+
     }
 }
     

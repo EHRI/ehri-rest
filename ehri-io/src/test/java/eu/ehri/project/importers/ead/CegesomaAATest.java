@@ -19,31 +19,30 @@
 
 package eu.ehri.project.importers.ead;
 
-import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.PermissionScope;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test the import of a Cegesoma AA EAD file.
@@ -58,29 +57,23 @@ public class CegesomaAATest extends AbstractImporterTest {
             C02_01 = "AA 1134 / 32",
             C02_02 = "AA 1134 / 34";
     DocumentaryUnit archdesc, c1, c2_1, c2_2;
-    int origCount=0;
-            
+    int origCount = 0;
+
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        
+
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
         origCount = getNodeCount(graph);
-        
- // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        
+
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaAA.properties")).importFile(ios, logMessage);
- // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
-        
-//        printGraph(graph);
+        new SaxImportManager(graph, agent, validUser, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("cegesomaAA.properties"))
+                .importFile(ios, logMessage);
+
         // How many new nodes will have been created? We should have
-        /** 
+        /**
          * event links: 6
          * relationship: 34
          * DocumentaryUnit: 5
@@ -91,18 +84,18 @@ public class CegesomaAATest extends AbstractImporterTest {
          */
         int newCount = origCount + 60;
         assertEquals(newCount, getNodeCount(graph));
-        
+
         archdesc = graph.frame(
-                getVertexByIdentifier(graph,ARCHDESC),
+                getVertexByIdentifier(graph, ARCHDESC),
                 DocumentaryUnit.class);
         c1 = graph.frame(
-                getVertexByIdentifier(graph,C01),
+                getVertexByIdentifier(graph, C01),
                 DocumentaryUnit.class);
         c2_1 = graph.frame(
-                getVertexByIdentifier(graph,C02_01),
+                getVertexByIdentifier(graph, C02_01),
                 DocumentaryUnit.class);
         c2_2 = graph.frame(
-                getVertexByIdentifier(graph,C02_02),
+                getVertexByIdentifier(graph, C02_02),
                 DocumentaryUnit.class);
 
         // Test ID generation is correct
@@ -114,25 +107,24 @@ public class CegesomaAATest extends AbstractImporterTest {
          * Test titles
          */
         // There should be one DocumentDescription for the <archdesc>
-        for(DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("In het Frans", dd.getProperty("languageOfMaterial"));
             assertEquals("Zie ook AA 1297", dd.getProperty("relatedMaterial"));
             assertTrue(dd.getProperty("notes").toString().startsWith("Nr 1-2-13: fotokopies Bibliothek"));
             assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.getProperty("findingAids"));
-//            for(String key : dd.getPropertyKeys())
-//                System.out.println(key);
-            for (MaintenanceEvent me : dd.getMaintenanceEvents()){
-              assertEquals("Automatisch gegenereerd door PALLAS systeem", me.getProperty("source"));
-              assertEquals("28/03/2013", me.getProperty("date"));
-              assertEquals(MaintenanceEventType.created.toString(), me.getProperty("eventType"));
+
+            for (MaintenanceEvent me : dd.getMaintenanceEvents()) {
+                assertEquals("Automatisch gegenereerd door PALLAS systeem", me.getProperty("source"));
+                assertEquals("28/03/2013", me.getProperty("date"));
+                assertEquals(MaintenanceEventType.created.toString(), me.getProperty("eventType"));
             }
             assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
         }
-        
+
         // There should be one DocumentDescription for the (only) <c01>
-        for(DocumentaryUnitDescription dd : c1.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription dd : c1.getDocumentDescriptions()) {
             assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
@@ -141,20 +133,20 @@ public class CegesomaAATest extends AbstractImporterTest {
         }
 
         // There should be one DocumentDescription for the (second) <c02>
-        for(DocumentaryUnitDescription dd : c2_2.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription dd : c2_2.getDocumentDescriptions()) {
             assertEquals("Wetteksten (U.) S.R.A.", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("item", dd.getProperty("levelOfDescription"));
         }
-    
+
         /**
          * Test hierarchy
          */
         assertEquals(1L, archdesc.getChildCount());
-        for(DocumentaryUnit du : archdesc.getChildren()){
+        for (DocumentaryUnit du : archdesc.getChildren()) {
             assertEquals(C01, du.getIdentifier());
         }
-    //test dates
+        //test dates
         for (DocumentaryUnitDescription d : c2_1.getDocumentDescriptions()) {
             // Single date is just a string
             assertFalse(d.getPropertyKeys().contains("unitDates"));
@@ -163,11 +155,11 @@ public class CegesomaAATest extends AbstractImporterTest {
                 assertEquals("1948-12-31", dp.getEndDate());
             }
         }
-        
+
         // Fonds has two dates with different types -> list
         for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             // start and end dates correctly parsed and setup
-            
+
             assertFalse(d.getPropertyKeys().contains("unitDates"));
             List<DatePeriod> dps = toList(d.getDatePeriods());
             assertEquals(2, dps.size());
@@ -177,8 +169,7 @@ public class CegesomaAATest extends AbstractImporterTest {
                 if (dateDesc.equals("1944-1948")) {
                     assertEquals("1944-01-01", dp.getStartDate());
                     assertEquals("1948-12-31", dp.getEndDate());
-                }
-                else if (dateDesc.equals("1944-1979")) {
+                } else if (dateDesc.equals("1944-1979")) {
                     assertEquals("1979-12-31", dp.getEndDate());
                 }
             }

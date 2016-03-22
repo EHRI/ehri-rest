@@ -20,7 +20,6 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -55,14 +54,10 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
                 .setTolerant(Boolean.TRUE);
         // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importManager.importFile(ios, logMessage);
-//        printGraph(graph);
+        importManager.importFile(ios, logMessage);
+
         // After...
-//       List<VertexProxy> graphState2 = getGraphState(graph);
-//       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
-        int count_fin = getNodeCount(graph);
+        int countAfter = getNodeCount(graph);
         /**
          * null: 8
          * DocumentaryUnit: 7
@@ -72,7 +67,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 5
          */
-        assertEquals(count + 36, count_fin);
+        assertEquals(count + 36, countAfter);
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
@@ -93,12 +88,12 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         //import the english version:
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        log = importManager.importFile(ios, logMessage);
+        importManager.importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-//        printGraph(graph);
+
         /**
          * null: 8
          * property: 1
@@ -107,7 +102,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 5
          */
-        assertEquals(count_fin + 29, getNodeCount(graph));
+        assertEquals(countAfter + 29, getNodeCount(graph));
         i = c1.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while (i.hasNext()) {
@@ -133,19 +128,19 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
             nrOfDesc++;
         }
         assertEquals(2, nrOfDesc);
-        int count_eng = getNodeCount(graph);
-// // Before...
+        int countEng = getNodeCount(graph);
+        // Before...
         List<VertexProxy> graphState1a = getGraphState(graph);
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        log = importManager.importFile(ios, logMessage);
-// // After...
+        importManager.importFile(ios, logMessage);
+        // After...
         List<VertexProxy> graphState2a = getGraphState(graph);
         GraphDiff diffa = diffGraph(graphState1a, graphState2a);
         diffa.printDebug(System.out);
 
-        System.out.println(count + " " + count_fin + " " + count_eng);
+        System.out.println(count + " " + countAfter + " " + countEng);
 
         // Nothing should have changed...
-        assertEquals(count_eng, getNodeCount(graph));
+        assertEquals(countEng, getNodeCount(graph));
     }
 }

@@ -27,15 +27,12 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.EadHandler;
-import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
@@ -57,9 +54,8 @@ public class IfzTest extends AbstractImporterTest {
     protected final String ARCHDESC = "G",
             C01 = "G_1",
             C02 = "G_2",
-            C03_01 = "G 35 / 1",
             C03_02 = "MB 35 / 10";
-    DocumentaryUnit archdesc, c1, c2, c3_1, c3_2;
+    DocumentaryUnit archdesc, c1, c2, c3_2;
     int origCount = 0;
 
     @Test
@@ -74,7 +70,9 @@ public class IfzTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("ifz.properties")).importFile(ios, logMessage);
+        new SaxImportManager(graph, agent, validUser, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("ifz.properties"))
+                .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -155,6 +153,5 @@ public class IfzTest extends AbstractImporterTest {
             List<DatePeriod> dp = toList(d.getDatePeriods());
             assertEquals(0, dp.size());
         }
-
     }
 }

@@ -67,6 +67,7 @@ public class EadHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory
             .getLogger(EadHandler.class);
 
+    @SuppressWarnings("unchecked")
     protected final List<DocumentaryUnit>[] children = new ArrayList[12];
 
     /**
@@ -367,8 +368,8 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @param currentGraph Data at the current node level
      */
+    @SuppressWarnings("unused")
     protected void extractDate(Map<String, Object> currentGraph) {
-
     }
 
     /**

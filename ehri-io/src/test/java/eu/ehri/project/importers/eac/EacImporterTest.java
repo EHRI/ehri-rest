@@ -28,12 +28,10 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
-import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.test.GraphTestBase;
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,14 +81,6 @@ public class EacImporterTest extends AbstractImporterTest {
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertNotNull(abwehr);
         assertEquals(0, toList(abwehr.getAnnotations()).size());
-
-        for (Description desc : abwehr.getDescriptions()) {
-            logger.debug(desc.getLanguageOfDescription());
-            for (UnknownProperty u : desc.getUnknownProperties()) {
-                logger.debug(u.getType());
-            }
-        }
-
     }
 
     @Test
@@ -134,7 +124,6 @@ public class EacImporterTest extends AbstractImporterTest {
                 HistoricalAgentDescription.class);
         assertEquals(Entities.HISTORICAL_AGENT_DESCRIPTION, c1.getType());
 
-
         assertTrue(c1.getProperty(Ontology.NAME_KEY) instanceof String);
         assertNotNull(c1.getProperty("otherFormsOfName"));
         // Alt names should be an array
@@ -142,7 +131,6 @@ public class EacImporterTest extends AbstractImporterTest {
 
         // Ensure that c1 is a description of the unit
         for (Description d : unit.getDescriptions()) {
-
             assertEquals(d.getName(), c1.getName());
             assertEquals(d.getEntity().getId(), unit.getId());
         }

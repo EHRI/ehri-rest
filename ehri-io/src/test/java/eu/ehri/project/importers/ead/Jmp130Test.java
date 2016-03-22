@@ -25,13 +25,11 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
@@ -42,12 +40,10 @@ import static org.junit.Assert.assertTrue;
 
 public class Jmp130Test extends AbstractImporterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(Jmp130Test.class);
     protected final String SINGLE_EAD = "JMP-130.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
     // Depends on hierarchical-ead.xml
-
     protected final String FONDS = "COLLECTION.JMP.ARCHIVE/130";
 
     @Test
@@ -59,8 +55,8 @@ public class Jmp130Test extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("jmp.properties"));
-
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("jmp.properties"));
         importManager.setTolerant(Boolean.TRUE);
 
         List<VertexProxy> graphState1 = getGraphState(graph);

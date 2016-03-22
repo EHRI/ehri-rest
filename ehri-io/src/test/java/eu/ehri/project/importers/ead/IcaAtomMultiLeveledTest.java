@@ -28,18 +28,18 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.util.List;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
-    private static final Logger logger = LoggerFactory.getLogger(IcaAtomMultiLeveledTest.class);
-     protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";
-private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive";
+    protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";
+
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
 
@@ -67,9 +67,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         // - 1 more UnknownProperty (1 1 1)
         // - 4 more import Event links (+1)
         // - 1 more import Event
-
         int createCount = origCount + 23;
-
 
         assertEquals(createCount, getNodeCount(graph));
 
@@ -86,7 +84,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         String targetUnitId = "nl-r1-hr_r000382hr_hr_hda_1551";
         assertEquals(targetUnitId, unit.getId());
 
-        for(Description d : unit.getDocumentDescriptions())
+        for (Description d : unit.getDocumentDescriptions())
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
 
         assertEquals(2L, unit.getChildCount());
@@ -110,7 +108,9 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
+        ImportLog log2 = new SaxImportManager(graph, agent, validUser,
+                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                .importFile(ios2, logMessage);
 
         // We should have no new nodes, not even SystemEvent
         assertEquals(createCount, getNodeCount(graph));

@@ -22,10 +22,11 @@ package eu.ehri.project.importers.cvoc;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import java.io.InputStream;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
 
 
 public class Wp2OrganisationsTest extends AbstractImporterTest {
@@ -45,5 +46,5 @@ public class Wp2OrganisationsTest extends AbstractImporterTest {
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
     }
-    
+
 }
