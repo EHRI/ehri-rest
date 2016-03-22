@@ -126,12 +126,12 @@ public class IpnTest extends AbstractImporterTest {
         * documentaryUnit: 3
         * property: 1
         * documentDescription: 3
-        * maintenanceEvent: 1
+        * maintenanceEvent: 3
         * systemEvent: 1
         * datePeriod: 2
         */
 
-        int newCount = origCount + 19; 
+        int newCount = origCount + 21;
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(

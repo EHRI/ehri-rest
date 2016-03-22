@@ -87,9 +87,9 @@ public class CegesomaAATest extends AbstractImporterTest {
          * documentDescription: 5
          * systemEvent: 1
          * datePeriod: 4
-         * maintenanceEvent: 1
+         * maintenanceEvent: 5
          */
-        int newCount = origCount + 56;
+        int newCount = origCount + 60;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -162,10 +162,6 @@ public class CegesomaAATest extends AbstractImporterTest {
                 assertEquals("1944-01-01", dp.getStartDate());
                 assertEquals("1948-12-31", dp.getEndDate());
             }
-            for (MaintenanceEvent me : d.getMaintenanceEvents()) {
-                //one to each documentDescription:
-                assertEquals(5, toList(me.asVertex().getEdges(Direction.OUT)).size());
-            }
         }
         
         // Fonds has two dates with different types -> list
@@ -186,12 +182,6 @@ public class CegesomaAATest extends AbstractImporterTest {
                     assertEquals("1979-12-31", dp.getEndDate());
                 }
             }
-
-            for (MaintenanceEvent me : d.getMaintenanceEvents()) {
-                //one to each documentDescription:
-                assertEquals(5, toList(me.asVertex().getEdges(Direction.OUT)).size());
-            }
         }
-        
     }
 }

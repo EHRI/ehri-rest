@@ -77,10 +77,15 @@ public class CegesomaAraTest extends AbstractImporterTest {
         printGraph(graph);
         // How many new nodes will have been created? We should have
         /**
-         * event links: 6 relationship: 34 DocumentaryUnit: 5 documentDescription: 5 systemEvent: 1 datePeriod: 4
-         * maintenanceEvent: 1
+         * event links: 6
+         * relationship: 34
+         * DocumentaryUnit: 5
+         * documentDescription: 5
+         * systemEvent: 1
+         * datePeriod: 4
+         * maintenanceEvent: 5
          */
-        int newCount = origCount + 56;
+        int newCount = origCount + 60;
         assertEquals(newCount, getNodeCount(graph));
 
         archdesc = graph.frame(

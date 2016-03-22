@@ -186,10 +186,9 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData) {
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
-            if (key.equals("maintenanceEvent")) {
+            if (key.equals("maintenanceEvent") && itemData.get(key) instanceof List) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
                     list.add(getMaintenanceEvent(event));
-
                 }
             }
         }

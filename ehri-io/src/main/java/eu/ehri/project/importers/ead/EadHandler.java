@@ -28,7 +28,6 @@ import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -59,12 +58,11 @@ public class EadHandler extends SaxXmlHandler {
             AUTHOR = "author";
     public static final String DEFAULT_PROPERTIES = "icaatom.properties";
 
-    final List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
-    int maintenanceOrder;
+    final List<Map<String,Object>> globalMaintenanceEvents = Lists.newArrayList();
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Entity>>builder().put(
-            "maintenanceEvent", MaintenanceEvent.class).build();
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes =
+            ImmutableMap.<String, Class<? extends Entity>>builder()
+                    .put("maintenanceEvent", MaintenanceEvent.class).build();
 
     private static final Logger logger = LoggerFactory
             .getLogger(EadHandler.class);
@@ -244,15 +242,12 @@ public class EadHandler extends SaxXmlHandler {
                         addAuthor(currentGraph);
                     }
 
-                    DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
-                    //add the maintenanceEvents, but only to the DD that was just created
-                    for (DocumentaryUnitDescription dd : current.getDocumentDescriptions()) {
-                        if (getSourceFileId() == null || getSourceFileId().equals(dd.getProperty(Ontology.SOURCEFILE_KEY))) {
-                            for (MaintenanceEvent me : maintenanceEvents) {
-                                dd.addMaintenanceEvent(me);
-                            }
-                        }
+                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
+                        logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
+                        currentGraph.put("maintenanceEvent", globalMaintenanceEvents);
                     }
+
+                    DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
 
                     topLevel = current; // if it is not overwritten, the current DU is the topLevel
                     logger.debug("importer used: {}", importer.getClass());
@@ -276,14 +271,12 @@ public class EadHandler extends SaxXmlHandler {
                     scopeIds.pop();
                 }
             } else {
-                //import the MaintenanceEvent
-                if (getImportantPath(currentPath).equals("maintenanceEvent")) {
+                // import the MaintenanceEvent
+                if (getImportantPath(currentPath).equals("maintenanceEvent")
+                        && (qName.equals("profiledesc") || qName.equals("change"))) {
                     Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
-                    me.put("order", maintenanceOrder++);
-                    MaintenanceEvent event = importer.importMaintenanceEvent(me);
-                    if (event != null) {
-                        maintenanceEvents.add(event);
-                    }
+                    me.put("order", globalMaintenanceEvents.size());
+                    globalMaintenanceEvents.add(me);
                 }
                 putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
                 depth--;

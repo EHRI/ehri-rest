@@ -78,11 +78,11 @@ public class DansEadImporterTest extends AbstractImporterTest {
          * relationship: 6
          * DocumentaryUnit: 4
          * documentDescription: 4
-         * maintenanceEvent: 1
+         * maintenanceEvent: 4
          * systemEvent: 1
          * datePeriod: 5  //there are 6 unitdates in the xml, however two are identical and get merged into 1
          */
-        int newCount = origCount + 14 + 6 + 5 + 1; 
+        int newCount = origCount + 29;
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);

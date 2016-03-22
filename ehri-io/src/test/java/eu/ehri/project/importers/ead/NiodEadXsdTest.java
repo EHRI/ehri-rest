@@ -78,10 +78,11 @@ public class NiodEadXsdTest extends AbstractImporterTest {
         * DocumentaryUnit: 6
         * property: 1
         * documentDescription: 6
+        * maintenance event: 6
         * systemEvent: 1
         * datePeriod: 6
         */
-        int newCount = origCount + 27; 
+        int newCount = origCount + 33;
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(

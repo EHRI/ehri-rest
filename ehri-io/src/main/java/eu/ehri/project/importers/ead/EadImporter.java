@@ -118,6 +118,14 @@ public class EadImporter extends EaImporter {
             }
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
         }
+
+        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+            logger.info("maintenance event found");
+            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT,
+                    new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+        }
+
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             StringBuilder unknownProperties = new StringBuilder();

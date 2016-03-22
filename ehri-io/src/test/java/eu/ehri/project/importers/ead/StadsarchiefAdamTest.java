@@ -65,7 +65,8 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
 //       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("stadsarchief.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("stadsarchief.properties")).importFile(ios, logMessage);
  // After...
 //       List<VertexProxy> graphState2 = getGraphState(graph);
 //       GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -80,8 +81,8 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         // - 6 more UnknownProperties 
         // - 7 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
-        // - 3 more MaintenanceEvents
-        int newCount = origCount + 30; 
+        // - 18 more MaintenanceEvents
+        int newCount = origCount + 45;
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(

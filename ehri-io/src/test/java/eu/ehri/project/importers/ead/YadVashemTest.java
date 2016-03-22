@@ -74,7 +74,8 @@ public class YadVashemTest extends AbstractImporterTest {
        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("yadvashem.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);
@@ -87,11 +88,12 @@ public class YadVashemTest extends AbstractImporterTest {
         * relationship: 4
         * DocumentaryUnit: 2
         * documentDescription: 3
+        * maintenance event: 3
         * systemEvent: 1
         * datePeriod: 1
         */
 
-        assertEquals(count + 15, getNodeCount(graph));
+        assertEquals(count + 18, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         for (DocumentaryUnitDescription desc : m19.getDocumentDescriptions()) {
             logger.debug("Document description graph ID: {}", desc.getId());
@@ -127,11 +129,12 @@ public class YadVashemTest extends AbstractImporterTest {
         * relationship: 5 (2 creator, 1 place, 1 subject, 1 geog)
         * DocumentaryUnit: 2
         * documentDescription: 3
+        * maintenance event: 3
         * property: 1
         * systemEvent: 1
         * datePeriod: 1
         */
-        assertEquals(count + 17, getNodeCount(graph));
+        assertEquals(count + 20, getNodeCount(graph));
         //ENG also imported:
 assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);

@@ -65,13 +65,13 @@ public class UshmmTest extends AbstractImporterTest {
         * 3 more import Event links
         * 1 more import Event
         * 17 more AccessPoints
-        * 1 more MaintenanceEvent (creation)
+        * 2 more MaintenanceEvent (creation)
         */
-        int createCount = origCount + 27;
+        int createCount = origCount + 28;
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 2 *logical* item...
-        assertEquals(2, log.getChanged());
+        assertEquals(2, log.getCreated());
 
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
@@ -87,7 +87,7 @@ public class UshmmTest extends AbstractImporterTest {
         
         // Check the alternative ID was added
         boolean foundAltId = false;
-        for(String altId : (List<String>) unit.getProperty("otherIdentifiers")) {
+        for(String altId : unit.<List<String>>getProperty("otherIdentifiers")) {
         	if (altId.equals(IMPORTED_ITEM_ALT_ID)) {
         		foundAltId = true;
         		break;
@@ -103,18 +103,17 @@ public class UshmmTest extends AbstractImporterTest {
         // Check scope is correct...
         assertEquals(agent, unit.getAncestors().iterator().next().getPermissionScope());
 
-//        // Now re-import the same file
-//        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-//        ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class).importFile(ios2, logMessage);
-//
-//        // We should only have three more nodes, for 
-//        // the action and 
-//        // the user event links, 
-//        // plus the global event
-//        assertEquals(createCount + 3, getNodeCount(graph));
-//        // And one logical item should've been updated
-//        assertEquals(1, log2.getUpdated());
+        // Now re-import the same file
+        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
+        ImportLog log2 = new SaxImportManager(graph, agent, validUser, EadImporter.class,
+                UshmmHandler.class).importFile(ios2, logMessage);
 
+        // We should only have three more nodes, for
+        // the action and
+        // the user event links,
+        // plus the global event
+        assertEquals(createCount, getNodeCount(graph));
+        // And one logical item should've been updated
+        assertEquals(2, log2.getUnchanged());
     }
-
 }

@@ -87,11 +87,11 @@ public class IfzTest extends AbstractImporterTest {
          * relationship: 11
          * DocumentaryUnit: 5
          * documentDescription: 5
-         * maintenanceEvent: 6
+         * maintenanceEvent: 30
          * systemEvent: 1
          * 1 date
          */
-        int newCount = origCount + 35;
+        int newCount = origCount + 59;
         assertEquals(newCount, getNodeCount(graph));
 
         archdesc = graph.frame(

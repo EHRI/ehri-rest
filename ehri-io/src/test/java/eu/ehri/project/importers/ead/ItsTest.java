@@ -102,11 +102,11 @@ public class ItsTest extends AbstractImporterTest {
          * null: 10 
          * DocumentaryUnit: 4
          * documentDescription: 8 
-         * maintenanceEvent: 8 (1+3)*2 
+         * maintenanceEvent: 32 (1+3)*8
          * systemEvent: 2
          * date: 3 (2 ENG, 1 GER)
          */
-        int createCount = origCount + 37;
+        int createCount = origCount + 61;
         assertEquals(createCount, getNodeCount(graph));
 
         // The first import creates 4? units
@@ -183,12 +183,12 @@ public class ItsTest extends AbstractImporterTest {
          * DocumentaryUnit: 8
          * property: 4
          * documentDescription: 8
-         * maintenanceEvent: 4 (3 Revision + 1 Creation)
+         * maintenanceEvent: 32 (3 Revision + 1 Creation) * 8
          * systemEvent: 1
          * datePeriod: 6
          */
 
-        int createCount = origCount + 63;
+        int createCount = origCount + 91;
         assertEquals(createCount, getNodeCount(graph));
 
         DocumentaryUnit u = graph.frame(
@@ -287,12 +287,12 @@ public class ItsTest extends AbstractImporterTest {
          * DocumentaryUnit: 4
          * documentDescription: 4
          * property: 1
-         * maintenanceEvent: 4
+         * maintenanceEvent: 16
          * systemEvent: 1
          * datePeriod: 2
          */
 
-        int createCount = origCount + 21;
+        int createCount = origCount + 33;
         assertEquals(createCount, getNodeCount(graph));
     }
 }
