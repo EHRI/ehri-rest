@@ -52,7 +52,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         ActionManager am = new ActionManager(graph);
         // Create a user and log it
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = new BundleDAO(graph).create(userBundle, UserProfile.class);
+        UserProfile user = new BundleManager(graph).create(userBundle, UserProfile.class);
         ActionManager.EventContext ctx1 = am.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation);
@@ -60,7 +60,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
         // Create a repository and log that too...
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
-        Repository repository = new BundleDAO(graph).create(repoBundle, Repository.class);
+        Repository repository = new BundleManager(graph).create(repoBundle, Repository.class);
 
         ActionManager.EventContext ctx2 = am.newEventContext(repository,
                 graph.frame(validUser.asVertex(), Actioner.class),
@@ -97,7 +97,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         ActionManager am = new ActionManager(graph, r1);
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit doc = new BundleDAO(graph).create(docBundle, DocumentaryUnit.class);
+        DocumentaryUnit doc = new BundleManager(graph).create(docBundle, DocumentaryUnit.class);
         ActionManager.EventContext ctx = am.newEventContext(doc,
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation);
@@ -110,7 +110,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
     public void testCreatingNewEventDoesNotTouchGraph() throws Exception {
         ActionManager am = new ActionManager(graph);
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
-        BundleDAO dao = new BundleDAO(graph);
+        BundleManager dao = new BundleManager(graph);
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
         int nodesBefore = getNodeCount(graph);
         int edgesBefore = getEdgeCount(graph);
@@ -134,7 +134,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         ActionManager am = new ActionManager(graph, r1);
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
-        BundleDAO dao = new BundleDAO(graph);
+        BundleManager dao = new BundleManager(graph);
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
         ActionManager.EventContext ctx1 = am.newEventContext(doc,
                 graph.frame(validUser.asVertex(), Actioner.class),

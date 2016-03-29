@@ -22,6 +22,7 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -50,13 +51,13 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 /**
  * Base class for testing the REST interface on a 'embedded' neo4j server.
  */
-public class BaseRestClientTest extends RunningServerTest {
+public class AbstractRestClientTest extends RunningServerTest {
 
-    protected static Client client = Client.create();
+    protected static final Client client = Client.create();
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
 
-    protected static Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
+    protected static final Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
@@ -80,7 +81,7 @@ public class BaseRestClientTest extends RunningServerTest {
     public void testAdminGetUserProfile() throws Exception {
         // get the admin user profile
         WebResource resource = client.resource(
-                ehriUri(Entities.USER_PROFILE, getAdminUserProfileId()));
+                entityUri(Entities.USER_PROFILE, getAdminUserProfileId()));
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
@@ -92,60 +93,50 @@ public class BaseRestClientTest extends RunningServerTest {
      * Helpers **
      */
 
-    protected List<Map<String, Object>> getItemList(String entityType, String userId) throws Exception {
-        return getItemList(entityType, userId, new MultivaluedMapImpl());
+    protected List<Map<String, Object>> getItemList(URI uri, String userId) throws Exception {
+        return getItemList(uri, userId, new MultivaluedMapImpl());
     }
 
     /**
      * Get a list of items at some url, as the given user.
      */
-    protected List<Map<String, Object>> getItemList(String url, String userId,
+    protected List<Map<String, Object>> getItemList(URI uri, String userId,
             MultivaluedMap<String, String> params) throws Exception {
         TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
         };
-        return jsonMapper.readValue(getJson(url, userId, params), typeRef);
+        return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
 
-    protected List<List<Map<String, Object>>> getItemListOfLists(String relativeUrl, String userId) throws Exception {
-        return getItemListOfLists(relativeUrl, userId, new MultivaluedMapImpl());
+    protected List<List<Map<String, Object>>> getItemListOfLists(URI uri, String userId) throws Exception {
+        return getItemListOfLists(uri, userId, new MultivaluedMapImpl());
     }
 
     /**
      * Get a list of items at some relativeUrl, as the given user.
      */
-    protected List<List<Map<String, Object>>> getItemListOfLists(String relativeUrl, String userId,
+    protected List<List<Map<String, Object>>> getItemListOfLists(URI uri, String userId,
             MultivaluedMap<String, String> params) throws Exception {
         TypeReference<LinkedList<LinkedList<HashMap<String, Object>>>> typeRef = new
                 TypeReference<LinkedList<LinkedList<HashMap<String, Object>>>>() {
-        };
-        return jsonMapper.readValue(getJson(relativeUrl, userId, params), typeRef);
+                };
+        return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
 
     /**
      * Function for fetching a list of entities with the given EntityType
      */
-    protected List<Map<String, Object>> getEntityList(String entityType,
-            String userId) throws Exception {
-        return getEntityList(entityType, userId, new MultivaluedMapImpl());
+    protected List<Map<String, Object>> getEntityList(String entityType, String userId)
+            throws Exception {
+        return getEntityList(entityUri(entityType), userId, new MultivaluedMapImpl());
     }
 
     /**
      * Function for fetching a list of entities with the given EntityType,
      * and some additional parameters.
      */
-    protected List<Map<String, Object>> getEntityList(String entityType,
+    protected List<Map<String, Object>> getEntityList(URI uri,
             String userId, MultivaluedMap<String, String> params) throws Exception {
-        return getItemList("/" + entityType, userId, params);
-    }
-
-    protected Integer getPaginationPage(ClientResponse response) {
-        MultivaluedMap<String,String> headers = response.getHeaders();
-        String range = headers.getFirst("Content-Range");
-        if (range != null && range.matches(paginationPattern.pattern())) {
-            Matcher matcher = paginationPattern.matcher(range);
-            return matcher.find() ? Integer.valueOf(matcher.group(1)) : null;
-        }
-        return null;
+        return getItemList(uri, userId, params);
     }
 
     protected Integer getPaginationTotal(ClientResponse response) {
@@ -158,10 +149,8 @@ public class BaseRestClientTest extends RunningServerTest {
         return null;
     }
 
-    protected Long getEntityCount(String entityType,
-            String userId) throws Exception {
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + entityType);
+    protected Long getEntityCount(String entityType, String userId) {
+        WebResource resource = client.resource(entityUri(entityType));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
@@ -175,6 +164,22 @@ public class BaseRestClientTest extends RunningServerTest {
             builder = builder.segment(segment);
         }
         return builder;
+    }
+
+    protected UriBuilder entityUriBuilder(String entityType, String... segments) {
+        List<String> segs = Lists.newArrayList(
+                AbstractRestResource.RESOURCE_ENDPOINT_PREFIX,
+                entityType);
+        segs.addAll(Lists.newArrayList(segments));
+        return ehriUriBuilder(segs.toArray(new String[segs.size()]));
+    }
+
+    protected URI entityUri(String entityType, String... segments) {
+        List<String> segs = Lists.newArrayList(
+                AbstractRestResource.RESOURCE_ENDPOINT_PREFIX,
+                entityType);
+        segs.addAll(Lists.newArrayList(segments));
+        return ehriUriBuilder(segs.toArray(new String[segs.size()])).build();
     }
 
     protected URI ehriUri(String... segments) {
@@ -220,8 +225,8 @@ public class BaseRestClientTest extends RunningServerTest {
         return Resources.toString(url, Charsets.UTF_8);
     }
 
-    private String getJson(String url, String userId, MultivaluedMap<String, String> params) {
-        WebResource resource = client.resource(getExtensionEntryPointUri() + url).queryParams(params);
+    private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
+        WebResource resource = client.resource(uri).queryParams(params);
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)

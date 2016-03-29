@@ -134,7 +134,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("generateConcepts/{repositoryId:.+}/{vocabularyId:.+}")
+    @Path("generate-concepts/{repositoryId:[^/]+}/{vocabularyId:[^/]+}")
     public long autoLinkRepositoryDocs(
             @PathParam("repositoryId") String repositoryId,
             @PathParam("vocabularyId") String vocabularyId,
@@ -186,7 +186,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("_regenerateId/{id:.+}")
+    @Path("regenerate-id/{id:[^/]+}")
     public String regenerateId(
             @PathParam("id") String id,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -228,7 +228,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("_regenerateIdsForType/{type:.+}")
+    @Path("regenerate-ids-for-type/{type:[^/]+}")
     public String regenerateIdsForType(
             @PathParam("type") String type,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -274,7 +274,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("_regenerateIdsForScope/{scope:.+}")
+    @Path("regenerate-ids-for-scope/{scope:[^/]+}")
     public String regenerateIdsForScope(
             @PathParam("scope") String scopeId,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
@@ -301,7 +301,7 @@ public class ToolsResource extends AbstractRestResource {
      */
     @POST
     @Produces("text/plain")
-    @Path("_regenerateDescriptionIds")
+    @Path("regenerate-description-ids")
     public String regenerateDescriptionIds(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
@@ -347,7 +347,7 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("_setLabels")
+    @Path("set-labels")
     public String setLabels()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         long done = 0;
@@ -373,19 +373,18 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("_setConstraints")
-    public String setConstraints() {
+    @Path("set-constraints")
+    public void setConstraints() {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             logger.info("Initializing graph schema...");
             manager.initialize();
             tx.success();
         }
-        return "done";
     }
 
     @POST
     @Produces("text/plain")
-    @Path("_upgrade1to2")
+    @Path("upgrade-1to2")
     public String upgradeDb1to2() throws IOException {
         final AtomicInteger done = new AtomicInteger();
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -410,8 +409,8 @@ public class ToolsResource extends AbstractRestResource {
 
     @POST
     @Produces("text/plain")
-    @Path("_fullUpgrade1to2")
-    public String fullUpgradeDb1to2()
+    @Path("full-upgrade-1to2")
+    public void fullUpgradeDb1to2()
             throws IOException, IdRegenerator.IdCollisionError, ItemNotFound {
         upgradeDb1to2();
         setLabels();
@@ -424,7 +423,6 @@ public class ToolsResource extends AbstractRestResource {
             }).setDbSchemaVersion();
             tx.success();
         }
-        return "ok";
     }
 
 

@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -64,7 +65,7 @@ import java.util.List;
 /**
  * Provides a web service interface for the Repository.
  */
-@Path(Entities.REPOSITORY)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.REPOSITORY)
 public class RepositoryResource extends AbstractAccessibleResource<Repository>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
@@ -74,7 +75,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -89,7 +90,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -111,7 +112,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -124,14 +125,13 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response response = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return response;
         }
     }
 
@@ -149,7 +149,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.DOCUMENTARY_UNIT)
+    @Path("{id:[^/]+}/" + Entities.DOCUMENTARY_UNIT)
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -179,7 +179,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @throws ItemNotFound
      */
     @GET
-    @Path("{id:.+}/eag")
+    @Path("{id:[^/]+}/eag")
     @Produces(MediaType.TEXT_XML)
     public Response exportEag(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)

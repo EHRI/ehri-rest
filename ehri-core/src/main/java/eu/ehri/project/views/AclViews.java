@@ -25,6 +25,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.GlobalPermissionSet;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
+import eu.ehri.project.acl.InheritedItemPermissionSet;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -60,7 +61,7 @@ public final class AclViews implements Scoped<AclViews> {
 
     /**
      * Scoped constructor.
-     * 
+     *
      * @param graph The graph
      * @param scope The ACL scope
      */
@@ -76,7 +77,7 @@ public final class AclViews implements Scoped<AclViews> {
 
     /**
      * Constructor with system scope.
-     * 
+     *
      * @param graph The graph
      */
     public AclViews(FramedGraph<?> graph) {
@@ -86,13 +87,13 @@ public final class AclViews implements Scoped<AclViews> {
     /**
      * Set the global permission matrix for a user.
      *
-     * @param accessor The user
-     * @param permissionSet The new permissions
-     * @param grantee The user/group granting the new permissions
+     * @param accessor      the user
+     * @param permissionSet the new permissions
+     * @param grantee       the user/group granting the new permissions
      * @throws PermissionDenied
      */
     public InheritedGlobalPermissionSet setGlobalPermissionMatrix(Accessor accessor,
-                                       GlobalPermissionSet permissionSet,
+            GlobalPermissionSet permissionSet,
             Accessor grantee) throws PermissionDenied {
         checkGrantPermission(grantee, permissionSet);
         acl.setPermissionMatrix(accessor, permissionSet);
@@ -112,10 +113,10 @@ public final class AclViews implements Scoped<AclViews> {
     /**
      * Set accessors for a given resource. If the given accessor set is empty
      * the resource will be globally visible.
-     * 
-     * @param entity The item
-     * @param accessors The list of users/groups who can access the item
-     * @param user The user making the change
+     *
+     * @param entity    the item
+     * @param accessors the list of users/groups who can access the item
+     * @param user      the user making the change
      */
     public void setAccessors(Accessible entity, Set<Accessor> accessors,
             Accessor user) throws PermissionDenied {
@@ -130,9 +131,9 @@ public final class AclViews implements Scoped<AclViews> {
     /**
      * Check the accessor has GRANT permissions to update another user's
      * permissions.
-     * 
-     * @param accessor The user
-     * @param permissionSet The user's permissions.
+     *
+     * @param accessor      the user
+     * @param permissionSet the user's permissions.
      * @throws PermissionDenied
      */
     private void checkGrantPermission(Accessor accessor,
@@ -162,15 +163,15 @@ public final class AclViews implements Scoped<AclViews> {
 
     /**
      * Set permissions for the given user on the given item.
-     * 
-     * @param item The item
-     * @param accessor The accessor
-     * @param permissionList The set of permissions to grant
-     * @param grantee The user doing the granting
-     * 
+     *
+     * @param item           the item
+     * @param accessor       the accessor
+     * @param permissionList the set of permissions to grant
+     * @param grantee        the user doing the granting
+     * @return the new inherited item permission set
      * @throws PermissionDenied
      */
-    public void setItemPermissions(Accessible item, Accessor accessor,
+    public InheritedItemPermissionSet setItemPermissions(Accessible item, Accessor accessor,
             Set<PermissionType> permissionList, Accessor grantee)
             throws PermissionDenied {
         helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
@@ -180,6 +181,7 @@ public final class AclViews implements Scoped<AclViews> {
                 grantee.as(Actioner.class), EventTypes.setItemPermissions)
                 .addSubjects(accessor.as(Accessible.class))
                 .commit();
+        return acl.getInheritedItemPermissions(item, accessor);
     }
 
     public void revokePermissionGrant(PermissionGrant grant, Accessor user)
@@ -194,7 +196,7 @@ public final class AclViews implements Scoped<AclViews> {
                     break;
                 default:
                     helper.checkEntityPermission(
-                        tg.as(Accessible.class), user, PermissionType.GRANT);
+                            tg.as(Accessible.class), user, PermissionType.GRANT);
             }
         }
         acl.revokePermissionGrant(grant);
@@ -205,9 +207,9 @@ public final class AclViews implements Scoped<AclViews> {
      * has on the user, so requires grant permissions for the user as
      * we as modify permissions for the group.
      *
-     * @param group The group
-     * @param user The user to add to the group
-     * @param grantee The user performing the action
+     * @param group   the group
+     * @param user    the user to add to the group
+     * @param grantee the user performing the action
      * @throws PermissionDenied
      */
     public void addAccessorToGroup(Group group, Accessor user, Accessor grantee)
@@ -225,9 +227,9 @@ public final class AclViews implements Scoped<AclViews> {
      * Remove a user from a group. Just as with adding uers, this requires
      * grant permissions for the user and modify permissions for the group.
      *
-     * @param group The group
-     * @param user The user to add to the group
-     * @param grantee The user performing the action
+     * @param group   the group
+     * @param user    the user to add to the group
+     * @param grantee the user performing the action
      * @throws PermissionDenied
      */
     public void removeAccessorFromGroup(Group group, Accessor user, Accessor grantee)

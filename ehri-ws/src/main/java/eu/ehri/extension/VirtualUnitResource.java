@@ -24,6 +24,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -50,7 +51,7 @@ import java.util.List;
 /**
  * Provides a web service interface for the VirtualUnit type
  */
-@Path(Entities.VIRTUAL_UNIT)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
@@ -66,7 +67,7 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -81,7 +82,7 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
@@ -100,7 +101,7 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + INCLUDED)
+    @Path("{id:[^/]+}/" + INCLUDED)
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -115,7 +116,7 @@ public final class VirtualUnitResource extends
     }
 
     @POST
-    @Path("{id:.+}/" + INCLUDED)
+    @Path("{id:[^/]+}/" + INCLUDED)
     public Response addIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
@@ -130,7 +131,7 @@ public final class VirtualUnitResource extends
     }
 
     @DELETE
-    @Path("{id:.+}/" + INCLUDED)
+    @Path("{id:[^/]+}/" + INCLUDED)
     public Response removeIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
@@ -145,7 +146,7 @@ public final class VirtualUnitResource extends
     }
 
     @POST
-    @Path("{from:.+}/" + INCLUDED + "/{to:.+}")
+    @Path("{from:[^/]+}/" + INCLUDED + "/{to:[^/]+}")
     public Response moveIncludedVirtualUnits(
             @PathParam("from") String fromId, @PathParam("to") String toId,
             @QueryParam(ID_PARAM) List<String> includedIds)
@@ -191,7 +192,7 @@ public final class VirtualUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -204,21 +205,20 @@ public final class VirtualUnitResource extends
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return item;
         }
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.VIRTUAL_UNIT)
+    @Path("{id:[^/]+}/" + Entities.VIRTUAL_UNIT)
     public Response createChildVirtualUnit(@PathParam("id") String id,
                                            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
                                            @QueryParam(ID_PARAM) List<String> includedIds)
@@ -244,23 +244,6 @@ public final class VirtualUnitResource extends
             });
             tx.success();
             return item;
-        }
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("forUser/{userId:.+}")
-    public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
-            throws AccessDenied, ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            Accessor accessor = manager.getEntity(userId, Accessor.class);
-            Accessor currentUser = getRequesterUserProfile();
-            Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
-            return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
         }
     }
 

@@ -42,7 +42,7 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.persistence.TraversalCallback;
 
@@ -98,17 +98,17 @@ public final class AnnotationViews implements Scoped<AnnotationViews> {
      */
     public Annotation create(String id, String did, Bundle bundle, UserProfile user, Collection<Accessor> accessibleTo)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound {
-        Accessible entity = manager.getEntity(id, Accessible.class);
+        Annotatable entity = manager.getEntity(id, Annotatable.class);
         Annotatable dep = manager.getEntity(did, Annotatable.class);
-        helper.checkEntityPermission(entity, user, PermissionType.ANNOTATE);
-        helper.checkReadAccess(entity, user);
+        helper.checkEntityPermission(entity.as(Accessible.class), user, PermissionType.ANNOTATE);
+        helper.checkReadAccess(entity.as(Accessible.class), user);
 
         if (!(entity.equals(dep) || isInSubtree(entity, dep))) {
             // FIXME: Better error message here...
             throw new PermissionDenied("Item is not covered by parent item's permissions");
         }
 
-        Annotation annotation = new BundleDAO(graph).create(bundle, Annotation.class);
+        Annotation annotation = new BundleManager(graph).create(bundle, Annotation.class);
         entity.addAnnotation(annotation);
         if (!entity.equals(dep)) {
             dep.addAnnotationPart(annotation);

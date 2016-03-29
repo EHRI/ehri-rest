@@ -20,6 +20,7 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
+import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -34,7 +35,8 @@ import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class RepositoryRestClientTest extends BaseRestClientTest {
+
+public class RepositoryRestClientTest extends AbstractRestClientTest {
 
     static final String COUNTRY_CODE = "nl";
     static final String ID = "r1";
@@ -54,7 +56,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     public void testCreateRepository() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
                 .entity(agentTestData)
                 .post(ClientResponse.class);
 
@@ -69,7 +71,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     public void testCreateRepositoryWithExistingIdentifier() throws Exception {
         String json = Bundle.fromString(agentTestData)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
-        URI uri = ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY);
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 uri).entity(json)
                 .post(ClientResponse.class);
@@ -87,7 +89,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     public void testUpdateRepositoryByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
                 .entity(agentTestData)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
@@ -107,7 +109,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
         // Create
         String badRepositoryTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
                 .entity(badRepositoryTestData)
                 .post(ClientResponse.class);
 
@@ -124,12 +126,12 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     @Test
     public void testDeleteRepository() throws Exception {
         // Create
-        URI uri = ehriUri(Entities.REPOSITORY, ID);
+        URI uri = entityUri(Entities.REPOSITORY, ID);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 uri)
                 .delete(ClientResponse.class);
 
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri)
@@ -158,7 +160,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
         // the scope of r2
         String permData = "{\"DocumentaryUnit\": [\"create\"]}";
 
-        URI grantUri = ehriUri(Entities.PERMISSION, LIMITED_USER_NAME, "scope", "r2");
+        URI grantUri = ehriUri(PermissionsResource.ENDPOINT, LIMITED_USER_NAME, "scope", "r2");
 
         response = jsonCallAs(getAdminUserProfileId(), grantUri)
                 .entity(permData)
@@ -183,7 +185,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
         // others the ability to create within that scope.
         String otherUserName = "linda";
         String grantPermData = "{\"DocumentaryUnit\": [\"grant\"]}";
-        URI otherGrantUri = ehriUri(Entities.PERMISSION, otherUserName, "scope", "r2");
+        URI otherGrantUri = ehriUri(PermissionsResource.ENDPOINT, otherUserName, "scope", "r2");
 
         response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri)
                 .entity(grantPermData)
@@ -194,7 +196,6 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     private URI getCreationUriFor(String id) {
-        return ehriUri(Entities.REPOSITORY, id, Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, id, Entities.DOCUMENTARY_UNIT);
     }
-
 }

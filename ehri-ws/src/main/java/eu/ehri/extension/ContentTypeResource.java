@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.project.definitions.Entities;
@@ -40,7 +41,7 @@ import javax.ws.rs.core.Response;
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-@Path(Entities.CONTENT_TYPE)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CONTENT_TYPE)
 public class ContentTypeResource extends AbstractAccessibleResource<ContentType>
         implements GetResource, ListResource {
 
@@ -50,7 +51,7 @@ public class ContentTypeResource extends AbstractAccessibleResource<ContentType>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);

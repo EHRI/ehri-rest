@@ -40,9 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-/**
- * User: mikebryant
- */
+
 public class AclViewsTest extends AbstractFixtureTest {
 
     private AclViews aclViews;
@@ -216,10 +214,10 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("soma", Group.class);
         Accessor grantee = invalidUser;
-        assertFalse(aclManager.belongsToAdmin(grantee));
+        assertFalse(AclManager.belongsToAdmin(grantee));
         // Grant the user specific permissions to update the group
         group.addMember(grantee);
-        assertFalse(aclManager.belongsToAdmin(grantee));
+        assertFalse(AclManager.belongsToAdmin(grantee));
         // Grant UPDATE permissions on the Group
         aclManager.grantPermission(graph.frame(user.asVertex(),
                 PermissionGrantTarget.class), PermissionType.GRANT, grantee);

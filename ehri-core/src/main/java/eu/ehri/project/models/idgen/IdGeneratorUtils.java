@@ -55,7 +55,7 @@ public class IdGeneratorUtils {
         logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, Lists.newArrayList(scopeIds));
         ListMultimap<String, String> errors = ArrayListMultimap.create();
         errors.put(dataKey, MessageFormat.format(
-                Messages.getString("BundleDAO.uniquenessError"), ident));
+                Messages.getString("BundleManager.uniquenessError"), ident));
         return errors;
     }
 

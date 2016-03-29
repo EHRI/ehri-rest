@@ -45,9 +45,9 @@ import java.util.Set;
 /**
  * Class responsible for creating, updating and deleting Bundles.
  */
-public final class BundleDAO {
+public final class BundleManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(BundleDAO.class);
+    private static final Logger logger = LoggerFactory.getLogger(BundleManager.class);
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
@@ -60,7 +60,7 @@ public final class BundleDAO {
      * @param graph The graph
      * @param scopeIds The ID set for the current scope.
      */
-    public BundleDAO(FramedGraph<?> graph, Collection<String> scopeIds) {
+    public BundleManager(FramedGraph<?> graph, Collection<String> scopeIds) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).dependentOnly().build();
@@ -72,7 +72,7 @@ public final class BundleDAO {
      *
      * @param graph The graph
      */
-    public BundleDAO(FramedGraph<?> graph) {
+    public BundleManager(FramedGraph<?> graph) {
         this(graph, Lists.<String>newArrayList());
     }
 

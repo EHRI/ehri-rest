@@ -54,7 +54,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.views.impl.CrudViews;
@@ -80,7 +80,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final FramedGraph<?> framedGraph;
     private final Actioner actioner;
     private final Vocabulary vocabulary;
-    private final BundleDAO dao;
+    private final BundleManager dao;
     private final boolean tolerant;
     private final String format;
     private final String defaultLang;
@@ -104,7 +104,7 @@ public final class JenaSkosImporter implements SkosImporter {
         this.tolerant = tolerant;
         this.format = format;
         this.defaultLang = defaultLang;
-        this.dao = new BundleDAO(framedGraph, vocabulary.idPath());
+        this.dao = new BundleManager(framedGraph, vocabulary.idPath());
     }
 
     /**

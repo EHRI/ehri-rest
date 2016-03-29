@@ -30,7 +30,7 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 
-public class HistoricalAgentRestClientTest extends BaseRestClientTest {
+public class HistoricalAgentRestClientTest extends AbstractRestClientTest {
 
     static final String TEST_ID = "a1";
     static final String UPDATED_NAME = "UpdatedNameTEST";
@@ -46,7 +46,7 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
     public void testCreateAuthority() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.HISTORICAL_AGENT))
+                entityUri(Entities.HISTORICAL_AGENT))
                 .entity(authorityTestData)
                 .post(ClientResponse.class);
 
@@ -65,7 +65,7 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.HISTORICAL_AGENT)).entity(json)
+                entityUri(Entities.HISTORICAL_AGENT)).entity(json)
                 .post(ClientResponse.class);
         assertStatus(BAD_REQUEST, response);
     }
@@ -74,7 +74,7 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
     public void testUpdateAuthorityByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.HISTORICAL_AGENT)).entity(authorityTestData)
+                entityUri(Entities.HISTORICAL_AGENT)).entity(authorityTestData)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
 
@@ -93,7 +93,7 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
         // Create
         String badAuthorityTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.HISTORICAL_AGENT)).entity(badAuthorityTestData)
+                entityUri(Entities.HISTORICAL_AGENT)).entity(badAuthorityTestData)
                 .post(ClientResponse.class);
 
         assertStatus(BAD_REQUEST, response);
@@ -102,12 +102,11 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
     @Test
     public void testDeleteAuthority() throws Exception {
         // Create
-        URI uri = ehriUri(Entities.HISTORICAL_AGENT, TEST_ID);
+        URI uri = entityUri(Entities.HISTORICAL_AGENT, TEST_ID);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 uri)
                 .delete(ClientResponse.class);
-
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);

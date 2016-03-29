@@ -34,7 +34,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Crud;
@@ -191,7 +191,7 @@ public final class CrudViews<E extends Accessible> implements Crud<E> {
     }
 
     // Helpers
-    private BundleDAO getPersister(PermissionScope scope) {
-        return new BundleDAO(graph, scope.idPath());
+    private BundleManager getPersister(PermissionScope scope) {
+        return new BundleManager(graph, scope.idPath());
     }
 }

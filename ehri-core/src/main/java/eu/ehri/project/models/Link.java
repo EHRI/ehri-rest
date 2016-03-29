@@ -27,6 +27,7 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.Promotable;
 import eu.ehri.project.models.base.Temporal;
@@ -36,7 +37,7 @@ import eu.ehri.project.models.base.Temporal;
  * a text property or some other entity.
  */
 @EntityType(EntityClass.LINK)
-public interface Link extends Promotable, Temporal {
+public interface Link extends Promotable, Temporal, Annotatable {
 
     @Fetch(value = Ontology.LINK_HAS_LINKER, numLevels = 0)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)

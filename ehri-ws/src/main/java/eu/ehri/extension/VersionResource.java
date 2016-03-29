@@ -20,12 +20,10 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.project.core.Tx;
+import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.events.Version;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -36,11 +34,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 /**
- * Provides a RESTful(ish) interface for accessing item versions.
+ * Web-service interface for accessing item versions.
  */
-@Path(Entities.VERSION)
-public class VersionResource extends
-        AbstractAccessibleResource<Version> {
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VERSION)
+public class VersionResource extends AbstractAccessibleResource<Version> implements GetResource {
 
     public VersionResource(@Context GraphDatabaseService database) {
         super(database, Version.class);
@@ -52,38 +49,11 @@ public class VersionResource extends
      * @param id the version id
      * @return a version item
      * @throws ItemNotFound
-     * @throws AccessDenied
      */
     @GET
     @Path("{id:[^/]+}")
-    public Response getVersion(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied {
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
-    }
-
-    /**
-     * Lookup and page the versions for a given item.
-     *
-     * @param id the event id
-     * @return a list of versions
-     * @throws ItemNotFound
-     * @throws AccessDenied
-     */
-    @GET
-    @Path("for/{id:.+}")
-    public Response listFor(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied {
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            Accessor user = getRequesterUserProfile();
-            Accessible item = views
-                    .setClass(Accessible.class)
-                    .detail(id, user);
-            return streamingPage(getQuery(Version.class).setStream(true)
-                    .page(item.getAllPriorVersions(), user), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
-        }
     }
 }

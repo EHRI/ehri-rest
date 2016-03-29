@@ -21,49 +21,50 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.extension.GenericResource;
+import eu.ehri.extension.UserProfileResource;
+import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
-import eu.ehri.extension.SystemEventResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.views.EventViews;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.base.AbstractRestResource.ID_PARAM;
 import static eu.ehri.extension.UserProfileResource.FOLLOWING;
 import static eu.ehri.extension.UserProfileResource.WATCHING;
+import static eu.ehri.extension.base.AbstractRestResource.ID_PARAM;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
-public class SystemEventRestClientTest extends BaseRestClientTest {
+public class SystemEventRestClientTest extends AbstractRestClientTest {
 
     static final String COUNTRY_CODE = "nl";
 
-    private String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
+    private static final String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
 
     @Test
     public void testListActions() throws Exception {
         // Create a new agent. We're going to test that this creates
         // a corresponding action.
-        String url = "/" + Entities.SYSTEM_EVENT;
+        URI uri = entityUri(Entities.SYSTEM_EVENT);
         List<List<Map<String, Object>>> actionsBefore = getItemListOfLists(
-                url, getAdminUserProfileId());
+                uri, getAdminUserProfileId());
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
                 .entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
         assertStatus(CREATED, response);
 
         List<List<Map<String, Object>>> actionsAfter = getItemListOfLists(
-                url, getAdminUserProfileId());
+                uri, getAdminUserProfileId());
         System.out.println(actionsAfter);
 
         // Having created a new Repository, we should have at least one Event.
@@ -76,26 +77,26 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // a corresponding action.
 
         jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
                 .entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
         // Add a good user filter...
         MultivaluedMap<String, String> goodFilters = new MultivaluedMapImpl();
-        goodFilters.add(SystemEventResource.USER_PARAM, getAdminUserProfileId());
+        goodFilters.add(AbstractAccessibleResource.USER_PARAM, getAdminUserProfileId());
 
         // Add a useless filter that should remove all results
         MultivaluedMap<String, String> badFilters = new MultivaluedMapImpl();
-        badFilters.add(SystemEventResource.USER_PARAM, "nobody");
+        badFilters.add(AbstractAccessibleResource.USER_PARAM, "nobody");
 
-        String url = "/" + Entities.SYSTEM_EVENT;
+        URI url = entityUri(Entities.SYSTEM_EVENT);
         List<List<Map<String, Object>>> goodFiltered = getItemListOfLists(
                 url, getAdminUserProfileId(), goodFilters);
 
         List<List<Map<String, Object>>> badFiltered = getItemListOfLists(
                 url, getAdminUserProfileId(), badFilters);
 
-        assertTrue(goodFiltered.size() > 0);
+        assertFalse(goodFiltered.isEmpty());
         assertEquals(0, badFiltered.size());
     }
 
@@ -104,9 +105,9 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Create an item
         client.resource(
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY));
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY));
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
                 .entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
@@ -115,7 +116,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         String id = url.substring(url.lastIndexOf("/") + 1);
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.SYSTEM_EVENT, "for", id))
+                ehriUri(GenericResource.ENDPOINT, id, GenericResource.EVENTS))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -125,7 +126,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Create an event by updating an item...
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.REPOSITORY, "r1"))
+                entityUri(Entities.REPOSITORY, "r1"))
                 .entity(jsonAgentTestString)
                 .header(AbstractRestResource.LOG_MESSAGE_HEADER_NAME, "Testing update")
                 .put(ClientResponse.class);
@@ -134,21 +135,20 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // At present, the personalised event stream for the validUser user should
         // contain all the regular events.
         String user = getRegularUserProfileId();
-        String personalisedEventUrl = "/" + Entities.SYSTEM_EVENT + "/aggregateForUser/" + user;
+        URI personalisedEventUrl = entityUri(Entities.USER_PROFILE, user, UserProfileResource.EVENTS);
         List<List<Map<String, Object>>> events = getItemListOfLists(personalisedEventUrl, user);
         assertEquals(1, events.size());
 
         // Now only fetch events related to items we're watching - this list
         // should currently be empty...
-        String personalisedEventUrlWatched = personalisedEventUrl + "?" + SystemEventResource.SHOW_PARAM + "=" + EventViews.ShowType.watched;
+        URI personalisedEventUrlWatched = entityUriBuilder(
+                    Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
+                .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventViews.ShowType.watched).build();
         events = getItemListOfLists(personalisedEventUrlWatched, user);
         assertEquals(0, events.size());
 
         // Now start watching item r1.
-        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user)
-                .segment(WATCHING)
+        URI watchUrl = entityUriBuilder(Entities.USER_PROFILE, user, WATCHING)
                 .queryParam(ID_PARAM, "r1").build();
 
         jsonCallAs(user, watchUrl).post(ClientResponse.class);
@@ -166,16 +166,14 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Only get events for people we follow, excluding those
         // for items we watch...
-        String personalisedEventUrlFollowed = personalisedEventUrl + "?" + SystemEventResource.SHOW_PARAM
-                + "=" + EventViews.ShowType.followed;
+        URI personalisedEventUrlFollowed = entityUriBuilder(
+                    Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
+                .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventViews.ShowType.followed).build();
         events = getItemListOfLists(personalisedEventUrlFollowed, user);
         assertEquals(0, events.size());
 
         // Now follow the other user...
-        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user)
-                .segment(FOLLOWING)
+        URI followUrl = entityUriBuilder(Entities.USER_PROFILE, user, FOLLOWING)
                 .queryParam(ID_PARAM, getAdminUserProfileId()).build();
         jsonCallAs(user, followUrl).post(ClientResponse.class);
 

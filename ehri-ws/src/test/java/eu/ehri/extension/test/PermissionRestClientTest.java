@@ -21,6 +21,9 @@ package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import eu.ehri.project.acl.ContentTypes;
@@ -39,15 +42,18 @@ import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import static eu.ehri.extension.PermissionsResource.ENDPOINT;
+
 /**
  * Test Permissions resource.
  */
-public class PermissionRestClientTest extends BaseRestClientTest {
+public class PermissionRestClientTest extends AbstractRestClientTest {
 
     static final String LIMITED_USER_NAME = "reto";
     static final String TEST_HOLDER_IDENTIFIER = "r2";
@@ -65,7 +71,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
             UniformInterfaceException, IOException {
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
+                ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -81,14 +87,14 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Set the permission via REST
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
+                ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .entity(jsonMapper.writeValueAsBytes(getTestMatrix()))
                 .post(ClientResponse.class);
 
         assertStatus(OK, response);
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
+                ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -111,7 +117,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // obviously fail...
         byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
+                ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
         assertStatus(UNAUTHORIZED, response);
         // TODO: Figure out why no content ever seems to be returned here?
@@ -122,7 +128,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // If we give a permission matrix for a content type that doesn't
         // exist we should get a DeserializationError in return.
-        Map<String, List<String>> testMatrix = getTestMatrix();
+        Map<String, List<String>> testMatrix = Maps.newHashMap(getTestMatrix());
         testMatrix.put(
                 "IDONTEXIST",
                 new ImmutableList.Builder<String>().add(
@@ -131,7 +137,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // Set the permission via REST
         byte[] bytes = jsonMapper.writeValueAsBytes(testMatrix);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
+                ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
         assertStatus(BAD_REQUEST, response);
     }
@@ -147,7 +153,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // Set the permission via REST
         byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
+                ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
 
         assertStatus(OK, response);
@@ -164,8 +170,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         response = jsonCallAs(LIMITED_USER_NAME,
                 response.getLocation()).delete(ClientResponse.class);
 
-        // Should get CREATED this time...
-        assertStatus(OK, response);
+        // Should get NO_CONTENT this time...
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
@@ -191,7 +197,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // the scope of r2
         String permData = "{\"DocumentaryUnit\": [\"create\"]}";
 
-        URI grantUri = ehriUri(Entities.PERMISSION, LIMITED_USER_NAME, "scope", r2);
+        URI grantUri = ehriUri(ENDPOINT, LIMITED_USER_NAME, "scope", r2);
 
         response = jsonCallAs(getAdminUserProfileId(), grantUri)
                 .entity(permData)
@@ -216,7 +222,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // others the ability to create within that scope.
         String otherUserName = "linda";
         String grantPermData = "{\"DocumentaryUnit\": [\"grant\"]}";
-        URI otherGrantUri = ehriUri(Entities.PERMISSION, otherUserName, "scope", r2);
+        URI otherGrantUri = ehriUri(ENDPOINT, otherUserName, "scope", r2);
 
         response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri).entity(grantPermData)
                 .post(ClientResponse.class);
@@ -230,7 +236,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Fetch an existing item's data
         String targetResourceId = "c4";
-        URI targetResourceUri = ehriUri(Entities.DOCUMENTARY_UNIT, targetResourceId);
+        URI targetResourceUri = entityUri(Entities.DOCUMENTARY_UNIT, targetResourceId);
 
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
                 .get(ClientResponse.class);
@@ -251,8 +257,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Set the permission via REST
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.PERMISSION,
-                        LIMITED_USER_NAME, targetResourceId))
+                ehriUri(ENDPOINT,
+                        LIMITED_USER_NAME, "item", targetResourceId))
                 .entity(permData)
                 .post(ClientResponse.class);
 
@@ -268,8 +274,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
                 .delete(ClientResponse.class);
 
-        // Should get CREATED this time...
-        assertStatus(OK, response);
+        // Should get NO_CONTENT this time...
+        assertStatus(NO_CONTENT, response);
     }
 
     private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(String json) throws IOException {
@@ -278,28 +284,28 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         return jsonMapper.readValue(json, typeRef);
     }
 
-    @SuppressWarnings("serial")
     private Map<String, List<String>> getTestMatrix() {
-        // @formatter:off
-        return new HashMap<String, List<String>>() {{
-            put(ContentTypes.DOCUMENTARY_UNIT.getName(), new LinkedList<String>() {{
-                add(PermissionType.CREATE.getName());
-                add(PermissionType.DELETE.getName());
-                add(PermissionType.UPDATE.getName());
-            }});
-            put(ContentTypes.REPOSITORY.getName(), new LinkedList<String>() {{
-                add(PermissionType.CREATE.getName());
-                add(PermissionType.DELETE.getName());
-                add(PermissionType.UPDATE.getName());
-            }});
-        }};
+        return ImmutableMap.<String, List<String>>of(
+                ContentTypes.DOCUMENTARY_UNIT.getName(),
+                Lists.newArrayList(
+                        PermissionType.CREATE.getName(),
+                        PermissionType.DELETE.getName(),
+                        PermissionType.UPDATE.getName()
+                ),
+                ContentTypes.REPOSITORY.getName(),
+                Lists.newArrayList(
+                        PermissionType.CREATE.getName(),
+                        PermissionType.DELETE.getName(),
+                        PermissionType.UPDATE.getName()
+                )
+        );
     }
 
     private URI getCreationUri() {
-        return ehriUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, Entities.DOCUMENTARY_UNIT);
     }
 
     private URI getCreationUriFor(String id) {
-        return ehriUri(Entities.REPOSITORY, id, Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, id, Entities.DOCUMENTARY_UNIT);
     }
 }

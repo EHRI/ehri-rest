@@ -37,7 +37,7 @@ import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +94,7 @@ public class VirtualEadImporter extends EaImporter {
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
-        BundleDAO persister = getPersister(idPath);
+        BundleManager persister = getPersister(idPath);
 
         boolean isVirtualLevel = isVirtualLevel(itemData);
         Bundle unit = new Bundle(unitEntity, extractVirtualUnit(itemData));

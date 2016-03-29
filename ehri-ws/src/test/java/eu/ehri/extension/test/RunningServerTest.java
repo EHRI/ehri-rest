@@ -48,7 +48,7 @@ public abstract class RunningServerTest {
     }
 
     @AfterClass
-    public static void shutdownDatabase() throws Exception {
+    public static void shutdownDatabase() {
         runner.stop();
     }
 
@@ -57,12 +57,12 @@ public abstract class RunningServerTest {
     }
 
     @Before
-    public void setupDb() throws Exception {
+    public void setupDb() {
         runner.setUpData();
     }
 
     @After
-    public void resetDb() throws Exception {
+    public void resetDb() {
         runner.tearDownData();
     }
 }

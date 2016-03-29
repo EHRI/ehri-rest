@@ -37,7 +37,7 @@ import eu.ehri.project.persistence.Bundle;
 
 import java.util.Map;
 
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 
 /**
@@ -52,7 +52,7 @@ public class CsvHistoricalAgentImporter extends CsvAuthoritativeItemImporter {
     @Override
     public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleDAO persister = getPersister();
+        BundleManager persister = getPersister();
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))

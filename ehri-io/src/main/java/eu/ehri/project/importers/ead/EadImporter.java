@@ -45,7 +45,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.utils.Slugify;
@@ -100,7 +100,7 @@ public class EadImporter extends EaImporter {
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
-        BundleDAO persister = getPersister(idPath);
+        BundleManager persister = getPersister(idPath);
 
         List<Map<String, Object>> extractedDates = extractDates(itemData);
         replaceDates(itemData, extractedDates);

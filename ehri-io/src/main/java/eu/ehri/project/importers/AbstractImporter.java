@@ -31,7 +31,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,13 +81,13 @@ public abstract class AbstractImporter<T> {
         return permissionScope;
     }
 
-    public BundleDAO getPersister(List<String> scopeIds) {
-        return new BundleDAO(framedGraph,
+    public BundleManager getPersister(List<String> scopeIds) {
+        return new BundleManager(framedGraph,
                 Lists.newArrayList(Iterables.concat(permissionScope.idPath(), scopeIds)));
     }
 
-    public BundleDAO getPersister() {
-        return new BundleDAO(framedGraph, permissionScope.idPath());
+    public BundleManager getPersister() {
+        return new BundleManager(framedGraph, permissionScope.idPath());
     }
 
     /**

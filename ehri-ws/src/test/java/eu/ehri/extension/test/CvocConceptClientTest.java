@@ -36,7 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-public class CvocConceptClientTest extends BaseRestClientTest {
+public class CvocConceptClientTest extends AbstractRestClientTest {
     static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
     static final String TEST_CVOC_CONCEPT_ID = "cvocc1";
 
@@ -69,7 +69,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         // Where is my deletion test, I want to know if it works
         response = jsonCallAs(getAdminUserProfileId(), location)
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
 
     }
 
@@ -117,7 +117,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
         // check if apple's broader is fruit
         // get apple's broader concepts
-        response = testGet(ehriUri(Entities.CVOC_CONCEPT, appleIdStr, "broader", "list"));
+        response = testGet(entityUri(Entities.CVOC_CONCEPT, appleIdStr, "broader", "list"));
         // check if fruit is in there
         assertTrue(containsIdentifier(response, "fruit"));
 
@@ -131,7 +131,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // apple should still exist
-        response = testGet(ehriUri(Entities.CVOC_CONCEPT, appleIdStr));
+        response = testGet(entityUri(Entities.CVOC_CONCEPT, appleIdStr));
         assertStatus(OK, response);
 
         // but not as a narrower of fruit!
@@ -187,7 +187,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
         // check if apple's relatedBy is tree
         // get apple's broader concepts
-        response = testGet(ehriUri(Entities.CVOC_CONCEPT,
+        response = testGet(entityUri(Entities.CVOC_CONCEPT,
                 appleIdStr, "relatedBy", "list"));
         // check if tree is in there
         assertTrue(containsIdentifier(response, "tree"));
@@ -202,7 +202,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // apple should still exist
-        response = testGet(ehriUri(Entities.CVOC_CONCEPT, appleIdStr));
+        response = testGet(entityUri(Entities.CVOC_CONCEPT, appleIdStr));
         assertStatus(OK, response);
 
         // but not as a related of tree!
@@ -213,12 +213,12 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
     @Test
     public void testGetConcept() throws Exception {
-        testGet(ehriUri(Entities.CVOC_CONCEPT, TEST_CVOC_CONCEPT_ID));
+        testGet(entityUri(Entities.CVOC_CONCEPT, TEST_CVOC_CONCEPT_ID));
     }
 
     @Test
     public void testDeleteConcept() throws Exception {
-        URI url = ehriUri(Entities.CVOC_CONCEPT, TEST_CVOC_CONCEPT_ID);
+        URI url = entityUri(Entities.CVOC_CONCEPT, TEST_CVOC_CONCEPT_ID);
         testDelete(url);
 
         // Check it's really gone...
@@ -264,8 +264,9 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).delete(ClientResponse.class);
-        assertStatus(OK, response);
+                        getAdminUserProfileId())
+                .delete(ClientResponse.class);
+        assertStatus(NO_CONTENT, response);
 
         return response;
     }
@@ -281,6 +282,6 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
     private URI getCreationUri() {
         // always create Concepts under a Vocabulary
-        return ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, Entities.CVOC_CONCEPT);
+        return entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, Entities.CVOC_CONCEPT);
     }
 }

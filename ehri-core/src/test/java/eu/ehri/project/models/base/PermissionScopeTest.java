@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Before;
@@ -93,7 +93,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
 
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
         Repository repo = manager.getEntity("r1", Repository.class);
-        BundleDAO dao = new BundleDAO(graph, repo.idPath());
+        BundleManager dao = new BundleManager(graph, repo.idPath());
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
         assertEquals("nl-r1-someid_01", doc.getId());
         doc.setPermissionScope(repo);

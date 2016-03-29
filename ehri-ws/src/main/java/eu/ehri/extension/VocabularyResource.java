@@ -19,10 +19,9 @@
 
 package eu.ehri.extension;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.hp.hpl.jena.rdf.model.Model;
 import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -63,7 +62,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -73,7 +71,7 @@ import java.util.List;
  * Provides a web service interface for the Vocabulary model. Vocabularies are
  * containers for Concepts.
  */
-@Path(Entities.CVOC_VOCABULARY)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
@@ -83,7 +81,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -98,7 +96,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(
             @PathParam("id") String id,
@@ -132,7 +130,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -145,20 +143,19 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Response item = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return item;
         }
     }
 
     @DELETE
-    @Path("{id:.+}/all")
-    public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
+    @Path("{id:[^/]+}/all")
+    public void deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
@@ -176,7 +173,6 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                 }
             }
             tx.success();
-            return Response.status(Status.OK).build();
         } catch (SerializationError | ValidationError e) {
             throw new RuntimeException(e);
         }
@@ -185,7 +181,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.CVOC_CONCEPT)
+    @Path("{id:[^/]+}/" + Entities.CVOC_CONCEPT)
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -216,7 +212,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
      * @throws ItemNotFound
      */
     @GET
-    @Path("{id:.+}/export")
+    @Path("{id:[^/]+}/export")
     @Produces({TURTLE_MIMETYPE, RDF_XML_MIMETYPE, N3_MIMETYPE})
     public Response exportSkos(@PathParam("id") String id,
             final @QueryParam("format") String format,

@@ -96,7 +96,7 @@ public final class ActionManager {
     private final GraphManager manager;
     private final Entity scope;
     private final Serializer versionSerializer;
-    private final BundleDAO dao;
+    private final BundleManager dao;
 
     /**
      * Constructor with scope.
@@ -108,7 +108,7 @@ public final class ActionManager {
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
         this.versionSerializer = new Serializer.Builder(graph).dependentOnly().build();
-        this.dao = new BundleDAO(graph);
+        this.dao = new BundleManager(graph);
     }
 
     /**

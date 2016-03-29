@@ -23,5 +23,5 @@ package eu.ehri.project.models.base;
  * An abstract entity representing either a documentary (physical) unit
  * or a virtual unit.
  */
-public interface AbstractUnit extends Described, ItemHolder, Watchable {
+public interface AbstractUnit extends Described, ItemHolder, Watchable, Versioned, Annotatable {
 }

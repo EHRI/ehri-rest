@@ -39,11 +39,12 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class GroupRestClientTest extends BaseRestClientTest {
+public class GroupRestClientTest extends AbstractRestClientTest {
 
     static final String TEST_GROUP_NAME = "admin";
     static final String CURRENT_ADMIN_USER = "mike";
@@ -54,7 +55,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         // Create
         String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.GROUP)).entity(jsonGroupTestString)
+                entityUri(Entities.GROUP)).entity(jsonGroupTestString)
                 .post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -69,7 +70,9 @@ public class GroupRestClientTest extends BaseRestClientTest {
     public void testCreateGroupWithMembers() throws Exception {
         // Create
         String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
-        URI uri = UriBuilder.fromPath(getExtensionEntryPointUri()).segment(Entities.GROUP)
+        URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX)
+                .segment(Entities.GROUP)
                 .queryParam(GroupResource.MEMBER_PARAM, "linda").build();
         ClientResponse response = client.resource(uri)
                 .accept(MediaType.APPLICATION_JSON)
@@ -98,18 +101,18 @@ public class GroupRestClientTest extends BaseRestClientTest {
     public void testAddUser() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.GROUP, TEST_GROUP_NAME, NON_ADMIN_USER))
+                entityUri(Entities.GROUP, TEST_GROUP_NAME, NON_ADMIN_USER))
                 .post(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
     public void testRemoveUser() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER))
+                entityUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER))
                 .delete(ClientResponse.class);
-        assertStatus(OK, response);
+        assertStatus(NO_CONTENT, response);
     }
 
     @Test
@@ -117,7 +120,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         final String GROUP_ID = "kcl";
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.GROUP, GROUP_ID, "list"))
+                entityUri(Entities.GROUP, GROUP_ID, "list"))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);

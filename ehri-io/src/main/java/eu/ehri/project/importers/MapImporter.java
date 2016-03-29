@@ -30,7 +30,7 @@ import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -225,7 +225,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
 
     @Override
     public MaintenanceEvent importMaintenanceEvent(Map<String, Object> event) {
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
+        BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
         try {
             Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
             //only if some source is given (especially with a creation) should a ME be created

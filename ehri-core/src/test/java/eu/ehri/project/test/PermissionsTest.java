@@ -36,7 +36,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Before;
@@ -66,7 +66,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void createTestUser() throws ValidationError, IntegrityError,
             ItemNotFound {
         // Add a new, fresh user with no perms to test with...
-        user = new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
+        user = new BundleManager(graph).create(new Bundle(EntityClass.USER_PROFILE,
                 (Map<String, Object>) TestData.getTestUserBundle().get("data")),
                 UserProfile.class);
         views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class);

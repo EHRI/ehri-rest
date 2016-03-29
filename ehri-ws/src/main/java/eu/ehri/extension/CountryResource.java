@@ -42,7 +42,7 @@ import java.util.List;
  * Provides a web service interface for managing countries
  * and creating repositories within them.
  */
-@Path(Entities.COUNTRY)
+@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.COUNTRY)
 public class CountryResource
         extends AbstractAccessibleResource<Country>
         implements CreateResource, GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {
@@ -53,7 +53,7 @@ public class CountryResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
         return getItem(id);
@@ -68,7 +68,7 @@ public class CountryResource
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/list")
+    @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
@@ -101,7 +101,7 @@ public class CountryResource
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -114,14 +114,13 @@ public class CountryResource
     }
 
     @DELETE
-    @Path("{id:.+}")
+    @Path("{id:[^/]+}")
     @Override
-    public Response delete(@PathParam("id") String id)
+    public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Response response = deleteItem(id);
+            deleteItem(id);
             tx.success();
-            return response;
         }
     }
 
@@ -139,7 +138,7 @@ public class CountryResource
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("{id:.+}/" + Entities.REPOSITORY)
+    @Path("{id:[^/]+}/" + Entities.REPOSITORY)
     @Override
     public Response createChild(@PathParam("id") String id,
                                 Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

@@ -38,11 +38,11 @@ import static org.junit.Assert.*;
 /**
  * Test admin REST functions.
  */
-public class AdminRestClientTest extends BaseRestClientTest {
+public class AdminRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testExportGraphSONAsAnon() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_exportGraphSON"));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-graphson"));
         ClientResponse response = resource.get(ClientResponse.class);
         String data = response.getEntity(String.class);
         assertStatus(OK, response);
@@ -53,7 +53,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testExportGraphSONAsAdmin() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_exportGraphSON"));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-graphson"));
         ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
                 .get(ClientResponse.class);
         String data = response.getEntity(String.class);
@@ -64,7 +64,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testExportJSON() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "_exportJSON"));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "export-json"));
         ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
                 .get(ClientResponse.class);
         String data = response.getEntity(String.class);
@@ -74,7 +74,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "createDefaultUserProfile"));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "create-default-user-profile"));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
@@ -87,7 +87,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
         // Create another user and ensure their idents are different and
         // incremental
-        WebResource resource2 = client.resource(ehriUri(ENDPOINT, "createDefaultUserProfile"));
+        WebResource resource2 = client.resource(ehriUri(ENDPOINT, "create-default-user-profile"));
         response = resource2.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 

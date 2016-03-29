@@ -82,6 +82,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final int DEFAULT_LIST_LIMIT = Query.DEFAULT_LIMIT;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
 
+    public static final String RESOURCE_ENDPOINT_PREFIX = "classes";
+
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = new JsonFactory();
 
@@ -121,7 +123,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * Header names
      */
     public static final String RANGE_HEADER_NAME = "Content-Range";
-    public static final String PATCH_HEADER_NAME = "Patch";
+    public static final String PATCH_HEADER_NAME = "X-Patch";
     public static final String AUTH_HEADER_NAME = "X-User";
     public static final String LOG_MESSAGE_HEADER_NAME = "X-LogMessage";
     public static final String STREAM_HEADER_NAME = "X-Stream";
@@ -236,7 +238,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param <T> the generic type of the query object
      * @return a query object
      */
-    protected <T extends Accessible> Query<T> getQuery(Class<T> cls) {
+    protected <T extends Entity> Query<T> getQuery(Class<T> cls) {
         return new Query.Builder<>(graph, cls)
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
                 .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
@@ -709,6 +711,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected URI getItemUri(Entity item) {
         return uriInfo.getBaseUriBuilder()
+                .path(RESOURCE_ENDPOINT_PREFIX)
                 .path(item.getType())
                 .path(item.getId()).build();
     }
@@ -717,13 +720,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * Return a response from a new item with a 201 CREATED status.
      *
      * @param frame A newly-created item
-     * @return A 201 response.
-     * @throws SerializationError
+     * @return a 201 response with the new item's location set
      */
-    protected Response creationResponse(Entity frame) throws SerializationError {
-        return Response.status(Response.Status.CREATED).location(getItemUri(frame))
-                .entity(getRepresentation(frame))
-                .build();
+    protected Response creationResponse(Entity frame) {
+        try {
+            return Response.status(Response.Status.CREATED).location(getItemUri(frame))
+                    .entity(getRepresentation(frame))
+                    .build();
+        } catch (SerializationError serializationError) {
+            throw new RuntimeException(serializationError);
+        }
     }
 
     /**

@@ -38,15 +38,20 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.persistence.TraversalCallback;
 
 import java.util.Set;
 
-
-public class DescriptionViews <E extends Described> {
+/**
+ * A view class for managing dependent item's, belonging to
+ * a top-level content type.
+ *
+ * @param <E> the top-level item's generic type
+ */
+public class DescriptionViews<E extends Described> {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
@@ -64,6 +69,18 @@ public class DescriptionViews <E extends Described> {
         this.actionManager = new ActionManager(graph);
     }
 
+    /**
+     * Delete a dependent item, belonging to the given parent.
+     *
+     * @param parentId   the parent ID
+     * @param id         the dependent item's ID
+     * @param user       the current user
+     * @param logMessage an optional log message
+     * @return the number of vertices deleted
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws SerializationError
+     */
     public int delete(String parentId, String id, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError {
         E parent = crud.detail(parentId, user);
@@ -80,24 +97,52 @@ public class DescriptionViews <E extends Described> {
                 .delete(serializer.entityToBundle(dependentItem));
     }
 
+    /**
+     * Create a dependent item, belonging to the given parent.
+     *
+     * @param parentId   the parent ID
+     * @param data       the dependent item data
+     * @param cls        the dependent item's class
+     * @param user       the current user
+     * @param logMessage an optional log message
+     * @param <T>        the dependent item's generic class
+     * @return the dependent item frame
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws ValidationError
+     */
     public <T extends Accessible> T create(String parentId, Bundle data,
-            Class<T> descriptionClass, Accessor user, Optional<String> logMessage)
+            Class<T> cls, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError {
         E parent = crud.detail(parentId, user);
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        T out = getPersister(parent).create(data, descriptionClass);
+        T out = getPersister(parent).create(data, cls);
         actionManager.newEventContext(parent, user.as(Actioner.class),
                 EventTypes.createDependent, logMessage)
                 .commit();
         return out;
     }
 
+    /**
+     * Update a dependent item, belonging to the given parent.
+     *
+     * @param parentId   the parent ID
+     * @param data       the dependent item data
+     * @param cls        the dependent item's class
+     * @param user       the current user
+     * @param logMessage an optional log message
+     * @param <T>        the dependent item's generic class
+     * @return a mutation wrapper containing the dependent item's frame
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws ValidationError
+     */
     public <T extends Accessible> Mutation<T> update(String parentId, Bundle data,
-                Class<T> descriptionClass, Accessor user, Optional<String> logMessage)
+            Class<T> cls, Accessor user, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError {
         E parent = crud.detail(parentId, user);
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        Mutation<T> out = getPersister(parent).update(data, descriptionClass);
+        Mutation<T> out = getPersister(parent).update(data, cls);
         if (!out.unchanged()) {
             actionManager
                     .newEventContext(parent, user.as(Actioner.class),
@@ -109,8 +154,8 @@ public class DescriptionViews <E extends Described> {
     }
 
     // Helpers
-    private BundleDAO getPersister(PermissionScope scope) {
-        return new BundleDAO(graph, scope.idPath());
+    private BundleManager getPersister(PermissionScope scope) {
+        return new BundleManager(graph, scope.idPath());
     }
 
     private Set<Entity> itemsInSubtree(Entity topLevel) {

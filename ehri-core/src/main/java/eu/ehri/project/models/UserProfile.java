@@ -33,6 +33,8 @@ import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Annotatable;
+import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.base.Watchable;
 
 import static eu.ehri.project.definitions.Ontology.ACCESSOR_BELONGS_TO_GROUP;
@@ -44,7 +46,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
  * A frame class representing a user within the database.
  */
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, Accessible, Actioner {
+public interface UserProfile extends Accessor, Accessible, Actioner, Versioned, Annotatable {
 
     String FOLLOWER_COUNT = "followers";
     String FOLLOWING_COUNT = "following";

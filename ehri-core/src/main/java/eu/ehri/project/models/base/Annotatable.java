@@ -26,8 +26,6 @@ import eu.ehri.project.models.Annotation;
 
 /**
  * An entity that can be annotated.
- *
-
  */
 public interface Annotatable extends Entity {
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
@@ -38,5 +36,4 @@ public interface Annotatable extends Entity {
 
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART, direction = Direction.IN)
     void addAnnotationPart(Annotation annotation);
-
 }

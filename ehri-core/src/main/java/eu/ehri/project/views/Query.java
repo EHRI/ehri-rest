@@ -34,7 +34,6 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -46,11 +45,11 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 
 /**
- * Handles querying Accessible entities with ACL semantics.
+ * Handles querying Entity entities with ACL semantics.
  *
  * @param <E>
  */
-public final class Query<E extends Accessible> {
+public final class Query<E extends Entity> {
     public static final int DEFAULT_LIMIT = 20;
     private static final long NO_COUNT = -1L;
 
@@ -114,15 +113,15 @@ public final class Query<E extends Accessible> {
     /**
      * Query builder.
      */
-    public static class Builder<E extends Accessible> {
+    public static class Builder<E extends Entity> {
         private FramedGraph<?> graph;
         private Class<E> cls;
-        private int offset = 0;
+        private int offset;
         private int limit = DEFAULT_LIMIT;
         private SortedMap<String, Sort> sort = ImmutableSortedMap.of();
         private Optional<Pair<String, Sort>> defSort = Optional.absent();
         private SortedMap<String, Pair<FilterPredicate, Object>> filters = ImmutableSortedMap.of();
-        private boolean stream = false;
+        private boolean stream;
 
         Builder<E> setSort(SortedMap<String, Sort> sort) {
             this.sort = sort;

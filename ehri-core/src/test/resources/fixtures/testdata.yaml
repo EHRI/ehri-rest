@@ -449,6 +449,7 @@
   relationships:
     hasAnnotator: mike
     hasAnnotationTarget: c1
+    hasAnnotationTargetPart: cd1
     
 - id: ann2
   type: Annotation

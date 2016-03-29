@@ -21,33 +21,25 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import eu.ehri.extension.AnnotationResource;
 import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 
+import java.net.URI;
+
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
-public class AnnotationRestClientTest extends BaseRestClientTest {
-
-    @Test
-    public void testGetAnnotations() throws Exception {
-        // Fetch annotations for an item.
-        WebResource resource = client.resource(ehriUri("Annotation", "for", "c1"));
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .get(ClientResponse.class);
-        assertStatus(OK, response);
-    }
+public class AnnotationRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testCreateAnnotation() throws Exception {
         // Create a link annotation between two objects
-        WebResource resource = client.resource(ehriUri("Annotation", "c1"));
+        URI uri = entityUriBuilder(Entities.ANNOTATION)
+                .queryParam(AnnotationResource.TARGET_PARAM, "c1").build();
+        WebResource resource = client.resource(uri);
         String jsonAnnotationTestString = "{\"type\": \"Annotation\", " +
                 "\"data\":{\"identifier\": \"39dj28dhs\", \"body\": \"test\"}}";
         ClientResponse response = resource
