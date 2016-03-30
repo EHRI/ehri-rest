@@ -30,7 +30,7 @@ import java.util.List;
 
 
 /**
- * Batch importer for JSON data in Bundle format.
+ * Batch operations for JSON data in Bundle format.
  */
 public class BatchOperations {
     private static final Logger logger = LoggerFactory.getLogger(BatchOperations.class);
@@ -43,17 +43,33 @@ public class BatchOperations {
     private final boolean version;
     private final boolean tolerant;
 
-    public BatchOperations(FramedGraph<?> graph, PermissionScope scope, boolean version, boolean tolerant) {
+    /**
+     * Constructor.
+     *
+     * @param graph    the graph object
+     * @param scopeOpt a nullable scope entity
+     * @param version  whether to created versioned for changed items
+     * @param tolerant whether to allow individual validation errors
+     *                 without failing the entire batch
+     */
+    public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant) {
         this.graph = graph;
+        this.scope = Optional.fromNullable(scopeOpt).or(SystemScope.getInstance());
+        this.version = version;
+        this.tolerant = tolerant;
+
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = scope;
         this.actionManager = new ActionManager(graph, scope);
         this.dao = new BundleManager(graph, scope.idPath());
         this.serializer = new Serializer.Builder(graph).dependentOnly().build();
-        this.version = version;
-        this.tolerant = tolerant;
     }
 
+    /**
+     * Simple constructor, with system scope, version creation
+     * activated and tolerant mode off.
+     *
+     * @param graph the graph object
+     */
     public BatchOperations(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance(), true, false);
     }
@@ -206,17 +222,17 @@ public class BatchOperations {
      *
      * @param ids        a list of item IDs
      * @param actioner   the current user
-     * @param logMessage a log message
+     * @param logMessage an optional log message
      * @return the number of items deleted
      * @throws ItemNotFound
      */
-    public int batchDelete(List<String> ids, Actioner actioner, String logMessage)
+    public int batchDelete(List<String> ids, Actioner actioner, Optional<String> logMessage)
             throws ItemNotFound {
         if (!ids.isEmpty()) {
             int done = 0;
             try {
                 ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
-                        EventTypes.deletion, Optional.of(logMessage));
+                        EventTypes.deletion, logMessage);
                 for (String id : ids) {
                     Entity entity = manager.getEntity(id, Entity.class);
                     ctx = ctx.addSubjects(entity.as(Accessible.class));

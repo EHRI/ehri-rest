@@ -33,7 +33,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.extension.errors.MissingOrInvalidUser;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -262,7 +262,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
             try {
                 return manager.getEntity(id.get(), Accessor.class);
             } catch (ItemNotFound e) {
-                throw new BadRequester(id.get());
+                throw new MissingOrInvalidUser(id.get());
             }
         }
     }
@@ -277,7 +277,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         Accessor profile = getRequesterUserProfile();
         if (profile.isAdmin() || profile.isAnonymous()
                 || !profile.getType().equals(Entities.USER_PROFILE)) {
-            throw new BadRequester("Invalid user: " + profile.getId());
+            throw new MissingOrInvalidUser(profile.getId());
         }
         return graph.frame(profile.asVertex(), UserProfile.class);
     }

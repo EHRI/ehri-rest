@@ -181,7 +181,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
     public void testBatchDeleteWithVersioning() throws Exception {
         int nodesBefore = getNodeCount(graph);
         int deleted = new BatchOperations(graph).batchDelete(Lists.newArrayList("a1"),
-                validUser.as(Actioner.class), "Test delete");
+                validUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(1, deleted);
         // By default, total nodes should have increased by 2, since we
         // deleted 2 nodes (item and description) and created 4:
@@ -198,7 +198,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         int deleted = new BatchOperations(graph)
                 .setVersioning(false)
                 .batchDelete(Lists.newArrayList("a1"),
-                        validUser.as(Actioner.class), "Test delete");
+                        validUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(1, deleted);
         // By default, total nodes should have increased by 1, since we
         // deleted 2 nodes (item and description) and created 3:

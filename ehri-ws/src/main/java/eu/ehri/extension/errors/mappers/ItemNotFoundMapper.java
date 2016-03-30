@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import eu.ehri.project.exceptions.ItemNotFound;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -55,6 +56,7 @@ public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
         };
         try {
             return Response.status(Status.NOT_FOUND)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(mapper.writeValueAsString(out)
                             .getBytes(Charsets.UTF_8)).build();
         } catch (Exception e1) {
