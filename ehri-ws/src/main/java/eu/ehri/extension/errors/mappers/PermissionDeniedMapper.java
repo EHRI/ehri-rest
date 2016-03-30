@@ -22,6 +22,7 @@ package eu.ehri.extension.errors.mappers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.exceptions.PermissionDenied;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -55,6 +56,7 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
         };
         try {
             return Response.status(Status.UNAUTHORIZED)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(mapper.writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);

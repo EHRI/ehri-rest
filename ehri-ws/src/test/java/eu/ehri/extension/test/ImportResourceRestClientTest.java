@@ -24,6 +24,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
+import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
 import eu.ehri.project.importers.ead.IcaAtomEadHandler;
 import org.apache.commons.io.FileUtils;
@@ -46,6 +47,7 @@ import java.util.zip.ZipOutputStream;
 
 import static eu.ehri.extension.ImportResource.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -262,6 +264,51 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         assertEquals(0, rootNode.path("updated").asInt());
         assertEquals(0, rootNode.path("unchanged").asInt());
         assertEquals(logText, rootNode.path("message").asText());
+    }
+
+    @Test
+    public void testBatchUpdate() throws Exception {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("import-patch-test.json");
+        System.out.println(payloadStream);
+        String logText = "Testing patch update";
+        URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
+                .queryParam(LOG_PARAM, logText).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
+                .header("Content-Type", "application/json")
+                .entity(payloadStream)
+                .put(ClientResponse.class);
+
+        String output = response.getEntity(String.class);
+        System.out.println(output);
+        assertStatus(ClientResponse.Status.OK, response);
+
+        JsonNode rootNode = jsonMapper.readTree(output);
+        assertEquals(0, rootNode.path("created").asInt());
+        assertEquals(1, rootNode.path("updated").asInt());
+        assertEquals(1, rootNode.path("unchanged").asInt());
+        assertEquals(logText, rootNode.path("message").asText());
+    }
+
+    @Test
+    public void testBatchDelete() throws Exception {
+        String user = getAdminUserProfileId();
+        assertTrue(checkExists("a2", user));
+        String logText = "Testing patch delete";
+        URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
+                .queryParam(LOG_PARAM, logText)
+                .queryParam(ID_PARAM, "a2")
+                .build();
+        ClientResponse response = callAs(user, jsonUri)
+                .delete(ClientResponse.class);
+        assertStatus(ClientResponse.Status.NO_CONTENT, response);
+        assertFalse(checkExists("a2", user));
+    }
+
+    private boolean checkExists(String id, String userId) {
+        URI uri = ehriUriBuilder(GenericResource.ENDPOINT, id).build();
+        return callAs(userId, uri).get(ClientResponse.class).getStatus()
+                == ClientResponse.Status.OK.getStatusCode();
     }
 
     private UriBuilder getImportUrl(String endPoint, String scopeId, String log, boolean tolerant) {

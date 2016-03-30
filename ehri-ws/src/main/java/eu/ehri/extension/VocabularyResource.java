@@ -160,8 +160,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
             Vocabulary vocabulary = views.detail(id, user);
-            CrudViews<Concept> conceptViews = new CrudViews<>(
-                    graph, Concept.class, vocabulary);
+            CrudViews<Concept> conceptViews = new CrudViews<>(graph, Concept.class, vocabulary);
             ActionManager actionManager = new ActionManager(graph, vocabulary);
             Iterable<Concept> concepts = vocabulary.getConcepts();
             if (concepts.iterator().hasNext()) {
@@ -169,6 +168,10 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                         .newEventContext(user, EventTypes.deletion, getLogMessage());
                 for (Concept concept : concepts) {
                     context.addSubjects(concept);
+                    context.createVersion(concept);
+                }
+                context.commit();
+                for (Concept concept : concepts) {
                     conceptViews.delete(concept.getId(), user);
                 }
             }

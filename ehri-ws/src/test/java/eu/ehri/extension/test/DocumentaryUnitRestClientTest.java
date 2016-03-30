@@ -232,11 +232,11 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
     }
 
     @Test
-    public void testListDocumentaryUnitWithBadRequester() throws Exception {
+    public void testListDocumentaryUnitWithBadUser() throws Exception {
         ClientResponse response = jsonCallAs("invalidId",
                 entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER, "list"))
                 .get(ClientResponse.class);
-        assertStatus(INTERNAL_SERVER_ERROR, response);
+        assertStatus(BAD_REQUEST, response);
     }
 
     @Test

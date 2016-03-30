@@ -19,25 +19,33 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -46,6 +54,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * prior to being materialised as vertices and edges.
  */
 public final class Bundle {
+
+    private static final Logger logger = LoggerFactory.getLogger(Bundle.class);
+
     private final boolean temp;
     private final String id;
     private final EntityClass type;
@@ -71,7 +82,7 @@ public final class Bundle {
          * match this predicate.
          *
          * @param bundle The bundle
-         * @return  Whether to remove the item
+         * @return Whether to remove the item
          */
         boolean remove(String relationLabel, Bundle bundle);
     }
@@ -103,6 +114,14 @@ public final class Bundle {
             return new Builder(cls);
         }
 
+        public static Builder from(Bundle bundle) {
+            return withClass(bundle.getType())
+                    .setId(bundle.getId())
+                    .addMetaData(bundle.getMetaData())
+                    .addData(bundle.getData())
+                    .addRelations(bundle.getRelations());
+        }
+
         public Builder addRelations(Multimap<String, Bundle> r) {
             relations.putAll(r);
             return this;
@@ -113,7 +132,7 @@ public final class Bundle {
             return this;
         }
 
-        public Builder addData(Map<String,Object> d) {
+        public Builder addData(Map<String, Object> d) {
             data.putAll(d);
             return this;
         }
@@ -123,7 +142,7 @@ public final class Bundle {
             return this;
         }
 
-        public Builder addMetaData(Map<String,Object> d) {
+        public Builder addMetaData(Map<String, Object> d) {
             meta.putAll(d);
             return this;
         }
@@ -252,10 +271,13 @@ public final class Bundle {
      * Get a data value by its key.
      *
      * @return The data value, or null if there is no data for this key
+     * @throws ClassCastException if the fetched data does not match the
+     *                            type requested
      */
-    public <T> T getDataValue(String key) {
+    @SuppressWarnings("unchecked")
+    public <T> T getDataValue(String key) throws ClassCastException {
         checkNotNull(key);
-        return (T)data.get(key);
+        return (T) data.get(key);
     }
 
     /**
@@ -365,10 +387,10 @@ public final class Bundle {
     /**
      * Get only the bundle's relations which have a dependent
      * relationship.
-     * 
+     *
      * @return A multimap of dependent relations.
      */
-    public Multimap<String,Bundle> getDependentRelations() {
+    public Multimap<String, Bundle> getDependentRelations() {
         Multimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(type.getJavaClass());
@@ -467,16 +489,57 @@ public final class Bundle {
     }
 
     /**
-     * Merge this bundle's data with that of another. Note: currently
-     * relation data is not merged.
+     * Merge this bundle's data with that of another. Relation data is merged when
+     * corresponding related items exist in the tree, but new related items are not
+     * added.
      *
      * @param otherBundle Another bundle
      * @return A bundle with data merged
      */
-    public Bundle mergeDataWith(Bundle otherBundle) {
+    public Bundle mergeDataWith(final Bundle otherBundle) {
         Map<String, Object> mergeData = Maps.newHashMap(getData());
         mergeData.putAll(otherBundle.getData());
-        return withData(mergeData);
+        final Builder builder = Builder.withClass(getType()).setId(getId()).addMetaData(meta)
+                .addData(mergeData);
+
+        // This is a slightly gnarly algorithm as written.
+        // We want to merge two relationship trees
+        for (Map.Entry<String, Collection<Bundle>> entry : otherBundle.getRelations().asMap().entrySet()) {
+            String relName = entry.getKey();
+            if (relations.containsKey(relName)) {
+                List<Bundle> relations = getRelations(relName);
+                Collection<Bundle> otherRelations = entry.getValue();
+                Set<Bundle> updated = Sets.newHashSet();
+                for (final Bundle otherRel : otherRelations) {
+                    Optional<Bundle> toUpdate = Iterables.tryFind(relations, new Predicate<Bundle>() {
+                        @Override
+                        public boolean apply(Bundle bundle) {
+                            return bundle.getId() != null && bundle.getId().equals(otherRel.getId());
+                        }
+                    });
+                    if (toUpdate.isPresent()) {
+                        Bundle up = toUpdate.get();
+                        updated.add(up);
+                        builder.addRelation(relName, up.mergeDataWith(otherRel));
+                    } else {
+                        logger.warn("Ignoring nested bundle in PATCH update: {}", otherRel);
+                    }
+                }
+                for (Bundle bundle : relations) {
+                    if (!updated.contains(bundle)) {
+                        builder.addRelation(relName, bundle);
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<String, Bundle> entry : relations.entries()) {
+            if (!otherBundle.hasRelations(entry.getKey())) {
+                builder.addRelation(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return builder.build();
     }
 
     /**
@@ -492,7 +555,7 @@ public final class Bundle {
                 .addData(data)
                 .addMetaData(meta)
                 .setId(id);
-        for (Map.Entry<String,Bundle> rel : relations.entries()) {
+        for (Map.Entry<String, Bundle> rel : relations.entries()) {
             if (!filter.remove(rel.getKey(), rel.getValue())) {
                 builder.addRelation(rel.getKey(), rel.getValue()
                         .filterRelations(filter));
@@ -569,6 +632,10 @@ public final class Bundle {
      */
     public static Bundle fromStream(InputStream stream) throws DeserializationError {
         return DataConverter.streamToBundle(stream);
+    }
+
+    public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
+        return DataConverter.bundleStream(inputStream);
     }
 
     @Override

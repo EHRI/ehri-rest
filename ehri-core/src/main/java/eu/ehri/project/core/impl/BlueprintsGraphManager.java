@@ -35,7 +35,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Entity;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -108,7 +107,7 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     @Override
     public <E> E getEntity(String id, EntityClass type, Class<E> cls)
             throws ItemNotFound {
-        return graph.frame(getVertex(id, type), cls);
+        return graph.frame(getVertex(id), cls);
     }
 
     @Override
@@ -126,17 +125,6 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
         } catch (NoSuchElementException e) {
             throw new ItemNotFound(id);
         }
-    }
-
-    @Override
-    public Vertex getVertex(String id, EntityClass type) throws ItemNotFound {
-        Preconditions
-                .checkNotNull(id, "attempt to fetch vertex with a null id");
-        for (Vertex v : graph.getVertices(EntityType.ID_KEY, id)) {
-            if (getEntityClass(v).equals(type))
-                return v;
-        }
-        throw new ItemNotFound(id);
     }
 
     @Override
@@ -172,12 +160,6 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     @Override
     public Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data) throws IntegrityError {
-        return createVertex(id, type, data, data.keySet());
-    }
-
-    @Override
-    public Vertex createVertex(String id, EntityClass type,
-            Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
         Preconditions
                 .checkNotNull(id, "null vertex ID given for item creation");
         Map<String, ?> indexData = getVertexData(id, type, data);
@@ -194,18 +176,11 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     @Override
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data) throws ItemNotFound {
-        return updateVertex(id, type, data, data.keySet());
-    }
-
-    @Override
-    public Vertex updateVertex(String id, EntityClass type,
-            Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
         Preconditions.checkNotNull(id, "null vertex ID given for item update");
         Map<String, ?> indexData = getVertexData(id, type, data);
-        Collection<String> indexKeys = getVertexKeys(keys);
         try {
             Vertex node = getVertex(id);
-            replaceProperties(node, indexData, indexKeys);
+            replaceProperties(node, indexData);
             return node;
         } catch (NoSuchElementException e) {
             throw new ItemNotFound(id);
@@ -245,15 +220,10 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
-    public void rebuildIndex() {
-    }
-
-    @Override
     public void initialize() {
     }
 
-    private <E extends Element> void replaceProperties(E item,
-            Map<String, ?> data, Collection<String> keys) {
+    private <E extends Element> void replaceProperties(E item, Map<String, ?> data) {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
             if (!key.startsWith(METADATA_PREFIX)) {
@@ -262,11 +232,10 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
         }
 
         // add all 'new' properties to the relationship and index
-        addProperties(item, data, keys);
+        addProperties(item, data);
     }
 
-    private <E extends Element> void addProperties(E item,
-            Map<String, ?> data, Collection<String> keys) {
+    private <E extends Element> void addProperties(E item, Map<String, ?> data) {
         Preconditions.checkNotNull(data, "Data map cannot be null");
         for (Map.Entry<String, ?> entry : data.entrySet()) {
             if (entry.getValue() == null)
@@ -287,12 +256,5 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
         vdata.put(EntityType.ID_KEY, id);
         vdata.put(EntityType.TYPE_KEY, type.getName());
         return vdata;
-    }
-
-    private Collection<String> getVertexKeys(Iterable<String> keys) {
-        List<String> vkeys = Lists.newArrayList(keys);
-        vkeys.add(EntityType.ID_KEY);
-        vkeys.add(EntityType.TYPE_KEY);
-        return vkeys;
     }
 }

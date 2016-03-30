@@ -19,6 +19,8 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -26,6 +28,10 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +46,7 @@ public class DataConverterTest extends AbstractFixtureTest {
     public void testBundleToXml() throws Exception {
         DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         Bundle bundle = new Serializer(graph).entityToBundle(c1)
-                .withDataValue("testarray", new String[] { "one", "two", "three" })
+                .withDataValue("testarray", new String[]{"one", "two", "three"})
                 .withDataValue("itemWithLt", "I should be escape because of: <>");
 
         Document document = bundle.toXml();
@@ -56,5 +62,27 @@ public class DataConverterTest extends AbstractFixtureTest {
         assertTrue(rootItem.hasChildNodes());
         // TODO: Check properties and relationships are serialized properly
         System.out.println(bundle.toXmlString());
+    }
+
+    @Test
+    public void testBundleStream() throws Exception {
+        try (InputStream stream = ClassLoader.getSystemClassLoader()
+                .getResourceAsStream("bundle-list.json");
+             CloseableIterable<Bundle> bundleMappingIterator = DataConverter.bundleStream(stream)) {
+            List<String> ids = Lists.newArrayList();
+            for (Bundle bundle : bundleMappingIterator) {
+                ids.add(bundle.getId());
+            }
+            assertEquals(Lists.newArrayList("item1", "item2"), ids);
+        }
+    }
+
+    @Test
+    public void testBundleStreamWithEmptyList() throws Exception {
+        InputStream stream = new ByteArrayInputStream("[]".getBytes());
+        try (CloseableIterable<Bundle> bundleMappingIterator = DataConverter.bundleStream(stream)) {
+            List<Bundle> ids = Lists.newArrayList(bundleMappingIterator);
+            assertTrue(ids.isEmpty());
+        }
     }
 }

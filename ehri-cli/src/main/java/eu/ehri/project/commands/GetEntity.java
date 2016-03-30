@@ -19,10 +19,10 @@
 
 package eu.ehri.project.commands;
 
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
 
@@ -38,7 +38,7 @@ public class GetEntity extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return String.format("%s [OPTIONS] <type> <identifier>", NAME);
+        return String.format("%s [OPTIONS] <identifier>", NAME);
     }
 
     @Override
@@ -47,19 +47,15 @@ public class GetEntity extends BaseCommand {
     }
 
     @Override
-    public int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws Exception {
-
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         Serializer serializer = new Serializer(graph);
 
-        if (cmdLine.getArgList().size() < 2)
+        if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getUsage());
 
-        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        String id = cmdLine.getArgs()[1];
-
-        System.out.println(serializer.vertexToJson(manager.getVertex(id, type)));
+        Vertex vertex = manager.getVertex(cmdLine.getArgs()[0]);
+        System.out.println(serializer.vertexToJson(vertex));
         return 0;
     }
 }

@@ -47,7 +47,6 @@ public class BundleProvider implements MessageBodyReader<Bundle> {
     public Bundle readFrom(Class<Bundle> bundleClass, Type type, Annotation[] annotations,
                            MediaType mediaType, MultivaluedMap<String,
             String> headers, InputStream stream) throws IOException, WebApplicationException {
-
         try {
             return Bundle.fromStream(stream);
         } catch (DeserializationError deserializationError) {

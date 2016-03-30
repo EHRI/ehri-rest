@@ -29,21 +29,24 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.managers.CsvImportManager;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.importers.eac.EacHandler;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
-import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.json.BatchOperations;
+import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.SaxXmlHandler;
-import eu.ehri.project.importers.cvoc.SkosImporter;
-import eu.ehri.project.importers.cvoc.SkosImporterFactory;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -56,8 +59,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -86,6 +91,7 @@ public class ImportResource extends AbstractRestResource {
     public static final String LOG_PARAM = "log";
     public static final String SCOPE_PARAM = "scope";
     public static final String TOLERANT_PARAM = "tolerant";
+    public static final String VERSION_PARAM = "version";
     public static final String HANDLER_PARAM = "handler";
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
@@ -101,9 +107,9 @@ public class ImportResource extends AbstractRestResource {
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
-     * <p>
+     * <p/>
      * Example:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      * curl -X POST \
@@ -113,13 +119,13 @@ public class ImportResource extends AbstractRestResource {
      * }
      * </pre>
      *
-     * @param scopeId    The id of the import scope (i.e. repository)
-     * @param tolerant   Whether or not to die on the first validation error
-     * @param logMessage Log message for import. If this refers to an accessible local file
+     * @param scopeId    the id of the import scope (i.e. repository)
+     * @param tolerant   whether or not to die on the first validation error
+     * @param logMessage log message for import. If this refers to an accessible local file
      *                   its contents will be used.
-     * @param format     The RDF format of the POSTed data
-     * @param stream     A stream of SKOS data in a valid format.
-     * @return A JSON object showing how many records were created,
+     * @param format     the RDF format of the POSTed data
+     * @param stream     a stream of SKOS data in a valid format.
+     * @return a JSON object showing how many records were created,
      * updated, or unchanged.
      */
     @POST
@@ -166,9 +172,9 @@ public class ImportResource extends AbstractRestResource {
      * The Content-Type header is used to distinguish the contents.
      * <br>
      * <b>Note:</b> The archive does not currently support compression.
-     * <p>
+     * <p/>
      * The way you would run with would typically be:
-     * <p>
+     * <p/>
      * <pre>
      * {@code
      *     curl -X POST \
@@ -180,26 +186,26 @@ public class ImportResource extends AbstractRestResource {
      * # it needs url encoding.
      * }
      * </pre>
-     * <p>
+     * <p/>
      * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
-     * <p>
+     * <p/>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
-     * @param scopeId       The id of the import scope (i.e. repository)
-     * @param tolerant      Whether or not to die on the first validation error
-     * @param logMessage    Log message for import. If this refers to an accessible local file
+     * @param scopeId       the id of the import scope (i.e. repository)
+     * @param tolerant      whether or not to die on the first validation error
+     * @param logMessage    log message for import. If this refers to an accessible local file
      *                      its contents will be used.
-     * @param handlerClass  The fully-qualified handler class name
+     * @param handlerClass  the fully-qualified handler class name
      *                      (defaults to EadHandler)
-     * @param importerClass The fully-qualified import class name
+     * @param importerClass the fully-qualified import class name
      *                      (defaults to EadImporter)
-     * @param propertyFile  A local file path pointing to an import properties
+     * @param propertyFile  a local file path pointing to an import properties
      *                      configuration file.
-     * @param data          File data containing one of: a single EAD file,
+     * @param data          file data containing one of: a single EAD file,
      *                      multiple EAD files in an archive, a list of local file
      *                      paths. The Content-Type header is used to distinguish
      *                      the contents.
-     * @return A JSON object showing how many records were created,
+     * @return a JSON object showing how many records were created,
      * updated, or unchanged.
      */
     @POST
@@ -207,7 +213,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("ead")
-    public Response importEad(
+    public ImportLog importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -238,7 +244,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
             tx.success();
-            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+            return log;
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException | InputParseError | ArchiveException e) {
@@ -254,7 +260,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("eag")
-    public Response importEag(
+    public ImportLog importEag(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -276,7 +282,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("eac")
-    public Response importEac(
+    public ImportLog importEac(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -294,7 +300,7 @@ public class ImportResource extends AbstractRestResource {
      * Import a set of CSV files. See EAD handler for options and
      * defaults but substitute text/csv for the input mimetype when
      * a single file is POSTed.
-     * <p>
+     * <p/>
      * Additional note: no handler class is required.
      */
     @POST
@@ -302,7 +308,7 @@ public class ImportResource extends AbstractRestResource {
             MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("csv")
-    public Response importCsv(
+    public ImportLog importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
@@ -325,13 +331,83 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             tx.success();
-            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+            return log;
         } catch (InputParseError ex) {
             throw new DeserializationError("ParseError: " + ex.getMessage());
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         } catch (IllegalArgumentException | ArchiveException e) {
             throw new DeserializationError(e.getMessage());
+        }
+    }
+
+    /**
+     * Update a batch of items via JSON containing (partial)
+     * data bundles.
+     *
+     * @param scopeId     the ID of there item's permission scope
+     * @param tolerant    whether to allow individual validation failures
+     * @param version     whether to create a version prior to delete
+     * @param logMessage  an optional log message
+     * @param inputStream a JSON document containing partial bundles containing
+     *                    the needed data transformations
+     * @return an import log describing the changes committed
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws DeserializationError
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("batch")
+    public ImportLog batchUpdate(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
+            @QueryParam(LOG_PARAM) String logMessage, InputStream inputStream)
+            throws IOException, ItemNotFound, ValidationError, DeserializationError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor accessor = getCurrentUser();
+            PermissionScope scope = scopeId != null
+                    ? manager.getEntity(scopeId, PermissionScope.class)
+                    : null;
+            ImportLog log = new BatchOperations(graph, scope, version, tolerant)
+                    .batchUpdate(inputStream,
+                            accessor.as(Actioner.class), getLogMessage(logMessage));
+            tx.success();
+            return log;
+        }
+    }
+
+    /**
+     * Delete a batch of objects via JSON containing their IDs.
+     *
+     * @param scopeId    the ID of there item's permission scope
+     * @param version    whether to create a version prior to delete
+     * @param logMessage an optional log message.
+     * @param ids        a list of IDs to delete
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws DeserializationError
+     */
+    @DELETE
+    @Path("batch")
+    public void batchDelete(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(ID_PARAM) List<String> ids)
+            throws IOException, ItemNotFound, DeserializationError {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Accessor accessor = getCurrentUser();
+            PermissionScope scope = scopeId != null
+                    ? manager.getEntity(scopeId, PermissionScope.class)
+                    : null;
+            new BatchOperations(graph, scope, version, false)
+                    .batchDelete(ids,
+                            accessor.as(Actioner.class), getLogMessage(logMessage));
+            tx.success();
         }
     }
 

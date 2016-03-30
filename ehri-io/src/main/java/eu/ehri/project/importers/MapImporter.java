@@ -229,9 +229,6 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         try {
             Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
             //only if some source is given (especially with a creation) should a ME be created
-            for (String e : unit.getPropertyKeys()) {
-                logger.debug(e);
-            }
             if (unit.getDataValue("source") != null) {
                 Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
                 return mutation.getNode();

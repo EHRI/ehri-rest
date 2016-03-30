@@ -23,15 +23,18 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.TestData;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +182,42 @@ public class BundleTest {
     }
 
     @Test
+    public void testMergeDataWithForTree() throws Exception {
+        Bundle nested = new Bundle(EntityClass.DATE_PERIOD)
+                .withDataValue(Ontology.DATE_PERIOD_START_DATE, "2001-01-01");
+        // Add a nested node to the bundle we're patching and generate IDs
+        Bundle start = bundle
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
+                        new Bundle(EntityClass.MAINTENANCE_EVENT)
+                                .withDataValue(Ontology.MAINTENANCE_EVENT_TYPE,
+                                        MaintenanceEventType.created.toString()));
+
+        Bundle withIds = start.generateIds(Sets.<String>newHashSet());
+        Bundle toMerge = BundleUtils.setBundle(withIds, "describes[0]/hasDate[-1]", nested)
+                .generateIds(Sets.<String>newHashSet());
+        Bundle patch = BundleUtils.set(withIds, "describes[0]/name", "Foobar 2");
+        Bundle merged = toMerge.mergeDataWith(patch);
+        assertNotSame(merged, bundle);
+        assertEquals("Foobar 2",
+                BundleUtils.get(merged, "describes[0]/name"));
+        assertEquals("created",
+                BundleUtils.get(merged, "describes[1]/eventType"));
+        assertEquals("2001-01-01",
+                BundleUtils.get(merged, "describes[0]/hasDate[0]/startDate"));
+    }
+
+    @Test
+    public void testMergeDataWithFullTree() throws Exception {
+        Bundle init = Bundle.fromStream(ClassLoader.getSystemClassLoader()
+                .getResourceAsStream("bundle-patch-init.json"));
+        Bundle data = Bundle.fromStream(ClassLoader.getSystemClassLoader()
+                .getResourceAsStream("bundle-patch-data.json"));
+        Bundle result = Bundle.fromStream(ClassLoader.getSystemClassLoader()
+                .getResourceAsStream("bundle-patch-result.json"));
+        assertEquals(result, init.mergeDataWith(data));
+    }
+
+    @Test
     public void testFilterRelations() throws Exception {
         // Remove descriptions with languageCode = "en"
         Bundle.Filter filter = new Bundle.Filter() {
@@ -186,15 +225,14 @@ public class BundleTest {
             public boolean remove(String relationLabel, Bundle bundle) {
                 String lang = bundle.getDataValue(Ontology.LANGUAGE);
                 return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                        && (lang != null
-                            && lang.equals("en"));
+                        && ("en".equals(lang));
             }
         };
         Bundle filtered = bundle.filterRelations(filter);
         assertFalse((Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
         assertTrue(filtered.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
     }
-        
+
     @Test
     public void testGetRelations() throws Exception {
         List<Bundle> relations = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
@@ -206,7 +244,7 @@ public class BundleTest {
         Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
-        Multimap<String,Bundle> rels = ImmutableListMultimap
+        Multimap<String, Bundle> rels = ImmutableListMultimap
                 .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
         Bundle bundle2 = bundle.replaceRelations(rels);
         assertEquals(1L, bundle2.getRelations(
@@ -218,7 +256,7 @@ public class BundleTest {
         Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
-        Multimap<String,Bundle> rels = ImmutableListMultimap
+        Multimap<String, Bundle> rels = ImmutableListMultimap
                 .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
         Bundle bundle2 = bundle.withRelations(rels);
         assertEquals(2L, bundle2.getRelations(
@@ -282,43 +320,16 @@ public class BundleTest {
     }
 
     @Test
-    public void testGetBundleClass() throws Exception {
-        // TODO
-    }
-
-    @Test
-    public void testGetPropertyKeys() throws Exception {
-        // TODO
-    }
-
-    @Test
     public void testGetUniquePropertyKeys() throws Exception {
-        // TODO
+        Collection<String> uniquePropertyKeys = bundle.getUniquePropertyKeys();
+        assertEquals(Sets.<String>newHashSet(), uniquePropertyKeys);
     }
 
-    @Test
-    public void testFromData() throws Exception {
-        // TODO
-    }
-
-    @Test
-    public void testToData() throws Exception {
-        // TODO
-    }
-
-    @Test
-    public void testFromString() throws Exception {
-        // TODO
-    }
-
-    @Test
-    public void testToJson() throws Exception {
-        // TODO
-    }
-
-    @Test
-    public void testToXml() throws Exception {
-        // TODO
+    @Test(expected = ClassCastException.class)
+    public void testGetDataValueWithBadType() throws Exception {
+        Map<String, Object> dataValue = bundle.
+                getDataValue(Ontology.IDENTIFIER_KEY);
+        fail("Shouldn't be able to see: " + dataValue);
     }
 
     @Test

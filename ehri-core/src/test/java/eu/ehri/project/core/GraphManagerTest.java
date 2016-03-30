@@ -20,9 +20,7 @@
 package eu.ehri.project.core;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -42,7 +40,6 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -257,39 +254,6 @@ public class GraphManagerTest {
                     .newHashMap(ImmutableMap.of(TEST_KEY, TEST_VALUE));
             Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
             manager.setProperty(vertex, EntityType.ID_KEY, "foo");
-        }
-
-        @Ignore("Ignored because semantics of indexing changed so getting" +
-                " vertices by property value should fall back to non-indexed" +
-                " behaviour.")
-        @Test
-        public void testSelectiveIndexing() throws IntegrityError {
-            // We need to create one first, sorry
-            Map<String, ?> data = ImmutableMap.of(
-                    "name", "joe",
-                    "age", 32,
-                    "height", "5.11");
-            List<String> keys = Lists.newArrayList("name", "age");
-
-            Vertex joe = manager.createVertex(TEST_ID1, TEST_TYPE, data, keys);
-
-            // try and find joe via name and age...
-            CloseableIterable<Vertex> query1 = manager.getVertices("name",
-                    data.get("name"), TEST_TYPE);
-            assertTrue(query1.iterator().hasNext());
-            Vertex joe1 = query1.iterator().next();
-            assertEquals(joe, joe1);
-
-            CloseableIterable<Vertex> query2 = manager.getVertices("age",
-                    data.get("age"), TEST_TYPE);
-            assertTrue(query2.iterator().hasNext());
-            Vertex joe2 = query2.iterator().next();
-            assertEquals(joe, joe2);
-
-            // Query by height should fail...
-            CloseableIterable<Vertex> query3 = manager.getVertices("height",
-                    data.get("height"), TEST_TYPE);
-            assertFalse(query3.iterator().hasNext());
         }
     }
 }
