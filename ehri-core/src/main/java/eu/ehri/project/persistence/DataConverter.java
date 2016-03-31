@@ -23,9 +23,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -68,20 +65,6 @@ class DataConverter {
     private static final JsonFactory factory = new JsonFactory();
     private static final ObjectMapper mapper = new ObjectMapper(factory);
     private static final ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-
-    public static class BundleDeserializer extends JsonDeserializer<Bundle> {
-        private static TypeReference<Map<String, Object>> tref = new TypeReference<Map<String, Object>>() {
-        };
-
-        @Override
-        public Bundle deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            try {
-                return dataToBundle(parser.readValueAs(tref));
-            } catch (DeserializationError deserializationError) {
-                throw new IOException(deserializationError);
-            }
-        }
-    }
 
     static {
         SimpleModule bundleModule = new SimpleModule();

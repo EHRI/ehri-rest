@@ -19,6 +19,7 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -28,7 +29,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,14 +36,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
 
@@ -200,16 +204,13 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
     public void testListDocumentaryUnit() throws Exception {
         MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
         params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
-        List<Map<String, Object>> data = getEntityList(
+        List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         assertTrue(!data.isEmpty());
-        Collections.sort(data, dataSort);
+        Collections.sort(data, bundleComparator);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
-        @SuppressWarnings("unchecked")
-        Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
-                "data");
-        assertEquals(FIRST_DOC_ID, c1data.get(Ontology.IDENTIFIER_KEY));
+        assertEquals(FIRST_DOC_ID, data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -237,16 +238,13 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         params.add(AbstractRestResource.OFFSET_PARAM, "1");
         params.add(AbstractRestResource.LIMIT_PARAM, "1");
         params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
-        List<Map<String, Object>> data = getEntityList(
+        List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
-        System.out.println(data);
         assertEquals(1, data.size());
-        Collections.sort(data, dataSort);
+        Collections.sort(data, bundleComparator);
         // Extract the second documentary unit. According to the fixtures this
         // should be named 'c2'.
-        @SuppressWarnings("unchecked")
-        Map<String, Object> c2data = (Map<String, Object>) data.get(0).get("data");
-        assertEquals("c2", c2data.get(Ontology.IDENTIFIER_KEY));
+        assertEquals("c2", data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -348,7 +346,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                    .get(ClientResponse.class);
+                .get(ClientResponse.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
@@ -362,11 +360,4 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER,
                 Entities.DOCUMENTARY_UNIT);
     }
-
-    private final Comparator<Map<String, Object>> dataSort = new Comparator<Map<String, Object>>() {
-        @Override
-        public int compare(Map<String, Object> a, Map<String, Object> b) {
-            return ((String) a.get("id")).compareTo((String) b.get("id"));
-        }
-    };
 }

@@ -19,11 +19,10 @@
 
 package eu.ehri.extension.test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.GroupResource;
+import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
@@ -32,10 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
@@ -82,17 +78,14 @@ public class GroupRestClientTest extends AbstractRestClientTest {
                 .post(ClientResponse.class);
 
         assertStatus(CREATED, response);
+
         // Get created doc via the response location?
         URI location = response.getLocation();
+        List<Bundle> list = getItemList(UriBuilder
+                        .fromUri(location).segment("list").build(),
+                getAdminUserProfileId());
 
-        response = jsonCallAs(getAdminUserProfileId(),
-                UriBuilder.fromUri(location).segment("list").build())
-                .get(ClientResponse.class);
-
-        assertStatus(OK, response);
-
-        // check results
-        Set<String> ids = getIdsFromEntityListJson(response.getEntity(String.class));
+        Set<String> ids = getIdsFromEntityList(list);
         assertTrue(ids.contains("linda"));
         assertEquals(1, ids.size());
     }
@@ -118,16 +111,10 @@ public class GroupRestClientTest extends AbstractRestClientTest {
     @Test
     public void testListGroupMembers() throws Exception {
         final String GROUP_ID = "kcl";
+        List<Bundle> list = getItemList(entityUri(Entities.GROUP, GROUP_ID, "list"),
+                getAdminUserProfileId());
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.GROUP, GROUP_ID, "list"))
-                .get(ClientResponse.class);
-
-        assertStatus(OK, response);
-
-        // check results
-        //System.out.println(response.getEntity(String.class));
-        Set<String> ids = getIdsFromEntityListJson(response.getEntity(String.class));
+        Set<String> ids = getIdsFromEntityList(list);
         // for 'kcl' it should be 'mike', 'reto' and nothing else
         assertTrue(ids.contains("mike"));
         assertTrue(ids.contains("reto"));
@@ -138,14 +125,10 @@ public class GroupRestClientTest extends AbstractRestClientTest {
      * Helpers **
      */
 
-    private Set<String> getIdsFromEntityListJson(String jsonString) throws IOException {
-        TypeReference<ArrayList<HashMap<String, Object>>> typeReference = new TypeReference<ArrayList<HashMap<String,
-                Object>>>() {
-        };
-        List<HashMap<String, Object>> data = jsonMapper.readValue(jsonString, typeReference);
+    private Set<String> getIdsFromEntityList(List<Bundle> list) throws IOException {
         Set<String> ids = Sets.newHashSet();
-        for (Map<String, Object> bundle : data) {
-            ids.add((String) bundle.get(Bundle.ID_KEY));
+        for (Bundle b : list) {
+            ids.add(b.getId());
         }
         return ids;
     }
