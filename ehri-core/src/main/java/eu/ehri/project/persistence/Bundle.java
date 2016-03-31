@@ -52,6 +52,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Class that represents a graph entity and subtree relations
  * prior to being materialised as vertices and edges.
+ *
+ * Note: unlike a vertex, a bundle can contain null values
+ * in its data map, though these values will not be externally
+ * visible. Null values <i>are</i> however used in merge operations,
+ * where the secondary bundle's null data values will indicate that
+ * the key/value should be removed from the primary bundle's data.
  */
 public final class Bundle {
 
@@ -60,7 +66,7 @@ public final class Bundle {
     private final boolean temp;
     private final String id;
     private final EntityClass type;
-    private final ImmutableMap<String, Object> data;
+    private final Map<String, Object> data;
     private final ImmutableMap<String, Object> meta;
     private final ImmutableListMultimap<String, Bundle> relations;
 
@@ -289,13 +295,9 @@ public final class Bundle {
      * @return A new bundle with value as key
      */
     public Bundle withDataValue(String key, Object value) {
-        if (value == null) {
-            return this;
-        } else {
-            Map<String, Object> newData = Maps.newHashMap(data);
-            newData.put(key, value);
-            return withData(newData);
-        }
+        Map<String, Object> newData = Maps.newHashMap(data);
+        newData.put(key, value);
+        return withData(newData);
     }
 
     /**
@@ -333,7 +335,12 @@ public final class Bundle {
      * @return The full data map
      */
     public Map<String, Object> getData() {
-        return data;
+        return ImmutableMap.copyOf(Maps.filterValues(data, new Predicate<Object>() {
+            @Override
+            public boolean apply(Object value) {
+                return value != null;
+            }
+        }));
     }
 
     /**
@@ -498,7 +505,18 @@ public final class Bundle {
      */
     public Bundle mergeDataWith(final Bundle otherBundle) {
         Map<String, Object> mergeData = Maps.newHashMap(getData());
-        mergeData.putAll(otherBundle.getData());
+
+        // This merges the data maps so that keys with null values in the
+        // second bundle are removed from the current one's data
+        logger.trace("Merging data: {}", otherBundle.data);
+        for (Map.Entry<String, Object> entry : otherBundle.data.entrySet()) {
+            if (entry.getValue() != null) {
+                mergeData.put(entry.getKey(), entry.getValue());
+            } else {
+                logger.trace("Unset key in merge: {}", entry.getKey());
+                mergeData.remove(entry.getKey());
+            }
+        }
         final Builder builder = Builder.withClass(getType()).setId(getId()).addMetaData(meta)
                 .addData(mergeData);
 
@@ -739,21 +757,18 @@ public final class Bundle {
     // Helpers...
 
     /**
-     * Return an immutable copy of the given data map with nulls removed
-     * and enums converted to string values.
+     * Return a copy of the given data map with enums converted to string values.
      */
-    private ImmutableMap<String, Object> filterData(Map<String, Object> data) {
+    private Map<String, Object> filterData(Map<String, Object> data) {
         Map<String, Object> filtered = Maps.newHashMap();
         for (Map.Entry<? extends String, Object> entry : data.entrySet()) {
-            if (entry.getValue() != null) {
-                Object value = entry.getValue();
-                if (value instanceof Enum<?>) {
-                    value = ((Enum) value).name();
-                }
-                filtered.put(entry.getKey(), value);
+            Object value = entry.getValue();
+            if (value instanceof Enum<?>) {
+                value = ((Enum) value).name();
             }
+            filtered.put(entry.getKey(), value);
         }
-        return ImmutableMap.copyOf(filtered);
+        return filtered;
     }
 
     /**

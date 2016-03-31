@@ -39,7 +39,6 @@ import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.persistence.utils.DataUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -335,7 +334,7 @@ class DataConverter {
         for (Entry<?, ?> entry : data.entrySet()) {
             Object value = entry.getValue();
             // Allow any null value, as long as it's not an empty array
-            if (value != null && !DataUtils.isEmptySequence(value)) {
+            if (!isEmptySequence(value)) {
                 cleaned.put((String) entry.getKey(), entry.getValue());
             }
         }
@@ -457,5 +456,25 @@ class DataConverter {
             }
             return dataValue;
         }
+    }
+
+    /**
+     * Ensure a value isn't an empty array or list, which will
+     * cause Neo4j to barf.
+     *
+     * @param value A unknown object
+     * @return If the object is a sequence type, and is empty
+     */
+    static boolean isEmptySequence(Object value) {
+        if (value == null) {
+            return false;
+        } else if (value instanceof Object[]) {
+            return ((Object[]) value).length == 0;
+        } else if (value instanceof Collection<?>) {
+            return ((Collection) value).isEmpty();
+        } else if (value instanceof Iterable<?>) {
+            return !((Iterable) value).iterator().hasNext();
+        }
+        return false;
     }
 }

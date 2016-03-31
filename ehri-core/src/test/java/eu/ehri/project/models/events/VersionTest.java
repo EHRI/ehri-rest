@@ -50,25 +50,28 @@ public class VersionTest extends AbstractFixtureTest {
         Bundle userBundle3 = userBundle.withDataValue("foo", "bar2");
         UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
-        ActionManager.EventContext ctx1 = actionManager.newEventContext(user,
+        SystemEvent first = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation);
-        SystemEvent first = ctx1.commit();
+                EventTypes.creation).commit();
         assertEquals(1, Iterables.count(first.getSubjects()));
 
-        // Change the user twice...
-        ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+        // Change the user twice in succession, with the data from userBundle2
+        // and userBundle3
+        SystemEvent second = actionManager.newEventContext(user,
+                validUser.as(Actioner.class),
                 EventTypes.modification)
-                .createVersion(user);
-        SystemEvent second = ctx2.commit();
+                .createVersion(user).commit();
         Mutation<UserProfile> update1 = bundleManager
                 .update(userBundle2, UserProfile.class);
         assertEquals(MutationState.UPDATED, update1.getState());
 
-        SystemEvent third = ctx2.createVersion(user).commit();
-        bundleManager.update(userBundle3, UserProfile.class);
-        assertEquals(MutationState.UPDATED, update1.getState());
+        // and again
+        SystemEvent third = actionManager.newEventContext(user,
+                validUser.as(Actioner.class),
+                EventTypes.modification)
+                .createVersion(user).commit();
+        Mutation<UserProfile> update2 = bundleManager.update(userBundle3, UserProfile.class);
+        assertEquals(MutationState.UPDATED, update2.getState());
 
         // Now compare the values in the versions
         Version firstVersion = second.getPriorVersions().iterator().next();

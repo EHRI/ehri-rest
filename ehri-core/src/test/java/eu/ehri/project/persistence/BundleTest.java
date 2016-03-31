@@ -173,6 +173,19 @@ public class BundleTest {
 
     @Test
     public void testMergeDataWith() throws Exception {
+        Bundle target = bundle.withDataValue("remove", "test");
+        Bundle merge = new Bundle(target.getType())
+                .withDataValue("akey", "avalue")
+                .withDataValue("remove", null);
+        Bundle merged = target.mergeDataWith(merge);
+        assertNotSame(merged, target);
+        assertEquals(merged.getDataValue(Ontology.IDENTIFIER_KEY), "foobar");
+        assertEquals(merged.getDataValue("akey"), "avalue");
+        assertNull(merged.getDataValue("remove"));
+    }
+
+    @Test
+    public void testMergeDataWithSubtractingNullValues() throws Exception {
         Bundle merge = new Bundle(bundle.getType())
                 .withDataValue("akey", "avalue");
         Bundle merged = bundle.mergeDataWith(merge);
@@ -330,6 +343,35 @@ public class BundleTest {
         Map<String, Object> dataValue = bundle.
                 getDataValue(Ontology.IDENTIFIER_KEY);
         fail("Shouldn't be able to see: " + dataValue);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testGetDataResultIsImmutable() throws Exception {
+        Map<String, Object> data = bundle.getData();
+        assertNull(bundle.getDataValue("test"));
+        data.put("test", "value");
+    }
+
+    @Test
+    public void testImmutability() throws Exception {
+        Map<String,Object> m = Maps.newHashMap();
+        m.put("test", "value");
+        Bundle b = bundle.withData(m);
+        assertNull(b.getDataValue("test2"));
+        m.put("test2", "value");
+        assertNull(b.getDataValue("test2"));
+    }
+
+    @Test
+    public void testNullValueHandling() throws Exception {
+        Map<String,Object> m = Maps.newHashMap();
+        m.put("test", "value");
+        m.put("null", null);
+        assertTrue(m.containsKey("null"));
+        Bundle b = bundle.withData(m);
+        assertNotNull(b.getDataValue("test"));
+        assertNull(b.getDataValue("null"));
+        assertFalse(b.getData().containsKey("null"));
     }
 
     @Test
