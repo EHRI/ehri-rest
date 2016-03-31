@@ -119,7 +119,7 @@ public class DbUpgrader1to2 {
         return this;
     }
 
-    public DbUpgrader1to2 setIdAndTypeOnEventLinks() throws IOException {
+    public DbUpgrader1to2 setIdAndTypeOnEventLinks() {
         for (Vertex v : graph.getVertices()) {
             String dt = v.getProperty(ActionManager.DEBUG_TYPE);
             if (ActionManager.EVENT_LINK.equalsIgnoreCase(dt)) {

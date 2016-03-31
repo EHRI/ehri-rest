@@ -89,9 +89,8 @@ public class PromotionViews implements Scoped<PromotionViews> {
      *
      * @param item The promotable item
      * @param user The item's promoter
-     * @throws PermissionDenied
      */
-    public void removeUpVote(Promotable item, UserProfile user) throws PermissionDenied {
+    public void removeUpVote(Promotable item, UserProfile user) {
         item.removePromotion(user);
     }
 
@@ -117,9 +116,8 @@ public class PromotionViews implements Scoped<PromotionViews> {
      *
      * @param item The promotable item
      * @param user The item's promoter
-     * @throws PermissionDenied
      */
-    public void removeDownVote(Promotable item, UserProfile user) throws PermissionDenied {
+    public void removeDownVote(Promotable item, UserProfile user) {
         item.removeDemotion(user);
     }
 

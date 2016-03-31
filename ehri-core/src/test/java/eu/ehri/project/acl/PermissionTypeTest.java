@@ -25,9 +25,7 @@ import static eu.ehri.project.acl.PermissionType.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * User: mike
- */
+
 public class PermissionTypeTest {
     @Test
     public void testContains() throws Exception {

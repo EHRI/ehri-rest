@@ -105,7 +105,6 @@ public class Linker {
      * @param vocabulary       an existing (presumably empty) vocabulary
      * @param user             the user to whom to attribute the operation
      * @return the number of new links created
-     * @throws ItemNotFound
      * @throws ValidationError
      * @throws PermissionDenied
      */
@@ -113,7 +112,7 @@ public class Linker {
             Repository repository,
             Vocabulary vocabulary,
             UserProfile user)
-            throws ItemNotFound, ValidationError, PermissionDenied {
+            throws ValidationError, PermissionDenied {
 
         // First, build a map of access point names to (null) concepts
         Map<String, String> conceptIdentifierNames = Maps.newHashMap();

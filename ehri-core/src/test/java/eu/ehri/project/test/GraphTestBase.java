@@ -48,9 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: michaelb
- */
+
 public abstract class GraphTestBase {
 
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());

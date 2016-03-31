@@ -30,7 +30,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
@@ -46,7 +45,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
  * A frame class representing a user within the database.
  */
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, Accessible, Actioner, Versioned, Annotatable {
+public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable {
 
     String FOLLOWER_COUNT = "followers";
     String FOLLOWING_COUNT = "following";
@@ -287,7 +286,7 @@ public interface UserProfile extends Accessor, Accessible, Actioner, Versioned, 
                             }
                             // Exclude other groups...
                             String type = vertex.getProperty(EntityType.TYPE_KEY);
-                            return !(type == null || !type.equals(Entities.USER_PROFILE));
+                            return Entities.USER_PROFILE.equals(type);
                         }
                     }));
         }

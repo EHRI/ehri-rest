@@ -1,10 +1,8 @@
 package eu.ehri.project.acl.wrapper;
 
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.ElementHelper;
-import com.tinkerpop.pipes.PipeFunction;
+
 
 import java.util.Set;
 

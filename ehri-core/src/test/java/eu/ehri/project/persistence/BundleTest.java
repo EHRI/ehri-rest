@@ -41,9 +41,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/**
- * User: michaelb
- */
+
 public class BundleTest {
 
     private Bundle bundle;
