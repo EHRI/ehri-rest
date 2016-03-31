@@ -173,18 +173,9 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testGetDocumentaryUnitByIdentifier() throws Exception {
-        // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
-                .get(ClientResponse.class);
-
-        assertStatus(OK, response);
-
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
-        JsonNode errValue = rootNode.path("data").path(
-                Ontology.IDENTIFIER_KEY);
-        assertFalse(errValue.isMissingNode());
-        assertEquals(TEST_JSON_IDENTIFIER, errValue.textValue());
+        Bundle doc = getEntity(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER,
+                getAdminUserProfileId());
+        assertEquals(TEST_JSON_IDENTIFIER, doc.getDataValue(Ontology.IDENTIFIER_KEY));
     }
 
     @Test

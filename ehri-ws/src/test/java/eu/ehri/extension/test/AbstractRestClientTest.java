@@ -27,8 +27,12 @@ import com.google.common.io.Resources;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.providers.BundleProvider;
+import eu.ehri.extension.providers.GlobalPermissionSetProvider;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
@@ -53,7 +57,14 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
  */
 public class AbstractRestClientTest extends RunningServerTest {
 
-    protected static final Client client = Client.create();
+    protected static final Client client;
+
+    static {
+        ClientConfig config = new DefaultClientConfig();
+        config.getClasses().add(GlobalPermissionSetProvider.class);
+        config.getClasses().add(BundleProvider.class);
+        client = Client.create(config);
+    }
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -131,6 +142,21 @@ public class AbstractRestClientTest extends RunningServerTest {
     }
 
     /**
+     * Get an item as a bundle object.
+     *
+     * @param type the item's type
+     * @param id   the items ID
+     * @return a bundle
+     * @throws Exception
+     */
+    protected Bundle getEntity(String type, String id, String userId) throws Exception {
+        return client.resource(entityUri(type, id))
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .get(Bundle.class);
+    }
+
+    /**
      * Function for fetching a list of entities with the given EntityType,
      * and some additional parameters.
      */
@@ -140,7 +166,7 @@ public class AbstractRestClientTest extends RunningServerTest {
     }
 
     protected Integer getPaginationTotal(ClientResponse response) {
-        MultivaluedMap<String,String> headers = response.getHeaders();
+        MultivaluedMap<String, String> headers = response.getHeaders();
         String range = headers.getFirst("Content-Range");
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);

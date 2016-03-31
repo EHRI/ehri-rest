@@ -186,6 +186,22 @@ class DataConverter {
         }
     }
 
+    /**
+     * Write a bundle to a JSON stream.
+     *
+     * @param bundle       the bundle
+     * @param outputStream the stream
+     * @throws SerializationError
+     */
+    public static void bundleToStream(Bundle bundle, OutputStream outputStream) throws SerializationError {
+        try {
+            mapper.writeValue(outputStream, bundle);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new SerializationError("Error encoding JSON", e);
+        }
+    }
+
     public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
         Preconditions.checkNotNull(inputStream);
         try {

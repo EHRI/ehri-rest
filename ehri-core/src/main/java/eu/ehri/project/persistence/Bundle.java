@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -650,6 +651,17 @@ public final class Bundle {
      */
     public static Bundle fromStream(InputStream stream) throws DeserializationError {
         return DataConverter.streamToBundle(stream);
+    }
+
+    /**
+     * Write a bundle to a JSON stream.
+     *
+     * @param bundle the bundle
+     * @param stream the output stream
+     * @throws SerializationError
+     */
+    public static void toStream(Bundle bundle, OutputStream stream) throws SerializationError {
+        DataConverter.bundleToStream(bundle, stream);
     }
 
     public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
