@@ -82,7 +82,6 @@ public class RepositoryRestClientTest extends AbstractRestClientTest {
                 .entity(json)
                 .post(ClientResponse.class);
         assertStatus(BAD_REQUEST, response);
-        System.out.println(response.getEntity(String.class));
     }
 
     @Test

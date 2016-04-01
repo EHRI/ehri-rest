@@ -59,9 +59,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * User: michaelb
- */
+
 public class AclManagerTest extends GraphTestBase {
 
     private FixtureLoader loader;

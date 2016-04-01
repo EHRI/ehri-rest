@@ -35,17 +35,17 @@ public enum MaintenanceEventType {
 
     public static MaintenanceEventType withName(String name) {
         try {
-            return MaintenanceEventType.valueOf(name);
+            return valueOf(name);
         } catch (IllegalArgumentException e) {
             OldValues compatVal = OldValues.valueOf(name);
             switch (compatVal) {
                 case creation:
                 case create:
-                    return MaintenanceEventType.created;
+                    return created;
                 case delete:
-                    return MaintenanceEventType.deleted;
+                    return deleted;
                 default:
-                    return MaintenanceEventType.updated;
+                    return updated;
             }
         }
     }
@@ -59,12 +59,12 @@ public enum MaintenanceEventType {
     public static MaintenanceEventType fromSystemEventType(EventTypes eventType) {
         switch (eventType) {
             case deletion:
-                return MaintenanceEventType.deleted;
+                return deleted;
             case ingest:
             case creation:
-                return MaintenanceEventType.created;
+                return created;
             default:
-                return MaintenanceEventType.updated;
+                return updated;
         }
     }
 }

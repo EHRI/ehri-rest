@@ -22,6 +22,8 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AdminResource;
+import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
@@ -39,6 +41,18 @@ import static org.junit.Assert.*;
  * Test admin REST functions.
  */
 public class AdminRestClientTest extends AbstractRestClientTest {
+
+    @Test
+    public void testAdminGetUserProfile() throws Exception {
+        // get the admin user profile
+        WebResource resource = client.resource(
+                entityUri(Entities.USER_PROFILE, getAdminUserProfileId()));
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+        assertStatus(OK, response);
+    }
 
     @Test
     public void testExportGraphSONAsAnon() throws Exception {
@@ -67,7 +81,6 @@ public class AdminRestClientTest extends AbstractRestClientTest {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "export-json"));
         ClientResponse response = resource.header(AUTH_HEADER_NAME, ADMIN_GROUP_IDENTIFIER)
                 .get(ClientResponse.class);
-        String data = response.getEntity(String.class);
         assertStatus(OK, response);
     }
 
@@ -79,8 +92,7 @@ public class AdminRestClientTest extends AbstractRestClientTest {
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
-        String json = response.getEntity(String.class);
-        Bundle bundle = Bundle.fromString(json);
+        Bundle bundle = response.getEntity(Bundle.class);
         String ident = (String) bundle.getData().get(Ontology.IDENTIFIER_KEY);
         assertTrue(ident != null);
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
@@ -92,13 +104,11 @@ public class AdminRestClientTest extends AbstractRestClientTest {
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
-        String json2 = response.getEntity(String.class);
-        Bundle bundle2 = Bundle.fromString(json2);
+        Bundle bundle2 = response.getEntity(Bundle.class);
         String ident2 = (String) bundle2.getData().get(
                 Ontology.IDENTIFIER_KEY);
         assertEquals(parseUserId(ident) + 1L, parseUserId(ident2));
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
-
     }
 
     // Helpers

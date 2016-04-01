@@ -224,11 +224,9 @@ public final class BundleManager {
      * @param master The master vertex
      * @param cls The master vertex class
      * @param relations A map of relations
-     * @throws IntegrityError
      */
     private void createDependents(Vertex master,
-            Class<?> cls, Multimap<String, Bundle> relations)
-            throws IntegrityError {
+            Class<?> cls, Multimap<String, Bundle> relations) {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
         for (String relation : relations.keySet()) {
@@ -250,10 +248,8 @@ public final class BundleManager {
      * @param master The master vertex
      * @param cls The master vertex class
      * @param relations A map of relations
-     * @throws ItemNotFound
      */
-    private void updateDependents(Vertex master, Class<?> cls, Multimap<String,
-            Bundle> relations) throws ItemNotFound {
+    private void updateDependents(Vertex master, Class<?> cls, Multimap<String, Bundle> relations) {
 
         // Get a list of dependent relationships for this class, and their
         // directions.

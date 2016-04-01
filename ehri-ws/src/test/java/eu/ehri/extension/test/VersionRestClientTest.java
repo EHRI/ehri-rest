@@ -19,7 +19,6 @@
 
 package eu.ehri.extension.test;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.project.definitions.Entities;
@@ -27,14 +26,18 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
 
+import java.util.List;
+
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class VersionRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testGetVersionsForItem() throws Exception {
         // Create an item
+        Bundle before = getEntity(Entities.REPOSITORY, "r1", getAdminUserProfileId());
         String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.REPOSITORY, "r1"))
@@ -42,15 +45,12 @@ public class VersionRestClientTest extends AbstractRestClientTest {
                 .put(ClientResponse.class);
         assertStatus(OK, response);
 
-        response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(GenericResource.ENDPOINT, "r1", GenericResource.VERSIONS))
-                .get(ClientResponse.class);
-
-        String json = response.getEntity(String.class);
-        // Check the response contains a new version
-        JsonNode rootNode = jsonMapper.readTree(json);
-        assertFalse(rootNode.path(0).path(Bundle.DATA_KEY)
-                .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
-        assertStatus(OK, response);
+        List<Bundle> versions = getItemList(ehriUri(GenericResource.ENDPOINT, "r1",
+                        GenericResource.VERSIONS),
+                getAdminUserProfileId());
+        assertEquals(1, versions.size());
+        String data = versions.get(0).getDataValue(Ontology.VERSION_ENTITY_DATA);
+        assertNotNull(data);
+        assertEquals(before.getData(), Bundle.fromString(data).getData());
     }
 }

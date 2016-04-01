@@ -22,7 +22,6 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.UserProfileResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
@@ -35,12 +34,14 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
-import static org.junit.Assert.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class VirtualUnitRestClientTest extends AbstractRestClientTest {
 
@@ -163,21 +164,13 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
 
     @Test
     public void testListVirtualUnit() throws Exception {
-        List<Map<String, Object>> data = getEntityList(
+        List<Bundle> data = getEntityList(
                 Entities.VIRTUAL_UNIT, getAdminUserProfileId());
         assertTrue(!data.isEmpty());
-        Collections.sort(data, new Comparator<Map<String, Object>>() {
-            @Override
-            public int compare(Map<String, Object> c1, Map<String, Object> c2) {
-                return ((String) c1.get("id")).compareTo((String) c2.get("id"));
-            }
-        });
+        Collections.sort(data, bundleComparator);
         // Extract the first collection. According to the fixtures this
         // should be named 'vc1'.
-        @SuppressWarnings("unchecked")
-        Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
-                "data");
-        assertEquals(FIRST_DOC_ID, c1data.get(Ontology.IDENTIFIER_KEY));
+        assertEquals(FIRST_DOC_ID, data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -279,7 +272,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                    .get(ClientResponse.class);
+                .get(ClientResponse.class);
         assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?

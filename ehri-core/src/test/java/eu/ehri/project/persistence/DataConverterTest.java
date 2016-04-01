@@ -25,6 +25,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
+import org.neo4j.helpers.collection.Iterables;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -33,7 +34,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import static eu.ehri.project.persistence.DataConverter.isEmptySequence;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -84,5 +87,21 @@ public class DataConverterTest extends AbstractFixtureTest {
             List<Bundle> ids = Lists.newArrayList(bundleMappingIterator);
             assertTrue(ids.isEmpty());
         }
+    }
+
+    @Test
+    public void testIsEmptySequence() throws Exception {
+        Object t1 = "a string";
+        Object t2 = Lists.newArrayList("not empty");
+        Object t3 = Lists.newArrayList();
+        Object[] t4 = {"not", "empty"};
+        Object[] t5 = {};
+        Object t6 = Iterables.empty();
+        assertFalse(isEmptySequence(t1));
+        assertFalse(isEmptySequence(t2));
+        assertTrue(isEmptySequence(t3));
+        assertFalse(isEmptySequence(t4));
+        assertTrue(isEmptySequence(t5));
+        assertTrue(isEmptySequence(t6));
     }
 }

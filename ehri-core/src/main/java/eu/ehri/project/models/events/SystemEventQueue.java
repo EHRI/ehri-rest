@@ -44,7 +44,7 @@ public interface SystemEventQueue extends Entity {
      *
      * @return a system event frame
      */
-    @Adjacency(label = SystemEventQueue.STREAM_START)
+    @Adjacency(label = STREAM_START)
     SystemEvent getLatestEvent();
 
     /**

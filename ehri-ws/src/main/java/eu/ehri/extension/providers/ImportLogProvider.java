@@ -46,7 +46,10 @@ public class ImportLogProvider implements MessageBodyWriter<ImportLog>, JsonMess
     }
 
     @Override
-    public void writeTo(ImportLog importLog, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
+    public void writeTo(ImportLog importLog, Class<?> aClass, Type type,
+            Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream)
+                throws IOException, WebApplicationException {
         mapper.writeValue(outputStream, importLog);
     }
 }

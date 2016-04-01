@@ -26,7 +26,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Named;
 

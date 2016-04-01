@@ -35,23 +35,23 @@ import java.lang.reflect.Type;
 
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
-public class BooleanJsonProvider implements MessageBodyWriter<Boolean> {
+public class NumberProvider implements MessageBodyWriter<Number>, JsonMessageBodyHandler {
 
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return Boolean.class.isAssignableFrom(aClass);
+        return Number.class.isAssignableFrom(aClass);
     }
 
     @Override
-    public long getSize(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
+    public long getSize(Number number, Class<?> aClass, Type type, Annotation[] annotations,
                         MediaType mediaType) {
         return -1L;
     }
 
     @Override
-    public void writeTo(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
+    public void writeTo(Number number, Class<?> aClass, Type type, Annotation[] annotations,
                         MediaType mediaType, MultivaluedMap<String, Object> headers,
                         OutputStream outputStream) throws IOException, WebApplicationException {
-        outputStream.write(bool.toString().getBytes(Charsets.UTF_8));
+        mapper.writeValue(outputStream, number);
     }
 }

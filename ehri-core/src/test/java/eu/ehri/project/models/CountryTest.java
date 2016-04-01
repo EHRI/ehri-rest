@@ -44,7 +44,6 @@ public class CountryTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCountOnDeletion() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
-        Repository repo = manager.getEntity("r1", Repository.class);
         assertEquals(2L, country.getChildCount());
         ViewFactory.getCrudNoLogging(graph, Repository.class).delete("r1", validUser);
         assertEquals(1L, country.getChildCount());

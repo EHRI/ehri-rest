@@ -220,8 +220,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     private void importNode(Map<Vertex, Multimap<String, String>> links,
-            Map<String, Object> node) throws DeserializationError,
-            ValidationError, IntegrityError, ItemNotFound {
+            Map<String, Object> node) throws DeserializationError, ValidationError {
         EntityClass isa = EntityClass.withName((String) node
                 .get(Bundle.TYPE_KEY));
 

@@ -21,17 +21,23 @@ package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.providers.BundleProvider;
+import eu.ehri.extension.providers.GlobalPermissionSetProvider;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDeserializer;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -39,10 +45,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,9 +58,22 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
  */
 public class AbstractRestClientTest extends RunningServerTest {
 
-    protected static final Client client = Client.create();
+    protected static final Client client;
+
+    static {
+        ClientConfig config = new DefaultClientConfig();
+        config.getClasses().add(GlobalPermissionSetProvider.class);
+        config.getClasses().add(BundleProvider.class);
+        client = Client.create(config);
+    }
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
+
+    static {
+        SimpleModule bundleModule = new SimpleModule();
+        bundleModule.addDeserializer(Bundle.class, new BundleDeserializer());
+        jsonMapper.registerModule(bundleModule);
+    }
 
     protected static final Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
 
@@ -74,50 +92,34 @@ public class AbstractRestClientTest extends RunningServerTest {
     }
 
     /**
-     * Tests if we have an admin user, we need that user for doing all the other
-     * tests
-     */
-    @Test
-    public void testAdminGetUserProfile() throws Exception {
-        // get the admin user profile
-        WebResource resource = client.resource(
-                entityUri(Entities.USER_PROFILE, getAdminUserProfileId()));
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertStatus(OK, response);
-    }
-
-    /**
      * Helpers **
      */
 
-    protected List<Map<String, Object>> getItemList(URI uri, String userId) throws Exception {
+    protected List<Bundle> getItemList(URI uri, String userId) throws Exception {
         return getItemList(uri, userId, new MultivaluedMapImpl());
     }
 
     /**
      * Get a list of items at some url, as the given user.
      */
-    protected List<Map<String, Object>> getItemList(URI uri, String userId,
+    protected List<Bundle> getItemList(URI uri, String userId,
             MultivaluedMap<String, String> params) throws Exception {
-        TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
+        TypeReference<LinkedList<Bundle>> typeRef = new TypeReference<LinkedList<Bundle>>() {
         };
         return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
 
-    protected List<List<Map<String, Object>>> getItemListOfLists(URI uri, String userId) throws Exception {
+    protected List<List<Bundle>> getItemListOfLists(URI uri, String userId) throws Exception {
         return getItemListOfLists(uri, userId, new MultivaluedMapImpl());
     }
 
     /**
      * Get a list of items at some relativeUrl, as the given user.
      */
-    protected List<List<Map<String, Object>>> getItemListOfLists(URI uri, String userId,
+    protected List<List<Bundle>> getItemListOfLists(URI uri, String userId,
             MultivaluedMap<String, String> params) throws Exception {
-        TypeReference<LinkedList<LinkedList<HashMap<String, Object>>>> typeRef = new
-                TypeReference<LinkedList<LinkedList<HashMap<String, Object>>>>() {
+        TypeReference<LinkedList<LinkedList<Bundle>>> typeRef = new
+                TypeReference<LinkedList<LinkedList<Bundle>>>() {
                 };
         return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
@@ -125,22 +127,35 @@ public class AbstractRestClientTest extends RunningServerTest {
     /**
      * Function for fetching a list of entities with the given EntityType
      */
-    protected List<Map<String, Object>> getEntityList(String entityType, String userId)
+    protected List<Bundle> getEntityList(String entityType, String userId)
             throws Exception {
         return getEntityList(entityUri(entityType), userId, new MultivaluedMapImpl());
+    }
+
+    /**
+     * Get an item as a bundle object.
+     *
+     * @param type the item's type
+     * @param id   the items ID
+     * @return a bundle
+     * @throws Exception
+     */
+    protected Bundle getEntity(String type, String id, String userId) throws Exception {
+        return jsonMapper.readValue(getJson(
+                entityUri(type, id), userId, new MultivaluedMapImpl()), Bundle.class);
     }
 
     /**
      * Function for fetching a list of entities with the given EntityType,
      * and some additional parameters.
      */
-    protected List<Map<String, Object>> getEntityList(URI uri,
+    protected List<Bundle> getEntityList(URI uri,
             String userId, MultivaluedMap<String, String> params) throws Exception {
         return getItemList(uri, userId, params);
     }
 
     protected Integer getPaginationTotal(ClientResponse response) {
-        MultivaluedMap<String,String> headers = response.getHeaders();
+        MultivaluedMap<String, String> headers = response.getHeaders();
         String range = headers.getFirst("Content-Range");
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
@@ -207,11 +222,11 @@ public class AbstractRestClientTest extends RunningServerTest {
         return callAs(user, ehriUriBuilder(segments).build());
     }
 
-    public void assertStatus(ClientResponse.Status status, ClientResponse response) {
+    protected void assertStatus(ClientResponse.Status status, ClientResponse response) {
         org.junit.Assert.assertEquals(status.getStatusCode(), response.getStatus());
     }
 
-    public void assertValidJsonData(ClientResponse response) {
+    protected void assertValidJsonData(ClientResponse response) {
         try {
             Bundle.fromString(response.getEntity(String.class));
         } catch (DeserializationError deserializationError) {
@@ -225,12 +240,19 @@ public class AbstractRestClientTest extends RunningServerTest {
         return Resources.toString(url, Charsets.UTF_8);
     }
 
+
+    protected final Comparator<Bundle> bundleComparator = new Comparator<Bundle>() {
+        @Override
+        public int compare(Bundle a, Bundle b) {
+            return a.getId().compareTo(b.getId());
+        }
+    };
+
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
         WebResource resource = client.resource(uri).queryParams(params);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+        return resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
-                .get(ClientResponse.class);
-        return response.getEntity(String.class);
+                .get(String.class);
     }
 }

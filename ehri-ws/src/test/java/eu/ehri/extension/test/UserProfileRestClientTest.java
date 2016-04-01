@@ -211,7 +211,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         String user3 = "linda";
 
         URI followingUrl = entityUri(Entities.USER_PROFILE, user1, FOLLOWING);
-        List<Map<String, Object>> followers = getItemList(followingUrl, user1);
+        List<Bundle> followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
 
         URI followUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
@@ -250,7 +250,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         String user1 = getRegularUserProfileId();
         String user2 = getAdminUserProfileId();
         URI blockedUrl = entityUri(Entities.USER_PROFILE, user1, BLOCKED);
-        List<Map<String, Object>> blocked = getItemList(blockedUrl, user1);
+        List<Bundle> blocked = getItemList(blockedUrl, user1);
         assertTrue(blocked.isEmpty());
 
         URI blockUrl = entityUriBuilder(Entities.USER_PROFILE, user1, BLOCKED)
@@ -279,7 +279,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         String item1 = "c1";
         String item2 = "c2";
         URI watchersUrl = entityUri(Entities.USER_PROFILE, user1, WATCHING);
-        List<Map<String, Object>> watching = getItemList(watchersUrl, user1);
+        List<Bundle> watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
 
         URI watchUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)

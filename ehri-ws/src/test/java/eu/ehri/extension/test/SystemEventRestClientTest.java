@@ -26,13 +26,13 @@ import eu.ehri.extension.UserProfileResource;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.EventViews;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
@@ -53,7 +53,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         // Create a new agent. We're going to test that this creates
         // a corresponding action.
         URI uri = entityUri(Entities.SYSTEM_EVENT);
-        List<List<Map<String, Object>>> actionsBefore = getItemListOfLists(
+        List<List<Bundle>> actionsBefore = getItemListOfLists(
                 uri, getAdminUserProfileId());
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
@@ -63,7 +63,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
 
         assertStatus(CREATED, response);
 
-        List<List<Map<String, Object>>> actionsAfter = getItemListOfLists(
+        List<List<Bundle>> actionsAfter = getItemListOfLists(
                 uri, getAdminUserProfileId());
         System.out.println(actionsAfter);
 
@@ -90,10 +90,10 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         badFilters.add(AbstractAccessibleResource.USER_PARAM, "nobody");
 
         URI url = entityUri(Entities.SYSTEM_EVENT);
-        List<List<Map<String, Object>>> goodFiltered = getItemListOfLists(
+        List<List<Bundle>> goodFiltered = getItemListOfLists(
                 url, getAdminUserProfileId(), goodFilters);
 
-        List<List<Map<String, Object>>> badFiltered = getItemListOfLists(
+        List<List<Bundle>> badFiltered = getItemListOfLists(
                 url, getAdminUserProfileId(), badFilters);
 
         assertFalse(goodFiltered.isEmpty());
@@ -136,13 +136,13 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         // contain all the regular events.
         String user = getRegularUserProfileId();
         URI personalisedEventUrl = entityUri(Entities.USER_PROFILE, user, UserProfileResource.EVENTS);
-        List<List<Map<String, Object>>> events = getItemListOfLists(personalisedEventUrl, user);
+        List<List<Bundle>> events = getItemListOfLists(personalisedEventUrl, user);
         assertEquals(1, events.size());
 
         // Now only fetch events related to items we're watching - this list
         // should currently be empty...
         URI personalisedEventUrlWatched = entityUriBuilder(
-                    Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
+                Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
                 .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventViews.ShowType.watched).build();
         events = getItemListOfLists(personalisedEventUrlWatched, user);
         assertEquals(0, events.size());
@@ -167,7 +167,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         // Only get events for people we follow, excluding those
         // for items we watch...
         URI personalisedEventUrlFollowed = entityUriBuilder(
-                    Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
+                Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
                 .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventViews.ShowType.followed).build();
         events = getItemListOfLists(personalisedEventUrlFollowed, user);
         assertEquals(0, events.size());

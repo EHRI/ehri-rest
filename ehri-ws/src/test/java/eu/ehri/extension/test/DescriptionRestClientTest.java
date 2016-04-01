@@ -31,12 +31,11 @@ import javax.ws.rs.core.Response;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.GenericResource.ENDPOINT;
-import static eu.ehri.extension.GenericResource.DESCRIPTIONS;
 import static eu.ehri.extension.GenericResource.ACCESS_POINTS;
+import static eu.ehri.extension.GenericResource.DESCRIPTIONS;
+import static eu.ehri.extension.GenericResource.ENDPOINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class DescriptionRestClientTest extends AbstractRestClientTest {
 
@@ -59,20 +58,11 @@ public class DescriptionRestClientTest extends AbstractRestClientTest {
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
+        Bundle node = response.getEntity(Bundle.class);
 
         // Check ID is the correct concatenation of all the scope IDs...
-        JsonNode idValue = rootNode
-                .path(Bundle.ID_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals("nl-r1-c1-c2.en-another_description", idValue.textValue());
-
-        // Check the identifier is present and correct...
-        JsonNode identValue = rootNode
-                .path(Bundle.DATA_KEY)
-                .path(Ontology.IDENTIFIER_KEY);
-        assertFalse(identValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, identValue.textValue());
+        assertEquals("nl-r1-c1-c2.en-another_description", node.getId());
+        assertEquals(TEST_DESCRIPTION_IDENTIFIER, node.getDataValue(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -84,15 +74,11 @@ public class DescriptionRestClientTest extends AbstractRestClientTest {
                 .entity(descriptionTestStr).put(ClientResponse.class);
         assertStatus(OK, response);
 
-        JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
-        JsonNode idValue = rootNode
-                .path(Bundle.DATA_KEY)
-                .path(Ontology.IDENTIFIER_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.textValue());
-        // Assert there are no extra descriptions
-        assertTrue(rootNode.path(Bundle.REL_KEY).path(
-                Ontology.DESCRIPTION_FOR_ENTITY).path(1).isMissingNode());
+        Bundle node = response.getEntity(Bundle.class);
+
+        // Check ID is the correct concatenation of all the scope IDs...
+        assertEquals(TEST_DESCRIPTION_IDENTIFIER, node.getDataValue(Ontology.IDENTIFIER_KEY));
+        assertEquals(1, node.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
     @Test

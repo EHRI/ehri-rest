@@ -26,7 +26,9 @@ import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ead.IcaAtomEadHandler;
+import eu.ehri.project.persistence.Bundle;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -48,6 +50,7 @@ import java.util.zip.ZipOutputStream;
 import static eu.ehri.extension.ImportResource.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -288,6 +291,31 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         assertEquals(1, rootNode.path("updated").asInt());
         assertEquals(1, rootNode.path("unchanged").asInt());
         assertEquals(logText, rootNode.path("message").asText());
+    }
+
+    @Test
+    public void testBatchUpdateToUnsetValues() throws Exception {
+        Bundle before = getEntity(Entities.REPOSITORY, "r1",
+                getAdminUserProfileId());
+        assertEquals("Repository 1", before.getDataValue("name"));
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("import-patch-test2.json");
+        String logText = "Testing patch to unset values";
+        URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
+                .queryParam(LOG_PARAM, logText)
+                .queryParam(SCOPE_PARAM, "nl").build();
+        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
+                .header("Content-Type", "application/json")
+                .entity(payloadStream)
+                .put(ClientResponse.class);
+
+        String output = response.getEntity(String.class);
+        System.out.println(output);
+        assertStatus(ClientResponse.Status.OK, response);
+
+        Bundle after = getEntity(Entities.REPOSITORY, "r1",
+                getAdminUserProfileId());
+        assertNull(after.getDataValue("name"));
     }
 
     @Test

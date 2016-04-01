@@ -23,9 +23,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -39,7 +36,6 @@ import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.persistence.utils.DataUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -69,20 +65,6 @@ class DataConverter {
     private static final JsonFactory factory = new JsonFactory();
     private static final ObjectMapper mapper = new ObjectMapper(factory);
     private static final ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-
-    public static class BundleDeserializer extends JsonDeserializer<Bundle> {
-        private static TypeReference<Map<String, Object>> tref = new TypeReference<Map<String, Object>>() {
-        };
-
-        @Override
-        public Bundle deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            try {
-                return dataToBundle(parser.readValueAs(tref));
-            } catch (DeserializationError deserializationError) {
-                throw new IOException(deserializationError);
-            }
-        }
-    }
 
     static {
         SimpleModule bundleModule = new SimpleModule();
@@ -184,6 +166,22 @@ class DataConverter {
         } catch (IOException e) {
             e.printStackTrace();
             throw new DeserializationError("Error decoding JSON", e);
+        }
+    }
+
+    /**
+     * Write a bundle to a JSON stream.
+     *
+     * @param bundle       the bundle
+     * @param outputStream the stream
+     * @throws SerializationError
+     */
+    public static void bundleToStream(Bundle bundle, OutputStream outputStream) throws SerializationError {
+        try {
+            mapper.writeValue(outputStream, bundle);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new SerializationError("Error encoding JSON", e);
         }
     }
 
@@ -335,7 +333,7 @@ class DataConverter {
         for (Entry<?, ?> entry : data.entrySet()) {
             Object value = entry.getValue();
             // Allow any null value, as long as it's not an empty array
-            if (value != null && !DataUtils.isEmptySequence(value)) {
+            if (!isEmptySequence(value)) {
                 cleaned.put((String) entry.getKey(), entry.getValue());
             }
         }
@@ -457,5 +455,25 @@ class DataConverter {
             }
             return dataValue;
         }
+    }
+
+    /**
+     * Ensure a value isn't an empty array or list, which will
+     * cause Neo4j to barf.
+     *
+     * @param value A unknown object
+     * @return If the object is a sequence type, and is empty
+     */
+    static boolean isEmptySequence(Object value) {
+        if (value == null) {
+            return false;
+        } else if (value instanceof Object[]) {
+            return ((Object[]) value).length == 0;
+        } else if (value instanceof Collection<?>) {
+            return ((Collection) value).isEmpty();
+        } else if (value instanceof Iterable<?>) {
+            return !((Iterable) value).iterator().hasNext();
+        }
+        return false;
     }
 }

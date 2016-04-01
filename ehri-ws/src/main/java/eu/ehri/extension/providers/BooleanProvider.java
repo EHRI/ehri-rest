@@ -34,24 +34,24 @@ import java.lang.reflect.Type;
 
 
 @Provider
-@Produces(MediaType.TEXT_XML)
-public class NumberXmlProvider implements MessageBodyWriter<Number> {
+@Produces(MediaType.APPLICATION_JSON)
+public class BooleanProvider implements MessageBodyWriter<Boolean>, JsonMessageBodyHandler {
 
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return Number.class.isAssignableFrom(aClass);
+        return Boolean.class.isAssignableFrom(aClass);
     }
 
     @Override
-    public long getSize(Number number, Class<?> aClass, Type type, Annotation[] annotations,
+    public long getSize(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
                         MediaType mediaType) {
         return -1L;
     }
 
     @Override
-    public void writeTo(Number number, Class<?> aClass, Type type, Annotation[] annotations,
+    public void writeTo(Boolean bool, Class<?> aClass, Type type, Annotation[] annotations,
                         MediaType mediaType, MultivaluedMap<String, Object> headers,
                         OutputStream outputStream) throws IOException, WebApplicationException {
-        outputStream.write(("<count>" + number + "</count>").getBytes(Charsets.UTF_8));
+        mapper.writeValue(outputStream, bool);
     }
 }

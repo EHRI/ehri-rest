@@ -103,10 +103,9 @@ public class LoggingCrudViews<E extends Accessible> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws DeserializationError
      */
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError {
         E out = views.create(bundle, user);
         actionManager
                 .newEventContext(out, graph.frame(user.asVertex(), Actioner.class),
@@ -141,10 +140,9 @@ public class LoggingCrudViews<E extends Accessible> implements Crud<E> {
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws DeserializationError
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError {
         Mutation<E> out = views.createOrUpdate(bundle, user);
         if (out.updated()) {
             actionManager
@@ -182,10 +180,9 @@ public class LoggingCrudViews<E extends Accessible> implements Crud<E> {
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws DeserializationError
      */
     public Mutation<E> update(Bundle bundle, Accessor user, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError {
         try {
             Mutation<E> out = views.update(bundle, user);
             if (!out.unchanged()) {
