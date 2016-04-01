@@ -254,7 +254,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userOrGroup:[^/]+}/" + GenericResource.PERMISSION_GRANTS)
     public Response listPermissionGrants(@PathParam("userOrGroup") String id) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();

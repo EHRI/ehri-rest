@@ -124,7 +124,7 @@ public class AdminResource extends AbstractRestResource {
      * @throws Exception
      */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("create-default-user-profile")
     public Response createDefaultUserProfile(String jsonData,

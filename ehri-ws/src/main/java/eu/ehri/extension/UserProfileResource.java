@@ -85,7 +85,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -93,7 +93,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response list() {
         return listItems();
@@ -101,7 +101,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createUserProfile(Bundle bundle,
             @QueryParam(GROUP_PARAM) List<String> groupIds,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
@@ -130,7 +130,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
@@ -155,7 +155,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + FOLLOWERS)
     public Response listFollowers(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -171,7 +171,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + FOLLOWING)
     public Response listFollowing(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -187,7 +187,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + IS_FOLLOWING + "/{otherId:[^/]+}")
     public boolean isFollowing(
             @PathParam("userId") String userId,
@@ -204,7 +204,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + IS_FOLLOWER + "/{otherId:[^/]+}")
     public boolean isFollower(
             @PathParam("userId") String userId,
@@ -252,7 +252,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + BLOCKED)
     public Response listBlocked(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -268,7 +268,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + IS_BLOCKING + "/{otherId:[^/]+}")
     public boolean isBlocking(
             @PathParam("userId") String userId,
@@ -316,7 +316,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + WATCHING)
     public Response listWatching(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -380,7 +380,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + GenericResource.ANNOTATIONS)
     public Response listAnnotations(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -396,7 +396,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + GenericResource.LINKS)
     public Response pageLinks(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
@@ -412,7 +412,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + Entities.VIRTUAL_UNIT)
     public Response pageVirtualUnits(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();

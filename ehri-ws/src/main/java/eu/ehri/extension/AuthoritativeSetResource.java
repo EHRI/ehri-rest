@@ -53,7 +53,7 @@ public class AuthoritativeSetResource extends
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -61,14 +61,14 @@ public class AuthoritativeSetResource extends
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response list() {
         return listItems();
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(
@@ -88,7 +88,7 @@ public class AuthoritativeSetResource extends
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
                            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -102,7 +102,7 @@ public class AuthoritativeSetResource extends
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
@@ -149,7 +149,7 @@ public class AuthoritativeSetResource extends
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + Entities.HISTORICAL_AGENT)
     @Override
     public Response createChild(@PathParam("id") String id,

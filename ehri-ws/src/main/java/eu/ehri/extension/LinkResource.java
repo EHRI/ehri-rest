@@ -70,7 +70,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -78,7 +78,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response list() {
         return listItems();
     }
@@ -111,7 +111,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response create(
             Bundle bundle,
             @QueryParam(SOURCE_PARAM) String source,

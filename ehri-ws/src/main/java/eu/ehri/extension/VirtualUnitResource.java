@@ -66,7 +66,7 @@ public final class VirtualUnitResource extends
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -74,14 +74,14 @@ public final class VirtualUnitResource extends
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response list() {
         return listItems();
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/list")
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
@@ -100,7 +100,7 @@ public final class VirtualUnitResource extends
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + INCLUDED)
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id) throws ItemNotFound {
@@ -164,7 +164,7 @@ public final class VirtualUnitResource extends
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createTopLevelVirtualUnit(Bundle bundle,
                                               @QueryParam(ACCESSOR_PARAM) List<String> accessors,
                                               @QueryParam(ID_PARAM) List<String> includedIds)
@@ -191,7 +191,7 @@ public final class VirtualUnitResource extends
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
@@ -217,7 +217,7 @@ public final class VirtualUnitResource extends
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + Entities.VIRTUAL_UNIT)
     public Response createChildVirtualUnit(@PathParam("id") String id,
                                            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,

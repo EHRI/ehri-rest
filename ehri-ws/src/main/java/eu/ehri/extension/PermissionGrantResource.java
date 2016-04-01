@@ -58,7 +58,7 @@ public class PermissionGrantResource extends AbstractRestResource implements Del
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {

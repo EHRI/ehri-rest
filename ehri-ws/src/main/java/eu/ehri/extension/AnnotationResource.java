@@ -71,7 +71,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -79,7 +79,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response list() {
         return listItems();
@@ -101,7 +101,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createAnnotation(
             @QueryParam(TARGET_PARAM) String id,
             @QueryParam(BODY_PARAM) String did,

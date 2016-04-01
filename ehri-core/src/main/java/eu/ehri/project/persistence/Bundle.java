@@ -39,7 +39,6 @@ import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -53,7 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Class that represents a graph entity and subtree relations
  * prior to being materialised as vertices and edges.
- *
+ * <p/>
  * Note: unlike a vertex, a bundle can contain null values
  * in its data map, though these values will not be externally
  * visible. Null values <i>are</i> however used in merge operations,
@@ -684,24 +683,6 @@ public final class Bundle {
         } catch (SerializationError e) {
             return "Invalid Bundle: " + e.getMessage();
         }
-    }
-
-    /**
-     * Serialize a bundle to a JSON string.
-     *
-     * @return document An XML document
-     */
-    public Document toXml() {
-        return DataConverter.bundleToXml(this);
-    }
-
-    /**
-     * Serialize to an XML String.
-     *
-     * @return An XML string
-     */
-    public String toXmlString() {
-        return DataConverter.bundleToXmlString(this);
     }
 
     /**

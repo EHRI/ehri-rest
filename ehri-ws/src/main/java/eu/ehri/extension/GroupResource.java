@@ -72,7 +72,7 @@ public class GroupResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -80,7 +80,7 @@ public class GroupResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response list() {
         return listItems();
@@ -88,7 +88,7 @@ public class GroupResource
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createGroup(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(MEMBER_PARAM) List<String> members)
@@ -116,7 +116,7 @@ public class GroupResource
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
@@ -165,7 +165,7 @@ public class GroupResource
      * UserProfiles and sub-Groups (direct descendants)
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/list")
     public Response listChildren(
             @PathParam("id") String id,

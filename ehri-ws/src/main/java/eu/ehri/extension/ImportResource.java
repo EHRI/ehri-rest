@@ -103,7 +103,6 @@ public class ImportResource extends AbstractRestResource {
         super(database);
     }
 
-
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.

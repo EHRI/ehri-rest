@@ -36,24 +36,11 @@ import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -338,123 +325,6 @@ class DataConverter {
             }
         }
         return cleaned;
-    }
-
-    /**
-     * Convert a bundle to an XML document (currently with a very ad-hoc schema.)
-     *
-     * @param bundle The bundle
-     * @return An XML document
-     */
-    public static Document bundleToXml(Bundle bundle) {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.newDocument();
-            Element root = bundleDataToElement(doc, bundle);
-            doc.appendChild(root);
-            return doc;
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Pretty-print a bundle as XML to a string.
-     *
-     * @param bundle a bundle
-     * @return an XML string
-     */
-    public static String bundleToXmlString(Bundle bundle) {
-        Document doc = bundleToXml(bundle);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            printDocument(doc, baos);
-            return baos.toString("UTF-8");
-        } catch (IOException | TransformerException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Pretty-print an XML document.
-     *
-     * @param doc The document
-     * @param out An OutputStream instance
-     * @throws IOException
-     * @throws TransformerException
-     */
-    public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-        transformer.transform(new DOMSource(doc),
-                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
-    }
-
-    private static Element bundleDataToElement(Document document, Bundle bundle) {
-        Element root = document.createElement("item");
-        root.setAttribute(Bundle.ID_KEY, bundle.getId());
-        root.setAttribute(Bundle.TYPE_KEY, bundle.getType().getName());
-        Element data = document.createElement(Bundle.DATA_KEY);
-        root.appendChild(data);
-        for (Entry<String, Object> entry : bundle.getData().entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (value != null) {
-                Element dataValue = bundleDataValueToElement(document, key, value);
-                data.appendChild(dataValue);
-            }
-        }
-        if (!bundle.getRelations().isEmpty()) {
-            Element relations = document.createElement(Bundle.REL_KEY);
-            root.appendChild(relations);
-            for (Entry<String, Collection<Bundle>> entry : bundle.getRelations().asMap().entrySet()) {
-                Element relation = document.createElement("relationship");
-                relation.setAttribute("label", entry.getKey());
-                relations.appendChild(relation);
-                for (Bundle relationBundle : entry.getValue()) {
-                    relation.appendChild(bundleDataToElement(document, relationBundle));
-                }
-            }
-        }
-
-        return root;
-    }
-
-    private static Element bundleDataValueToElement(Document document, String key, Object value) {
-        if (value instanceof Object[]) {
-            Element dataValue = document.createElement("propertySequence");
-            for (Object item : (Object[]) value) {
-                dataValue.appendChild(bundleDataValueToElement(document, key, item));
-            }
-            return dataValue;
-        } else {
-            Element dataValue = document.createElement("property");
-            if (value instanceof String) {
-                dataValue.setAttribute("name", key);
-                dataValue.setAttribute("type", "xs:string");
-                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-            } else if (value instanceof Integer) {
-                dataValue.setAttribute("name", key);
-                dataValue.setAttribute("type", "xs:int");
-                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-            } else if (value instanceof Long) {
-                dataValue.setAttribute("name", key);
-                dataValue.setAttribute("type", "xs:long");
-                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-            } else { // Mmmn, what should we do for other types???
-                dataValue.setAttribute("type", "unknown");
-                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-            }
-            return dataValue;
-        }
     }
 
     /**
