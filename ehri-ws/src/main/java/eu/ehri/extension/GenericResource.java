@@ -117,7 +117,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response list(@QueryParam("id") List<String> ids,
             @QueryParam("gid") List<Long> gids) throws ItemNotFound {
 
@@ -161,7 +161,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws PermissionDenied
      */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listFromJson(String json)
             throws ItemNotFound, PermissionDenied, DeserializationError, IOException {
@@ -177,7 +177,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -191,7 +191,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                 throw new AccessDenied(currentUser.getId(), id);
             }
 
-            Response response = single(item);
+            Response response = single(graph.frame(item, Accessible.class));
             tx.success();
             return response;
         }
@@ -206,6 +206,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + ACCESS)
     public Response visibility(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, SerializationError {
@@ -231,6 +232,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + ACCESS)
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
@@ -255,6 +257,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + PROMOTE)
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
@@ -262,8 +265,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.upVote(item, currentUser);
+            Response response = single(item);
             tx.success();
-            return single(item);
+            return response;
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -279,6 +283,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + PROMOTE)
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -286,8 +291,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeUpVote(item, currentUser);
+            Response response = single(item);
             tx.success();
-            return single(item);
+            return response;
         }
     }
 
@@ -300,6 +306,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + DEMOTE)
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
@@ -307,8 +314,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.downVote(item, currentUser);
+            Response response = single(item);
             tx.success();
-            return single(item);
+            return response;
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -324,6 +332,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + DEMOTE)
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -331,8 +340,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Promotable item = manager.getEntity(id, Promotable.class);
             UserProfile currentUser = getCurrentUser();
             pv.removeDownVote(item, currentUser);
+            Response response = single(item);
             tx.success();
-            return single(item);
+            return response;
         }
     }
 
@@ -374,7 +384,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + ANNOTATIONS)
     public Response annotations(
             @PathParam("id") String id) throws ItemNotFound {
@@ -397,7 +407,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + LINKS)
     public Response links(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -419,7 +429,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + PERMISSION_GRANTS)
     public Response permissionGrants(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
@@ -442,7 +452,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + SCOPE_PERMISSION_GRANTS)
     public Response permissionGrantsAsScope(@PathParam("id") String id)
             throws ItemNotFound {
@@ -471,7 +481,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + DESCRIPTIONS)
     public Response createDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -503,7 +513,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + DESCRIPTIONS)
     public Response updateDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
@@ -535,7 +545,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)
@@ -583,7 +593,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}/" + ACCESS_POINTS)
     public Response createAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)

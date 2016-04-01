@@ -19,7 +19,10 @@
 
 package eu.ehri.project.commands;
 
-import com.google.common.base.Optional;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -31,17 +34,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Command for listing entities of a given type.
@@ -50,22 +43,17 @@ public class ListEntities extends BaseCommand {
 
     final static String NAME = "list";
 
+    private static final JsonFactory jsonFactory = new JsonFactory();
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder("f")
                 .type(String.class)
-                .longOpt("format")
+                .longOpt("full")
                 .required(false)
-                .hasArg(true)
-                .desc("Format for output data, which defaults to just the id. " +
-                        "If provided can be one of: xml, json")
-                .build());
-        options.addOption(Option.builder("r")
-                .type(String.class)
-                .longOpt("root-node")
-                .required(false)
-                .hasArg(true)
-                .desc("Name of the root node (default: '" + NAME + "')")
+                .hasArg(false)
+                .desc("Output full JSON for items instead of just IDs")
                 .build());
     }
 
@@ -89,87 +77,32 @@ public class ListEntities extends BaseCommand {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         Serializer serializer = new Serializer(graph);
-        String rootName = cmdLine.getOptionValue("r", NAME);
-
-        if (!cmdLine.hasOption("f")) {
-            // default to only outputting the id's
-            printIds(manager, type);
+        if (cmdLine.hasOption('f')) {
+            printJson(manager, serializer, type);
         } else {
-            // if there is a second argument, that might be 'json' or 'xml'
-            String format = cmdLine.getOptionValue("f");
-            if (format.equalsIgnoreCase("xml")) {
-                printXml(manager, serializer, type, getTransformer(Optional.<InputStream>absent()),
-                        rootName);
-            } else if (format.equalsIgnoreCase("json")) {
-                printJson(manager, serializer, type);
-            } else {
-                // If there's an XSLT file in the resources that is named
-                // EntityType_destinationFormat.xslt use that...
-                String xsltName = String.format("%s_%s.xslt", type.getName(), format);
-                InputStream ios = EntityClass.class.getClassLoader().getResourceAsStream(xsltName);
-                if (ios != null) {
-                    try {
-                        Transformer transformer = getTransformer(Optional.fromNullable(ios));
-                        printXml(manager, serializer, type, transformer, rootName);
-                    } finally {
-                        ios.close();
-                    }
-                } else {
-                    // unknown format
-                    throw new RuntimeException(
-                            String.format("Unknown format: '%s' and no '%s' xslt found", format, xsltName));
-                }
-            }
+            printIds(manager, type);
         }
-
         return 0;
     }
 
     private void printIds(GraphManager manager, EntityClass type) {
-        for (Vertex acc : manager.getVertices(type)) {
-            System.out.println(manager.getId(acc));
+        try (CloseableIterable<Vertex> vertices = manager.getVertices(type)) {
+            for (Vertex acc : vertices) {
+                System.out.println(manager.getId(acc));
+            }
         }
     }
 
-    private void printJson(GraphManager manager, Serializer serializer, EntityClass type)
-            throws SerializationError {
-
-        // NOTE no json root {}, but always a list []
-        System.out.print("[\n");
-
-        int cnt = 0;
-        for (Vertex acc : manager.getVertices(type)) {
-            String jsonString = serializer.vertexToJson(acc);
-            if (cnt != 0) System.out.print(",\n");
-            System.out.println(jsonString);
-            cnt++;
+    private void printJson(GraphManager manager, final Serializer serializer, EntityClass type)
+            throws SerializationError, IOException {
+        try (CloseableIterable<Vertex> vertices = manager.getVertices(type);
+             JsonGenerator generator = jsonFactory.createGenerator(System.out)) {
+            generator.writeStartArray();
+            for (Vertex v : vertices) {
+                mapper.writeValue(generator, serializer.vertexToData(v));
+                generator.writeRaw('\n');
+            }
+            generator.writeEndArray();
         }
-        System.out.print("]\n"); // end list
-
-    }
-
-    private void printXml(GraphManager manager, Serializer serializer, EntityClass type,
-            Transformer transformer, String rootName)
-            throws UnsupportedEncodingException, SerializationError, TransformerException {
-        System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        System.out.print("<" + rootName + ">\n"); // root element
-        for (Vertex acc : manager.getVertices(type)) {
-            transformer.transform(new DOMSource(serializer.vertexToXml(acc)),
-                    new StreamResult(new OutputStreamWriter(System.out, "UTF-8")));
-        }
-        System.out.print("</" + rootName + ">\n"); // root element
-    }
-
-    private static Transformer getTransformer(Optional<InputStream> xsltOpt) throws TransformerException {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = xsltOpt.isPresent()
-                ? tf.newTransformer(new StreamSource(xsltOpt.get()))
-                : tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        return transformer;
     }
 }

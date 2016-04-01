@@ -51,7 +51,7 @@ public class CvocConceptResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -59,7 +59,7 @@ public class CvocConceptResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response list() {
         return listItems();
@@ -67,7 +67,7 @@ public class CvocConceptResource
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
@@ -92,7 +92,7 @@ public class CvocConceptResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
@@ -111,7 +111,7 @@ public class CvocConceptResource
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + Entities.CVOC_CONCEPT)
     @Override
     public Response createChild(@PathParam("id") String id,
@@ -195,7 +195,7 @@ public class CvocConceptResource
      * @throws AccessDenied
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/broader/list")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
@@ -217,7 +217,7 @@ public class CvocConceptResource
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/related/list")
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();
@@ -240,7 +240,7 @@ public class CvocConceptResource
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/relatedBy/list")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
         Tx tx = graph.getBaseGraph().beginTx();

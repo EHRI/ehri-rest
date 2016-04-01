@@ -92,7 +92,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
@@ -131,7 +131,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      * @throws ItemNotFound
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {

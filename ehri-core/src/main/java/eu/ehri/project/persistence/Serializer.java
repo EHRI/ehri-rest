@@ -35,7 +35,6 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -279,42 +278,6 @@ public final class Serializer {
     public String vertexToJson(Vertex item)
             throws SerializationError {
         return DataConverter.bundleToJson(vertexToBundle(item));
-    }
-
-    /**
-     * Serialise a vertex frame to XML.
-     *
-     * @param item The item vertex
-     * @return An XML document
-     * @throws SerializationError
-     */
-    public Document vertexToXml(Vertex item)
-            throws SerializationError {
-        return DataConverter.bundleToXml(vertexToBundle(item));
-    }
-
-    /**
-     * Serialise a vertex frame to XML string.
-     *
-     * @param item The item vertex
-     * @return An XML document string
-     * @throws SerializationError
-     */
-    public String vertexToXmlString(Vertex item)
-            throws SerializationError {
-        return DataConverter.bundleToXmlString(vertexToBundle(item));
-    }
-
-    /**
-     * Serialise a vertex frame to XML string.
-     *
-     * @param item The framed item
-     * @return An XML document string
-     * @throws SerializationError
-     */
-    public <T extends Entity> String entityToXmlString(T item)
-            throws SerializationError {
-        return DataConverter.bundleToXmlString(entityToBundle(item));
     }
 
     /**
