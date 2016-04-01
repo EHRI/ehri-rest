@@ -160,7 +160,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
         // run post-creation callbacks
         handler.process(entity);
-
         return creationResponse(entity);
     }
 
