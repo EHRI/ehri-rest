@@ -105,7 +105,8 @@ public class EadImporter extends EaImporter {
         List<Map<String, Object>> extractedDates = extractDates(itemData);
         replaceDates(itemData, extractedDates);
 
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractedDates) {
@@ -113,9 +114,6 @@ public class EadImporter extends EaImporter {
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
             logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
-            for (String s : rel.keySet()) {
-                logger.debug(s);
-            }
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
         }
 
@@ -136,6 +134,12 @@ public class EadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
+        // Set the description identifier same as the source file ID,
+        // which together with the lang code should form a unique
+        // identifier within the item
+        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY,
+                descBundle.getDataValue(Ontology.SOURCEFILE_KEY));
+
         // extractDocumentaryUnit does not throw ValidationError on missing ID
         Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
 
@@ -144,7 +148,7 @@ public class EadImporter extends EaImporter {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
         }
-        logger.debug("Imported item: " + itemData.get("name"));
+        logger.debug("Imported item: {}", itemData.get("name"));
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
@@ -166,7 +170,7 @@ public class EadImporter extends EaImporter {
             }
         }
         handleCallbacks(mutation);
-        logger.debug("============== " + frame.getIdentifier() + " created:" + mutation.created());
+        logger.debug("============== {} state: {}", frame.getIdentifier(), mutation.getState());
         if (mutation.created()) {
             solveUndeterminedRelationships(frame, descBundle);
         }
@@ -211,49 +215,20 @@ public class EadImporter extends EaImporter {
                 Bundle oldBundle = mergeSerializer
                         .vertexToBundle(manager.getVertex(unitWithIds.getId()));
 
-                // filter out dependents that a) are descriptions, b) have the same language/code
+                // filter out dependents that a) are descriptions, b) have the same language/code,
+                // and c) have the same source file ID
                 Bundle.Filter filter = new Bundle.Filter() {
                     @Override
                     public boolean remove(String relationLabel, Bundle bundle) {
                         String lang = bundle.getDataValue(Ontology.LANGUAGE);
                         String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
-                        return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                                && (lang != null
-                                && lang.equals(languageOfDesc)
-                                && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId))
-                        );
+                        return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
+                                && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                                && (lang != null && lang.equals(languageOfDesc))
+                                && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId));
                     }
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
-
-                // if this desc-id already exists, but with a different sourceFileId, 
-                // change the desc-id
-                String defaultDescIdentifier = DescriptionIdGenerator.descriptionJoiner.join(
-                        unitWithIds.getId(), languageOfDesc.toLowerCase());
-                logger.debug("merging: defaultDescIdentifier = {}", defaultDescIdentifier);
-                String newDescIdentifier = defaultDescIdentifier + HIERARCHY_SEPARATOR + Slugify.slugify(thisSourceFileId,
-                        SLUG_REPLACE);
-                logger.debug("merging: newDescIdentifier = {}", newDescIdentifier);
-                String generatedId = DescriptionIdGenerator.INSTANCE.generateId(itemIdPath, filtered);
-                logger.debug("merging: generated ID = {}", generatedId);
-                // First see whether this has been done before and a desc with the new id exists
-                if (manager.exists(newDescIdentifier)) {
-                    descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                    String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(itemIdPath, descBundle);
-                    logger.debug("merging: new desc ID exists, new generated ID = {}", anotherGeneratedId);
-                } else if (manager.exists(defaultDescIdentifier)) {
-                    Bundle oldDescBundle = mergeSerializer
-                            .vertexToBundle(manager.getVertex(defaultDescIdentifier));
-                    //if the previous had NO sourcefile_key OR it was different:
-                    if (oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
-                            || !thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())) {
-                        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, thisSourceFileId);
-                        logger.info("other description found ({}), creating new description id: {}",
-                                defaultDescIdentifier, descBundle.getDataValue(Ontology.IDENTIFIER_KEY));
-                        String anotherGeneratedId = DescriptionIdGenerator.INSTANCE.generateId(itemIdPath, descBundle);
-                        logger.debug("merging: def desc ID exists, source file differs, another generated ID = {}", anotherGeneratedId);
-                    }
-                }
 
                 return unitWithIds.withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
@@ -302,12 +277,12 @@ public class EadImporter extends EaImporter {
                     if (concept_id == null) {
                         concept_id = rel.getProperty("target");
                     }
-                    logger.debug("cvoc:" + cvoc_id + "  concept:" + concept_id);
+                    logger.debug("cvoc: {}, concept: {}", cvoc_id, concept_id);
                     Vocabulary vocabulary;
                     try {
                         vocabulary = manager.getEntity(cvoc_id, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
-                            logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
+                            logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
                             if (concept.getIdentifier().equalsIgnoreCase(concept_id)) {
                                 try {
                                     Bundle linkBundle = new Bundle(EntityClass.LINK)
@@ -327,7 +302,7 @@ public class EadImporter extends EaImporter {
 
                         }
                     } catch (ItemNotFound ex) {
-                        logger.error("Vocabulary with id " + cvoc_id + " not found. " + ex.getMessage());
+                        logger.error("Vocabulary with id {} not found: {}", cvoc_id, ex.getMessage());
                     }
 
                 } else {
@@ -359,18 +334,14 @@ public class EadImporter extends EaImporter {
                         relationNode.put(Ontology.NAME_KEY, origRelation.get(REL));
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                        logger.debug("relationNode without type: " + relationNode.get(Ontology.NAME_KEY));
+                        logger.debug("relationNode without type: {}", relationNode.get(Ontology.NAME_KEY));
                         relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }
             } else if (key.endsWith(ACCESS_POINT)) {
 
-                logger.debug(key + data.get(key).getClass());
                 if (data.get(key) instanceof List) {
-                    for (Object o : (List) data.get(key)) {
-                        logger.debug("" + o.getClass());
-                    }
                     //type, targetUrl, targetName, notes
                     for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                         if (origRelation.isEmpty()) {
@@ -381,7 +352,6 @@ public class EadImporter extends EaImporter {
                             if (eventkey.endsWith(ACCESS_POINT)) {
                                 relationNode.put(Ontology.ACCESS_POINT_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
                                 relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
-//logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
                             } else {
                                 relationNode.put(eventkey, origRelation.get(eventkey));
                             }

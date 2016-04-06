@@ -122,6 +122,10 @@ public class AraEadImporter extends EadImporter {
         }
         logger.debug("Imported item: " + itemData.get("name"));
 
+        // Set the description identifier same as the source file ID
+        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY,
+                descBundle.getDataValue(Ontology.SOURCEFILE_KEY));
+
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
