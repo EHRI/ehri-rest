@@ -432,7 +432,8 @@ public class ImportResource extends AbstractRestResource {
         logger.info("Import via compressed archive...");
         try (BufferedInputStream bis = new BufferedInputStream(data);
              ArchiveInputStream archiveInputStream = new
-                     ArchiveStreamFactory().createArchiveInputStream(bis)) {
+                     ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
+                        .createArchiveInputStream(bis)) {
             return importManager
                     .importFiles(archiveInputStream, logMessage);
         }

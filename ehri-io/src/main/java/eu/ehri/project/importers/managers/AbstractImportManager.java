@@ -172,12 +172,14 @@ public abstract class AbstractImportManager implements ImportManager {
         ArchiveEntry entry;
         while ((entry = inputStream.getNextEntry()) != null) {
             try {
-                currentFile = entry.getName();
-                BoundedInputStream boundedInputStream
-                        = new BoundedInputStream(inputStream, entry.getSize());
-                boundedInputStream.setPropagateClose(false);
-                logger.info("Importing file: " + currentFile);
-                importFile(boundedInputStream, action, log);
+                if (!entry.isDirectory()) {
+                    currentFile = entry.getName();
+                    BoundedInputStream boundedInputStream
+                            = new BoundedInputStream(inputStream, entry.getSize());
+                    boundedInputStream.setPropagateClose(false);
+                    logger.info("Importing file: " + currentFile);
+                    importFile(boundedInputStream, action, log);
+                }
             } catch (InputParseError | ValidationError e) {
                 log.setErrored(formatErrorLocation(), e.getMessage());
                 if (!tolerant) {
