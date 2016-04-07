@@ -36,7 +36,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -44,10 +43,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import static eu.ehri.extension.ImportResource.*;
+import static eu.ehri.project.test.IOHelpers.createZipFromResources;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -198,7 +196,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
     public void testImportEadWithMultipleFilesInZip() throws Exception {
         File temp = File.createTempFile("test-zip", ".zip");
         temp.deleteOnExit();
-        createZip(temp, SINGLE_EAD, HIERARCHICAL_EAD);
+        createZipFromResources(temp, SINGLE_EAD, HIERARCHICAL_EAD);
 
         // Get the path of an EAD file
         InputStream payloadStream = new FileInputStream(temp);
@@ -356,19 +354,6 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         String payloadText = Joiner.on("\n").join(paths) + "\n";
         return new ByteArrayInputStream(
                 payloadText.getBytes("UTF-8"));
-    }
-
-    private void createZip(File file, String... resources) throws URISyntaxException, IOException {
-        try (FileOutputStream fos = new FileOutputStream(file);
-                ZipOutputStream zos = new ZipOutputStream(fos)) {
-            for (String resource : resources) {
-                URL url = Resources.getResource(resource);
-                String name = new File(url.toURI()).getAbsolutePath();
-                zos.putNextEntry(new ZipEntry(name));
-                Resources.copy(url, zos);
-                zos.closeEntry();
-            }
-        }
     }
 
     private String getTestLogFilePath(String text) throws IOException {

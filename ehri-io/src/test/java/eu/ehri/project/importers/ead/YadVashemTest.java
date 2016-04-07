@@ -25,15 +25,23 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.test.IOHelpers;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
@@ -196,5 +204,30 @@ public class YadVashemTest extends AbstractImporterTest {
         //HEB re imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
         assertEquals(count_heb, getNodeCount(graph));
+    }
+
+    @Test
+    public void testIdempotentImportViaXmlAndZip() throws Exception {
+        String resource = "MS1_O84_HEB-partial-unicode.xml";
+        InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
+        importManager = new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+                .setTolerant(Boolean.TRUE);
+        ImportLog log = importManager.importFile(ios, "Test");
+        assertEquals(1, log.getCreated());
+
+        File temp = File.createTempFile("test-zip", ".zip");
+        //temp.deleteOnExit();
+        IOHelpers.createZipFromResources(temp, resource);
+
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(temp));
+             ArchiveInputStream archiveInputStream = new
+                     ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
+                     .createArchiveInputStream(bis)) {
+            ImportLog log2 = importManager
+                    .importFiles(archiveInputStream, "Test 2");
+            assertEquals(1, log2.getUnchanged());
+            assertEquals(0, log2.getUpdated());
+        }
     }
 }
