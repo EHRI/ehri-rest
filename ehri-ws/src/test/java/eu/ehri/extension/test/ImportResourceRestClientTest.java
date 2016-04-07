@@ -27,6 +27,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.IcaAtomEadHandler;
 import eu.ehri.project.persistence.Bundle;
 import org.apache.commons.io.FileUtils;
@@ -71,11 +72,10 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .post(ClientResponse.class);
 
         assertStatus(ClientResponse.Status.OK, response);
-        String output = response.getEntity(String.class);
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(1, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
     }
 
     @Test
@@ -92,14 +92,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        String output = response.getEntity(String.class);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(1, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test
@@ -116,14 +113,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        String output = response.getEntity(String.class);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(1, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test
@@ -182,14 +176,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
-        assertStatus(ClientResponse.Status.OK, response);
-        String output = response.getEntity(String.class);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(1, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test
@@ -210,15 +201,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
-        String output = response.getEntity(String.class);
-        System.out.println(output);
-        assertStatus(ClientResponse.Status.OK, response);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(6, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(6, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test
@@ -233,15 +220,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
-        String output = response.getEntity(String.class);
-        System.out.println(output);
-        assertStatus(ClientResponse.Status.OK, response);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(1, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test
@@ -256,15 +239,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
-        String output = response.getEntity(String.class);
-        System.out.println(output);
-        assertStatus(ClientResponse.Status.OK, response);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(1, rootNode.path("created").asInt());
-        assertEquals(0, rootNode.path("updated").asInt());
-        assertEquals(0, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test
@@ -280,15 +259,11 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .entity(payloadStream)
                 .put(ClientResponse.class);
 
-        String output = response.getEntity(String.class);
-        System.out.println(output);
-        assertStatus(ClientResponse.Status.OK, response);
-
-        JsonNode rootNode = jsonMapper.readTree(output);
-        assertEquals(0, rootNode.path("created").asInt());
-        assertEquals(1, rootNode.path("updated").asInt());
-        assertEquals(1, rootNode.path("unchanged").asInt());
-        assertEquals(logText, rootNode.path("message").asText());
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(0, log.getCreated());
+        assertEquals(1, log.getUpdated());
+        assertEquals(1, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
     }
 
     @Test

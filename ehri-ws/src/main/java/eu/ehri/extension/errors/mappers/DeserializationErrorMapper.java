@@ -28,8 +28,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * Maps the {@link DeserializationError} exception to the Bad Request response.
@@ -37,16 +35,6 @@ import java.io.StringWriter;
 @Provider
 public class DeserializationErrorMapper implements
         ExceptionMapper<DeserializationError> {
-
-    @SuppressWarnings("unused")
-    private String getStacktrace(Exception e) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        return sw.toString();
-    }
-
-    @SuppressWarnings("serial")
     @Override
     public Response toResponse(DeserializationError e) {
         return Response

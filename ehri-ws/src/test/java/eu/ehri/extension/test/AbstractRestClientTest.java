@@ -34,6 +34,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.providers.BundleProvider;
 import eu.ehri.extension.providers.GlobalPermissionSetProvider;
+import eu.ehri.extension.providers.ImportLogProvider;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
@@ -64,6 +65,7 @@ public class AbstractRestClientTest extends RunningServerTest {
         ClientConfig config = new DefaultClientConfig();
         config.getClasses().add(GlobalPermissionSetProvider.class);
         config.getClasses().add(BundleProvider.class);
+        config.getClasses().add(ImportLogProvider.class);
         client = Client.create(config);
     }
 

@@ -20,6 +20,7 @@
 package eu.ehri.project.importers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
@@ -50,9 +51,13 @@ public class ImportLog {
     }
 
     @JsonCreator
-    public ImportLog(Optional<String> logMessage, int created,
-            int updated, int unchanged, Map<String, String> errors) {
-        this(logMessage);
+    public ImportLog(
+            @JsonProperty("message") String logMessage,
+            @JsonProperty("created") int created,
+            @JsonProperty("updated") int updated,
+            @JsonProperty("unchanged") int unchanged,
+            @JsonProperty("errors") Map<String, String> errors) {
+        this(Optional.fromNullable(logMessage));
         this.created = created;
         this.unchanged = unchanged;
         this.updated = updated;
