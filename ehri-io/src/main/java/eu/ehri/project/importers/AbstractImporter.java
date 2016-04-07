@@ -30,6 +30,7 @@ import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
@@ -59,6 +60,7 @@ public abstract class AbstractImporter<T> {
     private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
 
     protected final PermissionScope permissionScope;
+    protected final Actioner actioner;
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
@@ -81,6 +83,8 @@ public abstract class AbstractImporter<T> {
         return permissionScope;
     }
 
+    public Actioner getActioner() { return actioner; }
+
     public BundleManager getPersister(List<String> scopeIds) {
         return new BundleManager(framedGraph,
                 Lists.newArrayList(Iterables.concat(permissionScope.idPath(), scopeIds)));
@@ -92,14 +96,15 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Constructor.
-     *
-     * @param graph the framed graph
+     *  @param graph the framed graph
      * @param scope the permission scope
+     * @param actioner the user performing the import
      * @param log   the log object
      */
-    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, ImportLog log) {
+    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, Actioner actioner, ImportLog log) {
         this.permissionScope = scope;
         this.framedGraph = graph;
+        this.actioner = actioner;
         this.log = log;
         manager = GraphManagerFactory.getInstance(graph);
     }

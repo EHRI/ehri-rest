@@ -28,6 +28,7 @@ import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -58,8 +59,8 @@ public class EagImporter extends EaImporter {
      * @param permissionScope A permission scope, e.g. a country
      * @param log             An import log instance
      */
-    public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, log);
     }
 
     @Override

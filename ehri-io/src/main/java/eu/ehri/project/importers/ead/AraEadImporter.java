@@ -30,6 +30,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -68,8 +69,9 @@ public class AraEadImporter extends EadImporter {
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public AraEadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
-        super(graph, permissionScope, log);
+    public AraEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
+            Actioner actioner, ImportLog log) {
+        super(graph, permissionScope, actioner, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
@@ -204,7 +206,6 @@ public class AraEadImporter extends EadImporter {
                     withIds = withIds.withDataValue(Ontology.OTHER_IDENTIFIERS, otherIdentifiers);
                 }
 
-
                 //if the unit exists, with a desc with the same sourcefileid, overwrite, else create new desc
                 //filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
@@ -220,26 +221,8 @@ public class AraEadImporter extends EadImporter {
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
 
-                //if this desc-id already exists, but with a different sourceFileId, 
-                //change the desc-id
-                String defaultDescIdentifier = withIds.getId() + "-" + languageOfDesc.toLowerCase();
-                String newDescIdentifier = withIds.getId() + "-" + thisSourceFileId.toLowerCase().replace("#", "-");
-                if (manager.exists(newDescIdentifier)) {
-                    descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                } else if (manager.exists(defaultDescIdentifier)) {
-                    Bundle oldDescBundle = mergeSerializer
-                            .vertexToBundle(manager.getVertex(defaultDescIdentifier));
-                    //if the previous had NO sourcefile_key OR it was different:
-                    if (oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY) == null
-                            || !thisSourceFileId.equals(oldDescBundle.getDataValue(Ontology.SOURCEFILE_KEY).toString())) {
-                        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY, newDescIdentifier);
-                        logger.info("other description found (" + defaultDescIdentifier + "), creating new description id: " + descBundle.getDataValue(Ontology.IDENTIFIER_KEY));
-                    }
-                }
-
                 return withIds.withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-
             } catch (SerializationError ex) {
                 throw new ValidationError(unit, "serialization error", ex.getMessage());
             } catch (ItemNotFound ex) {

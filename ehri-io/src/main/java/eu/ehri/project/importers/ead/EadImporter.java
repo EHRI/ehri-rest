@@ -36,19 +36,19 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.utils.Slugify;
+import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +83,8 @@ public class EadImporter extends EaImporter {
      * @param permissionScope the permission scope
      * @param log             the log
      */
-    public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
-        super(graph, permissionScope, log);
+    public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
+        super(graph, permissionScope, actioner, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
@@ -264,47 +264,43 @@ public class EadImporter extends EaImporter {
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
         //so they have id's. 
+        CrudViews<Link> crud = new CrudViews<>(framedGraph, Link.class);
+        Bundle linkBundle = new Bundle(EntityClass.LINK)
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
+
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
             for (AccessPoint rel : Sets.newHashSet(unitdesc.getAccessPoints())) {
-                /*
-                 * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
-                 * they need to be found in the vocabularies that are in the graph
-                 */
+                // the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
+                // they need to be found in the vocabularies that are in the graph
                 if (rel.getPropertyKeys().contains("cvoc")) {
-                    String cvoc_id = rel.getProperty("cvoc");
-                    String concept_id = rel.getProperty("concept");
-                    if (concept_id == null) {
-                        concept_id = rel.getProperty("target");
+                    String vocab = rel.getProperty("cvoc");
+                    String conceptId = rel.getProperty("concept");
+                    if (conceptId == null) {
+                        conceptId = rel.getProperty("target");
                     }
-                    logger.debug("cvoc: {}, concept: {}", cvoc_id, concept_id);
-                    Vocabulary vocabulary;
+                    logger.debug("cvoc: {}, concept: {}", vocab, conceptId);
                     try {
-                        vocabulary = manager.getEntity(cvoc_id, Vocabulary.class);
+                        Vocabulary vocabulary = manager.getEntity(vocab, Vocabulary.class);
                         for (Concept concept : vocabulary.getConcepts()) {
                             logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
-                            if (concept.getIdentifier().equalsIgnoreCase(concept_id)) {
+                            if (concept.getIdentifier().equalsIgnoreCase(conceptId)) {
                                 try {
-                                    Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                            .withDataValue(Ontology.LINK_HAS_TYPE, rel.getProperty("type").toString())
-                                            .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
-                                    UserProfile user = manager.getEntity(this.log.getActioner().getId(), UserProfile.class);
-                                    Link link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
+                                    Bundle data = linkBundle
+                                            .withDataValue(Ontology.LINK_HAS_TYPE, rel.getProperty("type"));
+                                    Link link = crud.create(data, actioner.as(Accessor.class));
                                     unit.addLink(link);
                                     concept.addLink(link);
                                     link.addLinkBody(rel);
-                                    logger.debug("link created between {} and {}", concept_id, concept.getId());
+                                    logger.debug("link created between {} and {}", conceptId, concept.getId());
                                 } catch (PermissionDenied ex) {
                                     logger.error(ex.getMessage());
                                 }
-
                             }
-
                         }
                     } catch (ItemNotFound ex) {
-                        logger.error("Vocabulary with id {} not found: {}", cvoc_id, ex.getMessage());
+                        logger.error("Vocabulary with id {} not found: {}", vocab, ex.getMessage());
                     }
-
                 } else {
                     logger.debug("no cvoc found");
                 }

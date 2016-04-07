@@ -32,6 +32,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -63,8 +64,9 @@ public class IcaAtomEadImporter extends EaImporter {
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public IcaAtomEadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
-        super(graph, permissionScope, log);
+    public IcaAtomEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
+            Actioner actioner, ImportLog log) {
+        super(graph, permissionScope, actioner, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
@@ -134,8 +136,6 @@ public class IcaAtomEadImporter extends EaImporter {
             solveUndeterminedRelationships(frame, descBundle);
         }
         return frame;
-
-
     }
 
 
@@ -151,21 +151,12 @@ public class IcaAtomEadImporter extends EaImporter {
 
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
-        /*
-         * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
-         * TODO: so for now, it is added manually
-         */
-        List<String> lpath = Lists.newArrayList();
-        for (String p : getPermissionScope().idPath()) {
-            lpath.add(p);
-        }
-        for (String p : idPath) {
-            lpath.add(p);
-        }
+
+        List<String> lpath = Lists.newArrayList(getPermissionScope().idPath());
+        lpath.addAll(idPath);
         Bundle withIds = unit.generateIds(lpath);
 
-
-        logger.debug("idpath: " + withIds.getId());
+        logger.debug("idpath: {}", withIds.getId());
         if (manager.exists(withIds.getId())) {
             try {
                 //read the current item’s bundle

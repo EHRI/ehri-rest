@@ -25,6 +25,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
@@ -51,8 +52,8 @@ public abstract class EaImporter extends MapImporter {
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public EaImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
-        super(graph, permissionScope, log);
+    public EaImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
+        super(graph, permissionScope, actioner, log);
     }
 
     /**

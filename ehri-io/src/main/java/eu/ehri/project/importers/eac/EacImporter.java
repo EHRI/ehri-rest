@@ -37,6 +37,7 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -68,8 +69,8 @@ public class EacImporter extends EaImporter {
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
-        super(graph, permissionScope, log);
+    public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
+        super(graph, permissionScope, actioner, log);
     }
 
     @Override
@@ -203,7 +204,11 @@ public class EacImporter extends EaImporter {
 
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
-        //so they have id's. 
+        //so they have id's.
+        CrudViews<Link> crud = new CrudViews<>(framedGraph, Link.class);
+        Bundle linkBundle = new Bundle(EntityClass.LINK)
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
+
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
             for (AccessPoint rel : Sets.newHashSet(unitdesc.getAccessPoints())) {
@@ -212,10 +217,8 @@ public class EacImporter extends EaImporter {
                     logger.debug("solving undetermindRels: {} {} ({})",
                             key, relationVertex.getProperty(key), descBundle.getId());
                 }
-                /*
-                 * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
-                 * they need to be found in the vocabularies that are in the graph
-                 */
+                // the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
+                // they need to be found in the vocabularies that are in the graph
                 if (relationVertex.getPropertyKeys().contains("cvoc")) {
                     String cvocId = relationVertex.getProperty("cvoc");
                     String conceptId = relationVertex.getProperty(LINK_TARGET);
@@ -227,11 +230,8 @@ public class EacImporter extends EaImporter {
                             if (concept.getIdentifier().equals(conceptId)) {
                                 try {
                                     String linkType = relationVertex.getProperty(REL_TYPE);
-                                    Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                            .withDataValue(Ontology.LINK_HAS_TYPE, linkType)
-                                            .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
-                                    UserProfile user = log.getActioner().as(UserProfile.class);
-                                    Link link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
+                                    Bundle data = linkBundle.withDataValue(Ontology.LINK_HAS_TYPE, linkType);
+                                    Link link = crud.create(data, actioner.as(UserProfile.class));
                                     unit.addLink(link);
                                     concept.addLink(link);
                                     link.addLinkBody(rel);

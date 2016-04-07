@@ -30,6 +30,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -45,8 +46,9 @@ import eu.ehri.project.persistence.Mutation;
  */
 public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
 
-    public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
+            Actioner actioner, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, log);
     }
 
     @Override
