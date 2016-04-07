@@ -20,25 +20,29 @@
 package eu.ehri.project.importers.properties;
 
 import eu.ehri.project.models.EntityClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.slf4j.LoggerFactory;
+
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class TestAllPropertiesFiles {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPropertiesFiles.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestAllPropertiesFiles.class);
     PropertiesChecker p;
-
-    public TestAllPropertiesFiles() {
-    }
 
     @Before
     public void init() {
@@ -77,19 +81,22 @@ public class TestAllPropertiesFiles {
     public void testEagXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
-@Test
+
+    @Test
     public void testDansEadProperties() {
         String propfile = "dansead.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
+
     @Test
     @Ignore //not used anymore
     public void testEadXmlProperties() {
-         String propfile = "icaatom.properties";
+        String propfile = "icaatom.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
+
     @Test
     public void testWp2EadXmlProperties() {
         String propfile = "wp2ead.properties";
@@ -102,13 +109,14 @@ public class TestAllPropertiesFiles {
         assertTrue(p.check(new XmlImportProperties("skos.properties"), EntityClass.CVOC_CONCEPT_DESCRIPTION));
     }
 
-    @Test @Ignore //ignore in favour of niodead.properties
+    @Test
+    @Ignore //ignore in favour of niodead.properties
     public void testNiodXmlProperties() {
         String propfile = "niod.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
-    
+
     @Test
     public void testNiodEadXmlProperties() {
         String propfile = "niodead.properties";
@@ -116,28 +124,23 @@ public class TestAllPropertiesFiles {
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
         XmlImportProperties prop = new XmlImportProperties(propfile);
         assertEquals("xref", prop.getAttributeProperty("href"));
+        assertThat(prop.getPropertiesWithValue("findingAids"), hasItem("otherfindaid/p/"));
     }
-    
+
     @Test
     public void testUshmmXmlProperties() {
         String propfile = "ushmm.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
-  @Test
+
+    @Test
     public void testDcEuropeanaProperties() {
         String propfile = "dceuropeana.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
-    @Test
-    @Ignore //not used anymore
-    public void testUkrainianDescXmlProperties() {
-        String propfile = "ukraine.properties";
-        logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
-    }
-    
+
     @Test
     public void testBundesarchiveProperties() {
         String propfile = "bundesarchive.properties";
@@ -172,25 +175,18 @@ public class TestAllPropertiesFiles {
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
-    
+
     @Test
     public void testCegesomaCAProperties() {
         String propfile = "cegesomaCA.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }
+
     @Test
     public void testGenericProperties() {
         String propfile = "generic.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
-    }
-
-    @Test
-    @Ignore //not used anymore
-    public void testUkrainianRepoXmlProperties() {
-        String propfile = "ukraine_repo.properties";
-        logger.debug(propfile);
-        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.REPOSITORY_DESCRIPTION));
     }
 }
