@@ -4,10 +4,10 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.1-SNAPSHOT</version>
+        <version>0.13.2-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-io</artifactId>
-    <version>0.13.1-SNAPSHOT</version>
+    <version>0.13.2-SNAPSHOT</version>
 
     <name>Import/Export Tools</name>
     <description>Classes for importing and exporting data in various formats.</description>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.1-SNAPSHOT</version>
+            <version>0.13.2-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.1-SNAPSHOT</version>
+            <version>0.13.2-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>2.3.2</version>
+            <version>2.3.3</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>2.3.2</version>
+            <version>2.3.3</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
