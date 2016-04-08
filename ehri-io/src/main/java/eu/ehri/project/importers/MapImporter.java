@@ -28,6 +28,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -77,8 +78,8 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
             Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
-    public MapImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public MapImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, log);
     }
 
     private void extractDateFromValue(List<Map<String, Object>> extractedDates, String value) throws ValidationError {
@@ -186,10 +187,9 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData) {
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
-            if (key.equals("maintenanceEvent")) {
+            if (key.equals("maintenanceEvent") && itemData.get(key) instanceof List) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
                     list.add(getMaintenanceEvent(event));
-
                 }
             }
         }

@@ -34,6 +34,7 @@ import eu.ehri.project.importers.MapImporter;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
@@ -55,8 +56,9 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
-    public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
+            Actioner actioner, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, log);
     }
 
     @Override

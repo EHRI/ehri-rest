@@ -50,7 +50,7 @@ public class MapImporterTest extends AbstractImporterTest {
     @Before
     public void init() throws ItemNotFound {
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
-        importer = new EadImporter(graph, agent, new ImportLog(null));
+        importer = new EadImporter(graph, agent, validUser, new ImportLog(null));
         mapWithOneParseableDate = Maps.newHashMap();
         mapWithOneParseableDate.put("unitDates", "1934/1936");
 

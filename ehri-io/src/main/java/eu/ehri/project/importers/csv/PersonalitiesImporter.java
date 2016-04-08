@@ -33,6 +33,7 @@ import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -57,8 +58,9 @@ public class PersonalitiesImporter extends MapImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
 
-    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner,
+            ImportLog log) {
+        super(framedGraph, permissionScope, actioner, log);
     }
 
     @Override

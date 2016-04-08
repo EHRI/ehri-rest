@@ -22,20 +22,19 @@ package eu.ehri.project.importers.ead;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.IcaAtomEadHandler;
-import eu.ehri.project.importers.ead.IcaAtomEadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
-import java.io.InputStream;
-import java.util.List;
 import org.junit.Test;
 
+import java.io.InputStream;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
@@ -72,7 +71,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        for(Description d : unit.getDocumentDescriptions())
+        for (Description d : unit.getDocumentDescriptions())
             assertEquals("Test EAD Item", d.getName());
 
         // Test scope and content has correctly decoded data.
@@ -83,8 +82,8 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         String scopeContent = firstDesc.getProperty("scopeAndContent");
         String expected =
                 "This is some test scope and content.\n\n" +
-                "This contains Something & Something else.\n\n" +
-                "This is another paragraph.";
+                        "This contains Something & Something else.\n\n" +
+                        "This is another paragraph.";
 
         assertEquals(expected, scopeContent);
 

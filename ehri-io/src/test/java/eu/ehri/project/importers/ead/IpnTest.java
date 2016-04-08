@@ -27,8 +27,8 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Ignore;
@@ -41,7 +41,11 @@ import java.io.InputStream;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class IpnTest extends AbstractImporterTest {
 
@@ -120,18 +124,18 @@ public class IpnTest extends AbstractImporterTest {
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
-       /**
-        * null: 4
-        * relationship: 4
-        * documentaryUnit: 3
-        * property: 1
-        * documentDescription: 3
-        * maintenanceEvent: 1
-        * systemEvent: 1
-        * datePeriod: 2
-        */
+        /**
+         * null: 4
+         * relationship: 4
+         * documentaryUnit: 3
+         * property: 1
+         * documentDescription: 3
+         * maintenanceEvent: 3
+         * systemEvent: 1
+         * datePeriod: 2
+         */
 
-        int newCount = origCount + 19; 
+        int newCount = origCount + 21;
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(
@@ -162,7 +166,8 @@ public class IpnTest extends AbstractImporterTest {
                 if (property.equals("processInfo")) {
                     hasProvenance = true;
                     System.out.println(d.getProperty(property));
-                    assertTrue(((List<String>) d.getProperty(property)).get(0).startsWith("This selection has been "));
+                    assertTrue(d.<List<String>>getProperty(property)
+                            .get(0).startsWith("This selection has been "));
                 }
             }
             assertTrue(hasProvenance);
@@ -184,12 +189,9 @@ public class IpnTest extends AbstractImporterTest {
         // test dates
         boolean hasDates = false;
         for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {
-            for (DatePeriod p : d.getDatePeriods()) {
-                hasDates = true;
-            }
+            hasDates = d.getDatePeriods().iterator().hasNext();
         }
         assertTrue(hasDates);
-
     }
 
     @Test
@@ -214,18 +216,18 @@ public class IpnTest extends AbstractImporterTest {
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
-       /**
-        * null: 4
-        * relationship: 5
-        * documentaryUnit: 3
-        * documentDescription: 3
-        * property: 1
-        * maintenanceEvent: 1
-        * systemEvent: 1
-        * datePeriod: 2
-        */
+        /**
+         * null: 4
+         * relationship: 5
+         * documentaryUnit: 3
+         * documentDescription: 3
+         * property: 1
+         * maintenanceEvent: 1
+         * systemEvent: 1
+         * datePeriod: 2
+         */
 
-        int newCount = origCount + 20; 
+        int newCount = origCount + 20;
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(

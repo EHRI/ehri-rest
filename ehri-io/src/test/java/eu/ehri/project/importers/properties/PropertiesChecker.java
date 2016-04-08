@@ -32,49 +32,49 @@ public class PropertiesChecker {
     private static final Logger logger = LoggerFactory.getLogger(PropertiesChecker.class);
     private final NodeProperties allowed;
 
-    public PropertiesChecker(NodeProperties allowedproperties) {
-        allowed = allowedproperties;
+    public PropertiesChecker(NodeProperties allowedProperties) {
+        allowed = allowedProperties;
     }
 
     /*
-     * checks whether these actualproperties adhere to the allowedproperties
-     * the actualproperties can contain less than the allowedproperties, but must at least contain the required ones 
-     * and it will log the superfluous ones, so 
-     * @param actualproperties
+     * Checks whether these actualProperties adhere to the allowedProperties
+     * the actualProperties can contain less than the allowedProperties,
+     * but must at least contain the required ones and it will log the
+     * superfluous ones
+     *
+     * @param actualProperties
      * @return returns true if it contains the required ones and no new ones
      */
-    public boolean check(ImportProperties actualproperties, EntityClass nodeEntity) {
+    public boolean check(ImportProperties actualProperties, EntityClass nodeEntity) {
         String node = nodeEntity.getName();
-        boolean testresult = true;
+        boolean testResult = true;
         if (allowed.getHandlerProperties(node) == null) {
-            logger.error("no properties allowed for " + node);
+            logger.error("no properties allowed for {}", node);
             return false;
         }
         if (allowed.getRequiredProperties(node) != null) {
             for (String required : allowed.getRequiredProperties(node)) {
-                if (!actualproperties.containsPropertyValue(required)) {
-                    logger.error(node + " should contain required " + required);
-                    testresult = false;
+                if (!actualProperties.containsPropertyValue(required)) {
+                    logger.error("{} should contain required {}", node, required);
+                    testResult = false;
                 }
             }
         }
         Set<String> handler = allowed.getHandlerProperties(node);
-        for (String property : actualproperties.getAllNonAttributeValues()) {
-            if(property.isEmpty() || property.equals("")){
+        for (String property : actualProperties.getAllNonAttributeValues()) {
+            if (property.isEmpty() || property.equals("")) {
                 logger.error("property file contains empty right-hand side");
-                testresult=false;
+                testResult = false;
             }
             if (!handler.contains(property)) {
-                if(nodeEntity.equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION) &&
-                    property.endsWith(EadImporter.ACCESS_POINT)){
-                    logger.debug(property.substring(0, property.indexOf(EadImporter.ACCESS_POINT)+6));
-                 
-                }else{
-                    logger.warn(node + " should NOT contain " + property);
+                if (nodeEntity.equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION) &&
+                        property.endsWith(EadImporter.ACCESS_POINT)) {
+                    logger.debug(property.substring(0, property.indexOf(EadImporter.ACCESS_POINT) + 6));
+                } else {
+                    logger.warn( "{} should NOT contain {}", node, property);
                 }
-//                testresult = false;
             }
         }
-        return testresult;
+        return testResult;
     }
 }

@@ -28,70 +28,81 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
+import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.test.IOHelpers;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  */
 public class YadVashemTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(YadVashemTest.class);
-       protected final String SINGLE_EAD = "YV_m19_eng.xml";
-       protected final String SINGLE_EAD_HEB = "YV_m19_heb.xml";
-       protected final String SINGLE_EAD_C1 = "YV_c1.xml";
+    protected final String SINGLE_EAD = "YV_m19_eng.xml";
+    protected final String SINGLE_EAD_HEB = "YV_m19_heb.xml";
+    protected final String SINGLE_EAD_C1 = "YV_c1.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1",
             ARCHDESC = "M.19",
             C1 = "M.19/7",
             C2 = "M.19/7.1";
-    
-    protected final String SOURCE_FILE_ID="10660245#ENG";
-    
+
     /**
-     * The test repository contains a unit (loaded from the fixtures) that matches 
+     * The test repository contains a unit (loaded from the fixtures) that matches
      * the unit described in the test file that is imported here.
      * This test checks that the existing description (which has a different source)
      * is untouched and the description from the test file is added.
+     *
      * @throws Exception
      */
     @Test
     public void testWithExistingDescription() throws Exception {
         final String logMessage = "Importing a single EAD";
         DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
-        
+
         assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());
 
         int count = getNodeCount(graph);
         System.out.println(count);
-         // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("yadvashem.properties"))
                 .setTolerant(Boolean.TRUE);
-        ImportLog log = importManager.importFile(ios, logMessage);
-//        printGraph(graph);
-        // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
-       /**
-        * null: 4
-        * relationship: 4
-        * DocumentaryUnit: 2
-        * documentDescription: 3
-        * systemEvent: 1
-        * datePeriod: 1
-        */
+        importManager.importFile(ios, logMessage);
 
-        assertEquals(count + 15, getNodeCount(graph));
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+        /**
+         * null: 4
+         * relationship: 4
+         * DocumentaryUnit: 2
+         * documentDescription: 3
+         * maintenance event: 3
+         * systemEvent: 1
+         * datePeriod: 1
+         */
+
+        assertEquals(count + 18, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         for (DocumentaryUnitDescription desc : m19.getDocumentDescriptions()) {
             logger.debug("Document description graph ID: {}", desc.getId());
@@ -99,7 +110,7 @@ public class YadVashemTest extends AbstractImporterTest {
         }
     }
 
-    @Test 
+    @Test
     public void testImportItemsT() throws Exception {
 
         final String logMessage = "Importing a single EAD";
@@ -107,38 +118,39 @@ public class YadVashemTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         System.out.println(count);
         DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
-        
+
         assertEquals("m19", m19.getIdentifier());
         assertEquals(1, toList(m19.getDocumentDescriptions()).size());
-         // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
                 .setTolerant(Boolean.TRUE);
-        ImportLog log = importManager.importFile(ios, logMessage);
-//        printGraph(graph);
+        importManager.importFile(ios, logMessage);
+
         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
        /*
         * null: 4
         * relationship: 5 (2 creator, 1 place, 1 subject, 1 geog)
         * DocumentaryUnit: 2
         * documentDescription: 3
+        * maintenance event: 3
         * property: 1
         * systemEvent: 1
         * datePeriod: 1
         */
-        assertEquals(count + 17, getNodeCount(graph));
+        assertEquals(count + 20, getNodeCount(graph));
         //ENG also imported:
-assertEquals(2, toList(m19.getDocumentDescriptions()).size());
+        assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
-        while(i.hasNext()){
+        while (i.hasNext()) {
             DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             assertEquals("eng", desc.getLanguageOfDescription());
@@ -147,52 +159,75 @@ assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         assertEquals(1, nrOfDesc);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-        log = importManager.importFile(ios, logMessage);
-//        printGraph(graph);
+        importManager.importFile(ios, logMessage);
+
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
-        logger.debug("size: "+ toList(m19.getDocumentDescriptions()).size());
-        for(DocumentaryUnitDescription m19desc : m19.getDocumentDescriptions()){
+        logger.debug("size: " + toList(m19.getDocumentDescriptions()).size());
+        for (DocumentaryUnitDescription m19desc : m19.getDocumentDescriptions()) {
             logger.debug(m19desc.getId() + ":" + m19desc.getLanguageOfDescription() + ":" + m19desc.getProperty(Ontology.SOURCEFILE_KEY));
         }
-        
+
         i = c1.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
-        while(i.hasNext()){
+        while (i.hasNext()) {
             DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             //assertEquals("fin", desc.getLanguageOfDescription());
             nrOfDesc++;
         }
         assertEquals(2, nrOfDesc);
-       
+
         i = c2.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
-        while(i.hasNext()){
+        while (i.hasNext()) {
             DocumentaryUnitDescription desc = i.next();
             System.out.println("language = " + desc.getLanguageOfDescription());
             nrOfDesc++;
         }
         assertEquals(2, nrOfDesc);
         int count_heb = getNodeCount(graph);
-        
+
         System.out.println(count + " " + count + " " + count_heb);
         printGraph(graph);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-                 // Before...
-       List<VertexProxy> graphState1_heb = getGraphState(graph);
+        // Before...
+        List<VertexProxy> graphState1_heb = getGraphState(graph);
         logger.debug("reimport HEB");
-        log = importManager.importFile(ios, logMessage);
-                // After...
-       List<VertexProxy> graphState2_heb = getGraphState(graph);
-       GraphDiff diff_heb = diffGraph(graphState1_heb, graphState2_heb);
-       diff_heb.printDebug(System.out);
+        importManager.importFile(ios, logMessage);
+        // After...
+        List<VertexProxy> graphState2_heb = getGraphState(graph);
+        GraphDiff diff_heb = diffGraph(graphState1_heb, graphState2_heb);
+        diff_heb.printDebug(System.out);
         logger.debug("reimport HEB");
         //HEB re imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
         assertEquals(count_heb, getNodeCount(graph));
-        
     }
 
+    @Test
+    public void testIdempotentImportViaXmlAndZip() throws Exception {
+        String resource = "MS1_O84_HEB-partial-unicode.xml";
+        InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
+        importManager = new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+                .setTolerant(Boolean.TRUE);
+        ImportLog log = importManager.importFile(ios, "Test");
+        assertEquals(1, log.getCreated());
+
+        File temp = File.createTempFile("test-zip", ".zip");
+        //temp.deleteOnExit();
+        IOHelpers.createZipFromResources(temp, resource);
+
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(temp));
+             ArchiveInputStream archiveInputStream = new
+                     ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
+                     .createArchiveInputStream(bis)) {
+            ImportLog log2 = importManager
+                    .importFiles(archiveInputStream, "Test 2");
+            assertEquals(1, log2.getUnchanged());
+            assertEquals(0, log2.getUpdated());
+        }
+    }
 }

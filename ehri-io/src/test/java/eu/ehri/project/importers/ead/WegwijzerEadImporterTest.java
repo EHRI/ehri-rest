@@ -20,23 +20,22 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.EadHandler;
-import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.util.List;
-import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class WegwijzerEadImporterTest extends AbstractImporterTest {
-    
-       protected final String SINGLE_EAD = "wegwijzer.xml";
 
-       // Depends on fixtures
-    protected final String TEST_REPO ="r1";
+    protected final String SINGLE_EAD = "wegwijzer.xml";
+
+    // Depends on fixtures
+    protected final String TEST_REPO = "r1";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -48,31 +47,25 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wegwijzer.properties"))
                 .setTolerant(Boolean.TRUE);
-        
-                 // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importManager.importFile(ios, logMessage);
+
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
+        importManager.importFile(ios, logMessage);
         printGraph(graph);
-        
- // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
-       /**
-        * null: 7
-        * relationship: 27
-        * DocumentaryUnit: 6
-        * documentDescription: 6
-        * maintenanceEvent: 1
-        * systemEvent: 1
-        * datePeriod: 6
-        */
-        assertEquals(getNodeCount(graph), origCount+54);
-//        printGraph(graph);
-       
 
-
-        
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+        /**
+         * null: 7
+         * relationship: 27
+         * DocumentaryUnit: 6
+         * documentDescription: 6
+         * maintenanceEvent: 6
+         * systemEvent: 1
+         * datePeriod: 6
+         */
+        assertEquals(origCount + 59, getNodeCount(graph));
     }
-
 }

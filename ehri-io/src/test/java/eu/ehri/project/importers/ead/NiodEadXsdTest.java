@@ -23,27 +23,27 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.base.PermissionScope;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class NiodEadXsdTest extends AbstractImporterTest {
-    
-    private static final Logger logger = LoggerFactory.getLogger(NiodEadXsdTest.class);
+
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "NIOD-38474.xml";
     // Identifiers of nodes in the imported documentary units
@@ -53,54 +53,56 @@ public class NiodEadXsdTest extends AbstractImporterTest {
             C02_1 = "MF1086380",
             C03 = "MF1086399",
             C03_2 = "MF1086398";
-    int origCount=0;
+    int origCount = 0;
 
     @Test
     public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        
+
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a NIOD EAD";
 
         origCount = getNodeCount(graph);
-        
-//  Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+
+        //  Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
+        new SaxImportManager(graph, agent, validUser,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties"))
+                .importFile(ios, logMessage);
         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
-//        printGraph(graph);
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+
        /*
         * null: 7
         * DocumentaryUnit: 6
         * property: 1
         * documentDescription: 6
+        * maintenance event: 6
         * systemEvent: 1
         * datePeriod: 6
         */
-        int newCount = origCount + 27; 
+        int newCount = origCount + 33;
         assertEquals(newCount, getNodeCount(graph));
-        
+
         DocumentaryUnit archdesc = graph.frame(
-                getVertexByIdentifier(graph,ARCHDESC),
+                getVertexByIdentifier(graph, ARCHDESC),
                 DocumentaryUnit.class);
         DocumentaryUnit c1 = graph.frame(
-                getVertexByIdentifier(graph,C01),
+                getVertexByIdentifier(graph, C01),
                 DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(
-                getVertexByIdentifier(graph,C02),
+                getVertexByIdentifier(graph, C02),
                 DocumentaryUnit.class);
         DocumentaryUnit c2_1 = graph.frame(
                 getVertexByIdentifier(graph, C02_1),
                 DocumentaryUnit.class);
         DocumentaryUnit c3 = graph.frame(
-                getVertexByIdentifier(graph,C03),
+                getVertexByIdentifier(graph, C03),
                 DocumentaryUnit.class);
         DocumentaryUnit c3_2 = graph.frame(
-                getVertexByIdentifier(graph,C03_2),
+                getVertexByIdentifier(graph, C03_2),
                 DocumentaryUnit.class);
 
         // Test correct ID generation
@@ -128,53 +130,53 @@ public class NiodEadXsdTest extends AbstractImporterTest {
 
         //test ref
         boolean hasRef = false;
-        for(DocumentaryUnitDescription d : c1.getDocumentDescriptions()){
-          for(String key: d.getPropertyKeys()){
-            if(key.equals("ref")){
-                assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2"));
-                
-                assertTrue(d.getProperty(key).toString().contains("http://files.archieven.nl/php/get_thumb.php?adt_id=298&toegang=250b&id=324872297&file=250b_19.jpg"));
-                assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&miadt=298&miaet=1&micode=250b&minr=1182347&miview=ldt"));
-                hasRef=true;
+        for (DocumentaryUnitDescription d : c1.getDocumentDescriptions()) {
+            for (String key : d.getPropertyKeys()) {
+                if (key.equals("ref")) {
+                    assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2"));
+
+                    assertTrue(d.getProperty(key).toString().contains("http://files.archieven.nl/php/get_thumb.php?adt_id=298&toegang=250b&id=324872297&file=250b_19.jpg"));
+                    assertTrue(d.getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&miadt=298&miaet=1&micode=250b&minr=1182347&miview=ldt"));
+                    hasRef = true;
+                }
             }
-          }
         }
         assertTrue(hasRef);
 
-    //test titles
-        for(DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()){
+        //test titles
+        for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             assertEquals("Caransa, A.", d.getName());
         }
         //test other identifiers
         assertNull(c1.getProperty(Ontology.OTHER_IDENTIFIERS));
         assertEquals("NL-AsdNIOD/809/2", c2_1.getProperty(Ontology.OTHER_IDENTIFIERS));
 
-        for(DocumentaryUnitDescription desc : c1.getDocumentDescriptions()){
-                assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
+        for (DocumentaryUnitDescription desc : c1.getDocumentDescriptions()) {
+            assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
         }
-    //test hierarchy
+        //test hierarchy
         assertEquals(1L, archdesc.getChildCount());
-        for(DocumentaryUnit d : archdesc.getChildren()){
+        for (DocumentaryUnit d : archdesc.getChildren()) {
             assertEquals(C01, d.getIdentifier());
         }
-        for(DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()){
+        for (DocumentaryUnitDescription d : c3_2.getDocumentDescriptions()) {
             //test level-of-desc
             assertEquals("file", d.getProperty("levelOfDescription"));
-            
+
             //test odd -> notes
             assertTrue(d.getProperty("notes").toString().contains("Fotokopieën"));
             assertTrue(d.getProperty("notes").toString().contains("ONTWIKKELINGSSTADIUM"));
         }
-    //test dates
-        for(DocumentaryUnitDescription d : c2_1.getDocumentDescriptions()){
-        	// Single date is just a string
-        	assertFalse(d.getPropertyKeys().contains("unitDates"));
-        	for (DatePeriod dp : d.getDatePeriods()){
-        		assertEquals("1980-01-01", dp.getStartDate());
-        		assertEquals("1980-12-31", dp.getEndDate());
-        	}
+        //test dates
+        for (DocumentaryUnitDescription d : c2_1.getDocumentDescriptions()) {
+            // Single date is just a string
+            assertFalse(d.getPropertyKeys().contains("unitDates"));
+            for (DatePeriod dp : d.getDatePeriods()) {
+                assertEquals("1980-01-01", dp.getStartDate());
+                assertEquals("1980-12-31", dp.getEndDate());
+            }
         }
-        
+
     }
 }
     

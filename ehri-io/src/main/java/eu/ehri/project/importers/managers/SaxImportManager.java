@@ -37,6 +37,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,7 +45,9 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -140,7 +143,8 @@ public class SaxImportManager extends AbstractImportManager {
         try {
             AbstractImporter<Map<String, Object>> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class,
-                            ImportLog.class).newInstance(framedGraph, permissionScope, log);
+                            Actioner.class, ImportLog.class)
+                    .newInstance(framedGraph, permissionScope, actioner, log);
 
             for (ImportCallback callback : extraCallbacks) {
                 importer.addCallback(callback);

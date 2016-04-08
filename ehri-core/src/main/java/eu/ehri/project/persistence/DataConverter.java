@@ -32,6 +32,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
@@ -68,7 +69,7 @@ class DataConverter {
     public static Map<String, Object> errorSetToData(ErrorSet errorSet) {
         Map<String, Object> data = Maps.newHashMap();
         data.put(ErrorSet.ERROR_KEY, errorSet.getErrors().asMap());
-        Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
+        Map<String, List<Map<String, Object>>> relations = Maps.newLinkedHashMap();
         Multimap<String, ErrorSet> crelations = errorSet.getRelations();
         for (String key : crelations.keySet()) {
             List<Map<String, Object>> rels = Lists.newArrayList();
@@ -104,16 +105,17 @@ class DataConverter {
      * @return A data map
      */
     public static Map<String, Object> bundleToData(Bundle bundle) {
-        Map<String, Object> data = Maps.newHashMap();
+        Map<String, Object> data = Maps.newLinkedHashMap();
         data.put(Bundle.ID_KEY, bundle.getId());
         data.put(Bundle.TYPE_KEY, bundle.getType().getName());
         data.put(Bundle.DATA_KEY, bundle.getData());
         if (bundle.hasMetaData()) {
             data.put(Bundle.META_KEY, bundle.getMetaData());
         }
-        Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
+        Map<String, List<Map<String, Object>>> relations = Maps.newLinkedHashMap();
         Multimap<String, Bundle> crelations = bundle.getRelations();
-        for (String key : crelations.keySet()) {
+        List<String> sortedKeys = Ordering.natural().sortedCopy(crelations.keySet());
+        for (String key : sortedKeys) {
             List<Map<String, Object>> rels = Lists.newArrayList();
             for (Bundle subbundle : crelations.get(key)) {
                 rels.add(bundleToData(subbundle));

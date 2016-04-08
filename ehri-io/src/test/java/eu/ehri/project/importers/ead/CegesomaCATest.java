@@ -23,14 +23,12 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.EadHandler;
-import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
@@ -50,7 +48,6 @@ public class CegesomaCATest extends AbstractImporterTest {
 
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE_NL = "CS-foto-188845-nl.xml";
-    protected final String XMLFILE_FR = "CS-foto-188845-fr.xml";
     protected final String ARCHDESC = "CA FE 1437";
     int origCount;
 

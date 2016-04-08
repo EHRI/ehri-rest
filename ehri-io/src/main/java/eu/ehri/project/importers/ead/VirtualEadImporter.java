@@ -35,6 +35,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -70,15 +71,15 @@ public class VirtualEadImporter extends EaImporter {
     private EntityClass unitEntity = EntityClass.VIRTUAL_UNIT;
 
     /**
-     * Construct an EadImporter object.
+     * Construct a VirtualEadImporter object.
      *
      * @param graph           the framed graph
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope, ImportLog log) {
-        super(graph, permissionScope, log);
-
+    public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
+            Actioner actioner, ImportLog log) {
+        super(graph, permissionScope, actioner, log);
     }
 
     /**
@@ -130,7 +131,7 @@ public class VirtualEadImporter extends EaImporter {
             if (idPath.isEmpty() && mutation.created()) {
                 EntityClass scopeType = manager.getEntityClass(permissionScope);
                 if (scopeType.equals(EntityClass.USER_PROFILE)) {
-                    UserProfile responsibleUser = framedGraph.frame(permissionScope.asVertex(), UserProfile.class);
+                    UserProfile responsibleUser = permissionScope.as(UserProfile.class);
                     frame.setAuthor(responsibleUser);
                     //the top Virtual Unit does not have a permissionScope. 
                 } else if (scopeType.equals(unitEntity)) {
@@ -246,16 +247,16 @@ public class VirtualEadImporter extends EaImporter {
 
     private DocumentaryUnit findReferredToDocumentaryUnit(Map<String, Object> itemData) throws ItemNotFound {
         if (itemData.containsKey(REPOID) && itemData.containsKey(UNITID)) {
-            String repositoryid = itemData.get(REPOID).toString();
-            String unitid = itemData.get(UNITID).toString();
-            Repository repository = manager.getEntity(repositoryid, Repository.class);
+            String repositoryId = itemData.get(REPOID).toString();
+            String unitId = itemData.get(UNITID).toString();
+            Repository repository = manager.getEntity(repositoryId, Repository.class);
             for (DocumentaryUnit unit : repository.getAllCollections()) {
-                logger.debug(unit.getIdentifier() + " " + unit.getId() + " " + unitid);
-                if (unit.getIdentifier().equals(unitid)) {
+                logger.debug("{} / {} / {}", unit.getIdentifier(), unit.getId(), unitId);
+                if (unit.getIdentifier().equals(unitId)) {
                     return unit;
                 }
             }
-            throw new ItemNotFound(String.format("No item %s found in repo %s", unitid, repositoryid));
+            throw new ItemNotFound(String.format("No item %s found in repo %s", unitId, repositoryId));
         }
         throw new ItemNotFound("Apparently no repositoryid/unitid combo given");
 

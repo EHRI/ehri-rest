@@ -25,16 +25,19 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
-public class ImportLogProvider implements MessageBodyWriter<ImportLog>, JsonMessageBodyHandler {
+public class ImportLogProvider implements MessageBodyWriter<ImportLog>,
+        MessageBodyReader<ImportLog>, JsonMessageBodyHandler {
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
         return aClass == ImportLog.class;
@@ -51,5 +54,18 @@ public class ImportLogProvider implements MessageBodyWriter<ImportLog>, JsonMess
             MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream)
                 throws IOException, WebApplicationException {
         mapper.writeValue(outputStream, importLog);
+    }
+
+    @Override
+    public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return aClass == ImportLog.class;
+    }
+
+    @Override
+    public ImportLog readFrom(Class<ImportLog> aClass, Type type,
+            Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, String> multivaluedMap, InputStream inputStream)
+                throws IOException, WebApplicationException {
+        return mapper.readValue(inputStream, ImportLog.class);
     }
 }

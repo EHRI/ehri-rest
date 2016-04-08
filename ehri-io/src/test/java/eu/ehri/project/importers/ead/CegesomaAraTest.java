@@ -23,22 +23,21 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test the import of a Cegesoma AA EAD file. This file was based on BundesarchiveTest.java.
@@ -64,23 +63,23 @@ public class CegesomaAraTest extends AbstractImporterTest {
 
         origCount = getNodeCount(graph);
 
-        // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
-
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaAA.properties")).importFile(ios, logMessage);
-        // After...
-        List<VertexProxy> graphState2 = getGraphState(graph);
-        GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
+        new SaxImportManager(graph, agent, validUser, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("cegesomaAA.properties"))
+                .importFile(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
         /**
-         * event links: 6 relationship: 34 DocumentaryUnit: 5 documentDescription: 5 systemEvent: 1 datePeriod: 4
-         * maintenanceEvent: 1
+         * event links: 6
+         * relationship: 34
+         * DocumentaryUnit: 5
+         * documentDescription: 5
+         * systemEvent: 1
+         * datePeriod: 4
+         * maintenanceEvent: 5
          */
-        int newCount = origCount + 56;
+        int newCount = origCount + 60;
         assertEquals(newCount, getNodeCount(graph));
 
         archdesc = graph.frame(
@@ -104,20 +103,18 @@ public class CegesomaAraTest extends AbstractImporterTest {
         for (String key : archdesc.getPropertyKeys()) {
             logger.debug(key + " " + archdesc.getProperty(key));
         }
-        assertTrue(((List<String>) archdesc.getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AA 627"));
+        assertTrue(archdesc.<List<String>>getProperty(Ontology.OTHER_IDENTIFIERS).contains("AA 627"));
 
         InputStream ios_ara = ClassLoader.getSystemResourceAsStream(ARA_XMLFILE);
         importManager = new SaxImportManager(graph, repository, validUser, AraEadImporter.class, EadHandler.class, new XmlImportProperties("ara.properties"))
                 .setTolerant(Boolean.TRUE);
 
-        ImportLog log_ara = importManager.importFile(ios_ara, logMessage);
+        importManager.importFile(ios_ara, logMessage);
         for (String key : archdesc.getPropertyKeys()) {
             logger.debug(key + " " + archdesc.getProperty(key));
         }
         assertTrue(archdesc.getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
-        assertTrue(((List<String>) archdesc.getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AA 627"));
-        assertTrue(((List<String>) archdesc.getProperty(Ontology.OTHER_IDENTIFIERS)).contains("AC559"));
-        
-
+        assertTrue(archdesc.<List<String>>getProperty(Ontology.OTHER_IDENTIFIERS).contains("AA 627"));
+        assertTrue(archdesc.<List<String>>getProperty(Ontology.OTHER_IDENTIFIERS).contains("AC559"));
     }
 }

@@ -25,24 +25,25 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
-
-import java.io.InputStream;
-import java.util.List;
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 public class IcaAtomEadImporterTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);
-       protected final String SINGLE_EAD = "hierarchical-ead.xml";
+    protected final String SINGLE_EAD = "hierarchical-ead.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
     // Depends on hierarchical-ead.xml
@@ -55,7 +56,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
@@ -67,11 +68,11 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits
-       	// - 5 more DocumentDescription
-	// - 1 more DatePeriod
+        // - 5 more DocumentDescription
+        // - 1 more DatePeriod
         // - 1 more UnknownProperties
         // - 1 UndeterminedRelationship, from origination/name
-	// - 6 more import Event links (4 for every Unit, 1 for the User)
+        // - 6 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
         int newCount = count + 20;
         assertEquals(newCount, getNodeCount(graph));
@@ -80,21 +81,21 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
                 FONDS_LEVEL);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(
-                getVertexByIdentifier(graph,FONDS_LEVEL),
+                getVertexByIdentifier(graph, FONDS_LEVEL),
                 DocumentaryUnit.class);
 
         // check the child items
         DocumentaryUnit c1 = graph.frame(
-                getVertexByIdentifier(graph,SUBFONDS_LEVEL),
+                getVertexByIdentifier(graph, SUBFONDS_LEVEL),
                 DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(
-                getVertexByIdentifier(graph,C2),
+                getVertexByIdentifier(graph, C2),
                 DocumentaryUnit.class);
         DocumentaryUnit c2_1 = graph.frame(
-                getVertexByIdentifier(graph,C2_1),
+                getVertexByIdentifier(graph, C2_1),
                 DocumentaryUnit.class);
         DocumentaryUnit c2_2 = graph.frame(
-                getVertexByIdentifier(graph,C2_2),
+                getVertexByIdentifier(graph, C2_2),
                 DocumentaryUnit.class);
 
         // Ensure that the first child's parent is unit
@@ -117,9 +118,9 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
 
 
         List<Accessible> subjects = toList(ev.getSubjects());
-        for(Accessible subject  : subjects)
+        for (Accessible subject : subjects)
             logger.info("identifier: " + subject.getId());
-        
+
         assertEquals(5, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
 

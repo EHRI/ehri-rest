@@ -107,11 +107,12 @@ public abstract class AbstractImportManager implements ImportManager {
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, InputParseError, ValidationError {
         // Create a new action for this import
+        Optional<String> msg = getLogMessage(logMessage);
         ActionManager.EventContext action = new ActionManager(
                 framedGraph, permissionScope).newEventContext(actioner,
-                EventTypes.ingest, getLogMessage(logMessage));
+                EventTypes.ingest, msg);
         // Create a manifest to store the results of the import.
-        ImportLog log = new ImportLog(action);
+        ImportLog log = new ImportLog(msg);
 
         // Do the import...
         importFile(ios, action, log);
@@ -129,10 +130,11 @@ public abstract class AbstractImportManager implements ImportManager {
 
         try {
 
+            Optional<String> msg = getLogMessage(logMessage);
             ActionManager.EventContext action = new ActionManager(
                     framedGraph, permissionScope).newEventContext(actioner,
-                    EventTypes.ingest, getLogMessage(logMessage));
-            ImportLog log = new ImportLog(action);
+                    EventTypes.ingest, msg);
+            ImportLog log = new ImportLog(msg);
             for (String path : paths) {
                 try {
                     currentFile = path;
@@ -141,7 +143,7 @@ public abstract class AbstractImportManager implements ImportManager {
                         importFile(ios, action, log);
                     }
                 } catch (ValidationError e) {
-                    log.setErrored(formatErrorLocation(), e.getMessage());
+                    log.addError(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
                         throw e;
                     }
@@ -164,22 +166,25 @@ public abstract class AbstractImportManager implements ImportManager {
     @Override
     public ImportLog importFiles(ArchiveInputStream inputStream, String logMessage)
             throws IOException, InputParseError, ValidationError {
+        Optional<String> msg = getLogMessage(logMessage);
         ActionManager.EventContext action = new ActionManager(
                 framedGraph, permissionScope).newEventContext(actioner,
-                EventTypes.ingest, getLogMessage(logMessage));
-        ImportLog log = new ImportLog(action);
+                EventTypes.ingest, msg);
+        ImportLog log = new ImportLog(msg);
 
         ArchiveEntry entry;
         while ((entry = inputStream.getNextEntry()) != null) {
             try {
-                currentFile = entry.getName();
-                BoundedInputStream boundedInputStream
-                        = new BoundedInputStream(inputStream, entry.getSize());
-                boundedInputStream.setPropagateClose(false);
-                logger.info("Importing file: " + currentFile);
-                importFile(boundedInputStream, action, log);
+                if (!entry.isDirectory()) {
+                    currentFile = entry.getName();
+                    BoundedInputStream boundedInputStream
+                            = new BoundedInputStream(inputStream, entry.getSize());
+                    boundedInputStream.setPropagateClose(false);
+                    logger.info("Importing file: " + currentFile);
+                    importFile(boundedInputStream, action, log);
+                }
             } catch (InputParseError | ValidationError e) {
-                log.setErrored(formatErrorLocation(), e.getMessage());
+                log.addError(formatErrorLocation(), e.getMessage());
                 if (!tolerant) {
                     throw e;
                 }

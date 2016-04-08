@@ -33,6 +33,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -53,8 +54,9 @@ public class UkrainianUnitImporter extends MapImporter {
     private final XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianUnitImporter.class);
 
-    public UkrainianUnitImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        super(framedGraph, permissionScope, log);
+    public UkrainianUnitImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
+            Actioner actioner, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, log);
         p = new XmlImportProperties("ukraine.properties");
     }
 

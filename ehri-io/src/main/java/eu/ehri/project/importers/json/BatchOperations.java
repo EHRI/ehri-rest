@@ -122,7 +122,7 @@ public class BatchOperations {
             throws DeserializationError, ItemNotFound, ValidationError {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
-        ImportLog log = new ImportLog(ctx);
+        ImportLog log = new ImportLog(logMessage);
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle bundle : bundleIter) {
                 try {
@@ -145,7 +145,7 @@ public class BatchOperations {
                     if (!tolerant) {
                         throw e;
                     } else {
-                        log.setErrored(bundle.getId(), e.getMessage());
+                        log.addError(bundle.getId(), e.getMessage());
                         logger.warn("Validation error patching {}: {}", bundle.getId(), e);
                     }
                 }
@@ -175,7 +175,7 @@ public class BatchOperations {
             throws DeserializationError, ItemNotFound, ValidationError {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
-        ImportLog log = new ImportLog(ctx);
+        ImportLog log = new ImportLog(logMessage);
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle bundle : bundleIter) {
                 Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
@@ -201,7 +201,7 @@ public class BatchOperations {
                     if (!tolerant) {
                         throw e;
                     } else {
-                        log.setErrored(entity.getId(), e.getMessage());
+                        log.addError(entity.getId(), e.getMessage());
                         logger.warn("Validation error patching {}: {}", entity.getId(), e);
                     }
                 }

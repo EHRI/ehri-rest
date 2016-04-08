@@ -170,10 +170,11 @@ public final class JenaSkosImporter implements SkosImporter {
             throws IOException, ValidationError {
 
         // Create a new action for this import
+        Optional<String> logMsg = getLogMessage(logMessage);
         ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
-                actioner, EventTypes.ingest, getLogMessage(logMessage));
+                actioner, EventTypes.ingest, logMsg);
         // Create a manifest to store the results of the import.
-        ImportLog log = new ImportLog(eventContext);
+        ImportLog log = new ImportLog(logMsg);
 
         OntModel model = ModelFactory.createOntologyModel();
         model.read(ios, null, format);
@@ -205,7 +206,7 @@ public final class JenaSkosImporter implements SkosImporter {
             } catch (ValidationError validationError) {
                 if (tolerant) {
                     logger.error(validationError.getMessage());
-                    log.setErrored(item.toString(), validationError.getMessage());
+                    log.addError(item.toString(), validationError.getMessage());
                 } else {
                     throw validationError;
                 }

@@ -19,17 +19,20 @@
 
 package eu.ehri.project.importers.properties;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
@@ -37,11 +40,12 @@ import java.util.Set;
  */
 public class XmlImportProperties implements ImportProperties {
 
-    private String configFileName;
+
+    private final String configFileName;
     private Properties cachedProperties;
 
     public XmlImportProperties(String configFile) {
-        setConfigFileName(configFile);
+        this.configFileName = configFile;
     }
 
     private Properties getProperties() {
@@ -61,15 +65,17 @@ public class XmlImportProperties implements ImportProperties {
 
     /**
      * Get a set of property keys that have a given value
+     *
      * @param value the value that requested properties must have
      * @return a set of key names that have the given value
      */
     public Set<String> getPropertiesWithValue(String value) {
-        Set<String> ps = new HashSet<>();
+        Set<String> ps = Sets.newHashSet();
         Properties p = getProperties();
         for (Entry<Object, Object> property : p.entrySet()) {
-            if (value.equals(property.getValue().toString()))
+            if (value.equals(property.getValue())) {
                 ps.add(property.getKey().toString());
+            }
         }
         return ps;
     }
@@ -83,16 +89,6 @@ public class XmlImportProperties implements ImportProperties {
         return null;
     }
 
-    public Set<String> getAllNonAttributeProperties() {
-        Set<String> ps = new HashSet<>();
-        Properties p = getProperties();
-        for (Object key : p.keySet()) {
-            if (!key.toString().startsWith("@"))
-                ps.add(key.toString());
-        }
-        return ps;
-    }
-
     public String getProperty(String key, String defaultValue) {
         return getProperties().getProperty(key, defaultValue);
     }
@@ -100,16 +96,6 @@ public class XmlImportProperties implements ImportProperties {
     @Override
     public boolean containsPropertyValue(String value) {
         return getProperties().containsValue(value);
-    }
-
-    private void setConfigFileName(String configFileName) {
-        this.configFileName = configFileName;
-    }
-
-
-    //TODO: should be a deep copy
-    public Set<Entry<Object, Object>> getEntries() {
-        return getProperties().entrySet();
     }
 
     @Override
@@ -141,36 +127,57 @@ public class XmlImportProperties implements ImportProperties {
     public String getAttributeProperty(String key) {
         return getProperty("@" + key);
     }
-
-    /**
-     * used to try to find the xml attribute value 'ehri_main_identifier' in
-     * properties like 'did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier'
-     *
-     * @param key       did/unitid/
-     * @param attribute {@literal @}ehrilabel
-     * @return ehri_main_identifier or null if no attribute value could be found in this property file
-     */
-    public String getValueForAttributeProperty(String key, String attribute) {
-        Properties p = getProperties();
-        for (Object k_object : p.keySet()) {
-            String k = k_object.toString();
-            if (k.startsWith(key + attribute) && k.contains("$")) {
-                return k.substring(1 + k.indexOf("$"));
-            }
-        }
-        return null;
-    }
 }
 
 abstract class PropertyLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertyLoader.class);
 
+    private static Properties loadPropertiesFromResource(String name, ClassLoader loader) {
+        logger.debug("loading resource {}...", name);
+        try (InputStream in = loader.getResourceAsStream(name)) {
+            if (in != null) {
+                Properties result = new Properties();
+                result.load(in);
+                return result;
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private static Properties loadPropertiesFromFile(Path path) {
+        logger.debug("loading file {}...", path.toUri());
+        try (FileInputStream ios = new FileInputStream(path.toFile())) {
+            Properties result = new Properties();
+            result.load(ios); // Can throw IOException
+            return result;
+        } catch (IOException e) {
+            logger.error("Error loading properties file: {}: {}", path, e);
+            return null;
+        }
+    }
+
+    public static Properties loadPropertiesFromResourceOrFile(String name, ClassLoader loader) {
+        Preconditions.checkNotNull(name, "Property resource name may not be null");
+        if (loader == null) {
+            loader = ClassLoader.getSystemClassLoader();
+        }
+        Path path = Paths.get(name);
+        if (Files.exists(path)) {
+            return loadPropertiesFromFile(path);
+        } else {
+            return loadPropertiesFromResource(name, loader);
+        }
+    }
+
     /**
-     * Looks up a resource named 'name' in the classpath. The resource must map to a file with .properties extention.
+     * Looks up a resource named 'name' in the classpath. The resource must map to a file with .properties extension.
      * The name is assumed to be absolute and can use either "/" or "." for package segment separation with an optional
      * leading "/" and optional ".properties" suffix. Thus, the following names refer to the same resource:
-     * <p>
+     * <p/>
      * <pre>
      * some.pkg.Resource
      * some.pkg.Resource.properties
@@ -181,100 +188,24 @@ abstract class PropertyLoader {
      * </pre>
      *
      * @param name   classpath resource name [may not be null]
-     * @param loader classloader through which to load the resource [null is equivalent to the application loader]
-     * @return resource converted to java.util.Properties [may be null if the resource was not found and
-     *         THROW_ON_LOAD_FAILURE is false]
-     * @throws IllegalArgumentException if the resource was not found and THROW_ON_LOAD_FAILURE is true
+     * @param loader the ClassLoader through which to load the resource [null is equivalent to the application loader]
+     * @return resource converted to java.util.Properties
+     * @throws IllegalArgumentException if the resource was not found
      */
-    public static Properties loadProperties(String name, ClassLoader loader) {
-        logger.debug("loading " + name + " ...");
-        if (name == null) {
-            throw new IllegalArgumentException("null input: name");
+    public static Properties loadProperties(String name, ClassLoader loader) throws IllegalArgumentException {
+        Properties result = loadPropertiesFromResourceOrFile(name, loader);
+        if (result == null) {
+            String err = String.format("could not load [%s] as a classpath resource", name);
+            throw new IllegalArgumentException(err);
         }
-
-        if (name.endsWith(SUFFIX)) {
-            name = name.substring(0, name.length() - SUFFIX.length());
-        }
-
-        Properties result = null;
-
-        InputStream in = null;
-        try {
-            if (loader == null) {
-                loader = ClassLoader.getSystemClassLoader();
-            }
-
-            if (LOAD_AS_RESOURCE_BUNDLE) {
-                name = name.replace('/', '.');
-                // Throws MissingResourceException on lookup failures:
-                ResourceBundle rb = ResourceBundle.getBundle(name, Locale
-                        .getDefault(), loader);
-
-                result = new Properties();
-                for (Enumeration<String> keys = rb.getKeys(); keys
-                        .hasMoreElements(); ) {
-                    String key = keys.nextElement();
-                    String value = rb.getString(key);
-
-                    result.put(key, value);
-                }
-            } else {
-
-                name = name.replace('.', '/');
-
-                if (!name.endsWith(SUFFIX)) {
-                    name = name.concat(SUFFIX);
-                }
-
-                // Returns null on lookup failures:
-                in = loader.getResourceAsStream(name);
-                if (in != null) {
-                    result = new Properties();
-                    result.load(in); // Can throw IOException
-                } else {
-                    logger.error(name + " is not a Resource");
-                    FileInputStream ios = new FileInputStream(name);
-                    logger.info("trying to read " + name + " as fileinputstream");
-
-                    in = ios;
-                    result = new Properties();
-                    result.load(in); // Can throw IOException
-                }
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            result = null;
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (Throwable ignore) {
-                }
-            }
-        }
-
-        if (THROW_ON_LOAD_FAILURE && (result == null)) {
-            throw new IllegalArgumentException("could not load ["
-                    + name
-                    + "]"
-                    + " as "
-                    + (LOAD_AS_RESOURCE_BUNDLE ? "a resource bundle"
-                    : "a classloader resource"));
-        }
-
         return result;
     }
 
     /**
      * A convenience overload of {@link #loadProperties(String, ClassLoader)} that uses the current thread's context
-     * classloader.
+     * ClassLoader.
      */
     public static Properties loadProperties(String name) {
-        return loadProperties(name, Thread.currentThread()
-                .getContextClassLoader());
+        return loadProperties(name, Thread.currentThread().getContextClassLoader());
     }
-
-    private static final boolean THROW_ON_LOAD_FAILURE = true;
-    private static final boolean LOAD_AS_RESOURCE_BUNDLE = false;
-    private static final String SUFFIX = ".properties";
 }

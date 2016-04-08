@@ -19,10 +19,11 @@
 
 package eu.ehri.project.importers;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.persistence.ActionManager.EventContext;
 
 import java.util.Map;
 
@@ -36,18 +37,31 @@ public class ImportLog {
     private int created;
     private int updated;
     private int unchanged;
-    private int errored;
-    private final EventContext eventContext;
+    private final Optional<String> logMessage;
     private final Map<String, String> errors = Maps.newHashMap();
 
 
     /**
      * Constructor.
      *
-     * @param action An event context
+     * @param logMessage a log message
      */
-    public ImportLog(EventContext action) {
-        this.eventContext = action;
+    public ImportLog(Optional<String> logMessage) {
+        this.logMessage = logMessage;
+    }
+
+    @JsonCreator
+    public ImportLog(
+            @JsonProperty("message") String logMessage,
+            @JsonProperty("created") int created,
+            @JsonProperty("updated") int updated,
+            @JsonProperty("unchanged") int unchanged,
+            @JsonProperty("errors") Map<String, String> errors) {
+        this(Optional.fromNullable(logMessage));
+        this.created = created;
+        this.unchanged = unchanged;
+        this.updated = updated;
+        this.errors.putAll(errors);
     }
 
     /**
@@ -96,7 +110,7 @@ public class ImportLog {
      * @return the number of errored item imports
      */
     public int getErrored() {
-        return errored;
+        return errors.size();
     }
 
     /**
@@ -113,16 +127,8 @@ public class ImportLog {
      * @param item  The item
      * @param error The error that occurred
      */
-    public void setErrored(String item, String error) {
+    public void addError(String item, String error) {
         errors.put(item, error);
-        errored++;
-    }
-
-    /**
-     * @return returns the Actioner associated with this import
-     */
-    public Actioner getActioner() {
-        return eventContext.getActioner();
     }
 
     /**
@@ -143,19 +149,24 @@ public class ImportLog {
     }
 
     @JsonValue
-    public Map<String,Object> getData() {
-        Map<String,Object> data = Maps.newHashMap();
+    public Map<String, Object> getData() {
+        Map<String, Object> data = Maps.newHashMap();
         data.put("created", created);
         data.put("updated", updated);
         data.put("unchanged", unchanged);
-        data.put("message", eventContext.getLogMessage().orNull());
+        data.put("errors", errors);
+        data.put("message", logMessage.orNull());
         return data;
+    }
+
+    public Optional<String> getLogMessage() {
+        return logMessage;
     }
 
     public void printReport() {
         System.out.println(
                 String.format(
-                        "Created: %d, Updated: %d, Unchanged: %s",
-                        created, updated, unchanged));
+                        "Created: %d, Updated: %d, Unchanged: %d, Errors: %d",
+                        created, updated, unchanged, errors.size()));
     }
 }
