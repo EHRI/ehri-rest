@@ -73,6 +73,8 @@ public class Ead2002Exporter implements EadExporter {
             .put("appraisal", "appraisal")
             .put("archivalHistory", "custodhist")
             .put("physicalCharacteristics", "phystech")
+            .put("relatedUnitsOfDescription", "relatedmaterial")
+            .put("separatedUnitsOfDescription", "separatedmaterial")
             .put("notes", "odd") // controversial!
             .build();
 
