@@ -54,6 +54,8 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Scope and contents note content no label |||\n\n" +
                         "Scope and contents note content |||",
                 "//ead/archdesc/scopecontent/p/text()");
+        assertXPath(doc, "Separated materials note content no label |||",
+                "//ead/archdesc/separatedmaterial[2]/p/text()");
         assertXPath(doc, "Series I",
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",

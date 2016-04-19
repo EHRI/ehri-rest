@@ -59,6 +59,7 @@ DocumentaryUnitDescription,processInfo,,,1
 DocumentaryUnitDescription,sources,,,1
 DocumentaryUnitDescription,sourceFileId,,1,
 DocumentaryUnitDescription,relatedUnitsOfDescription,,,1
+DocumentaryUnitDescription,separatedUnitsOfDescription,,,1
 DocumentaryUnitDescription,maintenanceEvent,,,1
 HistoricalAgentDescription,lastName,,,
 HistoricalAgentDescription,firstName,,,
