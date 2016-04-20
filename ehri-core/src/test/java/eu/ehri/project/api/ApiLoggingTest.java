@@ -20,6 +20,7 @@
 package eu.ehri.project.api;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -37,7 +38,6 @@ import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.Iterator;
 import java.util.List;
@@ -106,8 +106,9 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         // FIXME: getLatestAction() should return a single item, but due to
         // a current (2.2.0) limitation in frames' @GremlinGroovy mechanism
         // it can't
-        assertEquals(1, Iterables.count(validUser.getLatestAction()));
-        SystemEvent event = Iterables.single(validUser.getLatestAction());
+        assertEquals(1, Iterables.size(validUser.getLatestAction()));
+        SystemEvent event = Iterables.getFirst(validUser.getLatestAction(), null);
+        assertNotNull(event);
         assertNotNull(event.getFirstSubject());
         assertEquals(changedUser.asVertex(), event.getFirstSubject().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
@@ -120,8 +121,8 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         assertTrue(events.get(0).getSubjects().iterator().hasNext());
         assertTrue(events.get(1).getSubjects().iterator().hasNext());
 
-        assertEquals(1, Iterables.count(events.get(0).getSubjects()));
-        assertEquals(1, Iterables.count(events.get(1).getSubjects()));
+        assertEquals(1, Iterables.size(events.get(0).getSubjects()));
+        assertEquals(1, Iterables.size(events.get(1).getSubjects()));
 
         assertEquals(changedUser.asVertex(), events.get(0)
                 .getSubjects().iterator().next().asVertex());
@@ -153,8 +154,8 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
-            shouldDelete += Iterables.count(d.getDatePeriods());
-            shouldDelete += Iterables.count(d.getAccessPoints());
+            shouldDelete += Iterables.size(d.getDatePeriods());
+            shouldDelete += Iterables.size(d.getAccessPoints());
         }
 
         String log = "Deleting item";

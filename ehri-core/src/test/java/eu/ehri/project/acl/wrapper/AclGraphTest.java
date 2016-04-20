@@ -1,5 +1,6 @@
 package eu.ehri.project.acl.wrapper;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
@@ -16,7 +17,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -61,14 +61,14 @@ public class AclGraphTest extends AbstractFixtureTest {
     public void testGetVerticesAsValidUser() throws Exception {
         Iterable<Vertex> vertices = validUserGraph.getVertices(Ontology.IDENTIFIER_KEY, "c1");
         assertTrue(vertices.iterator().hasNext());
-        assertEquals(1L, Iterables.count(vertices));
+        assertEquals(1L, Iterables.size(vertices));
     }
 
     @Test
     public void testGetVerticesAsInvalidUser() throws Exception {
         Iterable<Vertex> vertices = invalidUserGraph.getVertices(Ontology.IDENTIFIER_KEY, "c1");
         assertFalse(vertices.iterator().hasNext());
-        assertEquals(0L, Iterables.count(vertices));
+        assertEquals(0L, Iterables.size(vertices));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class AclGraphTest extends AbstractFixtureTest {
         // should only get two nodes (c4 and nl-r1-m19) when we traverse 'heldBy'
         Iterable<Vertex> docs = invalidUserVertex
                 .getVertices(Direction.IN, Ontology.DOC_HELD_BY_REPOSITORY);
-        assertEquals(2, Iterables.count(docs));
+        assertEquals(2, Iterables.size(docs));
     }
 
     @Test

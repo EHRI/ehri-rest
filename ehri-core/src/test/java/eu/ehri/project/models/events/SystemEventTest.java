@@ -19,6 +19,7 @@
 
 package eu.ehri.project.models.events;
 
+import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
@@ -31,7 +32,6 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import static eu.ehri.project.persistence.ActionManager.sameAs;
 import static org.junit.Assert.assertEquals;
@@ -62,7 +62,7 @@ public class SystemEventTest extends AbstractFixtureTest {
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         SystemEvent first = ctx.commit();
-        assertEquals(1, Iterables.count(first.getSubjects()));
+        assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Delete the user and log it
         ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
@@ -73,7 +73,7 @@ public class SystemEventTest extends AbstractFixtureTest {
 
         // First event should now have 0 subjects, since it's
         // been deleted.
-        assertEquals(0, Iterables.count(first.getSubjects()));
+        assertEquals(0, Iterables.size(first.getSubjects()));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class SystemEventTest extends AbstractFixtureTest {
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         SystemEvent first = ctx.commit();
-        assertEquals(1, Iterables.count(first.getSubjects()));
+        assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Delete the user and log it
         ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
@@ -136,7 +136,7 @@ public class SystemEventTest extends AbstractFixtureTest {
                 validUser,
                 EventTypes.creation);
         SystemEvent first = ctx.commit();
-        assertEquals(1, Iterables.count(first.getSubjects()));
+        assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Do the same thing again after 1/2 second
         Thread.sleep(500);

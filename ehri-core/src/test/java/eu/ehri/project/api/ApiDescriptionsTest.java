@@ -20,6 +20,7 @@
 package eu.ehri.project.api;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -38,7 +39,6 @@ import eu.ehri.project.test.TestData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import static org.junit.Assert.*;
 
@@ -103,7 +103,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
-        long descCount = Iterables.count(unit.getDocumentDescriptions());
+        long descCount = Iterables.size(unit.getDocumentDescriptions());
         Bundle descBundle = new Serializer(graph).entityToBundle(unit)
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
@@ -112,7 +112,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
                 .updateDependent(unit.getId(), descBundle,
                         DocumentaryUnitDescription.class, Optional.<String>absent())
                 .getNode();
-        assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
+        assertEquals(descCount, Iterables.size(unit.getDocumentDescriptions()));
         assertEquals("some-new-title", changedDesc.getName());
     }
 
@@ -137,14 +137,14 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
-        long descCount = Iterables.count(unit.getDocumentDescriptions());
+        long descCount = Iterables.size(unit.getDocumentDescriptions());
 
-        DocumentaryUnitDescription d = Iterables.first(unit.getDocumentDescriptions());
+        DocumentaryUnitDescription d = Iterables.getFirst(unit.getDocumentDescriptions(), null);
         assertNotNull(d);
         int delCount = api(validUser).deleteDependent(unit.getId(), d.getId(),
                 Optional.<String>absent());
         Assert.assertTrue(delCount >= 1);
-        assertEquals(descCount - 1, Iterables.count(unit.getDocumentDescriptions()));
+        assertEquals(descCount - 1, Iterables.size(unit.getDocumentDescriptions()));
     }
 
     @Test

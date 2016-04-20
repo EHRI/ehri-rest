@@ -27,7 +27,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -53,14 +52,15 @@ public class Neo4jBasicTest {
 
     @Test(expected = org.neo4j.graphdb.NotInTransactionException.class)
     public void notAllowCountingNodesOutsideOfATx() {
-        GlobalGraphOperations.at(graphDb).getAllNodes();
+        graphDb.getAllNodes();
     }
 
     @Test
     public void shouldAllowCountingNodes() {
         try (Transaction tx = graphDb.beginTx()) {
-            Iterable<Node> nodes = GlobalGraphOperations.at(graphDb).getAllNodes();
+            Iterable<Node> nodes = graphDb.getAllNodes();
             assertEquals(0, Iterables.size(nodes));
+            tx.success();
         }
     }
 
@@ -81,8 +81,7 @@ public class Neo4jBasicTest {
             assertEquals(foundNode.getId(), n.getId());
             assertEquals(foundNode.getProperty("name"), "Nancy");
 
-            assertEquals(1, Iterables.size(
-                    GlobalGraphOperations.at(graphDb).getAllNodes()));
+            assertEquals(1, Iterables.size(graphDb.getAllNodes()));
             tx.success();
         }
     }

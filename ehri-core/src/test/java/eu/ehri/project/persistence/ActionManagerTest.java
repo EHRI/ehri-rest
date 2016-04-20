@@ -19,6 +19,7 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -31,7 +32,6 @@ import eu.ehri.project.models.events.Version;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.List;
 
@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 
 public class ActionManagerTest extends AbstractFixtureTest {
 
@@ -69,7 +70,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         SystemEvent second = ctx2.commit();
 
         // Check exactly one Event was created
-        assertEquals(1, Iterables.count(second.getSubjects()));
+        assertEquals(1, Iterables.size(second.getSubjects()));
         // Check item cache is correct...
         assertEquals(1L, second.subjectCount());
         assertNotNull(second.getActioner());
@@ -77,7 +78,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         // Check the user is correctly linked
         assertEquals(validUser, second.getActioner());
 
-        assertEquals(1, Iterables.count(repository.getHistory()));
+        assertEquals(1, Iterables.size(repository.getHistory()));
         assertNotNull(repository.getLatestEvent());
 
         // Check the latest event in the list is the one we want...
@@ -150,7 +151,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         SystemEvent event = ctx2.commit();
         assertTrue(update.updated());
         assertTrue(event.getPriorVersions().iterator().hasNext());
-        assertEquals(1, Iterables.count(event.getPriorVersions()));
+        assertEquals(1, Iterables.size(event.getPriorVersions()));
         Version version = event.getPriorVersions().iterator().next();
         assertNotNull(doc.getPriorVersion());
         assertEquals(version, doc.getPriorVersion());
@@ -160,7 +161,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
                 .withId(doc.getId())
                 .withDataValue("identifier", "changed-again"), DocumentaryUnit.class);
         SystemEvent event2 = ctx2.commit();
-        assertEquals(1, Iterables.count(event2.getPriorVersions()));
-        assertEquals(2, Iterables.count(doc.getAllPriorVersions()));
+        assertEquals(1, Iterables.size(event2.getPriorVersions()));
+        assertEquals(2, Iterables.size(doc.getAllPriorVersions()));
     }
 }

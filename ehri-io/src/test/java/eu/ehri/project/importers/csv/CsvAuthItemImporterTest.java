@@ -24,12 +24,12 @@
 package eu.ehri.project.importers.csv;
 
 import eu.ehri.project.importers.base.AbstractImporterTest;
+import com.google.common.collect.Lists;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class CsvAuthItemImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-        System.out.println(Iterables.toList(authoritativeSet.getAuthoritativeItems()));
+        System.out.println(Lists.newArrayList(authoritativeSet.getAuthoritativeItems()));
         /*
          * 9 Item
          * 9 ItemDesc

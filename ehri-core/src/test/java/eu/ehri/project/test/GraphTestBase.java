@@ -19,6 +19,7 @@
 
 package eu.ehri.project.test;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -41,7 +42,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
@@ -226,14 +226,14 @@ public abstract class GraphTestBase {
     }
 
     protected int getNodeCount(FramedGraph<?> graph) {
-        long l = Iterables.count(graph.getVertices());
+        long l = Iterables.size(graph.getVertices());
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
             throw new RuntimeException("Too many vertex items in graph to fit into an integer!");
         return (int) l;
     }
 
     protected int getEdgeCount(FramedGraph<?> graph) {
-        long l = Iterables.count(graph.getEdges());
+        long l = Iterables.size(graph.getEdges());
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
             throw new RuntimeException("Too many edge items in graph to fit into an integer!");
         return (int) l;

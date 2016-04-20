@@ -31,6 +31,7 @@ import eu.ehri.project.test.utils.GraphCleaner;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.eclipse.jetty.util.log.Log;
+import org.neo4j.helpers.HostnamePort;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.helpers.CommunityServerBuilder;
 import org.slf4j.LoggerFactory;
@@ -111,7 +112,7 @@ public class ServerRunner {
 
         System.setProperty("org.eclipse.jetty.LEVEL", "DEBUG");
         CommunityServerBuilder serverBuilder = CommunityServerBuilder.server()
-                .onPort(port);
+                .onAddress(new HostnamePort("localhost", port));
         for (Map.Entry<String, String> entry : packageMountPoints.entrySet()) {
             String mountPoint = entry.getValue().startsWith("/")
                     ? entry.getValue() : "/" + entry.getValue();

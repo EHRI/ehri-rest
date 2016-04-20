@@ -19,6 +19,7 @@
 
 package eu.ehri.project.models.events;
 
+import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
@@ -27,7 +28,6 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import static org.junit.Assert.*;
 
@@ -53,7 +53,7 @@ public class VersionTest extends AbstractFixtureTest {
         SystemEvent first = actionManager.newEventContext(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation).commit();
-        assertEquals(1, Iterables.count(first.getSubjects()));
+        assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Change the user twice in succession, with the data from userBundle2
         // and userBundle3
