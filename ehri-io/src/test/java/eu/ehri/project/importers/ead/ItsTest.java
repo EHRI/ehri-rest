@@ -62,8 +62,9 @@ public class ItsTest extends AbstractImporterTest {
     public void testUnitdate() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
         final String logMessage = "Importing a single EAD by ItsTest";
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        new SaxImportManager(graph, repository, validUser, true, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties"))
+                    .importFile(ios, logMessage);
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                 DocumentaryUnit.class);
@@ -87,7 +88,8 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
+        importManager = new SaxImportManager(graph, repository, validUser, false, true,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties"));
         ImportLog log_en = importManager.importFile(ios, logMessage);
         ImportLog log_de = importManager.importFile(ios2, logMessage);
 
@@ -168,7 +170,7 @@ public class ItsTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
 
-        importManager = new SaxImportManager(graph, repository, validUser,
+        importManager = new SaxImportManager(graph, repository, validUser, false, false,
                 EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"))
                 .setTolerant(Boolean.TRUE);
         importManager.importFile(ios, logMessage);
@@ -236,7 +238,8 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties")).setTolerant(Boolean.TRUE);
+        importManager = new SaxImportManager(graph, repository, validUser, true, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"));
 
         importManager.importFile(ios, logMessage);
 
@@ -268,11 +271,10 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser,
+        new SaxImportManager(graph, repository, validUser, true, false,
                 EadImporter.class, EadHandler.class,
                 new XmlImportProperties("its-pertinence.properties"))
-                .setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+                    .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

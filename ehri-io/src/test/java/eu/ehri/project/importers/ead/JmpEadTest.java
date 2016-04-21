@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -56,11 +57,9 @@ public class JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-
-        importManager.setTolerant(Boolean.TRUE);
-
-        ImportLog log = importManager.importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"))
+                .importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits fonds C1 C2 C3 4,5,6
@@ -82,7 +81,7 @@ public class JmpEadTest extends AbstractImporterTest {
 
         for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
             List<String> langs = d.getProperty("languageOfMaterial");
-            assertTrue(langs.size() > 0);
+            assertFalse(langs.isEmpty());
             assertEquals("deu", langs.get(0));
         }
 

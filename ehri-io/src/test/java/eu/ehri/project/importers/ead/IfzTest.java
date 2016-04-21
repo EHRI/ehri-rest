@@ -70,8 +70,8 @@ public class IfzTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("ifz.properties"))
+        new SaxImportManager(graph, agent, validUser, false, false,
+                    EadImporter.class, EadHandler.class, new XmlImportProperties("ifz.properties"))
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

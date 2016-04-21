@@ -47,6 +47,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+
 public class IpnTest extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(IpnTest.class);
@@ -73,14 +74,17 @@ public class IpnTest extends AbstractImporterTest {
         final String logMessage = "Importing a part of the IPN Virtual Collection";
 
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios1, logMessage);
+        new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class, EadHandler.class, new
+                XmlImportProperties("polishBranch.properties")).importFile(ios1, logMessage);
 
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios2, logMessage);
+        new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties"))
+                .importFile(ios2, logMessage);
 
         origCount = getNodeCount(graph);
         InputStream iosVc = ClassLoader.getSystemResourceAsStream(VC_XMLFILE);
-        new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(iosVc, logMessage);
+        new SaxImportManager(graph, agent, validUser, false, false, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties"))
+                .importFile(iosVc, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -115,7 +119,7 @@ public class IpnTest extends AbstractImporterTest {
 //       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
         @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios, logMessage);
         // After...
 //       List<VertexProxy> graphState2 = getGraphState(graph);
 //       GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -207,7 +211,7 @@ public class IpnTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE);
         @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -256,7 +260,7 @@ public class IpnTest extends AbstractImporterTest {
         for (DocumentaryUnitDescription d : descriptions) {
             assertEquals("Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie", d.getName());
             List<String> provenance = d.getProperty("processInfo");
-            assertTrue(provenance.size() > 0);
+            assertTrue(!provenance.isEmpty());
             assertThat(provenance.get(0), startsWith("This selection has been "));
         }
         for (DocumentaryUnitDescription desc : c1_1.getDocumentDescriptions()) {

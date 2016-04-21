@@ -60,9 +60,9 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser,
-                EadImporter.class, EadHandler.class,
-                new XmlImportProperties("bundesarchive.properties")).importFile(ios, logMessage);
+        new SaxImportManager(graph, agent, validUser, false, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties"))
+                .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

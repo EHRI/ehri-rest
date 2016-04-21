@@ -63,7 +63,7 @@ public class MemShoahTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser,
+        new SaxImportManager(graph, agent, validUser, false, false,
                 EadImporter.class, EadHandler.class, new XmlImportProperties("memshoah.properties"))
                 .importFile(ios, logMessage);
         // After...

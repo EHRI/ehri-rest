@@ -51,10 +51,10 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         System.out.println(count);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
-                .setTolerant(Boolean.TRUE);
-        // Before...
-        importManager.importFile(ios, logMessage);
+        SaxImportManager importManager = new SaxImportManager(graph, repository, validUser, true, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"));
+        importManager
+                .importFile(ios, logMessage);
 
         // After...
         int countAfter = getNodeCount(graph);
@@ -88,7 +88,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         //import the english version:
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        importManager.importFile(ios, logMessage);
+        importManager.allowUpdates(true).importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -132,7 +132,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1a = getGraphState(graph);
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        importManager.importFile(ios, logMessage);
+        importManager.allowUpdates(true).importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2a = getGraphState(graph);
         GraphDiff diffa = diffGraph(graphState1a, graphState2a);

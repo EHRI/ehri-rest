@@ -37,6 +37,7 @@ import java.io.InputStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class StadsarchiefAdamTest extends AbstractImporterTest {
@@ -62,8 +63,9 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
 
         // Before...
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("stadsarchief.properties")).importFile(ios, logMessage);
+        new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class,
+                EadHandler.class, new XmlImportProperties("stadsarchief.properties"))
+                .importFile(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have

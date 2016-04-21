@@ -44,13 +44,12 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser,
+        new SaxImportManager(graph, repository, validUser, true, false,
                 EadImporter.class, EadHandler.class, new XmlImportProperties("ara.properties"))
-                .setTolerant(Boolean.TRUE);
+                .importFile(ios, logMessage);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        importManager.importFile(ios, logMessage);
         printGraph(graph);
 
         // After...

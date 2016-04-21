@@ -68,7 +68,7 @@ public class CegesomaAATest extends AbstractImporterTest {
         origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class,
+        new SaxImportManager(graph, agent, validUser, true, false, EadImporter.class,
                 EadHandler.class, new XmlImportProperties("cegesomaAA.properties"))
                 .importFile(ios, logMessage);
 

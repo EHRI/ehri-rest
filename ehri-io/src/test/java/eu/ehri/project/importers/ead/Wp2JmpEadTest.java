@@ -60,9 +60,8 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser,
+        importManager = new SaxImportManager(graph, repository, validUser, true, false,
                     EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-        importManager.setTolerant(Boolean.TRUE);
 
         ImportLog log = importManager.importFile(ios, logMessage);
 

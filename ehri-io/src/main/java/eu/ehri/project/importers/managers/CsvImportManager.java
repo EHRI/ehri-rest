@@ -30,6 +30,7 @@ import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.ModeViolationException;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -56,8 +57,10 @@ public class CsvImportManager extends AbstractImportManager {
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
     public CsvImportManager(FramedGraph<?> framedGraph,
-            PermissionScope permissionScope, Actioner actioner, Class<? extends AbstractImporter> importerClass) {
-        super(framedGraph, permissionScope, actioner, importerClass);
+            PermissionScope permissionScope, Actioner actioner,
+            boolean tolerant,
+            boolean allowUpdates, Class<? extends AbstractImporter> importerClass) {
+        super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass);
     }
 
     /**
@@ -88,6 +91,11 @@ public class CsvImportManager extends AbstractImportManager {
                             log.addCreated();
                             break;
                         case UPDATED:
+                            if (!allowUpdates) {
+                                throw new ModeViolationException(String.format(
+                                        "Item '%s' was updated but import manager does not allow updates",
+                                        mutation.getNode().getId()));
+                            }
                             logger.info("Item updated: {}", mutation.getNode().getId());
                             eventContext.addSubjects(mutation.getNode());
                             log.addUpdated();

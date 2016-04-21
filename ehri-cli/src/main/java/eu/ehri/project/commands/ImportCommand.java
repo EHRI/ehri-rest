@@ -85,6 +85,10 @@ public abstract class ImportCommand extends BaseCommand {
                 .desc("Don't error if a file is not valid.")
                 .build());
         options.addOption(Option.builder()
+                .longOpt("allow-updates")
+                .desc("Allow the ingest process to update existing items.")
+                .build());
+        options.addOption(Option.builder()
                 .longOpt("log")
                 .hasArg()
                 .type(String.class)
@@ -144,10 +148,11 @@ public abstract class ImportCommand extends BaseCommand {
             // because the import managers do transactional stuff that they
             // probably should not do.
             ImportLog log = new SaxImportManager(graph, scope, user,
+                    cmdLine.hasOption("tolerant"),
+                    cmdLine.hasOption("allow-updates"),
                     importer, handler,
                     optionalProperties,
                     Lists.<ImportCallback>newArrayList())
-                    .setTolerant(cmdLine.hasOption("tolerant"))
                     .importFiles(filePaths, logMessage);
             log.printReport();
 

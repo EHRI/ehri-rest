@@ -48,7 +48,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +117,7 @@ public class EadImporter extends EaImporter {
         }
 
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
-            logger.info("maintenance event found");
+            logger.debug("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT,
                     new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -170,7 +169,7 @@ public class EadImporter extends EaImporter {
             }
         }
         handleCallbacks(mutation);
-        logger.debug("============== {} state: {}", frame.getIdentifier(), mutation.getState());
+        logger.debug("============== {} state: {}", frame.getId(), mutation.getState());
         if (mutation.created()) {
             solveUndeterminedRelationships(frame, descBundle);
         }

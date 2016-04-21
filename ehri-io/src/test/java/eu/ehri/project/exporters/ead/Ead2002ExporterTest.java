@@ -112,7 +112,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
             String topLevelIdentifier, String lang) throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
         ImportManager importManager = new SaxImportManager(graph, repository, validUser,
-                IcaAtomEadImporter.class, IcaAtomEadHandler.class);
+                false, true, IcaAtomEadImporter.class, IcaAtomEadHandler.class);
         importManager.importFile(ios, "Testing import/export");
 
         DocumentaryUnit fonds = graph.frame(

@@ -56,7 +56,8 @@ public class IcaAtomEadHandler extends EadHandler {
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
 
-    public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
+    public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer,
+            XmlImportProperties properties) {
         super(importer, properties);
         children[depth] = Lists.newArrayList();
     }

@@ -49,7 +49,8 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
-    private boolean tolerant;
+    protected final boolean tolerant;
+    protected final boolean allowUpdates;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -60,29 +61,27 @@ public abstract class AbstractImportManager implements ImportManager {
     /**
      * Constructor.
      *
-     * @param graph    the framed graph
-     * @param scope    the permission scope
-     * @param actioner the actioner
+     * @param graph         the framed graph
+     * @param scope         the permission scope
+     * @param actioner      the actioner
+     * @param tolerant      allow individual items to fail validation without
+     *                      failing an entire batch
+     * @param allowUpdates  allow this import manager to update data items as well
+     *                      as create them
+     * @param importerClass the class of the item importer object
      */
     public AbstractImportManager(
             FramedGraph<?> graph,
-            PermissionScope scope, Actioner actioner, Class<? extends AbstractImporter> importerClass) {
+            PermissionScope scope, Actioner actioner,
+            boolean tolerant,
+            boolean allowUpdates,
+            Class<? extends AbstractImporter> importerClass) {
         this.framedGraph = graph;
         this.permissionScope = scope;
         this.actioner = actioner;
-        this.importerClass = importerClass;
-    }
-
-    /**
-     * Tell the importer to simply skip invalid items rather than throwing an
-     * exception.
-     *
-     * @param tolerant true means it won't validateData the xml file
-     */
-    public AbstractImportManager setTolerant(boolean tolerant) {
-        logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
-        return this;
+        this.allowUpdates = allowUpdates;
+        this.importerClass = importerClass;
     }
 
     /**
@@ -127,7 +126,6 @@ public abstract class AbstractImportManager implements ImportManager {
     @Override
     public ImportLog importFiles(List<String> paths, String logMessage)
             throws IOException, ValidationError, InputParseError {
-
         try {
 
             Optional<String> msg = getLogMessage(logMessage);
@@ -213,7 +211,6 @@ public abstract class AbstractImportManager implements ImportManager {
     protected abstract void importFile(InputStream ios,
             ActionManager.EventContext eventContext, ImportLog log)
             throws IOException, ValidationError, InputParseError;
-
 
     // Helpers
 

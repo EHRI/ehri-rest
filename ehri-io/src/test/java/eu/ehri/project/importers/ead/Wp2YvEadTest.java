@@ -83,10 +83,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser,
+        SaxImportManager importManager = new SaxImportManager(graph, repository, validUser, true, false,
                 EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-        importManager.setTolerant(Boolean.TRUE);
-
         ImportLog log = importManager.importFile(ios, logMessage);
 
         //printGraph(graph);
@@ -156,7 +154,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         }
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+        ImportLog log2 = importManager
+                .allowUpdates(true)
+                .importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(4, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));

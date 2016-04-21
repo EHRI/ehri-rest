@@ -58,8 +58,9 @@ public class EacImporterTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = GraphTestBase.getGraphState(graph);
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false,
+                    EacImporter.class, EacHandler.class)
+                .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = GraphTestBase.getGraphState(graph);
         GraphDiff diff = GraphTestBase.diffGraph(graphState1, graphState2);
@@ -97,8 +98,9 @@ public class EacImporterTest extends AbstractImporterTest {
         List<VertexProxy> before = GraphTestBase.getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile);
-        ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false,
+                    EacImporter.class, EacHandler.class)
+                .importFile(ios, logMessage);
 
         List<VertexProxy> after = GraphTestBase.getGraphState(graph);
         GraphTestBase.diffGraph(before, after).printDebug(System.err);

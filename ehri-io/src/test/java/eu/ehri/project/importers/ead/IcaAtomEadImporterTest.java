@@ -61,8 +61,8 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
-                .setTolerant(Boolean.TRUE);
+        ImportManager importManager = new SaxImportManager(graph, agent, validUser, true, false,
+                IcaAtomEadImporter.class, IcaAtomEadHandler.class);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);
 

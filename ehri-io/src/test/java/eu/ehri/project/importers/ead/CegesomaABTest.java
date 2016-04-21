@@ -43,6 +43,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test the import of a Cegesoma AB EAD file.
@@ -64,7 +65,7 @@ public class CegesomaABTest extends AbstractImporterTest {
         origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class,
+        new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class,
                 EadHandler.class, new XmlImportProperties("cegesomaAB.properties"))
                 .importFile(ios, logMessage);
 

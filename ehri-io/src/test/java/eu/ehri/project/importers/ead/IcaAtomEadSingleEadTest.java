@@ -54,7 +54,9 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
+                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                .importFile(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -104,7 +106,9 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
+        ImportLog log2 = new SaxImportManager(graph, agent, validUser, false, false,
+                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                .importFile(ios2, logMessage);
 
         // We should no new nodes (not even a SystemEvent)
         assertEquals(createCount, getNodeCount(graph));

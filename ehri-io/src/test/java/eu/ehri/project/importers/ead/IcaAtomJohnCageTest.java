@@ -44,8 +44,9 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(JOHNCAGEXML);
-        new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class,
-                IcaAtomEadHandler.class).importFile(ios, logMessage);
+        new SaxImportManager(graph, agent, validUser, false, false,
+                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                .importFile(ios, logMessage);
         printGraph(graph);
 
         // How many new nodes will have been created? We should have

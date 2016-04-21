@@ -54,8 +54,9 @@ public class UshmmTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, UshmmHandler.class)
-                .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
+                    EadImporter.class, UshmmHandler.class)
+                .importFile(ios, logMessage);
 
         printGraph(graph);
         /* How many new nodes will have been created? We should have
@@ -105,7 +106,7 @@ public class UshmmTest extends AbstractImporterTest {
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new SaxImportManager(graph, agent, validUser, EadImporter.class,
+        ImportLog log2 = new SaxImportManager(graph, agent, validUser, false, true, EadImporter.class,
                 UshmmHandler.class).importFile(ios2, logMessage);
 
         // We should only have three more nodes, for

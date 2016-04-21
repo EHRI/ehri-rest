@@ -66,7 +66,7 @@ public class NiodEadXsdTest extends AbstractImporterTest {
         //  Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser,
+        new SaxImportManager(graph, agent, validUser, false, false,
                 EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties"))
                 .importFile(ios, logMessage);
         // After...

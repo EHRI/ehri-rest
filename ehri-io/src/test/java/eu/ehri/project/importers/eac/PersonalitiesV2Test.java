@@ -69,8 +69,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties(PROPERTIES)).setTolerant(Boolean.TRUE)
+        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false, EacImporter.class,
+                EacHandler.class, new XmlImportProperties(PROPERTIES))
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -110,8 +110,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties(PROPERTIES)).setTolerant(Boolean.TRUE)
+        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false, EacImporter.class,
+                EacHandler.class, new XmlImportProperties(PROPERTIES))
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -162,8 +162,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class, new XmlImportProperties(PROPERTIES)).setTolerant(Boolean.TRUE)
+        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false, EacImporter.class,
+                EacHandler.class, new XmlImportProperties(PROPERTIES))
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

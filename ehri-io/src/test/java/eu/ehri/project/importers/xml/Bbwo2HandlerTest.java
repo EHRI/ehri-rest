@@ -88,7 +88,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, DcEuropeanaHandler.class, new XmlImportProperties("dceuropeana.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, false, false,
+                EadImporter.class, DcEuropeanaHandler.class, new XmlImportProperties("dceuropeana.properties")).importFile(ios, logMessage);
 //        printGraph(graph);
         // After...
         List<VertexProxy> graphState2 = GraphTestBase.getGraphState(graph);

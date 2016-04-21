@@ -83,10 +83,9 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("yadvashem.properties"))
-                .setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        new SaxImportManager(graph, repository, validUser, false, true,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
+                .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -125,8 +124,8 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
-                .setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = new SaxImportManager(graph, repository, validUser, false, true,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"));
         importManager.importFile(ios, logMessage);
 
         // After...
@@ -159,7 +158,7 @@ public class YadVashemTest extends AbstractImporterTest {
         assertEquals(1, nrOfDesc);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-        importManager.importFile(ios, logMessage);
+        importManager.allowUpdates(true).importFile(ios, logMessage);
 
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
@@ -210,9 +209,8 @@ public class YadVashemTest extends AbstractImporterTest {
     public void testIdempotentImportViaXmlAndZip() throws Exception {
         String resource = "MS1_O84_HEB-partial-unicode.xml";
         InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
-        importManager = new SaxImportManager(graph, repository, validUser,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
-                .setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = new SaxImportManager(graph, repository, validUser, true, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"));
         ImportLog log = importManager.importFile(ios, "Test");
         assertEquals(1, log.getCreated());
 
@@ -225,6 +223,7 @@ public class YadVashemTest extends AbstractImporterTest {
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
                      .createArchiveInputStream(bis)) {
             ImportLog log2 = importManager
+                    .allowUpdates(true)
                     .importFiles(archiveInputStream, "Test 2");
             assertEquals(1, log2.getUnchanged());
             assertEquals(0, log2.getUpdated());

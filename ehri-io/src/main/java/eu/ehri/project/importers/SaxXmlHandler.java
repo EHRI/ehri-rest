@@ -310,23 +310,24 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     }
 
     /**
-     * did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier
+     * did/unitid/{@literal @}ehrilabel$ehri_main_identifier=objectIdentifier
      *
-     * @param path           did/unitid/
-     * @param attribute      @ehrilabel
-     * @param attributevalue $ehri_main_identifier
+     * @param path      did/unitid/
+     * @param attribute {@literal @}ehrilabel
+     * @param value     $ehri_main_identifier
      * @return the corresponding value to this path from the properties file. The search is inside out, so if
      * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first.
      * <p/>
      * If this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
-    private String getImportantPath(Stack<String> path, String attribute, String attributevalue) {
+    private String getImportantPath(Stack<String> path, String attribute, String value) {
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            if (properties.getProperty(all + attribute + attributevalue) != null) {
-                return properties.getProperty(all + attribute + attributevalue);
+            String key = properties.getProperty(all + attribute + value);
+            if (key != null) {
+                return key;
             }
         }
         return UNKNOWN + all.replace("/", "_");
@@ -335,18 +336,21 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     /**
      * If this path has no corresponding value in the properties file, it will return false
      * <p/>
-     * did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier
+     * did/unitid/{@literal @}ehrilabel$ehri_main_identifier=objectIdentifier
      *
-     * @param path           did/unitid/
-     * @param attribute      {@literal @}ehrilabel
-     * @param attributevalue $ehri_main_identifier
+     * @param path      did/unitid/
+     * @param attribute {@literal @}ehrilabel
+     * @param value     $ehri_main_identifier
      * @return returns true if this path is a key in the properties file.
      */
-    private boolean isKeyInPropertyFile(Stack<String> path, String attribute, String attributevalue) {
+    private boolean isKeyInPropertyFile(Stack<String> path, String attribute, String value) {
+        logger.trace("Checking for key in property file: {}, {}, {}", path, attribute, value);
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            if (properties.getProperty(all + attribute + attributevalue) != null) {
+            String key = all + attribute + value;
+            if (properties.getProperty(key) != null) {
+                logger.trace(" FOUND Path key: {}", key);
                 return true;
             }
         }

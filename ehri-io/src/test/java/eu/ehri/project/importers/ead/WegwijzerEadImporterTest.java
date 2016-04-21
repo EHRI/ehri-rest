@@ -45,8 +45,8 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wegwijzer.properties"))
-                .setTolerant(Boolean.TRUE);
+        importManager = new SaxImportManager(graph, repository, validUser,
+                true, false, EadImporter.class, EadHandler.class, new XmlImportProperties("wegwijzer.properties"));
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);

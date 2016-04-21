@@ -57,7 +57,7 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser,
+        new SaxImportManager(graph, agent, validUser, false, false,
                 EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties"))
                 .importFile(ios, logMessage);
 
@@ -84,7 +84,7 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
                 DocumentaryUnit.class);
 
         InputStream iosvc = ClassLoader.getSystemResourceAsStream(VCFILE);
-        new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class,
+        new SaxImportManager(graph, agent, validUser, false, false, VirtualEadImporter.class,
                 VirtualEadHandler.class, new XmlImportProperties("vc.properties"))
                 .importFile(iosvc, logMessage);
         printGraph(graph);

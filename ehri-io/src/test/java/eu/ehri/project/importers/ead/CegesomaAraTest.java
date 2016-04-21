@@ -64,8 +64,9 @@ public class CegesomaAraTest extends AbstractImporterTest {
         origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("cegesomaAA.properties"))
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, false, false,
+                EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaAA.properties"));
+        importManager
                 .importFile(ios, logMessage);
 
         printGraph(graph);
@@ -106,8 +107,8 @@ public class CegesomaAraTest extends AbstractImporterTest {
         assertTrue(archdesc.<List<String>>getProperty(Ontology.OTHER_IDENTIFIERS).contains("AA 627"));
 
         InputStream ios_ara = ClassLoader.getSystemResourceAsStream(ARA_XMLFILE);
-        importManager = new SaxImportManager(graph, repository, validUser, AraEadImporter.class, EadHandler.class, new XmlImportProperties("ara.properties"))
-                .setTolerant(Boolean.TRUE);
+        importManager = new SaxImportManager(graph, repository, validUser, true, true,
+                AraEadImporter.class, EadHandler .class, new XmlImportProperties("ara.properties"));
 
         importManager.importFile(ios_ara, logMessage);
         for (String key : archdesc.getPropertyKeys()) {
