@@ -18,13 +18,20 @@ we try:
 
     tail -f /opt/webapps/neo4j-version/data/log/console.log
 
-**Next: Back up the database.**  The Neo4j DB lives in /opt/webapps/data/graph.db. You
- can back it up without shutting down the server by running
+### Back up the database
+
+The Neo4j DB lives in /opt/webapps/data/graph.db. You can back it up without shutting 
+down the server by running:
 
     /opt/webapps/neo4j-backup.sh graph.db.BAK
 
-(To restore the DB, first shut down Neo4j, then replace /opt/webapps/data/graph.db with
-the backup directory.)
+To restore the DB the procedure is:
+ - shut down Neo4j
+ - replace /opt/webapps/data/graph.db with backup directory you specified previously
+ - ensure all files in the graph.db directory are owned and writable by the `webadm` group:
+    - chgrp -R webadm graph.db
+    - chmod -R g+rw graph.db
+ - restart Neo4j
 
 ## Procedure
 
@@ -84,12 +91,13 @@ These parameters are:
 **Note**: when importing a single EAD containing ~50,000 items in a single transaction the
 staging server might run out of memory. If it does the only option is to increase the
 Neo4j heap size  by uncommenting and setting the `wrapper.java.maxmemory=MORE_MB` (say,
- 3000) in `$NEO4J_HOME/conf/neo4j-wrapper.conf` and restarting Neo4j by running:
+ 3500) in `$NEO4J_HOME/conf/neo4j-wrapper.conf` and restarting Neo4j by running:
 
     sudo service neo4j-service restart
 
-*Additional note*: _Certain date patterns are fuzzy parsed by the importer and invalid
-dates such as 31st April will currently throw a runtime exception. So fix all these first_ ;)
+**Additional note**: _Certain date patterns are fuzzy parsed by the importer and invalid
+dates such as 31st April will currently throw a runtime exception resulting in a BadRequest
+from the web service. So fix all these first_ ;)
 
 If all goes well you should get something like this:
 
