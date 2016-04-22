@@ -442,7 +442,7 @@ public class ImportResource extends AbstractRestResource {
         try (BufferedInputStream bis = new BufferedInputStream(data);
              ArchiveInputStream archiveInputStream = new
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
-                        .createArchiveInputStream(bis)) {
+                     .createArchiveInputStream(bis)) {
             return importManager
                     .importFiles(archiveInputStream, logMessage);
         }

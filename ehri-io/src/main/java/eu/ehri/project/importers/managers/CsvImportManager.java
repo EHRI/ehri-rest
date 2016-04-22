@@ -30,7 +30,7 @@ import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.ModeViolationException;
+import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -92,7 +92,7 @@ public class CsvImportManager extends AbstractImportManager {
                             break;
                         case UPDATED:
                             if (!allowUpdates) {
-                                throw new ModeViolationException(String.format(
+                                throw new ModeViolation(String.format(
                                         "Item '%s' was updated but import manager does not allow updates",
                                         mutation.getNode().getId()));
                             }

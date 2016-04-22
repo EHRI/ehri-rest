@@ -29,7 +29,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
-import eu.ehri.project.importers.exceptions.ModeViolationException;
+import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -168,7 +168,7 @@ public class SaxImportManager extends AbstractImportManager {
                             break;
                         case UPDATED:
                             if (!allowUpdates) {
-                                throw new ModeViolationException(String.format(
+                                throw new ModeViolation(String.format(
                                         "Item '%s' was updated but import manager does not allow updates",
                                             mutation.getNode().getId()));
                             }
@@ -218,8 +218,8 @@ public class SaxImportManager extends AbstractImportManager {
 
     public SaxImportManager withProperties(String properties) {
         if (properties == null) {
-            return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass,
-                    handlerClass);
+            return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates,
+                    importerClass, handlerClass, Optional.<XmlImportProperties>absent(), extraCallbacks);
         } else {
             XmlImportProperties xmlImportProperties = new XmlImportProperties(properties);
             return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass,

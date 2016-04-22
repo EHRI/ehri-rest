@@ -23,7 +23,7 @@ package eu.ehri.project.importers.exceptions;
  * Input data violates an import/export mode by altering data in
  * a way that was no foreseen.
  */
-public class ModeViolationException extends RuntimeException {
+public class ModeViolation extends RuntimeException {
     private static final long serialVersionUID = -5295648478089620968L;
 
     /**
@@ -31,7 +31,7 @@ public class ModeViolationException extends RuntimeException {
      *
      * @param message a description of the error
      */
-    public ModeViolationException(String message) {
+    public ModeViolation(String message) {
         super(message);
     }
 }
