@@ -24,11 +24,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.VirtualUnit;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,25 +37,21 @@ import static org.junit.Assert.assertEquals;
 
 public class BundesarchiveVcTest extends AbstractImporterTest {
 
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "BA_split.xml";
     protected final String VCFILE = "BA_vc.xml";
     protected final String ARCHDESC = "NS 1";
-    int origCount = 0;
 
     @Test
     public void bundesarchiveTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the Split Bundesarchive EAD";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, false, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "bundesarchive.properties")
                 .importFile(ios, logMessage);
 
         // After...
@@ -84,8 +77,7 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
                 DocumentaryUnit.class);
 
         InputStream iosvc = ClassLoader.getSystemResourceAsStream(VCFILE);
-        new SaxImportManager(graph, agent, validUser, false, false, VirtualEadImporter.class,
-                VirtualEadHandler.class, new XmlImportProperties("vc.properties"))
+        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
                 .importFile(iosvc, logMessage);
         printGraph(graph);
 

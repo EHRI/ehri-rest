@@ -25,8 +25,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -45,14 +43,12 @@ import static org.junit.Assert.assertTrue;
 
 public class BundesarchiveSplitTest extends AbstractImporterTest {
 
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "BA_split.xml";
     protected final String ARCHDESC = "NS 1";
 
     @Test
     public void bundesarchiveTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the Split Bundesarchive EAD";
 
         int origCount = getNodeCount(graph);
@@ -60,8 +56,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, false, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "bundesarchive.properties")
                 .importFile(ios, logMessage);
 
         // After...
@@ -92,8 +87,8 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         assertTrue(archUnit.getPropertyKeys().contains(Ontology.OTHER_IDENTIFIERS));
 
         assertNull(archUnit.getParent());
-        assertEquals(agent, archUnit.getRepository());
-        assertEquals(agent, archUnit.getPermissionScope());
+        assertEquals(repository, archUnit.getRepository());
+        assertEquals(repository, archUnit.getPermissionScope());
 
         //test titles
         for (DocumentaryUnitDescription d : archUnit.getDocumentDescriptions()) {

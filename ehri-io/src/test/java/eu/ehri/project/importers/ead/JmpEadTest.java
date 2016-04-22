@@ -23,8 +23,6 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
@@ -42,9 +40,6 @@ import static org.junit.Assert.assertTrue;
 public class JmpEadTest extends AbstractImporterTest {
 
     protected final String SINGLE_EAD = "JMP20141117.xml";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
-    // Depends on hierarchical-ead.xml
 
     protected final String FONDS = "COLLECTION.JMP.ARCHIVE/NAD3";
 
@@ -57,8 +52,8 @@ public class JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"))
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("wp2ead.properties")
                 .importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have

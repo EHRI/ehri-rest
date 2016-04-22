@@ -3,7 +3,6 @@ package eu.ehri.project.exporters.ead;
 import eu.ehri.project.exporters.test.XmlExporterTest;
 import eu.ehri.project.importers.ead.IcaAtomEadHandler;
 import eu.ehri.project.importers.ead.IcaAtomEadImporter;
-import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -56,7 +55,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/scopecontent/p/text()");
         assertXPath(doc, "Separated materials note content no label |||",
                 "//ead/archdesc/separatedmaterial[2]/p/text()");
-        assertXPath(doc, "Series I",
+        assertXPath(doc, "Series I |||",
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",
                 "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
@@ -111,9 +110,10 @@ public class Ead2002ExporterTest extends XmlExporterTest {
     private String testImportExport(Repository repository, String resourceName,
             String topLevelIdentifier, String lang) throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
-        ImportManager importManager = new SaxImportManager(graph, repository, validUser,
-                false, true, IcaAtomEadImporter.class, IcaAtomEadHandler.class);
-        importManager.importFile(ios, "Testing import/export");
+        new SaxImportManager(graph, repository, validUser,
+                IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                //.allowUpdates(true)
+                .importFile(ios, "Testing import/export");
 
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);

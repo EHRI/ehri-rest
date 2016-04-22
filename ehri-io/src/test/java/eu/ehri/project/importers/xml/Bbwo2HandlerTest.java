@@ -25,11 +25,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -55,16 +52,13 @@ import java.util.List;
 
 public class Bbwo2HandlerTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(Bbwo2HandlerTest.class);
-    protected final String TEST_REPO = "r1";
+
     protected final String XMLFILE_NL = "bbwo2.xml";
     protected final String ARCHDESC = "1505";
-    DocumentaryUnit archdesc;
-    int origCount = 0;
 
     @Test
     public void bbwo2Test() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied, IntegrityError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example BBWO2 DC";
 
         //id="joodse-raad" source="niod-trefwoorden" term="Kinderen"
@@ -81,16 +75,14 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         Vocabulary vocabularyTest = manager.getEntity("niod_trefwoorden", Vocabulary.class);
         Assert.assertNotNull(vocabularyTest);
 
-
         // Before...
         List<VertexProxy> graphState1 = GraphTestBase.getGraphState(graph);
 
-
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, false, false,
-                EadImporter.class, DcEuropeanaHandler.class, new XmlImportProperties("dceuropeana.properties")).importFile(ios, logMessage);
-//        printGraph(graph);
+        saxImportManager(EadImporter.class, DcEuropeanaHandler.class, "dceuropeana.properties")
+                .importFile(ios, logMessage);
+
         // After...
         List<VertexProxy> graphState2 = GraphTestBase.getGraphState(graph);
         GraphDiff diff = GraphTestBase.diffGraph(graphState1, graphState2);

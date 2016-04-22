@@ -240,7 +240,9 @@ public class ImportResource extends AbstractRestResource {
             // Run the import!
             String message = getLogMessage(logMessage).orNull();
             ImportManager importManager = new SaxImportManager(
-                    graph, scope, user, tolerant, allowUpdates, importer, handler)
+                    graph, scope, user, importer, handler)
+                    .allowUpdates(allowUpdates)
+                    .setTolerant(tolerant)
                     .withProperties(propertyFile);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);

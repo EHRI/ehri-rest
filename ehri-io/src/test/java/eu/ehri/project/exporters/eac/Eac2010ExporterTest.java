@@ -46,7 +46,7 @@ public class Eac2010ExporterTest extends XmlExporterTest {
         AuthoritativeSet auths = manager.getEntity("auths", AuthoritativeSet.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream("abwehr.xml");
         String logMessage = "Test EAC import/export";
-        new SaxImportManager(graph, auths, validUser, false, false,
+        new SaxImportManager(graph, auths, validUser,
                 EacImporter.class, EacHandler.class)
                 .importFile(ios, logMessage);
         HistoricalAgent repo = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);

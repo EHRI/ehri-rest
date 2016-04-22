@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.managers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
@@ -76,6 +77,7 @@ public abstract class AbstractImportManager implements ImportManager {
             boolean tolerant,
             boolean allowUpdates,
             Class<? extends AbstractImporter> importerClass) {
+        Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
         this.actioner = actioner;

@@ -26,8 +26,6 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
@@ -61,16 +59,16 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
     @Test
     public void newPersonalitiesWithoutCreatedBy() throws Exception {
-        final String SINGLE_EAC = "PersonalitiesV2withoutCreatedBy.xml";
-        final String logMessage = "Importing EAC " + SINGLE_EAC;
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
+        final String file = "PersonalitiesV2withoutCreatedBy.xml";
+        final String logMessage = "Importing EAC " + file;
+        InputStream ios = ClassLoader.getSystemResourceAsStream(file);
         int count = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false, EacImporter.class,
-                EacHandler.class, new XmlImportProperties(PROPERTIES))
+        saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
+                .withScope(SystemScope.getInstance())
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -110,8 +108,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false, EacImporter.class,
-                EacHandler.class, new XmlImportProperties(PROPERTIES))
+        saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
+                .withScope(SystemScope.getInstance())
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -162,8 +160,8 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        new SaxImportManager(graph, SystemScope.getInstance(), validUser, true, false, EacImporter.class,
-                EacHandler.class, new XmlImportProperties(PROPERTIES))
+        saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
+                .withScope(SystemScope.getInstance())
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

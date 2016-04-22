@@ -23,7 +23,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Linkable;
@@ -64,19 +63,18 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importer.importFile(ios, logMessage);
-//        log.printReport();
+        importer.importFile(ios, logMessage);
+
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
 
 
-//        printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 5 more Concepts
        	 * 9 more ConceptDescription
-	 * 6 more import Event links 
+     	 * 6 more import Event links
          * 1 more import Event
          */
         assertEquals(count + 21, getNodeCount(graph));
@@ -110,9 +108,9 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, logMessage);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1)
+                .setTolerant(true);
+        importer.importFile(ios, logMessage);
 
 
         int count = getNodeCount(graph);
@@ -134,7 +132,6 @@ public class JoodsRaadTest extends AbstractImporterTest {
         diff.printDebug(System.out);
 
 
-//        printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 1 more Concepts
        	 * 1 more ConceptDescription

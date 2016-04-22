@@ -21,7 +21,6 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
@@ -49,12 +48,10 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
-        System.out.println(count);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, repository, validUser, true, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"));
-        importManager
-                .importFile(ios, logMessage);
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "finlandead.properties");
+        importManager.importFile(ios, logMessage);
 
         // After...
         int countAfter = getNodeCount(graph);

@@ -25,8 +25,6 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -47,8 +45,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class VirtualEadTest extends AbstractImporterTest {
-    protected final String TEST_REPO = "mike";
-    protected final String XMLFILE = "wp2_virtualcollection.xml";
     private static final String REPO1 = "002777";
     private static final String REPO2 = "002302";
     private static final String UNIT1 = "wp2_bt";
@@ -59,8 +55,6 @@ public class VirtualEadTest extends AbstractImporterTest {
 
     Repository repository1, repository2;
     DocumentaryUnit unit1, unit2;
-
-    int origCount = 0;
 
     @Test
     public void setStageTest() throws PermissionDenied, ValidationError {
@@ -74,17 +68,18 @@ public class VirtualEadTest extends AbstractImporterTest {
 
         setStage();
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
+        PermissionScope user = manager.getEntity("mike", PermissionScope.class);
         final String logMessage = "Importing an EAD as a Virtual collection";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
+        InputStream ios = ClassLoader.getSystemResourceAsStream("wp2_virtualcollection.xml");
 
-        new SaxImportManager(graph, agent, validUser, false, false,
-                VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(ios, logMessage);
+        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
+                .withScope(user)
+                .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -99,7 +94,7 @@ public class VirtualEadTest extends AbstractImporterTest {
         assertEquals(newCount, getNodeCount(graph));
 
         VirtualUnit toplevel = graph.frame(getVertexByIdentifier(graph, ARCHDESC), VirtualUnit.class);
-        assertEquals(agent, toplevel.getAuthor());
+        assertEquals(user, toplevel.getAuthor());
         assertEquals("ehri terezin research guide", toplevel.getIdentifier());
         assertEquals(1, toList(toplevel.getIncludedUnits()).size());
 

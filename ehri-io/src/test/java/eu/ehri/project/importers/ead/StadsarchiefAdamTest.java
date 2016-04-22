@@ -23,8 +23,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -37,12 +35,10 @@ import java.io.InputStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 
 public class StadsarchiefAdamTest extends AbstractImporterTest {
 
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "stadsarchief30602.xml";
     // Identifiers of nodes in the imported documentary units
     protected final String ARCHDESC = "NL-SAA-22626598", //"197a",
@@ -51,7 +47,6 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
             C02_1 = "NL-SAA-22730311",
             C03 = "NL-SAA-22752512",
             C03_2 = "NL-SAA-22752538";
-    int origCount = 0;
 
     @Test
     public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
@@ -59,12 +54,11 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a Stadsarchief EAD, with preprocessing done";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, false, false, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("stadsarchief.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "stadsarchief.properties")
                 .importFile(ios, logMessage);
 
         printGraph(graph);

@@ -25,7 +25,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -52,9 +51,6 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(Wp2YvEadTest.class);
     protected final String SINGLE_EAD = "wp2_yv_ead.xml";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
-    // Depends on hierarchical-ead.xml
     protected final String C1 = "O.64.2-A.";
     protected final String C2 = "O.64.2-A.A.";
     protected final String C3 = "3685529";
@@ -69,8 +65,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
-        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle,
-                validUser);
+        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class)
+                .create(vocabularyBundle, validUser);
         logger.debug(vocabulary.getId());
         Concept concept_288 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
         vocabulary.addItem(concept_288);
@@ -83,8 +79,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, repository, validUser, true, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("wp2ead.properties");
         ImportLog log = importManager.importFile(ios, logMessage);
 
         //printGraph(graph);

@@ -23,7 +23,6 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
@@ -40,9 +39,6 @@ import static org.junit.Assert.assertTrue;
 public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";
 
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
-
     // Depends on single-ead.xml
     protected final String IMPORTED_ITEM_ID = "HR r000382HR HR-HDA 1551";
 
@@ -54,8 +50,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
-                IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .importFile(ios, logMessage);
 
         printGraph(graph);
@@ -110,8 +105,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new SaxImportManager(graph, agent, validUser, false, true,
-                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log2 = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .importFile(ios2, logMessage);
 
         // We should have no new nodes, not even SystemEvent

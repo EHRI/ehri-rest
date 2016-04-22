@@ -24,7 +24,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -86,8 +85,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, true, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "wp2ead.properties");
         ImportLog logVC = importManager.importFile(iosVC, logMessage);
 
         // After...

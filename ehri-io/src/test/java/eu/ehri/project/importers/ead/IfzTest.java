@@ -28,12 +28,9 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -49,29 +46,25 @@ import static org.junit.Assert.assertFalse;
  */
 public class IfzTest extends AbstractImporterTest {
 
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "ifz_ED.xml";
     protected final String ARCHDESC = "G",
             C01 = "G_1",
             C02 = "G_2",
             C03_02 = "MB 35 / 10";
     DocumentaryUnit archdesc, c1, c2, c3_2;
-    int origCount = 0;
 
     @Test
     public void ifzTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Ifz EAD";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, false, false,
-                    EadImporter.class, EadHandler.class, new XmlImportProperties("ifz.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "ifz.properties")
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

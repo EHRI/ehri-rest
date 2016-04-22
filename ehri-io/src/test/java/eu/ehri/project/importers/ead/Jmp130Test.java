@@ -23,11 +23,8 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import org.junit.Test;
 
@@ -42,22 +39,19 @@ import static org.junit.Assert.assertTrue;
 public class Jmp130Test extends AbstractImporterTest {
 
     protected final String SINGLE_EAD = "JMP-130.xml";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
+
     // Depends on hierarchical-ead.xml
     protected final String FONDS = "COLLECTION.JMP.ARCHIVE/130";
 
     @Test
     public void testImportItemsT() throws Exception {
 
-        Repository agent = manager.getEntity(TEST_REPO, Repository.class);
-
         final String logMessage = "Importing JMP EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("jmp.properties"))
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("jmp.properties")
                 .importFile(ios, logMessage);
 
         List<VertexProxy> graphState1 = getGraphState(graph);
@@ -97,6 +91,6 @@ public class Jmp130Test extends AbstractImporterTest {
         assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
-        assertEquals(agent, fonds.getPermissionScope());
+        assertEquals(repository, fonds.getPermissionScope());
     }
 }

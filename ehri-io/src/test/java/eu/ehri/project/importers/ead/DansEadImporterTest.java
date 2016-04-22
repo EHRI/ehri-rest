@@ -20,8 +20,6 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
@@ -38,8 +36,7 @@ public class DansEadImporterTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "dans_convertedead_part.xml";
 
     // Depends on fixtures
-    protected final String TEST_REPO = "r1",
-            ARCHDESC = "easy-collection:2",
+    protected final String ARCHDESC = "easy-collection:2",
             C1 = "urn:nbn:nl:ui:13-4i8-gpf",
             C2 = "urn:nbn:nl:ui:13-qa8-3r5";
 
@@ -52,8 +49,7 @@ public class DansEadImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        new SaxImportManager(graph, repository, validUser, true, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("dansead.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "dansead.properties")
                 .importFile(ios, logMessage);
 
         // Before...

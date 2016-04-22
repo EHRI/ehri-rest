@@ -45,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 public class CegesomaAraTest extends AbstractImporterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CegesomaAraTest.class);
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "CegesomaAA.pxml";
     protected final String ARA_XMLFILE = "araEad.xml";
     protected final String ARCHDESC = "AA 1134",
@@ -53,7 +52,6 @@ public class CegesomaAraTest extends AbstractImporterTest {
             C02_01 = "AA 1134 / 32",
             C02_02 = "AA 1134 / 34";
     DocumentaryUnit archdesc, c1, c2_1, c2_2;
-    int origCount = 0;
 
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
@@ -61,11 +59,10 @@ public class CegesomaAraTest extends AbstractImporterTest {
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, false, false,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaAA.properties"));
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "cegesomaAA.properties");
         importManager
                 .importFile(ios, logMessage);
 
@@ -107,10 +104,9 @@ public class CegesomaAraTest extends AbstractImporterTest {
         assertTrue(archdesc.<List<String>>getProperty(Ontology.OTHER_IDENTIFIERS).contains("AA 627"));
 
         InputStream ios_ara = ClassLoader.getSystemResourceAsStream(ARA_XMLFILE);
-        importManager = new SaxImportManager(graph, repository, validUser, true, true,
-                AraEadImporter.class, EadHandler .class, new XmlImportProperties("ara.properties"));
-
-        importManager.importFile(ios_ara, logMessage);
+        saxImportManager(AraEadImporter.class, EadHandler.class, "ara.properties")
+            .allowUpdates(true)
+            .importFile(ios_ara, logMessage);
         for (String key : archdesc.getPropertyKeys()) {
             logger.debug(key + " " + archdesc.getProperty(key));
         }

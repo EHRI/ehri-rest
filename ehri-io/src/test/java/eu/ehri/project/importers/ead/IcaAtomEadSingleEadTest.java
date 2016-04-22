@@ -22,7 +22,6 @@ package eu.ehri.project.importers.ead;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
@@ -40,9 +39,6 @@ import static org.junit.Assert.assertTrue;
 public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "single-ead.xml";
 
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
-
     // Depends on single-ead.xml
     protected final String IMPORTED_ITEM_ID = "C00001";
 
@@ -54,8 +50,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, true, false,
-                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .importFile(ios, logMessage);
 
         printGraph(graph);
@@ -106,8 +101,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new SaxImportManager(graph, agent, validUser, false, false,
-                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log2 = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .importFile(ios2, logMessage);
 
         // We should no new nodes (not even a SystemEvent)

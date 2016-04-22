@@ -69,7 +69,8 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-            PermissionScope scope, Actioner actioner,
+            PermissionScope scope,
+            Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
@@ -121,17 +122,14 @@ public class SaxImportManager extends AbstractImportManager {
 
     /**
      * Constructor.
-     *
-     * @param graph    the framed graph
+     *  @param graph    the framed graph
      * @param scope    a permission scope
      * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
-            boolean tolerant,
-            boolean allowUpdates,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
-        this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, Lists
+        this(graph, scope, actioner, false, false, importerClass, handlerClass, Lists
                 .<ImportCallback>newArrayList());
     }
 
@@ -220,7 +218,7 @@ public class SaxImportManager extends AbstractImportManager {
 
     public SaxImportManager withProperties(String properties) {
         if (properties == null) {
-            return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass,
+            return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass,
                     handlerClass);
         } else {
             XmlImportProperties xmlImportProperties = new XmlImportProperties(properties);
@@ -236,6 +234,11 @@ public class SaxImportManager extends AbstractImportManager {
 
     public SaxImportManager allowUpdates(boolean allowUpdates) {
         return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
+                allowUpdates, importerClass, handlerClass, properties, extraCallbacks);
+    }
+
+    public SaxImportManager withScope(PermissionScope scope) {
+        return new SaxImportManager(framedGraph, scope, actioner, tolerant,
                 allowUpdates, importerClass, handlerClass, properties, extraCallbacks);
     }
 }

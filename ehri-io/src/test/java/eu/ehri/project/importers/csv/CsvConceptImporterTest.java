@@ -63,7 +63,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, true, false, CsvConceptImporter.class)
+        new CsvImportManager(graph, authoritativeSet, validUser, true, false, CsvConceptImporter.class)
                 .importFile(ios, logMessage);
         /*
          * 18 Concept

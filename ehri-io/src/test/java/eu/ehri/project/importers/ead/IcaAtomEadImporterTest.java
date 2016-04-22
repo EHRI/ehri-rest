@@ -24,7 +24,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.ImportManager;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
@@ -44,8 +43,7 @@ import static org.junit.Assert.assertTrue;
 public class IcaAtomEadImporterTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);
     protected final String SINGLE_EAD = "hierarchical-ead.xml";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
+
     // Depends on hierarchical-ead.xml
     protected final String FONDS_LEVEL = "Ctop level fonds";
     protected final String SUBFONDS_LEVEL = "C00001";
@@ -61,10 +59,9 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportManager importManager = new SaxImportManager(graph, agent, validUser, true, false,
-                IcaAtomEadImporter.class, IcaAtomEadHandler.class);
+        ImportManager importManager = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class);
         ImportLog log = importManager.importFile(ios, logMessage);
-//        printGraph(graph);
+
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits

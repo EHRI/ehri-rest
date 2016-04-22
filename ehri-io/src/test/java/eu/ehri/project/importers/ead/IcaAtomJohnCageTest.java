@@ -20,8 +20,6 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -32,20 +30,15 @@ import static org.junit.Assert.assertEquals;
 public class IcaAtomJohnCageTest extends AbstractImporterTest {
 
     protected final String JOHNCAGEXML = "johnCage.xml";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
-    // Depends on hierarchical-ead.xml
 
     @Test
     public void testImportItemsT() throws Exception {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(JOHNCAGEXML);
-        new SaxImportManager(graph, agent, validUser, false, false,
-                    IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .importFile(ios, logMessage);
         printGraph(graph);
 

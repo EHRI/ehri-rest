@@ -20,8 +20,6 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -43,8 +41,7 @@ public class VC_ARAImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        new SaxImportManager(graph, repository, validUser, true, false,
-                    EadImporter.class, EadHandler.class, new XmlImportProperties("ara.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "ara.properties")
                 .importFile(ios, logMessage);
 
         // Before...
@@ -60,8 +57,8 @@ public class VC_ARAImporterTest extends AbstractImporterTest {
         printGraph(graph);
 
         InputStream ios_vc = ClassLoader.getSystemResourceAsStream(VC_EAD);
-        new SaxImportManager(graph, repository, validUser, false, false,
-                VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc_ara.properties"))
+        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class)
+                .withProperties("vc_ara.properties")
                 .importFile(ios_vc, logMessage);
     }
 }
