@@ -55,6 +55,8 @@ import java.util.regex.Pattern;
 public abstract class MapImporter extends AbstractImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(MapImporter.class);
+    private final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
+    private final SimpleDateFormat yearDateFormat = new SimpleDateFormat("yyyy");
     protected final String OBJECT_ID = "objectIdentifier";
     private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
 
@@ -98,7 +100,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      * @param data the data map
      * @return returns a List with the separated datevalues
      */
-    protected static Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
+    protected Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
         Map<String, String> datesAsString = Maps.newHashMap();
         Object value;
         for (Entry<String, Object> property : data.entrySet()) {
@@ -267,7 +269,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         return data;
     }
 
-    private static String normaliseDate(String date) {
+    private String normaliseDate(String date) {
         return normaliseDate(date, Ontology.DATE_PERIOD_START_DATE);
     }
 
@@ -279,29 +281,29 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      *                   a period or the end of a period
      * @return a String containing the formatted date.
      */
-    public static String normaliseDate(String date, String beginOrEnd) {
+    protected String normaliseDate(String date, String beginOrEnd) {
         DateTimeFormatter fmt = ISODateTimeFormat.date();
-        String returndate = fmt.print(DateTime.parse(date));
-        if (returndate.startsWith("00")) {
-            returndate = "19" + returndate.substring(2);
+        String returnDate = fmt.print(DateTime.parse(date));
+        if (returnDate.startsWith("00")) {
+            returnDate = "19" + returnDate.substring(2);
             date = "19" + date;
         }
         if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
-            if (!date.equals(returndate)) {
+            if (!date.equals(returnDate)) {
                 ParsePosition p = new ParsePosition(0);
-                new SimpleDateFormat("yyyy-MM").parse(date, p);
+                yearMonthDateFormat.parse(date, p);
                 if (p.getIndex() > 0) {
-                    returndate = fmt.print(DateTime.parse(date).plusMonths(1).minusDays(1));
+                    returnDate = fmt.print(DateTime.parse(date).plusMonths(1).minusDays(1));
                 } else {
                     p = new ParsePosition(0);
-                    new SimpleDateFormat("yyyy").parse(date, p);
+                    yearDateFormat.parse(date, p);
                     if (p.getIndex() > 0) {
-                        returndate = fmt.print(DateTime.parse(date).plusYears(1).minusDays(1));
+                        returnDate = fmt.print(DateTime.parse(date).plusYears(1).minusDays(1));
                     }
                 }
             }
         }
-        return returndate;
+        return returnDate;
     }
 
     //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several

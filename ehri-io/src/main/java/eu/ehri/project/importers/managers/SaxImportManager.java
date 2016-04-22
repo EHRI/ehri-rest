@@ -198,8 +198,7 @@ public class SaxImportManager extends AbstractImportManager {
             SAXParser saxParser = spf.newSAXParser();
             saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             saxParser.parse(ios, handler);
-        } catch (InstantiationException | IllegalAccessException |
-                IllegalArgumentException | InvocationTargetException |
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                 NoSuchMethodException | SecurityException |
                 ParserConfigurationException e) {
             logger.error("{}: {}", e.getMessage(), e);
