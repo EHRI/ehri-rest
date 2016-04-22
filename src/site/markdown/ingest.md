@@ -9,6 +9,8 @@ This ingest covers importing the EAD file into the staging server, at which time
 should be ready for verification and if necessary, changes, before the production
 ingest.
 
+## Before you start
+
 First, log into the EHRI staging server via SSH and open a bunch of shells.
 In one of them, tail the following file, which will give us some information
 about what goes wrong, when something inevitably goes wrong the first few times
@@ -16,10 +18,22 @@ we try:
 
     tail -f /opt/webapps/neo4j-version/data/log/console.log
 
+**Next: Back up the database.**  The Neo4j DB lives in /opt/webapps/data/graph.db. You
+ can back it up without shutting down the server by running
+
+    /opt/webapps/neo4j-backup.sh graph.db.BAK
+
+(To restore the DB, first shut down Neo4j, then replace /opt/webapps/data/graph.db with
+the backup directory.)
+
+## Procedure
+
+Onwards with the ingest...
+
 Next, in another shell, copy the file(s) to be ingested to the server and place them
 in `/opt/webapps/data/import-data/de/de-002409`, the working directory for ITS data.
 
-Import properties handle cerain mappings between tags (with particular attributes)
+Import properties handle certain mappings between tags (with particular attributes)
 and EHRI fields. The ITS data has a particular mapping indicating that when the
 `<unitid>` has a `type="refcode"` that is the main doc unit identifier, and that the
 rest are the alternates. This file is, in this case:
@@ -67,7 +81,7 @@ These parameters are:
  - the `properties=$PROPERTIES` parameter tells it to file the import properties
    in a local file
 
-*Note*: when importing a single EAD containing ~50,000 items in a single transaction the
+**Note**: when importing a single EAD containing ~50,000 items in a single transaction the
 staging server might run out of memory. If it does the only option is to increase the
 Neo4j heap size  by uncommenting and setting the `wrapper.java.maxmemory=MORE_MB` (say,
  3000) in `$NEO4J_HOME/conf/neo4j-wrapper.conf` and restarting Neo4j by running:
@@ -86,6 +100,8 @@ get a reply like:
 
     {"created":0,"unchanged":48430,"message":"Import ITS 0.4 data using its-pertinence.properties.\n","updated":0,"errors":{}}
 
+## Indexing
+
 The final step is the re-index the ITS repository, making the items searchable. This can be done
 from the Portal Admin UI, or via the following command:
 
@@ -99,3 +115,14 @@ from the Portal Admin UI, or via the following command:
 
 (This tool is a library/CLI utility the is used by the portal UI and available on the server: see
 the https://github.com/EHRI/ehri-search-tools project for more details.)
+
+## Updating existing collections
+
+To update existing collections, when, for example, adding descriptions in another language, the
+procedure is exactly the same with one exception: the import Curl command needs an additional 
+parameter:
+
+    &allow-update=true
+
+Without this parameter the importer will throw a mode violation error when it ends up updating
+an existing collection.

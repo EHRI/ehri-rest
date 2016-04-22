@@ -27,6 +27,7 @@
             <item href="install.html" name="Installation"/>
             <item href="deployment.html" name="Deployment"/>
             <item href="import.html" name="Importing Data"/>
+            <item href="ingest.html" name="EAD Ingest"/>
             <item href="gotchas.html" name="Gotchas"/>
             <item href="migrations.html" name="DB Migration History"/>
             <item href="scripting.html" name="Scripting"/>
