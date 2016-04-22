@@ -152,7 +152,7 @@ public class ImportResource extends AbstractRestResource {
                     .setFormat(format)
                     .setTolerant(tolerant)
                     .importFile(stream, getLogMessage(logMessage).orNull());
-
+            logger.debug("Committing SKOS import transaction...");
             tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (InputParseError e) {
@@ -249,6 +249,7 @@ public class ImportResource extends AbstractRestResource {
                     .withProperties(propertyFile);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
+            logger.debug("Committing import transaction...");
             tx.success();
             return log;
         } catch (ClassNotFoundException e) {
@@ -341,6 +342,7 @@ public class ImportResource extends AbstractRestResource {
                     graph, scope, user, tolerant, allowUpdates, importer);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
+            logger.debug("Committing import transaction...");
             tx.success();
             return log;
         } catch (InputParseError ex) {
@@ -386,6 +388,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = new BatchOperations(graph, scope, version, tolerant)
                     .batchUpdate(inputStream,
                             accessor.as(Actioner.class), getLogMessage(logMessage));
+            logger.debug("Committing batch update transaction...");
             tx.success();
             return log;
         }
@@ -418,6 +421,7 @@ public class ImportResource extends AbstractRestResource {
             new BatchOperations(graph, scope, version, false)
                     .batchDelete(ids,
                             accessor.as(Actioner.class), getLogMessage(logMessage));
+            logger.debug("Committing delete transaction...");
             tx.success();
         }
     }
