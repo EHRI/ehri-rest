@@ -193,6 +193,9 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId       the id of the import scope (i.e. repository)
      * @param tolerant      whether or not to die on the first validation error
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
      * @param logMessage    log message for import. If this refers to an accessible local file
      *                      its contents will be used.
      * @param handlerClass  the fully-qualified handler class name

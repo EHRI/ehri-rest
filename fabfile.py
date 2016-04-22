@@ -442,7 +442,7 @@ def reindex_repository(repo_id):
         "--stats",
         "--solr", "http://localhost:8080/ehri/portal",
         "--rest", "http://localhost:7474/ehri",
-        "'repository|%s'" % repo_id,
+        "'Repository|%s'" % repo_id,
     ]
     run(" ".join(indexer_cmd))
 
