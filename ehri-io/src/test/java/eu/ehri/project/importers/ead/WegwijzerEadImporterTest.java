@@ -21,7 +21,6 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -34,9 +33,6 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
 
     protected final String SINGLE_EAD = "wegwijzer.xml";
 
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
-
     @Test
     public void testImportItemsT() throws Exception {
 
@@ -45,8 +41,8 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wegwijzer.properties"))
-                .setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "wegwijzer.properties");
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);

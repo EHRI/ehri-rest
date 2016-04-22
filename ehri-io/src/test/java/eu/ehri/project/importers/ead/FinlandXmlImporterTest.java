@@ -21,7 +21,6 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
@@ -49,11 +48,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
-        System.out.println(count);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
-                .setTolerant(Boolean.TRUE);
-        // Before...
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "finlandead.properties");
         importManager.importFile(ios, logMessage);
 
         // After...
@@ -88,7 +85,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         //import the english version:
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        importManager.importFile(ios, logMessage);
+        importManager.allowUpdates(true).importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -132,7 +129,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1a = getGraphState(graph);
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        importManager.importFile(ios, logMessage);
+        importManager.allowUpdates(true).importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2a = getGraphState(graph);
         GraphDiff diffa = diffGraph(graphState1a, graphState2a);

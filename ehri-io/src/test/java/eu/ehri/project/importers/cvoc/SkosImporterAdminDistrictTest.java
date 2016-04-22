@@ -42,7 +42,7 @@ public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
         UserProfile user = validUser; //graph.frame(graph.getVertex(validUserId), UserProfile.class);
-        Repository agent = manager.getEntity(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_REPO), Repository.class);
+        Repository agent = manager.getEntity(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_USER), Repository.class);
 
         final String logMessage = "Importing a single skos: " + SINGLE_SKOS;
 

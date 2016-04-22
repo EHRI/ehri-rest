@@ -24,9 +24,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
@@ -60,9 +59,8 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser,
-                    EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-        importManager.setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "wp2ead.properties");
 
         ImportLog log = importManager.importFile(ios, logMessage);
 

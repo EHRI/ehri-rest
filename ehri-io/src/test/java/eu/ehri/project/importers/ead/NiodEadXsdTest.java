@@ -24,12 +24,9 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -44,7 +41,6 @@ import static org.junit.Assert.assertTrue;
 
 public class NiodEadXsdTest extends AbstractImporterTest {
 
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "NIOD-38474.xml";
     // Identifiers of nodes in the imported documentary units
     protected final String ARCHDESC = "MF1081500", //"197a",
@@ -53,21 +49,19 @@ public class NiodEadXsdTest extends AbstractImporterTest {
             C02_1 = "MF1086380",
             C03 = "MF1086399",
             C03_2 = "MF1086398";
-    int origCount = 0;
 
     @Test
     public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a NIOD EAD";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         //  Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("niodead.properties")
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -115,8 +109,8 @@ public class NiodEadXsdTest extends AbstractImporterTest {
 
         // Check permission scope and hierarchy
         assertNull(archdesc.getParent());
-        assertEquals(agent, archdesc.getRepository());
-        assertEquals(agent, archdesc.getPermissionScope());
+        assertEquals(repository, archdesc.getRepository());
+        assertEquals(repository, archdesc.getPermissionScope());
         assertEquals(archdesc, c1.getParent());
         assertEquals(archdesc, c1.getPermissionScope());
         assertEquals(c1, c2.getParent());

@@ -56,8 +56,7 @@ public class YadVashemTest extends AbstractImporterTest {
     protected final String SINGLE_EAD_HEB = "YV_m19_heb.xml";
     protected final String SINGLE_EAD_C1 = "YV_c1.xml";
     // Depends on fixtures
-    protected final String TEST_REPO = "r1",
-            ARCHDESC = "M.19",
+    protected final String ARCHDESC = "M.19",
             C1 = "M.19/7",
             C2 = "M.19/7.1";
 
@@ -66,8 +65,6 @@ public class YadVashemTest extends AbstractImporterTest {
      * the unit described in the test file that is imported here.
      * This test checks that the existing description (which has a different source)
      * is untouched and the description from the test file is added.
-     *
-     * @throws Exception
      */
     @Test
     public void testWithExistingDescription() throws Exception {
@@ -83,10 +80,9 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("yadvashem.properties"))
-                .setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class, "yadvashem.properties")
+                .allowUpdates(true)
+                .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -116,7 +112,6 @@ public class YadVashemTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
-        System.out.println(count);
         DocumentaryUnit m19 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
 
         assertEquals("m19", m19.getIdentifier());
@@ -125,9 +120,9 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
-                .setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "yadvashem.properties");
+        importManager.allowUpdates(true).importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -159,7 +154,7 @@ public class YadVashemTest extends AbstractImporterTest {
         assertEquals(1, nrOfDesc);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-        importManager.importFile(ios, logMessage);
+        importManager.allowUpdates(true).importFile(ios, logMessage);
 
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
@@ -210,9 +205,8 @@ public class YadVashemTest extends AbstractImporterTest {
     public void testIdempotentImportViaXmlAndZip() throws Exception {
         String resource = "MS1_O84_HEB-partial-unicode.xml";
         InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
-        importManager = new SaxImportManager(graph, repository, validUser,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("yadvashem.properties"))
-                .setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("yadvashem.properties");
         ImportLog log = importManager.importFile(ios, "Test");
         assertEquals(1, log.getCreated());
 
@@ -225,6 +219,7 @@ public class YadVashemTest extends AbstractImporterTest {
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
                      .createArchiveInputStream(bis)) {
             ImportLog log2 = importManager
+                    .allowUpdates(true)
                     .importFiles(archiveInputStream, "Test 2");
             assertEquals(1, log2.getUnchanged());
             assertEquals(0, log2.getUpdated());

@@ -24,7 +24,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -86,12 +85,10 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
-
-
-        importManager.setTolerant(Boolean.TRUE);
-
+        SaxImportManager importManager = saxImportManager(
+                EadImporter.class, EadHandler.class, "wp2ead.properties");
         ImportLog logVC = importManager.importFile(iosVC, logMessage);
+
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -164,7 +161,9 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         }
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+        ImportLog log2 = importManager
+                .allowUpdates(true)
+                .importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(6, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));

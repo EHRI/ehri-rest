@@ -266,7 +266,7 @@ public class EadHandler extends SaxXmlHandler {
                         }
                     }
                 } catch (ValidationError ex) {
-                    logger.error("caught validation error: {}", ex);
+                    logger.error("caught validation error", ex);
                 } finally {
                     depth--;
                     scopeIds.pop();

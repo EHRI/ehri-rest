@@ -23,14 +23,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,26 +42,23 @@ import static org.junit.Assert.assertTrue;
  */
 public class MemShoahTest extends AbstractImporterTest {
 
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "memshoah.xml";
     protected final String ARCHDESC = "II, V, VI, VIa";
     DocumentaryUnit archdesc;
-    int origCount = 0;
 
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example MemShoah EAD";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("memshoah.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("memshoah.properties")
                 .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

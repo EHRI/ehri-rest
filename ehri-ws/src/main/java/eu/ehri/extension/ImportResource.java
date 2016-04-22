@@ -91,6 +91,7 @@ public class ImportResource extends AbstractRestResource {
     public static final String LOG_PARAM = "log";
     public static final String SCOPE_PARAM = "scope";
     public static final String TOLERANT_PARAM = "tolerant";
+    public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String VERSION_PARAM = "version";
     public static final String HANDLER_PARAM = "handler";
     public static final String IMPORTER_PARAM = "importer";
@@ -215,6 +216,7 @@ public class ImportResource extends AbstractRestResource {
     public ImportLog importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
@@ -237,9 +239,11 @@ public class ImportResource extends AbstractRestResource {
 
             // Run the import!
             String message = getLogMessage(logMessage).orNull();
-            ImportManager importManager = new SaxImportManager(graph, scope, user, importer, handler)
-                    .withProperties(propertyFile)
-                    .setTolerant(tolerant);
+            ImportManager importManager = new SaxImportManager(
+                    graph, scope, user, importer, handler)
+                    .allowUpdates(allowUpdates)
+                    .setTolerant(tolerant)
+                    .withProperties(propertyFile);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
             tx.success();
@@ -262,13 +266,14 @@ public class ImportResource extends AbstractRestResource {
     public ImportLog importEag(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, logMessage, propertyFile,
+        return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
                 nameOrDefault(handlerClass, EagHandler.class.getName()),
                 nameOrDefault(importerClass, EagImporter.class.getName()), data);
     }
@@ -284,13 +289,14 @@ public class ImportResource extends AbstractRestResource {
     public ImportLog importEac(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, logMessage, propertyFile,
+        return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
                 nameOrDefault(handlerClass, EacHandler.class.getName()),
                 nameOrDefault(importerClass, EacImporter.class.getName()), data);
     }
@@ -309,6 +315,8 @@ public class ImportResource extends AbstractRestResource {
     @Path("csv")
     public ImportLog importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream data)
@@ -326,7 +334,8 @@ public class ImportResource extends AbstractRestResource {
 
             // Run the import!
             String message = getLogMessage(logMessage).orNull();
-            ImportManager importManager = new CsvImportManager(graph, scope, user, importer);
+            ImportManager importManager = new CsvImportManager(
+                    graph, scope, user, tolerant, allowUpdates, importer);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             tx.success();
@@ -433,7 +442,7 @@ public class ImportResource extends AbstractRestResource {
         try (BufferedInputStream bis = new BufferedInputStream(data);
              ArchiveInputStream archiveInputStream = new
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
-                        .createArchiveInputStream(bis)) {
+                     .createArchiveInputStream(bis)) {
             return importManager
                     .importFiles(archiveInputStream, logMessage);
         }

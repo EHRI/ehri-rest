@@ -22,23 +22,24 @@ package eu.ehri.project.importers.ead;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class UshmmTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(UshmmTest.class);
-    
+
     protected final String SINGLE_EAD = "irn44515.xml";
     protected final String IMPORTED_ITEM_ID = "irn44645";
     protected final String IMPORTED_ITEM_ALT_ID = "RG-50.586*0032";
@@ -54,8 +55,8 @@ public class UshmmTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, UshmmHandler.class)
-                .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        ImportLog log = saxImportManager(EadImporter.class, UshmmHandler.class)
+                .importFile(ios, logMessage);
 
         printGraph(graph);
         /* How many new nodes will have been created? We should have
@@ -76,22 +77,22 @@ public class UshmmTest extends AbstractImporterTest {
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        for(Description d : unit.getDocumentDescriptions()) {
+        for (Description d : unit.getDocumentDescriptions()) {
             assertEquals("Oral history interview with Dobrila Kukolj", d.getName());
-        	assertEquals("eng", d.getLanguageOfDescription());
+            assertEquals("eng", d.getLanguageOfDescription());
         }
         SystemEvent event = unit.getLatestEvent();
         if (event != null) {
             logger.debug("event: " + event.getLogMessage());
         }
-        
+
         // Check the alternative ID was added
         boolean foundAltId = false;
-        for(String altId : unit.<List<String>>getProperty("otherIdentifiers")) {
-        	if (altId.equals(IMPORTED_ITEM_ALT_ID)) {
-        		foundAltId = true;
-        		break;
-        	}
+        for (String altId : unit.<List<String>>getProperty("otherIdentifiers")) {
+            if (altId.equals(IMPORTED_ITEM_ALT_ID)) {
+                foundAltId = true;
+                break;
+            }
         }
         assertTrue(foundAltId);
 
@@ -105,8 +106,8 @@ public class UshmmTest extends AbstractImporterTest {
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new SaxImportManager(graph, agent, validUser, EadImporter.class,
-                UshmmHandler.class).importFile(ios2, logMessage);
+        ImportLog log2 = saxImportManager(EadImporter.class, UshmmHandler.class)
+                .importFile(ios2, logMessage);
 
         // We should only have three more nodes, for
         // the action and

@@ -22,10 +22,7 @@ package eu.ehri.project.importers.ead;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -33,30 +30,22 @@ import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 
 public class IpnTest extends AbstractImporterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(IpnTest.class);
-    protected final String TEST_REPO = "r1";
     protected final String BRANCH_1_XMLFILE = "polishBranch.xml";
     // Identifiers of nodes in the imported documentary units
     protected final String BRANCH_1_ARCHDESC = "Pamięci Narodowej",
             BRANCH_1_C01_1 = "2746",
             BRANCH_1_C01_2 = "2747";
-    int origCount = 0;
 
     protected final String BRANCH_2_XMLFILE = "polishBranch_2.xml";
     // Identifiers of nodes in the imported documentary units
@@ -69,18 +58,20 @@ public class IpnTest extends AbstractImporterTest {
     @Test
     @Ignore
     public void polishVirtualCollectionTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of the IPN Virtual Collection";
 
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios1, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                .importFile(ios1, logMessage);
 
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios2, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                .importFile(ios2, logMessage);
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
         InputStream iosVc = ClassLoader.getSystemResourceAsStream(VC_XMLFILE);
-        new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(iosVc, logMessage);
+        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
+                .importFile(iosVc, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -103,26 +94,19 @@ public class IpnTest extends AbstractImporterTest {
     }
 
     @Test
-
     public void polishBranch_1_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
-        @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                .importFile(ios, logMessage);
         // After...
-//       List<VertexProxy> graphState2 = getGraphState(graph);
-//       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
 
-
-//        printGraph(graph);
         // How many new nodes will have been created? We should have
         /**
          * null: 4
@@ -201,13 +185,13 @@ public class IpnTest extends AbstractImporterTest {
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE);
-        @SuppressWarnings("unused")
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("polishBranch.properties")).importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                .importFile(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -256,7 +240,7 @@ public class IpnTest extends AbstractImporterTest {
         for (DocumentaryUnitDescription d : descriptions) {
             assertEquals("Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie", d.getName());
             List<String> provenance = d.getProperty("processInfo");
-            assertTrue(provenance.size() > 0);
+            assertTrue(!provenance.isEmpty());
             assertThat(provenance.get(0), startsWith("This selection has been "));
         }
         for (DocumentaryUnitDescription desc : c1_1.getDocumentDescriptions()) {
@@ -279,8 +263,6 @@ public class IpnTest extends AbstractImporterTest {
             }
         }
         assertTrue(hasDates);
-
     }
-
 }
     

@@ -60,7 +60,7 @@ public abstract class AbstractSkosTest extends AbstractFixtureTest {
             for (String key : v.getPropertyKeys()) {
                 String value = "";
                 if (v.getProperty(key) instanceof String[]) {
-                    String[] list = (String[]) v.getProperty(key);
+                    String[] list = v.getProperty(key);
                     for (String o : list) {
                         value += "[" + o + "] ";
                     }
@@ -75,5 +75,4 @@ public abstract class AbstractSkosTest extends AbstractFixtureTest {
             }
         }
     }
-
 }

@@ -27,10 +27,9 @@ import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Description;
@@ -62,8 +61,9 @@ public class ItsTest extends AbstractImporterTest {
     public void testUnitdate() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
         final String logMessage = "Importing a single EAD by ItsTest";
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("its-pertinence.properties")
+                .importFile(ios, logMessage);
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                 DocumentaryUnit.class);
@@ -87,7 +87,8 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-pertinence.properties")).setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence" +
+                ".properties").allowUpdates(true);
         ImportLog log_en = importManager.importFile(ios, logMessage);
         ImportLog log_de = importManager.importFile(ios2, logMessage);
 
@@ -167,11 +168,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-
-        importManager = new SaxImportManager(graph, repository, validUser,
-                EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties"))
-                .setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("its-provenance.properties")
+                .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -236,9 +235,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("its-provenance.properties")).setTolerant(Boolean.TRUE);
-
-        importManager.importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("its-provenance.properties")
+                .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -268,11 +267,9 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        importManager = new SaxImportManager(graph, repository, validUser,
-                EadImporter.class, EadHandler.class,
-                new XmlImportProperties("its-pertinence.properties"))
-                .setTolerant(Boolean.TRUE);
-        importManager.importFile(ios, logMessage);
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .withProperties("its-pertinence.properties")
+                .importFile(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

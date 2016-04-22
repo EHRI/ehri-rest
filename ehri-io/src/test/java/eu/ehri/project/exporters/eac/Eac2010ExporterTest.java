@@ -45,10 +45,10 @@ public class Eac2010ExporterTest extends XmlExporterTest {
     public void testImportExport1() throws Exception {
         AuthoritativeSet auths = manager.getEntity("auths", AuthoritativeSet.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream("abwehr.xml");
-        SaxImportManager importManager = new SaxImportManager(graph, auths, validUser, EacImporter.class, EacHandler
-                .class);
         String logMessage = "Test EAC import/export";
-        importManager.importFile(ios, logMessage);
+        new SaxImportManager(graph, auths, validUser,
+                EacImporter.class, EacHandler.class)
+                .importFile(ios, logMessage);
         HistoricalAgent repo = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
         String xml = testExport(repo, "eng");
         Document doc = parseDocument(xml);

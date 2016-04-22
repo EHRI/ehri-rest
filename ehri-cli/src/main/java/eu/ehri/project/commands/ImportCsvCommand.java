@@ -68,6 +68,10 @@ public abstract class ImportCsvCommand extends BaseCommand {
                 .desc("Don't error if a file is not valid.")
                 .build());
         options.addOption(Option.builder()
+                .longOpt("allow-updates")
+                .desc("Allow the ingest process to update existing items.")
+                .build());
+        options.addOption(Option.builder()
                 .longOpt("log")
                 .hasArg()
                 .type(String.class)
@@ -86,6 +90,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
         }
 
         boolean tolerant = cmdLine.hasOption("tolerant");
+        boolean allowUpdates = cmdLine.hasOption("allow-updates");
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getUsage());
@@ -106,8 +111,8 @@ public abstract class ImportCsvCommand extends BaseCommand {
             UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            ImportLog log = new CsvImportManager(graph, scope, user, importer)
-                    .setTolerant(tolerant).importFiles(filePaths, logMessage);
+            ImportLog log = new CsvImportManager(graph, scope, user, tolerant, allowUpdates, importer)
+                    .importFiles(filePaths, logMessage);
 
             log.printReport();
             if (log.getErrored() > 0) {

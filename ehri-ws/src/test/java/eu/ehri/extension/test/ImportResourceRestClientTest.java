@@ -33,6 +33,7 @@ import eu.ehri.project.persistence.Bundle;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -47,10 +48,8 @@ import java.util.List;
 
 import static eu.ehri.extension.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 
 public class ImportResourceRestClientTest extends AbstractRestClientTest {
@@ -88,7 +87,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/plain")
+                .type(MediaType.TEXT_PLAIN_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -108,16 +107,59 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
-        ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/xml")
+        ImportLog log = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_XML_TYPE)
                 .entity(payloadStream)
-                .post(ClientResponse.class);
+                .post(ImportLog.class);
 
-        ImportLog log = response.getEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orNull());
+    }
+
+    @Test
+    public void testImportSingleEadWithModeViolation() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream(SINGLE_EAD);
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .build();
+        ImportLog log = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_XML_TYPE)
+                .entity(payloadStream)
+                .post(ImportLog.class);
+
+        assertEquals(1, log.getCreated());
+
+        // Edit the item so subsequent EAD ingests will attempt to
+        // change it.
+        Bundle update = getEntity(Entities.DOCUMENTARY_UNIT, "nl-r1-test_doc", getAdminUserProfileId())
+                .withDataValue("foo", "bar");
+        URI uri2 = entityUri(Entities.DOCUMENTARY_UNIT, update.getId());
+        jsonCallAs(getAdminUserProfileId(), uri2).put(update.toJson());
+
+        ClientResponse response2 = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_XML_TYPE)
+                .entity(getClass()
+                        .getClassLoader().getResourceAsStream(SINGLE_EAD))
+                .post(ClientResponse.class);
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response2);
+        assertThat(response2.getEntity(String.class),
+                containsString("nl-r1-test_doc"));
+
+        URI uri3 = getImportUrl("ead", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(ALLOW_UPDATES_PARAM, "true")
+                .build();
+        ImportLog log2 = callAs(getAdminUserProfileId(), uri3)
+                .type(MediaType.TEXT_XML_TYPE)
+                .entity(getClass()
+                        .getClassLoader().getResourceAsStream(SINGLE_EAD))
+                .post(ImportLog.class);
+        assertEquals(1, log2.getUpdated());
     }
 
     @Test
@@ -129,7 +171,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .queryParam(HANDLER_PARAM, "IDontExist") // oops
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/plain")
+                .type(MediaType.TEXT_PLAIN_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -150,7 +192,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .queryParam(HANDLER_PARAM, "java.lang.String") // oops
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/plain")
+                .type(MediaType.TEXT_PLAIN_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -172,7 +214,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/plain")
+                .type(MediaType.TEXT_PLAIN_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -197,7 +239,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "application/octet-stream")
+                .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -216,7 +258,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         URI uri = getImportUrl("eag", "nl", logText, false)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/xml")
+                .type(MediaType.TEXT_XML_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -235,7 +277,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         URI uri = getImportUrl("eac", "auths", logText, false)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
-                .header("Content-Type", "text/xml")
+                .type(MediaType.TEXT_XML_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
@@ -255,7 +297,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
                 .queryParam(LOG_PARAM, logText).build();
         ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .header("Content-Type", "application/json")
+                .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(payloadStream)
                 .put(ClientResponse.class);
 
@@ -278,7 +320,7 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
                 .queryParam(LOG_PARAM, logText)
                 .queryParam(SCOPE_PARAM, "nl").build();
         ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .header("Content-Type", "application/json")
+                .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(payloadStream)
                 .put(ClientResponse.class);
 

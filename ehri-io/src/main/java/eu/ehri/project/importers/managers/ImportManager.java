@@ -80,9 +80,9 @@ public interface ImportManager {
      * @param inputStream the archive input stream
      * @param logMessage  an optional log message to describe the import
      * @return an ImportLog for the given stream
-     * @throws IOException     when reading or writing fails
-     * @throws InputParseError when parsing the stream data fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws IOException            when reading or writing fails
+     * @throws InputParseError        when parsing the stream data fails
+     * @throws ValidationError        when the content of the file is invalid
      */
     ImportLog importFiles(ArchiveInputStream inputStream, String logMessage)
             throws IOException, InputParseError, ValidationError;

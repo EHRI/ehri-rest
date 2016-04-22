@@ -23,16 +23,14 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.managers.AbstractImportManager;
+import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
-
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -46,23 +44,31 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
 
     /**
-     * Shared import manager
-     */
-    protected AbstractImportManager importManager;
-
-    /**
      * Action Manager
      */
     protected ActionManager actionManager;
 
     /**
-     * Test repository, initialised in test setup using TEST_REPO identifier.
+     * Test repository, initialised in test setup using TEST_USER identifier.
      */
     protected Repository repository;
     /**
      * Test repository identifier. Depends on fixtures
      */
     protected final String TEST_REPO = "r1";
+
+    /**
+     * Convenience method for creating a Sax import manager.
+     */
+    protected SaxImportManager saxImportManager(Class<? extends AbstractImporter> importerClass, Class<? extends
+            SaxXmlHandler> handlerClass) {
+        return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass);
+    }
+
+    protected SaxImportManager saxImportManager(Class<? extends AbstractImporter> importerClass, Class<? extends
+            SaxXmlHandler> handlerClass, String propertiesResource) {
+        return saxImportManager(importerClass, handlerClass).withProperties(propertiesResource);
+    }
 
     /**
      * Calls setUp in superclass and initialises the repository
@@ -77,14 +83,14 @@ public class AbstractImporterTest extends AbstractFixtureTest {
 
     /**
      * Resets the shared import manager after a Test.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @After
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
         logger.debug("Cleaning up after test: reset importManager");
-        importManager = null;
     }
 
     protected void printGraph(FramedGraph<?> graph) {
@@ -147,11 +153,12 @@ public class AbstractImporterTest extends AbstractFixtureTest {
 
     /**
      * Get a Vertex from the FramedGraph using its unit ID.
-     * @see {@link eu.ehri.project.definitions.Ontology#IDENTIFIER_KEY}
-     * @param graph the graph to search
+     *
+     * @param graph      the graph to search
      * @param identifier the Vertex's 'human readable' identifier
      * @return the first Vertex with the given identifier
      * @throws NoSuchElementException when there are no vertices with this identifier
+     * @see {@link eu.ehri.project.definitions.Ontology#IDENTIFIER_KEY}
      */
     protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String identifier) {
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, identifier);
@@ -160,11 +167,12 @@ public class AbstractImporterTest extends AbstractFixtureTest {
 
     /**
      * Get a Vertex from the FramedGraph using its graph ID.
-     * @see {@link eu.ehri.project.models.annotations.EntityType#ID_KEY}
+     *
      * @param graph the graph to search
-     * @param id the Vertex's generated, slugified identifier
+     * @param id    the Vertex's generated, slugified identifier
      * @return the first Vertex with the given identifier
      * @throws NoSuchElementException when there are no vertices with this identifier
+     * @see {@link eu.ehri.project.models.annotations.EntityType#ID_KEY}
      */
     protected Vertex getVertexById(FramedGraph<?> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(EntityType.ID_KEY, id);

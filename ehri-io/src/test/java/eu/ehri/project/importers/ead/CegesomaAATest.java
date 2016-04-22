@@ -24,14 +24,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,26 +47,22 @@ import static org.junit.Assert.assertTrue;
  */
 public class CegesomaAATest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(CegesomaAATest.class);
-    protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "CegesomaAA.pxml";
     protected final String ARCHDESC = "AA 1134",
             C01 = "1234",
             C02_01 = "AA 1134 / 32",
             C02_02 = "AA 1134 / 34";
     DocumentaryUnit archdesc, c1, c2_1, c2_2;
-    int origCount = 0;
 
     @Test
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
 
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing an example Cegesoma EAD";
 
-        origCount = getNodeCount(graph);
+        int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        new SaxImportManager(graph, agent, validUser, EadImporter.class,
-                EadHandler.class, new XmlImportProperties("cegesomaAA.properties"))
+        saxImportManager(EadImporter.class, EadHandler.class, "cegesomaAA.properties")
                 .importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
@@ -128,8 +121,7 @@ public class CegesomaAATest extends AbstractImporterTest {
             assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("SOMA_CEGES_72695#NLD", dd.getProperty("sourceFileId"));
-//            TODO
-//            assertEquals(1, toList(dd.getMaintenanceEvents()).size());
+            assertEquals(1, toList(dd.getMaintenanceEvents()).size());
         }
 
         // There should be one DocumentDescription for the (second) <c02>
