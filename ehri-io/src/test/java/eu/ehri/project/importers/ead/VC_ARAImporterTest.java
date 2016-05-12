@@ -42,7 +42,7 @@ public class VC_ARAImporterTest extends AbstractImporterTest {
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         saxImportManager(EadImporter.class, EadHandler.class, "ara.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
@@ -59,6 +59,6 @@ public class VC_ARAImporterTest extends AbstractImporterTest {
         InputStream ios_vc = ClassLoader.getSystemResourceAsStream(VC_EAD);
         saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class)
                 .withProperties("vc_ara.properties")
-                .importFile(ios_vc, logMessage);
+                .importInputStream(ios_vc, logMessage);
     }
 }

@@ -134,3 +134,20 @@ parameter:
 
 Without this parameter the importer will throw a mode violation error when it ends up updating
 an existing collection.
+
+## Ingesting multiple files in an archive
+
+It is possible to ingest multiple EAD files in a single transaction by providing the importer
+with an archive file (containing multiple XML files) instead of a single XML file. Currently
+the following formats are supported:
+
+ - zip (although some extensions are problematic)
+ - tar
+ - tar.gz
+
+The importer will assume the data it is given is an archive if the content type of the
+request is given as `application/octet-stream` (aka, miscellaneous binary) instead of
+either `text/xml` (XML) or `text/plain` (local file paths.)
+
+**Note**: if several EAD files provide different translations of the same items it is
+necessary to enable update ingests via `&allow-updates=true`.

@@ -25,7 +25,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
@@ -64,7 +63,7 @@ public class CegesomaAraTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "cegesomaAA.properties");
         importManager
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -106,7 +105,7 @@ public class CegesomaAraTest extends AbstractImporterTest {
         InputStream ios_ara = ClassLoader.getSystemResourceAsStream(ARA_XMLFILE);
         saxImportManager(AraEadImporter.class, EadHandler.class, "ara.properties")
             .allowUpdates(true)
-            .importFile(ios_ara, logMessage);
+            .importInputStream(ios_ara, logMessage);
         for (String key : archdesc.getPropertyKeys()) {
             logger.debug(key + " " + archdesc.getProperty(key));
         }

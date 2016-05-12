@@ -87,7 +87,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = saxImportManager(
                 EadImporter.class, EadHandler.class, "wp2ead.properties");
-        ImportLog logVC = importManager.importFile(iosVC, logMessage);
+        ImportLog logVC = importManager.importInputStream(iosVC, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -163,7 +163,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         // Check the importer is Idempotent
         ImportLog log2 = importManager
                 .allowUpdates(true)
-                .importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+                .importInputStream(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(6, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));

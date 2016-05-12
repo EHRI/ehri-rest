@@ -57,24 +57,24 @@ public class CsvImportManager extends AbstractImportManager {
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
     public CsvImportManager(FramedGraph<?> framedGraph,
-            PermissionScope permissionScope, Actioner actioner,
-            boolean tolerant,
-            boolean allowUpdates, Class<? extends AbstractImporter> importerClass) {
+                            PermissionScope permissionScope, Actioner actioner,
+                            boolean tolerant,
+                            boolean allowUpdates, Class<? extends AbstractImporter> importerClass) {
         super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass);
     }
 
     /**
      * Import CSV from the given InputStream, as part of the given action.
      *
-     * @param ios          The input stream
-     * @param eventContext The event context in which the ingest is happening
-     * @param log          An import log instance
+     * @param stream  the input stream
+     * @param context the event context in which the ingest is happening
+     * @param log     an import log instance
      * @throws IOException
      * @throws ValidationError
      */
     @Override
-    protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
-            final ImportLog log) throws IOException, ValidationError, InputParseError {
+    protected void importInputStream(InputStream stream, final ActionManager.EventContext context,
+                                     final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {
             AbstractImporter importer = importerClass
@@ -87,7 +87,7 @@ public class CsvImportManager extends AbstractImportManager {
                     switch (mutation.getState()) {
                         case CREATED:
                             logger.info("Item created: {}", mutation.getNode().getId());
-                            eventContext.addSubjects(mutation.getNode());
+                            context.addSubjects(mutation.getNode());
                             log.addCreated();
                             break;
                         case UPDATED:
@@ -97,7 +97,7 @@ public class CsvImportManager extends AbstractImportManager {
                                         mutation.getNode().getId()));
                             }
                             logger.info("Item updated: {}", mutation.getNode().getId());
-                            eventContext.addSubjects(mutation.getNode());
+                            context.addSubjects(mutation.getNode());
                             log.addUpdated();
                             break;
                         default:
@@ -110,7 +110,7 @@ public class CsvImportManager extends AbstractImportManager {
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
 
             try (MappingIterator<Map<String, String>> valueIterator = reader
-                    .readValues(new InputStreamReader(ios, "UTF-8"))) {
+                    .readValues(new InputStreamReader(stream, "UTF-8"))) {
                 while (valueIterator.hasNext()) {
                     Map<String, String> rawData = valueIterator.next();
                     Map<String, Object> dataMap = Maps.newHashMap();

@@ -51,7 +51,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -106,7 +106,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
-                .importFile(ios2, logMessage);
+                .importInputStream(ios2, logMessage);
 
         // We should have no new nodes, not even SystemEvent
         assertEquals(createCount, getNodeCount(graph));

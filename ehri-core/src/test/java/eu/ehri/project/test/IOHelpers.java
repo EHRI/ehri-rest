@@ -1,12 +1,17 @@
 package eu.ehri.project.test;
 
 import com.google.common.io.Resources;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -15,7 +20,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class IOHelpers {
     /**
-     * Create a zip file containing the named rsources
+     * Create a zip file containing the named resources.
      *
      * @param file      a file object (typically a temp file)
      * @param resources the resource names
@@ -33,6 +38,35 @@ public class IOHelpers {
                 Resources.copy(url, zos);
                 zos.closeEntry();
             }
+        }
+    }
+
+    /**
+     * Create a tar file containing the named resources.
+     *
+     * @param file      a file object (typically a temp file)
+     * @param resources the resource names
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    public static void createTarFromResources(File file, String... resources)
+            throws URISyntaxException, IOException {
+        try (FileOutputStream fos = new FileOutputStream(file);
+             TarArchiveOutputStream tos = new TarArchiveOutputStream(fos)) {
+            for (String resource : resources) {
+                URL url = Resources.getResource(resource);
+                tos.putArchiveEntry(new TarArchiveEntry(new File(url.toURI())));
+                Resources.copy(url, tos);
+                tos.closeArchiveEntry();
+            }
+        }
+    }
+
+    public static void gzipFile(File in, File out) throws IOException {
+        try (FileInputStream fis = new FileInputStream(in);
+             FileOutputStream fos = new FileOutputStream(out);
+            GZIPOutputStream gzip = new GZIPOutputStream(fos)) {
+            IOUtils.copy(fis, gzip);
         }
     }
 }

@@ -46,7 +46,7 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        importManager.importFile(ios, logMessage);
+        importManager.importInputStream(ios, logMessage);
         printGraph(graph);
 
         // After...

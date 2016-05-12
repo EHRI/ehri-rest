@@ -60,7 +60,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportManager importManager = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class);
-        ImportLog log = importManager.importFile(ios, logMessage);
+        ImportLog log = importManager.importInputStream(ios, logMessage);
 
 
         // How many new nodes will have been created? We should have
@@ -134,7 +134,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
         assertEquals(c2, c2_2.getPermissionScope());
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManager.importFile(
+        ImportLog log2 = importManager.importInputStream(
                 ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(5, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());

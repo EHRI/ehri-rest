@@ -24,7 +24,6 @@
 package eu.ehri.project.importers.csv;
 
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.Accessible;
@@ -36,7 +35,6 @@ import java.io.InputStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +62,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         new CsvImportManager(graph, authoritativeSet, validUser, true, false, CsvConceptImporter.class)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         /*
          * 18 Concept
          * 18 ConceptDesc

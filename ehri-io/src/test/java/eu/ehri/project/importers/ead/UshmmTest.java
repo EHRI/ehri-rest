@@ -56,7 +56,7 @@ public class UshmmTest extends AbstractImporterTest {
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log = saxImportManager(EadImporter.class, UshmmHandler.class)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         printGraph(graph);
         /* How many new nodes will have been created? We should have
@@ -107,7 +107,7 @@ public class UshmmTest extends AbstractImporterTest {
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = saxImportManager(EadImporter.class, UshmmHandler.class)
-                .importFile(ios2, logMessage);
+                .importInputStream(ios2, logMessage);
 
         // We should only have three more nodes, for
         // the action and

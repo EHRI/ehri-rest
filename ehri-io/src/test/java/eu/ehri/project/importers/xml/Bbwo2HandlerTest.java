@@ -34,7 +34,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
@@ -81,7 +80,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);
         saxImportManager(EadImporter.class, DcEuropeanaHandler.class, "dceuropeana.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = GraphTestBase.getGraphState(graph);

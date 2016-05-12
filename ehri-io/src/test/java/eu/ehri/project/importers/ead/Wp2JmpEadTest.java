@@ -62,7 +62,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         SaxImportManager importManager = saxImportManager(
                 EadImporter.class, EadHandler.class, "wp2ead.properties");
 
-        ImportLog log = importManager.importFile(ios, logMessage);
+        ImportLog log = importManager.importInputStream(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 7 more DocumentaryUnits fonds C1 C2 C3 4,5,6
@@ -124,7 +124,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         }
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+        ImportLog log2 = importManager.importInputStream(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(7, log2.getUnchanged());
         assertEquals(newCount, getNodeCount(graph));
     }

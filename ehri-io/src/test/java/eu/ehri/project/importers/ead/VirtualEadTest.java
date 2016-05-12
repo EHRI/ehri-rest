@@ -79,7 +79,7 @@ public class VirtualEadTest extends AbstractImporterTest {
 
         saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
                 .withScope(user)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

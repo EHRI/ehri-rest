@@ -113,7 +113,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         new SaxImportManager(graph, repository, validUser,
                 IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 //.allowUpdates(true)
-                .importFile(ios, "Testing import/export");
+                .importInputStream(ios, "Testing import/export");
 
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
