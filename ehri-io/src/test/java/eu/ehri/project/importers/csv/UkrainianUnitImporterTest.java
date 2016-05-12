@@ -65,7 +65,7 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log = new CsvImportManager(graph, repo, validUser, false, false,
                     UkrainianUnitImporter.class)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         assertTrue(log.hasDoneWork());
 
         /*

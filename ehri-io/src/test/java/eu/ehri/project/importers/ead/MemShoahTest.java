@@ -59,7 +59,7 @@ public class MemShoahTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("memshoah.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

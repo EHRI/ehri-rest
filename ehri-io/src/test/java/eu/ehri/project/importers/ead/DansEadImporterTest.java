@@ -50,7 +50,7 @@ public class DansEadImporterTest extends AbstractImporterTest {
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         saxImportManager(EadImporter.class, EadHandler.class, "dansead.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);

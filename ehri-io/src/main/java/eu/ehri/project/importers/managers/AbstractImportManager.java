@@ -100,12 +100,12 @@ public abstract class AbstractImportManager implements ImportManager {
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
         try (FileInputStream ios = new FileInputStream(filePath)) {
-            return importFile(ios, logMessage);
+            return importInputStream(ios, logMessage);
         }
     }
 
     @Override
-    public ImportLog importFile(InputStream ios, String logMessage)
+    public ImportLog importInputStream(InputStream stream, String logMessage)
             throws IOException, InputParseError, ValidationError {
         // Create a new action for this import
         Optional<String> msg = getLogMessage(logMessage);
@@ -116,7 +116,7 @@ public abstract class AbstractImportManager implements ImportManager {
         ImportLog log = new ImportLog(msg);
 
         // Do the import...
-        importFile(ios, action, log);
+        importInputStream(stream, action, log);
         // If nothing was imported, remove the action...
         if (log.hasDoneWork()) {
             action.commit();
@@ -126,7 +126,7 @@ public abstract class AbstractImportManager implements ImportManager {
     }
 
     @Override
-    public ImportLog importFiles(List<String> paths, String logMessage)
+    public ImportLog importFiles(List<String> filePaths, String logMessage)
             throws IOException, ValidationError, InputParseError {
         try {
 
@@ -135,12 +135,12 @@ public abstract class AbstractImportManager implements ImportManager {
                     framedGraph, permissionScope).newEventContext(actioner,
                     EventTypes.ingest, msg);
             ImportLog log = new ImportLog(msg);
-            for (String path : paths) {
+            for (String path : filePaths) {
                 try {
                     currentFile = path;
-                    try (InputStream ios = new FileInputStream(path)) {
-                        logger.info("Importing file: " + path);
-                        importFile(ios, action, log);
+                    try (InputStream stream = new FileInputStream(path)) {
+                        logger.info("Importing file: {}", path);
+                        importInputStream(stream, action, log);
                     }
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
@@ -164,7 +164,7 @@ public abstract class AbstractImportManager implements ImportManager {
     }
 
     @Override
-    public ImportLog importFiles(ArchiveInputStream inputStream, String logMessage)
+    public ImportLog importArchive(ArchiveInputStream stream, String logMessage)
             throws IOException, InputParseError, ValidationError {
         Optional<String> msg = getLogMessage(logMessage);
         ActionManager.EventContext action = new ActionManager(
@@ -173,15 +173,15 @@ public abstract class AbstractImportManager implements ImportManager {
         ImportLog log = new ImportLog(msg);
 
         ArchiveEntry entry;
-        while ((entry = inputStream.getNextEntry()) != null) {
+        while ((entry = stream.getNextEntry()) != null) {
             try {
                 if (!entry.isDirectory()) {
                     currentFile = entry.getName();
                     BoundedInputStream boundedInputStream
-                            = new BoundedInputStream(inputStream, entry.getSize());
+                            = new BoundedInputStream(stream, entry.getSize());
                     boundedInputStream.setPropagateClose(false);
-                    logger.info("Importing file: " + currentFile);
-                    importFile(boundedInputStream, action, log);
+                    logger.info("Importing file: {}", currentFile);
+                    importInputStream(boundedInputStream, action, log);
                 }
             } catch (InputParseError | ValidationError e) {
                 log.addError(formatErrorLocation(), e.getMessage());
@@ -203,15 +203,15 @@ public abstract class AbstractImportManager implements ImportManager {
     /**
      * Import an InputStream with an event context.
      *
-     * @param ios          the InputStream to import
-     * @param eventContext the event that this import is part of
-     * @param log          an import log to write to
+     * @param stream  the InputStream to import
+     * @param context the event that this import is part of
+     * @param log     an import log to write to
      * @throws IOException
      * @throws ValidationError
      * @throws InputParseError
      */
-    protected abstract void importFile(InputStream ios,
-            ActionManager.EventContext eventContext, ImportLog log)
+    protected abstract void importInputStream(InputStream stream,
+                                              ActionManager.EventContext context, ImportLog log)
             throws IOException, ValidationError, InputParseError;
 
     // Helpers

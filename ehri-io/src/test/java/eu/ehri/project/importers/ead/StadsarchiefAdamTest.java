@@ -59,7 +59,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         // Before...
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         saxImportManager(EadImporter.class, EadHandler.class, "stadsarchief.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have

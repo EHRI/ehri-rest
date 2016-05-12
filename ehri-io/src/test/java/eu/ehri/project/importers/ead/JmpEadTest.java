@@ -54,7 +54,7 @@ public class JmpEadTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("wp2ead.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits fonds C1 C2 C3 4,5,6

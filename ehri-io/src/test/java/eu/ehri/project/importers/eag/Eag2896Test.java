@@ -63,7 +63,7 @@ public class Eag2896Test extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
         SaxImportManager importManager = new SaxImportManager(graph, country, validUser,
                 EagImporter.class, EagHandler.class);
-        ImportLog log = importManager.importFile(ios, logMessage);
+        ImportLog log = importManager.importInputStream(ios, logMessage);
         //printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more Repository
@@ -121,7 +121,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
         // Test idempotency
         int edgeCount = getEdgeCount(graph);
-        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_UNIT), logMessage);
+        ImportLog log2 = importManager.importInputStream(ClassLoader.getSystemResourceAsStream(SINGLE_UNIT), logMessage);
         assertFalse(log2.hasDoneWork());
         assertEquals(afterCount, getNodeCount(graph));
         assertEquals(edgeCount, getEdgeCount(graph));

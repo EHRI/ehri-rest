@@ -55,7 +55,7 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         new CsvImportManager(graph, authoritativeSet, validUser,
                 false, false, PersonalitiesImporter.class)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         /*
          * 16 HistAgent

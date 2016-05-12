@@ -63,7 +63,7 @@ public class ItsTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD by ItsTest";
         saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("its-pertinence.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                 DocumentaryUnit.class);
@@ -89,8 +89,8 @@ public class ItsTest extends AbstractImporterTest {
 
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence" +
                 ".properties").allowUpdates(true);
-        ImportLog log_en = importManager.importFile(ios, logMessage);
-        ImportLog log_de = importManager.importFile(ios2, logMessage);
+        ImportLog log_en = importManager.importInputStream(ios, logMessage);
+        ImportLog log_de = importManager.importInputStream(ios2, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -170,7 +170,7 @@ public class ItsTest extends AbstractImporterTest {
 
         saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("its-provenance.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -237,7 +237,7 @@ public class ItsTest extends AbstractImporterTest {
 
         saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("its-provenance.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -269,7 +269,7 @@ public class ItsTest extends AbstractImporterTest {
 
         saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("its-pertinence.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

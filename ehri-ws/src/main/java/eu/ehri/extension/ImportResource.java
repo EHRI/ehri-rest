@@ -434,10 +434,9 @@ public class ImportResource extends AbstractRestResource {
         if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
             // Extract our list of paths...
             List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
-            return importManager
-                    .importFiles(paths, message);
+            return importManager.importFiles(paths, message);
         } else if (Lists.newArrayList(accepts).contains(mediaType)) {
-            return importManager.importFile(data, message);
+            return importManager.importInputStream(data, message);
         } else {
             return importArchive(importManager, message, data);
         }
@@ -451,7 +450,7 @@ public class ImportResource extends AbstractRestResource {
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
                      .createArchiveInputStream(bis)) {
             return importManager
-                    .importFiles(archiveInputStream, logMessage);
+                    .importArchive(archiveInputStream, logMessage);
         }
     }
 

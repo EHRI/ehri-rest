@@ -29,7 +29,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml");
         SaxImportManager importManager = new SaxImportManager(graph, nl, validUser,
                 EagImporter.class, EagHandler.class);
-        importManager.importFile(ios, "Text EAG import/export");
+        importManager.importInputStream(ios, "Text EAG import/export");
         Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
         testExport(repo, "eng");
     }

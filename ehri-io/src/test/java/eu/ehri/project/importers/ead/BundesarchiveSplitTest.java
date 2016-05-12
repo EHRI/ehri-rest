@@ -28,7 +28,6 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -57,7 +56,7 @@ public class BundesarchiveSplitTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         saxImportManager(EadImporter.class, EadHandler.class, "bundesarchive.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

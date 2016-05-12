@@ -48,7 +48,7 @@ public class Eac2010ExporterTest extends XmlExporterTest {
         String logMessage = "Test EAC import/export";
         new SaxImportManager(graph, auths, validUser,
                 EacImporter.class, EacHandler.class)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         HistoricalAgent repo = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
         String xml = testExport(repo, "eng");
         Document doc = parseDocument(xml);

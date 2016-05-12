@@ -27,7 +27,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.test.IOHelpers;
@@ -82,7 +81,7 @@ public class YadVashemTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
         saxImportManager(EadImporter.class, EadHandler.class, "yadvashem.properties")
                 .allowUpdates(true)
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -122,7 +121,7 @@ public class YadVashemTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = saxImportManager(
                 EadImporter.class, EadHandler.class, "yadvashem.properties");
-        importManager.allowUpdates(true).importFile(ios, logMessage);
+        importManager.allowUpdates(true).importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -154,7 +153,7 @@ public class YadVashemTest extends AbstractImporterTest {
         assertEquals(1, nrOfDesc);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-        importManager.allowUpdates(true).importFile(ios, logMessage);
+        importManager.allowUpdates(true).importInputStream(ios, logMessage);
 
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
@@ -190,7 +189,7 @@ public class YadVashemTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1_heb = getGraphState(graph);
         logger.debug("reimport HEB");
-        importManager.importFile(ios, logMessage);
+        importManager.importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2_heb = getGraphState(graph);
         GraphDiff diff_heb = diffGraph(graphState1_heb, graphState2_heb);
@@ -207,11 +206,11 @@ public class YadVashemTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class)
                 .withProperties("yadvashem.properties");
-        ImportLog log = importManager.importFile(ios, "Test");
+        ImportLog log = importManager.importInputStream(ios, "Test");
         assertEquals(1, log.getCreated());
 
         File temp = File.createTempFile("test-zip", ".zip");
-        //temp.deleteOnExit();
+        temp.deleteOnExit();
         IOHelpers.createZipFromResources(temp, resource);
 
         try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(temp));
@@ -220,7 +219,7 @@ public class YadVashemTest extends AbstractImporterTest {
                      .createArchiveInputStream(bis)) {
             ImportLog log2 = importManager
                     .allowUpdates(true)
-                    .importFiles(archiveInputStream, "Test 2");
+                    .importArchive(archiveInputStream, "Test 2");
             assertEquals(1, log2.getUnchanged());
             assertEquals(0, log2.getUpdated());
         }

@@ -65,7 +65,7 @@ public class IfzTest extends AbstractImporterTest {
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         saxImportManager(EadImporter.class, EadHandler.class, "ifz.properties")
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

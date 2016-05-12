@@ -69,7 +69,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
         saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
                 .withScope(SystemScope.getInstance())
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -110,7 +110,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
         saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
                 .withScope(SystemScope.getInstance())
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -162,7 +162,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
         saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
                 .withScope(SystemScope.getInstance())
-                .importFile(ios, logMessage);
+                .importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

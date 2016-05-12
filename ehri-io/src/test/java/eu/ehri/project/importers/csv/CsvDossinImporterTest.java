@@ -50,7 +50,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        new CsvImportManager(graph, ps, validUser, false, false, EadImporter.class).importFile(ios, logMessage);
+        new CsvImportManager(graph, ps, validUser, false, false, EadImporter.class).importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
