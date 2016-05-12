@@ -143,8 +143,7 @@ the following formats are supported:
 
  - zip (although some extensions are problematic)
  - tar
-
-**Note**: at the time of writing, GZIPed tar files (.tgz, .tar.gz) are **not** supported.
+ - tar.gz
 
 The importer will assume the data it is given is an archive if the content type of the
 request is given as `application/octet-stream` (aka, miscellaneous binary) instead of

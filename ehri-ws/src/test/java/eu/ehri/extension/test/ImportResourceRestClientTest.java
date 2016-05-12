@@ -30,6 +30,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.IcaAtomEadHandler;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.test.IOHelpers;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -233,6 +234,33 @@ public class ImportResourceRestClientTest extends AbstractRestClientTest {
 
         // Get the path of an EAD file
         InputStream payloadStream = new FileInputStream(temp);
+
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
+                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(6, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orNull());
+    }
+
+    @Test
+    public void testImportEadWithMultipleFilesInGZipTar() throws Exception {
+        File temp = File.createTempFile("test-tar", ".tar");
+        temp.deleteOnExit();
+        File gzip = File.createTempFile("test-gzip", ".gz");
+        createZipFromResources(temp, SINGLE_EAD, HIERARCHICAL_EAD);
+        IOHelpers.gzipFile(temp, gzip);
+
+        // Get the path of an EAD file
+        InputStream payloadStream = new FileInputStream(gzip);
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)

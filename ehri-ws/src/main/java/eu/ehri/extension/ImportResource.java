@@ -75,6 +75,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Resource class for import endpoints.
@@ -428,8 +429,9 @@ public class ImportResource extends AbstractRestResource {
 
     // Helpers
 
-    private ImportLog importDataStream(ImportManager importManager, String message, InputStream data,
-            MediaType... accepts) throws IOException, ValidationError, InputParseError, ArchiveException {
+    private ImportLog importDataStream(
+            ImportManager importManager, String message, InputStream data, MediaType... accepts)
+            throws IOException, ValidationError, InputParseError, ArchiveException {
         MediaType mediaType = requestHeaders.getMediaType();
         if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
             // Extract our list of paths...
@@ -438,19 +440,34 @@ public class ImportResource extends AbstractRestResource {
         } else if (Lists.newArrayList(accepts).contains(mediaType)) {
             return importManager.importInputStream(data, message);
         } else {
-            return importArchive(importManager, message, data);
+            return importPotentiallyGZippedArchive(importManager, message, data);
         }
     }
 
-    private ImportLog importArchive(ImportManager importManager, String logMessage, InputStream data)
+    private ImportLog importPotentiallyGZippedArchive(
+            ImportManager importManager, String message, InputStream data)
             throws IOException, ValidationError, ArchiveException, InputParseError {
-        logger.info("Import via compressed archive...");
+        try (BufferedInputStream bufStream = new BufferedInputStream(data)) {
+            bufStream.mark(0);
+            try (GZIPInputStream gzipStream = new GZIPInputStream(bufStream)) {
+                logger.debug("Importing gzipped archive stream...");
+                return importArchive(importManager, message, gzipStream);
+            } catch (java.util.zip.ZipException e) {
+                // Assume data is not in zip format?
+                bufStream.reset();
+                logger.debug("Importing uncompressed archive stream...");
+                return importArchive(importManager, message, bufStream);
+            }
+        }
+    }
+
+    private ImportLog importArchive(ImportManager importManager, String message, InputStream data)
+            throws IOException, ValidationError, ArchiveException, InputParseError {
         try (BufferedInputStream bis = new BufferedInputStream(data);
              ArchiveInputStream archiveInputStream = new
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
                      .createArchiveInputStream(bis)) {
-            return importManager
-                    .importArchive(archiveInputStream, logMessage);
+            return importManager.importArchive(archiveInputStream, message);
         }
     }
 
