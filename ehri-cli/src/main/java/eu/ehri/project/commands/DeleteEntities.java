@@ -45,9 +45,6 @@ public class DeleteEntities extends BaseCommand {
 
     final static String NAME = "delete-all";
 
-    public DeleteEntities() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()

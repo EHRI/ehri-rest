@@ -20,7 +20,7 @@
 package eu.ehri.project.importers.csv;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;

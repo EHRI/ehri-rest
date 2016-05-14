@@ -17,13 +17,14 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.base;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
@@ -38,9 +39,9 @@ import java.util.Map.Entry;
 /**
  * Import Map based representations of EAD or EAC for a given repository into the database.
  */
-public abstract class EaImporter extends MapImporter {
+public abstract class SaxXmlImporter extends MapImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(EaImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(SaxXmlImporter.class);
     protected static final String LINK_TARGET = "target";
 
     public static final String RESOLVED_LINK_DESC = "Link provided by data provider.";
@@ -52,7 +53,7 @@ public abstract class EaImporter extends MapImporter {
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public EaImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
+    public SaxXmlImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(graph, permissionScope, actioner, log);
     }
 

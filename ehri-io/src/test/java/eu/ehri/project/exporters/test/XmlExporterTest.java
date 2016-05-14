@@ -1,7 +1,7 @@
 package eu.ehri.project.exporters.test;
 
 import com.google.common.io.Resources;
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import org.junit.Before;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;

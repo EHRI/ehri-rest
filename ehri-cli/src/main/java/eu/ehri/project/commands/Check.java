@@ -53,17 +53,14 @@ public class Check extends BaseCommand {
 
     final static String NAME = "check";
 
-    public Check() {
-    }
-    
-	@Override
-	public String getHelp() {
+    @Override
+    public String getHelp() {
         return "Perform various checks on the graph structure";
-	}
-	
+    }
+
     @Override
     public String getUsage() {
-		return NAME + " [OPTIONS]";
+        return NAME + " [OPTIONS]";
     }
 
     @Override
@@ -73,10 +70,10 @@ public class Check extends BaseCommand {
                 .desc("Quick checks only")
                 .build());
     }
-    
+
     @Override
     public int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws Exception {
+                               CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         checkPermissionScopes(graph, manager);
@@ -87,18 +84,18 @@ public class Check extends BaseCommand {
 
     /**
      * The following types of item should ALL have a permission scope.
+     * <p/>
+     * Doc unit - either a repository or another doc unit
+     * Concept - a vocabulary
+     * Repository - a country
+     * Hist agent - an auth set
      *
-     *  Doc unit - either a repository or another doc unit
-     *  Concept - a vocabulary
-     *  Repository - a country
-     *  Hist agent - an auth set
-     *
-     * @param graph The graph
+     * @param graph   The graph
      * @param manager The graph manager
      * @throws Exception
      */
     public void checkPermissionScopes(FramedGraph<?> graph,
-            GraphManager manager) {
+                                      GraphManager manager) {
 
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 

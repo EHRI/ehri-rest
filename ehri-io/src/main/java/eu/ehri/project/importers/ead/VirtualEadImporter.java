@@ -25,9 +25,9 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -62,7 +62,7 @@ import java.util.Map;
  * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
  * should not be any c-levels beneath such a c-level
  */
-public class VirtualEadImporter extends EaImporter {
+public class VirtualEadImporter extends SaxXmlImporter {
 
     protected static final String REPOID = "vcRepository";
     protected static final String UNITID = "objectIdentifier";

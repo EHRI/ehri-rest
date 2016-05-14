@@ -19,7 +19,7 @@
 
 package eu.ehri.project.importers.ead;
 
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import org.junit.Test;
 
 import java.io.InputStream;

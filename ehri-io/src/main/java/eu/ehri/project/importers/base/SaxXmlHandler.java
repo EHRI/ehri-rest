@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

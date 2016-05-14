@@ -42,7 +42,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -256,7 +256,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 Bundle linkBundle = new Bundle(EntityClass.LINK)
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
                         .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
-                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, EaImporter.RESOLVED_LINK_DESC);
+                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, SaxXmlImporter.RESOLVED_LINK_DESC);
                 UserProfile user = manager.getEntity(actioner.getId(), UserProfile.class);
                 Link link;
                 link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);

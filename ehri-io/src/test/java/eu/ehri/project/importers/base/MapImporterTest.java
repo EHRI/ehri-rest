@@ -17,12 +17,13 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.base;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.PermissionScope;

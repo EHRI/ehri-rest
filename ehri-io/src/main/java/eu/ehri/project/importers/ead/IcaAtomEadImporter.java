@@ -26,7 +26,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -52,7 +52,7 @@ import java.util.Map;
  * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  */
-public class IcaAtomEadImporter extends EaImporter {
+public class IcaAtomEadImporter extends SaxXmlImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
     private final Serializer mergeSerializer;

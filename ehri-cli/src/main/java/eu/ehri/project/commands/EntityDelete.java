@@ -37,9 +37,6 @@ public class EntityDelete extends BaseCommand {
 
     final static String NAME = "delete";
 
-    public EntityDelete() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()

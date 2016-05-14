@@ -22,7 +22,7 @@ package eu.ehri.project.importers.cvoc;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Linkable;

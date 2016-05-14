@@ -28,7 +28,7 @@ import org.junit.Test;
 
 
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Description;

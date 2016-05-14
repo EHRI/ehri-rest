@@ -22,7 +22,7 @@ package eu.ehri.project.importers.eag;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.models.Country;
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 /**
  * Importer of EAG-based descriptions.
  */
-public class EagImporter extends EaImporter {
+public class EagImporter extends SaxXmlImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     private final Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");

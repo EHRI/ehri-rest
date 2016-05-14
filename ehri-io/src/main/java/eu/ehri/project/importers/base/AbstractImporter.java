@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.base;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -26,6 +26,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;

@@ -29,9 +29,9 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
@@ -56,7 +56,7 @@ import java.util.Map;
 /**
  * Import EAC for a given repository into the database.
  */
-public class EacImporter extends EaImporter {
+public class EacImporter extends SaxXmlImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     public static final String REL_TYPE = "type";

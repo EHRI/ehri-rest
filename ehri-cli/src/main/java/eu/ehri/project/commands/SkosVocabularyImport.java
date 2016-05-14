@@ -40,9 +40,6 @@ public class SkosVocabularyImport extends BaseCommand {
 
     final static String NAME = "skos-import";
 
-    public SkosVocabularyImport() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()

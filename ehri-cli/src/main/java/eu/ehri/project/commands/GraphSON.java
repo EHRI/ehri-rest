@@ -63,9 +63,6 @@ public class GraphSON extends BaseCommand {
 
     final static String NAME = "graphson";
 
-    public GraphSON() {
-    }
-
     @Override
     public String getHelp() {
         return "Load or dump GraphSON data.";

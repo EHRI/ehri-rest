@@ -46,9 +46,6 @@ public class UserAdd extends BaseCommand {
 
     final static String NAME = "useradd";
 
-    public UserAdd() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()

@@ -28,9 +28,9 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -56,9 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import static eu.ehri.project.models.idgen.IdGeneratorUtils.HIERARCHY_SEPARATOR;
-import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
-
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
@@ -67,7 +64,7 @@ import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
  * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  */
-public class EadImporter extends EaImporter {
+public class EadImporter extends SaxXmlImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.

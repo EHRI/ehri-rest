@@ -19,7 +19,7 @@
 
 package eu.ehri.project.importers.ead;
 
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
