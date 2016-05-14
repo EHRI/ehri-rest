@@ -89,8 +89,9 @@ public class VirtualEadTest extends AbstractImporterTest {
         // - 2 more VirtualUnits (archdesc, 1 child (other 2 children are already existing DUs))
         // - 2 more DocumentDescription
         // - 3 more import Event links (2 for every Unit, 1 for the User)
+        // - 2 more maintenance events
         // - 1 more import Event
-        int newCount = origCount + 8;
+        int newCount = origCount + 10;
         assertEquals(newCount, getNodeCount(graph));
 
         VirtualUnit toplevel = graph.frame(getVertexByIdentifier(graph, ARCHDESC), VirtualUnit.class);

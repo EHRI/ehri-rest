@@ -19,21 +19,16 @@
 
 package eu.ehri.project.importers.base;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Mutation;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -85,16 +80,6 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         super(framedGraph, permissionScope, actioner, log);
     }
 
-    private void extractDateFromValue(List<Map<String, Object>> extractedDates, String value) throws ValidationError {
-        logger.debug("date: {}", value);
-        Map<String, Object> dpb;
-        dpb = extractDate(value);
-        if (dpb != null) {
-            extractedDates.add(dpb);
-        }
-        logger.debug("nr of dates found: {}", extractedDates.size());
-    }
-
     /**
      * Extract datevalues from datamap
      *
@@ -122,7 +107,8 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     }
 
     /**
-     * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
+     * Extract a list of entity bundles for DatePeriods from the data,
+     * attempting to parse the unitdate attribute.
      *
      * @param data the data map
      */
@@ -131,11 +117,8 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
         Map<String, String> dateValues = returnDatesAsString(data, dates);
         for (String s : dateValues.keySet()) {
-            try {
-                extractDateFromValue(extractedDates, s);
-            } catch (ValidationError e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+            for (Map<String, Object> dp : extractDate(s).asSet()) {
+                extractedDates.add(dp);
             }
         }
         return extractedDates;
@@ -148,36 +131,33 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      * @param extractedDates the set of extracted dates
      */
     protected void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates) {
-        Map<String, String> datevalues = returnDatesAsString(data, dates);
-        Map<String, String> datetypes = Maps.newHashMap();
-        for (String datevalue : datevalues.keySet()) {
-            datetypes.put(datevalues.get(datevalue), null);
+        Map<String, String> dateValues = returnDatesAsString(data, dates);
+        Map<String, String> dateTypes = Maps.newHashMap();
+        for (String dateValue : dateValues.keySet()) {
+            dateTypes.put(dateValues.get(dateValue), null);
         }
-
-
-        for (Map<String, Object> datemap : extractedDates) {
-            datevalues.remove(datemap.get(Ontology.DATE_HAS_DESCRIPTION));
+        for (Map<String, Object> dateMap : extractedDates) {
+            dateValues.remove(dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
         }
         //replace dates in data map
-        for (String datevalue : datevalues.keySet()) {
-            String datetype = datevalues.get(datevalue);
-            logger.debug("{} -- {}", datevalue, datetype);
-            if (datetypes.containsKey(datetype) && datetypes.get(datetype) != null) {
-                datetypes.put(datetype, datetypes.get(datetype) + ", " + datevalue.trim());
+        for (String datevalue : dateValues.keySet()) {
+            String dateType = dateValues.get(datevalue);
+            logger.debug("{} -- {}", datevalue, dateType);
+            if (dateTypes.containsKey(dateType) && dateTypes.get(dateType) != null) {
+                dateTypes.put(dateType, dateTypes.get(dateType) + ", " + datevalue.trim());
             } else {
-                datetypes.put(datetype, datevalue.trim());
+                dateTypes.put(dateType, datevalue.trim());
             }
         }
-        for (String datetype : datetypes.keySet()) {
-            logger.debug("datetype {} -- {}", datetype, datetypes.get(datetype));
-            if (datetypes.get(datetype) == null) {
-                data.remove(datetype);
+        for (String dateType : dateTypes.keySet()) {
+            logger.debug("datetype {} -- {}", dateType, dateTypes.get(dateType));
+            if (dateTypes.get(dateType) == null) {
+                data.remove(dateType);
             } else {
-                data.put(datetype, datetypes.get(datetype));
+                data.put(dateType, dateTypes.get(dateType));
             }
-            logger.debug("" + data.get(datetype));
+            logger.debug("" + data.get(dateType));
         }
-
     }
 
     /**
@@ -212,7 +192,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         for (Entry<String, Object> eventEntry : event.entrySet()) {
             if (eventEntry.getKey().equals("maintenanceEvent/type")) {
                 me.put(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType
-                        .withName((String)eventEntry.getValue()));
+                        .withName((String) eventEntry.getValue()));
             } else if (eventEntry.getKey().equals("maintenanceEvent/agentType")) {
                 me.put(Ontology.MAINTENANCE_EVENT_AGENT_TYPE, eventEntry.getValue());
             } else {
@@ -225,33 +205,15 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         return me;
     }
 
-
-    @Override
-    public MaintenanceEvent importMaintenanceEvent(Map<String, Object> event) {
-        BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
-        try {
-            Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
-            //only if some source is given (especially with a creation) should a ME be created
-            if (unit.getDataValue("source") != null) {
-                Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
-                return mutation.getNode();
-            }
-        } catch (ValidationError ex) {
-            logger.error(ex.getMessage());
-        }
-        return null;
-    }
-
     /**
      * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
      * @param date the data map
      * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
-    private Map<String, Object> extractDate(Object date) /*throws ValidationError*/ {
-        logger.debug("date value: {}", date);
-        Map<String, Object> data = matchDate((String) date);
-        return data.isEmpty() ? null : data;
+    private Optional<Map<String, Object>> extractDate(String date) {
+        Map<String, Object> data = matchDate(date);
+        return data.isEmpty() ? Optional.<Map<String, Object>>absent() : Optional.of(data);
     }
 
     private Map<String, Object> matchDate(String date) {
@@ -305,26 +267,5 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
             }
         }
         return returnDate;
-    }
-
-    //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several
-
-    /**
-     * extract data nodes from the data, that are not covered by their respectable properties file.
-     *
-     * @param data the data map
-     * @return returns 1 Map of all the tags that were not handled by the property file of this Importer
-     */
-    protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data) {
-        List<Map<String, Object>> l = Lists.newArrayList();
-        Map<String, Object> unit = Maps.newHashMap();
-        for (Entry<String, Object> property : data.entrySet()) {
-            if (property.getKey().startsWith(SaxXmlHandler.UNKNOWN)) {
-                unit.put(property.getKey().replace(SaxXmlHandler.UNKNOWN, ""), property.getValue());
-            }
-        }
-        l.add(unit);
-        return l;
-
     }
 }

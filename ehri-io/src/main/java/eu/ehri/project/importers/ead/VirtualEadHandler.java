@@ -31,7 +31,6 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,9 @@ import java.util.regex.Pattern;
 public class VirtualEadHandler extends SaxXmlHandler {
     public static final String AUTHOR = "authors",
             SOURCEFILEID = "sourceFileId";
-    final List<MaintenanceEvent> maintenanceEvents = Lists.newArrayList();
+
+    final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
+
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap.<String, Class<?
             extends Entity>>of("maintenanceEvent", MaintenanceEvent.class);
 
@@ -148,7 +149,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
     /**
      * Called when the XML parser encounters an end tag. This is tuned for EAD files, which come in many flavours.
-     * <p>
+     * <p/>
      * Certain elements represent subcollections, for which we create new nodes (here, we create representative Maps for nodes).
      * Many EAD producers use the standard in their own special way, so this method calls generalised methods to filter, get data
      * in the right place and reformat.
@@ -208,15 +209,13 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     //add the <author> of the ead to every description
                     addAuthor(currentGraph);
 
-                    AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
-                    //add the maintenanceEvents, but only to the DD that was just created
-                    for (Description dd : current.getDescriptions()) {
-                        if (getSourceFileId().equals(dd.getProperty(SOURCEFILEID))) {
-                            for (MaintenanceEvent me : maintenanceEvents) {
-                                dd.addMaintenanceEvent(me);
-                            }
-                        }
+                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
+                        logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
+                        currentGraph.put("maintenanceEvent", globalMaintenanceEvents);
                     }
+
+                    AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
+
                     if (current.getType().equals(Entities.VIRTUAL_UNIT)) {
                         logger.debug("virtual unit created: " + current.getIdentifier());
                         topLevel = (VirtualUnit) current; // if it is not overwritten, the current DU is the topLevel
@@ -257,9 +256,11 @@ public class VirtualEadHandler extends SaxXmlHandler {
                 }
             } else {
                 //import the MaintenanceEvent
-                if (getImportantPath(currentPath).equals("maintenanceEvent")) {
+                if (getImportantPath(currentPath).equals("maintenanceEvent")
+                        && (qName.equals("profiledesc") || qName.equals("change"))) {
                     Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
-                    maintenanceEvents.add(importer.importMaintenanceEvent(me));
+                    me.put("order", globalMaintenanceEvents.size());
+                    globalMaintenanceEvents.add(me);
                 }
 
                 putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
@@ -271,15 +272,12 @@ public class VirtualEadHandler extends SaxXmlHandler {
         if (currentPath.isEmpty()) {
             currentGraphPath.pop();
         }
-
     }
 
     protected String getSourceFileId() {
-        if (getEadId()
-                .toLowerCase()
-                .endsWith("#" + getDefaultLanguage()
-                        .toLowerCase()))
+        if (getEadId().toLowerCase().endsWith("#" + getDefaultLanguage().toLowerCase())) {
             return getEadId();
+        }
         return getEadId() + "#" + getDefaultLanguage().toUpperCase();
     }
 
