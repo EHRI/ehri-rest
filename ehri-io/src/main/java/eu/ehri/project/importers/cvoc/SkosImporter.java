@@ -65,6 +65,14 @@ public interface SkosImporter {
     SkosImporter setTolerant(boolean tolerant);
 
     /**
+     * Set the URI prefix for items created by the importer.
+     *
+     * @param prefix a URI prefix
+     * @return A new SKOS importer with the given format
+     */
+    SkosImporter setBaseURI(String prefix);
+
+    /**
      * Set the RDF format. Supported values are: N3, TTL, TURTLE,
      * and the default, RDF/XML.
      *
