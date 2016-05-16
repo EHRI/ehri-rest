@@ -21,7 +21,7 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import org.slf4j.Logger;

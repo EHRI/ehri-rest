@@ -21,7 +21,7 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;

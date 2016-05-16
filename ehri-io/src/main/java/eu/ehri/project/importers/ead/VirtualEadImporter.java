@@ -25,9 +25,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -48,27 +46,25 @@ import java.util.Map;
 
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:
- * <p>
+ * <p/>
  * the archdesc should describe the purpose of this vc. it can not in itself refer to a DU.
- * <p>
+ * <p/>
  * every c level is either 1) a virtual level (=VirtualLevel), or 2) it points to an existing DocumentaryUnit
  * (=VirtualReferrer) (and consequently to the entire subtree beneath it) 1) there is no repository-tag with a
  * ehri-label
- * <p>
+ * <p/>
  * 2) there is exactly one repository-tag with an ehri-label &lt;repository
  * label="ehri_repository_vc"&gt;il-002777&lt;/repository&gt; (this will not be shown in the portal) and exactly one unitid with
  * a ehri-main-identifier label, that is identical to the existing unitid within the graph for this repository
- * <p>
+ * <p/>
  * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
  * should not be any c-levels beneath such a c-level
  */
-public class VirtualEadImporter extends EaImporter {
+public class VirtualEadImporter extends EadImporter {
 
     protected static final String REPOID = "vcRepository";
     protected static final String UNITID = "objectIdentifier";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
-    //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
-    private EntityClass unitEntity = EntityClass.VIRTUAL_UNIT;
 
     /**
      * Construct a VirtualEadImporter object.
@@ -97,34 +93,20 @@ public class VirtualEadImporter extends EaImporter {
 
         BundleManager persister = getPersister(idPath);
 
-        boolean isVirtualLevel = isVirtualLevel(itemData);
-        Bundle unit = new Bundle(unitEntity, extractVirtualUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.VIRTUAL_UNIT, extractVirtualUnit(itemData));
 
-        if (isVirtualLevel) { //VirtualLevel
+        if (isVirtualLevel(itemData)) {
             // Check for missing identifier, throw an exception when there is no ID.
             if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
                 throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                         "Missing identifier " + Ontology.IDENTIFIER_KEY);
             }
-            logger.debug("Imported item: " + itemData.get("name"));
-            Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
-            // Add dates and descriptions to the bundle since they're @Dependent
-            // relations.
-            for (Map<String, Object> dpb : extractDates(itemData)) {
-                descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
-            }
-            for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
-                logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
-                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
-            }
-            Map<String, Object> unknowns = extractUnknownProperties(itemData);
-            if (!unknowns.isEmpty()) {
-                logger.debug("Unknown Properties found");
-                descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
-            }
-            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-            Mutation<VirtualUnit> mutation =
-                    persister.createOrUpdate(unit, VirtualUnit.class);
+            logger.debug("Imported item: {}", itemData.get("name"));
+
+            Bundle description = getDescription(itemData);
+
+            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
+            Mutation<VirtualUnit> mutation = persister.createOrUpdate(unit, VirtualUnit.class);
             VirtualUnit frame = mutation.getNode();
             // Set the repository/item relationship
             //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
@@ -134,7 +116,7 @@ public class VirtualEadImporter extends EaImporter {
                     UserProfile responsibleUser = permissionScope.as(UserProfile.class);
                     frame.setAuthor(responsibleUser);
                     //the top Virtual Unit does not have a permissionScope. 
-                } else if (scopeType.equals(unitEntity)) {
+                } else if (scopeType.equals(EntityClass.VIRTUAL_UNIT)) {
                     VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
                     parent.addChild(frame);
                     frame.setPermissionScope(parent);
@@ -144,7 +126,7 @@ public class VirtualEadImporter extends EaImporter {
             }
             handleCallbacks(mutation);
             return frame;
-        } else { //find the referred Documentary Unit and RETURN it
+        } else {
             try {
                 //find the DocumentaryUnit using the repository_id/unit_id combo
                 return findReferredToDocumentaryUnit(itemData);
@@ -157,17 +139,17 @@ public class VirtualEadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        String REL = "AccessPoint";
+        String rel = "AccessPoint";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
-            if (key.endsWith(REL)) {
-                logger.debug(key + " found in data");
+            if (key.endsWith(rel)) {
+                logger.debug("{} found in data", key);
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     for (String eventkey : origRelation.keySet()) {
                         logger.debug(eventkey);
-                        if (eventkey.endsWith(REL)) {
+                        if (eventkey.endsWith(rel)) {
                             relationNode.put(Ontology.ACCESS_POINT_TYPE, eventkey);
                             relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
                         } else {
@@ -186,7 +168,7 @@ public class VirtualEadImporter extends EaImporter {
 
     /**
      * Creates a Map containing properties of a Virtual Unit.
-     * <p>
+     * <p/>
      * These properties are the unit's identifiers.
      *
      * @param itemData Map of all extracted information
@@ -210,35 +192,9 @@ public class VirtualEadImporter extends EaImporter {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 
-    /**
-     * Creates a Map containing properties of a Documentary Unit description. These properties are the unit
-     * description's properties: all except the doc unit identifiers and unknown properties.
-     *
-     * @param itemData Map of all extracted information
-     * @param depth    depth of node in the tree
-     * @return a Map representing a Documentary Unit Description node
-     * @throws ValidationError
-     */
-    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
-
-        Map<String, Object> unit = Maps.newHashMap();
-        for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID)
-                    || key.equals(Ontology.OTHER_IDENTIFIERS)
-                    || key.startsWith(SaxXmlHandler.UNKNOWN))) {
-                unit.put(key, itemData.get(key));
-            }
-        }
-        return unit;
-    }
-
     @Override
     public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void importAsVirtualCollection() {
-        unitEntity = EntityClass.VIRTUAL_UNIT;
     }
 
     private boolean isVirtualLevel(Map<String, Object> itemData) {
@@ -259,6 +215,5 @@ public class VirtualEadImporter extends EaImporter {
             throw new ItemNotFound(String.format("No item %s found in repo %s", unitId, repositoryId));
         }
         throw new ItemNotFound("Apparently no repositoryid/unitid combo given");
-
     }
 }

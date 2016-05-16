@@ -26,7 +26,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.MapImporter;
+import eu.ehri.project.importers.base.MapImporter;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;

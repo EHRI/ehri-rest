@@ -37,9 +37,6 @@ public class UserListEntities extends BaseCommand {
 
     final static String NAME = "user-list";
 
-    public UserListEntities() {
-    }
-
     @Override
     public String getUsage() {
         return String.format("%s [OPTIONS] <type>", NAME);

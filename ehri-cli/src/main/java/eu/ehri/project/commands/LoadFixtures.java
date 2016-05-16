@@ -36,9 +36,6 @@ public class LoadFixtures extends BaseCommand {
 
     final static String NAME = "load-fixtures";
 
-    public LoadFixtures() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()

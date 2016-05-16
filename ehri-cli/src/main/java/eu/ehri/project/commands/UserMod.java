@@ -44,9 +44,6 @@ public class UserMod extends BaseCommand {
 
     final static String NAME = "usermod";
 
-    public UserMod() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()

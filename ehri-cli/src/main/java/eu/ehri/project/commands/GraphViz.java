@@ -44,9 +44,6 @@ public class GraphViz extends BaseCommand {
 
     final static String NAME = "graphviz";
 
-    public GraphViz() {
-    }
-
     @Override
     public String getUsage() {
         return String.format("%s [OPTIONS] <identifier> ...", NAME);

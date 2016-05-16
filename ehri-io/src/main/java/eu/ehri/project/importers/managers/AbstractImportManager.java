@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.base.Actioner;

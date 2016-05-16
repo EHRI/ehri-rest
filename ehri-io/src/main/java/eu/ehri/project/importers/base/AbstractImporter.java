@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.base;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -26,9 +26,10 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -83,7 +84,9 @@ public abstract class AbstractImporter<T> {
         return permissionScope;
     }
 
-    public Actioner getActioner() { return actioner; }
+    public Actioner getActioner() {
+        return actioner;
+    }
 
     public BundleManager getPersister(List<String> scopeIds) {
         return new BundleManager(framedGraph,
@@ -96,10 +99,11 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Constructor.
-     *  @param graph the framed graph
-     * @param scope the permission scope
+     *
+     * @param graph    the framed graph
+     * @param scope    the permission scope
      * @param actioner the user performing the import
-     * @param log   the log object
+     * @param log      the log object
      */
     public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, Actioner actioner, ImportLog log) {
         this.permissionScope = scope;
@@ -137,7 +141,7 @@ public abstract class AbstractImporter<T> {
      * @throws ValidationError when the item representation does not validate
      */
     public abstract Accessible importItem(T itemData,
-            List<String> scopeIds) throws ValidationError;
+                                          List<String> scopeIds) throws ValidationError;
 
     /**
      * Extract a list of DatePeriod bundles from an item's data.
@@ -172,8 +176,6 @@ public abstract class AbstractImporter<T> {
     public abstract Iterable<Map<String, Object>> extractMaintenanceEvent(T itemData);
 
     public abstract Map<String, Object> getMaintenanceEvent(T event);
-
-    public abstract MaintenanceEvent importMaintenanceEvent(T event);
 
     // Helpers
 

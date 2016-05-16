@@ -21,7 +21,7 @@
  */
 package eu.ehri.project.importers.ead;
 
-import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

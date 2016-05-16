@@ -19,10 +19,10 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.base.SaxXmlHandler;
 
 /**
  * Import EAD from the command line.

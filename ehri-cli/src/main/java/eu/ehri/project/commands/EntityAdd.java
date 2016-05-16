@@ -46,9 +46,6 @@ public class EntityAdd extends BaseCommand {
 
     final static String NAME = "add";
 
-    public EntityAdd() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder("P")

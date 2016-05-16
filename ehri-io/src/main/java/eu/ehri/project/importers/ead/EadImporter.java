@@ -28,9 +28,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EaImporter;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -56,9 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import static eu.ehri.project.models.idgen.IdGeneratorUtils.HIERARCHY_SEPARATOR;
-import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
-
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
@@ -67,7 +63,7 @@ import static eu.ehri.project.models.idgen.IdGeneratorUtils.SLUG_REPLACE;
  * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  */
-public class EadImporter extends EaImporter {
+public class EadImporter extends SaxXmlImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
@@ -101,43 +97,7 @@ public class EadImporter extends EaImporter {
 
         BundleManager persister = getPersister(idPath);
 
-        List<Map<String, Object>> extractedDates = extractDates(itemData);
-        replaceDates(itemData, extractedDates);
-
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION,
-                extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
-        // Add dates and descriptions to the bundle since they're @Dependent
-        // relations.
-        for (Map<String, Object> dpb : extractedDates) {
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
-        }
-        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
-            logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
-            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
-        }
-
-        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
-            logger.debug("maintenance event found {}", dpb);
-            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT,
-                    new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
-        }
-
-        Map<String, Object> unknowns = extractUnknownProperties(itemData);
-        if (!unknowns.isEmpty()) {
-            StringBuilder unknownProperties = new StringBuilder();
-            for (String u : unknowns.keySet()) {
-                unknownProperties.append(u);
-            }
-            logger.debug("Unknown Properties found: {}", unknownProperties);
-            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
-        }
-
-        // Set the description identifier same as the source file ID,
-        // which together with the lang code should form a unique
-        // identifier within the item
-        descBundle = descBundle.withDataValue(Ontology.IDENTIFIER_KEY,
-                descBundle.getDataValue(Ontology.SOURCEFILE_KEY));
+        Bundle description = getDescription(itemData);
 
         // extractDocumentaryUnit does not throw ValidationError on missing ID
         Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
@@ -150,7 +110,8 @@ public class EadImporter extends EaImporter {
         logger.debug("Imported item: {}", itemData.get("name"));
 
         Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
+                persister.createOrUpdate(mergeWithPreviousAndSave(unit,
+                        description, idPath), DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
@@ -171,11 +132,63 @@ public class EadImporter extends EaImporter {
         handleCallbacks(mutation);
         logger.debug("============== {} state: {}", frame.getId(), mutation.getState());
         if (mutation.created()) {
-            solveUndeterminedRelationships(frame, descBundle);
+            solveUndeterminedRelationships(frame);
         }
         return frame;
+    }
 
+    /**
+     * Extract the documentary unit description bundle from the raw map data.
+     * <p/>
+     * Note: the itemData map is mutable and should be considered an out parameter.
+     *
+     * @param itemData the raw data map
+     * @return a description bundle
+     * @throws ValidationError
+     */
+    protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
+        List<Map<String, Object>> extractedDates = extractDates(itemData);
+        replaceDates(itemData, extractedDates);
 
+        Map<String, Object> raw = extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+
+        Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                .addData(raw);
+
+        // Add dates and descriptions to the bundle since they're @Dependent
+        // relations.
+        for (Map<String, Object> dpb : extractedDates) {
+            descBuilder.addRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+        }
+
+        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
+            logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
+            descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
+        }
+
+        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+            logger.debug("maintenance event found {}", dpb);
+            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
+            descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
+                    new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+        }
+
+        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        if (!unknowns.isEmpty()) {
+            StringBuilder unknownProperties = new StringBuilder();
+            for (String u : unknowns.keySet()) {
+                unknownProperties.append(u);
+            }
+            logger.debug("Unknown Properties found: {}", unknownProperties);
+            descBuilder.addRelation(Ontology.HAS_UNKNOWN_PROPERTY,
+                    new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+        }
+
+        // Set the description identifier same as the source file ID,
+        // which together with the lang code should form a unique
+        // identifier within the item
+        descBuilder.addDataValue(Ontology.IDENTIFIER_KEY, raw.get(Ontology.SOURCEFILE_KEY));
+        return descBuilder.build();
     }
 
     /**
@@ -202,9 +215,8 @@ public class EadImporter extends EaImporter {
          * TODO: so for now, it is added manually
          */
         List<String> itemIdPath = Lists.newArrayList(getPermissionScope().idPath());
-        for (String p : idPath) {
-            itemIdPath.add(p);
-        }
+        itemIdPath.addAll(idPath);
+
         Bundle unitWithIds = unit.generateIds(itemIdPath);
         logger.debug("merging: docUnit's graph id = {}", unitWithIds.getId());
         // If the bundle exists, we merge
@@ -231,7 +243,6 @@ public class EadImporter extends EaImporter {
 
                 return unitWithIds.withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-
             } catch (SerializationError ex) {
                 throw new ValidationError(unit, "serialization error", ex.getMessage());
             } catch (ItemNotFound ex) {
@@ -243,7 +254,7 @@ public class EadImporter extends EaImporter {
     }
 
     /**
-     * subclasses can override this method to cater to their special needs for UndeterminedRelationships
+     * Subclasses can override this method to cater to their special needs for UndeterminedRelationships
      * by default, it expects something like this in the original EAD:
      * <p/>
      * <pre>
@@ -255,21 +266,21 @@ public class EadImporter extends EaImporter {
      * <p/>
      * it works in unison with the extractRelations() method.
      *
-     * @param unit       the current unit
-     * @param descBundle - not used
+     * @param unit the current unit
      * @throws ValidationError
      */
-    protected void solveUndeterminedRelationships(DocumentaryUnit unit, Bundle descBundle) throws ValidationError {
-        //Try to resolve the undetermined relationships
-        //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
-        //so they have id's. 
+    protected void solveUndeterminedRelationships(DocumentaryUnit unit) throws ValidationError {
+        // Try to resolve the undetermined relationships
+        // we can only create the annotations after the DocumentaryUnit
+        // and its Description have been added to the graph,
+        // so they have IDs.
         CrudViews<Link> crud = new CrudViews<>(framedGraph, Link.class);
         Bundle linkBundle = new Bundle(EntityClass.LINK)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
 
-        for (Description unitdesc : unit.getDescriptions()) {
+        for (Description desc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
-            for (AccessPoint rel : Sets.newHashSet(unitdesc.getAccessPoints())) {
+            for (AccessPoint rel : Sets.newHashSet(desc.getAccessPoints())) {
                 // the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
                 // they need to be found in the vocabularies that are in the graph
                 if (rel.getPropertyKeys().contains("cvoc")) {
@@ -303,7 +314,6 @@ public class EadImporter extends EaImporter {
                 } else {
                     logger.debug("no cvoc found");
                 }
-
             }
         }
     }
@@ -311,10 +321,10 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        String REL = "relation";
+        String rel = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
-            if (key.equals(REL)) {
+            if (key.equals(rel)) {
                 //name identifier
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
@@ -326,7 +336,7 @@ public class EadImporter extends EaImporter {
                         relationNode.put("cvoc", origRelation.get("cvoc"));
                         relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get("type"));
                     } else {
-                        relationNode.put(Ontology.NAME_KEY, origRelation.get(REL));
+                        relationNode.put(Ontology.NAME_KEY, origRelation.get(rel));
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
                         logger.debug("relationNode without type: {}", relationNode.get(Ontology.NAME_KEY));
@@ -364,32 +374,10 @@ public class EadImporter extends EaImporter {
                     relationNode.put(Ontology.ACCESS_POINT_TYPE, key.substring(0, key.indexOf("Point")));
                     relationNode.put(Ontology.NAME_KEY, data.get(key));
                     list.add(relationNode);
-
                 }
             }
         }
         return list;
-    }
-
-    /**
-     * Creates a Map containing properties of a Documentary Unit.
-     * These properties are the unit's identifiers.
-     *
-     * @param itemData Map of all extracted information
-     * @param depth    depth of node in the tree
-     * @return a Map representing a Documentary Unit node
-     * @throws ValidationError
-     */
-    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
-        Map<String, Object> unit = Maps.newHashMap();
-        if (itemData.get(OBJECT_ID) != null) {
-            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
-        }
-        if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
-            logger.debug("otherIdentifiers is not null");
-            unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
-        }
-        return unit;
     }
 
     /**
@@ -409,28 +397,6 @@ public class EadImporter extends EaImporter {
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
             logger.debug("otherIdentifiers is not null");
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
-        }
-        return unit;
-    }
-
-    /**
-     * Creates a Map containing properties of a Documentary Unit description.
-     * These properties are the unit description's properties: all except the doc unit identifiers and unknown properties.
-     *
-     * @param itemData Map of all extracted information
-     * @param depth    depth of node in the tree
-     * @return a Map representing a Documentary Unit Description node
-     * @throws ValidationError
-     */
-    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
-
-        Map<String, Object> unit = Maps.newHashMap();
-        for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID)
-                    || key.equals(Ontology.OTHER_IDENTIFIERS)
-                    || key.startsWith(SaxXmlHandler.UNKNOWN))) {
-                unit.put(key, itemData.get(key));
-            }
         }
         return unit;
     }

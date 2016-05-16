@@ -22,18 +22,13 @@ package eu.ehri.project.commands;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.utils.GraphInitializer;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 
 /**
  * Initialise the graph database with minimal nodes.
  */
 public class Initialize extends BaseCommand {
-    
+
     final static String NAME = "initialize";
-
-
-    public Initialize() {
-    }
 
     @Override
     public String getUsage() {

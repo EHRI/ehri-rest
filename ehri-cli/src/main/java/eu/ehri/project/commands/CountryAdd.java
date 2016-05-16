@@ -46,9 +46,6 @@ public class CountryAdd extends BaseCommand {
 
     final static String NAME = "countryadd";
 
-    public CountryAdd() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()
@@ -83,7 +80,7 @@ public class CountryAdd extends BaseCommand {
 
     @Override
     public int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
+                               CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         String logMessage = cmdLine.getOptionValue("c",

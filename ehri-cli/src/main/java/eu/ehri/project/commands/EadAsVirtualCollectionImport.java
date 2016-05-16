@@ -19,8 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.importers.ead.VirtualEadHandler;
 import eu.ehri.project.importers.ead.VirtualEadImporter;
 
@@ -32,17 +30,7 @@ public class EadAsVirtualCollectionImport extends ImportCommand {
     final static String NAME = "virtual-ead-import";
 
     public EadAsVirtualCollectionImport() {
-        this(VirtualEadHandler.class, VirtualEadImporter.class);
-    }
-
-    /**
-     * Generic EAD import command, designed for extending classes that use specific Handlers.
-     *
-     * @param handler  The Handler class to be used for import
-     * @param importer The Importer class to be used. If null, IcaAtomEadImporter is used.
-     */
-    public EadAsVirtualCollectionImport(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
-        super(handler, importer);
+        super(VirtualEadHandler.class, VirtualEadImporter.class);
     }
 
     @Override

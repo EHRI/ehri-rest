@@ -32,10 +32,6 @@ public class GenSchema extends BaseCommand {
 
     final static String NAME = "gen-schema";
 
-
-    public GenSchema() {
-    }
-
     @Override
     public String getUsage() {
         return NAME;

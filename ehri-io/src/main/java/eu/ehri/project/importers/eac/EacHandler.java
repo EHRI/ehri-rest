@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.EaHandler;
+import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -42,7 +43,7 @@ import java.util.Map;
  * import.
  * Makes use of eac.properties with format: part/of/path/=attribute
  */
-public class EacHandler extends EaHandler {
+public class EacHandler extends SaxXmlHandler {
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Entity>>builder()
@@ -107,4 +108,38 @@ public class EacHandler extends EaHandler {
         }
     }
 
+    private String chooseName(Object names) {
+        String nameValue;
+        if (names instanceof String) {
+            nameValue = names.toString();
+        } else if (names instanceof List) {
+            Object firstName = ((List) names).get(0);
+            if (firstName instanceof String) {
+                nameValue = firstName.toString();
+            } else {
+                Map nameMap = (Map) firstName;
+                if (nameMap.get("namePart") instanceof String) {
+                    nameValue = nameMap.get("namePart").toString();
+                } else if (nameMap.get("namePart") instanceof List) {
+                    nameValue = "";
+                    for (Object p : (List) nameMap.get("namePart")) {
+                        nameValue += p + " ";
+                    }
+
+                } else {
+                    nameValue = nameMap.get("namePart").toString();
+                }
+            }
+
+            for (int i = 1; i < ((List) names).size(); i++) {
+                Map m = (Map) ((List) names).get(i);
+                logger.debug("other name: {}", m.get("namePart"));
+                putPropertyInCurrentGraph("otherFormsOfName", m.get("namePart").toString());
+            }
+        } else {
+            logger.warn("no {} found", Ontology.NAME_KEY);
+            nameValue = "no title";
+        }
+        return nameValue.trim();
+    }
 }

@@ -36,9 +36,6 @@ public class RelationAdd extends BaseCommand {
 
     final static String NAME = "add-rel";
 
-    public RelationAdd() {
-    }
-
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder("s")

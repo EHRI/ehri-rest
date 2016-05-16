@@ -33,9 +33,6 @@ public class GetEntity extends BaseCommand {
 
     final static String NAME = "get";
 
-    public GetEntity() {
-    }
-
     @Override
     public String getUsage() {
         return String.format("%s [OPTIONS] <identifier>", NAME);
