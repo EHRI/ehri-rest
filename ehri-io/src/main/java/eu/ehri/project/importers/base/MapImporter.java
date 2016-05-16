@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -51,13 +52,16 @@ import java.util.regex.Pattern;
 public abstract class MapImporter extends AbstractImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(MapImporter.class);
-    private final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
-    private final SimpleDateFormat yearDateFormat = new SimpleDateFormat("yyyy");
-    protected final String OBJECT_ID = "objectIdentifier";
-    private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
+
+    // NB: Using English locale here to avoid ambiguities caused by system dependent
+    // time zones such as: Cannot parse "1940-05-16": Illegal instant due to time zone
+    // offset transition (Europe/Amsterdam)
+    // https://en.wikipedia.org/wiki/UTC%2B00:20
+    private static final DateTimeFormatter isoDateTimeFormat = ISODateTimeFormat.date()
+            .withLocale(Locale.ENGLISH);
 
     // Various date patterns
-    private final Pattern[] datePatterns = {
+    private static final Pattern[] datePatterns = {
             // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
             // Yad Vashem in Wp2: 12-15-1941, 9-30-1944
             Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
@@ -75,6 +79,13 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
             Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
             Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
+
+    protected static final String OBJECT_ID = "objectIdentifier";
+
+    // NB: Not static yet since these objects aren't thread safe :(
+    private final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
+    private final SimpleDateFormat yearDateFormat = new SimpleDateFormat("yyyy");
+    private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
 
     public MapImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(framedGraph, permissionScope, actioner, log);
@@ -245,8 +256,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      * @return a String containing the formatted date.
      */
     protected String normaliseDate(String date, String beginOrEnd) {
-        DateTimeFormatter fmt = ISODateTimeFormat.date();
-        String returnDate = fmt.print(DateTime.parse(date));
+        String returnDate = isoDateTimeFormat.print(DateTime.parse(date));
         if (returnDate.startsWith("00")) {
             returnDate = "19" + returnDate.substring(2);
             date = "19" + date;
@@ -256,12 +266,12 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
                 ParsePosition p = new ParsePosition(0);
                 yearMonthDateFormat.parse(date, p);
                 if (p.getIndex() > 0) {
-                    returnDate = fmt.print(DateTime.parse(date).plusMonths(1).minusDays(1));
+                    returnDate = isoDateTimeFormat.print(DateTime.parse(date).plusMonths(1).minusDays(1));
                 } else {
                     p = new ParsePosition(0);
                     yearDateFormat.parse(date, p);
                     if (p.getIndex() > 0) {
-                        returnDate = fmt.print(DateTime.parse(date).plusYears(1).minusDays(1));
+                        returnDate = isoDateTimeFormat.print(DateTime.parse(date).plusYears(1).minusDays(1));
                     }
                 }
             }
