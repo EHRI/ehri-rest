@@ -83,6 +83,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final BundleManager dao;
     private final boolean tolerant;
     private final String format;
+    private final String baseURI;
     private final String defaultLang;
     public static final String DEFAULT_LANG = "eng";
 
@@ -97,11 +98,12 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param defaultLang The language to use for elements without specified language
      */
     public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
-            Vocabulary vocabulary, boolean tolerant, String format, String defaultLang) {
+            Vocabulary vocabulary, boolean tolerant, String baseURI, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
         this.tolerant = tolerant;
+        this.baseURI = baseURI;
         this.format = format;
         this.defaultLang = defaultLang;
         this.dao = new BundleManager(framedGraph, vocabulary.idPath());
@@ -116,26 +118,35 @@ public final class JenaSkosImporter implements SkosImporter {
      */
     public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
-        this(framedGraph, actioner, vocabulary, false, null, DEFAULT_LANG);
+        this(framedGraph, actioner, vocabulary, false, null, null, DEFAULT_LANG);
     }
 
     @Override
     public JenaSkosImporter setTolerant(boolean tolerant) {
-        logger.debug("Setting importer to tolerant: " + tolerant);
+        logger.debug("Setting importer to tolerant: {}", tolerant);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, baseURI, format, defaultLang);
+    }
+
+    @Override
+    public JenaSkosImporter setBaseURI(String prefix) {
+        logger.debug("Setting importer base URI: {}", prefix);
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, prefix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setFormat(String format) {
+        logger.debug("Setting importer format: {}", format);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, baseURI, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setDefaultLang(String lang) {
+        logger.debug("Setting importer default language: {}", lang);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, format,
+                framedGraph, actioner, vocabulary, tolerant, baseURI, format,
                 LanguageHelpers.iso639DashTwoCode(lang));
     }
 
@@ -179,7 +190,7 @@ public final class JenaSkosImporter implements SkosImporter {
         OntModel model = ModelFactory.createOntologyModel();
         model.read(ios, null, format);
         OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-        logger.debug("in import file: " + SkosRDFVocabulary.CONCEPT.getURI());
+        logger.debug("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
         ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
         Map<Resource, Concept> imported = Maps.newHashMap();
 
@@ -314,7 +325,7 @@ public final class JenaSkosImporter implements SkosImporter {
                         }
                     }
                 } catch (ItemNotFound ex) {
-                    logger.error("AuthoritativeSet with id " + cvocId + " not found. " + ex.getMessage());
+                    logger.error("AuthoritativeSet with id {} not found: {}", cvocId, ex.getMessage());
                 }
             }
         }
@@ -467,10 +478,16 @@ public final class JenaSkosImporter implements SkosImporter {
         return parts.size() > 1 ? Optional.of(parts.get(1)) : Optional.<String>absent();
     }
 
-    private static String getId(URI uri) {
-        return uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
-                + (uri.getQuery() != null ? uri.getQuery() : "")
-                + (uri.getFragment() != null ? uri.getFragment() : "");
+    private String getId(URI uri) {
+        if (baseURI != null && uri.toString().startsWith(baseURI)) {
+            return uri.toString().substring(baseURI.length());
+        } else if (uri.getFragment() != null) {
+            return uri.getFragment();
+        } else {
+            return uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                    + (uri.getQuery() != null ? uri.getQuery() : "")
+                    + (uri.getFragment() != null ? uri.getFragment() : "");
+        }
     }
 
     private Optional<String> getLogMessage(String msg) {

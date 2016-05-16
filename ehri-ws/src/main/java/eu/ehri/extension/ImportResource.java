@@ -92,6 +92,7 @@ public class ImportResource extends AbstractRestResource {
     public static final String LOG_PARAM = "log";
     public static final String SCOPE_PARAM = "scope";
     public static final String TOLERANT_PARAM = "tolerant";
+    public static final String BASE_URI_PARAM = "baseURI";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String VERSION_PARAM = "version";
     public static final String HANDLER_PARAM = "handler";
@@ -136,6 +137,7 @@ public class ImportResource extends AbstractRestResource {
     public Response importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(BASE_URI_PARAM) String baseURI,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
             InputStream stream)
@@ -152,6 +154,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importer
                     .setFormat(format)
                     .setTolerant(tolerant)
+                    .setBaseURI(baseURI)
                     .importFile(stream, getLogMessage(logMessage).orNull());
             logger.debug("Committing SKOS import transaction...");
             tx.success();
