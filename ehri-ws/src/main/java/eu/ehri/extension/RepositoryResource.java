@@ -33,12 +33,15 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.DocumentWriter;
+import eu.ehri.project.exporters.ead.Ead2002Exporter;
+import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
+import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -61,6 +64,8 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Provides a web service interface for the Repository.
@@ -174,7 +179,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      *
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
-     * @return an EAD XML Document
+     * @return an EAG XML Document
      * @throws IOException
      * @throws ItemNotFound
      */
@@ -199,6 +204,52 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                     }
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
+        }
+    }
+
+    /**
+     * Export the given repository's top-level units as EAD streamed
+     * in a ZIP file.
+     *
+     * @param id   the unit id
+     * @param lang a three-letter ISO639-2 code
+     * @return an EAD XML Document
+     * @throws IOException
+     * @throws ItemNotFound
+     */
+    @GET
+    @Path("{id:[^/]+}/ead")
+    @Produces("application/zip")
+    public Response exportEad(@PathParam("id") String id,
+            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            throws IOException, ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            final Repository repo = views.detail(id, getRequesterUserProfile());
+            final EadExporter eadExporter = new Ead2002Exporter(graph);
+            return Response.ok(new StreamingOutput() {
+                @Override
+                public void write(OutputStream outputStream) throws IOException {
+                    try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
+                        for (DocumentaryUnit doc : repo.getCollections()) {
+                            ZipEntry zipEntry = new ZipEntry(doc.getId() + ".xml");
+                            zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
+                            zos.putNextEntry(zipEntry);
+                            eadExporter.export(doc, zos, lang);
+                            zos.closeEntry();
+                        }
+                        tx.success();
+                    } catch (TransformerException e) {
+                        throw new WebApplicationException(e);
+                    } finally {
+                        tx.close();
+                    }
+                }
+            }).type("application/zip").build();
+        } catch (Exception e) {
+            tx.failure();
+            tx.close();
+            throw e;
         }
     }
 }
