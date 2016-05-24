@@ -19,17 +19,25 @@
 
 package eu.ehri.extension.test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertEquals;
@@ -137,6 +145,31 @@ public class RepositoryRestClientTest extends AbstractRestClientTest {
                 .get(ClientResponse.class);
 
         assertStatus(NOT_FOUND, response);
+    }
+
+    @Test
+    public void testExportEad() throws Exception {
+        // Create
+        URI uri = entityUri(Entities.REPOSITORY, ID, "ead");
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        File tmp = File.createTempFile("test", ".zip");
+        tmp.deleteOnExit();
+        try (InputStream stream = response.getEntityInputStream()) {
+            Files.copy(stream, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            final AtomicInteger count = new AtomicInteger(0);
+            try (FileInputStream fis = new FileInputStream(tmp);
+                 ZipInputStream zis = new ZipInputStream(fis)) {
+                ZipEntry zipEntry;
+                while ((zipEntry = zis.getNextEntry()) != null) {
+                    System.out.println(zipEntry.getName());
+                    count.getAndIncrement();
+                }
+            }
+            // There should be three top level items: c1, c4, and m19
+            assertEquals(3, count.get());
+        }
     }
 
     @Test
