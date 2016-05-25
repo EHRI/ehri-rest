@@ -36,7 +36,6 @@ import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
@@ -95,13 +94,13 @@ public class DocumentaryUnitResource
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             DocumentaryUnit parent = manager.getEntity(id, DocumentaryUnit.class);
             Iterable<DocumentaryUnit> units = all
                     ? parent.getAllChildren()
                     : parent.getChildren();
-            return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()), tx);
+            return streamingPage(getQuery().page(units, cls), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -114,7 +113,7 @@ public class DocumentaryUnitResource
     @Path("{id:[^/]+}")
     @Override
     public Response update(@PathParam("id") String id,
-                           Bundle bundle) throws PermissionDenied,
+            Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = updateItem(id, bundle);
@@ -140,19 +139,18 @@ public class DocumentaryUnitResource
     @Path("{id:[^/]+}/" + Entities.DOCUMENTARY_UNIT)
     @Override
     public Response createChild(@PathParam("id") String id,
-                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final DocumentaryUnit parent = views.detail(id, user);
+            final DocumentaryUnit parent = api().detail(id, cls);
             Response resource = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
                         @Override
                         public void process(DocumentaryUnit doc) throws PermissionDenied {
                             parent.addChild(doc);
                         }
                     },
-                    views.setScope(parent));
+                    api().withScope(parent), cls);
             tx.success();
             return resource;
         }
@@ -161,8 +159,8 @@ public class DocumentaryUnitResource
     /**
      * Export the given documentary unit as EAD.
      *
-     * @param id      the unit id
-     * @param lang    a three-letter ISO639-2 code
+     * @param id   the unit id
+     * @param lang a three-letter ISO639-2 code
      * @return an EAD XML Document
      * @throws IOException
      * @throws ItemNotFound
@@ -173,8 +171,8 @@ public class DocumentaryUnitResource
     public Response exportEad(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        try(final Tx tx = graph.getBaseGraph().beginTx()) {
-            DocumentaryUnit unit = views.detail(id, getRequesterUserProfile());
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            DocumentaryUnit unit = api().detail(id, cls);
             EadExporter eadExporter = new Ead2002Exporter(graph);
             final Document document = eadExporter.export(unit, lang);
             tx.success();

@@ -2,9 +2,11 @@ package eu.ehri.project.views;
 
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.views.api.UserProfilesApi;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,29 +14,31 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class UserProfileViewsTest extends AbstractFixtureTest {
+public class UserProfilesApiTest extends AbstractFixtureTest {
 
-    private UserProfileViews views;
     private ActionManager am;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        views = new UserProfileViews(graph);
         am = new ActionManager(graph);
+    }
+
+    private UserProfilesApi views(Accessor accessor) {
+        return loggingApi(accessor).userProfiles();
     }
 
     @Test
     public void testNoOpLogging() throws Exception {
         // If no items are given, we shouldn't log anything...
         SystemEvent latestEvent = am.getLatestGlobalEvent();
-        views.addWatching(invalidUser, Lists.<String>newArrayList(), invalidUser);
+        views(invalidUser).addWatching(invalidUser, Lists.<String>newArrayList());
         assertEquals(latestEvent, am.getLatestGlobalEvent());
     }
 
     @Test
     public void testAddWatching() throws Exception {
-        views.addWatching(invalidUser, Lists.newArrayList(item.getId()), invalidUser);
+        views(invalidUser).addWatching(invalidUser, Lists.newArrayList(item.getId()));
         SystemEvent latestEvent = am.getLatestGlobalEvent();
         assertEquals(invalidUser, latestEvent.getActioner());
         assertEquals(EventTypes.watch, latestEvent.getEventType());
@@ -44,7 +48,7 @@ public class UserProfileViewsTest extends AbstractFixtureTest {
     public void testRemoveWatching() throws Exception {
         invalidUser.addWatching(item);
         List<String> ids = Lists.newArrayList(item.getId());
-        views.removeWatching(invalidUser, ids, invalidUser);
+        views(invalidUser).removeWatching(invalidUser, ids);
         SystemEvent latestEvent = am.getLatestGlobalEvent();
         assertEquals(invalidUser, latestEvent.getActioner());
         assertEquals(EventTypes.unwatch, latestEvent.getEventType());
@@ -52,7 +56,7 @@ public class UserProfileViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testAddFollowers() throws Exception {
-        views.addFollowers(invalidUser, Lists.newArrayList(validUser.getId()), invalidUser);
+        views(invalidUser).addFollowers(invalidUser, Lists.newArrayList(validUser.getId()));
         SystemEvent latestEvent = am.getLatestGlobalEvent();
         assertEquals(invalidUser, latestEvent.getActioner());
         assertEquals(EventTypes.follow, latestEvent.getEventType());
@@ -61,7 +65,7 @@ public class UserProfileViewsTest extends AbstractFixtureTest {
     @Test
     public void testRemoveFollowers() throws Exception {
         invalidUser.addFollowing(validUser);
-        views.removeFollowers(invalidUser, Lists.newArrayList(validUser.getId()), invalidUser);
+        views(invalidUser).removeFollowers(invalidUser, Lists.newArrayList(validUser.getId()));
         SystemEvent latestEvent = am.getLatestGlobalEvent();
         assertEquals(invalidUser, latestEvent.getActioner());
         assertEquals(EventTypes.unfollow, latestEvent.getEventType());
@@ -69,7 +73,7 @@ public class UserProfileViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testAddBlocked() throws Exception {
-        views.addBlocked(invalidUser, Lists.newArrayList(validUser.getId()), invalidUser);
+        views(invalidUser).addBlocked(invalidUser, Lists.newArrayList(validUser.getId()));
         SystemEvent latestEvent = am.getLatestGlobalEvent();
         assertEquals(invalidUser, latestEvent.getActioner());
         assertEquals(EventTypes.block, latestEvent.getEventType());
@@ -78,7 +82,7 @@ public class UserProfileViewsTest extends AbstractFixtureTest {
     @Test
     public void testRemoveBlocked() throws Exception {
         invalidUser.addBlocked(validUser);
-        views.removeBlocked(invalidUser, Lists.newArrayList(validUser.getId()), invalidUser);
+        views(invalidUser).removeBlocked(invalidUser, Lists.newArrayList(validUser.getId()));
         SystemEvent latestEvent = am.getLatestGlobalEvent();
         assertEquals(invalidUser, latestEvent.getActioner());
         assertEquals(EventTypes.unblock, latestEvent.getEventType());

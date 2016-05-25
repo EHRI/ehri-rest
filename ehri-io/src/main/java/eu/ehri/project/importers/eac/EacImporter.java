@@ -26,16 +26,17 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.SaxXmlHandler;
+import eu.ehri.project.importers.base.SaxXmlImporter;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
@@ -46,7 +47,8 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.api.Api;
+import eu.ehri.project.views.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,7 +207,7 @@ public class EacImporter extends SaxXmlImporter {
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
         //so they have id's.
-        CrudViews<Link> crud = new CrudViews<>(framedGraph, Link.class);
+        Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = new Bundle(EntityClass.LINK)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
 
@@ -231,12 +233,12 @@ public class EacImporter extends SaxXmlImporter {
                                 try {
                                     String linkType = relationVertex.getProperty(REL_TYPE);
                                     Bundle data = linkBundle.withDataValue(Ontology.LINK_HAS_TYPE, linkType);
-                                    Link link = crud.create(data, actioner.as(UserProfile.class));
+                                    Link link = api.create(data, Link.class);
                                     unit.addLink(link);
                                     concept.addLink(link);
                                     link.addLinkBody(rel);
-                                } catch (PermissionDenied ex) {
-                                    logger.error("Unexpected permission error on EAC relationship creation: {}", ex);
+                                } catch (PermissionDenied | DeserializationError ex) {
+                                    logger.error("Unexpected error on EAC relationship creation: {}", ex);
                                     throw new RuntimeException(ex);
                                 }
                             }

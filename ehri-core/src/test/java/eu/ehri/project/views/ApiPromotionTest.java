@@ -24,6 +24,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.views.api.impl.ApiImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,20 +33,19 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test promotion/demotion.
- *
+ * <p/>
  * NB: An item can be promoted multiple times (meaning there's
  * a "promotedBy" relationship from an item to a user. To
  * properly demote an item all "promotedBy" relationships must
  * be removed.
- *
+ * <p/>
  * NB2: This might be to change.
  */
-public class PromotionViewsTest extends AbstractFixtureTest {
+public class ApiPromotionTest extends AbstractFixtureTest {
 
     private UserProfile promoter;
     private UserProfile viewer;
     private AclManager acl;
-    private PromotionViews promotionViews;
 
     @Before
     public void setUp() throws Exception {
@@ -53,14 +53,13 @@ public class PromotionViewsTest extends AbstractFixtureTest {
         promoter = manager.getEntity("tim", UserProfile.class);
         viewer = manager.getEntity("reto", UserProfile.class);
         acl = new AclManager(graph);
-        promotionViews = new PromotionViews(graph);
     }
 
-    @Test(expected = PromotionViews.NotPromotableError.class)
+    @Test(expected = ApiImpl.NotPromotableError.class)
     public void testPromotingUnpromotableItemThrowsAnError() throws Exception {
         Annotation ann = manager.getEntity("ann3", Annotation.class);
         assertFalse(acl.canAccess(ann, viewer));
-        promotionViews.upVote(ann, promoter);
+        api(promoter).upVote(ann);
         assertTrue(acl.canAccess(ann, viewer));
     }
 
@@ -68,7 +67,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     public void testDemoteItem() throws Exception {
         Annotation ann = manager.getEntity("ann4", Annotation.class);
         assertTrue(acl.canAccess(ann, viewer));
-        promotionViews.removeUpVote(ann, promoter);
+        api(promoter).removeUpVote(ann);
         assertFalse(acl.canAccess(ann, viewer));
     }
 
@@ -77,7 +76,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
         UserProfile promoter2 = manager.getEntity("mike", UserProfile.class);
         Annotation ann = manager.getEntity("ann4", Annotation.class);
         assertTrue(acl.canAccess(ann, viewer));
-        promotionViews.removeDownVote(ann, promoter2);
+        api(promoter2).removeDownVote(ann);
         // Item is *still* promoted by an other user
         // so we can still see it.
         assertTrue(acl.canAccess(ann, viewer));
@@ -87,7 +86,7 @@ public class PromotionViewsTest extends AbstractFixtureTest {
     public void testPromoteItem() throws Exception {
         Annotation ann = manager.getEntity("ann5", Annotation.class);
         assertFalse(acl.canAccess(ann, viewer));
-        promotionViews.upVote(ann, promoter);
+        api(promoter).upVote(ann);
         assertTrue(acl.canAccess(ann, viewer));
     }
 

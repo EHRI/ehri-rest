@@ -19,19 +19,39 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.*;
+import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.CreateResource;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.ParentResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.api.Api;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -74,12 +94,11 @@ public class AuthoritativeSetResource extends
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            AuthoritativeSet set = views.detail(id, user);
-            return streamingPage(getQuery(AuthoritativeItem.class)
-                    .page(set.getAuthoritativeItems(), user), tx);
+            AuthoritativeSet set = api().detail(id, cls);
+            return streamingPage(getQuery()
+                    .page(set.getAuthoritativeItems(), AuthoritativeItem.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -91,7 +110,7 @@ public class AuthoritativeSetResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
-                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response response = createItem(bundle, accessors);
@@ -132,13 +151,12 @@ public class AuthoritativeSetResource extends
             @PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            AuthoritativeSet set = views.detail(id, user);
-            LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<>(graph,
-                    AuthoritativeItem.class, set);
+            Api api = api();
+            AuthoritativeSet set = api.detail(id, cls);
             Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
+            Api scopedApi = api.withScope(set);
             for (AuthoritativeItem agent : agents) {
-                agentViews.delete(agent.getId(), user);
+                scopedApi.delete(agent.getId());
             }
             tx.success();
             return Response.status(Status.OK).build();
@@ -153,19 +171,18 @@ public class AuthoritativeSetResource extends
     @Path("{id:[^/]+}/" + Entities.HISTORICAL_AGENT)
     @Override
     public Response createChild(@PathParam("id") String id,
-                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final AuthoritativeSet set = views.detail(id, user);
+            final AuthoritativeSet set = api().detail(id, cls);
             Response item = createItem(bundle, accessors, new Handler<HistoricalAgent>() {
                 @Override
                 public void process(HistoricalAgent agent) throws PermissionDenied {
                     set.addItem(agent);
                     agent.setPermissionScope(set);
                 }
-            }, views.setScope(set).setClass(HistoricalAgent.class));
+            }, api().withScope(set), HistoricalAgent.class);
             tx.success();
             return item;
         }

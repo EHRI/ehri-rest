@@ -30,8 +30,6 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.ModelTestBase;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -47,10 +45,10 @@ public class CvocConceptTest extends ModelTestBase {
 
     /**
      * Just play a bit with a small 'graph' of concepts.
-     * 
+     * <p/>
      * NOTE: Better wait for the improved testing 'fixture' before doing
      * extensive testing on Concepts
-     * 
+     *
      * @throws Exception
      */
     @SuppressWarnings("serial")
@@ -155,67 +153,66 @@ public class CvocConceptTest extends ModelTestBase {
     @Test
     public void testCreateConceptWithDescription() throws Exception {
         UserProfile validUser = manager.getEntity("mike", UserProfile.class);
-        Crud<Concept> conceptViews = new CrudViews<>(graph,
-                Concept.class);
         Bundle bundle = Bundle.fromData(getAppleTestBundle());
 
-        Concept concept = null;
-        concept = conceptViews.create(bundle, validUser);
+        Concept concept = api(validUser).create(bundle, Concept.class);
         graph.getBaseGraph().commit();
 
-		// Does the label have the correct properties
-		assertNotNull(concept);
-		
-		// test for description
-		Description description = concept.getDescriptions().iterator().next();
-		assertEquals(TEST_LABEL_LANG, description.getLanguageOfDescription());
-		
-		//String[] altLabels = ((ConceptDescription)description).getAltLabels();		
-		// NOTE: use framing on the vertex to get the Model class
-		// that is the frames way of doning things
-		
-		ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);		
-		assertEquals("pref1", descr.getName());
-		// etc. etc.
-		
-		//String[] altLabels = descr.getAltLabels();		
-		//assertEquals("alt2", altLabels[1]);
-		// NOTE we can't call getAltLabels() on the interface, because it is optional
-		List<String> altLabels = descr.getProperty(Ontology.CONCEPT_ALTLABEL);
-		assertFalse(altLabels == null);
-		assertEquals(2, altLabels.size());
-		assertEquals("alt2", altLabels.get(1));
-	}
-    
-	@SuppressWarnings("serial")
+        // Does the label have the correct properties
+        assertNotNull(concept);
+
+        // test for description
+        Description description = concept.getDescriptions().iterator().next();
+        assertEquals(TEST_LABEL_LANG, description.getLanguageOfDescription());
+
+        //String[] altLabels = ((ConceptDescription)description).getAltLabels();
+        // NOTE: use framing on the vertex to get the Model class
+        // that is the frames way of doning things
+
+        ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);
+        assertEquals("pref1", descr.getName());
+        // etc. etc.
+
+        //String[] altLabels = descr.getAltLabels();
+        //assertEquals("alt2", altLabels[1]);
+        // NOTE we can't call getAltLabels() on the interface, because it is optional
+        List<String> altLabels = descr.getProperty(Ontology.CONCEPT_ALTLABEL);
+        assertFalse(altLabels == null);
+        assertEquals(2, altLabels.size());
+        assertEquals("alt2", altLabels.get(1));
+    }
+
+    @SuppressWarnings("serial")
     @Test
-	public void testAddConceptToVocabulary() throws Exception {
-		UserProfile validUser = manager.getEntity("mike", UserProfile.class);
+    public void testAddConceptToVocabulary() throws Exception {
+        Map<String, Object> data = new HashMap<String, Object>() {{
+            put(Ontology.IDENTIFIER_KEY, "testVocabulary");
+        }};
+        Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);
+        data = new HashMap<String, Object>() {{
+            put(Ontology.IDENTIFIER_KEY, "apples");
+        }};
+        Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
 
-		Map<String, Object> data = new HashMap<String, Object>() {{put(Ontology.IDENTIFIER_KEY, "testVocabulary");}};
-		Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);
-		data = new HashMap<String, Object>() {{put(Ontology.IDENTIFIER_KEY, "apples");}};
-		Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
+        // frame it
+        Vocabulary vocabulary = graph.frame(v_voc, Vocabulary.class);
+        Concept apples = graph.frame(v_apples, Concept.class);
 
-		// frame it
-		Vocabulary vocabulary = graph.frame(v_voc, Vocabulary.class);
-		Concept apples = graph.frame(v_apples, Concept.class);
-
-		// now add the apples to the vocabulary
+        // now add the apples to the vocabulary
         vocabulary.addItem(apples);
         assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
-	}
-	
-	// test creation of a vocabulary using the BundleManager
-	@Test
-	public void testCreateVocabulary() throws Exception {
+    }
+
+    // test creation of a vocabulary using the BundleManager
+    @Test
+    public void testCreateVocabulary() throws Exception {
         String vocid = "voc-test-id";
         Bundle bundle = Bundle.Builder.withClass(EntityClass.CVOC_VOCABULARY)
                 .setId(vocid)
                 .addDataValue(Ontology.IDENTIFIER_KEY, vocid)
                 .addDataValue(Ontology.NAME_KEY, "Test Vocabulaey")
                 .build();
-         Vocabulary vocabulary = new BundleManager(graph).create(bundle, Vocabulary.class);
-         assertEquals(vocid, vocabulary.getIdentifier());
-	}
+        Vocabulary vocabulary = new BundleManager(graph).create(bundle, Vocabulary.class);
+        assertEquals(vocid, vocabulary.getIdentifier());
+    }
 }

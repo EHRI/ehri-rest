@@ -39,11 +39,12 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
@@ -57,7 +58,8 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.LanguageHelpers;
-import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.api.Api;
+import eu.ehri.project.views.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -260,7 +262,8 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private void solveUndeterminedRelationships(Concept unit, Map<AuthoritativeItem, String> linkedConcepts) {
-        GraphManager manager = GraphManagerFactory.getInstance(framedGraph);
+        Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
+
         for (AuthoritativeItem concept : linkedConcepts.keySet()) {
             try {
                 String reltype = linkedConcepts.get(concept);
@@ -268,12 +271,10 @@ public final class JenaSkosImporter implements SkosImporter {
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
                         .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, SaxXmlImporter.RESOLVED_LINK_DESC);
-                UserProfile user = manager.getEntity(actioner.getId(), UserProfile.class);
-                Link link;
-                link = new CrudViews<>(framedGraph, Link.class).create(linkBundle, user);
+                Link link = api.create(linkBundle, Link.class);
                 unit.addLink(link);
                 concept.addLink(link);
-            } catch (ItemNotFound | ValidationError | PermissionDenied ex) {
+            } catch (ValidationError | PermissionDenied | DeserializationError ex) {
                 logger.error(ex.getMessage());
             }
         }

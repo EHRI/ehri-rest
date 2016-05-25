@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.views.api.impl;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
@@ -39,76 +39,59 @@ import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+import eu.ehri.project.acl.PermissionUtils;
+import eu.ehri.project.views.api.VirtualUnitsApi;
 
 import java.util.List;
 
 /**
  * View class for interacting with virtual units.
  */
-public class VirtualUnitViews {
+class VirtualUnitsApiImpl implements VirtualUnitsApi {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
-    private final AclManager aclManager;
-    private final ViewHelper viewHelper;
+    private final PermissionUtils viewHelper;
+    private final Accessor accessor;
 
-    public VirtualUnitViews(FramedGraph<?> graph) {
+    VirtualUnitsApiImpl(FramedGraph<?> graph, Accessor accessor) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.aclManager = new AclManager(graph);
-        this.viewHelper = new ViewHelper(graph);
-
+        this.viewHelper = new PermissionUtils(graph);
+        this.accessor = accessor;
     }
 
-    public void moveIncludedUnits(VirtualUnit from, VirtualUnit to, Iterable<DocumentaryUnit> included,
-            Accessor accessor) throws PermissionDenied {
+    @Override
+    public void moveIncludedUnits(VirtualUnit from, VirtualUnit to, Iterable<DocumentaryUnit> included) throws PermissionDenied {
         // Wrap this in a list as a precaution because it
         // will be iterated twice!
         List<DocumentaryUnit> items = Lists.newArrayList(included);
-        removeIncludedUnits(from, items, accessor);
-        addIncludedUnits(to, items, accessor);
+        removeIncludedUnits(from, items);
+        addIncludedUnits(to, items);
     }
 
-    /**
-     * Add documentary units to be included in a virtual unit as child items.
-     *
-     * @param parent   The parent VU
-     * @param included A set of child DUs
-     * @param accessor The current user
-     * @throws PermissionDenied
-     */
-    public void addIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included, Accessor accessor)
+    @Override
+    public VirtualUnit addIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included)
             throws PermissionDenied {
         viewHelper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         for (DocumentaryUnit unit : included) {
             parent.addIncludedUnit(unit);
         }
+        return parent;
     }
 
-    /**
-     * Remove documentary units from a virtual unit as child items.
-     *
-     * @param parent   The parent VU
-     * @param included A set of child DUs
-     * @param accessor The current user
-     * @throws PermissionDenied
-     */
-    public void removeIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included, Accessor accessor)
+    @Override
+    public VirtualUnit removeIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included)
             throws PermissionDenied {
         viewHelper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         for (DocumentaryUnit unit : included) {
             parent.removeIncludedUnit(unit);
         }
+        return parent;
     }
 
-    /**
-     * Find virtual collections to which this item belongs.
-     *
-     * @param item     An item (typically a documentary unit)
-     * @param accessor The current user
-     * @return A set of top-level virtual units
-     */
-    public Iterable<VirtualUnit> getVirtualCollections(Entity item, Accessor accessor) {
+    @Override
+    public Iterable<VirtualUnit> getVirtualCollections(Entity item) {
 
         // This is a relatively complicated traversal. We want to go from the item,
         // then to any descriptions, from those descriptions to any virtual units
@@ -148,14 +131,8 @@ public class VirtualUnitViews {
         return graph.frameVertices(out, VirtualUnit.class);
     }
 
-    /**
-     * Find virtual collections to which this user belongs.
-     *
-     * @param user     An user (typically a documentary unit)
-     * @param accessor The current user
-     * @return A set of top-level virtual units
-     */
-    public Iterable<VirtualUnit> getVirtualCollectionsForUser(Entity user, Accessor accessor) {
+    @Override
+    public Iterable<VirtualUnit> getVirtualCollectionsForUser(Entity user) {
         GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<>();
         Pipeline<Vertex, Vertex> filtered = pipe.start(user.asVertex())
                 .in(Ontology.VC_HAS_AUTHOR)

@@ -23,16 +23,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
@@ -44,16 +43,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
-public class LinkViewsTest extends AbstractFixtureTest {
-
-    private LinkViews linkViews;
-    private ActionManager actionManager;
+public class ApiLinkingTest extends AbstractFixtureTest {
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        linkViews = new LinkViews(graph);
-        actionManager = new ActionManager(graph);
     }
 
     @Test
@@ -72,23 +66,23 @@ public class LinkViewsTest extends AbstractFixtureTest {
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = linkViews.create("c1", "a1", Lists.newArrayList("ur1"),
-                linkBundle, validUser, Lists.<Accessor>newArrayList());
+        Link link = api(validUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
+                linkBundle, Lists.<Accessor>newArrayList());
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2L, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
         assertEquals(1L, Iterables.size(link.getLinkBodies()));
         assertTrue(Iterables.contains(link.getLinkBodies(), rel));
-        assertTrue(Lists.newArrayList(actionManager
+        assertTrue(Lists.newArrayList(api(validUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
     }
 
 
     @Test(expected = PermissionDenied.class)
     public void testCreateLinkWithoutPermission() throws Exception {
-        linkViews.create("c1", "a1", Lists.newArrayList("ur1"),
-                getLinkBundle("won't work!", "too bad!"), invalidUser,
+        api(invalidUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
+                getLinkBundle("won't work!", "too bad!"),
                 Lists.<Accessor>newArrayList());
     }
 
@@ -100,8 +94,8 @@ public class LinkViewsTest extends AbstractFixtureTest {
         String linkDesc = "Test Link";
         String linkType = "subjectAccess";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = linkViews.createAccessPointLink("c1", "a1", "cd1", linkDesc, linkType,
-                linkBundle, validUser, Lists.<Accessor>newArrayList(validUser, invalidUser));
+        Link link = api(validUser).createAccessPointLink("c1", "a1", "cd1", linkDesc, linkType,
+                linkBundle, Lists.<Accessor>newArrayList(validUser, invalidUser));
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2L, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -113,7 +107,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
         Description d = rel.getDescription();
         assertEquals(desc, d);
         assertTrue(link.hasAccessRestriction());
-        assertTrue(Lists.newArrayList(actionManager
+        assertTrue(Lists.newArrayList(api(validUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
     }
 

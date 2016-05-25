@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.views.api.impl;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSortedMap;
@@ -46,8 +46,9 @@ public class QueryUtils {
      * @param filterList A list of filter spec strings
      * @return A map of filter specs
      */
-    static SortedMap<String, Pair<Query.FilterPredicate, Object>> parseFilters(Collection<String> filterList) {
-        ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, Object>> builder =
+    public static SortedMap<String, Pair<QueryApiImpl.FilterPredicate, Object>> parseFilters(Collection<String>
+            filterList) {
+        ImmutableSortedMap.Builder<String, Pair<QueryApiImpl.FilterPredicate, Object>> builder =
                 new ImmutableSortedMap.Builder<>(Ordering.natural());
         Splitter psplit = Splitter.on("__");
         Splitter vsplit = Splitter.on(":");
@@ -59,10 +60,10 @@ public class QueryUtils {
                 List<String> pp = psplit.splitToList(ppred);
                 if (pp.size() == 1) {
                     builder.put(pp.get(0), new Pair<>(
-                            Query.FilterPredicate.EQUALS, ((Object) value)));
+                            QueryApiImpl.FilterPredicate.EQUALS, ((Object) value)));
                 } else if (pp.size() > 1) {
                     builder.put(pp.get(0), new Pair<>(
-                            Query.FilterPredicate.valueOf(pp.get(1)), (Object)value));
+                            QueryApiImpl.FilterPredicate.valueOf(pp.get(1)), (Object)value));
                 }
             }
         }
@@ -75,16 +76,16 @@ public class QueryUtils {
      * @param orderSpecs A list of order spec strings
      * @return A map of order specs
      */
-    static SortedMap<String, Query.Sort> parseOrderSpecs(Collection<String> orderSpecs) {
-        ImmutableSortedMap.Builder<String, Query.Sort> builder =
+    public static SortedMap<String, QueryApiImpl.Sort> parseOrderSpecs(Collection<String> orderSpecs) {
+        ImmutableSortedMap.Builder<String, QueryApiImpl.Sort> builder =
                 new ImmutableSortedMap.Builder<>(Ordering.natural());
         Splitter psplit = Splitter.on("__");
         for (String spec : orderSpecs) {
             List<String> od = psplit.splitToList(spec);
             if (od.size() == 1) {
-                builder.put(od.get(0), Query.Sort.ASC);
+                builder.put(od.get(0), QueryApiImpl.Sort.ASC);
             } else if (od.size() > 1) {
-                builder.put(od.get(0), Query.Sort.valueOf(od.get(1)));
+                builder.put(od.get(0), QueryApiImpl.Sort.valueOf(od.get(1)));
             }
         }
         return builder.build();

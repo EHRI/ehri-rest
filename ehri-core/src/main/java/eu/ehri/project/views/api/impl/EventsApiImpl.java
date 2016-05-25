@@ -17,7 +17,7 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.views.api.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -42,27 +42,28 @@ import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.utils.pipes.AggregatorPipe;
+import eu.ehri.project.views.api.EventsApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
  * View class for handling event streams.
  */
-public class EventViews {
+public class EventsApiImpl implements eu.ehri.project.views.api.EventsApi {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventViews.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventsApiImpl.class);
 
     // Maximum number of events to be aggregated in a single batch
     private static final int MAX_AGGREGATION = 200;
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
+    private final Accessor accessor;
     private final ActionManager actionManager;
     private final int offset;
     private final int limit;
@@ -97,18 +98,9 @@ public class EventViews {
         }
     };
 
-    // Discriminator for personalised events
-    public enum ShowType {
-        watched, followed
-    }
-
-    // Discriminator for aggregation type
-    public enum Aggregation {
-        user, strict, off
-    }
-
     public static class Builder {
-        private FramedGraph<?> graph;
+        private final FramedGraph<?> graph;
+        private final Accessor accessor;
         private int offset = -1;
         private int limit = -1;
         private Set<String> users = Sets.newHashSet();
@@ -120,8 +112,24 @@ public class EventViews {
         private Set<ShowType> showType = Sets.newHashSet();
         private Aggregation aggregation = Aggregation.strict;
 
-        public Builder(FramedGraph<?> graph) {
+        public Builder(FramedGraph<?> graph, Accessor accessor) {
             this.graph = graph;
+            this.accessor = accessor;
+        }
+
+        private Builder(EventsApiImpl eventsApi) {
+            this.graph = eventsApi.graph;
+            this.accessor = eventsApi.accessor;
+            this.offset = eventsApi.offset;
+            this.limit = eventsApi.limit;
+            this.users = eventsApi.users;
+            this.ids = eventsApi.ids;
+            this.entityTypes = eventsApi.entityTypes;
+            this.eventTypes = eventsApi.eventTypes;
+            this.from = eventsApi.from;
+            this.to = eventsApi.to;
+            this.showType = eventsApi.showType;
+            this.aggregation = eventsApi.aggregation;
         }
 
         public Builder withRange(int offset, int limit) {
@@ -140,25 +148,13 @@ public class EventViews {
             return this;
         }
 
-        public Builder withEntityTypes(String... entities) {
-            for (String entity : entities) {
-                try {
-                    this.entityTypes.add(EntityClass.withName(entity));
-                } catch (NoSuchElementException e) {
-                    logger.warn("Invalid entity type: " + entity);
-                }
-            }
+        public Builder withEntityTypes(EntityClass... entities) {
+            this.entityTypes.addAll(Lists.newArrayList(entities));
             return this;
         }
 
-        public Builder withEventTypes(String... eventTypes) {
-            for (String eventType : eventTypes) {
-                try {
-                    this.eventTypes.add(EventTypes.valueOf(eventType));
-                } catch (IllegalArgumentException e) {
-                    logger.warn("Invalid event type: " + eventType);
-                }
-            }
+        public Builder withEventTypes(EventTypes... eventTypes) {
+            this.eventTypes.addAll(Lists.newArrayList(eventTypes));
             return this;
         }
 
@@ -172,14 +168,8 @@ public class EventViews {
             return this;
         }
 
-        public Builder withShowType(String... showTypes) {
-            for (String showType : showTypes) {
-                try {
-                    this.showType.add(ShowType.valueOf(showType));
-                } catch (NoSuchElementException e) {
-                    logger.warn("Invalid show type type: " + showType);
-                }
-            }
+        public Builder withShowType(ShowType... showTypes) {
+            this.showType.addAll(Lists.newArrayList(showTypes));
             return this;
         }
 
@@ -188,9 +178,10 @@ public class EventViews {
             return this;
         }
 
-        public EventViews build() {
-            return new EventViews(
+        public EventsApi build() {
+            return new EventsApiImpl(
                     graph,
+                    accessor,
                     offset,
                     limit,
                     users,
@@ -205,8 +196,9 @@ public class EventViews {
         }
     }
 
-    private EventViews(
+    private EventsApiImpl(
             FramedGraph<?> graph,
+            Accessor accessor,
             int offset,
             int limit,
             Collection<String> users,
@@ -218,6 +210,7 @@ public class EventViews {
             Collection<ShowType> showType,
             Aggregation aggregation) {
         this.graph = graph;
+        this.accessor = accessor;
         this.actionManager = new ActionManager(graph);
         this.manager = GraphManagerFactory.getInstance(graph);
         this.offset = offset;
@@ -233,8 +226,8 @@ public class EventViews {
 
     }
 
-    public EventViews(FramedGraph<?> graph) {
-        this(graph,
+    public EventsApiImpl(FramedGraph<?> graph, Accessor accessor) {
+        this(graph, accessor,
                 -1,
                 -1,
                 Lists.<String>newArrayList(),
@@ -247,7 +240,8 @@ public class EventViews {
                 Aggregation.strict);
     }
 
-    public Iterable<SystemEvent> list(Accessor accessor) {
+    @Override
+    public Iterable<SystemEvent> list() {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(initStream());
 
@@ -255,7 +249,8 @@ public class EventViews {
         return setPipelineRange(applyAclFilter(filterEvents(pipe), accessor));
     }
 
-    public Iterable<List<SystemEvent>> aggregate(Accessor accessor) {
+    @Override
+    public Iterable<List<SystemEvent>> aggregate() {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(initStream());
 
@@ -269,7 +264,8 @@ public class EventViews {
      * List items "interesting" for a user, optionally filtered by the `ShowType`
      * to items they watch or users they follow.
      */
-    public Iterable<SystemEvent> listAsUser(UserProfile asUser, Accessor accessor) {
+    @Override
+    public Iterable<SystemEvent> listAsUser(UserProfile asUser) {
         GremlinPipeline<SystemEvent, SystemEvent> pipe = getPersonalisedEvents(asUser, accessor);
         return setPipelineRange(pipe);
     }
@@ -277,7 +273,8 @@ public class EventViews {
     /**
      * List events "interesting" for a user, with aggregation.
      */
-    public Iterable<List<SystemEvent>> aggregateAsUser(UserProfile asUser, Accessor accessor) {
+    @Override
+    public Iterable<List<SystemEvent>> aggregateAsUser(UserProfile asUser) {
         GremlinPipeline<SystemEvent, SystemEvent> pipe = getPersonalisedEvents(asUser, accessor);
         return setPipelineRange(aggregateFilter(pipe));
     }
@@ -285,7 +282,8 @@ public class EventViews {
     /**
      * List an item's events.
      */
-    public Iterable<SystemEvent> listForItem(Accessible item, Accessor accessor) {
+    @Override
+    public Iterable<SystemEvent> listForItem(Accessible item) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
         // Add additional generic filters
@@ -296,7 +294,8 @@ public class EventViews {
     /**
      * Aggregate an item's events.
      */
-    public Iterable<List<SystemEvent>> aggregateForItem(Accessible item, Accessor accessor) {
+    @Override
+    public Iterable<List<SystemEvent>> aggregateForItem(Accessible item) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(item.getHistory());
         // Add additional generic filters
@@ -308,10 +307,10 @@ public class EventViews {
      * Aggregate a user's actions.
      *
      * @param byUser   the user
-     * @param accessor the current accessor
      * @return an event stream
      */
-    public Iterable<List<SystemEvent>> aggregateUserActions(UserProfile byUser, Accessor accessor) {
+    @Override
+    public Iterable<List<SystemEvent>> aggregateUserActions(UserProfile byUser) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
                 byUser.as(Actioner.class).getActions());
@@ -325,10 +324,10 @@ public class EventViews {
      * List a user's actions.
      *
      * @param byUser   the user
-     * @param accessor the current accessor
      * @return an event stream
      */
-    public Iterable<SystemEvent> listByUser(UserProfile byUser, Accessor accessor) {
+    @Override
+    public Iterable<SystemEvent> listByUser(UserProfile byUser) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
                 byUser.as(Actioner.class).getActions());
@@ -348,7 +347,7 @@ public class EventViews {
         if (users.isEmpty() && ids.isEmpty()) {
             // No item/user filter: scan the global queue...
             return actionManager.getLatestGlobalEvents();
-        } else  {
+        } else {
             List<Actioner> actioners = getItems(users, Actioner.class);
             List<Accessible> entities = getItems(ids, Accessible.class);
             if (actioners.size() == 1) {
@@ -531,131 +530,58 @@ public class EventViews {
         return applyAclFilter(pipe, accessor);
     }
 
-    public EventViews from(String from) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                ids,
-                entityTypes,
-                eventTypes,
-                Optional.fromNullable(from),
-                to,
-                showType,
-                aggregation);
+    @Override
+    public EventsApi from(String from) {
+        return new EventsApiImpl.Builder(this)
+                .from(from).build();
     }
 
-    public EventViews to(String to) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                ids,
-                entityTypes,
-                eventTypes,
-                from,
-                Optional.fromNullable(to),
-                showType,
-                aggregation);
+    @Override
+    public EventsApi to(String to) {
+        return new EventsApiImpl.Builder(this)
+                .to(to).build();
     }
 
-    public EventViews withIds(String... ids) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                Lists.newArrayList(ids),
-                entityTypes,
-                eventTypes,
-                from,
-                to,
-                showType,
-                aggregation);
+    @Override
+    public EventsApi withIds(String... ids) {
+        return new EventsApiImpl.Builder(this)
+                .withIds(ids).build();
     }
 
-    public EventViews withRange(int offset, int limit) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                Lists.newArrayList(users),
-                ids,
-                entityTypes,
-                eventTypes,
-                from,
-                to,
-                showType,
-                aggregation);
+    @Override
+    public EventsApi withRange(int offset, int limit) {
+        return new EventsApiImpl.Builder(this)
+                .withRange(offset, limit).build();
     }
 
-    public EventViews withUsers(String... users) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                Lists.newArrayList(users),
-                ids,
-                entityTypes,
-                eventTypes,
-                from,
-                to,
-                showType,
-                aggregation);
+    @Override
+    public EventsApi withUsers(String... users) {
+        return new EventsApiImpl.Builder(this)
+                .withUsers(users).build();
     }
 
-    public EventViews withEntityClasses(EntityClass... entityTypes) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                ids,
-                Lists.newArrayList(entityTypes),
-                eventTypes,
-                from,
-                to,
-                showType,
-                aggregation);
+    @Override
+    public EventsApi withEntityClasses(EntityClass... entityTypes) {
+        return new EventsApiImpl.Builder(this)
+                .withEntityTypes(entityTypes).build();
     }
 
-    public EventViews withEventTypes(EventTypes... eventTypes) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                ids,
-                entityTypes,
-                Lists.newArrayList(eventTypes),
-                from,
-                to,
-                showType,
-                aggregation);
+    @Override
+    public EventsApi withEventTypes(EventTypes... eventTypes) {
+        return new EventsApiImpl.Builder(this)
+                .withEventTypes(eventTypes).build();
     }
 
-    public EventViews withShowType(ShowType... type) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                ids,
-                entityTypes,
-                eventTypes,
-                from,
-                to,
-                Lists.newArrayList(type),
-                aggregation);
+    @Override
+    public EventsApi withShowType(ShowType... type) {
+        return new EventsApiImpl.Builder(this)
+                .withShowType(type).build();
     }
 
-    public EventViews withAggregation(Aggregation aggregation) {
-        return new EventViews(graph,
-                offset,
-                limit,
-                users,
-                ids,
-                entityTypes,
-                eventTypes,
-                from,
-                to,
-                showType,
-                aggregation
-        );
+    @Override
+    public EventsApi withAggregation(Aggregation aggregation) {
+        return new EventsApiImpl.Builder(this)
+                .withAggregation(aggregation).build();
     }
 
     private GremlinPipeline<SystemEvent, List<SystemEvent>> aggregateFilter(GremlinPipeline<SystemEvent, SystemEvent> pipeline) {

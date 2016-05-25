@@ -28,10 +28,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -99,8 +103,8 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
                 .lastIndexOf('/') + 1);
 
         // make apple narrower of fruit
-        WebResource resource = client.resource(fruitLocation + "/narrower/"
-                + appleIdStr);
+        WebResource resource = client.resource(getRelationUri(fruitLocation, "narrower",
+                appleIdStr));
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -117,12 +121,12 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
 
         // check if apple's broader is fruit
         // get apple's broader concepts
-        response = testGet(entityUri(Entities.CVOC_CONCEPT, appleIdStr, "broader", "list"));
+        response = testGet(entityUri(Entities.CVOC_CONCEPT, appleIdStr, "broader"));
         // check if fruit is in there
         assertTrue(containsIdentifier(response, "fruit"));
 
         // Test removal of one narrower concept
-        resource = client.resource(fruitLocation + "/narrower/" + appleIdStr);
+        resource = client.resource(getRelationUri(fruitLocation, "narrower", appleIdStr));
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -135,7 +139,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         assertStatus(OK, response);
 
         // but not as a narrower of fruit!
-        response = testGet(fruitLocation + "/list");
+        response = testGet(fruitLocation);
         // check if apple is NOT in there
         assertFalse(containsIdentifier(response, "apple"));
     }
@@ -169,8 +173,8 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
                 .lastIndexOf('/') + 1);
 
         // make apple related of fruit
-        WebResource resource = client.resource(treeLocation + "/related/"
-                + appleIdStr);
+        URI related = getRelationUri(treeLocation, "related", appleIdStr);
+        WebResource resource = client.resource(related);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -181,19 +185,19 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         assertStatus(OK, response);
 
         // get fruit's related concepts
-        response = testGet(treeLocation + "/related/list");
+        response = testGet(treeLocation + "/related");
         // check if apple is in there
         assertTrue(containsIdentifier(response, "apple"));
 
         // check if apple's relatedBy is tree
         // get apple's broader concepts
         response = testGet(entityUri(Entities.CVOC_CONCEPT,
-                appleIdStr, "relatedBy", "list"));
+                appleIdStr, "relatedBy"));
         // check if tree is in there
         assertTrue(containsIdentifier(response, "tree"));
 
         // Test removal of one related concept
-        resource = client.resource(treeLocation + "/related/" + appleIdStr);
+        resource = client.resource(related);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -206,7 +210,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         assertStatus(OK, response);
 
         // but not as a related of tree!
-        response = testGet(treeLocation + "/related/list");
+        response = testGet(treeLocation + "/related");
         // check that apple is NOT in there
         assertFalse(containsIdentifier(response, "apple"));
     }
@@ -278,6 +282,14 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
         return response;
+    }
+
+    private URI getRelationUri(URI base, String relation, String... related) {
+        UriBuilder uriBuilder = UriBuilder.fromUri(base).segment(relation);
+        for (String rel : related) {
+            uriBuilder = uriBuilder.queryParam("id", rel);
+        }
+        return uriBuilder.build();
     }
 
     private URI getCreationUri() {

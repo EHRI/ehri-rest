@@ -29,9 +29,9 @@ module Ehri
 
         headers = csv.read_next().to_a
 
-        ctx = Persistence::ActionManager.new(Graph).new_event_context(user, EventTypes::ingest,
-                          Java::ComGoogleCommonBase::Optional.of("Importing spreadsheet data for Ukrainian repositories"))
-        log = Importers::ImportLog.new(ctx)
+        log = Java::ComGoogleCommonBase::Optional.of("Importing spreadsheet data for Ukrainian repositories")
+        ctx = Persistence::ActionManager.new(Graph).new_event_context(user, EventTypes::ingest, log)
+        log = Importers::ImportLog.new(log)
 
         while (row = csv.read_next) != nil
           data = Hash[*headers.zip(row.to_a).flatten]
@@ -48,7 +48,7 @@ module Ehri
             repo = Manager.get_entity(repo_code, Models::Repository.java_class)
             @repolookup[repo_code] = repo
 
-            importer = Importers::UkrainianUnitImporter.new(Graph, repo, log)
+            importer = Java::EuEhriProjectImportersCsv::UkrainianUnitImporter.new(Graph, repo, user, log)
             @importerlookup[repo_code] = importer
 
             importer.add_callback do |mutation|

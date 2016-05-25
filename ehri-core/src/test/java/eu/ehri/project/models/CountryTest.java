@@ -24,7 +24,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-import eu.ehri.project.views.ViewFactory;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -45,7 +44,7 @@ public class CountryTest extends AbstractFixtureTest {
     public void testGetChildCountOnDeletion() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
         assertEquals(2L, country.getChildCount());
-        ViewFactory.getCrudNoLogging(graph, Repository.class).delete("r1", validUser);
+        api(validUser).delete("r1");
         assertEquals(1L, country.getChildCount());
     }
 

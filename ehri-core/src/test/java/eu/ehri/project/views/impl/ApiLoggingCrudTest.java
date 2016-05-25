@@ -27,8 +27,6 @@ import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.ViewFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +37,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 
-public class LoggingCrudViewsTest extends AbstractFixtureTest {
+public class ApiLoggingCrudTest extends AbstractFixtureTest {
 
     private ActionManager am;
     private Serializer depSerializer;
@@ -53,9 +51,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreate() throws Exception {
-        Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
-        Repository repository = lcv.create(repoBundle, validUser);
+        Repository repository = loggingApi(validUser).create(repoBundle, Repository.class);
         assertEquals(repository, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
     }
@@ -63,10 +60,9 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreateOrUpdate() throws Exception {
         Bundle before = depSerializer.entityToBundle(manager.getEntity("r1", Repository.class));
-        Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle())
                 .withId("r1");
-        Mutation<Repository> cou = lcv.createOrUpdate(repoBundle, validUser);
+        Mutation<Repository> cou = loggingApi(validUser).createOrUpdate(repoBundle, Repository.class);
         assertTrue(cou.updated());
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(cou.getNode(), event.getSubjects().iterator().next());
@@ -79,8 +75,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
     @Test
     public void testUpdate() throws Exception {
         Bundle before = depSerializer.entityToBundle(manager.getEntity("r1", Repository.class));
-        Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
-        Mutation<Repository> cou = lcv.update(before.withDataValue("identifier", "new-id"), validUser);
+        Mutation<Repository> cou = loggingApi(validUser)
+                .update(before.withDataValue("identifier", "new-id"), Repository.class);
         assertTrue(cou.updated());
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(cou.getNode(), event.getSubjects().iterator().next());
@@ -93,8 +89,7 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
     public void testDelete() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
         Bundle before = depSerializer.entityToBundle(r1);
-        Crud<Repository> lcv = ViewFactory.getCrudWithLogging(graph, Repository.class);
-        lcv.delete("r1", validUser);
+        loggingApi(validUser).delete("r1");
         SystemEvent event = am.getLatestGlobalEvent();
         assertFalse(manager.exists("r1"));
         assertTrue(event.getPriorVersions().iterator().hasNext());

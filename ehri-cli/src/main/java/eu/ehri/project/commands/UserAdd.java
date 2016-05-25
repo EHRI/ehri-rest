@@ -34,7 +34,7 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.api.Api;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -108,19 +108,19 @@ public class UserAdd extends BaseCommand {
         }
 
         Bundle bundle = new Bundle(EntityClass.USER_PROFILE,
-                Maps.<String, Object> newHashMap())
+                Maps.<String, Object>newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, userId)
                 .withDataValue(Ontology.NAME_KEY, userName);
         String nodeId = EntityClass.USER_PROFILE.getIdGen()
                 .generateId(SystemScope.getInstance().idPath(), bundle);
         bundle = bundle.withId(nodeId);
 
-        LoggingCrudViews<UserProfile> view = new LoggingCrudViews<>(
-                graph, UserProfile.class);
-        UserProfile newUser = view.create(bundle, admin, getLogMessage(logMessage));
+        Api api = api(graph, admin);
+        UserProfile newUser = api
+                .create(bundle, UserProfile.class, getLogMessage(logMessage));
         for (String groupId : groups) {
             Group group = manager.getEntity(groupId, EntityClass.GROUP, Group.class);
-            group.addMember(newUser);
+            api.acl().addAccessorToGroup(group, newUser);
         }
 
         return 0;

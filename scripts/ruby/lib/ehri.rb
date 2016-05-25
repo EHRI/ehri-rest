@@ -55,6 +55,10 @@ module Ehri
     include_package "eu.ehri.project.views"
   end
 
+  module Api
+    include_package "eu.ehri.project.views.api"
+  end
+
   module Exceptions
     include_package "eu.ehri.project.exceptions"
   end

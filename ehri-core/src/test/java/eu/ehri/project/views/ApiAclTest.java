@@ -20,10 +20,13 @@
 package eu.ehri.project.views;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.GlobalPermissionSet;
+import eu.ehri.project.acl.InheritedGlobalPermissionSet;
+import eu.ehri.project.acl.InheritedItemPermissionSet;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Group;
@@ -36,21 +39,17 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 
-public class AclViewsTest extends AbstractFixtureTest {
-
-    private AclViews aclViews;
-    private AclManager aclManager;
+public class ApiAclTest extends AbstractFixtureTest {
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        aclViews = new AclViews(graph);
-        aclManager = new AclManager(graph);
     }
 
     @Test(expected = PermissionDenied.class)
@@ -62,20 +61,20 @@ public class AclViewsTest extends AbstractFixtureTest {
                 .set(ContentTypes.COUNTRY, PermissionType.PROMOTE)
                 .build();
         // This should barf 'cos linda can't update KCL perms
-        aclViews.setGlobalPermissionMatrix(group, set, user);
+        api(user).acl().setGlobalPermissionMatrix(group, set);
     }
 
     @Test
     public void testSetGlobalPermissionMatrix() throws Exception {
         Accessor user = manager.getEntity("mike", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        assertFalse(aclManager
+        assertFalse(api(user).aclManager()
                 .hasPermission(ContentTypes.COUNTRY, PermissionType.PROMOTE, group));
         GlobalPermissionSet set = GlobalPermissionSet.newBuilder()
                 .set(ContentTypes.COUNTRY, PermissionType.PROMOTE)
                 .build();
-        aclViews.setGlobalPermissionMatrix(group, set, user);
-        assertTrue(aclManager
+        api(user).acl().setGlobalPermissionMatrix(group, set);
+        assertTrue(api(user).aclManager()
                 .hasPermission(ContentTypes.COUNTRY, PermissionType.PROMOTE, group));
     }
 
@@ -83,12 +82,14 @@ public class AclViewsTest extends AbstractFixtureTest {
     public void testSetEmptyGlobalPermissionMatrix() throws Exception {
         Accessor actioner = manager.getEntity("mike", Accessor.class);
         Accessor target = manager.getEntity("linda", UserProfile.class);
-        GlobalPermissionSet oldGlobalPermissions = aclManager.getGlobalPermissions(target);
+        GlobalPermissionSet oldGlobalPermissions = api(actioner).aclManager().getGlobalPermissions(target);
         assertTrue(oldGlobalPermissions.has(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE));
         GlobalPermissionSet emptySet = GlobalPermissionSet.newBuilder().build();
         // This should revoke ALL of Linda's permissions
-        aclViews.setGlobalPermissionMatrix(target, emptySet, actioner);
-        GlobalPermissionSet newGlobalPermissions = aclManager.getGlobalPermissions(target);
+        InheritedGlobalPermissionSet newInheritedGlobalPermissions =
+                api(actioner).acl().setGlobalPermissionMatrix(target, emptySet);
+        assertEquals(target.getId(), newInheritedGlobalPermissions.accessorId());
+        GlobalPermissionSet newGlobalPermissions = api(actioner).aclManager().getGlobalPermissions(target);
         for (ContentTypes ctype : ContentTypes.values()) {
             for (PermissionType ptype : PermissionType.values()) {
                 assertFalse(newGlobalPermissions.has(ctype, ptype));
@@ -102,7 +103,7 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
         assertFalse(Iterables.contains(group.getAccessors(), user));
-        aclViews.setAccessors(group, Sets.newHashSet(user), actioner);
+        api(actioner).acl().setAccessors(group, Sets.newHashSet(user));
         assertTrue(Iterables.contains(group.getAccessors(), user));
     }
 
@@ -111,7 +112,7 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor actioner = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
         assertFalse(Iterables.contains(group.getAccessors(), actioner));
-        aclViews.setAccessors(group, Sets.newHashSet(actioner), actioner);
+        api(actioner).acl().setAccessors(group, Sets.newHashSet(actioner));
     }
 
     @Test
@@ -119,18 +120,19 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor actioner = manager.getEntity("mike", Accessor.class);
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        assertFalse(aclManager.hasPermission(group, PermissionType.DELETE, user));
-        aclViews
-                .setItemPermissions(group, user, Sets.newHashSet(PermissionType.DELETE), actioner);
-        assertTrue(aclManager.hasPermission(group, PermissionType.DELETE, user));
+        assertFalse(api(actioner).aclManager().hasPermission(group, PermissionType.DELETE, user));
+        InheritedItemPermissionSet inheritedItemPermissionSet = api(actioner).acl()
+                .setItemPermissions(group, user, Sets.newHashSet(PermissionType.DELETE));
+        assertEquals(user.getId(), inheritedItemPermissionSet.accessorId());
+        assertTrue(api(actioner).aclManager().hasPermission(group, PermissionType.DELETE, user));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testSetItemPermissionsWithPermissionDenied() throws Exception {
         Accessor actioner = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        aclViews
-                .setItemPermissions(group, actioner, Sets.newHashSet(PermissionType.DELETE), actioner);
+        api(actioner).acl()
+                .setItemPermissions(group, actioner, Sets.newHashSet(PermissionType.DELETE));
     }
 
     @Test
@@ -139,10 +141,10 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor user = manager.getEntity("reto", Accessor.class);
         Repository repo = manager.getEntity("r1", Repository.class);
         PermissionGrant grant = manager.getEntity("retoKclWriteGrant", PermissionGrant.class);
-        assertTrue(aclManager.withScope(repo)
+        assertTrue(api(actioner).aclManager().withScope(repo)
                 .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE, user));
-        aclViews.revokePermissionGrant(grant, actioner);
-        assertFalse(aclManager.withScope(repo)
+        api(actioner).acl().revokePermissionGrant(grant);
+        assertFalse(api(actioner).aclManager().withScope(repo)
                 .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE, user));
     }
 
@@ -152,37 +154,39 @@ public class AclViewsTest extends AbstractFixtureTest {
         Accessor user = manager.getEntity("reto", Accessor.class);
         Repository repo = manager.getEntity("r1", Repository.class);
         PermissionGrant grant = manager.getEntity("retoKclWriteGrant", PermissionGrant.class);
-        assertTrue(aclManager.withScope(repo)
+        assertTrue(api(actioner).aclManager().withScope(repo)
                 .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE, user));
-        aclViews.revokePermissionGrant(grant, actioner);
+        api(actioner).acl().revokePermissionGrant(grant);
     }
 
     @Test
     public void testValidUserCanAddAccessorToGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        aclViews.addAccessorToGroup(group, user, validUser);
+        api(validUser).acl().addAccessorToGroup(group, user);
     }
 
     @Test(expected = PermissionDenied.class)
     public void testInvalidUserCannotAddAccessorToGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        aclViews.addAccessorToGroup(group, user, invalidUser);
+        api(invalidUser).acl().addAccessorToGroup(group, user);
     }
 
     @Test
     public void testRemoveAccessorFromGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("dans", Group.class);
-        aclViews.removeAccessorFromGroup(group, user, validUser);
+        assertTrue(Lists.newArrayList(group.getMembers()).contains(user));
+        api(validUser).acl().removeAccessorFromGroup(group, user);
+        assertFalse(Lists.newArrayList(group.getMembers()).contains(user));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testInvalidUserCannotRemoveAccessorFromGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("dans", Group.class);
-        aclViews.removeAccessorFromGroup(group, user, invalidUser);
+        api(invalidUser).acl().removeAccessorFromGroup(group, user);
     }
 
     @Test
@@ -191,14 +195,14 @@ public class AclViewsTest extends AbstractFixtureTest {
         Group group = manager.getEntity("niod", Group.class);
         Accessor grantee = invalidUser;
         // Grant the user specific permissions to update the group
-        aclManager.grantPermission(
+        api(grantee).aclManager().grantPermission(
                 user.as(PermissionGrantTarget.class), PermissionType.GRANT, grantee);
-        aclManager.grantPermission(
+        api(grantee).aclManager().grantPermission(
                 group.as(PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
         try {
             // This should still fail, because the user doesn't belong
             // to the group himself...
-            aclViews.addAccessorToGroup(group, user, grantee);
+            api(grantee).acl().addAccessorToGroup(group, user);
             fail("User should NOT have had grant permissions!");
         } catch (PermissionDenied e) {
             // expected...
@@ -206,7 +210,7 @@ public class AclViewsTest extends AbstractFixtureTest {
         // Add the user to the group, so he should then be
         // able to do the adding himself...
         group.addMember(grantee);
-        aclViews.addAccessorToGroup(group, user, grantee);
+        api(grantee).acl().addAccessorToGroup(group, user);
     }
 
     @Test
@@ -219,19 +223,19 @@ public class AclViewsTest extends AbstractFixtureTest {
         group.addMember(grantee);
         assertFalse(AclManager.belongsToAdmin(grantee));
         // Grant UPDATE permissions on the Group
-        aclManager.grantPermission(graph.frame(user.asVertex(),
+        api(grantee).aclManager().grantPermission(graph.frame(user.asVertex(),
                 PermissionGrantTarget.class), PermissionType.GRANT, grantee);
         try {
             // This should still fail, because the user does not have UPDATE
             // permissions on the Group
-            aclViews.addAccessorToGroup(group, user, grantee);
+            api(grantee).acl().addAccessorToGroup(group, user);
             fail("User should NOT have had grant permissions!");
         } catch (PermissionDenied e) {
             // expected...
         }
         // Grant UPDATE permissions on the Group
-        aclManager.grantPermission(
+        api(grantee).aclManager().grantPermission(
                 group.as(PermissionGrantTarget.class), PermissionType.UPDATE, grantee);
-        aclViews.addAccessorToGroup(group, user, grantee);
+        api(grantee).acl().addAccessorToGroup(group, user);
     }
 }

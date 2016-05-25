@@ -28,8 +28,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.ViewFactory;
 import org.junit.Test;
 
 import java.util.List;
@@ -130,7 +128,6 @@ public class AccessibleTest extends AbstractFixtureTest {
     private Mutation<DocumentaryUnit> doUpdate(DocumentaryUnit unit) throws Exception {
         Bundle doc = new Serializer(graph).entityToBundle(unit)
                 .withDataValue("somekey", "someval");
-        Crud<DocumentaryUnit> crud = ViewFactory.getCrudWithLogging(graph, DocumentaryUnit.class);
-        return crud.update(doc, validUser);
+        return loggingApi(validUser).update(doc, DocumentaryUnit.class);
     }
 }

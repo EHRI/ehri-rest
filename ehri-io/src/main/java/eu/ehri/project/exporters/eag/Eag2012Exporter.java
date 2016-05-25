@@ -20,7 +20,8 @@ import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.views.EventViews;
+import eu.ehri.project.views.api.EventsApi;
+import eu.ehri.project.views.api.impl.EventsApiImpl;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class Eag2012Exporter implements EagExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eag2012Exporter.class);
 
     protected final FramedGraph<?> framedGraph;
-    protected final EventViews eventManager;
+    protected final EventsApi eventManager;
     private final DocumentBuilder documentBuilder;
 
     public static final Map<String, String> descriptiveTextMappings = ImmutableMap.<String, String>builder()
@@ -66,7 +67,7 @@ public class Eag2012Exporter implements EagExporter {
 
     public Eag2012Exporter(final FramedGraph<?> framedGraph) {
         this.framedGraph = framedGraph;
-        eventManager = new EventViews(framedGraph);
+        eventManager = new EventsApiImpl(framedGraph, AnonymousAccessor.getInstance());
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
@@ -295,7 +296,7 @@ public class Eag2012Exporter implements EagExporter {
         }
 
         List<List<SystemEvent>> systemEvents = Lists.newArrayList(eventManager
-                .aggregateForItem(entity, AnonymousAccessor.getInstance()));
+                .aggregateForItem(entity));
         for (int i = systemEvents.size() - 1; i >= 0; i--) {
             List<SystemEvent> agg = systemEvents.get(i);
             SystemEvent event = agg.get(0);

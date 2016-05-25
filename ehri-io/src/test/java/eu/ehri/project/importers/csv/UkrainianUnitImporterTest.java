@@ -28,7 +28,7 @@ import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
+
 import java.io.InputStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -52,7 +52,7 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest {
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "uk");
         repoBundle = repoBundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, repoDescBundle);
         repoBundle = repoBundle.withRelation(Ontology.REPOSITORY_HAS_COUNTRY, ukrainianBundle);
-        Repository repo = new CrudViews<>(graph, Repository.class).create(repoBundle, validUser);
+        Repository repo = api(validUser).create(repoBundle, Repository.class);
 
         int count = getNodeCount(graph);
         

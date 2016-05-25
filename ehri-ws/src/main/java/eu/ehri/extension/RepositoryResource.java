@@ -39,7 +39,6 @@ import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -100,14 +99,13 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            Repository repository = views.detail(id, user);
+            Repository repository = api().detail(id, cls);
             Iterable<DocumentaryUnit> units = all
                     ? repository.getAllDocumentaryUnits()
                     : repository.getTopLevelDocumentaryUnits();
-            return streamingPage(getQuery(DocumentaryUnit.class).page(units, user), tx);
+            return streamingPage(getQuery().page(units, DocumentaryUnit.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -161,14 +159,13 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final Repository repository = views.detail(id, user);
+            final Repository repository = api().detail(id, cls);
             Response response = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
                 @Override
                 public void process(DocumentaryUnit doc) throws PermissionDenied {
                     repository.addTopLevelDocumentaryUnit(doc);
                 }
-            }, views.setScope(repository).setClass(DocumentaryUnit.class));
+            }, api().withScope(repository), DocumentaryUnit.class);
             tx.success();
             return response;
         }
@@ -190,7 +187,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Repository repo = views.detail(id, getRequesterUserProfile());
+            Repository repo = api().detail(id, cls);
             EagExporter eagExporter = new Eag2012Exporter(graph);
             final Document document = eagExporter.export(repo, lang);
             tx.success();
@@ -225,7 +222,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws IOException, ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            final Repository repo = views.detail(id, getRequesterUserProfile());
+            final Repository repo = api().detail(id, cls);
             final EadExporter eadExporter = new Ead2002Exporter(graph);
             return Response.ok(new StreamingOutput() {
                 @Override

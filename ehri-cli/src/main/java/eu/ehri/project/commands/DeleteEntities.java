@@ -31,9 +31,8 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.api.Api;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -107,11 +106,11 @@ public class DeleteEntities extends BaseCommand {
 
     private void deleteIds(FramedGraph<?> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
-        CrudViews<Accessible> views = new CrudViews<>(graph, Accessible.class);
+        Api api = api(graph, user).enableLogging(false);
         try (CloseableIterable<Accessible> items = manager.getEntities(type, Accessible.class)) {
             for (Accessible acc : items) {
                 System.out.println(acc.getId());
-                views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
+                api.delete(acc.getId());
             }
         }
     }

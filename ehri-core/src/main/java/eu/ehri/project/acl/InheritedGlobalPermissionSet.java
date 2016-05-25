@@ -19,8 +19,8 @@
 
 package eu.ehri.project.acl;
 
-import com.google.common.collect.Lists;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.Map;
@@ -35,17 +35,19 @@ public class InheritedGlobalPermissionSet {
      * Builder class for InheritedGlobalPermissionSets.
      */
     public static class Builder {
+        private final String accessorId;
         private final List<AccessorPermissions<GlobalPermissionSet>> perms = Lists.newArrayList();
 
         /**
          * Create a new builder with the primary (subject) accessor.
          *
-         * @param accessorId      The primary accessor's ID
+         * @param accessorId    The primary accessor's ID
          * @param permissionSet The primary accessor's own global permissions
          */
         public Builder(String accessorId, GlobalPermissionSet permissionSet) {
             AccessorPermissions<GlobalPermissionSet> permissions
                     = new AccessorPermissions<>(accessorId, permissionSet);
+            this.accessorId = accessorId;
             perms.add(permissions);
         }
 
@@ -67,13 +69,16 @@ public class InheritedGlobalPermissionSet {
          * @return A new InheritedGlobalPermissionSet
          */
         public InheritedGlobalPermissionSet build() {
-            return new InheritedGlobalPermissionSet(perms);
+            return new InheritedGlobalPermissionSet(accessorId, perms);
         }
     }
 
+    private final String accessorId;
     private final List<AccessorPermissions<GlobalPermissionSet>> permissionsList;
 
-    private InheritedGlobalPermissionSet(List<AccessorPermissions<GlobalPermissionSet>> permissionsList) {
+    private InheritedGlobalPermissionSet(String accessorId,
+            List<AccessorPermissions<GlobalPermissionSet>> permissionsList) {
+        this.accessorId = accessorId;
         this.permissionsList = permissionsList;
     }
 
@@ -100,13 +105,16 @@ public class InheritedGlobalPermissionSet {
 
         InheritedGlobalPermissionSet that = (InheritedGlobalPermissionSet) o;
 
-        return permissionsList.equals(that.permissionsList);
+        return accessorId.equals(that.accessorId)
+                && permissionsList.equals(that.permissionsList);
 
     }
 
     @Override
     public int hashCode() {
-        return permissionsList.hashCode();
+        int result = accessorId.hashCode();
+        result = 31 * result + permissionsList.hashCode();
+        return result;
     }
 
     /**
@@ -127,5 +135,14 @@ public class InheritedGlobalPermissionSet {
     @Override
     public String toString() {
         return permissionsList.toString();
+    }
+
+    /**
+     * Fetch the accessor's ID for this permission set.
+     *
+     * @return a user ID string
+     */
+    public String accessorId() {
+        return accessorId;
     }
 }

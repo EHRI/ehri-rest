@@ -143,7 +143,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            HistoricalAgent agent = views.detail(id, getRequesterUserProfile());
+            HistoricalAgent agent = api().detail(id, HistoricalAgent.class);
             EacExporter eacExporter = new Eac2010Exporter(graph);
             final Document document = eacExporter.export(agent, lang);
             tx.success();

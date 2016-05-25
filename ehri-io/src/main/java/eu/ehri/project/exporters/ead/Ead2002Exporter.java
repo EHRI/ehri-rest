@@ -14,15 +14,16 @@ import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
-import eu.ehri.project.views.EventViews;
+import eu.ehri.project.views.api.EventsApi;
+import eu.ehri.project.views.api.impl.EventsApiImpl;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -54,7 +55,7 @@ public class Ead2002Exporter implements EadExporter {
     protected static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
 
     protected final FramedGraph<?> framedGraph;
-    protected final EventViews eventManager;
+    protected final EventsApi eventManager;
     private final DocumentBuilder documentBuilder;
 
     public static final Map<String, String> multiValueTextMappings = ImmutableMap.<String, String>builder()
@@ -106,7 +107,7 @@ public class Ead2002Exporter implements EadExporter {
 
     public Ead2002Exporter(final FramedGraph<?> framedGraph) {
         this.framedGraph = framedGraph;
-        eventManager = new EventViews(framedGraph);
+        eventManager = new EventsApiImpl(framedGraph, AnonymousAccessor.getInstance());
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
@@ -204,7 +205,7 @@ public class Ead2002Exporter implements EadExporter {
 
     private void addRevisionDesc(Document doc, Element eadHeaderElem, DocumentaryUnit unit) {
         List<List<SystemEvent>> eventList = Lists.newArrayList(eventManager
-                .aggregateForItem(unit, AnonymousAccessor.getInstance()));
+                .aggregateForItem(unit));
         if (!eventList.isEmpty()) {
             Element revDescElem = doc.createElement("revisiondesc");
             eadHeaderElem.appendChild(revDescElem);

@@ -20,10 +20,8 @@
 package eu.ehri.project.test;
 
 import com.google.common.collect.Lists;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import eu.ehri.project.views.Crud;
 import org.junit.After;
 import org.junit.Before;
 
@@ -32,7 +30,6 @@ import java.util.List;
 
 public abstract class ModelTestBase extends GraphTestBase {
 
-    protected Crud<DocumentaryUnit> views;
     protected FixtureLoader helper;
 
     protected <T> List<T> toList(Iterable<T> iter) {

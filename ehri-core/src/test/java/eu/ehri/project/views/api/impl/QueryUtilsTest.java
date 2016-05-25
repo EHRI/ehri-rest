@@ -17,10 +17,11 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.views.api.impl;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.pipes.util.structures.Pair;
+import eu.ehri.project.views.api.QueryApi;
 import org.junit.Test;
 
 import java.util.SortedMap;
@@ -31,22 +32,22 @@ import static org.junit.Assert.assertTrue;
 public class QueryUtilsTest {
     @Test
     public void testParseFilters() throws Exception {
-        SortedMap<String, Pair<Query.FilterPredicate, Object>> filters
+        SortedMap<String, Pair<QueryApi.FilterPredicate, Object>> filters
                 = QueryUtils.parseFilters(Lists.newArrayList("identifier__GT:c1"));
         assertTrue(filters.containsKey("identifier"));
-        Pair<Query.FilterPredicate, Object> pair = filters.get("identifier");
-        assertEquals(Query.FilterPredicate.GT, pair.getA());
+        Pair<QueryApi.FilterPredicate, Object> pair = filters.get("identifier");
+        assertEquals(QueryApi.FilterPredicate.GT, pair.getA());
         assertEquals("c1", pair.getB());
     }
 
     @Test
     public void testParseOrderSpecs() throws Exception {
-        SortedMap<String, Query.Sort> orders = QueryUtils
+        SortedMap<String, QueryApi.Sort> orders = QueryUtils
                 .parseOrderSpecs(Lists.newArrayList("identifier__DESC", "name"));
         assertTrue(orders.containsKey("identifier"));
-        Query.Sort sort = orders.get("identifier");
-        assertEquals(Query.Sort.DESC, sort);
-        Query.Sort nameSort = orders.get("name");
-        assertEquals(Query.Sort.ASC, nameSort);
+        QueryApi.Sort sort = orders.get("identifier");
+        assertEquals(QueryApi.Sort.DESC, sort);
+        QueryApi.Sort nameSort = orders.get("name");
+        assertEquals(QueryApi.Sort.ASC, nameSort);
     }
 }

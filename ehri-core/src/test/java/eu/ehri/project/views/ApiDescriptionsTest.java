@@ -23,11 +23,10 @@ import com.google.common.base.Optional;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
-import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
@@ -36,7 +35,6 @@ import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +43,7 @@ import org.neo4j.helpers.collection.Iterables;
 import static org.junit.Assert.*;
 
 
-public class DescriptionViewsTest extends AbstractFixtureTest {
+public class ApiDescriptionsTest extends AbstractFixtureTest {
 
     private ActionManager am;
     private Serializer depSerializer;
@@ -59,19 +57,17 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
-                graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         Bundle descBundle = bundle
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.IDENTIFIER_KEY, "some-new-id");
 
-        DocumentaryUnitDescription changedDesc = descViews.create(unit.getId(), descBundle,
-                DocumentaryUnitDescription.class, validUser, Optional.<String>absent());
+        DocumentaryUnitDescription changedDesc = api(validUser)
+                .createDependent(unit.getId(), descBundle,
+                        DocumentaryUnitDescription.class, Optional.<String>absent());
         unit.addDescription(changedDesc);
 
         // The order in which items are serialized is undefined, so we just have to throw
@@ -88,29 +84,23 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test(expected = ValidationError.class)
     public void testCreateDependentWithValidationError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
-                graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         Bundle descBundle = bundle
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
-        descViews.create(unit.getId(), descBundle,
-                DocumentaryUnitDescription.class, validUser, Optional.<String>absent());
+        api(validUser).createDependent(unit.getId(), descBundle,
+                DocumentaryUnitDescription.class, Optional.<String>absent());
         fail("Creating a dependent should have thrown a validation error");
     }
 
     @Test
     public void testUpdateDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
-                graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
@@ -118,8 +108,9 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
 
-        DocumentaryUnitDescription changedDesc = descViews.update(unit.getId(), descBundle,
-                DocumentaryUnitDescription.class, validUser, Optional.<String>absent())
+        DocumentaryUnitDescription changedDesc = api(validUser)
+                .updateDependent(unit.getId(), descBundle,
+                        DocumentaryUnitDescription.class, Optional.<String>absent())
                 .getNode();
         assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
         assertEquals("some-new-title", changedDesc.getName());
@@ -127,74 +118,64 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
 
     @Test(expected = ValidationError.class)
     public void testUpdateDependentWithValidationError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
-                graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         Bundle descBundle = new Serializer(graph).entityToBundle(unit)
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
-        descViews.update(unit.getId(), descBundle,
-                DocumentaryUnitDescription.class, validUser, Optional.<String>absent()).getNode();
+        api(validUser).updateDependent(unit.getId(), descBundle,
+                DocumentaryUnitDescription.class, Optional.<String>absent()).getNode();
         fail("Updating a dependent should have thrown a validation error");
     }
 
     @Test
     public void testDeleteDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<>(
-                graph, DocumentaryUnit.class);
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
 
         DocumentaryUnitDescription d = Iterables.first(unit.getDocumentDescriptions());
         assertNotNull(d);
-        int delCount = descViews.delete(unit.getId(), d.getId(),
-                validUser, Optional.<String>absent());
+        int delCount = api(validUser).deleteDependent(unit.getId(), d.getId(),
+                Optional.<String>absent());
         Assert.assertTrue(delCount >= 1);
         assertEquals(descCount - 1, Iterables.count(unit.getDocumentDescriptions()));
     }
 
     @Test
     public void testDeleteDependentDescription() throws Exception {
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         // This should throw permission denied since c1 is not in the new item's subtree...
-        int delete = descViews.delete("c1", "cd1", validUser, Optional.<String>absent());
+        int delete = api(validUser).deleteDependent("c1", "cd1", Optional.<String>absent());
         // the number of items deleted should be 1 desc, 2 dates, 2 access points = 5
         assertEquals(5, delete);
     }
 
     @Test
     public void testDeleteDependentAccessPoint() throws Exception {
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         // This should throw permission denied since c1 is not in the new item's subtree...
-        int delete = descViews.delete("c1", "ur1", validUser, Optional.<String>absent());
+        int delete = api(validUser).deleteDependent("c1", "ur1", Optional.<String>absent());
         assertEquals(1, delete);
     }
 
     @Test(expected = PermissionDenied.class)
     public void testDeleteNonDependent() throws Exception {
-        DescriptionViews<DocumentaryUnit> descViews = getView(DocumentaryUnit.class);
         // This should throw permission denied since c1 is not in the new item's subtree...
-        descViews.delete("c1", "cd2", validUser, Optional.<String>absent());
+        api(validUser).deleteDependent("c1", "cd2", Optional.<String>absent());
     }
 
     @Test
     public void testUpdateDependentLogging() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
-        DescriptionViews<Repository> lcv = getView(Repository.class);
         Description description = r1.getDescriptions().iterator().next();
         Bundle desc = depSerializer.entityToBundle(description);
-        Mutation<RepositoryDescription> cou = lcv.update(
-                "r1", desc.withDataValue("name", "changed"),
-                RepositoryDescription.class, validUser, Optional.<String>absent());
+        Mutation<RepositoryDescription> cou = loggingApi(validUser)
+                .updateDependent("r1", desc.withDataValue("name", "changed"),
+                        RepositoryDescription.class, Optional.<String>absent());
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(cou.updated());
         assertTrue(event.getPriorVersions().iterator().hasNext());
@@ -208,9 +189,8 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
         Repository r1 = manager.getEntity("r1", Repository.class);
         Bundle desc = Bundle.fromData(TestData.getTestAgentBundle())
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
-        DescriptionViews<Repository> lcv = getView(Repository.class);
-        RepositoryDescription r11 = lcv.create("r1", desc, RepositoryDescription.class,
-                validUser, Optional.<String>absent());
+        loggingApi(validUser).createDependent("r1", desc, RepositoryDescription.class,
+                Optional.<String>absent());
         assertEquals(r1, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
     }
@@ -218,17 +198,12 @@ public class DescriptionViewsTest extends AbstractFixtureTest {
     @Test
     public void testDeleteDependentLogging() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
-        DescriptionViews<Repository> lcv = getView(Repository.class);
         Description description = r1.getDescriptions().iterator().next();
         Bundle desc = depSerializer.entityToBundle(description);
-        lcv.delete("r1", description.getId(), validUser, Optional.<String>absent());
+        loggingApi(validUser).deleteDependent("r1", description.getId(), Optional.<String>absent());
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(desc, old);
-    }
-
-    private <T  extends Described> DescriptionViews<T> getView(Class<T> cls) {
-        return new DescriptionViews<>(graph, cls);
     }
 }

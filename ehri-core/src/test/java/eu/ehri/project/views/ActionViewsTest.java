@@ -27,8 +27,8 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
@@ -36,7 +36,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.api.Api;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 
@@ -58,18 +58,15 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws IntegrityError
      */
     @Test
-    public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
-        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<>(
-                graph, DocumentaryUnit.class);
+    public void testUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
+        DocumentaryUnit changedUnit = api(validUser).update(newBundle, DocumentaryUnit.class).getNode();
         assertEquals(newName, changedUnit.getProperty("name"));
         assertTrue(changedUnit.getDescriptions().iterator().hasNext());
         DocumentaryUnitDescription desc = graph.frame(
@@ -94,18 +91,15 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws IntegrityError
      */
     @Test
-    public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
-        LoggingCrudViews<UserProfile> userViews = new LoggingCrudViews<>(
-                graph, UserProfile.class);
+    public void testUserUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = userViews.create(bundle, validUser);
+        UserProfile user = loggingApi(validUser).create(bundle, UserProfile.class);
         assertEquals(TestData.TEST_USER_NAME, user.getName());
 
         String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue("name", newName);
 
-        UserProfile changedUser = userViews.update(newBundle, validUser).getNode();
+        UserProfile changedUser = loggingApi(validUser).update(newBundle, UserProfile.class).getNode();
         assertEquals(newName, changedUser.getName());
 
         // Check we have an audit action.
@@ -153,8 +147,6 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError, ItemNotFound {
-        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<>(
-                graph, DocumentaryUnit.class);
         int shouldDelete = 1;
         int origActionCount = toList(validUser.getHistory()).size();
 
@@ -167,7 +159,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         }
 
         String log = "Deleting item";
-        Integer deleted = docViews.delete(item.getId(), validUser, Optional.of(log));
+        Integer deleted = loggingApi(validUser).delete(item.getId(), Optional.of(log));
         assertEquals(Integer.valueOf(shouldDelete), deleted);
 
         List<SystemEvent> actions = toList(validUser.getActions());

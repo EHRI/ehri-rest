@@ -17,15 +17,11 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.acl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.AccessDenied;
@@ -41,18 +37,18 @@ import eu.ehri.project.models.utils.ClassUtils;
 /**
  * Messy stopgap class to hold a bunch of sort-of view/sort-of acl functions.
  */
-public final class ViewHelper {
+public final class PermissionUtils {
 
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final AclManager acl;
     private final GraphManager manager;
 
-    public ViewHelper(FramedGraph<?> graph) {
+    public PermissionUtils(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 
-    public ViewHelper(FramedGraph<?> graph, PermissionScope scope) {
+    public PermissionUtils(FramedGraph<?> graph, PermissionScope scope) {
         Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.acl = new AclManager(graph, scope);
@@ -148,8 +144,8 @@ public final class ViewHelper {
      * @param scope The new scope
      * @return A new view helper
      */
-    public ViewHelper setScope(PermissionScope scope) {
-        return new ViewHelper(graph, Optional
+    public PermissionUtils setScope(PermissionScope scope) {
+        return new PermissionUtils(graph, Optional
                 .fromNullable(scope).or(SystemScope.INSTANCE));
     }
 }

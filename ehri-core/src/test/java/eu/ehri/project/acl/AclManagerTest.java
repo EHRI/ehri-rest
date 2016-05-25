@@ -40,7 +40,7 @@ import eu.ehri.project.test.TestData;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.api.Api;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,29 +81,29 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testIsAdmin() throws Exception {
         Group admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(admin));
+        new AclManager(graph);
+        assertTrue(AclManager.belongsToAdmin(admin));
     }
 
     @Test
     public void testBelongsToAdmin() throws Exception {
         loader.loadTestData();
         UserProfile mike = manager.getEntity("mike", UserProfile.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(mike));
+        assertTrue(AclManager.belongsToAdmin(mike));
 
         // Test a user not directly in admin, but belonging to a group that is,
         // is also an admin user.
         UserProfile tim = manager.getEntity("tim", UserProfile.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(tim));
+        assertTrue(AclManager.belongsToAdmin(tim));
     }
 
     @Test
     public void testIsAnonymous() throws Exception {
         Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         Accessor anon = AnonymousAccessor.getInstance();
-        AclManager acl = new AclManager(graph);
-        assertFalse(acl.belongsToAdmin(anon));
-        assertTrue(acl.isAnonymous(anon));
-        assertFalse(acl.isAnonymous(admin));
+        assertFalse(AclManager.belongsToAdmin(anon));
+        assertTrue(AclManager.isAnonymous(anon));
+        assertFalse(AclManager.isAnonymous(admin));
     }
 
     @Test
@@ -227,7 +227,7 @@ public class AclManagerTest extends GraphTestBase {
         Vertex cd1 = manager.getVertex("cd1");
         List<Vertex> frames = Lists.newArrayList(c1, r1, cd1);
 
-        GremlinPipeline<Vertex, Vertex> pipeline = new GremlinPipeline<Vertex, Vertex>(frames);
+        GremlinPipeline<Vertex, Vertex> pipeline = new GremlinPipeline<>(frames);
         List<Vertex> filtered = pipeline
                 .filter(acl.getContentTypeFilterFunction()).toList();
         assertEquals(2L, filtered.size());
@@ -246,7 +246,7 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.canAccess(ann3v, user));
         assertTrue(acl.canAccess(ann4v, user));
 
-        PipeFunction<Vertex,Boolean> aclFilter = acl.getAclFilterFunction(user);
+        PipeFunction<Vertex,Boolean> aclFilter = AclManager.getAclFilterFunction(user);
         List<Vertex> filtered = new GremlinPipeline<Vertex,Vertex>(
                 Lists.newArrayList(ann3v.asVertex(), ann4v.asVertex())).filter(aclFilter).toList();
         assertEquals(1L, filtered.size());
@@ -347,13 +347,10 @@ public class AclManagerTest extends GraphTestBase {
 
         // Create a repository
         // New create some stuff
-        LoggingCrudViews<Repository> repoViews
-                = new LoggingCrudViews<Repository>(graph, Repository.class);
-
-        Repository gbrepo = repoViews.setScope(gb).create(
-                Bundle.fromData(TestData.getTestAgentBundle()), gbuser);
-        Repository nlrepo = repoViews.setScope(nl).create(
-                Bundle.fromData(TestData.getTestAgentBundle()), nluser);
+        Repository gbrepo = api(gbuser).withScope(gb).create(
+                Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
+        Repository nlrepo = api(nluser).withScope(nl).create(
+                Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
 
         assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, CREATE, gbuser));
         assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, UPDATE, gbuser));
@@ -392,19 +389,18 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.hasPermission(DOCUMENTARY_UNIT, UPDATE, user1));
         assertFalse(acl.hasPermission(DOCUMENTARY_UNIT, DELETE, user1));
 
-        // New create some stuff
-        LoggingCrudViews<DocumentaryUnit> views
-                = new LoggingCrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class, repo);
+        Api repoApi = anonApi().withScope(repo);
 
-        DocumentaryUnit headdoc1 = views.create(
+        // New create some stuff
+        DocumentaryUnit headdoc1 = repoApi.withAccessor(headUser).create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(Ontology.IDENTIFIER_KEY, "head-doc"), headUser);
-        DocumentaryUnit userdoc1 = views.create(
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "head-doc"), DocumentaryUnit.class);
+        DocumentaryUnit userdoc1 = repoApi.withAccessor(user1).create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-1"), user1);
-        DocumentaryUnit userdoc2 = views.create(
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-1"), DocumentaryUnit.class);
+        DocumentaryUnit userdoc2 = repoApi.withAccessor(user2).create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-2"), user2);
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-2"), DocumentaryUnit.class);
 
         // Ensure Head Archivist can update/delete user1's doc
         assertTrue(acl.hasPermission(userdoc1, UPDATE, headArchivists));

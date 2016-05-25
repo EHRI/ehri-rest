@@ -41,8 +41,9 @@ import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.EventViews;
-import eu.ehri.project.views.VirtualUnitViews;
+import eu.ehri.project.views.api.EventsApi;
+import eu.ehri.project.views.api.Api;
+import eu.ehri.project.views.api.UserProfilesApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -108,7 +109,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             ValidationError, DeserializationError,
             ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final UserProfile currentUser = getCurrentUser();
+            final Api.Acl acl = api().acl();
             final Set<Group> groups = Sets.newHashSet();
             for (String groupId : groupIds) {
                 groups.add(manager.getEntity(groupId, Group.class));
@@ -117,7 +118,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
                 @Override
                 public void process(UserProfile userProfile) throws PermissionDenied {
                     for (Group group : groups) {
-                        aclViews.addAccessorToGroup(group, userProfile, currentUser);
+                        acl.addAccessorToGroup(group, userProfile);
                     }
                 }
             });
@@ -160,10 +161,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listFollowers(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(UserProfile.class)
-                    .page(user.getFollowers(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getFollowers(), UserProfile.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -176,10 +176,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listFollowing(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(UserProfile.class)
-                    .page(user.getFollowing(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getFollowing(), UserProfile.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -194,8 +193,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
+            UserProfile user = api().detail(userId, cls);
             boolean following = user.isFollowing(
                     manager.getEntity(otherId, UserProfile.class));
             tx.success();
@@ -211,8 +209,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
+            UserProfile user = api().detail(userId, cls);
             boolean follower = user.isFollower(manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return follower;
@@ -226,11 +223,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.addFollowing(manager.getEntity(id, UserProfile.class));
-            }
+            UserProfile user = api().detail(userId, cls);
+            userProfilesApi().addFollowers(user, otherIds);
             tx.success();
         }
     }
@@ -242,11 +236,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.removeFollowing(manager.getEntity(id, UserProfile.class));
-            }
+            UserProfile user = api().detail(userId, cls);
+            userProfilesApi().removeFollowers(user, otherIds);
             tx.success();
         }
     }
@@ -257,10 +248,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listBlocked(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(UserProfile.class)
-                    .page(user.getBlocked(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getBlocked(), UserProfile.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -275,8 +265,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
+            UserProfile user = api().detail(userId, cls);
             boolean blocking = user.isBlocking(manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return blocking;
@@ -290,11 +279,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.addBlocked(manager.getEntity(id, UserProfile.class));
-            }
+            UserProfile user = api().detail(userId, cls);
+            userProfilesApi().addBlocked(user, otherIds);
             tx.success();
         }
     }
@@ -306,11 +292,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.removeBlocked(manager.getEntity(id, UserProfile.class));
-            }
+            UserProfile user = api().detail(userId, cls);
+            userProfilesApi().removeBlocked(user, otherIds);
             tx.success();
         }
     }
@@ -321,10 +304,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listWatching(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(Watchable.class)
-                    .page(user.getWatching(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getWatching(), Watchable.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -338,11 +320,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.addWatching(manager.getEntity(id, Watchable.class));
-            }
+            UserProfile user = api().detail(userId, cls);
+            userProfilesApi().addWatching(user, otherIds);
             tx.success();
         }
     }
@@ -354,11 +333,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            for (String id : otherIds) {
-                user.removeWatching(manager.getEntity(id, Watchable.class));
-            }
+            UserProfile user = api().detail(userId, cls);
+            userProfilesApi().removeWatching(user, otherIds);
             tx.success();
         }
     }
@@ -371,8 +347,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
+            UserProfile user = api().detail(userId, cls);
             boolean watching = user.isWatching(manager.getEntity(otherId, Watchable.class));
             tx.success();
             return watching;
@@ -385,10 +360,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listAnnotations(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(Annotation.class)
-                    .page(user.getAnnotations(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getAnnotations(), Annotation.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -401,10 +375,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response pageLinks(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(Link.class)
-                    .page(user.getLinks(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getLinks(), Link.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -417,10 +390,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response pageVirtualUnits(@PathParam("userId") String userId) throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            UserProfile user = views.detail(userId, accessor);
-            return streamingPage(getQuery(VirtualUnit.class)
-                    .page(user.getVirtualUnits(), accessor), tx);
+            UserProfile user = api().detail(userId, cls);
+            return streamingPage(getQuery()
+                    .page(user.getVirtualUnits(), VirtualUnit.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -442,16 +414,14 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{userId:[^/]+}/" + ACTIONS)
     public Response aggregateUserActions(
             @PathParam("userId") String userId,
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventViews.Aggregation aggregation)
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
             UserProfile user = manager.getEntity(userId, UserProfile.class);
-            EventViews eventViews = getEventViewsBuilder()
-                    .withAggregation(aggregation)
-                    .build();
-            return streamingListOfLists(eventViews.aggregateUserActions(user, accessor), tx);
+            EventsApi eventsApi = getEventsApi()
+                    .withAggregation(aggregation);
+            return streamingListOfLists(eventsApi.aggregateUserActions(user), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -474,16 +444,14 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{userId:[^/]+}/" + EVENTS)
     public Response aggregateEventsForUser(
             @PathParam("userId") String userId,
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
             UserProfile asUser = manager.getEntity(userId, UserProfile.class);
-            EventViews eventViews = getEventViewsBuilder()
-                    .withAggregation(aggregation)
-                    .build();
-            return streamingListOfLists(eventViews.aggregateAsUser(asUser, user), tx);
+            EventsApi eventsApi = getEventsApi()
+                    .withAggregation(aggregation);
+            return streamingListOfLists(eventsApi.aggregateAsUser(asUser), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -498,14 +466,20 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
-            Accessor currentUser = getRequesterUserProfile();
-            Iterable<VirtualUnit> units = new VirtualUnitViews(graph)
-                    .getVirtualCollectionsForUser(accessor, currentUser);
-            return streamingPage(getQuery(VirtualUnit.class)
-                    .page(units, currentUser), tx);
+            Iterable<VirtualUnit> units = api().virtualUnits()
+                    .getVirtualCollectionsForUser(accessor);
+            return streamingPage(getQuery()
+                    .page(units, VirtualUnit.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
         }
+    }
+
+    // Helpers
+
+    private UserProfilesApi userProfilesApi() {
+        // Logging on these events is currently not enabled.
+        return api().enableLogging(false).userProfiles();
     }
 }

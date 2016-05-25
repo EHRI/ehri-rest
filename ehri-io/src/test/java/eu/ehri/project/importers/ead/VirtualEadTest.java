@@ -20,11 +20,7 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -34,10 +30,8 @@ import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -57,14 +51,14 @@ public class VirtualEadTest extends AbstractImporterTest {
     DocumentaryUnit unit1, unit2;
 
     @Test
-    public void setStageTest() throws PermissionDenied, ValidationError {
+    public void setStageTest() throws Exception {
         setStage();
         assertEquals(REPO1, repository1.getIdentifier());
         assertEquals(UNIT1, unit1.getIdentifier());
     }
 
     @Test
-    public void virtualUnitTest() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied {
+    public void virtualUnitTest() throws Exception {
 
         setStage();
 
@@ -124,7 +118,7 @@ public class VirtualEadTest extends AbstractImporterTest {
         assertEquals(1, countIncludedUnits);
     }
 
-    private void setStage() throws PermissionDenied, ValidationError {
+    private void setStage() throws Exception {
         Bundle repo1Bundle = new Bundle(EntityClass.REPOSITORY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, REPO1);
         Bundle repo2Bundle = new Bundle(EntityClass.REPOSITORY)
@@ -143,15 +137,15 @@ public class VirtualEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, UNIT2 + "title")
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "cze");
 
-        repository1 = new CrudViews<>(graph, Repository.class).create(repo1Bundle, validUser);
-        repository2 = new CrudViews<>(graph, Repository.class).create(repo2Bundle, validUser);
+        repository1 = api(validUser).create(repo1Bundle, Repository.class);
+        repository2 = api(validUser).create(repo2Bundle, Repository.class);
 
         documentaryUnit1Bundle = documentaryUnit1Bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, documentDescription1Bundle);
-        unit1 = new CrudViews<>(graph, DocumentaryUnit.class).create(documentaryUnit1Bundle, validUser);
+        unit1 = api(validUser).create(documentaryUnit1Bundle, DocumentaryUnit.class);
         unit1.setRepository(repository1);
 
         documentaryUnit2Bundle = documentaryUnit2Bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, documentDescription2Bundle);
-        unit2 = new CrudViews<>(graph, DocumentaryUnit.class).create(documentaryUnit2Bundle, validUser);
+        unit2 = api(validUser).create(documentaryUnit2Bundle, DocumentaryUnit.class);
         unit2.setRepository(repository2);
     }
 }

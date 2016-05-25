@@ -34,7 +34,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -80,7 +79,7 @@ public class CountryAdd extends BaseCommand {
 
     @Override
     public int execWithOptions(FramedGraph<?> graph,
-                               CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
+            CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         String logMessage = cmdLine.getOptionValue("c",
@@ -105,9 +104,7 @@ public class CountryAdd extends BaseCommand {
         bundle = bundle.withId(nodeId);
 
         try {
-            LoggingCrudViews<Country> view = new LoggingCrudViews<>(
-                    graph, Country.class);
-            view.create(bundle, admin, getLogMessage(logMessage));
+            api(graph, admin).create(bundle, Country.class, getLogMessage(logMessage));
         } catch (ValidationError e) {
             System.err.printf("A country with id: '%s' already exists%n", nodeId);
             return 9;

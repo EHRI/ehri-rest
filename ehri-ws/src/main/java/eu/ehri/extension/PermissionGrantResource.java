@@ -28,7 +28,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DELETE;
@@ -83,9 +82,8 @@ public class PermissionGrantResource extends AbstractRestResource implements Del
     @Override
     public void delete(@PathParam("id") String id) throws ItemNotFound, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            new AclViews(graph).revokePermissionGrant(manager.getEntity(id,
-                            EntityClass.PERMISSION_GRANT, PermissionGrant.class),
-                    getRequesterUserProfile());
+            api().acl().revokePermissionGrant(manager.getEntity(id,
+                    EntityClass.PERMISSION_GRANT, PermissionGrant.class));
             tx.success();
         }
     }

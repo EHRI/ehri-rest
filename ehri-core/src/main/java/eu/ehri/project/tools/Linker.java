@@ -25,21 +25,23 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Slugify;
-import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.api.Api;
+import eu.ehri.project.views.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,20 +91,20 @@ public class Linker {
      * Populate a pre-created vocabulary with concepts created based on
      * access points for all collections within a repository, then link
      * those concepts to the relevant documentary units.
-     * <p>
+     * <p/>
      * One creation event will be generated for the newly-created concepts
      * (with the vocabulary as the scope) and another for the newly-created
      * links. Currently events will still be created if no concepts/links
      * are made.
-     * <p>
+     * <p/>
      * It should be advised that this function is not idempotent and
      * running it twice will generate concepts/links twice.
-     * <p>
+     * <p/>
      * NB. One could argue this function does too much...
      *
-     * @param repository       the repository
-     * @param vocabulary       an existing (presumably empty) vocabulary
-     * @param user             the user to whom to attribute the operation
+     * @param repository the repository
+     * @param vocabulary an existing (presumably empty) vocabulary
+     * @param user       the user to whom to attribute the operation
      * @return the number of new links created
      * @throws ValidationError
      * @throws PermissionDenied
@@ -155,7 +157,7 @@ public class Linker {
         ActionManager.EventContext conceptEvent = actionManager
                 .setScope(vocabulary)
                 .newEventContext(user, EventTypes.creation, logMessage);
-        CrudViews<Concept> conceptMaker = new CrudViews<>(graph, Concept.class, vocabulary);
+        Api api = ApiFactory.noLogging(graph, user);
 
         for (Map.Entry<String, String> idName : conceptIdentifierNames.entrySet()) {
             String identifier = idName.getKey();
@@ -176,7 +178,7 @@ public class Linker {
                     .build();
 
             try {
-                Concept concept = conceptMaker.create(conceptBundle, user);
+                Concept concept = api.create(conceptBundle, Concept.class);
                 concept.setVocabulary(vocabulary);
                 identifierConcept.put(identifier, Optional.fromNullable(concept));
                 conceptEvent.addSubjects(concept);
@@ -193,6 +195,8 @@ public class Linker {
                 if (!tolerant) {
                     throw validationError;
                 }
+            } catch (DeserializationError e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -202,8 +206,6 @@ public class Linker {
         // which the concept originally derived.
         ActionManager.EventContext linkEvent = actionManager
                 .newEventContext(user, EventTypes.creation, logMessage);
-        CrudViews<Link> linkMaker = new CrudViews<>(graph, Link.class);
-
         long linkCount = 0L;
         for (DocumentaryUnit doc : repository.getAllDocumentaryUnits()) {
             for (DocumentaryUnitDescription description : doc.getDocumentDescriptions()) {
@@ -218,17 +220,21 @@ public class Linker {
                         }
 
                         Optional<Concept> conceptOpt = identifierConcept.get(identifier);
-                        if (conceptOpt != null && conceptOpt.isPresent()) {
-                            Concept concept = conceptOpt.get();
-                            Bundle linkBundle = Bundle.Builder.withClass(EntityClass.LINK)
-                                    .addDataValue(Ontology.LINK_HAS_TYPE, LINK_TYPE)
-                                    .build();
-                            Link link = linkMaker.create(linkBundle, user);
-                            link.addLinkTarget(doc);
-                            link.addLinkTarget(concept);
-                            link.addLinkBody(relationship);
-                            linkEvent.addSubjects(link);
-                            linkCount++;
+                        try {
+                            if (conceptOpt != null && conceptOpt.isPresent()) {
+                                Concept concept = conceptOpt.get();
+                                Bundle linkBundle = Bundle.Builder.withClass(EntityClass.LINK)
+                                        .addDataValue(Ontology.LINK_HAS_TYPE, LINK_TYPE)
+                                        .build();
+                                Link link = api.create(linkBundle, Link.class);
+                                link.addLinkTarget(doc);
+                                link.addLinkTarget(concept);
+                                link.addLinkBody(relationship);
+                                linkEvent.addSubjects(link);
+                                linkCount++;
+                            }
+                        } catch (DeserializationError e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 }
@@ -279,7 +285,7 @@ public class Linker {
     /**
      * Set the log message for the created items.
      *
-     * @param logMessage    a descriptive string
+     * @param logMessage a descriptive string
      * @return a new linker object
      */
     public Linker withLogMessage(String logMessage) {
@@ -290,7 +296,7 @@ public class Linker {
     /**
      * Set the log message for the created items.
      *
-     * @param logMessage    a descriptive string
+     * @param logMessage a descriptive string
      * @return a new linker object
      */
     public Linker withLogMessage(Optional<String> logMessage) {

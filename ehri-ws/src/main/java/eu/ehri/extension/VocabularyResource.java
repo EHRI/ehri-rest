@@ -45,7 +45,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.api.Api;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -101,12 +101,12 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Vocabulary vocabulary = views.detail(id, user);
-            return streamingPage(getQuery(Concept.class)
-                    .page(vocabulary.getConcepts(), user), tx);
+            Vocabulary vocabulary = api().detail(id, cls);
+            return streamingPage(getQuery()
+                    .page(vocabulary.getConcepts(), Concept.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -159,8 +159,8 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             UserProfile user = getCurrentUser();
-            Vocabulary vocabulary = views.detail(id, user);
-            CrudViews<Concept> conceptViews = new CrudViews<>(graph, Concept.class, vocabulary);
+            Api api = api().enableLogging(false);
+            Vocabulary vocabulary = api.detail(id, cls);
             ActionManager actionManager = new ActionManager(graph, vocabulary);
             Iterable<Concept> concepts = vocabulary.getConcepts();
             if (concepts.iterator().hasNext()) {
@@ -172,7 +172,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                 }
                 context.commit();
                 for (Concept concept : concepts) {
-                    conceptViews.delete(concept.getId(), user);
+                    api.delete(concept.getId());
                 }
             }
             tx.success();
@@ -191,14 +191,13 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final Vocabulary vocabulary = views.detail(id, user);
+            final Vocabulary vocabulary = api().detail(id, cls);
             Response item = createItem(bundle, accessors, new Handler<Concept>() {
                 @Override
                 public void process(Concept concept) throws PermissionDenied {
                     concept.setVocabulary(vocabulary);
                 }
-            }, views.setScope(vocabulary).setClass(Concept.class));
+            }, api().withScope(vocabulary), Concept.class);
             tx.success();
             return item;
         }
@@ -225,10 +224,8 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
-
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final Accessor user = getRequesterUserProfile();
-            final Vocabulary vocabulary = views.detail(id, user);
+            final Vocabulary vocabulary = api().detail(id, cls);
             final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary);
             final Model model = skosImporter.export(base);
             tx.success();

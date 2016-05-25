@@ -32,7 +32,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.api.Api;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -142,22 +142,24 @@ public class EntityAdd extends BaseCommand {
 
     // Suppressing warnings here because we throw a RuntimeException if the
     // item class is not of an acceptable type.
-    @SuppressWarnings("unchecked")
     public void createItem(FramedGraph<?> graph,
             CommandLine cmdLine, String id, Bundle bundle,
             PermissionScope scope, UserProfile user, String logMessage) throws DeserializationError,
             ValidationError, PermissionDenied {
 
-        if (!Accessible.class.isAssignableFrom(bundle.getBundleJavaClass())) {
-            throw new DeserializationError("Item class: " + bundle.getBundleJavaClass().getSimpleName() +
+        Class<?> cls = bundle.getBundleJavaClass();
+        if (!Accessible.class.isAssignableFrom(cls)) {
+            throw new DeserializationError("Item class: " + cls.getSimpleName() +
                     " is not a first-class database item");
         }
+        @SuppressWarnings("unchecked")
+        Class<? extends Accessible> accessibleCls = (Class<? extends Accessible>) cls;
 
-        LoggingCrudViews<?> view = new LoggingCrudViews(graph, bundle.getBundleJavaClass(), scope);
+        Api api = api(graph, user);
         if (cmdLine.hasOption("update")) {
-            view.createOrUpdate(bundle.withId(id), user, getLogMessage(logMessage));
+            api.createOrUpdate(bundle.withId(id), accessibleCls, getLogMessage(logMessage));
         } else {
-            view.create(bundle.withId(id), user, getLogMessage(logMessage));
+            api.create(bundle.withId(id), accessibleCls, getLogMessage(logMessage));
         }
     }
 }

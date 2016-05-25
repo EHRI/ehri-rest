@@ -17,12 +17,13 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.views.api.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -37,6 +38,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.views.api.QueryApi;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,11 +48,8 @@ import java.util.SortedMap;
 
 /**
  * Handles querying Entity entities with ACL semantics.
- *
- * @param <E>
  */
-public final class Query<E extends Entity> {
-    public static final int DEFAULT_LIMIT = 20;
+public final class QueryApiImpl implements QueryApi {
     private static final long NO_COUNT = -1L;
 
     private final int offset;
@@ -62,27 +61,14 @@ public final class Query<E extends Entity> {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
-    private final Class<E> cls;
-
-    /**
-     * Directions for sort.
-     */
-    public enum Sort {
-        ASC, DESC
-    }
-
-    /**
-     * Filter predicates
-     */
-    public enum FilterPredicate {
-        EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES, GT, GTE, LT, LTE
-    }
+    private final Accessor accessor;
 
     /**
      * Full Constructor.
      */
-    private Query(
-            FramedGraph<?> graph, Class<E> cls,
+    public QueryApiImpl(
+            FramedGraph<?> graph,
+            Accessor accessor,
             int offset,
             int limit,
             SortedMap<String, Sort> sort,
@@ -90,7 +76,7 @@ public final class Query<E extends Entity> {
             SortedMap<String, Pair<FilterPredicate, Object>> filters,
             boolean stream) {
         this.graph = graph;
-        this.cls = cls;
+        this.accessor = accessor;
         this.offset = offset;
         this.limit = limit;
         this.sort = ImmutableSortedMap.copyOf(sort);
@@ -103,8 +89,8 @@ public final class Query<E extends Entity> {
     /**
      * Simple constructor.
      */
-    public Query(FramedGraph<?> graph, Class<E> cls) {
-        this(graph, cls, 0, DEFAULT_LIMIT,
+    public QueryApiImpl(FramedGraph<?> graph, Accessor accessor) {
+        this(graph, accessor, 0, DEFAULT_LIMIT,
                 ImmutableSortedMap.<String, Sort>of(), Optional
                         .<Pair<String, Sort>>absent(), ImmutableSortedMap
                         .<String, Pair<FilterPredicate, Object>>of(), false);
@@ -113,9 +99,9 @@ public final class Query<E extends Entity> {
     /**
      * Query builder.
      */
-    public static class Builder<E extends Entity> {
+    public static class Builder {
         private FramedGraph<?> graph;
-        private Class<E> cls;
+        private Accessor accessor;
         private int offset;
         private int limit = DEFAULT_LIMIT;
         private SortedMap<String, Sort> sort = ImmutableSortedMap.of();
@@ -123,13 +109,13 @@ public final class Query<E extends Entity> {
         private SortedMap<String, Pair<FilterPredicate, Object>> filters = ImmutableSortedMap.of();
         private boolean stream;
 
-        Builder<E> setSort(SortedMap<String, Sort> sort) {
+        Builder setSort(SortedMap<String, Sort> sort) {
             this.sort = sort;
             return this;
         }
 
-        Builder(Query<E> query) {
-            this(query.graph, query.cls);
+        Builder(QueryApiImpl query) {
+            this(query.graph, query.accessor);
             this.offset = query.offset;
             this.limit = query.limit;
             this.sort = query.sort;
@@ -138,129 +124,86 @@ public final class Query<E extends Entity> {
             this.stream = query.stream;
         }
 
-        Builder<E> setFilters(SortedMap<String, Pair<FilterPredicate, Object>> filters) {
+        Builder setFilters(SortedMap<String, Pair<FilterPredicate, Object>> filters) {
             this.filters = filters;
             return this;
         }
 
-        public Builder(FramedGraph<?> graph, Class<E> cls) {
+        public Builder(FramedGraph<?> graph, Accessor accessor) {
             this.graph = graph;
-            this.cls = cls;
+            this.accessor = accessor;
         }
 
-        public Builder<E> setOffset(int offset) {
+        public Builder setOffset(int offset) {
             this.offset = offset;
             return this;
         }
 
-        public Builder<E> setLimit(int limit) {
+        public Builder setLimit(int limit) {
             this.limit = limit;
             return this;
         }
 
-        public Builder<E> setSort(Collection<String> orderSpecs) {
+        public Builder setSort(Collection<String> orderSpecs) {
             this.sort = QueryUtils.parseOrderSpecs(orderSpecs);
             return this;
         }
 
-        public Builder<E> setFilters(Collection<String> filters) {
+        public Builder setFilters(Collection<String> filters) {
             this.filters = QueryUtils.parseFilters(filters);
             return this;
         }
 
-        public Builder<E> setStream(boolean stream) {
+        public Builder setStream(boolean stream) {
             this.stream = stream;
             return this;
         }
 
-        public Query<E> build() {
-            return new Query<>(graph, cls, offset, limit, sort, defSort, filters, stream);
+        public QueryApiImpl build() {
+            return new QueryApiImpl(graph, accessor, offset, limit, sort, defSort, filters, stream);
         }
     }
 
-    public Query<E> setOffset(int offset) {
-        return new Builder<>(this).setOffset(offset).build();
+    @Override
+    public QueryApiImpl setOffset(int offset) {
+        return new Builder(this).setOffset(offset).build();
     }
 
-    public Query<E> setLimit(int limit) {
-        return new Builder<>(this).setLimit(limit).build();
+    @Override
+    public QueryApiImpl setLimit(int limit) {
+        return new Builder(this).setLimit(limit).build();
     }
 
-    public Query<E> filter(String key, FilterPredicate predicate, Object value) {
+    @Override
+    public QueryApiImpl filter(String key, FilterPredicate predicate, Object value) {
         ImmutableSortedMap.Builder<String, Pair<FilterPredicate, Object>> m =
                 new ImmutableSortedMap.Builder<>(Ordering.natural());
         m.putAll(filters);
         m.put(key, new Pair<>(predicate, value));
-        return new Builder<>(this).setFilters(m.build()).build();
+        return new Builder(this).setFilters(m.build()).build();
     }
 
-    public Query<E> orderBy(String key, Sort order) {
-        ImmutableSortedMap.Builder<String, Sort> m =
-                new ImmutableSortedMap.Builder<>(Ordering.natural());
-        m.putAll(sort);
-        m.put(key, order);
-        return new Builder<>(this).setSort(m.build()).build();
+    @Override
+    public QueryApiImpl filter(Collection<String> filterSpecs) {
+        return new Builder(this).setFilters(filterSpecs).build();
     }
 
-    public Query<E> clearFilters() {
-        return new Builder<>(this)
-                .setFilters(ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, Object>>of()).build();
+    @Override
+    public QueryApiImpl orderBy(String key, Sort order) {
+        SortedMap<String, Sort> sm = Maps.newTreeMap();
+        sm.putAll(sort);
+        sm.put(key, order);
+        return new Builder(this).setSort(sm).build();
     }
 
-    public Query<E> clearOrdering() {
-        return new Builder<>(this)
-                .setSort(ImmutableSortedMap
-                        .<String, Sort>of()).build();
+    @Override
+    public QueryApiImpl orderBy(Collection<String> orderSpecs) {
+        return new Builder(this).setSort(orderSpecs).build();
     }
 
-    public Query<E> setStream(boolean stream) {
-        return new Builder<>(this).setStream(stream).build();
-    }
-
-    /**
-     * Class representing a page of content.
-     *
-     * @param <T> the item type
-     */
-    public static class Page<T> implements Iterable<T> {
-        private final Iterable<T> iterable;
-        private final int page;
-        private final int count;
-        private final long total;
-
-        public Page(Iterable<T> iterable, int page, int count, long total) {
-            this.iterable = iterable;
-            this.total = total;
-            this.page = page;
-            this.count = count;
-        }
-
-        public Iterable<T> getIterable() {
-            return iterable;
-        }
-
-        public long getTotal() {
-            return total;
-        }
-
-        public Integer getOffset() {
-            return page;
-        }
-
-        public Integer getLimit() {
-            return count;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return iterable.iterator();
-        }
-
-        @Override
-        public String toString() {
-            return String.format("<Page[...] %d %d (%d)", page, count, total);
-        }
+    @Override
+    public QueryApiImpl setStream(boolean stream) {
+        return new Builder(this).setStream(stream).build();
     }
 
     /**
@@ -300,33 +243,28 @@ public final class Query<E extends Entity> {
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
      */
-    public Page<E> page(Accessor user) {
-        return page(ClassUtils.getEntityType(cls), user);
+    @Override
+    public <E extends Entity> Page<E> page(Class<E> cls) {
+        return page(ClassUtils.getEntityType(cls), cls);
     }
 
     /**
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
      */
-    public Page<E> page(EntityClass type, Accessor user) {
-        return page(manager.getEntities(type, cls), user);
+    @Override
+    public <E extends Entity> Page<E> page(EntityClass type, Class<E> cls) {
+        return page(manager.getEntities(type, cls), cls);
     }
 
     /**
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
      */
-    public Page<E> page(Iterable<E> vertices, Accessor user) {
-        return page(vertices, user, cls);
-    }
-
-    /**
-     * Return a Page instance containing a total of total items, and an iterable
-     * for the given page/count.
-     */
-    public <T extends Entity> Page<T> page(Iterable<T> vertices, Accessor user, Class<T> cls) {
+    @Override
+    public <E extends Entity> Page<E> page(Iterable<E> vertices, Class<E> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
-                .getAclFilterFunction(user);
+                .getAclFilterFunction(accessor);
 
         GremlinPipeline<E, Vertex> pipeline = new GremlinPipeline<E, Vertex>(
                 new FramedVertexIterableAdaptor<>(vertices))
@@ -339,7 +277,7 @@ public final class Query<E extends Entity> {
             // FIXME: We have to read the vertices into memory here since we
             // can't re-use the iterator for counting and streaming.
             ArrayList<Vertex> userVerts = Lists.newArrayList(setFilters(pipeline).iterator());
-            Iterable<T> iterable = graph.frameVertices(
+            Iterable<E> iterable = graph.frameVertices(
                     setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
                             userVerts))), cls);
             return new Page<>(iterable, offset, limit, userVerts.size());
@@ -350,12 +288,13 @@ public final class Query<E extends Entity> {
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
      */
-    public Page<E> page(String key, String query, Accessor user) {
+    @Override
+    public <E extends Entity> Page<E> page(String key, String query, Class<E> cls) {
         try (CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
                 ClassUtils.getEntityType(cls))) {
             try (CloseableIterable<Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls))) {
-                PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager.getAclFilterFunction(user);
+                PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager.getAclFilterFunction(accessor);
                 long numItems = stream
                         ? NO_COUNT
                         : setFilters(new GremlinPipeline<Vertex, Vertex>(countQ)
@@ -371,21 +310,13 @@ public final class Query<E extends Entity> {
     }
 
     /**
-     * Count items.
-     * <p/>
-     * NB: Count doesn't 'account' for ACL privileges!
-     */
-    public long count() {
-        return count(ClassUtils.getEntityType(cls));
-    }
-
-    /**
      * Count items accessible to a given user.
      * <p/>
      * NB: Count doesn't 'account' for ACL privileges!
      */
-    public <T> long count(Iterable<T> vertices) {
-        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<>(vertices);
+    @Override
+    public long count(Iterable<?> vertices) {
+        GremlinPipeline<?, Vertex> filter = new GremlinPipeline<>(vertices);
         return setFilters(filter).count();
     }
 
@@ -394,6 +325,7 @@ public final class Query<E extends Entity> {
      * <p/>
      * NB: Count doesn't 'account' for ACL privileges!
      */
+    @Override
     public long count(EntityClass type) {
         return count(manager.getVertices(type));
     }

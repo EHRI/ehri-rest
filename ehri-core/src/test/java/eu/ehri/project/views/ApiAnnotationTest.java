@@ -20,7 +20,6 @@
 package eu.ehri.project.views;
 
 import com.google.common.collect.Lists;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -36,20 +35,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class AnnotationViewsTest extends AbstractFixtureTest {
+public class ApiAnnotationTest extends AbstractFixtureTest {
 
-    public AnnotationViews av;
-    public AclManager acl;
-    public UserProfile admin;
-    public UserProfile user;
-    public Group canAnnotate;
+    private UserProfile user;
+    private Group canAnnotate;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        acl = new AclManager(graph);
-        av = new AnnotationViews(graph);
-        admin = manager.getEntity("mike", UserProfile.class);
         user = manager.getEntity("reto", UserProfile.class);
         canAnnotate = manager.getEntity("portal", Group.class);
     }
@@ -58,8 +51,8 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
     public void testCreateForWithoutPermission() throws Exception {
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
-        Annotation annotation = av
-                .create("c4", "cd4", ann, user, Lists.<Accessor>newArrayList());
+        Annotation annotation = api(user)
+                .createAnnotation("c4", "cd4", ann, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 
@@ -68,8 +61,8 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         canAnnotate.addMember(user);
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
-        Annotation annotation = av
-                .create("c1", "cd1", ann, user, Lists.<Accessor>newArrayList());
+        Annotation annotation = api(user)
+                .createAnnotation("c1", "cd1", ann, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 
@@ -78,8 +71,8 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         canAnnotate.addMember(user);
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
-        Annotation annotation = av
-                .create("c4", "cd1", ann, user, Lists.<Accessor>newArrayList());
+        Annotation annotation = api(user)
+                .createAnnotation("c4", "cd1", ann, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 
@@ -88,8 +81,8 @@ public class AnnotationViewsTest extends AbstractFixtureTest {
         canAnnotate.addMember(user);
         Bundle ann = new Bundle(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
-        Annotation annotation = av
-                .create("c4", "cd4", ann, user, Lists.<Accessor>newArrayList());
+        Annotation annotation = api(user)
+                .createAnnotation("c4", "cd4", ann, Lists.<Accessor>newArrayList());
         assertEquals("test", annotation.getBody());
     }
 }

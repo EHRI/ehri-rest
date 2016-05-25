@@ -26,16 +26,16 @@ module Ehri
         @repo_id = repo_id
       end
 
-      def import_with_scope(xmlpath, scope, event, log)
+      def import_with_scope(xmlpath, scope, event, user, log)
         puts "Importing #{xmlpath}"
         child_path = File.join @data_dir, xmlpath.match(/irn(?<num>\d+)\.xml$/)["num"]
 
         children = []
-        if Dir.exists? child_path
+        if Dir.exist? child_path
           children = Dir.glob("#{child_path}/irn*xml")
         end
 
-        importer = Importers::IcaAtomEadImporter.new(Graph, scope, log)
+        importer = Java::EuEhriProjectImportersEad::IcaAtomEadImporter.new(Graph, scope, user, log)
 
         importer.add_callback do |mutation|
           case mutation.get_state
@@ -54,11 +54,11 @@ module Ehri
             Graph.get_base_graph.commit
           end
           children.each do |cxml|
-            import_with_scope(cxml, mutation.get_node, event, log)
+            import_with_scope(cxml, mutation.get_node, event, user, log)
           end
         end
 
-        handler = Importers::UshmmHandler.new importer
+        handler = Java::EuEhriProjectImportersEad::UshmmHandler.new importer
         spf = Java::JavaxXmlParsers::SAXParserFactory.new_instance
         spf.set_namespace_aware false
         spf.set_validating false
@@ -78,14 +78,14 @@ module Ehri
           user = Manager.get_entity(@user_id, Models::UserProfile.java_class)
 
           # Start an action!
+          msg = Java::ComGoogleCommonBase::Optional.of("Importing USHMM data")
           ctx = Persistence::ActionManager.new(
-            Graph, ushmm).new_event_context(user, EventTypes::ingest, 
-                            Java::ComGoogleCommonBase::Optional.of("Importing USHMM data"))
-          log = Importers::ImportLog.new(ctx)
+            Graph, ushmm).new_event_context(user, EventTypes::ingest, msg)
+          log = Importers::ImportLog.new(msg)
 
           # We basically need recursive behaviour here
           Dir.glob("#{@data_dir}/irn*xml").each do |xmlpath|
-            import_with_scope xmlpath, ushmm, ctx, log
+            import_with_scope xmlpath, ushmm, ctx, user, log
           end
 
           log.print_report

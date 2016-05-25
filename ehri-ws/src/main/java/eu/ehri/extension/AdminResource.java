@@ -28,7 +28,6 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import eu.ehri.extension.base.AbstractRestResource;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.wrapper.AclGraph;
 import eu.ehri.project.core.Tx;
@@ -39,8 +38,6 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.JsonDataExporter;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -138,10 +135,8 @@ public class AdminResource extends AbstractRestResource {
                     .build();
 
             // NB: This assumes that admin's ID is the same as its identifier.
-            Accessor accessor = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER,
-                    Accessor.class);
-            Crud<UserProfile> view = ViewFactory.getCrudWithLogging(graph, UserProfile.class);
-            UserProfile user = view.create(bundle, accessor);
+            Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
+            UserProfile user = api().withAccessor(admin).create(bundle, UserProfile.class);
 
             // add to the groups
             for (String groupId : groups) {
@@ -150,7 +145,7 @@ public class AdminResource extends AbstractRestResource {
             }
 
             // Grant them owner permissions on their own account.
-            new AclManager(graph).grantPermission(user, PermissionType.OWNER, user);
+            api().aclManager().grantPermission(user, PermissionType.OWNER, user);
             Response response = creationResponse(user);
             tx.success();
             return response;

@@ -48,7 +48,9 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.api.Api;
+import eu.ehri.project.views.api.ApiFactory;
+import eu.ehri.project.views.api.QueryApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +79,7 @@ import java.util.Map;
  */
 public abstract class AbstractRestResource implements TxCheckedResource {
 
-    public static final int DEFAULT_LIST_LIMIT = Query.DEFAULT_LIMIT;
+    public static final int DEFAULT_LIST_LIMIT = QueryApi.DEFAULT_LIMIT;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
 
     public static final String RESOURCE_ENDPOINT_PREFIX = "classes";
@@ -209,18 +211,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Get a query object configured according to incoming parameters.
      *
-     * @param cls the class of the query object
-     * @param <T> the generic type of the query object
      * @return a query object
      */
-    protected <T extends Entity> Query<T> getQuery(Class<T> cls) {
-        return new Query.Builder<>(graph, cls)
+    protected QueryApi getQuery() {
+        return api().query()
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
                 .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
-                .setFilters(getStringListQueryParam(FILTER_PARAM))
-                .setSort(getStringListQueryParam(SORT_PARAM))
-                .setStream(isStreaming())
-                .build();
+                .filter(getStringListQueryParam(FILTER_PARAM))
+                .orderBy(getStringListQueryParam(SORT_PARAM))
+                .setStream(isStreaming());
     }
 
     /**
@@ -240,6 +239,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 throw new MissingOrInvalidUser(id.get());
             }
         }
+    }
+
+    /**
+     * Fetch an instance of the API with the current user.
+     *
+     * @return an Api instance
+     */
+    protected Api api() {
+        return ApiFactory.withLogging(graph, getRequesterUserProfile());
     }
 
     /**
@@ -344,7 +352,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx   the current transaction
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingPage(Query.Page<T> page, Tx tx) {
+    protected <T extends Entity> Response streamingPage(QueryApi.Page<T> page, Tx tx) {
         return streamingPage(page, getSerializer(), tx);
     }
 
@@ -401,7 +409,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingPage(
-            final Query.Page<T> page, final Serializer serializer, final Tx tx) {
+            final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
         return getStreamingJsonOutput(page, serializer, tx).getResponse();
     }
 
@@ -550,9 +558,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private static abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
-        protected final Query.Page<T> page;
+        protected final QueryApi.Page<T> page;
 
-        public TransactionalPageStreamWrapper(final Request request, final Query.Page<T> page, final Tx tx) {
+        public TransactionalPageStreamWrapper(final Request request, final QueryApi.Page<T> page, final Tx tx) {
             super(request, tx);
             this.page = page;
         }
@@ -596,7 +604,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
-            final Query.Page<T> page, final Serializer serializer, final Tx tx) {
+            final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
         return new TransactionalPageStreamWrapper<T>(request, page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {

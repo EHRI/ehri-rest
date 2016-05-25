@@ -19,25 +19,26 @@
 
 package eu.ehri.extension.base;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.AclViews;
-import eu.ehri.project.views.EventViews;
-import eu.ehri.project.views.Query;
-import eu.ehri.project.views.ViewHelper;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.api.Api;
+import eu.ehri.project.views.api.EventsApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.core.Context;
@@ -64,14 +65,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     public final static String SHOW_PARAM = "show"; // watched, follows
     public final static String AGGREGATION_PARAM = "aggregation";
 
-    protected final LoggingCrudViews<E> views;
     protected final AclManager aclManager;
     protected final ActionManager actionManager;
-    protected final AclViews aclViews;
-    protected final Query<E> querier;
     protected final Class<E> cls;
-    protected final ViewHelper helper;
-
 
     /**
      * Functor used to post-process items.
@@ -103,12 +99,8 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             @Context GraphDatabaseService database, Class<E> cls) {
         super(database);
         this.cls = cls;
-        views = new LoggingCrudViews<>(graph, cls);
         aclManager = new AclManager(graph);
         actionManager = new ActionManager(graph);
-        aclViews = new AclViews(graph);
-        querier = new Query<>(graph, cls);
-        helper = new ViewHelper(graph);
     }
 
     /**
@@ -117,9 +109,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @return a list of entities
      */
     public Response listItems() {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            return streamingPage(getQuery(cls).page(getRequesterUserProfile()), tx);
+            return streamingPage(getQuery().page(cls), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -136,8 +128,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *                     to be run on the created object after it is initialised
      *                     but before the response is generated. This is useful for adding
      *                     relationships to the new item.
-     * @param views        the view instance to use to create the item. This allows callers
-     *                     to override the scope and the class used.
+     * @param scopedApi    the Api instance to use to create the item. This allows callers
+     *                     to override the scope used.
+     * @param otherCls     the class of the created item.
      * @param <T>          the generic type of class T
      * @return the response of the create request, the 'location' will contain
      * the url of the newly created instance.
@@ -149,13 +142,13 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             Bundle entityBundle,
             List<String> accessorIds,
             Handler<T> handler,
-            LoggingCrudViews<T> views)
+            Api scopedApi,
+            Class<T> otherCls)
             throws PermissionDenied, ValidationError, DeserializationError {
         Accessor user = getRequesterUserProfile();
-        T entity = views
-                .create(entityBundle, user, getLogMessage());
+        T entity = scopedApi.create(entityBundle, otherCls, getLogMessage());
         if (!accessorIds.isEmpty()) {
-            aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
+            api().acl().setAccessors(entity, getAccessors(accessorIds, user));
         }
 
         // run post-creation callbacks
@@ -181,7 +174,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      */
     public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, DeserializationError {
-        return createItem(entityBundle, accessorIds, handler, views);
+        return createItem(entityBundle, accessorIds, handler, api(), cls);
     }
 
     public Response createItem(Bundle entityBundle, List<String> accessorIds)
@@ -199,7 +192,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      */
     public Response getItem(String id) throws ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            E entity = views.detail(id, getRequesterUserProfile());
+            E entity = api().detail(id, cls);
             if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
                 throw new ItemNotFound(id);
             }
@@ -219,9 +212,8 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @throws DeserializationError
      */
     public Response updateItem(Bundle entityBundle)
-            throws PermissionDenied, ValidationError, DeserializationError {
-        Mutation<E> update = views
-                .update(entityBundle, getRequesterUserProfile(), getLogMessage());
+            throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError {
+        Mutation<E> update = api().update(entityBundle, cls, getLogMessage());
         return single(update.getNode());
     }
 
@@ -243,7 +235,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try {
-            E entity = views.detail(id, getRequesterUserProfile());
+            E entity = api().detail(id, cls);
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
                 Bundle existing = depSerializer.entityToBundle(entity);
@@ -269,9 +261,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     protected void deleteItem(String id, Handler<E> preProcess)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try {
-            Accessor user = getRequesterUserProfile();
-            preProcess.process(views.detail(id, user));
-            views.delete(id, user, getLogMessage());
+            Api api = api();
+            preProcess.process(api.detail(id, cls));
+            api.delete(id, getLogMessage());
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
         }
@@ -297,24 +289,42 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @return a new event query builder
      */
-    protected EventViews.Builder getEventViewsBuilder() {
-        List<String> eventTypes = getStringListQueryParam(EVENT_TYPE_PARAM);
-        List<String> entityClasses = getStringListQueryParam(ITEM_TYPE_PARAM);
-        List<String> showTypes = getStringListQueryParam(SHOW_PARAM);
+    protected EventsApi getEventsApi() {
+        List<EventTypes> eventTypes = Lists.transform(getStringListQueryParam(EVENT_TYPE_PARAM),
+                new Function<String, EventTypes>() {
+            @Override
+            public EventTypes apply(String s) {
+                return EventTypes.valueOf(s);
+            }
+        });
+        List<EntityClass> entityClasses = Lists.transform(getStringListQueryParam(ITEM_TYPE_PARAM),
+                new Function<String, EntityClass>() {
+            @Override
+            public EntityClass apply(String s) {
+                return EntityClass.withName(s);
+            }
+        });
+        List<EventsApi.ShowType> showTypes = Lists.transform(getStringListQueryParam(SHOW_PARAM),
+                new Function<String, EventsApi.ShowType>() {
+            @Override
+            public EventsApi.ShowType apply(String s) {
+                return EventsApi.ShowType.valueOf(s);
+            }
+        });
         List<String> fromStrings = getStringListQueryParam(FROM_PARAM);
         List<String> toStrings = getStringListQueryParam(TO_PARAM);
         List<String> users = getStringListQueryParam(USER_PARAM);
         List<String> ids = getStringListQueryParam(ITEM_ID_PARAM);
-        return new EventViews.Builder(graph)
+        return api().events()
                 .withRange(getIntQueryParam(OFFSET_PARAM, 0),
                         getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
-                .withEventTypes(eventTypes.toArray(new String[eventTypes.size()]))
-                .withEntityTypes(entityClasses.toArray(new String[entityClasses.size()]))
+                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
+                .withEntityClasses(entityClasses.toArray(new EntityClass[entityClasses.size()]))
                 .from(fromStrings.isEmpty() ? null : fromStrings.get(0))
                 .to(toStrings.isEmpty() ? null : toStrings.get(0))
                 .withUsers(users.toArray(new String[users.size()]))
                 .withIds(ids.toArray(new String[ids.size()]))
-                .withShowType(showTypes.toArray(new String[showTypes.size()]));
+                .withShowType(showTypes.toArray(new EventsApi.ShowType[showTypes.size()]));
     }
 
     /**

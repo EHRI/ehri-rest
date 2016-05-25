@@ -34,7 +34,6 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,9 +69,9 @@ public class Wp2BtEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");
-        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
+        Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
-        Concept concept_716 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
+        Concept concept_716 = api(validUser).create(conceptBundle, Concept.class);
         vocabulary.addItem(concept_716);
 
 

@@ -17,10 +17,11 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.views;
+package eu.ehri.project.acl;
 
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.PermissionUtils;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -36,14 +37,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 
-public class ViewHelperTest extends AbstractFixtureTest {
+public class PermissionUtilsTest extends AbstractFixtureTest {
 
-    private ViewHelper viewHelper;
+    private PermissionUtils viewHelper;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        viewHelper = new ViewHelper(graph);
+        viewHelper = new PermissionUtils(graph);
     }
 
     @Test(expected = PermissionDenied.class)
