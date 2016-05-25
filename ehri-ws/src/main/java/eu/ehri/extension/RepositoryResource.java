@@ -105,8 +105,8 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             Accessor user = getRequesterUserProfile();
             Repository repository = views.detail(id, user);
             Iterable<DocumentaryUnit> units = all
-                    ? repository.getAllCollections()
-                    : repository.getCollections();
+                    ? repository.getAllDocumentaryUnits()
+                    : repository.getTopLevelDocumentaryUnits();
             return streamingPage(getQuery(DocumentaryUnit.class).page(units, user), tx);
         } catch (Exception e) {
             tx.close();
@@ -166,7 +166,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             Response response = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
                 @Override
                 public void process(DocumentaryUnit doc) throws PermissionDenied {
-                    repository.addCollection(doc);
+                    repository.addTopLevelDocumentaryUnit(doc);
                 }
             }, views.setScope(repository).setClass(DocumentaryUnit.class));
             tx.success();
@@ -231,7 +231,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 @Override
                 public void write(OutputStream outputStream) throws IOException {
                     try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-                        for (DocumentaryUnit doc : repo.getCollections()) {
+                        for (DocumentaryUnit doc : repo.getTopLevelDocumentaryUnits()) {
                             ZipEntry zipEntry = new ZipEntry(doc.getId() + ".xml");
                             zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
                             zos.putNextEntry(zipEntry);

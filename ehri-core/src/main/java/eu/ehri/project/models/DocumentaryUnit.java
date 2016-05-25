@@ -160,9 +160,9 @@ public interface DocumentaryUnit extends AbstractUnit {
 
 
         public void setRepository(Repository repository) {
-            // NB: Convenience methods that proxies addCollection (which
+            // NB: Convenience methods that proxies addTopLevelDocumentaryUnit (which
             // in turn maintains the child item cache.)
-            repository.addCollection(frame(it(), DocumentaryUnit.class));
+            repository.addTopLevelDocumentaryUnit(frame(it(), DocumentaryUnit.class));
         }
 
         public Repository getRepository() {

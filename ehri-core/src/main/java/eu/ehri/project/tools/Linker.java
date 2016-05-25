@@ -25,7 +25,6 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -119,7 +118,7 @@ public class Linker {
         Map<String, Optional<Concept>> identifierConcept = Maps.newHashMap();
         Map<String, Integer> identifierCount = Maps.newHashMap();
 
-        for (DocumentaryUnit doc : repository.getAllCollections()) {
+        for (DocumentaryUnit doc : repository.getAllDocumentaryUnits()) {
             for (DocumentaryUnitDescription description : doc.getDocumentDescriptions()) {
                 for (AccessPoint relationship : description.getAccessPoints()) {
                     if (accessPointTypes.isEmpty() || accessPointTypes
@@ -206,7 +205,7 @@ public class Linker {
         CrudViews<Link> linkMaker = new CrudViews<>(graph, Link.class);
 
         long linkCount = 0L;
-        for (DocumentaryUnit doc : repository.getAllCollections()) {
+        for (DocumentaryUnit doc : repository.getAllDocumentaryUnits()) {
             for (DocumentaryUnitDescription description : doc.getDocumentDescriptions()) {
                 for (AccessPoint relationship : description.getAccessPoints()) {
                     if (accessPointTypes.isEmpty() || accessPointTypes

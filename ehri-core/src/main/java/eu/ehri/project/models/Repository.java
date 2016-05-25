@@ -62,7 +62,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      * @return an iterable of top-level items
      */
     @Adjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, direction = Direction.IN)
-    Iterable<DocumentaryUnit> getCollections();
+    Iterable<DocumentaryUnit> getTopLevelDocumentaryUnits();
 
     /**
      * Fetch items at <b>all</b> levels (including children of top-level
@@ -71,7 +71,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      * @return an iterable of documentary unit items
      */
     @JavaHandler
-    Iterable<DocumentaryUnit> getAllCollections();
+    Iterable<DocumentaryUnit> getAllDocumentaryUnits();
 
     /**
      * Add a documentary unit as a top-level item in this
@@ -80,7 +80,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      * @param unit a documentary unit item
      */
     @JavaHandler
-    void addCollection(DocumentaryUnit unit);
+    void addTopLevelDocumentaryUnit(DocumentaryUnit unit);
 
     /**
      * Fetch the country in which this repository resides.
@@ -109,7 +109,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
             return gremlin().inE(Ontology.DOC_HELD_BY_REPOSITORY).count();
         }
 
-        public void addCollection(DocumentaryUnit unit) {
+        public void addTopLevelDocumentaryUnit(DocumentaryUnit unit) {
             JavaHandlerUtils.addSingleRelationship(unit.asVertex(), it(),
                     Ontology.DOC_HELD_BY_REPOSITORY);
         }
@@ -118,7 +118,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
             country.addRepository(frame(it(), Repository.class));
         }
 
-        public Iterable<DocumentaryUnit> getAllCollections() {
+        public Iterable<DocumentaryUnit> getAllDocumentaryUnits() {
             Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").in(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
