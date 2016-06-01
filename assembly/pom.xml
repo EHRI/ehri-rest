@@ -3,7 +3,7 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.2-SNAPSHOT</version>
+        <version>0.13.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -60,27 +60,27 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>0.13.2-SNAPSHOT</version>
+            <version>0.13.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.2-SNAPSHOT</version>
+            <version>0.13.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-cli</artifactId>
-            <version>0.13.2-SNAPSHOT</version>
+            <version>0.13.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
-            <version>0.13.2-SNAPSHOT</version>
+            <version>0.13.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
-            <version>0.13.2-SNAPSHOT</version>
+            <version>0.13.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <profiles>
@@ -90,7 +90,7 @@
                 <dependency>
                     <groupId>ehri-project</groupId>
                     <artifactId>ehri-ws-sparql</artifactId>
-                    <version>0.13.2-SNAPSHOT</version>
+                    <version>0.13.3-SNAPSHOT</version>
                 </dependency>
             </dependencies>
             <build>
