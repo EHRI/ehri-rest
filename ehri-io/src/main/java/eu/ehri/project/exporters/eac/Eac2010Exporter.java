@@ -404,7 +404,7 @@ public class Eac2010Exporter implements EacExporter {
 
             Element eventDateTimeElem = doc.createElement("eventDateTime");
             // TODO: Normalise and put standardDateTime attribute here?
-            eventDateTimeElem.setTextContent((String) event.getProperty("maintenanceEvent/date"));
+            eventDateTimeElem.setTextContent((String) event.getProperty("date"));
             eventElem.appendChild(eventDateTimeElem);
 
             Element agentTypeElem = doc.createElement("agentType");
@@ -415,7 +415,7 @@ public class Eac2010Exporter implements EacExporter {
             agentElem.setTextContent("EHRI");
             eventElem.appendChild(agentElem);
 
-            String eventDesc = event.getProperty("maintenanceEvent/source");
+            String eventDesc = event.getProperty("source");
             if (eventDesc != null && !eventDesc.trim().isEmpty()) {
                 Element eventDescElem = doc.createElement("eventDescription");
                 eventElem.appendChild(eventDescElem);

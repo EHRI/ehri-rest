@@ -201,11 +201,11 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
     public Map<String, Object> getMaintenanceEvent(Map<String, Object> event) {
         Map<String, Object> me = Maps.newHashMap();
         for (Entry<String, Object> eventEntry : event.entrySet()) {
-            if (eventEntry.getKey().equals("maintenanceEvent/type")) {
+            // Hack for EAG 1 and 2012 compatibility - maps maintenance event
+            // types from old to new values
+            if (eventEntry.getKey().equals(Ontology.MAINTENANCE_EVENT_TYPE)) {
                 me.put(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType
-                        .withName((String) eventEntry.getValue()));
-            } else if (eventEntry.getKey().equals("maintenanceEvent/agentType")) {
-                me.put(Ontology.MAINTENANCE_EVENT_AGENT_TYPE, eventEntry.getValue());
+                        .withName((String) eventEntry.getValue()).toString());
             } else {
                 me.put(eventEntry.getKey(), eventEntry.getValue());
             }

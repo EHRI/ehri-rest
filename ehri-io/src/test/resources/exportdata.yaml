@@ -73,8 +73,8 @@
             - id: example-maintenance-event-1
               type: MaintenanceEvent
               data:
-                maintenanceEvent/date: !!str 2013-09-09
-                maintenanceEvent/source: Exported from ICA-AtoM
+                date: !!str 2013-09-09
+                source: Exported from ICA-AtoM
                 eventType: updated
           hasAddress:
             - id: example-address-1
@@ -152,8 +152,8 @@
             - id: example-maintenance-event-2
               type: MaintenanceEvent
               data:
-                maintenanceEvent/date: !!str 2013-09-09
-                maintenanceEvent/source: Exported from ICA-AtoM
+                date: !!str 2013-09-09
+                source: Exported from ICA-AtoM
                 eventType: updated
           hasDate:
             - id: example-date-1
