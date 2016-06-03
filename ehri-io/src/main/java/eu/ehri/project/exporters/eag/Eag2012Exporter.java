@@ -284,7 +284,7 @@ public class Eag2012Exporter implements EagExporter {
             eventElem.appendChild(agentType);
 
             Element eventDateTime = doc.createElement("eventDateTime");
-            eventDateTime.setTextContent((String) event.getProperty("maintenanceEvent/date"));
+            eventDateTime.setTextContent((String) event.getProperty("date"));
             eventElem.appendChild(eventDateTime);
 
             Element eventType = doc.createElement("eventType");
