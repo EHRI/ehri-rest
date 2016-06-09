@@ -26,7 +26,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.views.api.QueryApi;
+import eu.ehri.project.api.QueryApi;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;

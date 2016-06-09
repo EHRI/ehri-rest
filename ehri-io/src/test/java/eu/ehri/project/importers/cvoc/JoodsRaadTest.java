@@ -28,7 +28,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.api.QueryApi;
+import eu.ehri.project.api.QueryApi;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

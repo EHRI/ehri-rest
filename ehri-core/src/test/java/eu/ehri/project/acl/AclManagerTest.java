@@ -40,7 +40,7 @@ import eu.ehri.project.test.TestData;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import eu.ehri.project.views.api.Api;
+import eu.ehri.project.api.Api;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +81,6 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testIsAdmin() throws Exception {
         Group admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        new AclManager(graph);
         assertTrue(AclManager.belongsToAdmin(admin));
     }
 

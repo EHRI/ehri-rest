@@ -39,7 +39,7 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.api.Api;
+import eu.ehri.project.api.Api;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;

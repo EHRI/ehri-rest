@@ -27,7 +27,7 @@ import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.api.EventsApi;
+import eu.ehri.project.api.EventsApi;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;

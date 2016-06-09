@@ -41,9 +41,9 @@ import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.api.EventsApi;
-import eu.ehri.project.views.api.Api;
-import eu.ehri.project.views.api.UserProfilesApi;
+import eu.ehri.project.api.EventsApi;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.UserProfilesApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;

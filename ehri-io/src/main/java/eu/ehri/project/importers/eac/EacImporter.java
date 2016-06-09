@@ -47,8 +47,8 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.views.api.Api;
-import eu.ehri.project.views.api.ApiFactory;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

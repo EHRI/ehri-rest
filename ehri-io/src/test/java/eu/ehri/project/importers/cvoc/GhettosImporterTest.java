@@ -29,7 +29,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import java.io.InputStream;
 import java.util.List;
 
-import eu.ehri.project.views.api.QueryApi;
+import eu.ehri.project.api.QueryApi;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

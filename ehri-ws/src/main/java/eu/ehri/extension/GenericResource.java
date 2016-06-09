@@ -56,8 +56,8 @@ import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.views.api.EventsApi;
-import eu.ehri.project.views.api.impl.ApiImpl;
+import eu.ehri.project.api.EventsApi;
+import eu.ehri.project.api.impl.ApiImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
