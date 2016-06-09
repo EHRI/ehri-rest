@@ -85,7 +85,7 @@ public class ApiImpl implements Api {
         this.actionManager = new ActionManager(graph, scope);
         this.virtualUnitViews = new VirtualUnitsApiImpl(graph, accessor);
         this.conceptsApi = new ConceptsApiImpl(graph, accessor, logging);
-        this.userProfilesApi = new UserProfilesApiImpl(graph, accessor, logging);
+        this.userProfilesApi = new UserProfilesApiImpl(graph, this);
         this.eventsApi = new EventsApiImpl(graph, accessor);
         this.bundleManager = new BundleManager(graph);
         this.depSerializer = new Serializer.Builder(graph).dependentOnly().build();
@@ -94,6 +94,11 @@ public class ApiImpl implements Api {
     @Override
     public Accessor accessor() {
         return accessor;
+    }
+
+    @Override
+    public boolean isLogging() {
+        return logging;
     }
 
     @Override

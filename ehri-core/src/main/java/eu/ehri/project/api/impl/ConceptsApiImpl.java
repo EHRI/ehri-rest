@@ -8,6 +8,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
@@ -38,10 +39,11 @@ class ConceptsApiImpl implements ConceptsApi {
     }
 
     @Override
-    public Concept addRelatedConcepts(Concept concept, List<String> related) throws ItemNotFound, PermissionDenied {
+    public Concept addRelatedConcepts(String id, List<String> related) throws ItemNotFound, PermissionDenied {
+        Concept concept = manager.getEntity(id, EntityClass.CVOC_CONCEPT, Concept.class);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-        for (String id : related) {
-            Concept other = manager.getEntity(id, Concept.class);
+        for (String otherId : related) {
+            Concept other = manager.getEntity(otherId, Concept.class);
             helper.checkEntityPermission(other, accessor, PermissionType.UPDATE);
             concept.addRelatedConcept(other);
         }
@@ -51,10 +53,11 @@ class ConceptsApiImpl implements ConceptsApi {
     }
 
     @Override
-    public Concept removeRelatedConcepts(Concept concept, List<String> related) throws ItemNotFound, PermissionDenied {
+    public Concept removeRelatedConcepts(String id, List<String> related) throws ItemNotFound, PermissionDenied {
+        Concept concept = manager.getEntity(id, EntityClass.CVOC_CONCEPT, Concept.class);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-        for (String id : related) {
-            Concept other = manager.getEntity(id, Concept.class);
+        for (String otherId : related) {
+            Concept other = manager.getEntity(otherId, Concept.class);
             helper.checkEntityPermission(other, accessor, PermissionType.UPDATE);
             concept.removeRelatedConcept(other);
         }
@@ -64,10 +67,11 @@ class ConceptsApiImpl implements ConceptsApi {
     }
 
     @Override
-    public Concept addNarrowerConcepts(Concept concept, List<String> narrower) throws ItemNotFound, PermissionDenied {
+    public Concept addNarrowerConcepts(String id, List<String> narrower) throws ItemNotFound, PermissionDenied {
+        Concept concept = manager.getEntity(id, EntityClass.CVOC_CONCEPT, Concept.class);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-        for (String id : narrower) {
-            Concept other = manager.getEntity(id, Concept.class);
+        for (String otherId : narrower) {
+            Concept other = manager.getEntity(otherId, Concept.class);
             helper.checkEntityPermission(other, accessor, PermissionType.UPDATE);
             concept.addNarrowerConcept(other);
         }
@@ -76,10 +80,11 @@ class ConceptsApiImpl implements ConceptsApi {
     }
 
     @Override
-    public Concept removeNarrowerConcepts(Concept concept, List<String> narrower) throws ItemNotFound, PermissionDenied {
+    public Concept removeNarrowerConcepts(String id, List<String> narrower) throws ItemNotFound, PermissionDenied {
+        Concept concept = manager.getEntity(id, EntityClass.CVOC_CONCEPT, Concept.class);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-        for (String id : narrower) {
-            Concept other = manager.getEntity(id, Concept.class);
+        for (String otherId : narrower) {
+            Concept other = manager.getEntity(otherId, Concept.class);
             helper.checkEntityPermission(other, accessor, PermissionType.UPDATE);
             concept.removeNarrowerConcept(other);
         }

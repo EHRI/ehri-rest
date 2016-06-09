@@ -220,8 +220,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = api().detail(userId, cls);
-            userProfilesApi().addFollowers(user, otherIds);
+            userProfilesApi().addFollowers(userId, otherIds);
             tx.success();
         }
     }
@@ -233,8 +232,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = api().detail(userId, cls);
-            userProfilesApi().removeFollowers(user, otherIds);
+            userProfilesApi().removeFollowers(userId, otherIds);
             tx.success();
         }
     }
@@ -276,8 +274,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = api().detail(userId, cls);
-            userProfilesApi().addBlocked(user, otherIds);
+            userProfilesApi().addBlocked(userId, otherIds);
             tx.success();
         }
     }
@@ -289,8 +286,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = api().detail(userId, cls);
-            userProfilesApi().removeBlocked(user, otherIds);
+            userProfilesApi().removeBlocked(userId, otherIds);
             tx.success();
         }
     }
@@ -317,8 +313,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = api().detail(userId, cls);
-            userProfilesApi().addWatching(user, otherIds);
+            userProfilesApi().addWatching(userId, otherIds);
             tx.success();
         }
     }
@@ -330,8 +325,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = api().detail(userId, cls);
-            userProfilesApi().removeWatching(user, otherIds);
+            userProfilesApi().removeWatching(userId, otherIds);
             tx.success();
         }
     }

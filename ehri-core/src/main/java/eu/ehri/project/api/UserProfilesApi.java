@@ -6,15 +6,15 @@ import eu.ehri.project.models.UserProfile;
 import java.util.List;
 
 public interface UserProfilesApi {
-    void addWatching(UserProfile user, List<String> ids) throws ItemNotFound;
+    UserProfile addWatching(String userId, List<String> ids) throws ItemNotFound;
 
-    void removeWatching(UserProfile user, List<String> ids) throws ItemNotFound;
+    UserProfile removeWatching(String userId, List<String> ids) throws ItemNotFound;
 
-    void addFollowers(UserProfile user, List<String> ids) throws ItemNotFound;
+    UserProfile addFollowers(String userId, List<String> ids) throws ItemNotFound;
 
-    void removeFollowers(UserProfile user, List<String> ids) throws ItemNotFound;
+    UserProfile removeFollowers(String userId, List<String> ids) throws ItemNotFound;
 
-    void addBlocked(UserProfile user, List<String> ids) throws ItemNotFound;
+    UserProfile addBlocked(String userId, List<String> ids) throws ItemNotFound;
 
-    void removeBlocked(UserProfile user, List<String> ids) throws ItemNotFound;
+    UserProfile removeBlocked(String userId, List<String> ids) throws ItemNotFound;
 }

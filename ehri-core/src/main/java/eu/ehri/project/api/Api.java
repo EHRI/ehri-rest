@@ -315,6 +315,13 @@ public interface Api {
     Promotable removeDemotion(String id) throws ItemNotFound, PermissionDenied;
 
     /**
+     * Determine if logging is enabled.
+     *
+     * @return logging?
+     */
+    boolean isLogging();
+
+    /**
      * ACL and permission related operations.
      */
     interface Acl {

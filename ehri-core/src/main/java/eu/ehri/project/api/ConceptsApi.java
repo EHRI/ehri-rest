@@ -8,11 +8,15 @@ import java.util.List;
 
 public interface ConceptsApi {
 
-    Concept addRelatedConcepts(Concept concept, List<String> related) throws ItemNotFound, PermissionDenied;
+    Concept addRelatedConcepts(String id, List<String> related)
+            throws ItemNotFound, PermissionDenied;
 
-    Concept removeRelatedConcepts(Concept concept, List<String> related) throws ItemNotFound, PermissionDenied;
+    Concept removeRelatedConcepts(String id, List<String> related)
+            throws ItemNotFound, PermissionDenied;
 
-    Concept addNarrowerConcepts(Concept concept, List<String> narrower) throws ItemNotFound, PermissionDenied;
+    Concept addNarrowerConcepts(String id, List<String> narrower)
+            throws ItemNotFound, PermissionDenied;
 
-    Concept removeNarrowerConcepts(Concept concept, List<String> narrower) throws ItemNotFound, PermissionDenied;
+    Concept removeNarrowerConcepts(String id, List<String> narrower)
+            throws ItemNotFound, PermissionDenied;
 }

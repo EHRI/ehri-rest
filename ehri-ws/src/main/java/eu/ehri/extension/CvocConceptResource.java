@@ -160,9 +160,8 @@ public class CvocConceptResource
             @QueryParam(ID_PARAM) List<String> narrower)
             throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Concept concept = api().detail(id, cls);
             Response item = single(api().concepts()
-                    .addNarrowerConcepts(concept, narrower));
+                    .addNarrowerConcepts(id, narrower));
             tx.success();
             return item;
         }
@@ -183,9 +182,8 @@ public class CvocConceptResource
             @QueryParam(ID_PARAM) List<String> narrower)
             throws PermissionDenied, AccessDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Concept concept = api().detail(id, cls);
             Response item = single(api().concepts()
-                    .removeNarrowerConcepts(concept, narrower));
+                    .removeNarrowerConcepts(id, narrower));
             tx.success();
             return item;
         }
@@ -275,9 +273,8 @@ public class CvocConceptResource
             @QueryParam(ID_PARAM) List<String> related)
             throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Concept concept = api().detail(id, cls);
             Response item = single(api().concepts()
-                    .addRelatedConcepts(concept, related));
+                    .addRelatedConcepts(id, related));
             tx.success();
             return item;
         }
@@ -300,9 +297,8 @@ public class CvocConceptResource
             @QueryParam(ID_PARAM) List<String> related)
             throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Concept concept = api().detail(id, cls);
             Response item = single(api().concepts()
-                    .removeRelatedConcepts(concept, related));
+                    .removeRelatedConcepts(id, related));
             tx.success();
             return item;
         }

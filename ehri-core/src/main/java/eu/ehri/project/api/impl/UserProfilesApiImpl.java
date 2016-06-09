@@ -2,6 +2,7 @@ package eu.ehri.project.api.impl;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -22,71 +23,79 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
-    private final ActionManager actionManager;
-    private final Accessor accessor;
-    private final boolean logging;
+    private final Api api;
 
-    UserProfilesApiImpl(FramedGraph<?> graph, Accessor accessor, boolean logging) {
+    UserProfilesApiImpl(FramedGraph<?> graph, Api api) {
         this.graph = graph;
-        manager = GraphManagerFactory.getInstance(graph);
-        actionManager = new ActionManager(graph);
-        this.accessor = accessor;
-        this.logging = logging;
+        this.manager = GraphManagerFactory.getInstance(graph);
+        this.api = api;
     }
 
     @Override
-    public void addWatching(UserProfile user, List<String> ids) throws ItemNotFound {
+    public UserProfile addWatching(String userId, List<String> ids) throws ItemNotFound {
+        UserProfile user = api.detail(userId, UserProfile.class);
         for (String id : ids) {
             user.addWatching(manager.getEntity(id, Watchable.class));
         }
         log(user, ids, EventTypes.watch);
+        return user;
     }
 
     @Override
-    public void removeWatching(UserProfile user, List<String> ids) throws ItemNotFound {
+    public UserProfile removeWatching(String userId, List<String> ids) throws ItemNotFound {
+        UserProfile user = api.detail(userId, UserProfile.class);
         for (String id : ids) {
             user.removeWatching(manager.getEntity(id, Watchable.class));
         }
         log(user, ids, EventTypes.unwatch);
+        return user;
     }
 
     @Override
-    public void addFollowers(UserProfile user, List<String> ids) throws ItemNotFound {
+    public UserProfile addFollowers(String userId, List<String> ids) throws ItemNotFound {
+        UserProfile user = api.detail(userId, UserProfile.class);
         for (String id : ids) {
             user.addFollowing(manager.getEntity(id, UserProfile.class));
         }
         log(user, ids, EventTypes.follow);
+        return user;
     }
 
     @Override
-    public void removeFollowers(UserProfile user, List<String> ids) throws ItemNotFound {
+    public UserProfile removeFollowers(String userId, List<String> ids) throws ItemNotFound {
+        UserProfile user = api.detail(userId, UserProfile.class);
         for (String id : ids) {
             user.removeFollowing(manager.getEntity(id, UserProfile.class));
         }
         log(user, ids, EventTypes.unfollow);
+        return user;
     }
 
     @Override
-    public void addBlocked(UserProfile user, List<String> ids) throws ItemNotFound {
+    public UserProfile addBlocked(String userId, List<String> ids) throws ItemNotFound {
+        UserProfile user = api.detail(userId, UserProfile.class);
         for (String id : ids) {
             user.addBlocked(manager.getEntity(id, UserProfile.class));
         }
         log(user, ids, EventTypes.block);
+        return user;
     }
 
     @Override
-    public void removeBlocked(UserProfile user, List<String> ids) throws ItemNotFound {
+    public UserProfile removeBlocked(String userId, List<String> ids) throws ItemNotFound {
+        UserProfile user = api.detail(userId, UserProfile.class);
         for (String id : ids) {
             user.removeBlocked(manager.getEntity(id, UserProfile.class));
         }
         log(user, ids, EventTypes.unblock);
+        return user;
     }
 
     private Optional<SystemEvent> log(UserProfile user, List<String> ids, EventTypes type)
             throws ItemNotFound {
-        if (logging && !ids.isEmpty()) {
-            ActionManager.EventContext ctx = actionManager
-                    .newEventContext(user, accessor.as(Actioner.class), type);
+        if (api.isLogging() && !ids.isEmpty()) {
+            ActionManager.EventContext ctx = api.actionManager()
+                    .newEventContext(user, api.accessor().as(Actioner.class), type);
             for (String id : ids) {
                 ctx.addSubjects(manager.getEntity(id, Accessible.class));
             }
