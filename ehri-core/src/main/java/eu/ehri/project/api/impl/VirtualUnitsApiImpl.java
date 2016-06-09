@@ -103,28 +103,23 @@ class VirtualUnitsApiImpl implements VirtualUnitsApi {
                 .in(Ontology.DESCRIPTION_FOR_ENTITY)
                 .in(Ontology.VC_DESCRIBED_BY)
                 .as("n").out(Ontology.VC_IS_PART_OF)
-                .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-                    @Override
-                    public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                        return (!vertexLoopBundle.getObject()
-                                .getEdges(Direction.OUT, Ontology.VC_IS_PART_OF)
-                                .iterator().hasNext())
-                                && manager.getEntityClass(vertexLoopBundle.getObject())
-                                .equals(EntityClass.VIRTUAL_UNIT);
-                    }
-                });
+                .loop("n", JavaHandlerUtils.defaultMaxLoops, vertexLoopBundle ->
+                        (!vertexLoopBundle.getObject()
+                            .getEdges(Direction.OUT, Ontology.VC_IS_PART_OF)
+                            .iterator().hasNext())
+                        && manager.getEntityClass(vertexLoopBundle.getObject())
+                                .equals(EntityClass.VIRTUAL_UNIT));
 
         GremlinPipeline<Vertex, Vertex> out = new GremlinPipeline<Vertex, Vertex>(item.asVertex())
                 .copySplit(new GremlinPipeline<Vertex, Object>(item.asVertex())
                         .in(Ontology.DESCRIPTION_FOR_ENTITY)
                         .in(Ontology.VC_DESCRIBED_BY), otherPipe)
-                .exhaustMerge().cast(Vertex.class).filter(new PipeFunction<Vertex, Boolean>() {
-                    @Override
-                    public Boolean compute(Vertex vertex) {
-                        return !vertex.getEdges(Direction.OUT, Ontology.VC_IS_PART_OF)
-                                .iterator().hasNext();
-                    }
-                }).filter(AclManager.getAclFilterFunction(accessor));
+                .exhaustMerge()
+                .cast(Vertex.class)
+                .filter(vertex ->
+                        !vertex.getEdges(Direction.OUT, Ontology.VC_IS_PART_OF)
+                                .iterator().hasNext())
+                .filter(AclManager.getAclFilterFunction(accessor));
 
         return graph.frameVertices(out, VirtualUnit.class);
     }

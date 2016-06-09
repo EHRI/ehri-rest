@@ -160,12 +160,9 @@ public class CountryResource
             DeserializationError, ItemNotFound {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             final Country country = api().detail(id, cls);
-            Response item = createItem(bundle, accessors, new Handler<Repository>() {
-                @Override
-                public void process(Repository repository) throws PermissionDenied {
-                    repository.setCountry(country);
-                }
-            }, api().withScope(country), Repository.class);
+            Response item = createItem(bundle, accessors,
+                    repository -> repository.setCountry(country),
+                    api().withScope(country), Repository.class);
             tx.success();
             return item;
         }

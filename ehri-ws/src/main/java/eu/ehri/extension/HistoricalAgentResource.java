@@ -147,14 +147,11 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
             EacExporter eacExporter = new Eac2010Exporter(graph);
             final Document document = eacExporter.export(agent, lang);
             tx.success();
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try {
-                        new DocumentWriter(document).write(outputStream);
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    }
+            return Response.ok((StreamingOutput) outputStream -> {
+                try {
+                    new DocumentWriter(document).write(outputStream);
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }

@@ -144,12 +144,8 @@ public class DocumentaryUnitResource
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final DocumentaryUnit parent = api().detail(id, cls);
-            Response resource = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
-                        @Override
-                        public void process(DocumentaryUnit doc) throws PermissionDenied {
-                            parent.addChild(doc);
-                        }
-                    },
+            Response resource = createItem(bundle, accessors,
+                    parent::addChild,
                     api().withScope(parent), cls);
             tx.success();
             return resource;
@@ -176,14 +172,11 @@ public class DocumentaryUnitResource
             EadExporter eadExporter = new Ead2002Exporter(graph);
             final Document document = eadExporter.export(unit, lang);
             tx.success();
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try {
-                        new DocumentWriter(document).write(outputStream);
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    }
+            return Response.ok((StreamingOutput) outputStream -> {
+                try {
+                    new DocumentWriter(document).write(outputStream);
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }

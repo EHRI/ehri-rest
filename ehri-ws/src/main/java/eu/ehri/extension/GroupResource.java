@@ -98,12 +98,9 @@ public class GroupResource
             for (String member : members) {
                 groupMembers.add(manager.getEntity(member, Accessor.class));
             }
-            Response item = createItem(bundle, accessors, new Handler<Group>() {
-                @Override
-                public void process(Group group) throws PermissionDenied {
-                    for (Accessor member : groupMembers) {
-                        acl.addAccessorToGroup(group, member);
-                    }
+            Response item = createItem(bundle, accessors, group -> {
+                for (Accessor member : groupMembers) {
+                    acl.addAccessorToGroup(group, member);
                 }
             });
             tx.success();

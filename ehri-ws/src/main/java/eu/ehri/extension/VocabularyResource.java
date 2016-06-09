@@ -190,12 +190,9 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Vocabulary vocabulary = api().detail(id, cls);
-            Response item = createItem(bundle, accessors, new Handler<Concept>() {
-                @Override
-                public void process(Concept concept) throws PermissionDenied {
-                    concept.setVocabulary(vocabulary);
-                }
-            }, api().withScope(vocabulary), Concept.class);
+            Response item = createItem(bundle, accessors,
+                    concept -> concept.setVocabulary(vocabulary),
+                    api().withScope(vocabulary), Concept.class);
             tx.success();
             return item;
         }
@@ -227,12 +224,9 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary);
             final Model model = skosImporter.export(base);
             tx.success();
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                    model.getWriter(rdfFormat).write(model, outputStream, base);
-                }
-            }).type(mediaType + "; charset=utf-8").build();
+            return Response.ok((StreamingOutput) outputStream ->
+                        model.getWriter(rdfFormat).write(model, outputStream, base))
+                    .type(mediaType + "; charset=utf-8").build();
         }
     }
 }

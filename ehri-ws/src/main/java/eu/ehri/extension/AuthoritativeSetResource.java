@@ -176,12 +176,9 @@ public class AuthoritativeSetResource extends
             DeserializationError, ItemNotFound {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             final AuthoritativeSet set = api().detail(id, cls);
-            Response item = createItem(bundle, accessors, new Handler<HistoricalAgent>() {
-                @Override
-                public void process(HistoricalAgent agent) throws PermissionDenied {
-                    set.addItem(agent);
-                    agent.setPermissionScope(set);
-                }
+            Response item = createItem(bundle, accessors, agent -> {
+                set.addItem(agent);
+                agent.setPermissionScope(set);
             }, api().withScope(set), HistoricalAgent.class);
             tx.success();
             return item;

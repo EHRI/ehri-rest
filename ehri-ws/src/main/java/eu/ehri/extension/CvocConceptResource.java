@@ -135,12 +135,9 @@ public class CvocConceptResource
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Concept parent = api().detail(id, cls);
-            Response item = createItem(bundle, accessors, new Handler<Concept>() {
-                @Override
-                public void process(Concept concept) {
-                    parent.addNarrowerConcept(concept);
-                    concept.setVocabulary(parent.getVocabulary());
-                }
+            Response item = createItem(bundle, accessors, concept -> {
+                parent.addNarrowerConcept(concept);
+                concept.setVocabulary(parent.getVocabulary());
             }, api().withScope(parent.getVocabulary()), cls);
             tx.success();
             return item;

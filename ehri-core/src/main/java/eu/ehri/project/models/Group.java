@@ -129,13 +129,10 @@ public interface Group extends Accessor, Accessible,
 
         public Iterable<Accessible> getAllUserProfileMembers() {
             GremlinPipeline<Vertex,Vertex> pipe = gremlin().as("n").in(Ontology.ACCESSOR_BELONGS_TO_GROUP)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-                        @Override
-                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return vertexLoopBundle.getObject()
-                                    .getProperty(EntityType.TYPE_KEY)
-                                    .equals(Entities.USER_PROFILE);
-                        }
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, vertexLoopBundle -> {
+                        return vertexLoopBundle.getObject()
+                                .getProperty(EntityType.TYPE_KEY)
+                                .equals(Entities.USER_PROFILE);
                     });
             return frameVertices(pipe.dedup());
         }

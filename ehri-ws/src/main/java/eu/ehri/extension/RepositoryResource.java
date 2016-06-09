@@ -160,12 +160,9 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             final Repository repository = api().detail(id, cls);
-            Response response = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
-                @Override
-                public void process(DocumentaryUnit doc) throws PermissionDenied {
-                    repository.addTopLevelDocumentaryUnit(doc);
-                }
-            }, api().withScope(repository), DocumentaryUnit.class);
+            Response response = createItem(bundle, accessors,
+                    repository::addTopLevelDocumentaryUnit,
+                    api().withScope(repository), DocumentaryUnit.class);
             tx.success();
             return response;
         }
@@ -191,14 +188,11 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             EagExporter eagExporter = new Eag2012Exporter(graph);
             final Document document = eagExporter.export(repo, lang);
             tx.success();
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try {
-                        new DocumentWriter(document).write(outputStream);
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    }
+            return Response.ok((StreamingOutput) outputStream -> {
+                try {
+                    new DocumentWriter(document).write(outputStream);
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }
@@ -224,23 +218,20 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         try {
             final Repository repo = api().detail(id, cls);
             final EadExporter eadExporter = new Ead2002Exporter(graph);
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-                        for (DocumentaryUnit doc : repo.getTopLevelDocumentaryUnits()) {
-                            ZipEntry zipEntry = new ZipEntry(doc.getId() + ".xml");
-                            zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
-                            zos.putNextEntry(zipEntry);
-                            eadExporter.export(doc, zos, lang);
-                            zos.closeEntry();
-                        }
-                        tx.success();
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    } finally {
-                        tx.close();
+            return Response.ok((StreamingOutput) outputStream -> {
+                try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
+                    for (DocumentaryUnit doc : repo.getTopLevelDocumentaryUnits()) {
+                        ZipEntry zipEntry = new ZipEntry(doc.getId() + ".xml");
+                        zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
+                        zos.putNextEntry(zipEntry);
+                        eadExporter.export(doc, zos, lang);
+                        zos.closeEntry();
                     }
+                    tx.success();
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
+                } finally {
+                    tx.close();
                 }
             }).type("application/zip").build();
         } catch (Exception e) {

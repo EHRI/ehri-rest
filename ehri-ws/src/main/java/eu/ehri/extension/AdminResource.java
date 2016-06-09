@@ -82,15 +82,12 @@ public class AdminResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("export-graphson")
     public Response getGraphSON() throws Exception {
-        return Response.ok(new StreamingOutput() {
-            @Override
-            public void write(OutputStream stream) throws IOException, WebApplicationException {
-                try (final Tx tx = graph.getBaseGraph().beginTx()) {
-                    Accessor accessor = getRequesterUserProfile();
-                    AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
-                    GraphSONWriter.outputGraph(aclGraph, stream, GraphSONMode.EXTENDED);
-                    tx.success();
-                }
+        return Response.ok((StreamingOutput) stream -> {
+            try (final Tx tx = graph.getBaseGraph().beginTx()) {
+                Accessor accessor = getRequesterUserProfile();
+                AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
+                GraphSONWriter.outputGraph(aclGraph, stream, GraphSONMode.EXTENDED);
+                tx.success();
             }
         }).build();
     }
@@ -99,15 +96,12 @@ public class AdminResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("export-json")
     public Response exportNodes() throws Exception {
-        return Response.ok(new StreamingOutput() {
-            @Override
-            public void write(OutputStream stream) throws IOException, WebApplicationException {
-                try (final Tx tx = graph.getBaseGraph().beginTx()) {
-                    Accessor accessor = getRequesterUserProfile();
-                    AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
-                    JsonDataExporter.outputGraph(aclGraph, stream);
-                    tx.success();
-                }
+        return Response.ok((StreamingOutput) stream -> {
+            try (final Tx tx = graph.getBaseGraph().beginTx()) {
+                Accessor accessor = getRequesterUserProfile();
+                AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
+                JsonDataExporter.outputGraph(aclGraph, stream);
+                tx.success();
             }
         }).build();
     }

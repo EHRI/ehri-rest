@@ -183,13 +183,10 @@ public final class VirtualUnitResource extends
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);
 
-            Response item = createItem(bundle, accessors, new Handler<VirtualUnit>() {
-                @Override
-                public void process(VirtualUnit virtualUnit) {
-                    virtualUnit.setAuthor(currentUser);
-                    for (DocumentaryUnit include : includedUnits) {
-                        virtualUnit.addIncludedUnit(include);
-                    }
+            Response item = createItem(bundle, accessors, virtualUnit -> {
+                virtualUnit.setAuthor(currentUser);
+                for (DocumentaryUnit include : includedUnits) {
+                    virtualUnit.addIncludedUnit(include);
                 }
             });
             tx.success();
@@ -241,13 +238,10 @@ public final class VirtualUnitResource extends
             // NB: Unlike most other items created in another context, virtual
             // units do not inherit the permission scope of their 'parent',
             // because they make have many parents.
-            Response item = createItem(bundle, accessors, new Handler<VirtualUnit>() {
-                @Override
-                public void process(VirtualUnit virtualUnit) {
-                    parent.addChild(virtualUnit);
-                    for (DocumentaryUnit included : includedUnits) {
-                        virtualUnit.addIncludedUnit(included);
-                    }
+            Response item = createItem(bundle, accessors, virtualUnit -> {
+                parent.addChild(virtualUnit);
+                for (DocumentaryUnit included : includedUnits) {
+                    virtualUnit.addIncludedUnit(included);
                 }
             });
             tx.success();
@@ -266,12 +260,9 @@ public final class VirtualUnitResource extends
 
         PipeFunction<Vertex, Boolean> aclFilter = AclManager.getAclFilterFunction(accessor);
 
-        PipeFunction<Vertex, Boolean> typeFilter = new PipeFunction<Vertex, Boolean>() {
-            @Override
-            public Boolean compute(Vertex vertex) {
-                EntityClass entityClass = manager.getEntityClass(vertex);
-                return EntityClass.DOCUMENTARY_UNIT.equals(entityClass);
-            }
+        PipeFunction<Vertex, Boolean> typeFilter = vertex -> {
+            EntityClass entityClass = manager.getEntityClass(vertex);
+            return EntityClass.DOCUMENTARY_UNIT.equals(entityClass);
         };
 
         GremlinPipeline<Vertex, Vertex> units = new GremlinPipeline<Vertex, Vertex>(

@@ -167,13 +167,9 @@ public interface DocumentaryUnit extends AbstractUnit {
 
         public Repository getRepository() {
             Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").out(Ontology.DOC_IS_CHILD_OF)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-                        @Override
-                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.OUT,
-                                    Ontology.DOC_IS_CHILD_OF).iterator().hasNext();
-                        }
-                    });
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops,
+                            vertexLoopBundle -> !vertexLoopBundle.getObject().getVertices(Direction.OUT,
+                            Ontology.DOC_IS_CHILD_OF).iterator().hasNext());
 
             GremlinPipeline<Vertex, Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);

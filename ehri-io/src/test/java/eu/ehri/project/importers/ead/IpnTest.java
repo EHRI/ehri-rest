@@ -149,7 +149,6 @@ public class IpnTest extends AbstractImporterTest {
             for (String property : d.getPropertyKeys()) {
                 if (property.equals("processInfo")) {
                     hasProvenance = true;
-                    System.out.println(d.getProperty(property));
                     assertTrue(d.<List<String>>getProperty(property)
                             .get(0).startsWith("This selection has been "));
                 }

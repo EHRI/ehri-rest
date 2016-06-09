@@ -80,22 +80,13 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
     // - same event type
     // - same subject(s)
     // - same actioner
-    private static final AggregatorPipe.AggregatorFunction<SystemEvent> strictAggregator = new AggregatorPipe
-            .AggregatorFunction<SystemEvent>() {
-        @Override
-        public boolean aggregate(SystemEvent a, SystemEvent b, int count) {
-            return ActionManager.sameAs(a, b);
-        }
-    };
+    private static final AggregatorPipe.AggregatorFunction<SystemEvent> strictAggregator =
+            (a, b, count) -> ActionManager.sameAs(a, b);
 
     // Aggregator function that aggregates adjacent events by actioner
-    private static final AggregatorPipe.AggregatorFunction<SystemEvent> userAggregator = new AggregatorPipe
-            .AggregatorFunction<SystemEvent>() {
-        @Override
-        public boolean aggregate(SystemEvent a, SystemEvent b, int count) {
-            return count < MAX_AGGREGATION && ActionManager.sequentialWithSameAccessor(b, a);
-        }
-    };
+    private static final AggregatorPipe.AggregatorFunction<SystemEvent> userAggregator =
+            (a, b, count) -> count < MAX_AGGREGATION
+                    && ActionManager.sequentialWithSameAccessor(b, a);
 
     public static class Builder {
         private final FramedGraph<?> graph;
@@ -374,12 +365,8 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
     }
 
     private Iterable<SystemEvent> mergeEventQueues(List<Iterable<SystemEvent>> queues) {
-        return Iterables.mergeSorted(queues, new Comparator<SystemEvent>() {
-            @Override
-            public int compare(SystemEvent event1, SystemEvent event2) {
-                return event2.getTimestamp().compareTo(event1.getTimestamp());
-            }
-        });
+        return Iterables.mergeSorted(queues,
+                (event1, event2) -> event2.getTimestamp().compareTo(event1.getTimestamp()));
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> applyAclFilter(GremlinPipeline<SystemEvent, SystemEvent> pipe,
@@ -389,20 +376,17 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
         // Filter items accessible to this asUser... hide the
         // event if any subjects or the scope are inaccessible
         // to the asUser.
-        return pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-            @Override
-            public Boolean compute(SystemEvent event) {
-                Entity eventScope = event.getEventScope();
-                if (eventScope != null && !aclFilterTest.compute(eventScope.asVertex())) {
+        return pipe.filter(event -> {
+            Entity eventScope = event.getEventScope();
+            if (eventScope != null && !aclFilterTest.compute(eventScope.asVertex())) {
+                return false;
+            }
+            for (Accessible e : event.getSubjects()) {
+                if (!aclFilterTest.compute(e.asVertex())) {
                     return false;
                 }
-                for (Accessible e : event.getSubjects()) {
-                    if (!aclFilterTest.compute(e.asVertex())) {
-                        return false;
-                    }
-                }
-                return true;
             }
+            return true;
         });
     }
 
@@ -410,70 +394,50 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
             GremlinPipeline<SystemEvent, SystemEvent> pipe) {
 
         if (!eventTypes.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    return eventTypes.contains(event.getEventType());
-                }
-            });
+            pipe = pipe.filter(event -> eventTypes.contains(event.getEventType()));
         }
 
         if (!ids.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    for (Accessible e : event.getSubjects()) {
-                        if (ids.contains(e.getId())) {
-                            return true;
-                        }
+            pipe = pipe.filter(event -> {
+                for (Accessible e : event.getSubjects()) {
+                    if (ids.contains(e.getId())) {
+                        return true;
                     }
-                    return false;
                 }
+                return false;
             });
         }
 
         if (!entityTypes.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    for (Accessible e : event.getSubjects()) {
-                        if (entityTypes.contains(manager.getEntityClass(e))) {
-                            return true;
-                        }
+            pipe = pipe.filter(event -> {
+                for (Accessible e : event.getSubjects()) {
+                    if (entityTypes.contains(manager.getEntityClass(e))) {
+                        return true;
                     }
-                    return false;
                 }
+                return false;
             });
         }
 
         if (!users.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    Actioner actioner = event.getActioner();
-                    return actioner != null && users.contains(actioner.getId());
-                }
+            pipe = pipe.filter(event -> {
+                Actioner actioner = event.getActioner();
+                return actioner != null && users.contains(actioner.getId());
             });
         }
 
         // Add from/to filters (depends on timestamp strings comparing the right way!
         if (from.isPresent()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    String timestamp = event.getTimestamp();
-                    return from.get().compareTo(timestamp) >= 0;
-                }
+            pipe = pipe.filter(event -> {
+                String timestamp = event.getTimestamp();
+                return from.get().compareTo(timestamp) >= 0;
             });
         }
 
         if (to.isPresent()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    String timestamp = event.getTimestamp();
-                    return to.get().compareTo(timestamp) <= 0;
-                }
+            pipe = pipe.filter(event -> {
+                String timestamp = event.getTimestamp();
+                return to.get().compareTo(timestamp) <= 0;
             });
         }
 
@@ -498,16 +462,13 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
                 watching.add(item.getId());
             }
 
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    for (Accessible e : event.getSubjects()) {
-                        if (watching.contains(e.getId())) {
-                            return true;
-                        }
+            pipe = pipe.filter(event -> {
+                for (Accessible e : event.getSubjects()) {
+                    if (watching.contains(e.getId())) {
+                        return true;
                     }
-                    return false;
                 }
+                return false;
             });
         }
 
@@ -517,12 +478,9 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
                 following.add(other.getId());
             }
 
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    Actioner actioner = event.getActioner();
-                    return actioner != null && following.contains(actioner.getId());
-                }
+            pipe = pipe.filter(event -> {
+                Actioner actioner = event.getActioner();
+                return actioner != null && following.contains(actioner.getId());
             });
         }
 

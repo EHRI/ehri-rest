@@ -230,16 +230,13 @@ public class EadImporter extends SaxXmlImporter {
 
                 // filter out dependents that a) are descriptions, b) have the same language/code,
                 // and c) have the same source file ID
-                Bundle.Filter filter = new Bundle.Filter() {
-                    @Override
-                    public boolean remove(String relationLabel, Bundle bundle) {
-                        String lang = bundle.getDataValue(Ontology.LANGUAGE);
-                        String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
-                        return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
-                                && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                                && (lang != null && lang.equals(languageOfDesc))
-                                && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId));
-                    }
+                Bundle.Filter filter = (relationLabel, bundle) -> {
+                    String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                    String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
+                    return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
+                            && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                            && (lang != null && lang.equals(languageOfDesc))
+                            && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId));
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
 
@@ -405,6 +402,6 @@ public class EadImporter extends SaxXmlImporter {
 
     @Override
     public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
-        return importItem(itemData, new Stack<String>());
+        return importItem(itemData, new Stack<>());
     }
 }

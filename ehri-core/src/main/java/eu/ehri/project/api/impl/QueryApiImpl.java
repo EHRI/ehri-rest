@@ -278,7 +278,7 @@ public final class QueryApiImpl implements QueryApi {
             // can't re-use the iterator for counting and streaming.
             ArrayList<Vertex> userVerts = Lists.newArrayList(setFilters(pipeline).iterator());
             Iterable<E> iterable = graph.frameVertices(
-                    setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
+                    setPipelineRange(setOrder(new GremlinPipeline<>(
                             userVerts))), cls);
             return new Page<>(iterable, offset, limit, userVerts.size());
         }
@@ -373,18 +373,16 @@ public final class QueryApiImpl implements QueryApi {
      */
     private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction(final SortedMap<String, Sort> sort) {
         final Ordering<Comparable<?>> order = Ordering.natural().nullsLast();
-        return new PipeFunction<Pair<Vertex, Vertex>, Integer>() {
-            public Integer compute(Pair<Vertex, Vertex> pair) {
-                ComparisonChain chain = ComparisonChain.start();
-                for (Entry<String, Sort> entry : sort.entrySet()) {
-                    Vertex a = entry.getValue() == Sort.ASC ? pair.getA() : pair.getB();
-                    Vertex b = entry.getValue() == Sort.ASC ? pair.getB() : pair.getA();
-                    chain = chain.compare(
-                            (String) a.getProperty(entry.getKey()),
-                            (String) b.getProperty(entry.getKey()), order);
-                }
-                return chain.result();
+        return pair -> {
+            ComparisonChain chain = ComparisonChain.start();
+            for (Entry<String, Sort> entry : sort.entrySet()) {
+                Vertex a = entry.getValue() == Sort.ASC ? pair.getA() : pair.getB();
+                Vertex b = entry.getValue() == Sort.ASC ? pair.getB() : pair.getA();
+                chain = chain.compare(
+                        (String) a.getProperty(entry.getKey()),
+                        (String) b.getProperty(entry.getKey()), order);
             }
+            return chain.result();
         };
     }
 
@@ -392,18 +390,16 @@ public final class QueryApiImpl implements QueryApi {
      * Create a function that filters nodes given a string and a predicate.
      */
     private PipeFunction<Vertex, Boolean> getFilterFunction() {
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex vertex) {
-                for (Entry<String, Pair<FilterPredicate, Object>> entry : filters
-                        .entrySet()) {
-                    String p = vertex.getProperty(entry.getKey());
-                    if (p == null || !matches(p, entry.getValue()
-                            .getB(), entry.getValue().getA())) {
-                        return false;
-                    }
+        return vertex -> {
+            for (Entry<String, Pair<FilterPredicate, Object>> entry : filters
+                    .entrySet()) {
+                String p = vertex.getProperty(entry.getKey());
+                if (p == null || !matches(p, entry.getValue()
+                        .getB(), entry.getValue().getA())) {
+                    return false;
                 }
-                return true;
             }
+            return true;
         };
     }
 

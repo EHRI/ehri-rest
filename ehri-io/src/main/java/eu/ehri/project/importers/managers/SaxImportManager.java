@@ -159,27 +159,25 @@ public class SaxImportManager extends AbstractImportManager {
             }
 
             // Add housekeeping callbacks for the log object...
-            importer.addCallback(new ImportCallback() {
-                public void itemImported(Mutation<? extends Accessible> mutation) {
-                    switch (mutation.getState()) {
-                        case CREATED:
-                            logger.info("Item created: {}", mutation.getNode().getId());
-                            context.addSubjects(mutation.getNode());
-                            log.addCreated();
-                            break;
-                        case UPDATED:
-                            if (!allowUpdates) {
-                                throw new ModeViolation(String.format(
-                                        "Item '%s' was updated but import manager does not allow updates",
-                                        mutation.getNode().getId()));
-                            }
-                            logger.info("Item updated: {}", mutation.getNode().getId());
-                            context.addSubjects(mutation.getNode());
-                            log.addUpdated();
-                            break;
-                        default:
-                            log.addUnchanged();
-                    }
+            importer.addCallback(mutation -> {
+                switch (mutation.getState()) {
+                    case CREATED:
+                        logger.info("Item created: {}", mutation.getNode().getId());
+                        context.addSubjects(mutation.getNode());
+                        log.addCreated();
+                        break;
+                    case UPDATED:
+                        if (!allowUpdates) {
+                            throw new ModeViolation(String.format(
+                                    "Item '%s' was updated but import manager does not allow updates",
+                                    mutation.getNode().getId()));
+                        }
+                        logger.info("Item updated: {}", mutation.getNode().getId());
+                        context.addSubjects(mutation.getNode());
+                        log.addUpdated();
+                        break;
+                    default:
+                        log.addUnchanged();
                 }
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...

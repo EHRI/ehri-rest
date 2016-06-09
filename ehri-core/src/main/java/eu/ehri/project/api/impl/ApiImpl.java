@@ -540,12 +540,7 @@ public class ApiImpl implements Api {
 
     private Set<Entity> itemsInSubtree(Entity topLevel) {
         final Set<Entity> items = Sets.newHashSet();
-        depSerializer.traverseSubtree(topLevel, new TraversalCallback() {
-            @Override
-            public void process(Entity frame, int depth, String relation, int relationIndex) {
-                items.add(frame);
-            }
-        });
+        depSerializer.traverseSubtree(topLevel, (frame, depth, relation, relationIndex) -> items.add(frame));
         return items;
     }
 

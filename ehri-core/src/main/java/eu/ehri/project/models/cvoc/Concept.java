@@ -79,7 +79,6 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
 
     @JavaHandler
     void removeNarrowerConcept(Concept concept);
-
     
     // Related concepts, should be like a symmetric associative link... 
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
@@ -100,15 +99,18 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
      */
     abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
 
+        @Override
         public long getChildCount() {
             return gremlin().outE(Ontology.CONCEPT_HAS_NARROWER).count();
         }
 
+        @Override
         public void addRelatedConcept(Concept related) {
             JavaHandlerUtils.addUniqueRelationship(it(),
                     related.asVertex(), Ontology.CONCEPT_HAS_RELATED);
         }
 
+        @Override
         public void addNarrowerConcept(Concept concept) {
             if (!concept.asVertex().equals(it())) {
                 JavaHandlerUtils.addUniqueRelationship(it(),
@@ -116,6 +118,7 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
             }
         }
 
+        @Override
         public void removeNarrowerConcept(Concept concept) {
             JavaHandlerUtils.removeAllRelationships(it(), concept.asVertex(),
                     Ontology.CONCEPT_HAS_NARROWER);

@@ -277,17 +277,14 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
             return frameVertices(gremlin().as("n")
                     .out(Ontology.ACCESSOR_BELONGS_TO_GROUP)
                     .loop("n", defaultMaxLoops, noopLoopFunc)
-                    .in(Ontology.ACCESSOR_BELONGS_TO_GROUP).filter(new PipeFunction<Vertex, Boolean>() {
-                        @Override
-                        public Boolean compute(Vertex vertex) {
-                            // Exclude the current user...
-                            if (it().equals(vertex)) {
-                                return false;
-                            }
-                            // Exclude other groups...
-                            String type = vertex.getProperty(EntityType.TYPE_KEY);
-                            return Entities.USER_PROFILE.equals(type);
+                    .in(Ontology.ACCESSOR_BELONGS_TO_GROUP).filter(vertex -> {
+                        // Exclude the current user...
+                        if (it().equals(vertex)) {
+                            return false;
                         }
+                        // Exclude other groups...
+                        String type = vertex.getProperty(EntityType.TYPE_KEY);
+                        return Entities.USER_PROFILE.equals(type);
                     }));
         }
 

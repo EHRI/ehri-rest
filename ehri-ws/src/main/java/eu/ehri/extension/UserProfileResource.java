@@ -114,12 +114,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             for (String groupId : groupIds) {
                 groups.add(manager.getEntity(groupId, Group.class));
             }
-            Response item = createItem(bundle, accessors, new Handler<UserProfile>() {
-                @Override
-                public void process(UserProfile userProfile) throws PermissionDenied {
-                    for (Group group : groups) {
-                        acl.addAccessorToGroup(group, userProfile);
-                    }
+            Response item = createItem(bundle, accessors, userProfile -> {
+                for (Group group : groups) {
+                    acl.addAccessorToGroup(group, userProfile);
                 }
             });
             tx.success();

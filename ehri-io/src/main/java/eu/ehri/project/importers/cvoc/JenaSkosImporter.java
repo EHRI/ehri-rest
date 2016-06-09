@@ -369,26 +369,14 @@ public final class JenaSkosImporter implements SkosImporter {
     private void hookupRelationships(Resource item, Concept current,
             Map<Resource, Concept> conceptMap) {
 
-        connectRelation(current, item, conceptMap, SkosRDFVocabulary.BROADER.getURI(), new ConnectFunc() {
-            @Override
-            public void connect(Concept current, Concept related) {
-                related.addNarrowerConcept(current);
-            }
-        });
+        connectRelation(current, item, conceptMap, SkosRDFVocabulary.BROADER.getURI(),
+                (it, other) -> other.addNarrowerConcept(it));
 
-        connectRelation(current, item, conceptMap, SkosRDFVocabulary.NARROWER.getURI(), new ConnectFunc() {
-            @Override
-            public void connect(Concept current, Concept related) {
-                current.addNarrowerConcept(related);
-            }
-        });
+        connectRelation(current, item, conceptMap, SkosRDFVocabulary.NARROWER.getURI(),
+                (it, other) -> it.addNarrowerConcept(other));
 
-        connectRelation(current, item, conceptMap, SkosRDFVocabulary.RELATED.getURI(), new ConnectFunc() {
-            @Override
-            public void connect(Concept current, Concept related) {
-                current.addRelatedConcept(related);
-            }
-        });
+        connectRelation(current, item, conceptMap, SkosRDFVocabulary.RELATED.getURI(),
+                (it, other) -> it.addRelatedConcept(other));
     }
 
     private List<Bundle> getDescriptions(Resource item) {

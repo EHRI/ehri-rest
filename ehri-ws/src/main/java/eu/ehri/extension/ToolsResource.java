@@ -106,12 +106,9 @@ public class ToolsResource extends AbstractRestResource {
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
         final SchemaExporter schemaExporter = new SchemaExporter(rdfFormat);
-        return Response.ok(new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                schemaExporter.dumpSchema(outputStream, baseUri);
-            }
-        }).type(mediaType + "; charset=utf-8").build();
+        return Response.ok((StreamingOutput) outputStream ->
+                    schemaExporter.dumpSchema(outputStream, baseUri))
+                .type(mediaType + "; charset=utf-8").build();
     }
 
     /**
@@ -389,12 +386,9 @@ public class ToolsResource extends AbstractRestResource {
         final AtomicInteger done = new AtomicInteger();
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             logger.info("Upgrading DB schema...");
-            DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
-                @Override
-                public void changed() {
-                    if (done.getAndIncrement() % 100000 == 0) {
-                        graph.getBaseGraph().commit();
-                    }
+            DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, () -> {
+                if (done.getAndIncrement() % 100000 == 0) {
+                    graph.getBaseGraph().commit();
                 }
             });
             upgrader1to2
@@ -416,10 +410,7 @@ public class ToolsResource extends AbstractRestResource {
         setLabels();
         setConstraints();
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
-                @Override
-                public void changed() {
-                }
+            new DbUpgrader1to2(graph, () -> {
             }).setDbSchemaVersion();
             tx.success();
         }

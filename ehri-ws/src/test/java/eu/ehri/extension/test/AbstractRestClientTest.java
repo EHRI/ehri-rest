@@ -243,12 +243,7 @@ public class AbstractRestClientTest extends RunningServerTest {
     }
 
 
-    protected final Comparator<Bundle> bundleComparator = new Comparator<Bundle>() {
-        @Override
-        public int compare(Bundle a, Bundle b) {
-            return a.getId().compareTo(b.getId());
-        }
-    };
+    protected final Comparator<Bundle> bundleComparator = (a, b) -> a.getId().compareTo(b.getId());
 
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
         WebResource resource = client.resource(uri).queryParams(params);
