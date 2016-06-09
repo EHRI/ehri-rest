@@ -207,6 +207,19 @@ public interface Api {
             Class<T> cls, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError;
 
+    /**
+     * Update a dependent item, belonging to the given parent.
+     *
+     * @param parentId   the parent ID
+     * @param data       the dependent item data
+     * @param cls        the dependent item's class
+     * @param logMessage an optional log message
+     * @param <T>        the dependent item's generic class
+     * @return the dependent item frame
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws ValidationError
+     */
     <T extends Accessible> Mutation<T> updateDependent(String parentId, Bundle data,
             Class<T> cls, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError;
@@ -262,33 +275,48 @@ public interface Api {
     /**
      * Up vote an item, removing a down vote if there is one.
      *
-     * @param item the promotable item
+     * @param id the promotable item's ID
+     * @return the promotable item
+     * @throws ItemNotFound
      * @throws PermissionDenied
+     * @throws NotPromotableError
      */
-    void upVote(Promotable item) throws PermissionDenied, ApiImpl.NotPromotableError;
+    Promotable promote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError;
 
     /**
      * Remove an up vote.
      *
-     * @param item the promotable item
+     * @param id the promotable item's ID
+     * @return the promotable item
+     * @throws ItemNotFound
+     * @throws PermissionDenied
      */
-    void removeUpVote(Promotable item) throws PermissionDenied;
+    Promotable removePromotion(String id) throws ItemNotFound, PermissionDenied;
 
     /**
      * Down vote an item, removing an up vote if there is one.
      *
-     * @param item the promotable item
+     * @param id the promotable item's ID
+     * @return the promotable item
+     * @throws ItemNotFound
      * @throws PermissionDenied
+     * @throws NotPromotableError
      */
-    void downVote(Promotable item) throws PermissionDenied, ApiImpl.NotPromotableError;
+    Promotable demote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError;
 
     /**
      * Remove a down vote.
      *
-     * @param item the promotable item
+     * @param id the promotable item's ID
+     * @return the promotable item
+     * @throws ItemNotFound
+     * @throws PermissionDenied
      */
-    void removeDownVote(Promotable item) throws PermissionDenied;
+    Promotable removeDemotion(String id) throws ItemNotFound, PermissionDenied;
 
+    /**
+     * ACL and permission related operations.
+     */
     interface Acl {
         /**
          * Set the global permission matrix for a user.

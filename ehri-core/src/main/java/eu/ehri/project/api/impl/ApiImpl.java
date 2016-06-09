@@ -446,7 +446,8 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public void upVote(Promotable item) throws PermissionDenied, NotPromotableError {
+    public Promotable promote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError {
+        Promotable item = detail(id, Promotable.class);
         helper.checkEntityPermission(item, accessor, PermissionType.PROMOTE);
         if (!item.isPromotable()) {
             throw new NotPromotableError(item.getId());
@@ -457,15 +458,19 @@ public class ApiImpl implements Api {
             actionManager.newEventContext(item, user, EventTypes.promotion)
                     .commit();
         }
+        return item;
     }
 
     @Override
-    public void removeUpVote(Promotable item) throws PermissionDenied {
+    public Promotable removePromotion(String id) throws ItemNotFound, PermissionDenied {
+        Promotable item = detail(id, Promotable.class);
         item.removePromotion(accessor.as(UserProfile.class));
+        return item;
     }
 
     @Override
-    public void downVote(Promotable item) throws PermissionDenied, NotPromotableError {
+    public Promotable demote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError {
+        Promotable item = detail(id, Promotable.class);
         helper.checkEntityPermission(item, accessor, PermissionType.PROMOTE);
         if (!item.isPromotable()) {
             throw new ApiImpl.NotPromotableError(item.getId());
@@ -476,11 +481,14 @@ public class ApiImpl implements Api {
             actionManager.newEventContext(item, user, EventTypes.demotion)
                     .commit();
         }
+        return item;
     }
 
     @Override
-    public void removeDownVote(Promotable item) throws PermissionDenied {
+    public Promotable removeDemotion(String id) throws ItemNotFound, PermissionDenied {
+        Promotable item = detail(id, Promotable.class);
         item.removeDemotion(accessor.as(UserProfile.class));
+        return item;
     }
 
     @Override

@@ -51,7 +51,6 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.Promotable;
 import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
@@ -255,11 +254,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = api().detail(id, Promotable.class);
-            api().upVote(item);
-            Response response = single(item);
+            Response item = single(api().promote(id));
             tx.success();
-            return response;
+            return item;
         } catch (ApiImpl.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -280,9 +277,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = api().detail(id, Promotable.class);
-            api().removeUpVote(item);
-            Response response = single(item);
+            Response response = single(api().removePromotion(id));
             tx.success();
             return response;
         }
@@ -302,11 +297,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = api().detail(id, Promotable.class);
-            api().downVote(item);
-            Response response = single(item);
+            Response item = single(api().demote(id));
             tx.success();
-            return response;
+            return item;
         } catch (ApiImpl.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -327,11 +320,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = api().detail(id, Promotable.class);
-            api().removeDownVote(item);
-            Response response = single(item);
+            Response item = single(api().removeDemotion(id));
             tx.success();
-            return response;
+            return item;
         }
     }
 
