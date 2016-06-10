@@ -25,7 +25,8 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.api.QueryApi;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -46,7 +47,7 @@ public class UserListEntities extends BaseCommand {
     public String getHelp() {
         return "List entities of a given type as a given user.";
     }
-    
+
     @Override
     public void setCustomOptions(Options options) {
         options.addOption(Option.builder()
@@ -75,8 +76,8 @@ public class UserListEntities extends BaseCommand {
                 cmdLine.getOptionValue("user"), UserProfile.class);
 
         @SuppressWarnings("unchecked")
-        Query<Accessible> query = new Query<>(graph, (Class<Accessible>) cls);
-        for (Accessible acc : query.page(user)) {
+        QueryApi query = api(graph, user).query();
+        for (Entity acc : query.page(Entity.class)) {
             System.out.println(acc.getId());
         }
 

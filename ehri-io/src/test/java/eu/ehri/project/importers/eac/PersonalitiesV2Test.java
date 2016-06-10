@@ -21,11 +21,7 @@ package eu.ehri.project.importers.eac;
 
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
@@ -35,12 +31,10 @@ import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -136,15 +130,15 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
     }
 
     @Test
-    public void newPersonalitiesWithReferredNodes() throws ItemNotFound, PermissionDenied, ValidationError, IOException, InputParseError {
+    public void newPersonalitiesWithReferredNodes() throws Exception {
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "FAST_keywords")
                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382");
-        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
+        Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
-        Concept concept_716 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
+        Concept concept_716 = api(validUser).create(conceptBundle, Concept.class);
         vocabulary.addItem(concept_716);
 
 

@@ -39,9 +39,7 @@ import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -62,10 +60,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Provides a web service interface for the Repository.
@@ -100,14 +95,13 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            Repository repository = views.detail(id, user);
+            Repository repository = api().detail(id, cls);
             Iterable<DocumentaryUnit> units = all
-                    ? repository.getAllCollections()
-                    : repository.getCollections();
-            return streamingPage(getQuery(DocumentaryUnit.class).page(units, user), tx);
+                    ? repository.getAllDocumentaryUnits()
+                    : repository.getTopLevelDocumentaryUnits();
+            return streamingPage(getQuery().page(units, DocumentaryUnit.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -161,14 +155,10 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final Repository repository = views.detail(id, user);
-            Response response = createItem(bundle, accessors, new Handler<DocumentaryUnit>() {
-                @Override
-                public void process(DocumentaryUnit doc) throws PermissionDenied {
-                    repository.addCollection(doc);
-                }
-            }, views.setScope(repository).setClass(DocumentaryUnit.class));
+            final Repository repository = api().detail(id, cls);
+            Response response = createItem(bundle, accessors,
+                    repository::addTopLevelDocumentaryUnit,
+                    api().withScope(repository), DocumentaryUnit.class);
             tx.success();
             return response;
         }
@@ -190,18 +180,15 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Repository repo = views.detail(id, getRequesterUserProfile());
-            EagExporter eagExporter = new Eag2012Exporter(graph);
+            Repository repo = api().detail(id, cls);
+            EagExporter eagExporter = new Eag2012Exporter(graph, api());
             final Document document = eagExporter.export(repo, lang);
             tx.success();
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try {
-                        new DocumentWriter(document).write(outputStream);
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    }
+            return Response.ok((StreamingOutput) outputStream -> {
+                try {
+                    new DocumentWriter(document).write(outputStream);
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }
@@ -225,27 +212,9 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws IOException, ItemNotFound {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            final Repository repo = views.detail(id, getRequesterUserProfile());
-            final EadExporter eadExporter = new Ead2002Exporter(graph);
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-                        for (DocumentaryUnit doc : repo.getCollections()) {
-                            ZipEntry zipEntry = new ZipEntry(doc.getId() + ".xml");
-                            zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
-                            zos.putNextEntry(zipEntry);
-                            eadExporter.export(doc, zos, lang);
-                            zos.closeEntry();
-                        }
-                        tx.success();
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    } finally {
-                        tx.close();
-                    }
-                }
-            }).type("application/zip").build();
+            final Repository repo = api().detail(id, cls);
+            final EadExporter eadExporter = new Ead2002Exporter(graph, api());
+            return exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang, tx);
         } catch (Exception e) {
             tx.failure();
             tx.close();

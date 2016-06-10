@@ -25,11 +25,11 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.Query;
 
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.api.QueryApi;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -64,11 +64,11 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "PLACE.ČSÚ.544256";
-        Query<Concept> query = new Query<>(graph, Concept.class);
+        QueryApi query = api(validUser).query();
 
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).page(
-                Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
+                Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         Concept location = list.get(0);
         //  <geo:lat>52.43333333333333</geo:lat>

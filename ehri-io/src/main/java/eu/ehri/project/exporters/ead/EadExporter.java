@@ -1,5 +1,6 @@
 package eu.ehri.project.exporters.ead;
 
+import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import org.w3c.dom.Document;
 
@@ -10,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Encoded Archival Description (EAD) export.
  */
-public interface EadExporter {
+public interface EadExporter extends XmlExporter<DocumentaryUnit> {
 
     /**
      * Export a documentary unit as an EAD document.

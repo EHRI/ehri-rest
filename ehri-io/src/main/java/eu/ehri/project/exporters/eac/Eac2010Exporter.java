@@ -19,17 +19,15 @@
 
 package eu.ehri.project.exporters.eac;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exporters.DocumentWriter;
-import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.HistoricalAgent;
@@ -42,7 +40,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.views.EventViews;
+import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -66,12 +64,12 @@ import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 /**
  * Export EAC 2010 XML.
  */
-public class Eac2010Exporter implements EacExporter {
+public final class Eac2010Exporter implements EacExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eac2010Exporter.class);
 
-    protected final FramedGraph<?> framedGraph;
-    protected final EventViews eventManager;
-    protected final DocumentBuilder documentBuilder;
+    private final FramedGraph<?> framedGraph;
+    private final Api api;
+    private final DocumentBuilder documentBuilder;
 
     private static final ImmutableMap<String, String> descriptiveTextMappings = ImmutableMap.<String, String>builder()
             .put("place", "places/place/placeEntry")
@@ -87,9 +85,9 @@ public class Eac2010Exporter implements EacExporter {
             .put("biographicalHistory", "biogHist")
             .build();
 
-    public Eac2010Exporter(final FramedGraph<?> framedGraph) {
+    public Eac2010Exporter(final FramedGraph<?> framedGraph, Api api) {
         this.framedGraph = framedGraph;
-        eventManager = new EventViews(framedGraph);
+        this.api = api;
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
@@ -244,7 +242,7 @@ public class Eac2010Exporter implements EacExporter {
         cpfDescElem.appendChild(identityElem);
 
         Element entityTypeElem = doc.createElement("entityType");
-        entityTypeElem.setTextContent((String) desc.getProperty("typeOfEntity"));
+        entityTypeElem.setTextContent(desc.getProperty("typeOfEntity"));
         identityElem.appendChild(entityTypeElem);
 
         Element nameElem = doc.createElement("nameEntry");
@@ -404,7 +402,7 @@ public class Eac2010Exporter implements EacExporter {
 
             Element eventDateTimeElem = doc.createElement("eventDateTime");
             // TODO: Normalise and put standardDateTime attribute here?
-            eventDateTimeElem.setTextContent((String) event.getProperty("date"));
+            eventDateTimeElem.setTextContent(event.getProperty("date"));
             eventElem.appendChild(eventDateTimeElem);
 
             Element agentTypeElem = doc.createElement("agentType");
@@ -426,8 +424,8 @@ public class Eac2010Exporter implements EacExporter {
         }
 
         // Post-ingest events
-        List<List<SystemEvent>> systemEvents = Lists.newArrayList(eventManager
-                .aggregateForItem(entity, AnonymousAccessor.getInstance()));
+        List<List<SystemEvent>> systemEvents = Lists.newArrayList(
+                api.events().aggregateForItem(entity));
         for (int i = systemEvents.size() - 1; i >= 0; i--) {
             List<SystemEvent> agg = systemEvents.get(i);
             SystemEvent event = agg.get(0);
@@ -541,12 +539,9 @@ public class Eac2010Exporter implements EacExporter {
     }
 
     protected String getEntityName(Described entity, String lang) {
-        return LanguageHelpers.getBestDescription(entity, lang).transform(new Function<Description, String>() {
-            @Override
-            public String apply(Description description) {
-                return description.getName();
-            }
-        }).or(entity.getIdentifier()); // Fallback
+        return LanguageHelpers.getBestDescription(entity, lang)
+                .transform(Description::getName)
+                .or(entity.getIdentifier()); // Fallback
     }
 
     private void addTextElements(Document doc, Element parent, Description desc, String key, String path)

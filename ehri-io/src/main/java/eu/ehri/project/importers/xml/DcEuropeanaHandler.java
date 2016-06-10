@@ -67,7 +67,7 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
                     extractName(currentMap);
                     
                     Helpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get("objectIdentifier").toString());
-                    importer.importItem(currentMap, new Stack<String>());
+                    importer.importItem(currentMap, new Stack<>());
 //                importer.importTopLevelExtraNodes(topLevel, current);
                     //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
                 } catch (ValidationError ex) {

@@ -57,6 +57,6 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
      * @return The base id string.
      */
     public String getIdBase(Bundle bundle) {
-        return String.valueOf(bundle.getDataValue(IDENTIFIER_KEY));
+        return bundle.getDataValue(IDENTIFIER_KEY);
     }
 }

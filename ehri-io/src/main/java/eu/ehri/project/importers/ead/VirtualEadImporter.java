@@ -206,7 +206,7 @@ public class VirtualEadImporter extends EadImporter {
             String repositoryId = itemData.get(REPOID).toString();
             String unitId = itemData.get(UNITID).toString();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
-            for (DocumentaryUnit unit : repository.getAllCollections()) {
+            for (DocumentaryUnit unit : repository.getAllDocumentaryUnits()) {
                 logger.debug("{} / {} / {}", unit.getIdentifier(), unit.getId(), unitId);
                 if (unit.getIdentifier().equals(unitId)) {
                     return unit;

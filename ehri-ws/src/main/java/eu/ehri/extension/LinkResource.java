@@ -34,7 +34,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.LinkViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -62,11 +61,8 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     public static final String SOURCE_PARAM = "source";
     public static final String BODY_PARAM = "body";
 
-    private final LinkViews linkViews;
-
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
-        linkViews = new LinkViews(graph);
     }
 
     @GET
@@ -125,8 +121,8 @@ public class LinkResource extends AbstractAccessibleResource<Link>
                 throw new DeserializationError("Both source and target must be provided");
             }
             UserProfile user = getCurrentUser();
-            Link link = linkViews.create(target,
-                    source, bodies, bundle, user, getAccessors(accessors, user));
+            Link link = api().createLink(target,
+                    source, bodies, bundle, getAccessors(accessors, user));
             Response response = creationResponse(link);
             tx.success();
             return response;

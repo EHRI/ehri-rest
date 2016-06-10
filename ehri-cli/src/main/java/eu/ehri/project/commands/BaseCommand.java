@@ -21,6 +21,9 @@ package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -108,6 +111,10 @@ public abstract class BaseCommand implements Command {
     public CommandLine getCmdLine(String[] args) throws ParseException {
         setCustomOptions(options);
         return parser.parse(options, args);
+    }
+
+    protected Api api(FramedGraph<?> graph, Accessor accessor) {
+        return ApiFactory.withLogging(graph, accessor);
     }
 
     /**

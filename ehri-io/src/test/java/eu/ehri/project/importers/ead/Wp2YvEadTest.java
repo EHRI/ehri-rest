@@ -22,8 +22,8 @@ package eu.ehri.project.importers.ead;
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -34,7 +34,6 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,10 +64,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
-        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class)
-                .create(vocabularyBundle, validUser);
+        Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
-        Concept concept_288 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
+        Concept concept_288 = api(validUser).create(conceptBundle, Concept.class);
         vocabulary.addItem(concept_288);
 
         Vocabulary vocabularyTest = manager.getEntity("wp2_keywords", Vocabulary.class);

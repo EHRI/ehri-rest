@@ -1,9 +1,13 @@
 sudo: false
 
 language: java
+jdk: oraclejdk8
 
-install:
-  - mvn -Psparql install -DskipTests=true
+cache:
+  directories:
+    - '$HOME/.m2/repository'  
 
+
+install: /bin/true
 script:
   - mvn -Psparql test -Dmaven.javadoc.skip=true

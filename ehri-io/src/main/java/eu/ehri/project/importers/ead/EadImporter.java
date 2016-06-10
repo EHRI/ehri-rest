@@ -24,6 +24,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -35,9 +36,9 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -47,7 +48,8 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -228,16 +230,13 @@ public class EadImporter extends SaxXmlImporter {
 
                 // filter out dependents that a) are descriptions, b) have the same language/code,
                 // and c) have the same source file ID
-                Bundle.Filter filter = new Bundle.Filter() {
-                    @Override
-                    public boolean remove(String relationLabel, Bundle bundle) {
-                        String lang = bundle.getDataValue(Ontology.LANGUAGE);
-                        String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
-                        return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
-                                && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                                && (lang != null && lang.equals(languageOfDesc))
-                                && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId));
-                    }
+                Bundle.Filter filter = (relationLabel, bundle) -> {
+                    String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                    String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
+                    return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
+                            && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                            && (lang != null && lang.equals(languageOfDesc))
+                            && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId));
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
 
@@ -274,7 +273,7 @@ public class EadImporter extends SaxXmlImporter {
         // we can only create the annotations after the DocumentaryUnit
         // and its Description have been added to the graph,
         // so they have IDs.
-        CrudViews<Link> crud = new CrudViews<>(framedGraph, Link.class);
+        Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = new Bundle(EntityClass.LINK)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
 
@@ -298,12 +297,12 @@ public class EadImporter extends SaxXmlImporter {
                                 try {
                                     Bundle data = linkBundle
                                             .withDataValue(Ontology.LINK_HAS_TYPE, rel.getProperty("type"));
-                                    Link link = crud.create(data, actioner.as(Accessor.class));
+                                    Link link = api.create(data, Link.class);
                                     unit.addLink(link);
                                     concept.addLink(link);
                                     link.addLinkBody(rel);
                                     logger.debug("link created between {} and {}", conceptId, concept.getId());
-                                } catch (PermissionDenied ex) {
+                                } catch (PermissionDenied | DeserializationError ex) {
                                     logger.error(ex.getMessage());
                                 }
                             }
@@ -403,6 +402,6 @@ public class EadImporter extends SaxXmlImporter {
 
     @Override
     public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
-        return importItem(itemData, new Stack<String>());
+        return importItem(itemData, new Stack<>());
     }
 }

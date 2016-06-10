@@ -14,12 +14,7 @@ public class AggregatorPipeTest {
 
     @Test
     public void testAggregation() throws Exception {
-        Pipe<Integer, List<Integer>> pipe = new AggregatorPipe<>(new AggregatorPipe.AggregatorFunction<Integer>() {
-            @Override
-            public boolean aggregate(Integer a, Integer b, int count) {
-                return a + 1 == b;
-            }
-        });
+        Pipe<Integer, List<Integer>> pipe = new AggregatorPipe<>((a, b, count) -> a + 1 == b);
 
         pipe.setStarts(Arrays.asList(1, 2, 3, 5, 6, 7));
         List<List<Integer>> ranges = Lists.newArrayList(pipe.iterator());
@@ -30,12 +25,7 @@ public class AggregatorPipeTest {
 
     @Test
     public void testAggregationWithCount() throws Exception {
-        Pipe<Integer, List<Integer>> pipe = new AggregatorPipe<>(new AggregatorPipe.AggregatorFunction<Integer>() {
-            @Override
-            public boolean aggregate(Integer a, Integer b, int count) {
-                return count < 2 && a + 1 == b;
-            }
-        });
+        Pipe<Integer, List<Integer>> pipe = new AggregatorPipe<>((a, b, count) -> count < 2 && a + 1 == b);
 
         pipe.setStarts(Arrays.asList(1, 2, 3, 5, 6, 7));
         List<List<Integer>> ranges = Lists.newArrayList(pipe.iterator());

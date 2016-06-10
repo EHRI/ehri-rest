@@ -25,11 +25,10 @@ module Ehri
           Manager.get_entity(code, Models::Country.java_class)
         else
           bundle = Persistence::Bundle.new(EntityClass::COUNTRY)
-          .with_data_value("identifier", code)
-          .with_data_value("name", name)
+            .with_data_value("identifier", code)
+            .with_data_value("name", name)
           log = Optional::of("Creating country record for #{name}")
-          Views::ViewFactory.get_crud_with_logging(Graph, 
-                                                   Models::Country.java_class).create(bundle, user, log)
+          Api::ApiFactory.withLogging(Graph, user).create(bundle, Models::Country.java_class, log)
         end
       end
 
@@ -44,8 +43,8 @@ module Ehri
         msg = "Importing EAG for country #{countryname}"
 
         manager = Managers::SaxImportManager.new(Graph, country, user, 
-                                                  Importers::EagImporter.java_class,
-                                                  Importers::EagHandler.java_class)
+                                                  Java::EuEhriProjectImportersEag::EagImporter.java_class,
+                                                  Java::EuEhriProjectImportersEag::EagHandler.java_class)
         log = manager.import_files(repos, msg)
 
         log.print_report

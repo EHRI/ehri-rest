@@ -46,13 +46,7 @@ public final class JavaHandlerUtils {
      * @return A pipe function
      */
     public static <S> PipeFunction<LoopPipe.LoopBundle<S>, Boolean> maxLoopFuncFactory(final int maxLoops) {
-        return new PipeFunction<LoopPipe.LoopBundle<S>,
-                Boolean>() {
-            @Override
-            public Boolean compute(LoopPipe.LoopBundle<S> vertexLoopBundle) {
-                return vertexLoopBundle.getLoops() < maxLoops;
-            }
-        };
+        return vertexLoopBundle -> vertexLoopBundle.getLoops() < maxLoops;
     }
 
     /**
@@ -65,12 +59,7 @@ public final class JavaHandlerUtils {
      * Pipe function that always allows looping to continue.
      */
     public static final PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noopLoopFunc
-            = new PipeFunction<com.tinkerpop.pipes.branch.LoopPipe.LoopBundle<Vertex>, Boolean>() {
-        @Override
-        public Boolean compute(com.tinkerpop.pipes.branch.LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-            return true;
-        }
-    };
+            = vertexLoopBundle -> true;
 
     /**
      * Given a pipeline

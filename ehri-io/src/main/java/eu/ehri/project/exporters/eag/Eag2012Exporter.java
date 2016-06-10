@@ -7,9 +7,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.exporters.DocumentWriter;
-import eu.ehri.project.utils.LanguageHelpers;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -20,7 +19,7 @@ import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.views.EventViews;
+import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -47,11 +46,11 @@ import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 /**
  * Export EAG 2012 XML.
  */
-public class Eag2012Exporter implements EagExporter {
+public final class Eag2012Exporter implements EagExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eag2012Exporter.class);
 
-    protected final FramedGraph<?> framedGraph;
-    protected final EventViews eventManager;
+    private final FramedGraph<?> framedGraph;
+    private final Api api;
     private final DocumentBuilder documentBuilder;
 
     public static final Map<String, String> descriptiveTextMappings = ImmutableMap.<String, String>builder()
@@ -64,9 +63,9 @@ public class Eag2012Exporter implements EagExporter {
             .put("researchServices", "services/searchroom/researchServices")
             .build();
 
-    public Eag2012Exporter(final FramedGraph<?> framedGraph) {
+    public Eag2012Exporter(final FramedGraph<?> framedGraph, Api api) {
         this.framedGraph = framedGraph;
-        eventManager = new EventViews(framedGraph);
+        this.api = api;
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
@@ -126,8 +125,7 @@ public class Eag2012Exporter implements EagExporter {
                     .or("Europe")); // FIXME: Default???
             repoElem.appendChild(geogAreaElem);
 
-            for (Address address : (desc.as(RepositoryDescription.class))
-                    .getAddresses()) {
+            for (Address address : (desc.as(RepositoryDescription.class)).getAddresses()) {
                 Element locationElem = doc.createElement("location");
                 locationElem.setAttribute("localType", "postal address");
                 repoElem.appendChild(locationElem);
@@ -138,11 +136,11 @@ public class Eag2012Exporter implements EagExporter {
                 countryElem.setTextContent(new Locale("en", cc).getDisplayCountry());
                 Element postCodeElem = doc.createElement("municipalityPostalcode");
                 locationElem.appendChild(postCodeElem);
-                postCodeElem.setTextContent((String) address.getProperty("postalcode"));
+                postCodeElem.setTextContent(address.getProperty("postalcode"));
 
                 Element streetElem = doc.createElement("street");
                 locationElem.appendChild(streetElem);
-                streetElem.setTextContent((String) address.getProperty("street"));
+                streetElem.setTextContent(address.getProperty("street"));
 
                 for (String contact : new String[]{"telephone", "fax"}) {
                     for (Object strOrList : Optional.fromNullable(address.getProperty(contact)).asSet()) {
@@ -176,7 +174,7 @@ public class Eag2012Exporter implements EagExporter {
             repoElem.appendChild(timetableElem);
             Element openingElem = doc.createElement("opening");
             timetableElem.appendChild(openingElem);
-            openingElem.setTextContent((String) desc.getProperty("openingTimes"));
+            openingElem.setTextContent(desc.getProperty("openingTimes"));
 
             Element accessElem = doc.createElement("access");
             accessElem.setAttribute("question", "yes"); // ???
@@ -190,7 +188,7 @@ public class Eag2012Exporter implements EagExporter {
 
             Element accessibilityElem = doc.createElement("accessibility");
             accessibilityElem.setAttribute("question", "yes");
-            accessibilityElem.setTextContent(((String) desc.getProperty("accessibility")));
+            accessibilityElem.setTextContent((desc.getProperty("accessibility")));
             repoElem.appendChild(accessibilityElem);
 
             addTextElements(doc, repoElem, desc, "researchServices");
@@ -284,7 +282,7 @@ public class Eag2012Exporter implements EagExporter {
             eventElem.appendChild(agentType);
 
             Element eventDateTime = doc.createElement("eventDateTime");
-            eventDateTime.setTextContent((String) event.getProperty("date"));
+            eventDateTime.setTextContent(event.getProperty("date"));
             eventElem.appendChild(eventDateTime);
 
             Element eventType = doc.createElement("eventType");
@@ -294,8 +292,8 @@ public class Eag2012Exporter implements EagExporter {
             revDescElem.appendChild(eventElem);
         }
 
-        List<List<SystemEvent>> systemEvents = Lists.newArrayList(eventManager
-                .aggregateForItem(entity, AnonymousAccessor.getInstance()));
+        List<List<SystemEvent>> systemEvents = Lists.newArrayList(
+                api.events().aggregateForItem(entity));
         for (int i = systemEvents.size() - 1; i >= 0; i--) {
             List<SystemEvent> agg = systemEvents.get(i);
             SystemEvent event = agg.get(0);

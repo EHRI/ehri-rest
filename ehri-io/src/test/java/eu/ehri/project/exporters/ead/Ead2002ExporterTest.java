@@ -99,7 +99,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {
-        Ead2002Exporter exporter = new Ead2002Exporter(graph);
+        Ead2002Exporter exporter = new Ead2002Exporter(graph, api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
@@ -117,7 +117,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
 
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
-        Ead2002Exporter exporter = new Ead2002Exporter(graph);
+        Ead2002Exporter exporter = new Ead2002Exporter(graph, api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(fonds, baos, lang);
         String xml = baos.toString("UTF-8");

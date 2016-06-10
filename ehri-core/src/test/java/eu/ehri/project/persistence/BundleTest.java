@@ -231,13 +231,10 @@ public class BundleTest {
     @Test
     public void testFilterRelations() throws Exception {
         // Remove descriptions with languageCode = "en"
-        Bundle.Filter filter = new Bundle.Filter() {
-            @Override
-            public boolean remove(String relationLabel, Bundle bundle) {
-                String lang = bundle.getDataValue(Ontology.LANGUAGE);
-                return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                        && ("en".equals(lang));
-            }
+        Bundle.Filter filter = (relationLabel, bundle1) -> {
+            String lang = bundle1.getDataValue(Ontology.LANGUAGE);
+            return bundle1.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                    && ("en".equals(lang));
         };
         Bundle filtered = bundle.filterRelations(filter);
         assertFalse((Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());

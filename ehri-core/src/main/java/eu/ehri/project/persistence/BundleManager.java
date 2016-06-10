@@ -137,6 +137,10 @@ public final class BundleManager {
         }
     }
 
+    public BundleManager withScopeIds(Collection<String> scopeIds) {
+        return new BundleManager(graph, scopeIds);
+    }
+
     // Helpers
     private int deleteCount(Bundle bundle, int count) throws Exception {
         Integer c = count;

@@ -164,14 +164,11 @@ public class IcaAtomEadImporter extends SaxXmlImporter {
                         .vertexToBundle(manager.getVertex(withIds.getId()));
 
                 //filter out dependents that a) are descriptions, b) have the same language/code
-                Bundle.Filter filter = new Bundle.Filter() {
-                    @Override
-                    public boolean remove(String relationLabel, Bundle bundle) {
-                        String lang = bundle.getDataValue(Ontology.LANGUAGE);
-                        return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                                && (lang != null
-                                && lang.equals(languageOfDesc));
-                    }
+                Bundle.Filter filter = (relationLabel, bundle) -> {
+                    String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                    return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                            && (lang != null
+                            && lang.equals(languageOfDesc));
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
 

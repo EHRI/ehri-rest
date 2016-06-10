@@ -31,6 +31,8 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.api.EventsApi;
+import eu.ehri.project.api.impl.ApiImpl;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -42,7 +44,6 @@ import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Annotatable;
@@ -52,14 +53,10 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.Promotable;
 import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.views.DescriptionViews;
-import eu.ehri.project.views.EventViews;
-import eu.ehri.project.views.PromotionViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -99,13 +96,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public static final String ACCESS_POINTS = "access-points";
     public static final String VERSIONS = "versions";
 
-    private final PromotionViews pv;
-    private final DescriptionViews<Described> dv;
-
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
-        pv = new PromotionViews(graph);
-        dv = new DescriptionViews<>(graph, Described.class);
     }
 
     /**
@@ -238,10 +230,10 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessible item = manager.getEntity(id, Accessible.class);
+            Accessible item = api().detail(id, Accessible.class);
             Accessor current = getRequesterUserProfile();
             Set<Accessor> accessors = getAccessors(accessorIds, current);
-            aclViews.setAccessors(item, accessors, current);
+            api().acl().setAccessors(item, accessors);
             Response response = single(item);
             tx.success();
             return response;
@@ -262,13 +254,10 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getEntity(id, Promotable.class);
-            UserProfile currentUser = getCurrentUser();
-            pv.upVote(item, currentUser);
-            Response response = single(item);
+            Response item = single(api().promote(id));
             tx.success();
-            return response;
-        } catch (PromotionViews.NotPromotableError e) {
+            return item;
+        } catch (ApiImpl.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
         }
@@ -288,10 +277,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getEntity(id, Promotable.class);
-            UserProfile currentUser = getCurrentUser();
-            pv.removeUpVote(item, currentUser);
-            Response response = single(item);
+            Response response = single(api().removePromotion(id));
             tx.success();
             return response;
         }
@@ -311,13 +297,10 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getEntity(id, Promotable.class);
-            UserProfile currentUser = getCurrentUser();
-            pv.downVote(item, currentUser);
-            Response response = single(item);
+            Response item = single(api().demote(id));
             tx.success();
-            return response;
-        } catch (PromotionViews.NotPromotableError e) {
+            return item;
+        } catch (ApiImpl.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
         }
@@ -337,12 +320,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Promotable item = manager.getEntity(id, Promotable.class);
-            UserProfile currentUser = getCurrentUser();
-            pv.removeDownVote(item, currentUser);
-            Response response = single(item);
+            Response item = single(api().removeDemotion(id));
             tx.success();
-            return response;
+            return item;
         }
     }
 
@@ -359,17 +339,14 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + EVENTS)
     public Response events(
             @PathParam("id") String id,
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation)
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound, AccessDenied {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor accessor = getRequesterUserProfile();
-            Accessible item = views
-                    .setClass(Accessible.class).detail(id, accessor);
-            EventViews eventViews = getEventViewsBuilder()
-                    .withAggregation(aggregation)
-                    .build();
-            return streamingListOfLists(eventViews.aggregateForItem(item, accessor), tx);
+            Accessible item = api().detail(id, Accessible.class);
+            EventsApi eventsApi = getEventsApi()
+                    .withAggregation(aggregation);
+            return streamingListOfLists(eventsApi.aggregateForItem(item), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -388,11 +365,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + ANNOTATIONS)
     public Response annotations(
             @PathParam("id") String id) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            return streamingPage(getQuery(Annotation.class).page(
-                    manager.getEntity(id, Annotatable.class).getAnnotations(),
-                    getRequesterUserProfile()), tx);
+            Annotatable entity = manager.getEntity(id, Annotatable.class);
+            return streamingPage(getQuery().page(
+                    entity.getAnnotations(),
+                    Annotation.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -410,11 +388,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + LINKS)
     public Response links(@PathParam("id") String id) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            return streamingPage(getQuery(Link.class).page(
-                    manager.getEntity(id, Linkable.class).getLinks(),
-                    getRequesterUserProfile()), tx);
+            Linkable entity = manager.getEntity(id, Linkable.class);
+            return streamingPage(getQuery().page(
+                    entity.getLinks(),
+                    Link.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -433,12 +412,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + PERMISSION_GRANTS)
     public Response permissionGrants(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             PermissionGrantTarget target = manager.getEntity(id, PermissionGrantTarget.class);
-            Accessor accessor = getRequesterUserProfile();
-            return streamingPage(getQuery(PermissionGrant.class)
-                    .page(target.getPermissionGrants(), accessor), tx);
+            return streamingPage(getQuery()
+                    .page(target.getPermissionGrants(),
+                            PermissionGrant.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -456,12 +435,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + SCOPE_PERMISSION_GRANTS)
     public Response permissionGrantsAsScope(@PathParam("id") String id)
             throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
-            Accessor accessor = getRequesterUserProfile();
-            return streamingPage(getQuery(PermissionGrant.class)
-                    .page(scope.getPermissionGrants(), accessor), tx);
+            return streamingPage(getQuery()
+                    .page(scope.getPermissionGrants(),
+                            PermissionGrant.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -487,10 +466,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Described item = views.setClass(Described.class).detail(id, user);
-            Description desc = dv.create(id, bundle,
-                    Description.class, user, getLogMessage());
+            Described item = api().detail(id, Described.class);
+            Description desc = api().createDependent(id, bundle,
+                    Description.class, getLogMessage());
             item.addDescription(desc);
             Response response = buildResponse(item, desc, Response.Status.CREATED);
             tx.success();
@@ -519,10 +497,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor userProfile = getRequesterUserProfile();
-            Described item = views.setClass(Described.class).detail(id, userProfile);
-            Mutation<Description> desc = dv.update(id, bundle,
-                    Description.class, userProfile, getLogMessage());
+            Described item = api().detail(id, Described.class);
+            Mutation<Description> desc = api().updateDependent(id, bundle,
+                    Description.class, getLogMessage());
             Response response = buildResponse(item, desc.getNode(), Response.Status.OK);
             tx.success();
             return response;
@@ -570,8 +547,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @PathParam("id") String id, @PathParam("did") String did)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            dv.delete(id, did, user, getLogMessage());
+            api().deleteDependent(id, did, getLogMessage());
             tx.success();
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
@@ -597,14 +573,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}/" + ACCESS_POINTS)
     public Response createAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            Described item = views.setClass(Described.class).detail(id, user);
-            Description desc = manager.getEntity(did, Description.class);
-            AccessPoint rel = dv.create(id, bundle,
-                    AccessPoint.class, user, getLogMessage());
+            Described item = api().detail(id, Described.class);
+            Description desc = api().detail(did, Description.class);
+            AccessPoint rel = api().createDependent(id, bundle,
+                    AccessPoint.class, getLogMessage());
             desc.addAccessPoint(rel);
             Response response = buildResponse(item, rel, Response.Status.CREATED);
             tx.success();
@@ -628,11 +602,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response listFor(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            Versioned item = views.setClass(Versioned.class)
-                    .detail(id, user);
-            return streamingPage(getQuery(Version.class).setStream(true)
-                    .page(item.getAllPriorVersions(), user), tx);
+            Versioned item = api().detail(id, Versioned.class);
+            return streamingPage(getQuery().setStream(true)
+                    .page(item.getAllPriorVersions(), Version.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -659,8 +631,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            UserProfile user = getCurrentUser();
-            dv.delete(id, apid, user, getLogMessage());
+            api().deleteDependent(id, apid, getLogMessage());
             tx.success();
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);

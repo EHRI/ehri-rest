@@ -39,11 +39,7 @@ public class SubtreeTraverserTest extends AbstractFixtureTest {
         // Doc c1 has six nodes in its subtree
         final Counter counter = new Counter();
         new Serializer.Builder(graph).dependentOnly().build()
-                .traverseSubtree(item, new TraversalCallback() {
-            public void process(Entity vertexFrame, int depth, String rname, int rnum) {
-                counter.count++;
-            }
-        });
+                .traverseSubtree(item, (vertexFrame, depth, rname, rnum) -> counter.count++);
         assertEquals(6, counter.count);
     }
 }

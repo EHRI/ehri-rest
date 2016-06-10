@@ -35,7 +35,7 @@ public interface Actioner extends Named {
     /**
      * Fetch a list of Actions for this user in newest-first order.
      * 
-     * @return
+     * @return a list of actions
      */
     @JavaHandler
     Iterable<SystemEvent> getActions();

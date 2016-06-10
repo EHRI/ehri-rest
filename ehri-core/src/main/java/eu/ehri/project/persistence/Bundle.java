@@ -335,12 +335,7 @@ public final class Bundle {
      * @return The full data map
      */
     public Map<String, Object> getData() {
-        return ImmutableMap.copyOf(Maps.filterValues(data, new Predicate<Object>() {
-            @Override
-            public boolean apply(Object value) {
-                return value != null;
-            }
-        }));
+        return ImmutableMap.copyOf(Maps.filterValues(data, value -> value != null));
     }
 
     /**
@@ -529,12 +524,8 @@ public final class Bundle {
                 Collection<Bundle> otherRelations = entry.getValue();
                 Set<Bundle> updated = Sets.newHashSet();
                 for (final Bundle otherRel : otherRelations) {
-                    Optional<Bundle> toUpdate = Iterables.tryFind(relations, new Predicate<Bundle>() {
-                        @Override
-                        public boolean apply(Bundle bundle) {
-                            return bundle.getId() != null && bundle.getId().equals(otherRel.getId());
-                        }
-                    });
+                    Optional<Bundle> toUpdate = Iterables.tryFind(relations,
+                            bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()));
                     if (toUpdate.isPresent()) {
                         Bundle up = toUpdate.get();
                         updated.add(up);

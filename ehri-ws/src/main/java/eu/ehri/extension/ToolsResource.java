@@ -57,13 +57,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -106,12 +104,9 @@ public class ToolsResource extends AbstractRestResource {
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
         final SchemaExporter schemaExporter = new SchemaExporter(rdfFormat);
-        return Response.ok(new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                schemaExporter.dumpSchema(outputStream, baseUri);
-            }
-        }).type(mediaType + "; charset=utf-8").build();
+        return Response.ok((StreamingOutput) outputStream ->
+                    schemaExporter.dumpSchema(outputStream, baseUri))
+                .type(mediaType + "; charset=utf-8").build();
     }
 
     /**
@@ -389,12 +384,9 @@ public class ToolsResource extends AbstractRestResource {
         final AtomicInteger done = new AtomicInteger();
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             logger.info("Upgrading DB schema...");
-            DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
-                @Override
-                public void changed() {
-                    if (done.getAndIncrement() % 100000 == 0) {
-                        graph.getBaseGraph().commit();
-                    }
+            DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, () -> {
+                if (done.getAndIncrement() % 100000 == 0) {
+                    graph.getBaseGraph().commit();
                 }
             });
             upgrader1to2
@@ -416,10 +408,7 @@ public class ToolsResource extends AbstractRestResource {
         setLabels();
         setConstraints();
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            new DbUpgrader1to2(graph, new DbUpgrader1to2.OnChange() {
-                @Override
-                public void changed() {
-                }
+            new DbUpgrader1to2(graph, () -> {
             }).setDbSchemaVersion();
             tx.success();
         }

@@ -28,11 +28,15 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -72,6 +76,18 @@ public abstract class GraphTestBase {
         return list;
     }
 
+    protected Api api(Accessor accessor) {
+        return ApiFactory.noLogging(graph, accessor);
+    }
+
+    protected Api anonApi() {
+        return api(AnonymousAccessor.getInstance());
+    }
+
+    protected Api loggingApi(Accessor accessor) {
+        return api(accessor).enableLogging(true);
+    }
+
     protected static GraphDiff diffGraph(Collection<VertexProxy> list1, Collection<VertexProxy> list2) {
         Set<VertexProxy> added = Sets.newHashSet(list2);
         added.removeAll(list1);
@@ -94,7 +110,7 @@ public abstract class GraphTestBase {
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() {
         GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                 .newGraphDatabase();
-        try (Transaction tx = rawGraph.beginTx()){
+        try (Transaction tx = rawGraph.beginTx()) {
             Neo4jGraphManager.createIndicesAndConstraints(rawGraph);
             tx.success();
         }

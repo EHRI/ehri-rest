@@ -359,12 +359,7 @@ public class LanguageHelpers {
      */
     public static Optional<Description> getBestDescription(Described item, Optional<Description> priorDescOpt, String langCode) {
         List<Description> descriptions = Lists.newArrayList(item.getDescriptions());
-        Collections.sort(descriptions, new Comparator<Description>() {
-            @Override
-            public int compare(Description d1, Description d2) {
-                return d1.getId().compareTo(d2.getId());
-            }
-        });
+        Collections.sort(descriptions, (d1, d2) -> d1.getId().compareTo(d2.getId()));
         Description fallBack = null;
         for (Description description : descriptions) {
             if (fallBack == null) {

@@ -98,7 +98,7 @@ public class Eac2010ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(HistoricalAgent agent, String lang) throws Exception {
-        Eac2010Exporter exporter = new Eac2010Exporter(graph);
+        Eac2010Exporter exporter = new Eac2010Exporter(graph, api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(agent, baos, lang);
         String xml = baos.toString("UTF-8");

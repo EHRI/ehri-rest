@@ -44,13 +44,21 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
@@ -60,6 +68,21 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 public class AbstractRestClientTest extends RunningServerTest {
 
     protected static final Client client;
+
+    protected List<ZipEntry> readZip(InputStream stream) throws IOException {
+        File tmp = File.createTempFile("test", ".zip");
+        tmp.deleteOnExit();
+        Files.copy(stream, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        final List<ZipEntry> entries = Lists.newArrayList();
+        try (FileInputStream fis = new FileInputStream(tmp);
+             ZipInputStream zis = new ZipInputStream(fis)) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                entries.add(zipEntry);
+            }
+        }
+        return entries;
+    }
 
     static {
         ClientConfig config = new DefaultClientConfig();
@@ -243,12 +266,7 @@ public class AbstractRestClientTest extends RunningServerTest {
     }
 
 
-    protected final Comparator<Bundle> bundleComparator = new Comparator<Bundle>() {
-        @Override
-        public int compare(Bundle a, Bundle b) {
-            return a.getId().compareTo(b.getId());
-        }
-    };
+    protected final Comparator<Bundle> bundleComparator = (a, b) -> a.getId().compareTo(b.getId());
 
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
         WebResource resource = client.resource(uri).queryParams(params);

@@ -19,6 +19,7 @@
 
 package eu.ehri.project.exporters.eac;
 
+import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.HistoricalAgent;
 import org.w3c.dom.Document;
 
@@ -29,7 +30,7 @@ import java.io.OutputStream;
 /**
  * Encoded Archive Context (EAC) export.
  */
-public interface EacExporter {
+public interface EacExporter extends XmlExporter<HistoricalAgent> {
 
     /**
      * Export a historical agent as an EAC document.

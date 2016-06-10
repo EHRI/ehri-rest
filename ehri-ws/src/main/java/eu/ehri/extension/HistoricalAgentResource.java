@@ -57,7 +57,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -143,18 +142,15 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            HistoricalAgent agent = views.detail(id, getRequesterUserProfile());
-            EacExporter eacExporter = new Eac2010Exporter(graph);
+            HistoricalAgent agent = api().detail(id, HistoricalAgent.class);
+            EacExporter eacExporter = new Eac2010Exporter(graph, api());
             final Document document = eacExporter.export(agent, lang);
             tx.success();
-            return Response.ok(new StreamingOutput() {
-                @Override
-                public void write(OutputStream outputStream) throws IOException {
-                    try {
-                        new DocumentWriter(document).write(outputStream);
-                    } catch (TransformerException e) {
-                        throw new WebApplicationException(e);
-                    }
+            return Response.ok((StreamingOutput) outputStream -> {
+                try {
+                    new DocumentWriter(document).write(outputStream);
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }

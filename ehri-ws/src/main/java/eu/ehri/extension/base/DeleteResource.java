@@ -23,8 +23,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 
-import javax.ws.rs.core.Response;
-
 
 public interface DeleteResource {
     /**

@@ -304,7 +304,7 @@ public final class Serializer {
     private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite)
             throws SerializationError {
         try {
-            EntityClass type = EntityClass.withName((String) item
+            EntityClass type = EntityClass.withName(item
                     .getProperty(EntityType.TYPE_KEY));
             String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);

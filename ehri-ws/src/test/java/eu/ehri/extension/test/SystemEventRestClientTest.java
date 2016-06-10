@@ -27,7 +27,7 @@ import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.EventViews;
+import eu.ehri.project.api.EventsApi;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -143,7 +143,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         // should currently be empty...
         URI personalisedEventUrlWatched = entityUriBuilder(
                 Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
-                .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventViews.ShowType.watched).build();
+                .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventsApi.ShowType.watched).build();
         events = getItemListOfLists(personalisedEventUrlWatched, user);
         assertEquals(0, events.size());
 
@@ -168,7 +168,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         // for items we watch...
         URI personalisedEventUrlFollowed = entityUriBuilder(
                 Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
-                .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventViews.ShowType.followed).build();
+                .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventsApi.ShowType.followed).build();
         events = getItemListOfLists(personalisedEventUrlFollowed, user);
         assertEquals(0, events.size());
 

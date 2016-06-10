@@ -22,14 +22,13 @@ package eu.ehri.extension;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.GetResource;
+import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.views.EventViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DefaultValue;
@@ -109,14 +108,12 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response list(
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventViews.Aggregation aggregation) {
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation) {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            EventViews eventViews = getEventViewsBuilder()
-                    .withAggregation(aggregation)
-                    .build();
-            return streamingListOfLists(eventViews.aggregate(user), tx);
+            EventsApi eventsApi = getEventsApi()
+                    .withAggregation(aggregation);
+            return streamingListOfLists(eventsApi.aggregate(), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -137,11 +134,10 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
             throws ItemNotFound, AccessDenied {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            SystemEvent event = views.detail(id, user);
+            SystemEvent event = api().detail(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...
-            return streamingPage(getQuery(Accessible.class)
-                    .page(event.getSubjects(), user),
+            return streamingPage(getQuery()
+                    .page(event.getSubjects(), Accessible.class),
                         getSerializer().withDepth(1).withCache(), tx);
         } catch (Exception e) {
             tx.close();

@@ -34,6 +34,7 @@ public class InheritedItemPermissionSet {
      * Builder class for InheritedItemPermissionSets.
      */
     public static class Builder {
+        private final String accessorId;
         private final List<AccessorPermissions<List<PermissionType>>> perms
                 = Lists.newArrayList();
 
@@ -46,6 +47,7 @@ public class InheritedItemPermissionSet {
         public Builder(String accessorId, List<PermissionType> permissionSet) {
             AccessorPermissions<List<PermissionType>> permissions
                     = new AccessorPermissions<>(accessorId, permissionSet);
+            this.accessorId = accessorId;
             perms.add(permissions);
         }
 
@@ -67,13 +69,16 @@ public class InheritedItemPermissionSet {
          * @return A new InheritedItemPermissionSet
          */
         public InheritedItemPermissionSet build() {
-            return new InheritedItemPermissionSet(perms);
+            return new InheritedItemPermissionSet(accessorId, perms);
         }
     }
 
+    private final String accessorId;
     private final List<AccessorPermissions<List<PermissionType>>> permissionsList;
 
-    private InheritedItemPermissionSet(List<AccessorPermissions<List<PermissionType>>> permissionsList) {
+    private InheritedItemPermissionSet(String accessorId,
+            List<AccessorPermissions<List<PermissionType>>> permissionsList) {
+        this.accessorId = accessorId;
         this.permissionsList = permissionsList;
     }
 
@@ -114,17 +119,28 @@ public class InheritedItemPermissionSet {
 
         InheritedItemPermissionSet that = (InheritedItemPermissionSet) o;
 
-        return permissionsList.equals(that.permissionsList);
-
+        return accessorId.equals(that.accessorId)
+                && permissionsList.equals(that.permissionsList);
     }
 
     @Override
     public int hashCode() {
-        return permissionsList.hashCode();
+        int result = accessorId.hashCode();
+        result = 31 * result + permissionsList.hashCode();
+        return result;
     }
 
     @Override
     public String toString() {
         return permissionsList.toString();
+    }
+
+    /**
+     * Fetch the accessor's ID for this permission set.
+     *
+     * @return a user ID string
+     */
+    public String accessorId() {
+        return accessorId;
     }
 }

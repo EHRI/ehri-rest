@@ -36,7 +36,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.AnnotationViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -63,11 +62,8 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     public static final String TARGET_PARAM = "target";
     public static final String BODY_PARAM = "body";
 
-    private final AnnotationViews annotationViews;
-
     public AnnotationResource(@Context GraphDatabaseService database) {
         super(database, Annotation.class);
-        annotationViews = new AnnotationViews(graph);
     }
 
     @GET
@@ -106,7 +102,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
             @QueryParam(TARGET_PARAM) String id,
             @QueryParam(BODY_PARAM) String did,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-                Bundle bundle)
+            Bundle bundle)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, SerializationError {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
@@ -114,8 +110,8 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
                 throw new DeserializationError("Target must be provided");
             }
             UserProfile user = getCurrentUser();
-            Annotation ann = annotationViews.create(id, did == null ? id : did,
-                    bundle, user, getAccessors(accessors, user));
+            Annotation ann = api().createAnnotation(id, did == null ? id : did,
+                    bundle, getAccessors(accessors, user));
             Response response = creationResponse(ann);
             tx.success();
             return response;

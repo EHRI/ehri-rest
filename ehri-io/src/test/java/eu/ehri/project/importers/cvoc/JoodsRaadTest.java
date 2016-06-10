@@ -28,7 +28,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.api.QueryApi;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,10 +82,10 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "698";
-        Query<Concept> query = new Query<>(graph, Concept.class);
+        QueryApi query = api(validUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).page(
-                Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
+                Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 

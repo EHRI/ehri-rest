@@ -35,6 +35,9 @@ import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.extension.errors.MissingOrInvalidUser;
 import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
+import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.core.Tx;
@@ -48,7 +51,6 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +63,6 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -77,7 +77,7 @@ import java.util.Map;
  */
 public abstract class AbstractRestResource implements TxCheckedResource {
 
-    public static final int DEFAULT_LIST_LIMIT = Query.DEFAULT_LIMIT;
+    public static final int DEFAULT_LIST_LIMIT = QueryApi.DEFAULT_LIMIT;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
 
     public static final String RESOURCE_ENDPOINT_PREFIX = "classes";
@@ -209,18 +209,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Get a query object configured according to incoming parameters.
      *
-     * @param cls the class of the query object
-     * @param <T> the generic type of the query object
      * @return a query object
      */
-    protected <T extends Entity> Query<T> getQuery(Class<T> cls) {
-        return new Query.Builder<>(graph, cls)
+    protected QueryApi getQuery() {
+        return api().query()
                 .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
                 .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
-                .setFilters(getStringListQueryParam(FILTER_PARAM))
-                .setSort(getStringListQueryParam(SORT_PARAM))
-                .setStream(isStreaming())
-                .build();
+                .filter(getStringListQueryParam(FILTER_PARAM))
+                .orderBy(getStringListQueryParam(SORT_PARAM))
+                .setStream(isStreaming());
     }
 
     /**
@@ -240,6 +237,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 throw new MissingOrInvalidUser(id.get());
             }
         }
+    }
+
+    /**
+     * Fetch an instance of the API with the current user.
+     *
+     * @return an Api instance
+     */
+    protected Api api() {
+        return ApiFactory.withLogging(graph, getRequesterUserProfile());
     }
 
     /**
@@ -344,8 +350,12 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @param tx   the current transaction
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingPage(Query.Page<T> page, Tx tx) {
+    protected <T extends Entity> Response streamingPage(QueryApi.Page<T> page, Tx tx) {
         return streamingPage(page, getSerializer(), tx);
+    }
+
+    protected boolean isHeadRequest() {
+        return request.getMethod().equalsIgnoreCase("HEAD");
     }
 
     /**
@@ -355,13 +365,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * We cannot just return a regular StreamingResponse here
      * because then HEAD requests will leak the transaction.
      */
-    static abstract class TransactionalStreamWrapper {
+    abstract class TransactionalStreamWrapper {
         protected final Tx tx;
-        protected final Request request;
 
-        public TransactionalStreamWrapper(final Request request, final Tx tx) {
+        public TransactionalStreamWrapper(final Tx tx) {
             this.tx = tx;
-            this.request = request;
         }
 
         protected Map<String, Object> getHeaders() {
@@ -371,7 +379,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         abstract StreamingOutput getStreamingOutput();
 
         public Response getResponse() {
-            if (request.getMethod().equalsIgnoreCase("HEAD")) {
+            if (isHeadRequest()) {
                 try {
                     Response.ResponseBuilder r = Response.ok();
                     for (Map.Entry<String, Object> entry : getHeaders().entrySet()) {
@@ -401,7 +409,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingPage(
-            final Query.Page<T> page, final Serializer serializer, final Tx tx) {
+            final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
         return getStreamingJsonOutput(page, serializer, tx).getResponse();
     }
 
@@ -451,28 +459,25 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected Response streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(request, tx) {
+        return new TransactionalStreamWrapper(tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
-                return new StreamingOutput() {
-                    @Override
-                    public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                            g.writeStartArray();
-                            for (Vertex item : list) {
-                                jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));
-                                g.writeRaw('\n');
-                            }
-                            g.writeEndArray();
-
-                            tx.success();
-                        } catch (SerializationError e) {
-                            tx.failure();
-                            throw new RuntimeException(e);
-                        } finally {
-                            tx.close();
+                return stream -> {
+                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
+                        g.writeStartArray();
+                        for (Vertex item : list) {
+                            jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));
+                            g.writeRaw('\n');
                         }
+                        g.writeEndArray();
+
+                        tx.success();
+                    } catch (SerializationError e) {
+                        tx.failure();
+                        throw new RuntimeException(e);
+                    } finally {
+                        tx.close();
                     }
                 };
             }
@@ -549,11 +554,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         }
     }
 
-    private static abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
-        protected final Query.Page<T> page;
+    private abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
+        protected final QueryApi.Page<T> page;
 
-        public TransactionalPageStreamWrapper(final Request request, final Query.Page<T> page, final Tx tx) {
-            super(request, tx);
+        public TransactionalPageStreamWrapper(final QueryApi.Page<T> page, final Tx tx) {
+            super(tx);
             this.page = page;
         }
 
@@ -567,28 +572,25 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
             final Iterable<T> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(request, tx) {
+        return new TransactionalStreamWrapper(tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
-                return new StreamingOutput() {
-                    @Override
-                    public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                            g.writeStartArray();
-                            for (T item : list) {
-                                g.writeRaw('\n');
-                                jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
-                            }
-                            g.writeEndArray();
-                            tx.success();
-                        } catch (SerializationError e) {
-                            e.printStackTrace();
-                            tx.failure();
-                            throw new RuntimeException(e);
-                        } finally {
-                            tx.close();
+                return stream -> {
+                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
+                        g.writeStartArray();
+                        for (T item : list) {
+                            g.writeRaw('\n');
+                            jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
                         }
+                        g.writeEndArray();
+                        tx.success();
+                    } catch (SerializationError e) {
+                        e.printStackTrace();
+                        tx.failure();
+                        throw new RuntimeException(e);
+                    } finally {
+                        tx.close();
                     }
                 };
             }
@@ -596,29 +598,26 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
-            final Query.Page<T> page, final Serializer serializer, final Tx tx) {
-        return new TransactionalPageStreamWrapper<T>(request, page, tx) {
+            final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
+        return new TransactionalPageStreamWrapper<T>(page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
-                return new StreamingOutput() {
-                    @Override
-                    public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                            g.writeStartArray();
-                            for (T item : page.getIterable()) {
-                                jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
-                                g.writeRaw('\n');
-                            }
-                            g.writeEndArray();
-
-                            tx.success();
-                        } catch (SerializationError e) {
-                            tx.failure();
-                            throw new RuntimeException(e);
-                        } finally {
-                            tx.close();
+                return stream -> {
+                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
+                        g.writeStartArray();
+                        for (T item : page.getIterable()) {
+                            jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
+                            g.writeRaw('\n');
                         }
+                        g.writeEndArray();
+
+                        tx.success();
+                    } catch (SerializationError e) {
+                        tx.failure();
+                        throw new RuntimeException(e);
+                    } finally {
+                        tx.close();
                     }
                 };
             }
@@ -627,33 +626,30 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     private <T extends Entity> Response getStreamingJsonGroupOutput(
             final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(request, tx) {
+        return new TransactionalStreamWrapper(tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
-                return new StreamingOutput() {
-                    @Override
-                    public void write(OutputStream stream) throws IOException {
-                        try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
+                return stream -> {
+                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
+                        g.writeStartArray();
+                        for (Collection<T> collect : list) {
                             g.writeStartArray();
-                            for (Collection<T> collect : list) {
-                                g.writeStartArray();
-                                for (T item : collect) {
-                                    jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
-                                }
-                                g.writeEndArray();
-                                g.writeRaw('\n');
+                            for (T item : collect) {
+                                jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
                             }
                             g.writeEndArray();
-
-                            tx.success();
-                        } catch (SerializationError e) {
-                            e.printStackTrace();
-                            tx.failure();
-                            throw new RuntimeException(e);
-                        } finally {
-                            tx.close();
+                            g.writeRaw('\n');
                         }
+                        g.writeEndArray();
+
+                        tx.success();
+                    } catch (SerializationError e) {
+                        e.printStackTrace();
+                        tx.failure();
+                        throw new RuntimeException(e);
+                    } finally {
+                        tx.close();
                     }
                 };
             }

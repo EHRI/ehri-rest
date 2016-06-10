@@ -20,22 +20,21 @@
 package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.api.QueryApi;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 public class CampsV2_1Test extends AbstractImporterTest {
@@ -53,7 +52,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
-        
+
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
@@ -72,10 +71,10 @@ public class CampsV2_1Test extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "675";
-        Query<Concept> query = new Query<>(graph, Concept.class);
+        QueryApi query = api(validUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).page(
-                Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
+                Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
@@ -111,10 +110,10 @@ public class CampsV2_1Test extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "675";
-        Query<Concept> query = new Query<>(graph, Concept.class);
+        QueryApi query = api(validUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).page(
-                Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
+                Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 
@@ -122,23 +121,21 @@ public class CampsV2_1Test extends AbstractImporterTest {
         for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {
             assertEquals(vocabulary, e.getPermissionScope());
         }
-        
+
         //import version 2
         ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE_VERSION2);
-//        importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
 
         importer.setTolerant(true);
-        
-                // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
         log = importer.importFile(ios, "Importing the modified camps as a SKOS file");
         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
 
-        
 
 //         printGraph(graph);
         /*  How many new nodes will have been created? We should have*/
@@ -147,12 +144,12 @@ public class CampsV2_1Test extends AbstractImporterTest {
          * null: 3
          * cvocConceptDescription: 2
          * systemEvent: 1
-         * 
+         *
          * REMOVED:
          * vocConceptDescription: 2
-         * 
+         *
          */
-         afterNodeCount = count + 26 + 4;
+        afterNodeCount = count + 26 + 4;
         assertEquals(afterNodeCount, getNodeCount(graph));
         assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
 

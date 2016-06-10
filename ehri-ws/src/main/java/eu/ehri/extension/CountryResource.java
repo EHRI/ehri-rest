@@ -19,23 +19,42 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.*;
+import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.CreateResource;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.ParentResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.eag.Eag2012Exporter;
+import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -71,13 +90,12 @@ public class CountryResource
     @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
-                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            Country country = views.detail(id, user);
-            return streamingPage(getQuery(Repository.class)
-                    .page(country.getRepositories(), user), tx);
+            Country country = api().detail(id, cls);
+            return streamingPage(getQuery()
+                    .page(country.getRepositories(), Repository.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -89,7 +107,7 @@ public class CountryResource
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
-                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
             Response item = createItem(bundle, accessors);
@@ -141,20 +159,45 @@ public class CountryResource
     @Path("{id:[^/]+}/" + Entities.REPOSITORY)
     @Override
     public Response createChild(@PathParam("id") String id,
-                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final Country country = views.detail(id, user);
-            Response item = createItem(bundle, accessors, new Handler<Repository>() {
-                @Override
-                public void process(Repository repository) throws PermissionDenied {
-                    repository.setCountry(country);
-                }
-            }, views.setScope(country).setClass(Repository.class));
+            final Country country = api().detail(id, cls);
+            Response item = createItem(bundle, accessors,
+                    repository -> repository.setCountry(country),
+                    api().withScope(country), Repository.class);
             tx.success();
             return item;
+        }
+    }
+
+    /**
+     * Export the given country's repositories as EAG streamed
+     * in a ZIP file.
+     *
+     * @param id   the country ID
+     * @param lang a three-letter ISO639-2 code
+     * @return a zip containing the country's repositories as EAG
+     * @throws IOException
+     * @throws ItemNotFound
+     */
+    @GET
+    @Path("{id:[^/]+}/eag")
+    @Produces("application/zip")
+    public Response exportEag(
+            @PathParam("id") String id,
+            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            throws IOException, ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            final Country country = api().detail(id, cls);
+            final EagExporter eagExporter = new Eag2012Exporter(graph, api());
+            return exportItemsAsZip(eagExporter, country.getRepositories(), lang, tx);
+        } catch (Exception e) {
+            tx.failure();
+            tx.close();
+            throw e;
         }
     }
 }

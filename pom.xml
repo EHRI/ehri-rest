@@ -7,7 +7,7 @@
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
-    <version>0.13.2-SNAPSHOT</version>
+    <version>0.13.3-SNAPSHOT</version>
    <name>EHRI Backend</name>
     <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
     <url>https://github.com/EHRI</url>
@@ -124,8 +124,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <compilerArgs>
                         <arg>-Xlint</arg>
                     </compilerArgs>

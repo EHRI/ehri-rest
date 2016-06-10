@@ -29,13 +29,8 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
         this.baseGraph = graph;
         this.accessor = accessor;
         this.aclVertexFilter = AclManager.getAclFilterFunction(accessor);
-        this.aclEdgeFilter = new PipeFunction<Edge, Boolean>() {
-            @Override
-            public Boolean compute(Edge edge) {
-                return aclVertexFilter.compute(edge.getVertex(Direction.OUT))
-                        && aclVertexFilter.compute(edge.getVertex(Direction.IN));
-            }
-        };
+        this.aclEdgeFilter = edge -> aclVertexFilter.compute(edge.getVertex(Direction.OUT))
+                && aclVertexFilter.compute(edge.getVertex(Direction.IN));
     }
 
     @Override

@@ -93,13 +93,9 @@ public interface Version extends Accessible {
     abstract class Impl implements JavaHandlerContext<Vertex>, Version {
         public Accessible getEntity() {
             Pipeline<Vertex,Vertex> out =  gremlin().as("n").in(Ontology.ENTITY_HAS_PRIOR_VERSION)
-                    .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-                        @Override
-                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    Ontology.ENTITY_HAS_PRIOR_VERSION).iterator().hasNext();
-                        }
-                    });
+                    .loop("n", JavaHandlerUtils.noopLoopFunc,
+                            vertexLoopBundle -> !vertexLoopBundle.getObject().getVertices(Direction.IN,
+                            Ontology.ENTITY_HAS_PRIOR_VERSION).iterator().hasNext());
             return (Accessible)(out.hasNext() ? frame(out.next()) : null);
         }
     }

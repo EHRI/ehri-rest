@@ -20,13 +20,8 @@
 package eu.ehri.project.importers.xml;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadImporter;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -38,13 +33,11 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.GraphTestBase;
-import eu.ehri.project.views.impl.CrudViews;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -56,7 +49,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
     protected final String ARCHDESC = "1505";
 
     @Test
-    public void bbwo2Test() throws ItemNotFound, IOException, ValidationError, InputParseError, PermissionDenied, IntegrityError {
+    public void bbwo2Test() throws Exception {
 
         final String logMessage = "Importing an example BBWO2 DC";
 
@@ -66,8 +59,8 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, "NIOD Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "joodse-raad");
-        Vocabulary vocabulary = new CrudViews<>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
-        Concept concept_716 = new CrudViews<>(graph, Concept.class).create(conceptBundle, validUser);
+        Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
+        Concept concept_716 = api(validUser).create(conceptBundle, Concept.class);
         vocabulary.addItem(concept_716);
 
 

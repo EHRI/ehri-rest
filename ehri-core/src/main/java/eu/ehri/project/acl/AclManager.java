@@ -354,11 +354,7 @@ public final class AclManager {
         for (ContentTypes ct : ContentTypes.values()) {
             typeStrings.add(ct.getName());
         }
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex v) {
-                return v != null && typeStrings.contains(manager.getType(v));
-            }
-        };
+        return v -> v != null && typeStrings.contains(manager.getType(v));
     }
 
     /**
@@ -375,27 +371,25 @@ public final class AclManager {
         }
 
         final HashSet<Vertex> all = getAllAccessors(accessor);
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex v) {
-                Iterable<Vertex> verts = v.getVertices(Direction.OUT,
-                        Ontology.IS_ACCESSIBLE_TO);
-                // If there's no Access conditions, it's
-                // read-only...
-                if (!verts.iterator().hasNext()) {
-                    return true;
-                }
-                // If it's promoted it's publicly accessible
-                if (isPromoted(v)) {
-                    return true;
-                }
-                // Otherwise, check relevant accessors...
-                for (Vertex other : verts) {
-                    if (all.contains(other)) {
-                        return true;
-                    }
-                }
-                return false;
+        return v -> {
+            Iterable<Vertex> verts = v.getVertices(Direction.OUT,
+                    Ontology.IS_ACCESSIBLE_TO);
+            // If there's no Access conditions, it's
+            // read-only...
+            if (!verts.iterator().hasNext()) {
+                return true;
             }
+            // If it's promoted it's publicly accessible
+            if (isPromoted(v)) {
+                return true;
+            }
+            // Otherwise, check relevant accessors...
+            for (Vertex other : verts) {
+                if (all.contains(other)) {
+                    return true;
+                }
+            }
+            return false;
         };
     }
 
@@ -699,11 +693,7 @@ public final class AclManager {
      * user
      */
     private static PipeFunction<Vertex, Boolean> noopFilterFunction() {
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex v) {
-                return true;
-            }
-        };
+        return v -> true;
     }
 
     // Get a list of the current scope and its parents

@@ -26,6 +26,7 @@ import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -34,11 +35,9 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -94,17 +93,14 @@ public class GroupResource
             @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            final UserProfile currentUser = getCurrentUser();
+            final Api.Acl acl = api().acl();
             final Set<Accessor> groupMembers = Sets.newHashSet();
             for (String member : members) {
                 groupMembers.add(manager.getEntity(member, Accessor.class));
             }
-            Response item = createItem(bundle, accessors, new Handler<Group>() {
-                @Override
-                public void process(Group group) throws PermissionDenied {
-                    for (Accessor member : groupMembers) {
-                        aclViews.addAccessorToGroup(group, member, currentUser);
-                    }
+            Response item = createItem(bundle, accessors, group -> {
+                for (Accessor member : groupMembers) {
+                    acl.addAccessorToGroup(group, member);
                 }
             });
             tx.success();
@@ -139,7 +135,7 @@ public class GroupResource
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
-            aclViews.addAccessorToGroup(group, accessor, getRequesterUserProfile());
+            api().acl().addAccessorToGroup(group, accessor);
             tx.success();
         }
     }
@@ -154,8 +150,7 @@ public class GroupResource
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
-
-            new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
+            api().acl().removeAccessorFromGroup(group, accessor);
             tx.success();
         }
     }
@@ -176,8 +171,8 @@ public class GroupResource
             Iterable<Accessible> members = all
                     ? group.getAllUserProfileMembers()
                     : group.getMembersAsEntities();
-            return streamingPage(getQuery(Accessible.class)
-                    .page(members, getRequesterUserProfile()), tx);
+            return streamingPage(getQuery()
+                    .page(members, Accessible.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;

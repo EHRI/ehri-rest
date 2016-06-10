@@ -69,13 +69,8 @@ public class BundleUtils {
      */
     public static <T> T get(Bundle bundle, String path) {
         return fetchAttribute(bundle, BundlePath.fromString(path),
-                new GetOperation<T>() {
-                    public T run(Bundle subjectNode,
-                            BundlePath subjectPath) {
-                        return subjectNode.getDataValue(subjectPath
-                                .getTerminus());
-                    }
-                });
+                (subjectNode, subjectPath) -> subjectNode.getDataValue(subjectPath
+                        .getTerminus()));
     }
 
     /**
@@ -111,13 +106,11 @@ public class BundleUtils {
      */
     public static Bundle delete(Bundle bundle, String path) {
         return mutateAttribute(bundle, BundlePath.fromString(path),
-                new SetOperation() {
-                    public Bundle run(Bundle subject, BundlePath p) {
-                        Map<String, Object> data = Maps.newHashMap(subject
-                                .getData());
-                        data.remove(p.getTerminus());
-                        return subject.withData(data);
-                    }
+                (subject, p) -> {
+                    Map<String, Object> data = Maps.newHashMap(subject
+                            .getData());
+                    data.remove(p.getTerminus());
+                    return subject.withData(data);
                 });
     }
 
@@ -157,11 +150,7 @@ public class BundleUtils {
      */
     public static <T> Bundle set(Bundle bundle, String path, final T value) {
         return mutateAttribute(bundle, BundlePath.fromString(path),
-                new SetOperation() {
-                    public Bundle run(Bundle subject, BundlePath p) {
-                        return subject.withDataValue(p.getTerminus(), value);
-                    }
-                });
+                (subject, p) -> subject.withDataValue(p.getTerminus(), value));
     }
 
     /**
@@ -199,13 +188,8 @@ public class BundleUtils {
      */
     public static List<Bundle> getRelations(Bundle bundle, String path) {
         return fetchAttribute(bundle, BundlePath.fromString(path),
-                new GetOperation<List<Bundle>>() {
-                    public List<Bundle> run(Bundle subjectNode,
-                            BundlePath subjectPath) {
-                        return subjectNode.getRelations(subjectPath
-                                .getTerminus());
-                    }
-                });
+                (subjectNode, subjectPath) -> subjectNode.getRelations(subjectPath
+                        .getTerminus()));
     }
 
     // Private implementation helpers.

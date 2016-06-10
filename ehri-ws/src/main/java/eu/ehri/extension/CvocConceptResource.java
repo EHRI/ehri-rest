@@ -19,21 +19,37 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.*;
-import eu.ehri.project.acl.PermissionType;
+import eu.ehri.extension.base.AbstractAccessibleResource;
+import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.ParentResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
@@ -96,13 +112,12 @@ public class CvocConceptResource
     @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
-                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Accessor user = getRequesterUserProfile();
-            Concept concept = views.detail(id, user);
-            return streamingPage(getQuery(Concept.class)
-                    .page(concept.getNarrowerConcepts(), user), tx);
+            Concept concept = api().detail(id, cls);
+            return streamingPage(getQuery()
+                    .page(concept.getNarrowerConcepts(), Concept.class), tx);
         } catch (Exception e) {
             tx.close();
             throw e;
@@ -115,19 +130,15 @@ public class CvocConceptResource
     @Path("{id:[^/]+}/" + Entities.CVOC_CONCEPT)
     @Override
     public Response createChild(@PathParam("id") String id,
-                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor user = getRequesterUserProfile();
-            final Concept parent = views.detail(id, user);
-            Response item = createItem(bundle, accessors, new Handler<Concept>() {
-                @Override
-                public void process(Concept concept) {
-                    parent.addNarrowerConcept(concept);
-                    concept.setVocabulary(parent.getVocabulary());
-                }
-            }, views.setScope(parent.getVocabulary()));
+            final Concept parent = api().detail(id, cls);
+            Response item = createItem(bundle, accessors, concept -> {
+                parent.addNarrowerConcept(concept);
+                concept.setVocabulary(parent.getVocabulary());
+            }, api().withScope(parent.getVocabulary()), cls);
             tx.success();
             return item;
         }
@@ -136,53 +147,45 @@ public class CvocConceptResource
     /**
      * Add an existing concept to the list of 'narrower' relations.
      *
-     * @param id         The item ID
-     * @param idNarrower The narrower item ID
+     * @param id       the item ID
+     * @param narrower the narrower item IDs
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      */
     @POST
-    @Path("{id:[^/]+}/narrower/{idNarrower:[^/]+}")
+    @Path("{id:[^/]+}/narrower")
     public Response addNarrowerCvocConcept(
             @PathParam("id") String id,
-            @PathParam("idNarrower") String idNarrower)
+            @QueryParam(ID_PARAM) List<String> narrower)
             throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            Concept concept = views.detail(id, accessor);
-            Concept relatedConcept = views.detail(idNarrower, accessor);
-            helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-            helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
-            concept.addNarrowerConcept(relatedConcept);
+            Response item = single(api().concepts()
+                    .addNarrowerConcepts(id, narrower));
             tx.success();
-            return Response.status(Status.OK).build();
+            return item;
         }
     }
 
     /**
      * Remove a narrower relationship between two concepts.
      *
-     * @param id         The item ID
-     * @param idNarrower The narrower item ID
+     * @param id       the item ID
+     * @param narrower the narrower item IDs
      * @throws AccessDenied
      * @throws ItemNotFound
      */
     @DELETE
-    @Path("{id:[^/]+}/narrower/{idNarrower:[^/]+}")
+    @Path("{id:[^/]+}/narrower")
     public Response removeNarrowerCvocConcept(
             @PathParam("id") String id,
-            @PathParam("idNarrower") String idNarrower)
+            @QueryParam(ID_PARAM) List<String> narrower)
             throws PermissionDenied, AccessDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            Concept concept = views.detail(id, accessor);
-            Concept relatedConcept = views.detail(idNarrower, accessor);
-            helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-            helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
-            concept.removeNarrowerConcept(relatedConcept);
+            Response item = single(api().concepts()
+                    .removeNarrowerConcepts(id, narrower));
             tx.success();
-            return Response.status(Status.OK).build();
+            return item;
         }
     }
 
@@ -196,12 +199,12 @@ public class CvocConceptResource
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/broader/list")
+    @Path("{id:[^/]+}/broader")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Concept concept = views.detail(id, getRequesterUserProfile());
+            Concept concept = api().detail(id, cls);
             return streamingList(concept.getBroaderConcepts(), tx);
         } catch (Exception e) {
             tx.close();
@@ -218,11 +221,11 @@ public class CvocConceptResource
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/related/list")
+    @Path("{id:[^/]+}/related")
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Concept concept = views.detail(id, getRequesterUserProfile());
+            Concept concept = api().detail(id, cls);
             return streamingList(concept.getRelatedConcepts(), tx);
         } catch (Exception e) {
             tx.close();
@@ -241,11 +244,11 @@ public class CvocConceptResource
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/relatedBy/list")
+    @Path("{id:[^/]+}/relatedBy")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
+        final Tx tx = graph.getBaseGraph().beginTx();
         try {
-            Concept concept = views.detail(id, getRequesterUserProfile());
+            Concept concept = api().detail(id, cls);
             return streamingList(concept.getRelatedByConcepts(), tx);
         } catch (Exception e) {
             tx.close();
@@ -257,28 +260,23 @@ public class CvocConceptResource
      * Add a relation by creating the 'related' edge between the two <em>existing</em>
      * items.
      *
-     * @param id        The item ID
-     * @param idRelated The related item ID
+     * @param id      the item ID
+     * @param related the related item IDs
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      */
     @POST
-    @Path("{id:[^/]+}/related/{idRelated:[^/]+}")
+    @Path("{id:[^/]+}/related")
     public Response addRelatedCvocConcept(
             @PathParam("id") String id,
-            @PathParam("idRelated") String idRelated)
+            @QueryParam(ID_PARAM) List<String> related)
             throws AccessDenied, PermissionDenied, ItemNotFound {
-
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            Concept concept = views.detail(id, accessor);
-            Concept relatedConcept = views.detail(idRelated, accessor);
-            helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-            helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
-            concept.addRelatedConcept(relatedConcept);
+            Response item = single(api().concepts()
+                    .addRelatedConcepts(id, related));
             tx.success();
-            return Response.status(Status.OK).build();
+            return item;
         }
     }
 
@@ -286,27 +284,23 @@ public class CvocConceptResource
      * Remove a relation by deleting the edge, not the vertex of the related
      * concept.
      *
-     * @param id        The item ID
-     * @param idRelated The related item ID
+     * @param id      the item ID
+     * @param related the related item ID
      * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      */
     @DELETE
-    @Path("{id:[^/]+}/related/{idRelated:[^/]+}")
+    @Path("{id:[^/]+}/related")
     public Response removeRelatedCvocConcept(
             @PathParam("id") String id,
-            @PathParam("idRelated") String idRelated)
+            @QueryParam(ID_PARAM) List<String> related)
             throws AccessDenied, PermissionDenied, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
-            Accessor accessor = getRequesterUserProfile();
-            Concept concept = views.detail(id, accessor);
-            Concept relatedConcept = views.detail(idRelated, accessor);
-            helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
-            helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
-            concept.removeRelatedConcept(relatedConcept);
+            Response item = single(api().concepts()
+                    .removeRelatedConcepts(id, related));
             tx.success();
-            return Response.status(Status.OK).build();
+            return item;
         }
     }
 }

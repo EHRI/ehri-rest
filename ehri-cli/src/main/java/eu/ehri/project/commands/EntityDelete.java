@@ -24,8 +24,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -82,10 +80,7 @@ public class EntityDelete extends BaseCommand {
         // Find the user
         UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                 UserProfile.class);
-
-        LoggingCrudViews<Accessible> api = new LoggingCrudViews<>(
-                graph, Accessible.class);
-        api.delete(id, user, Optional.of(logMessage));
+        api(graph, user).delete(id, Optional.of(logMessage));
 
         return 0;
     }
