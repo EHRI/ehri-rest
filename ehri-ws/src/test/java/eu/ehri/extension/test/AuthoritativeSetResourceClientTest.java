@@ -31,7 +31,7 @@ import java.util.zip.ZipEntry;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 
-public class AuthoritativeSetRestClientTest extends AbstractRestClientTest {
+public class AuthoritativeSetResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testExportEad() throws Exception {
         // Create

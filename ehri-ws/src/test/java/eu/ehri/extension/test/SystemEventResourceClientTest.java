@@ -24,7 +24,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.UserProfileResource;
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.api.EventsApi;
@@ -38,11 +38,11 @@ import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.UserProfileResource.FOLLOWING;
 import static eu.ehri.extension.UserProfileResource.WATCHING;
-import static eu.ehri.extension.base.AbstractRestResource.ID_PARAM;
+import static eu.ehri.extension.base.AbstractResource.ID_PARAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class SystemEventRestClientTest extends AbstractRestClientTest {
+public class SystemEventResourceClientTest extends AbstractResourceClientTest {
 
     static final String COUNTRY_CODE = "nl";
 
@@ -128,7 +128,7 @@ public class SystemEventRestClientTest extends AbstractRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.REPOSITORY, "r1"))
                 .entity(jsonAgentTestString)
-                .header(AbstractRestResource.LOG_MESSAGE_HEADER_NAME, "Testing update")
+                .header(AbstractResource.LOG_MESSAGE_HEADER_NAME, "Testing update")
                 .put(ClientResponse.class);
         assertStatus(OK, response);
 

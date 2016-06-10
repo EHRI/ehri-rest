@@ -24,7 +24,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.GenericResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class GenericRestClientTest extends AbstractRestClientTest {
+public class GenericResourceClientTest extends AbstractResourceClientTest {
 
     private static final String ITEM1 = "c1";
     private static final String ITEM2 = "c4";
@@ -179,13 +179,13 @@ public class GenericRestClientTest extends AbstractRestClientTest {
 
         // Set the form data
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
-        queryParams.add(AbstractRestResource.ACCESSOR_PARAM, LIMITED_USER_NAME);
+        queryParams.add(AbstractResource.ACCESSOR_PARAM, LIMITED_USER_NAME);
 
         response = client.resource(ehriUri(ENDPOINT, "c1", ACCESS))
                 .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .post(ClientResponse.class);
         assertStatus(OK, response);
@@ -210,14 +210,14 @@ public class GenericRestClientTest extends AbstractRestClientTest {
 
         // Set the form data
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
-        queryParams.add(AbstractRestResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME);
+        queryParams.add(AbstractResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME);
 
         WebResource resource = client.resource(ehriUri(ENDPOINT, "c1", ACCESS));
         response = resource
                 .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .post(ClientResponse.class);
         assertStatus(OK, response);

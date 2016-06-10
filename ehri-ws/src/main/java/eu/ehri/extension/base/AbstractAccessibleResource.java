@@ -62,7 +62,7 @@ import java.util.zip.ZipOutputStream;
  *
  * @param <E> the specific Accessible derived class
  */
-public class AbstractAccessibleResource<E extends Accessible> extends AbstractRestResource {
+public class AbstractAccessibleResource<E extends Accessible> extends AbstractResource {
 
     public final static String ITEM_TYPE_PARAM = "type";
     public final static String ITEM_ID_PARAM = "item";

@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -53,7 +53,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.util.List;
 
@@ -61,7 +60,7 @@ import java.util.List;
  * Provides a web service interface for managing countries
  * and creating repositories within them.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.COUNTRY)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.COUNTRY)
 public class CountryResource
         extends AbstractAccessibleResource<Country>
         implements CreateResource, GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {

@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
 /**
  * Web-service interface for accessing item versions.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VERSION)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VERSION)
 public class VersionResource extends AbstractAccessibleResource<Version> implements GetResource {
 
     public VersionResource(@Context GraphDatabaseService database) {

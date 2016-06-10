@@ -53,7 +53,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 
-public class ImportResourceRestClientTest extends AbstractRestClientTest {
+public class ImportResourceResourceClientTest extends AbstractResourceClientTest {
     // NB: This file is *copied* into the extension test resources because
     // I can't figure out how to refer to resources in another module...
     protected static final String SINGLE_EAD = "ead.xml";

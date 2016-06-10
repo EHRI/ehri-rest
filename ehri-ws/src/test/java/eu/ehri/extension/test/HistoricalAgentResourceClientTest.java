@@ -30,7 +30,7 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 
-public class HistoricalAgentRestClientTest extends AbstractRestClientTest {
+public class HistoricalAgentResourceClientTest extends AbstractResourceClientTest {
 
     static final String TEST_ID = "a1";
     static final String UPDATED_NAME = "UpdatedNameTEST";

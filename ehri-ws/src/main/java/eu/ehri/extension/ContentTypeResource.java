@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.project.definitions.Entities;
@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CONTENT_TYPE)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CONTENT_TYPE)
 public class ContentTypeResource extends AbstractAccessibleResource<ContentType>
         implements GetResource, ListResource {
 

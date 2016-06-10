@@ -19,7 +19,7 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.GlobalPermissionSet;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
@@ -46,10 +46,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Provides a RESTful(ish) interface for setting PermissionTarget perms.
+ * Web service resource for setting and reading permissions.
  */
 @Path(PermissionsResource.ENDPOINT)
-public class PermissionsResource extends AbstractRestResource {
+public class PermissionsResource extends AbstractResource {
 
     public static final String ENDPOINT = "permissions";
 
@@ -65,7 +65,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     public static CacheControl getCacheControl() {
         CacheControl cacheControl = new CacheControl();
-        cacheControl.setMaxAge(AbstractRestResource.ITEM_CACHE_TIME);
+        cacheControl.setMaxAge(AbstractResource.ITEM_CACHE_TIME);
         return cacheControl;
     }
 

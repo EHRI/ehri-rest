@@ -20,37 +20,26 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.extension.GenericResource;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
 
-import java.util.List;
+import java.io.InputStream;
+import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-public class VersionRestClientTest extends AbstractRestClientTest {
-
+public class CountryResourceClientTest extends AbstractResourceClientTest {
     @Test
-    public void testGetVersionsForItem() throws Exception {
-        // Create an item
-        Bundle before = getEntity(Entities.REPOSITORY, "r1", getAdminUserProfileId());
-        String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.REPOSITORY, "r1"))
-                .entity(jsonAgentTestString)
-                .put(ClientResponse.class);
+    public void testExportEad() throws Exception {
+        // Create
+        URI uri = entityUri(Entities.COUNTRY, "nl", "eag");
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .get(ClientResponse.class);
         assertStatus(OK, response);
-
-        List<Bundle> versions = getItemList(ehriUri(GenericResource.ENDPOINT, "r1",
-                        GenericResource.VERSIONS),
-                getAdminUserProfileId());
-        assertEquals(1, versions.size());
-        String data = versions.get(0).getDataValue(Ontology.VERSION_ENTITY_DATA);
-        assertNotNull(data);
-        assertEquals(before.getData(), Bundle.fromString(data).getData());
+        try (InputStream stream = response.getEntityInputStream()) {
+            // There should be two items: r1 and r3
+            assertEquals(2, readZip(stream).size());
+        }
     }
 }

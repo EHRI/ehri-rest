@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.UserProfileResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -43,7 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class VirtualUnitRestClientTest extends AbstractRestClientTest {
+public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
 
     private String jsonVirtualUnitStr;
     private String partialJsonVirtualUnitTestStr;
@@ -188,7 +188,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
@@ -202,7 +202,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -216,7 +216,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertStatus(OK, response);
@@ -225,7 +225,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -243,7 +243,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
@@ -259,9 +259,9 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .header(AbstractRestResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
+                .header(AbstractResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
                 .entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertStatus(OK, response);
@@ -270,7 +270,7 @@ public class VirtualUnitRestClientTest extends AbstractRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .get(ClientResponse.class);
         assertStatus(OK, response);

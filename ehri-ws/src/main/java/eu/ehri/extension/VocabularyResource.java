@@ -21,7 +21,7 @@ package eu.ehri.extension;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -69,7 +69,7 @@ import java.util.List;
  * Provides a web service interface for the Vocabulary model. Vocabularies are
  * containers for Concepts.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_VOCABULARY)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 

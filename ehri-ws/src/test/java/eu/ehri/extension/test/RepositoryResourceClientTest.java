@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 
-public class RepositoryRestClientTest extends AbstractRestClientTest {
+public class RepositoryResourceClientTest extends AbstractResourceClientTest {
 
     static final String COUNTRY_CODE = "nl";
     static final String ID = "r1";

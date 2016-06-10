@@ -22,7 +22,7 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AdminResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -32,15 +32,15 @@ import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.base.AbstractRestResource.AUTH_HEADER_NAME;
+import static eu.ehri.extension.base.AbstractResource.AUTH_HEADER_NAME;
 import static eu.ehri.extension.AdminResource.ENDPOINT;
 import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 import static org.junit.Assert.*;
 
 /**
- * Test admin REST functions.
+ * Test admin web service functions.
  */
-public class AdminRestClientTest extends AbstractRestClientTest {
+public class AdminResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testAdminGetUserProfile() throws Exception {
@@ -49,7 +49,7 @@ public class AdminRestClientTest extends AbstractRestClientTest {
                 entityUri(Entities.USER_PROFILE, getAdminUserProfileId()));
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(OK, response);
     }

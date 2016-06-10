@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.oupls.sail.pg.PropertyGraphSail;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import info.aduna.iteration.CloseableIteration;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -74,7 +74,7 @@ import java.util.Map;
  * </pre>
  */
 @Path(SparQLResource.ENDPOINT)
-public class SparQLResource extends AbstractRestResource {
+public class SparQLResource extends AbstractResource {
 
     public static final String ENDPOINT = "sparql";
     public static final String HTTP_EHRI_PROJECT_EU = "http://ehri-project.eu";

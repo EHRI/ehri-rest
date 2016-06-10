@@ -27,7 +27,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.wrapper.AclGraph;
 import eu.ehri.project.core.Tx;
@@ -60,7 +60,7 @@ import java.util.Map;
  * and general graph-maintenance functionality.
  */
 @Path(AdminResource.ENDPOINT)
-public class AdminResource extends AbstractRestResource {
+public class AdminResource extends AbstractResource {
 
     public static final String ENDPOINT = "admin";
     public static final String DEFAULT_USER_ID_PREFIX = "user";

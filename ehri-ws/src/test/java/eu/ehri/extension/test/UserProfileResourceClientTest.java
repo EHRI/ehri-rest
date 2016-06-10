@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -35,7 +35,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
@@ -47,7 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class UserProfileRestClientTest extends AbstractRestClientTest {
+public class UserProfileResourceClientTest extends AbstractResourceClientTest {
 
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
@@ -85,7 +84,7 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
@@ -193,8 +192,8 @@ public class UserProfileRestClientTest extends AbstractRestClientTest {
 
         // Create
         URI uri = entityUriBuilder(Entities.USER_PROFILE)
-                .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_EXISTING)
-                .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_NONEXISTING)
+                .queryParam(AbstractResource.GROUP_PARAM, GROUP_ID_EXISTING)
+                .queryParam(AbstractResource.GROUP_PARAM, GROUP_ID_NONEXISTING)
                 .build();
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)

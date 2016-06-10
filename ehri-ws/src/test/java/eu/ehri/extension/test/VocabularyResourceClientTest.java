@@ -21,7 +21,7 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.VocabularyResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +34,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertEquals;
 
 
-public class CvocVocabularyClientTest extends AbstractRestClientTest {
+public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
 
     private static final String jsonTestVocabularyString = "{\"type\":\"" + Entities.CVOC_VOCABULARY +
@@ -100,7 +100,7 @@ public class CvocVocabularyClientTest extends AbstractRestClientTest {
 
     @Test
     public void testExportVocabulary() throws Exception {
-        UriBuilder uri = ehriUriBuilder(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX,
+        UriBuilder uri = ehriUriBuilder(AbstractResource.RESOURCE_ENDPOINT_PREFIX,
                 Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "export");
         ClientResponse response = client.resource(uri.build())
                 .get(ClientResponse.class);

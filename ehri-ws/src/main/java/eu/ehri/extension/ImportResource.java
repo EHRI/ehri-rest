@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -81,7 +81,7 @@ import java.util.zip.GZIPInputStream;
  * Resource class for import endpoints.
  */
 @Path(ImportResource.ENDPOINT)
-public class ImportResource extends AbstractRestResource {
+public class ImportResource extends AbstractResource {
 
     public static final String ENDPOINT = "import";
 

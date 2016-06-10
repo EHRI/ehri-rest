@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
@@ -81,7 +81,7 @@ import javax.ws.rs.core.Response;
  * <p/>
  * Standard paging parameters apply to all end-points.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.SYSTEM_EVENT)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.SYSTEM_EVENT)
 public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
         implements GetResource {
 

@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -57,7 +57,7 @@ import java.util.List;
  * creation endpoint is part of the VocabularyResource and creation without a
  * Vocabulary is not possible via this API.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_CONCEPT)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_CONCEPT)
 public class CvocConceptResource
         extends AbstractAccessibleResource<Concept>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
