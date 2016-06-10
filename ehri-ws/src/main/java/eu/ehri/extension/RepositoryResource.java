@@ -61,7 +61,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -185,7 +184,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws IOException, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             Repository repo = api().detail(id, cls);
-            EagExporter eagExporter = new Eag2012Exporter(graph);
+            EagExporter eagExporter = new Eag2012Exporter(graph, api());
             final Document document = eagExporter.export(repo, lang);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
@@ -217,7 +216,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
             final Repository repo = api().detail(id, cls);
-            final EadExporter eadExporter = new Ead2002Exporter(graph);
+            final EadExporter eadExporter = new Ead2002Exporter(graph, api());
             return Response.ok((StreamingOutput) outputStream -> {
                 try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
                     for (DocumentaryUnit doc : repo.getTopLevelDocumentaryUnits()) {

@@ -57,7 +57,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -169,7 +168,7 @@ public class DocumentaryUnitResource
             throws IOException, ItemNotFound {
         try (final Tx tx = graph.getBaseGraph().beginTx()) {
             DocumentaryUnit unit = api().detail(id, cls);
-            EadExporter eadExporter = new Ead2002Exporter(graph);
+            EadExporter eadExporter = new Ead2002Exporter(graph, api());
             final Document document = eadExporter.export(unit, lang);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {

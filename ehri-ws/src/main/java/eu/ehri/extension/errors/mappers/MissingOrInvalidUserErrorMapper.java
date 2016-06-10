@@ -22,7 +22,6 @@ package eu.ehri.extension.errors.mappers;
 import com.google.common.base.Charsets;
 import eu.ehri.extension.errors.MissingOrInvalidUser;
 
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

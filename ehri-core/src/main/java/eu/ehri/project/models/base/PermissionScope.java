@@ -97,13 +97,9 @@ public interface PermissionScope extends Identifiable {
             List<String> pIds = Lists.reverse(gremlin().as("n")
                     .out(Ontology.HAS_PERMISSION_SCOPE)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc)
-                    .transform(new PipeFunction<Vertex, String>() {
-                        @Override
-                        public String compute(Vertex vertex) {
-                            return vertex.getProperty(Ontology.IDENTIFIER_KEY);
-                        }
-                    }).toList());
-            pIds.add((String) it().getProperty(Ontology.IDENTIFIER_KEY));
+                    .transform(vertex -> vertex.<String>getProperty(Ontology.IDENTIFIER_KEY))
+                    .toList());
+            pIds.add(it().<String>getProperty(Ontology.IDENTIFIER_KEY));
             return pIds;
         }
     }

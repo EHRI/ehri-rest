@@ -88,7 +88,7 @@ public interface QueryApi {
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
      */
-    <E extends Entity> Page<E> page(Iterable<E> vertices, Class<E> cls);
+    <E extends Entity> Page<E> page(Iterable<E> entities, Class<E> cls);
 
     /**
      * Return a Page instance containing a total of total items, and an iterable

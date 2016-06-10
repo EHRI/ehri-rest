@@ -79,7 +79,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(Repository repository, String lang) throws Exception {
-        Eag2012Exporter exporter = new Eag2012Exporter(graph);
+        Eag2012Exporter exporter = new Eag2012Exporter(graph, api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(repository, baos, lang);
         String xml = baos.toString("UTF-8");

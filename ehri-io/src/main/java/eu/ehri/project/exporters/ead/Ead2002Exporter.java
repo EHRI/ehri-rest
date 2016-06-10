@@ -8,7 +8,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Address;
@@ -20,10 +22,9 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
-import eu.ehri.project.api.EventsApi;
-import eu.ehri.project.api.impl.EventsApiImpl;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -50,12 +51,12 @@ import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 /**
  * EAD 2002 Export.
  */
-public class Ead2002Exporter implements EadExporter {
+public final class Ead2002Exporter implements EadExporter {
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);
-    protected static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
+    private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
 
-    protected final FramedGraph<?> framedGraph;
-    protected final EventsApi eventManager;
+    private final FramedGraph<?> framedGraph;
+    private final Api api;
     private final DocumentBuilder documentBuilder;
 
     public static final Map<String, String> multiValueTextMappings = ImmutableMap.<String, String>builder()
@@ -105,9 +106,9 @@ public class Ead2002Exporter implements EadExporter {
                     "webpage",
                     "email");
 
-    public Ead2002Exporter(final FramedGraph<?> framedGraph) {
+    public Ead2002Exporter(final FramedGraph<?> framedGraph, final Api api) {
         this.framedGraph = framedGraph;
-        eventManager = new EventsApiImpl(framedGraph, AnonymousAccessor.getInstance());
+        this.api = api;
         try {
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
@@ -195,17 +196,18 @@ public class Ead2002Exporter implements EadExporter {
 
     // Sort the children by identifier. FIXME: This might be a bad assumption!
     private Iterable<DocumentaryUnit> getOrderedChildren(DocumentaryUnit unit) {
-        return Ordering.from(new Comparator<DocumentaryUnit>() {
-            @Override
-            public int compare(DocumentaryUnit c1, DocumentaryUnit c2) {
-                return c1.getIdentifier().compareTo(c2.getIdentifier());
-            }
-        }).sortedCopy(unit.getChildren());
+        return api
+                .query()
+                .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC)
+                .setLimit(-1)
+                .setStream(true)
+                .page(unit.getChildren(), DocumentaryUnit.class)
+                .getIterable();
     }
 
     private void addRevisionDesc(Document doc, Element eadHeaderElem, DocumentaryUnit unit) {
-        List<List<SystemEvent>> eventList = Lists.newArrayList(eventManager
-                .aggregateForItem(unit));
+        List<List<SystemEvent>> eventList = Lists.newArrayList(
+                api.events().aggregateForItem(unit));
         if (!eventList.isEmpty()) {
             Element revDescElem = doc.createElement("revisiondesc");
             eadHeaderElem.appendChild(revDescElem);

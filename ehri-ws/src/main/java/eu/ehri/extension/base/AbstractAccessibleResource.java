@@ -23,6 +23,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -37,8 +39,6 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.EventsApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.core.Context;

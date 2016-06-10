@@ -31,6 +31,8 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.api.EventsApi;
+import eu.ehri.project.api.impl.ApiImpl;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -55,8 +57,6 @@ import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.api.EventsApi;
-import eu.ehri.project.api.impl.ApiImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;

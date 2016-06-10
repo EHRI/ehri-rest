@@ -262,12 +262,12 @@ public final class QueryApiImpl implements QueryApi {
      * for the given page/count.
      */
     @Override
-    public <E extends Entity> Page<E> page(Iterable<E> vertices, Class<E> cls) {
+    public <E extends Entity> Page<E> page(Iterable<E> entities, Class<E> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
                 .getAclFilterFunction(accessor);
 
         GremlinPipeline<E, Vertex> pipeline = new GremlinPipeline<E, Vertex>(
-                new FramedVertexIterableAdaptor<>(vertices))
+                new FramedVertexIterableAdaptor<>(entities))
                 .filter(aclFilterFunction);
 
         if (stream) {
@@ -379,8 +379,8 @@ public final class QueryApiImpl implements QueryApi {
                 Vertex a = entry.getValue() == Sort.ASC ? pair.getA() : pair.getB();
                 Vertex b = entry.getValue() == Sort.ASC ? pair.getB() : pair.getA();
                 chain = chain.compare(
-                        (String) a.getProperty(entry.getKey()),
-                        (String) b.getProperty(entry.getKey()), order);
+                        a.getProperty(entry.getKey()),
+                        b.getProperty(entry.getKey()), order);
             }
             return chain.result();
         };

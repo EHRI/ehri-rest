@@ -19,8 +19,6 @@
 
 package eu.ehri.extension.providers;
 
-import com.google.common.base.Charsets;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
