@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import com.google.common.collect.Iterables;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractRestResource;
 import eu.ehri.extension.base.CreateResource;
@@ -27,6 +28,7 @@ import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.ParentResource;
 import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
@@ -35,11 +37,13 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.eac.Eac2010Exporter;
+import eu.ehri.project.exporters.eac.EacExporter;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.api.Api;
+import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -52,11 +56,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Provides a web service interface for the AuthoritativeSet items. model.
@@ -182,6 +192,36 @@ public class AuthoritativeSetResource extends
             }, api().withScope(set), HistoricalAgent.class);
             tx.success();
             return item;
+        }
+    }
+
+    /**
+     * Export the given set's historical agents as EAC streamed
+     * in a ZIP file.
+     *
+     * @param id   the set ID
+     * @param lang a three-letter ISO639-2 code
+     * @return a zip containing the set's historical agents as EAC
+     * @throws IOException
+     * @throws ItemNotFound
+     */
+    @GET
+    @Path("{id:[^/]+}/eac")
+    @Produces("application/zip")
+    public Response exportEag(@PathParam("id") String id,
+            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            throws IOException, ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            final AuthoritativeSet set = api().detail(id, cls);
+            final EacExporter eacExporter = new Eac2010Exporter(graph, api());
+            Iterable<HistoricalAgent> agents = Iterables.transform(set.getAuthoritativeItems(),
+                    a -> a.as(HistoricalAgent.class));
+            return exportItemsAsZip(eacExporter, agents, lang, tx);
+        } catch (Exception e) {
+            tx.failure();
+            tx.close();
+            throw e;
         }
     }
 }

@@ -354,6 +354,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return streamingPage(page, getSerializer(), tx);
     }
 
+    protected boolean isHeadRequest() {
+        return request.getMethod().equalsIgnoreCase("HEAD");
+    }
+
     /**
      * An abstraction class that handles streaming responses that
      * need to manage a transaction.
@@ -361,13 +365,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      * We cannot just return a regular StreamingResponse here
      * because then HEAD requests will leak the transaction.
      */
-    static abstract class TransactionalStreamWrapper {
+    abstract class TransactionalStreamWrapper {
         protected final Tx tx;
-        protected final Request request;
 
-        public TransactionalStreamWrapper(final Request request, final Tx tx) {
+        public TransactionalStreamWrapper(final Tx tx) {
             this.tx = tx;
-            this.request = request;
         }
 
         protected Map<String, Object> getHeaders() {
@@ -377,7 +379,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         abstract StreamingOutput getStreamingOutput();
 
         public Response getResponse() {
-            if (request.getMethod().equalsIgnoreCase("HEAD")) {
+            if (isHeadRequest()) {
                 try {
                     Response.ResponseBuilder r = Response.ok();
                     for (Map.Entry<String, Object> entry : getHeaders().entrySet()) {
@@ -457,7 +459,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected Response streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(request, tx) {
+        return new TransactionalStreamWrapper(tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
@@ -552,11 +554,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         }
     }
 
-    private static abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
+    private abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
         protected final QueryApi.Page<T> page;
 
-        public TransactionalPageStreamWrapper(final Request request, final QueryApi.Page<T> page, final Tx tx) {
-            super(request, tx);
+        public TransactionalPageStreamWrapper(final QueryApi.Page<T> page, final Tx tx) {
+            super(tx);
             this.page = page;
         }
 
@@ -570,7 +572,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
             final Iterable<T> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(request, tx) {
+        return new TransactionalStreamWrapper(tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
@@ -597,7 +599,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
             final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
-        return new TransactionalPageStreamWrapper<T>(request, page, tx) {
+        return new TransactionalPageStreamWrapper<T>(page, tx) {
             @Override
             public StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();
@@ -624,7 +626,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     private <T extends Entity> Response getStreamingJsonGroupOutput(
             final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(request, tx) {
+        return new TransactionalStreamWrapper(tx) {
             @Override
             StreamingOutput getStreamingOutput() {
                 final Serializer cacheSerializer = serializer.withCache();

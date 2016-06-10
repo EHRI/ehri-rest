@@ -19,7 +19,6 @@
 
 package eu.ehri.extension.base;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.ehri.project.acl.AclManager;
@@ -32,19 +31,28 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
+import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -219,7 +227,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     /**
      * Update (change) an instance of the 'entity' in the database
-     * <p/>
+     * <p>
      * If the Patch header is true top-level bundle data will be merged
      * instead of overwritten.
      *
@@ -284,6 +292,31 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     // Helpers
 
+    protected <T extends Entity> Response exportItemsAsZip(XmlExporter<T> exporter,
+            Iterable<T> items, String lang, final Tx tx) throws IOException {
+        if (isHeadRequest()) {
+            tx.close();
+            return Response.noContent().build();
+        } else {
+            return Response.ok((StreamingOutput) outputStream -> {
+                try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
+                    for (T item : items) {
+                        ZipEntry zipEntry = new ZipEntry(item.getId() + ".xml");
+                        zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
+                        zos.putNextEntry(zipEntry);
+                        exporter.export(item, zos, lang);
+                        zos.closeEntry();
+                    }
+                    tx.success();
+                } catch (TransformerException e) {
+                    throw new WebApplicationException(e);
+                } finally {
+                    tx.close();
+                }
+            }).type("application/zip").build();
+        }
+    }
+
     /**
      * Get an event query builder object.
      *
@@ -291,31 +324,17 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      */
     protected EventsApi getEventsApi() {
         List<EventTypes> eventTypes = Lists.transform(getStringListQueryParam(EVENT_TYPE_PARAM),
-                new Function<String, EventTypes>() {
-            @Override
-            public EventTypes apply(String s) {
-                return EventTypes.valueOf(s);
-            }
-        });
+                EventTypes::valueOf);
         List<EntityClass> entityClasses = Lists.transform(getStringListQueryParam(ITEM_TYPE_PARAM),
-                new Function<String, EntityClass>() {
-            @Override
-            public EntityClass apply(String s) {
-                return EntityClass.withName(s);
-            }
-        });
+                EntityClass::withName);
         List<EventsApi.ShowType> showTypes = Lists.transform(getStringListQueryParam(SHOW_PARAM),
-                new Function<String, EventsApi.ShowType>() {
-            @Override
-            public EventsApi.ShowType apply(String s) {
-                return EventsApi.ShowType.valueOf(s);
-            }
-        });
+                EventsApi.ShowType::valueOf);
         List<String> fromStrings = getStringListQueryParam(FROM_PARAM);
         List<String> toStrings = getStringListQueryParam(TO_PARAM);
         List<String> users = getStringListQueryParam(USER_PARAM);
         List<String> ids = getStringListQueryParam(ITEM_ID_PARAM);
-        return api().events()
+        return api()
+                .events()
                 .withRange(getIntQueryParam(OFFSET_PARAM, 0),
                         getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
                 .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))

@@ -33,6 +33,8 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.eag.Eag2012Exporter;
+import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
@@ -51,6 +53,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -165,6 +169,35 @@ public class CountryResource
                     api().withScope(country), Repository.class);
             tx.success();
             return item;
+        }
+    }
+
+    /**
+     * Export the given country's repositories as EAG streamed
+     * in a ZIP file.
+     *
+     * @param id   the country ID
+     * @param lang a three-letter ISO639-2 code
+     * @return a zip containing the country's repositories as EAG
+     * @throws IOException
+     * @throws ItemNotFound
+     */
+    @GET
+    @Path("{id:[^/]+}/eag")
+    @Produces("application/zip")
+    public Response exportEag(
+            @PathParam("id") String id,
+            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            throws IOException, ItemNotFound {
+        final Tx tx = graph.getBaseGraph().beginTx();
+        try {
+            final Country country = api().detail(id, cls);
+            final EagExporter eagExporter = new Eag2012Exporter(graph, api());
+            return exportItemsAsZip(eagExporter, country.getRepositories(), lang, tx);
+        } catch (Exception e) {
+            tx.failure();
+            tx.close();
+            throw e;
         }
     }
 }

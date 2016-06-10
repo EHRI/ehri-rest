@@ -40,7 +40,6 @@ import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
-import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -62,8 +61,6 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Provides a web service interface for the Repository.
@@ -217,22 +214,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         try {
             final Repository repo = api().detail(id, cls);
             final EadExporter eadExporter = new Ead2002Exporter(graph, api());
-            return Response.ok((StreamingOutput) outputStream -> {
-                try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-                    for (DocumentaryUnit doc : repo.getTopLevelDocumentaryUnits()) {
-                        ZipEntry zipEntry = new ZipEntry(doc.getId() + ".xml");
-                        zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
-                        zos.putNextEntry(zipEntry);
-                        eadExporter.export(doc, zos, lang);
-                        zos.closeEntry();
-                    }
-                    tx.success();
-                } catch (TransformerException e) {
-                    throw new WebApplicationException(e);
-                } finally {
-                    tx.close();
-                }
-            }).type("application/zip").build();
+            return exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang, tx);
         } catch (Exception e) {
             tx.failure();
             tx.close();

@@ -1,5 +1,6 @@
 package eu.ehri.project.exporters.eag;
 
+import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.Repository;
 import org.w3c.dom.Document;
 
@@ -10,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Encoded Archive Guide (EAD) export.
  */
-public interface EagExporter {
+public interface EagExporter extends XmlExporter<Repository> {
 
     /**
      * Export a repository as an EAG document.
