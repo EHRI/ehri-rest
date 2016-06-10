@@ -199,10 +199,4 @@
             <version>0.13.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>opencast-public</id>
-            <url>http://repository.opencastproject.org/nexus/content/repositories/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>
