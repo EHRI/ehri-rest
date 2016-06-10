@@ -22,7 +22,7 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AnnotationResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 
-public class AnnotationRestClientTest extends AbstractRestClientTest {
+public class AnnotationResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testCreateAnnotation() throws Exception {
@@ -45,7 +45,7 @@ public class AnnotationRestClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(jsonAnnotationTestString)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);

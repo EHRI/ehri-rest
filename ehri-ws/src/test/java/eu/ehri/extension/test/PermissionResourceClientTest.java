@@ -53,7 +53,7 @@ import static eu.ehri.extension.PermissionsResource.ENDPOINT;
 /**
  * Test Permissions resource.
  */
-public class PermissionRestClientTest extends AbstractRestClientTest {
+public class PermissionResourceClientTest extends AbstractResourceClientTest {
 
     static final String LIMITED_USER_NAME = "reto";
     static final String TEST_HOLDER_IDENTIFIER = "r2";
@@ -85,7 +85,7 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME)
                 .get(ContentTypes.DOCUMENTARY_UNIT.getName()));
 
-        // Set the permission via REST
+        // Set the permission
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .entity(jsonMapper.writeValueAsBytes(getTestMatrix()))
@@ -113,7 +113,7 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
     @Test
     public void testPermissionSetPermissionDenied() throws Exception {
 
-        // Test a user setting his own permissions over REST - this should
+        // Test a user setting his own permissions - this should
         // obviously fail...
         byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
@@ -134,7 +134,7 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
                 new ImmutableList.Builder<String>().add(
                         PermissionType.CREATE.getName()).build());
 
-        // Set the permission via REST
+        // Set the permission
         byte[] bytes = jsonMapper.writeValueAsBytes(testMatrix);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
@@ -150,7 +150,7 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
                 .post(ClientResponse.class);
         assertStatus(UNAUTHORIZED, response);
 
-        // Set the permission via REST
+        // Set the permission
         byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
@@ -255,7 +255,7 @@ public class PermissionRestClientTest extends AbstractRestClientTest {
         // Now grant the user permissions to update and delete just on this item
         String permData = "[\"update\", \"delete\"]";
 
-        // Set the permission via REST
+        // Set the permission
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(ENDPOINT,
                         LIMITED_USER_NAME, "item", targetResourceId))

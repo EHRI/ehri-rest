@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -55,7 +55,7 @@ import java.util.List;
 /**
  * Web service interface for creating annotations.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.ANNOTATION)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.ANNOTATION)
 public class AnnotationResource extends AbstractAccessibleResource<Annotation>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 

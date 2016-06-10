@@ -22,7 +22,7 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-public class CvocConceptClientTest extends AbstractRestClientTest {
+public class ConceptResourceClientTest extends AbstractResourceClientTest {
     static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
     static final String TEST_CVOC_CONCEPT_ID = "cvocc1";
 
@@ -108,7 +108,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).post(ClientResponse.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an
         // edge...)
@@ -130,7 +130,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).delete(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -178,7 +178,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).post(ClientResponse.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an
         // edge...)
@@ -201,7 +201,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).delete(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -230,7 +230,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }
@@ -256,7 +256,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         WebResource resource = client.resource(url);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -267,7 +267,7 @@ public class CvocConceptClientTest extends AbstractRestClientTest {
         WebResource resource = client.resource(url);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .delete(ClientResponse.class);
         assertStatus(NO_CONTENT, response);

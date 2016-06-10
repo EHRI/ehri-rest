@@ -20,7 +20,7 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -62,7 +62,7 @@ import java.util.List;
 /**
  * Provides a web service interface for the DocumentaryUnit model.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.DOCUMENTARY_UNIT)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource
         extends AbstractAccessibleResource<DocumentaryUnit>
         implements GetResource, ListResource, UpdateResource, ParentResource, DeleteResource {

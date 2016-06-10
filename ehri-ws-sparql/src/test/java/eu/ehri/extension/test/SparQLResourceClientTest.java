@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test for the SparQL endpoint
  */
-public class SparQLResourceClientTest extends AbstractRestClientTest {
+public class SparQLResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testSparQLQuery() throws Exception {

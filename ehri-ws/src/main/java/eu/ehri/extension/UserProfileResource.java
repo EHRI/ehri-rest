@@ -21,7 +21,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -65,7 +65,7 @@ import java.util.Set;
 /**
  * Provides a web service interface for the UserProfile.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.USER_PROFILE)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 

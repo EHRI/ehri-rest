@@ -37,7 +37,7 @@ import static eu.ehri.extension.GenericResource.ENDPOINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class DescriptionRestClientTest extends AbstractRestClientTest {
+public class DescriptionResourceClientTest extends AbstractResourceClientTest {
 
     private String descriptionTestStr;
     private String accessPointTestStr;

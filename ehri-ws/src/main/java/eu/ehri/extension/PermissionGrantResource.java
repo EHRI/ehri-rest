@@ -19,7 +19,7 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.core.Tx;
@@ -42,8 +42,8 @@ import javax.ws.rs.core.Response;
 /**
  * Provides a web service interface for the PermissionGrant model.
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.PERMISSION_GRANT)
-public class PermissionGrantResource extends AbstractRestResource implements DeleteResource, GetResource {
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.PERMISSION_GRANT)
+public class PermissionGrantResource extends AbstractResource implements DeleteResource, GetResource {
 
     public PermissionGrantResource(@Context GraphDatabaseService database) {
         super(database);

@@ -24,7 +24,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
@@ -63,7 +63,7 @@ import java.util.List;
 /**
  * Provides a web service interface for the VirtualUnit type
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VIRTUAL_UNIT)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {

@@ -30,9 +30,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test admin REST functions.
+ * Test web service miscellaneous functions.
  */
-public class ToolsRestClientTest extends AbstractRestClientTest {
+public class ToolsResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testRegenerateId() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-id", "c1"))

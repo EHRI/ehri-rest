@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 
-public class LinkRestClientTest extends AbstractRestClientTest {
+public class LinkResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testCreateLink() throws Exception {
         // Create a link annotation between two objects

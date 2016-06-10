@@ -24,7 +24,7 @@ import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
@@ -49,7 +49,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
+public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTest {
 
     private String jsonDocumentaryUnitTestStr;
     private String invalidJsonDocumentaryUnitTestStr;
@@ -113,7 +113,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         String c4cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
         assertThat(c4cc, not(containsString("no-cache")));
         assertThat(c4cc, not(containsString("no-store")));
-        assertThat(c4cc, containsString("max-age=" + AbstractRestResource.ITEM_CACHE_TIME));
+        assertThat(c4cc, containsString("max-age=" + AbstractResource.ITEM_CACHE_TIME));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
     @Test
     public void testListDocumentaryUnit() throws Exception {
         MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
-        params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
+        params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         assertTrue(!data.isEmpty());
@@ -235,9 +235,9 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
     public void testListDocumentaryUnitWithOffset() throws Exception {
         // Fetch the second doc unit item (c2)
         MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
-        params.add(AbstractRestResource.OFFSET_PARAM, "1");
-        params.add(AbstractRestResource.LIMIT_PARAM, "1");
-        params.add(AbstractRestResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
+        params.add(AbstractResource.OFFSET_PARAM, "1");
+        params.add(AbstractResource.LIMIT_PARAM, "1");
+        params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         assertEquals(1, data.size());
@@ -262,7 +262,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
@@ -276,7 +276,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -290,7 +290,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertStatus(OK, response);
@@ -299,7 +299,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -317,7 +317,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
@@ -333,9 +333,9 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .header(AbstractRestResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
+                .header(AbstractResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
                 .entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertStatus(OK, response);
@@ -344,7 +344,7 @@ public class DocumentaryUnitRestClientTest extends AbstractRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .get(ClientResponse.class);
         assertStatus(OK, response);

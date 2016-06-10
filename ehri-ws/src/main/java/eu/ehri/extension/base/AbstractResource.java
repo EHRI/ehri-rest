@@ -75,7 +75,7 @@ import java.util.Map;
 /**
  * Base class for web service resources.
  */
-public abstract class AbstractRestResource implements TxCheckedResource {
+public abstract class AbstractResource implements TxCheckedResource {
 
     public static final int DEFAULT_LIST_LIMIT = QueryApi.DEFAULT_LIMIT;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
@@ -85,7 +85,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
     protected static final JsonFactory jsonFactory = new JsonFactory();
 
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractRestResource.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
     /**
@@ -152,7 +152,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      *
      * @param database A Neo4j graph database
      */
-    public AbstractRestResource(@Context GraphDatabaseService database) {
+    public AbstractResource(@Context GraphDatabaseService database) {
         graph = graphFactory.create(new TxNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();

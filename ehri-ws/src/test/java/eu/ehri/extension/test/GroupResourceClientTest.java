@@ -22,7 +22,7 @@ package eu.ehri.extension.test;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GroupResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
@@ -40,7 +40,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class GroupRestClientTest extends AbstractRestClientTest {
+public class GroupResourceClientTest extends AbstractResourceClientTest {
 
     static final String TEST_GROUP_NAME = "admin";
     static final String CURRENT_ADMIN_USER = "mike";
@@ -67,13 +67,13 @@ public class GroupRestClientTest extends AbstractRestClientTest {
         // Create
         String jsonGroupTestString = "{\"type\": \"Group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
         URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX)
+                .segment(AbstractResource.RESOURCE_ENDPOINT_PREFIX)
                 .segment(Entities.GROUP)
                 .queryParam(GroupResource.MEMBER_PARAM, "linda").build();
         ClientResponse response = client.resource(uri)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
                 .entity(jsonGroupTestString)
                 .post(ClientResponse.class);
 

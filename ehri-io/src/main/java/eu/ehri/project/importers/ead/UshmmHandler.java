@@ -39,22 +39,8 @@ public class UshmmHandler extends EadHandler {
 
     private int count;
 
-    /**
-     * @param importer
-     */
     public UshmmHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("ushmm.properties"));
-
-    }
-
-    /**
-     * Generic constructor, available so that the generic REST call can be made on the USHMM Handler.
-     *
-     * @param importer
-     * @param props
-     */
-    public UshmmHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties props) {
-        super(importer, props);
 
     }
 

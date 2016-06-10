@@ -21,7 +21,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
@@ -43,7 +43,6 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -56,24 +55,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Provides a web service interface for the AuthoritativeSet items. model.
  * Authoritative Sets are containers for Historical Agents
  * (authority files.)
  */
-@Path(AbstractRestResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.AUTHORITATIVE_SET)
+@Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.AUTHORITATIVE_SET)
 public class AuthoritativeSetResource extends
         AbstractAccessibleResource<AuthoritativeSet>
         implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {

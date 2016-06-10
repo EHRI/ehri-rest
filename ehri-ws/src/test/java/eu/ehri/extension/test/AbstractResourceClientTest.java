@@ -31,15 +31,13 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.base.AbstractRestResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.providers.BundleProvider;
 import eu.ehri.extension.providers.GlobalPermissionSetProvider;
 import eu.ehri.extension.providers.ImportLogProvider;
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDeserializer;
-import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -60,12 +58,10 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-
 /**
- * Base class for testing the REST interface on a 'embedded' neo4j server.
+ * Base class for testing the web service interface on a 'embedded' neo4j server.
  */
-public class AbstractRestClientTest extends RunningServerTest {
+public class AbstractResourceClientTest extends RunningServerTest {
 
     protected static final Client client;
 
@@ -193,7 +189,7 @@ public class AbstractRestClientTest extends RunningServerTest {
         WebResource resource = client.resource(entityUri(entityType));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .header(AbstractResource.AUTH_HEADER_NAME, userId)
                 .head();
         return Long.valueOf(getPaginationTotal(response));
     }
@@ -208,7 +204,7 @@ public class AbstractRestClientTest extends RunningServerTest {
 
     protected UriBuilder entityUriBuilder(String entityType, String... segments) {
         List<String> segs = Lists.newArrayList(
-                AbstractRestResource.RESOURCE_ENDPOINT_PREFIX,
+                AbstractResource.RESOURCE_ENDPOINT_PREFIX,
                 entityType);
         segs.addAll(Lists.newArrayList(segments));
         return ehriUriBuilder(segs.toArray(new String[segs.size()]));
@@ -216,7 +212,7 @@ public class AbstractRestClientTest extends RunningServerTest {
 
     protected URI entityUri(String entityType, String... segments) {
         List<String> segs = Lists.newArrayList(
-                AbstractRestResource.RESOURCE_ENDPOINT_PREFIX,
+                AbstractResource.RESOURCE_ENDPOINT_PREFIX,
                 entityType);
         segs.addAll(Lists.newArrayList(segments));
         return ehriUriBuilder(segs.toArray(new String[segs.size()])).build();
@@ -240,7 +236,7 @@ public class AbstractRestClientTest extends RunningServerTest {
 
     protected WebResource.Builder callAs(String user, URI uri) {
         return client.resource(uri)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user);
+                .header(AbstractResource.AUTH_HEADER_NAME, user);
     }
 
     protected WebResource.Builder callAs(String user, String... segments) {
@@ -272,7 +268,7 @@ public class AbstractRestClientTest extends RunningServerTest {
         WebResource resource = client.resource(uri).queryParams(params);
         return resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .header(AbstractResource.AUTH_HEADER_NAME, userId)
                 .get(String.class);
     }
 }
