@@ -86,8 +86,8 @@ public class EacHandler extends SaxXmlHandler {
             try {
                 logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
-                if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
-                    putPropertyInCurrentGraph("objectIdentifier", "id");
+                if (!currentGraphPath.peek().containsKey(OBJECT_IDENTIFIER)) {
+                    putPropertyInCurrentGraph(OBJECT_IDENTIFIER, "id");
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName

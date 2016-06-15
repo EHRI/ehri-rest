@@ -56,6 +56,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  */
 public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
+    protected static final String OBJECT_IDENTIFIER = AbstractImporter.OBJECT_IDENTIFIER;
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
 
     /**
@@ -66,7 +67,6 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     /**
      * Key in the node that denotes the object's identifier.
      */
-    public static final String OBJECT_IDENTIFIER = "objectIdentifier";
     protected final Stack<Map<String, Object>> currentGraphPath = new Stack<>();
     protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
     protected final Stack<String> currentPath = new Stack<>();

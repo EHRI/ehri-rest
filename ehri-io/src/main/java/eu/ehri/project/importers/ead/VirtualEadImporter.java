@@ -63,7 +63,7 @@ import java.util.Map;
 public class VirtualEadImporter extends EadImporter {
 
     protected static final String REPOID = "vcRepository";
-    protected static final String UNITID = "objectIdentifier";
+    protected static final String UNITID = OBJECT_IDENTIFIER;
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
     /**
@@ -101,7 +101,7 @@ public class VirtualEadImporter extends EadImporter {
                 throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                         "Missing identifier " + Ontology.IDENTIFIER_KEY);
             }
-            logger.debug("Imported item: {}", itemData.get("name"));
+            logger.debug("Imported item: {}", itemData.get(Ontology.NAME_KEY));
 
             Bundle description = getDescription(itemData);
 
@@ -177,8 +177,8 @@ public class VirtualEadImporter extends EadImporter {
      */
     protected Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();
-        if (itemData.get(OBJECT_ID) != null) {
-            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+        if (itemData.get(OBJECT_IDENTIFIER) != null) {
+            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
         }
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
             logger.debug("otherIdentifiers is not null");

@@ -80,8 +80,6 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
             Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
-    protected static final String OBJECT_ID = "objectIdentifier";
-
     // NB: Not static yet since these objects aren't thread safe :(
     private final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
     private final SimpleDateFormat yearDateFormat = new SimpleDateFormat("yyyy");

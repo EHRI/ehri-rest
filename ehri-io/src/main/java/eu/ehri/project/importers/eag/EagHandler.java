@@ -74,9 +74,9 @@ public class EagHandler extends SaxXmlHandler {
             try {
                 logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
-                if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
+                if (!currentGraphPath.peek().containsKey(OBJECT_IDENTIFIER)) {
                     logger.warn("no objectIdentifier found");
-                    putPropertyInCurrentGraph("objectIdentifier", "id");
+                    putPropertyInCurrentGraph(OBJECT_IDENTIFIER, "id");
                 }
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");

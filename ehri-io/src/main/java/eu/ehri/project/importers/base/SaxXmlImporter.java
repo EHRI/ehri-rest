@@ -83,7 +83,7 @@ public abstract class SaxXmlImporter extends MapImporter {
      */
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();
-        unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
             logger.debug("otherIdentifiers is not null");
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
@@ -169,7 +169,7 @@ public abstract class SaxXmlImporter extends MapImporter {
                 description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
                         itemProperty.getKey(), itemProperty.getValue(), entity));
             } else if (!itemProperty.getKey().startsWith(SaxXmlHandler.UNKNOWN)
-                    && !itemProperty.getKey().equals("objectIdentifier")
+                    && !itemProperty.getKey().equals(OBJECT_IDENTIFIER)
                     && !itemProperty.getKey().equals(Ontology.IDENTIFIER_KEY)
                     && !itemProperty.getKey().equals(Ontology.OTHER_IDENTIFIERS)
                     && !itemProperty.getKey().startsWith("maintenanceEvent")

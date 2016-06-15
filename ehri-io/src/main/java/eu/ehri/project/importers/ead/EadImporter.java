@@ -390,8 +390,8 @@ public class EadImporter extends SaxXmlImporter {
     @Override
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();
-        if (itemData.get(OBJECT_ID) != null) {
-            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+        if (itemData.get(OBJECT_IDENTIFIER) != null) {
+            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
         }
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
             logger.debug("otherIdentifiers is not null");
