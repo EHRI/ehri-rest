@@ -34,7 +34,11 @@ public class XmlExporterTest extends AbstractImporterTest {
     }
 
     protected Document parseDocument(String xml) throws Exception {
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         return documentBuilder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
     }
 

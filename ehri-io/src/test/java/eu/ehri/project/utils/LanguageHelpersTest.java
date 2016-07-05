@@ -41,4 +41,11 @@ public class LanguageHelpersTest {
         assertTrue(c3.isPresent());
         assertEquals("Australia", c3.get());
     }
+
+    @Test
+    public void testCodeToName() throws Exception {
+        assertEquals("English", LanguageHelpers.codeToName("eng"));
+        assertEquals("German", LanguageHelpers.codeToName("deu"));
+        assertEquals("German", LanguageHelpers.codeToName("ger"));
+    }
 }
