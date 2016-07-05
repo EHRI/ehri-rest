@@ -188,7 +188,7 @@ public class EacImporter extends SaxXmlImporter {
             } else if (key.equals("book")) {
                 extractBooks(itemData.get(key), description);
             } else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
-                    && !key.equals("objectIdentifier")
+                    && !key.equals(OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith("maintenanceEvent")

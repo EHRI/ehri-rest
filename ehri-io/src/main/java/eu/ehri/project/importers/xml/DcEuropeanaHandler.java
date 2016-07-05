@@ -66,7 +66,7 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
                     extractIdentifier(currentMap);
                     extractName(currentMap);
                     
-                    Helpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get("objectIdentifier").toString());
+                    Helpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get(OBJECT_IDENTIFIER).toString());
                     importer.importItem(currentMap, new Stack<>());
 //                importer.importTopLevelExtraNodes(topLevel, current);
                     //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
@@ -130,11 +130,11 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
     }
 
     private void extractIdentifier(Map<String, Object> currentMap) {
-        if (currentMap.containsKey("objectIdentifier")){
-        logger.debug(currentMap.get("objectIdentifier")+"");
-            String id = currentMap.get("objectIdentifier").toString();
+        if (currentMap.containsKey(OBJECT_IDENTIFIER)){
+        logger.debug(currentMap.get(OBJECT_IDENTIFIER)+"");
+            String id = currentMap.get(OBJECT_IDENTIFIER).toString();
             if(id.startsWith("http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&imid=")){
-                currentMap.put("objectIdentifier", id.substring(60));
+                currentMap.put(OBJECT_IDENTIFIER, id.substring(60));
             }
         }else{
             for(String key: currentMap.keySet())

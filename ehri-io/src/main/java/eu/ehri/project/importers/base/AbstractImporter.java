@@ -55,6 +55,7 @@ import java.util.Map;
  */
 public abstract class AbstractImporter<T> {
 
+    public static final String OBJECT_IDENTIFIER = "objectIdentifier";
     private static final String NODE_PROPERTIES = "allowedNodeProperties.csv";
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporter.class);

@@ -47,15 +47,15 @@ public class UshmmHandler extends EadHandler {
     @Override
     protected void extractIdentifier(Map<String, Object> currentGraph) {
         //not all units have ids, and some have multiple, find the "irn"
-        if (currentGraph.containsKey("objectIdentifier")) {
-            if (currentGraph.get("objectIdentifier") instanceof List) {
-                logger.debug("class of identifier: " + currentGraph.get("objectIdentifier").getClass());
-                List<String> identifiers = (List<String>) currentGraph.get("objectIdentifier");
+        if (currentGraph.containsKey(OBJECT_IDENTIFIER)) {
+            if (currentGraph.get(OBJECT_IDENTIFIER) instanceof List) {
+                logger.debug("class of identifier: " + currentGraph.get(OBJECT_IDENTIFIER).getClass());
+                List<String> identifiers = (List<String>) currentGraph.get(OBJECT_IDENTIFIER);
                 List<String> identifierType = (List<String>) currentGraph.get("objectIdentifierType");
                 for (int i = 0; i < identifiers.size(); i++) {
                     if (identifierType.get(i).equals("irn")) {
                         logger.debug("found official id: " + identifiers.get(i));
-                        currentGraph.put("objectIdentifier", identifiers.get(i));
+                        currentGraph.put(OBJECT_IDENTIFIER, identifiers.get(i));
                     } else {
                         logger.debug("found other form of identifier: " + identifiers.get(i));
                         addOtherIdentifier(currentGraph, identifiers.get(i));
@@ -66,7 +66,7 @@ public class UshmmHandler extends EadHandler {
             }
         } else {
             logger.error("no unitid found, setting {}", ++count);
-            currentGraph.put("objectIdentifier", "ushmmID" + count);
+            currentGraph.put(OBJECT_IDENTIFIER, "ushmmID" + count);
         }
     }
 }
