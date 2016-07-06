@@ -40,6 +40,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exporters.dc.DublinCore11Exporter;
+import eu.ehri.project.exporters.dc.DublinCoreExporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Link;
@@ -58,6 +60,7 @@ import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.w3c.dom.Document;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -599,7 +602,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Path("{id:[^/]+}/" + VERSIONS)
-    public Response listFor(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
+    public Response listVersions(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         final Tx tx = graph.getBaseGraph().beginTx();
         try {
             Versioned item = api().detail(id, Versioned.class);
@@ -635,6 +638,21 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             tx.success();
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
+        }
+    }
+
+    @GET
+    @Path("{id:[^/]+}/dc")
+    public Document exportDc(
+            @PathParam("id") String id,
+            @QueryParam("lang") String langCode)
+            throws AccessDenied, ItemNotFound, IOException {
+        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            Described item = api().detail(id, Described.class);
+            DublinCoreExporter exporter = new DublinCore11Exporter(graph, api());
+            Document doc = exporter.export(item, langCode);
+            tx.success();
+            return doc;
         }
     }
 
