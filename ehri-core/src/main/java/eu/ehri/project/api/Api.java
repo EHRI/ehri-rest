@@ -12,6 +12,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Link;
@@ -251,7 +252,7 @@ public interface Api {
      * @throws PermissionDenied
      */
     Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            String bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
+            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
             throws ItemNotFound, ValidationError, PermissionDenied;
 
     /**

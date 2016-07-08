@@ -91,8 +91,8 @@ public enum SkosRDFVocabulary {
             .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
             .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
             .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
-            .put("personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
-            .put("placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
+            .put("person", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("place", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .build();
 
     // Properties that end up as undeterminedRelation nodes.
@@ -102,8 +102,8 @@ public enum SkosRDFVocabulary {
             .put("skos:closeMatch", URI.create("http://www.w3.org/2004/02/skos/core#closeMatch"))
             .put("skos:broadMatch", URI.create("http://www.w3.org/2004/02/skos/core#broadMatch"))
             .put("skos:relatedMatch", URI.create("http://www.w3.org/2004/02/skos/core#relatedMatch"))
-            .put("sem:personAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
-            .put("sem:placeAccess", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
+            .put("sem:person", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
+            .put("sem:place", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .build();
 
     public static final Map<String, List<URI>> LANGUAGE_PROPS = ImmutableMap.<String,List<URI>>builder()

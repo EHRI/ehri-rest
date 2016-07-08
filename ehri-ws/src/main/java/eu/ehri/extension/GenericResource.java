@@ -22,7 +22,6 @@ package eu.ehri.extension;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Charsets;
-import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -124,12 +123,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                 }
             }
 
-            FluentIterable<Vertex> verticesByGids = FluentIterable.from(gids)
-                    .transform(new Function<Long, Vertex>() {
-                        public Vertex apply(Long id) {
-                            return graph.getVertex(id);
-                        }
-                    });
+            FluentIterable<Vertex> verticesByGids = FluentIterable
+                    .from(gids)
+                    .transform(graph::getVertex);
 
             // Object a lazily-computed view of the ids->vertices...
             Iterable<Vertex> verticesByIds = manager.getVertices(ids);

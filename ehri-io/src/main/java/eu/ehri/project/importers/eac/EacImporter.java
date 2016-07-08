@@ -34,6 +34,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
@@ -117,9 +118,10 @@ public class EacImporter extends SaxXmlImporter {
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
-            if (rel.containsKey(REL_TYPE) && rel.get(REL_TYPE).equals("subjectAccess")) {
+            if (rel.containsKey(REL_TYPE) && rel.get(REL_TYPE).equals(AccessPointType.subject.name())) {
                 logger.debug("relation found");
-                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
+                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT,
+                        new Bundle(EntityClass.ACCESS_POINT, rel));
             }
         }
 
@@ -153,7 +155,7 @@ public class EacImporter extends SaxXmlImporter {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL_TYPE)) {
-                            relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get(eventkey) + "Access");
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
                             Map<String, Object> m = (Map) ((List) origRelation.get(eventkey)).get(0);
                             //try to find the original identifier
@@ -167,7 +169,7 @@ public class EacImporter extends SaxXmlImporter {
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
                         // Corporate bodies are the default type
-                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
                     }
                     list.add(relationNode);
                 }

@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -64,7 +65,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
         AccessPoint rel = manager.getEntity("ur1", AccessPoint.class);
         String linkDesc = "Test Link";
-        String linkType = "subjectAccess";
+        String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
         Link link = api(validUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
                 linkBundle, Lists.<Accessor>newArrayList());
@@ -92,10 +93,11 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
         DocumentaryUnitDescription desc = manager.getEntity("cd1", DocumentaryUnitDescription.class);
         String linkDesc = "Test Link";
-        String linkType = "subjectAccess";
+        String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = api(validUser).createAccessPointLink("c1", "a1", "cd1", linkDesc, linkType,
-                linkBundle, Lists.<Accessor>newArrayList(validUser, invalidUser));
+        Link link = api(validUser).createAccessPointLink("c1", "a1", "cd1",
+                linkDesc, AccessPointType.subject, linkBundle,
+                Lists.<Accessor>newArrayList(validUser, invalidUser));
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2L, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -103,7 +105,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         assertEquals(1L, Iterables.size(link.getLinkBodies()));
         AccessPoint rel = link.getLinkBodies().iterator().next().as(AccessPoint.class);
         assertEquals(rel.getName(), linkDesc);
-        assertEquals(rel.getRelationshipType(), linkType);
+        assertEquals(rel.getRelationshipType(), AccessPointType.subject);
         Description d = rel.getDescription();
         assertEquals(desc, d);
         assertTrue(link.hasAccessRestriction());

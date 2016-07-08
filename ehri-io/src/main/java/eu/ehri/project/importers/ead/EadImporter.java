@@ -32,6 +32,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -295,8 +296,9 @@ public class EadImporter extends SaxXmlImporter {
                             logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
                             if (concept.getIdentifier().equalsIgnoreCase(conceptId)) {
                                 try {
+                                    // TODO: Fix link type here...
                                     Bundle data = linkBundle
-                                            .withDataValue(Ontology.LINK_HAS_TYPE, rel.getProperty("type"));
+                                            .withDataValue(Ontology.LINK_HAS_TYPE, "associative");
                                     Link link = api.create(data, Link.class);
                                     unit.addLink(link);
                                     concept.addLink(link);
@@ -339,7 +341,7 @@ public class EadImporter extends SaxXmlImporter {
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
                         logger.debug("relationNode without type: {}", relationNode.get(Ontology.NAME_KEY));
-                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
                     }
                     list.add(relationNode);
                 }
@@ -354,14 +356,15 @@ public class EadImporter extends SaxXmlImporter {
                         Map<String, Object> relationNode = Maps.newHashMap();
                         for (String eventkey : origRelation.keySet()) {
                             if (eventkey.endsWith(ACCESS_POINT)) {
-                                relationNode.put(Ontology.ACCESS_POINT_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
+                                relationNode.put(Ontology.ACCESS_POINT_TYPE,
+                                        eventkey.substring(0, eventkey.indexOf(ACCESS_POINT)));
                                 relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
                             } else {
                                 relationNode.put(eventkey, origRelation.get(eventkey));
                             }
                         }
                         if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                            relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
                         }
                         //if no name is given, it was apparently an empty <controlaccess> tag?
                         if (relationNode.containsKey(Ontology.NAME_KEY)) {
@@ -370,7 +373,8 @@ public class EadImporter extends SaxXmlImporter {
                     }
                 } else {
                     Map<String, Object> relationNode = Maps.newHashMap();
-                    relationNode.put(Ontology.ACCESS_POINT_TYPE, key.substring(0, key.indexOf("Point")));
+                    relationNode.put(Ontology.ACCESS_POINT_TYPE,
+                            key.substring(0, key.indexOf(ACCESS_POINT)));
                     relationNode.put(Ontology.NAME_KEY, data.get(key));
                     list.add(relationNode);
                 }

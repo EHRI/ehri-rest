@@ -25,6 +25,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
@@ -139,7 +140,7 @@ public abstract class SaxXmlImporter extends MapImporter {
                     }
                     // Set a default relationship type if no type was found in the relationship
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
                     }
                     listOfRelations.add(relationNode);
                 }
@@ -176,7 +177,6 @@ public abstract class SaxXmlImporter extends MapImporter {
                     && !itemProperty.getKey().startsWith("relation")
                     && !itemProperty.getKey().startsWith("IGNORE")
                     && !itemProperty.getKey().startsWith("address/")
-                    && !itemProperty.getKey().endsWith("Access")
                     && !itemProperty.getKey().endsWith("AccessPoint")) {
                 description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
                         itemProperty.getKey(), itemProperty.getValue(), entity));

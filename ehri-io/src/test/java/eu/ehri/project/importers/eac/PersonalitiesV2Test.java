@@ -23,6 +23,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
@@ -175,7 +176,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         HistoricalAgent person = manager.getEntity("ehri_pers_000051", HistoricalAgent.class);
         for (Description d : person.getDescriptions()) {
             for (AccessPoint rel : d.getAccessPoints()) {
-                if (rel.getRelationshipType().equals("subjectAccess")) {
+                if (rel.getRelationshipType().equals(AccessPointType.subject)) {
                     if (rel.getName().equals("Diplomatic documents")) {
                         assertEquals(1, toList(rel.getLinks()).size());
                         for (Link link : rel.getLinks()) {

@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
 import com.google.common.io.Resources;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
@@ -13,6 +12,7 @@ import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.DatePeriod;
@@ -22,7 +22,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
@@ -40,7 +39,6 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -86,13 +84,13 @@ public final class Ead2002Exporter implements EadExporter {
             .put("unitDates", "unitdate")
             .build();
 
-    public static final Map<String, String> controlAccessMappings = ImmutableMap.<String, String>builder()
-            .put("subjectAccess", "subject")
-            .put("personAccess", "persname")
-            .put("familyAccess", "famname")
-            .put("corporateBodyAccess", "corpname")
-            .put("placeAccess", "geogname")
-            .put("genreAccess", "genreform")
+    public static final Map<AccessPointType, String> controlAccessMappings = ImmutableMap.<AccessPointType, String>builder()
+            .put(AccessPointType.subject, "subject")
+            .put(AccessPointType.person, "persname")
+            .put(AccessPointType.family, "famname")
+            .put(AccessPointType.corporateBody, "corpname")
+            .put(AccessPointType.place, "geogname")
+            .put(AccessPointType.genre, "genreform")
             .build();
 
     public static final List<String> addressKeys = ImmutableList
@@ -407,9 +405,9 @@ public final class Ead2002Exporter implements EadExporter {
     }
 
     private void addControlAccess(Document doc, Element element, Description desc) {
-        Map<String, List<AccessPoint>> byType = Maps.newHashMap();
+        Map<AccessPointType, List<AccessPoint>> byType = Maps.newHashMap();
         for (AccessPoint accessPoint : desc.getAccessPoints()) {
-            String type = accessPoint.getRelationshipType();
+            AccessPointType type = accessPoint.getRelationshipType();
             if (controlAccessMappings.containsKey(type)) {
                 if (byType.containsKey(type)) {
                     byType.get(type).add(accessPoint);
@@ -419,8 +417,8 @@ public final class Ead2002Exporter implements EadExporter {
             }
         }
 
-        for (Map.Entry<String, List<AccessPoint>> entry : byType.entrySet()) {
-            String type = entry.getKey();
+        for (Map.Entry<AccessPointType, List<AccessPoint>> entry : byType.entrySet()) {
+            AccessPointType type = entry.getKey();
             Element ctrlElem = doc.createElement("controlaccess");
             element.appendChild(ctrlElem);
             for (AccessPoint accessPoint : entry.getValue()) {

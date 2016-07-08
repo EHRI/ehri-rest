@@ -26,6 +26,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -82,11 +84,10 @@ public class CegesomaABTest extends AbstractImporterTest {
         //José Gotovitch
         for (DocumentaryUnitDescription d : archdesc.getDocumentDescriptions()) {
             boolean hasPersonAccess = false;
-            for (Vertex relation : d.asVertex().getVertices(Direction.OUT, Ontology.HAS_ACCESS_POINT)) {
-                Link link = graph.frame(relation, Link.class);
-                if (link.getLinkType().equals("creatorAccess")) {
+            for (AccessPoint accessPoint : d.getAccessPoints()) {
+                if (accessPoint.getRelationshipType().equals(AccessPointType.creator)) {
                     hasPersonAccess = true;
-                    assertEquals("José Gotovitch", link.getProperty(Ontology.NAME_KEY));
+                    assertEquals("José Gotovitch", accessPoint.getProperty(Ontology.NAME_KEY));
                 }
             }
             assertTrue(hasPersonAccess);

@@ -121,7 +121,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertTrue(!toList(c3.getLinks()).isEmpty());
         for (Link a : c3.getLinks()) {
             logger.debug(a.getLinkType() + " " + a.getDescription());
-            assertEquals("subjectAccess", a.getLinkType());
+            assertEquals("associative", a.getLinkType());
             assertEquals(1, Iterables.size(a.getLinkBodies()));
         }
 

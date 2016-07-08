@@ -263,14 +263,14 @@
               type: AccessPoint
               data:
                 name: Subject Access 1
-                type: subjectAccess
+                type: subject
                 description: test description
                 category: associative
             - id: ur2
               type: AccessPoint
               data:
                 name: Person Access 1
-                type: personAccess
+                type: person
                 description: test description
                 category: associative
       - id: cd1-2
