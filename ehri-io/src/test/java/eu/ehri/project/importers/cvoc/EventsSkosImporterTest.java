@@ -24,6 +24,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 
 import java.io.InputStream;
+
+import eu.ehri.project.models.AccessPointType;
 import org.junit.Test;
 
 
@@ -112,7 +114,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         for(Description desc : teheranChildren.getDescriptions()){
 //            for(String k : desc.getPropertyKeys())
 //                System.out.println(k+"-"+desc.getProperty(k));
-            assertTrue(desc.getPropertyKeys().contains("personAccess"));
+            assertTrue(desc.getPropertyKeys().contains(AccessPointType.person.name()));
         }
         
         AuthoritativeItem ad1 = manager.getEntity("ad1", AuthoritativeItem.class);
@@ -122,7 +124,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
             assertTrue(desc.getPropertyKeys().contains("type"));
             assertEquals("associate", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("sem"));
-            assertEquals("personAccess", desc.getProperty("sem"));
+            assertEquals("person", desc.getProperty("sem"));
             for(Linkable e : desc.getLinkTargets()){
                 assertTrue(e.getId().equals("cvoc1-2") || e.getId().equals("a1"));
             }

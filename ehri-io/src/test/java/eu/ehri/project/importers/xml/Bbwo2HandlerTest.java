@@ -23,6 +23,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -111,7 +112,7 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         DocumentaryUnit person = manager.getEntity("nl-r1-1505", DocumentaryUnit.class);
         for (Description d : person.getDescriptions()) {
             for (AccessPoint rel : d.getAccessPoints()) {
-                if (rel.getRelationshipType().equals("subjectAccess")) {
+                if (rel.getRelationshipType().equals(AccessPointType.subject)) {
                     if (rel.getName().equals("kinderen")) {
                         Assert.assertEquals(1, toList(rel.getLinks()).size());
                         for (Link link : rel.getLinks()) {

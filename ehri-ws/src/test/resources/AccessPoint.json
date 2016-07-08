@@ -2,7 +2,7 @@
 
   "type": "AccessPoint",
   "data": {
-    "type": "associative",
+    "type": "subject",
     "name": "Test Access Point"
   }
 }

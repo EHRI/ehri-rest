@@ -21,6 +21,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
@@ -391,7 +392,7 @@ public class ApiImpl implements Api {
 
     @Override
     public Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            String bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
+            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
             throws ItemNotFound, ValidationError, PermissionDenied {
         Linkable t1 = manager.getEntity(targetId1, Linkable.class);
         Linkable t2 = manager.getEntity(targetId2, Linkable.class);

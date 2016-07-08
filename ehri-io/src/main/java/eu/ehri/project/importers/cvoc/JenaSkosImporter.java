@@ -33,8 +33,9 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.Filter;
-import com.hp.hpl.jena.util.iterator.Map1;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -58,8 +59,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.LanguageHelpers;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,10 +248,10 @@ public final class JenaSkosImporter implements SkosImporter {
 
         Map<AuthoritativeItem, String> linkedConcepts = Maps.newHashMap();
 
-        List<Bundle> undetermined = getUndeterminedRelations(item, linkedConcepts);
+        List<Bundle> unknown = getAdditionalRelations(item, linkedConcepts);
         for (Bundle description : getDescriptions(item)) {
             Bundle withRels = description
-                    .withRelations(Ontology.HAS_ACCESS_POINT, undetermined);
+                    .withRelations(Ontology.HAS_UNKNOWN_PROPERTY, unknown);
             builder.addRelation(Ontology.DESCRIPTION_FOR_ENTITY, withRels);
         }
 
@@ -280,34 +279,30 @@ public final class JenaSkosImporter implements SkosImporter {
         }
     }
 
-    private List<Bundle> getUndeterminedRelations(Resource item, Map<AuthoritativeItem, String> linkedItems) {
-        List<Bundle> undetermined = Lists.newArrayList();
+    private List<Bundle> getAdditionalRelations(Resource item, Map<AuthoritativeItem, String> linkedItems) {
+        List<Bundle> unknown = Lists.newArrayList();
 
         for (Map.Entry<String, URI> rel : SkosRDFVocabulary.RELATION_PROPS.entrySet()) {
             for (RDFNode annotation : getObjectWithPredicate(item, rel.getValue())) {
                 if (annotation.isLiteral()) {
-                    undetermined.add(Bundle.Builder.withClass(EntityClass.ACCESS_POINT)
-                            .addDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
-                            .addDataValue(Ontology.NAME_KEY, annotation.toString())
+                    unknown.add(Bundle.Builder.withClass(EntityClass.UNKNOWN_PROPERTY)
+                            .addDataValue(rel.getKey(), annotation.toString())
                             .build());
                 } else {
                     if (rel.getKey().startsWith("skos:") || rel.getKey().startsWith("sem:")) {
-                        String prefix = rel.getKey().startsWith("skos:") ? "skos" : "sem";
                         Optional<AuthoritativeItem> found = findRelatedConcept(annotation.toString());
                         if (found.isPresent()) {
                             linkedItems.put(found.get(), rel.getKey());
                         } else {
-                            undetermined.add(Bundle.Builder.withClass(EntityClass.ACCESS_POINT)
-                                    .addDataValue(Ontology.ANNOTATION_TYPE, "associate")
-                                    .addDataValue(prefix, rel.getKey().substring(rel.getKey().indexOf(":") + 1))
-                                    .addDataValue(Ontology.NAME_KEY, annotation.toString())
+                            unknown.add(Bundle.Builder.withClass(EntityClass.UNKNOWN_PROPERTY)
+                                    .addDataValue(rel.getKey(), annotation.toString())
                                     .build());
                         }
                     }
                 }
             }
         }
-        return undetermined;
+        return unknown;
     }
 
     private Optional<AuthoritativeItem> findRelatedConcept(String name) {
@@ -346,12 +341,7 @@ public final class JenaSkosImporter implements SkosImporter {
             public boolean accept(Statement statement) {
                 return statement.getPredicate().hasURI(propUri.toString());
             }
-        }).mapWith(new Map1<Statement, RDFNode>() {
-            @Override
-            public RDFNode map1(Statement statement) {
-                return statement.getObject();
-            }
-        }).toList();
+        }).mapWith(Statement::getObject).toList();
     }
 
     private void connectRelation(Concept current, Resource item, Map<Resource, Concept> others,

@@ -234,13 +234,13 @@
               type: AccessPoint
               data:
                 name: Example Subject 1
-                type: subjectAccess
+                type: subject
                 description: test description
             - id: example-access-point-2
               type: AccessPoint
               data:
                 name: Example Person 1
-                type: personAccess
+                type: person
                 description: test description
     heldBy: nl-000001
     hasPermissionScope: nl-000001

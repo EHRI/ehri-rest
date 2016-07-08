@@ -27,7 +27,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
-import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -119,14 +119,15 @@ public class JenaSkosExporter implements SkosExporter {
                     writeProperty(model, resource, key, cdv.getProperty(key), lang);
                 }
 
-                // In some cases there'll be an access point with a relation type
-                // such as owl:sameAs and a name value pointing to some other URL.
-                for (AccessPoint accessPoint : description.getAccessPoints()) {
-                    String type = accessPoint.getRelationshipType();
-                    String name = accessPoint.getName();
-                    if (SkosRDFVocabulary.RELATION_PROPS.containsKey(type)) {
-                        model.add(resource,
-                                model.createProperty(SkosRDFVocabulary.RELATION_PROPS.get(type).toString()), name);
+                // In some cases there'll be an unknown property with a key
+                // such as owl:sameAs and a value pointing to some other URL.
+                for (UnknownProperty prop : description.getUnknownProperties()) {
+                    for (String key : prop.getPropertyKeys()) {
+                        String value = prop.getProperty(key);
+                        if (SkosRDFVocabulary.RELATION_PROPS.containsKey(key)) {
+                            model.add(resource,
+                                    model.createProperty(SkosRDFVocabulary.RELATION_PROPS.get(key).toString()), value);
+                        }
                     }
                 }
             }
@@ -169,7 +170,7 @@ public class JenaSkosExporter implements SkosExporter {
     private void writeListOrScalar(Model model, Resource resource,
             Property property, Object listOrScalar, String lang) {
         if (listOrScalar instanceof List) {
-            List<?> list = (List)listOrScalar;
+            List<?> list = (List) listOrScalar;
             for (Object obj : list) {
                 logger.trace("Writing list property: {} -> {}", property, obj);
                 writeObject(model, resource, property, obj, lang);
@@ -183,7 +184,7 @@ public class JenaSkosExporter implements SkosExporter {
     private void writeObject(Model model, Resource resource,
             Property property, Object value, String lang) {
         if (value instanceof String) {
-            model.add(resource, property, (String)value, lang);
+            model.add(resource, property, (String) value, lang);
         } else {
             model.add(resource, property, model.createTypedLiteral(value));
         }

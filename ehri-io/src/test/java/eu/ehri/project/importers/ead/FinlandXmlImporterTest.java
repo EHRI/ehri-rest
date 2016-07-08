@@ -63,8 +63,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
          * maintenanceEvent: 7
          * systemEvent: 1
          * datePeriod: 5
+         * accessPoint: 1
          */
-        assertEquals(count + 36, countAfter);
+        assertEquals(count + 37, countAfter);
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         Iterator<DocumentaryUnitDescription> i = c1.getDocumentDescriptions().iterator();
@@ -97,9 +98,10 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
          * documentDescription: 7
          * maintenanceEvent: 7
          * systemEvent: 1
+         * accessPoint: 6
          * datePeriod: 5
          */
-        assertEquals(countAfter + 29, getNodeCount(graph));
+        assertEquals(countAfter + 35, getNodeCount(graph));
         i = c1.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while (i.hasNext()) {

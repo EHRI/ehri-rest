@@ -60,7 +60,7 @@ public interface AccessPoint extends Accessible, Named {
      */
     @Mandatory
     @Property(Ontology.ACCESS_POINT_TYPE)
-    String getRelationshipType();
+    AccessPointType getRelationshipType();
 }
 
 

@@ -9,6 +9,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.utils.LanguageHelpers;
@@ -109,19 +110,18 @@ public class DublinCore11Exporter implements DublinCoreExporter {
             }
 
             for (AccessPoint accessPoint : desc.getAccessPoints()) {
-                switch (accessPoint.<String>getProperty("type")) {
-                    case "creatorAccess":
-                        addElement(doc, rootElem, "creator", accessPoint.getName());
+                AccessPointType type = accessPoint.getRelationshipType();
+                switch (type) {
+                    case creator:
+                    case subject:
+                        addElement(doc, rootElem, type.name(), accessPoint.getName());
                         break;
-                    case "subjectAccess":
-                        addElement(doc, rootElem, "subject", accessPoint.getName());
-                        break;
-                    case "personAccess":
-                    case "corporateBodyAccess":
-                    case "familyAccess":
+                    case person:
+                    case corporateBody:
+                    case family:
                         addElement(doc, rootElem, "relation", accessPoint.getName());
                         break;
-                    case "placeAccess":
+                    case place:
                         addElement(doc, rootElem, "coverage", accessPoint.getName());
                         break;
                     default:

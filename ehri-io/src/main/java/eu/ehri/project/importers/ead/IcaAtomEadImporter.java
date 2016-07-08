@@ -28,6 +28,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -188,24 +189,24 @@ public class IcaAtomEadImporter extends SaxXmlImporter {
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        String REL = "AccessPoint";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
-            if (key.endsWith(REL)) {
+            if (key.endsWith(EadImporter.ACCESS_POINT)) {
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
-                    for (String eventkey : origRelation.keySet()) {
-                        logger.debug(eventkey);
-                        if (eventkey.endsWith(REL)) {
-                            relationNode.put(Ontology.ACCESS_POINT_TYPE, eventkey);
-                            relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
+                    for (String relationKey : origRelation.keySet()) {
+                        logger.debug("Found relation type key: {}", relationKey);
+                        if (relationKey.endsWith(EadImporter.ACCESS_POINT)) {
+                            relationNode.put(Ontology.ACCESS_POINT_TYPE,
+                                    relationKey.substring(0, relationKey.indexOf(EadImporter.ACCESS_POINT)));
+                            relationNode.put(Ontology.NAME_KEY, origRelation.get(relationKey));
                         } else {
-                            relationNode.put(eventkey, origRelation.get(eventkey));
+                            relationNode.put(relationKey, origRelation.get(relationKey));
                         }
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                        relationNode.put(Ontology.ACCESS_POINT_TYPE, "corporateBodyAccessPoint");
+                        relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
                     }
                     list.add(relationNode);
                 }
