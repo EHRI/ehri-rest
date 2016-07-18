@@ -45,6 +45,8 @@ public class XmlExporterTest extends AbstractImporterTest {
     protected void validatesSchema(String xml, String schemaResourceName) throws IOException, SAXException {
         SchemaFactory factory = SchemaFactory
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        factory.setResourceResolver(new LocalResourceResolver());
+
         Schema schema = factory.newSchema(Resources.getResource(schemaResourceName));
         Validator validator = schema.newValidator();
         validator.validate(new StreamSource(new ByteArrayInputStream(xml.getBytes("UTF-8"))));
