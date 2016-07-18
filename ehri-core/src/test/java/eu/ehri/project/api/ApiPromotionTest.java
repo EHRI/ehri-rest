@@ -33,12 +33,12 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test promotion/demotion.
- * <p/>
+ * <p>
  * NB: An item can be promoted multiple times (meaning there's
  * a "promotedBy" relationship from an item to a user. To
  * properly demote an item all "promotedBy" relationships must
  * be removed.
- * <p/>
+ * <p>
  * NB2: This might be to change.
  */
 public class ApiPromotionTest extends AbstractFixtureTest {

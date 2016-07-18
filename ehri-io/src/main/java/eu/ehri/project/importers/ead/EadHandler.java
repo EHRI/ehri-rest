@@ -180,7 +180,7 @@ public class EadHandler extends SaxXmlHandler {
 
     /**
      * Called when the XML parser encounters an end tag. This is tuned for EAD files, which come in many flavours.
-     * <p/>
+     * <p>
      * Certain elements represent subcollections, for which we create new nodes (here, we create representative Maps for nodes).
      * Many EAD producers use the standard in their own special way, so this method calls generalised methods to filter, get data
      * in the right place and reformat.

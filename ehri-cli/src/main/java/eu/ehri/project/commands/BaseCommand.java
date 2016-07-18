@@ -38,7 +38,7 @@ import java.io.StringWriter;
 /**
  * Abstract base class for commands. Provides the main
  * entry points for interaction:
- * <p/>
+ * <p>
  * <ul>
  * <li>Set options</li>
  * <li>Get help</li>

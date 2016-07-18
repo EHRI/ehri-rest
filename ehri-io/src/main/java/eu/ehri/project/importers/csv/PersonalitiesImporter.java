@@ -48,7 +48,7 @@ import java.util.Map;
 
 /**
  * Importer of historical agents encoded in {@link Map}s.
- * <p/>
+ * <p>
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  */

@@ -52,7 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Class that represents a graph entity and subtree relations
  * prior to being materialised as vertices and edges.
- * <p/>
+ * <p>
  * Note: unlike a vertex, a bundle can contain null values
  * in its data map, though these values will not be externally
  * visible. Null values <i>are</i> however used in merge operations,

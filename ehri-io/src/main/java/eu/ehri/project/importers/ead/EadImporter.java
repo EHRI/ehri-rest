@@ -63,7 +63,7 @@ import java.util.Stack;
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
  * a hierarchical structure describing their child items. This means that we need to recursively descend through the
  * archdesc and c,c01-12 levels.
- * <p/>
+ * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  */
 public class EadImporter extends SaxXmlImporter {
@@ -142,7 +142,7 @@ public class EadImporter extends SaxXmlImporter {
 
     /**
      * Extract the documentary unit description bundle from the raw map data.
-     * <p/>
+     * <p>
      * Note: the itemData map is mutable and should be considered an out parameter.
      *
      * @param itemData the raw data map
@@ -256,14 +256,14 @@ public class EadImporter extends SaxXmlImporter {
     /**
      * Subclasses can override this method to cater to their special needs for UndeterminedRelationships
      * by default, it expects something like this in the original EAD:
-     * <p/>
+     * <p>
      * <pre>
      * {@code
      * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
      * Leonhard (* 11.5.1886)</persname>
      * }
      * </pre>
-     * <p/>
+     * <p>
      * it works in unison with the extractRelations() method.
      *
      * @param unit the current unit

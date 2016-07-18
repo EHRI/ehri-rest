@@ -45,7 +45,7 @@ public class CvocConceptTest extends ModelTestBase {
 
     /**
      * Just play a bit with a small 'graph' of concepts.
-     * <p/>
+     * <p>
      * NOTE: Better wait for the improved testing 'fixture' before doing
      * extensive testing on Concepts
      *

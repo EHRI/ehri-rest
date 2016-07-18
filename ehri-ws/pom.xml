@@ -9,7 +9,7 @@
     </parent>
 
     <name>Web Service</name>
-    <description>Web service layer exposed via a Neo4j extension.</description>
+    <description>Web service layer exposed via a Neo4j extension at path: /ehri</description>
 
     <artifactId>ehri-ws</artifactId>
     <version>0.13.4-SNAPSHOT</version>
@@ -60,14 +60,20 @@
     <reporting>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.enunciate</groupId>
-                <artifactId>maven-enunciate-plugin</artifactId>
-                <version>1.29</version>
+                <groupId>com.webcohesion.enunciate</groupId>
+                <artifactId>enunciate-maven-plugin</artifactId>
+                <version>2.5.0</version>
                 <configuration>
                     <configFile>enunciate.xml</configFile>
-                    <enunciateArtifactId>docs</enunciateArtifactId>
-                    <moduleName>docs</moduleName>
+                    <docsDir>${project.build.directory}</docsDir>
                     <docsSubdir>wsdocs</docsSubdir>
+                    <excludes>
+                        <exclude>org.neo4j.**</exclude>
+                    </excludes>
+                    <includes>
+                        <include>eu.ehri.extension.**</include>
+                    </includes>
+                    <enunciateArtifactId>docs</enunciateArtifactId>
                 </configuration>
                 <reportSets>
                     <reportSet>
@@ -80,6 +86,7 @@
             </plugin>
         </plugins>
     </reporting>
+
 
     <dependencies>
         <!-- the ehri data via tinkerpop frames project -->

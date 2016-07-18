@@ -40,17 +40,17 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 /**
  * Reader of XML files, creator of {@link Map}-based representations of EA* files.
  * Makes use of properties file with format:
- * <p/>
+ * <p>
  * path/within/xml/=node/property
- * <p/>
+ * <p>
  * if no &lt;node&gt; is given, it is the default logical-unit or unit-description of this property file.
  * with eac.properties this would be an HistoricalAgent with an HistoricalAgentDescription
  * if there is a &lt;node&gt; given, it will translate to another graph node, like Address.
- * <p/>
+ * <p>
  * lines starting with '{@literal @}' give the attributes:
  * <code>{@literal @}attribute=tmpname
  * path/within/xml/@tmpname=node/property</code>
- * <p/>
+ * <p>
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node,
  * with an edge to the unit-description.
  */
@@ -301,7 +301,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param path the stacked element names forming a path from the root to the current element
      * @return the corresponding value to this path from the properties file. the search is inside out, so if
      * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
-     * <p/>
+     * <p>
      * if this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
@@ -317,7 +317,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value     $ehri_main_identifier
      * @return the corresponding value to this path from the properties file. The search is inside out, so if
      * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first.
-     * <p/>
+     * <p>
      * If this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
@@ -335,7 +335,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
 
     /**
      * If this path has no corresponding value in the properties file, it will return false
-     * <p/>
+     * <p>
      * did/unitid/{@literal @}ehrilabel$ehri_main_identifier=objectIdentifier
      *
      * @param path      did/unitid/

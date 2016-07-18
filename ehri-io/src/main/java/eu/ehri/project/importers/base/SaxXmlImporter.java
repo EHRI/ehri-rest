@@ -75,7 +75,7 @@ public abstract class SaxXmlImporter extends MapImporter {
     /**
      * Extract DocumentaryUnit properties from the itemData and return them as a new Map.
      * This implementation only extracts the objectIdentifier.
-     * <p/>
+     * <p>
      * This implementation does not throw ValidationErrors.
      *
      * @param itemData a Map containing raw properties of a DocumentaryUnit

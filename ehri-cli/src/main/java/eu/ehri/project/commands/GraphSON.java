@@ -39,7 +39,7 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Dump the complete graph as graphSON file, or import such a dump
- * <p/>
+ * <p>
  * Example usage:
  * <pre>
  *     <code>

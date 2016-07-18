@@ -109,16 +109,16 @@ public class ImportResource extends AbstractResource {
     /**
      * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
-     * <p/>
+     * <p>
      * Example:
-     * <p/>
+     * <p>
      * <pre>
-     * {@code
+     *    <code>
      * curl -X POST \
      *      -H "X-User: mike" \
      *      --data-binary @skos-data.rdf \
-     *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&log=testing&tolerant=true"
-     * }
+     *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&amp;log=testing&amp;tolerant=true"
+     *     </code>
      * </pre>
      *
      * @param scopeId    the id of the import scope (i.e. repository)
@@ -176,23 +176,23 @@ public class ImportResource extends AbstractResource {
      * The Content-Type header is used to distinguish the contents.
      * <br>
      * <b>Note:</b> The archive does not currently support compression.
-     * <p/>
+     * <p>
      * The way you would run with would typically be:
-     * <p/>
+     * <p>
      * <pre>
-     * {@code
+     *    <code>
      *     curl -X POST \
      *      -H "X-User: mike" \
      *      --data-binary @ead-list.txt \
-     *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&log=testing&tolerant=true"
+     *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&amp;log=testing&amp;tolerant=true"
      *
      * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
      * # it needs url encoding.
-     * }
+     *    </code>
      * </pre>
-     * <p/>
+     * <p>
      * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
-     * <p/>
+     * <p>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       the id of the import scope (i.e. repository)
@@ -313,7 +313,7 @@ public class ImportResource extends AbstractResource {
      * Import a set of CSV files. See EAD handler for options and
      * defaults but substitute text/csv for the input mimetype when
      * a single file is POSTed.
-     * <p/>
+     * <p>
      * Additional note: no handler class is required.
      */
     @POST

@@ -37,16 +37,16 @@ public interface ListResource {
      * header in the form:
      * <p>
      * <pre><code>page=1; count=20; total=50</code></pre>
-     * <p>
+     *
      * If the header <code>X-Stream</code> is set to <code>true</code>
      * no count of total items will be performed. This is more efficient when returning large
      * numbers of items or when limiting is disabled completely.
-     * <p>
+     *
      * Example:
      * <pre>
-     * {@code
-     * curl http://localhost:7474/ehri/[RESOURCE]/list?page=5&limit=10
-     * }
+     *      <code>
+     * curl http://localhost:7474/ehri/[RESOURCE]/list?page=5&amp;limit=10
+     *      </code>
      * </pre>
      *
      * @return A list of serialized item representations

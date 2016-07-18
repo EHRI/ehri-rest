@@ -48,7 +48,7 @@ import javax.ws.rs.core.Response;
  * <p>
  * The following query parameters apply to all actions in this
  * resource to apply filtering to the event streams.
- * </p>
+ * <p>
  * <dl>
  * <dt>eventTypes</dt><dd>Filter events by type</dd>
  * <dt>itemTypes</dt><dd>Filter events based on the item type of their subjects</dd>
@@ -57,7 +57,7 @@ import javax.ws.rs.core.Response;
  * <dt>from</dt><dd>Exclude events prior to this date (ISO 8601 format)</dd>
  * <dt>to</dt><dd>Exclude events after this date (ISO 8601 format)</dd>
  * </dl>
- * <p/>
+ * <p>
  * Additionally the aggregate* end-points accept an <code>aggregation</code>
  * parameter that groups sequential events according to one of two different
  * strategies:
@@ -76,9 +76,9 @@ import javax.ws.rs.core.Response;
  * </ul>
  * </dd>
  * </dl>
- * <p/>
+ * <p>
  * Additionally, aggregation can be disabled by using <code>aggregation=off</code>.
- * <p/>
+ * <p>
  * Standard paging parameters apply to all end-points.
  */
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.SYSTEM_EVENT)

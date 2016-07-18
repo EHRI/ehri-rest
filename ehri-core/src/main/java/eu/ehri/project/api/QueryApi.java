@@ -103,7 +103,7 @@ public interface QueryApi {
 
     /**
      * Count all items of a given type.
-     * <p/>
+     * <p>
      * NB: Count doesn't 'account' for ACL privileges!
      */
     long count(EntityClass type);

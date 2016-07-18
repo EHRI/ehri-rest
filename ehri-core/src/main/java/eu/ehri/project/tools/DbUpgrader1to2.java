@@ -29,11 +29,11 @@ import java.util.UUID;
 /**
  * Single-use code to upgrade the DB schema from version
  * 1 to version 2.
- * <p/>
+ * <p>
  * Ideally, we'd use some declarative script for this, and were
  * it not for the JSON data in Version nodes that represents
  * prior incarnations of items, we could.
- * <p/>
+ * <p>
  * This function de-serializes the serialized data, upgrades it
  * to the new format, and serializes it again.
  */

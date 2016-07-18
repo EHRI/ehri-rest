@@ -84,7 +84,7 @@ public class Check extends BaseCommand {
 
     /**
      * The following types of item should ALL have a permission scope.
-     * <p/>
+     * <p>
      * Doc unit - either a repository or another doc unit
      * Concept - a vocabulary
      * Repository - a country
@@ -92,9 +92,8 @@ public class Check extends BaseCommand {
      *
      * @param graph   The graph
      * @param manager The graph manager
-     * @throws Exception
      */
-    public void checkPermissionScopes(FramedGraph<?> graph,
+    private void checkPermissionScopes(FramedGraph<?> graph,
                                       GraphManager manager) {
 
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);

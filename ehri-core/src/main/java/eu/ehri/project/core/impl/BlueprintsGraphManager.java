@@ -41,7 +41,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
- * <p/>
+ * <p>
  * This class can be extended for when specific graph implementations (such
  * as Neo4j) can provide more efficient implementations of certain methods.
  */

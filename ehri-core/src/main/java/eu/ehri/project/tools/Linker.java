@@ -91,15 +91,15 @@ public class Linker {
      * Populate a pre-created vocabulary with concepts created based on
      * access points for all collections within a repository, then link
      * those concepts to the relevant documentary units.
-     * <p/>
+     * <p>
      * One creation event will be generated for the newly-created concepts
      * (with the vocabulary as the scope) and another for the newly-created
      * links. Currently events will still be created if no concepts/links
      * are made.
-     * <p/>
+     * <p>
      * It should be advised that this function is not idempotent and
      * running it twice will generate concepts/links twice.
-     * <p/>
+     * <p>
      * NB. One could argue this function does too much...
      *
      * @param repository the repository

@@ -73,7 +73,7 @@ public class AdminResource extends AbstractResource {
     /**
      * Export the DB as a stream of JSON in
      * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
-     * <p/>
+     * <p>
      * The mode used is EXTENDED.
      */
     @GET
