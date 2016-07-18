@@ -311,7 +311,7 @@ public final class QueryApiImpl implements QueryApi {
 
     /**
      * Count items accessible to a given user.
-     * <p/>
+     * <p>
      * NB: Count doesn't 'account' for ACL privileges!
      */
     @Override
@@ -322,7 +322,7 @@ public final class QueryApiImpl implements QueryApi {
 
     /**
      * Count all items of a given type.
-     * <p/>
+     * <p>
      * NB: Count doesn't 'account' for ACL privileges!
      */
     @Override

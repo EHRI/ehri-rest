@@ -164,7 +164,7 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     /**
      * Get a serializer according to passed-in serialization config.
-     * <p/>
+     * <p>
      * Currently the only parameter is <code>_ip=[propertyName]</code> which
      * ensures a given property is always included in the output.
      *
@@ -361,7 +361,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     /**
      * An abstraction class that handles streaming responses that
      * need to manage a transaction.
-     * <p/>
+     * <p>
      * We cannot just return a regular StreamingResponse here
      * because then HEAD requests will leak the transaction.
      */

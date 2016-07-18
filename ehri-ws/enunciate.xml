@@ -1,22 +1,33 @@
 <?xml version="1.0"?>
-<enunciate label="ehri-ws-api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.25.xsd">
 
-    <services>
-        <rest defaultRestSubcontext="/"/>
-    </services>
+<enunciate slug="api"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.5.0.xsd">
 
-    <api-classes>
-        <include pattern="eu.ehri.extension.*"/>
-    </api-classes>
+    <title>EHRI Web Service API</title>
+    <copyright>The EHRI Project</copyright>
+
+    <application root="http://localhost:7474/ehri"/>
 
     <modules>
-        <docs
-            includeExampleXml="false"
-            includeExampleJson="true" 
-            docsDir="restapi"
-            title="EHRI Web Service API"
-            copyright="The EHRI Project"
-             />
+        <!-- everything disabled except docs -->
+
+        <c-xml-client disabled="true"/>
+        <csharp-xml-client disabled="true"/>
+        <gwt-json-overlay disabled="true"/>
+        <idl disabled="true"/>
+        <jackson disabled="true" />
+        <jackson1 disabled="true"/>
+        <java-json-client disabled="true"/>
+        <java-xml-client disabled="true"/>
+        <javascript-client disabled="true"/>
+        <jaxb disabled="true"/>
+        <jaxws disabled="true"/>
+        <obj-c-xml-client disabled="true"/>
+        <php-json-client disabled="true"/>
+        <php-xml-client disabled="true"/>
+        <ruby-json-client disabled="true"/>
+        <spring-web disabled="true"/>
+        <swagger disabled="true"/>
     </modules>
 </enunciate>
