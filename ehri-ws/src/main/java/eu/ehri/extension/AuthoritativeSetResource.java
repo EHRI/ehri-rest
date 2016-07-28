@@ -98,14 +98,13 @@ public class AuthoritativeSetResource extends
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+
+        try(final Tx tx = beginTx()) {
             AuthoritativeSet set = api().detail(id, cls);
-            return streamingPage(getQuery()
-                    .page(set.getAuthoritativeItems(), AuthoritativeItem.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery().page(set.getAuthoritativeItems(),
+                    AuthoritativeItem.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -116,7 +115,7 @@ public class AuthoritativeSetResource extends
     public Response create(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             Response response = createItem(bundle, accessors);
             tx.success();
             return response;
@@ -131,7 +130,7 @@ public class AuthoritativeSetResource extends
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             Response response = updateItem(id, bundle);
             tx.success();
             return response;
@@ -143,7 +142,7 @@ public class AuthoritativeSetResource extends
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -154,7 +153,7 @@ public class AuthoritativeSetResource extends
     public Response deleteAllAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             Api api = api();
             AuthoritativeSet set = api.detail(id, cls);
             Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
@@ -178,7 +177,7 @@ public class AuthoritativeSetResource extends
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             final AuthoritativeSet set = api().detail(id, cls);
             Response item = createItem(bundle, accessors, agent -> {
                 set.addItem(agent);
@@ -205,17 +204,14 @@ public class AuthoritativeSetResource extends
     public Response exportEag(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             final AuthoritativeSet set = api().detail(id, cls);
             final EacExporter eacExporter = new Eac2010Exporter(graph, api());
-            Iterable<HistoricalAgent> agents = Iterables.transform(set.getAuthoritativeItems(),
-                    a -> a.as(HistoricalAgent.class));
-            return exportItemsAsZip(eacExporter, agents, lang, tx);
-        } catch (Exception e) {
-            tx.failure();
-            tx.close();
-            throw e;
+            Iterable<HistoricalAgent> agents = Iterables
+                    .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));
+            Response response = exportItemsAsZip(eacExporter, agents, lang);
+            tx.success();
+            return response;
         }
     }
 }

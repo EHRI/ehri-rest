@@ -41,7 +41,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
@@ -99,15 +98,12 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            Accessor user = getRequesterUserProfile();
+        try (final Tx tx = beginTx()) {
             Vocabulary vocabulary = api().detail(id, cls);
-            return streamingPage(getQuery()
-                    .page(vocabulary.getConcepts(), Concept.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(vocabulary.getConcepts(), Concept.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -118,7 +114,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     public Response create(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = createItem(bundle, accessors);
             tx.success();
             return item;
@@ -133,7 +129,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -145,7 +141,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -155,7 +151,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @Path("{id:[^/]+}/all")
     public void deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile user = getCurrentUser();
             Api api = api().enableLogging(false);
             Vocabulary vocabulary = api.detail(id, cls);
@@ -188,7 +184,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Vocabulary vocabulary = api().detail(id, cls);
             Response item = createItem(bundle, accessors,
                     concept -> concept.setVocabulary(vocabulary),
@@ -219,7 +215,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Vocabulary vocabulary = api().detail(id, cls);
             final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary);
             final Model model = skosImporter.export(base);

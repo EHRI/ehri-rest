@@ -95,16 +95,14 @@ public final class VirtualUnitResource extends
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             VirtualUnit parent = manager.getEntity(id, VirtualUnit.class);
             Iterable<VirtualUnit> units = all
                     ? parent.getAllChildren()
                     : parent.getChildren();
-            return streamingPage(getQuery().page(units, cls), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery().page(units, cls));
+            tx.success();
+            return response;
         }
     }
 
@@ -113,14 +111,12 @@ public final class VirtualUnitResource extends
     @Path("{id:[^/]+}/" + INCLUDED)
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             VirtualUnit parent = manager.getEntity(id, VirtualUnit.class);
-            return streamingPage(getQuery()
-                    .page(parent.getIncludedUnits(), DocumentaryUnit.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(parent.getIncludedUnits(), DocumentaryUnit.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -129,7 +125,7 @@ public final class VirtualUnitResource extends
     public Response addIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit parent = api().detail(id, cls);
             Response item = single(api().virtualUnits().addIncludedUnits(parent,
@@ -144,7 +140,7 @@ public final class VirtualUnitResource extends
     public Response removeIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit parent = api().detail(id, cls);
             Response item = single(api().virtualUnits().removeIncludedUnits(parent,
@@ -160,7 +156,7 @@ public final class VirtualUnitResource extends
             @PathParam("from") String fromId, @PathParam("to") String toId,
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile currentUser = getCurrentUser();
             VirtualUnit fromVu = api().detail(fromId, cls);
             VirtualUnit toVu = api().detail(toId, cls);
@@ -178,7 +174,7 @@ public final class VirtualUnitResource extends
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Accessor currentUser = getCurrentUser();
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);
@@ -202,7 +198,7 @@ public final class VirtualUnitResource extends
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -214,7 +210,7 @@ public final class VirtualUnitResource extends
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -229,7 +225,7 @@ public final class VirtualUnitResource extends
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor currentUser = getRequesterUserProfile();
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);

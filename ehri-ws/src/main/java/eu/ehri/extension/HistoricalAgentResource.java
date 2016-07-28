@@ -93,7 +93,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     public Response create(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = createItem(bundle, accessors);
             tx.success();
             return item;
@@ -108,7 +108,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response response = updateItem(id, bundle);
             tx.success();
             return response;
@@ -120,7 +120,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -141,7 +141,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     public Response exportEac(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             HistoricalAgent agent = api().detail(id, HistoricalAgent.class);
             EacExporter eacExporter = new Eac2010Exporter(graph, api());
             final Document document = eacExporter.export(agent, lang);

@@ -108,7 +108,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, DeserializationError,
             ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Api.Acl acl = api().acl();
             final Set<Group> groups = Sets.newHashSet();
             for (String groupId : groupIds) {
@@ -134,7 +134,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -146,7 +146,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -156,14 +156,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + FOLLOWERS)
     public Response listFollowers(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getFollowers(), UserProfile.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getFollowers(), UserProfile.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -171,14 +169,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + FOLLOWING)
     public Response listFollowing(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getFollowing(), UserProfile.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getFollowing(), UserProfile.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -189,7 +185,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             boolean following = user.isFollowing(
                     manager.getEntity(otherId, UserProfile.class));
@@ -205,7 +201,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             boolean follower = user.isFollower(manager.getEntity(otherId, UserProfile.class));
             tx.success();
@@ -219,7 +215,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             userProfilesApi().addFollowers(userId, otherIds);
             tx.success();
         }
@@ -231,7 +227,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             userProfilesApi().removeFollowers(userId, otherIds);
             tx.success();
         }
@@ -241,14 +237,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + BLOCKED)
     public Response listBlocked(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getBlocked(), UserProfile.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getBlocked(), UserProfile.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -259,7 +253,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             boolean blocking = user.isBlocking(manager.getEntity(otherId, UserProfile.class));
             tx.success();
@@ -273,7 +267,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             userProfilesApi().addBlocked(userId, otherIds);
             tx.success();
         }
@@ -285,7 +279,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             userProfilesApi().removeBlocked(userId, otherIds);
             tx.success();
         }
@@ -295,14 +289,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + WATCHING)
     public Response listWatching(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getWatching(), Watchable.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getWatching(), Watchable.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -312,7 +304,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             userProfilesApi().addWatching(userId, otherIds);
             tx.success();
         }
@@ -324,7 +316,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             userProfilesApi().removeWatching(userId, otherIds);
             tx.success();
         }
@@ -337,7 +329,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             boolean watching = user.isWatching(manager.getEntity(otherId, Watchable.class));
             tx.success();
@@ -349,14 +341,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + GenericResource.ANNOTATIONS)
     public Response listAnnotations(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getAnnotations(), Annotation.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getAnnotations(), Annotation.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -364,14 +354,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + GenericResource.LINKS)
     public Response pageLinks(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getLinks(), Link.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getLinks(), Link.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -379,14 +367,12 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:[^/]+}/" + Entities.VIRTUAL_UNIT)
     public Response pageVirtualUnits(@PathParam("userId") String userId) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            return streamingPage(getQuery()
-                    .page(user.getVirtualUnits(), VirtualUnit.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getVirtualUnits(), VirtualUnit.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -407,15 +393,13 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile user = manager.getEntity(userId, UserProfile.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            return streamingListOfLists(eventsApi.aggregateUserActions(user), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingListOfLists(eventsApi.aggregateUserActions(user));
+            tx.success();
+            return response;
         }
     }
 
@@ -437,15 +421,13 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("userId") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             UserProfile asUser = manager.getEntity(userId, UserProfile.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            return streamingListOfLists(eventsApi.aggregateAsUser(asUser), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingListOfLists(eventsApi.aggregateAsUser(asUser));
+            tx.success();
+            return response;
         }
     }
 
@@ -454,16 +436,13 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{userId:[^/]+}/" + VIRTUAL_UNITS)
     public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
             throws AccessDenied, ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             Iterable<VirtualUnit> units = api().virtualUnits()
                     .getVirtualCollectionsForUser(accessor);
-            return streamingPage(getQuery()
-                    .page(units, VirtualUnit.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery().page(units, VirtualUnit.class));
+            tx.success();
+            return response;
         }
     }
 

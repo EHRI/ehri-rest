@@ -89,7 +89,7 @@ public class CvocConceptResource
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -101,7 +101,7 @@ public class CvocConceptResource
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -113,14 +113,12 @@ public class CvocConceptResource
     @Override
     public Response listChildren(@PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            return streamingPage(getQuery()
-                    .page(concept.getNarrowerConcepts(), Concept.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(concept.getNarrowerConcepts(), Concept.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -133,7 +131,7 @@ public class CvocConceptResource
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Concept parent = api().detail(id, cls);
             Response item = createItem(bundle, accessors, concept -> {
                 parent.addNarrowerConcept(concept);
@@ -159,7 +157,7 @@ public class CvocConceptResource
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> narrower)
             throws AccessDenied, PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .addNarrowerConcepts(id, narrower));
             tx.success();
@@ -181,7 +179,7 @@ public class CvocConceptResource
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> narrower)
             throws PermissionDenied, AccessDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .removeNarrowerConcepts(id, narrower));
             tx.success();
@@ -202,13 +200,11 @@ public class CvocConceptResource
     @Path("{id:[^/]+}/broader")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            return streamingList(concept.getBroaderConcepts(), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingList(concept.getBroaderConcepts());
+            tx.success();
+            return response;
         }
     }
 
@@ -223,13 +219,11 @@ public class CvocConceptResource
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/related")
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            return streamingList(concept.getRelatedConcepts(), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingList(concept.getRelatedConcepts());
+            tx.success();
+            return response;
         }
     }
 
@@ -246,13 +240,11 @@ public class CvocConceptResource
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/relatedBy")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            return streamingList(concept.getRelatedByConcepts(), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingList(concept.getRelatedByConcepts());
+            tx.success();
+            return response;
         }
     }
 
@@ -272,7 +264,7 @@ public class CvocConceptResource
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> related)
             throws AccessDenied, PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .addRelatedConcepts(id, related));
             tx.success();
@@ -296,7 +288,7 @@ public class CvocConceptResource
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> related)
             throws AccessDenied, PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .removeRelatedConcepts(id, related));
             tx.success();

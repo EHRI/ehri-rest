@@ -81,7 +81,7 @@ public class AdminResource extends AbstractResource {
     @Path("export-graphson")
     public Response getGraphSON() throws Exception {
         return Response.ok((StreamingOutput) stream -> {
-            try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            try (final Tx tx = beginTx()) {
                 Accessor accessor = getRequesterUserProfile();
                 AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
                 GraphSONWriter.outputGraph(aclGraph, stream, GraphSONMode.EXTENDED);
@@ -95,7 +95,7 @@ public class AdminResource extends AbstractResource {
     @Path("export-json")
     public Response exportNodes() throws Exception {
         return Response.ok((StreamingOutput) stream -> {
-            try (final Tx tx = graph.getBaseGraph().beginTx()) {
+            try (final Tx tx = beginTx()) {
                 Accessor accessor = getRequesterUserProfile();
                 AclGraph<?> aclGraph = new AclGraph<Graph>(graph.getBaseGraph(), accessor);
                 JsonDataExporter.outputGraph(aclGraph, stream);
@@ -118,7 +118,7 @@ public class AdminResource extends AbstractResource {
     @Path("create-default-user-profile")
     public Response createDefaultUserProfile(String jsonData,
             @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             String ident = getNextDefaultUserId();
             Bundle bundle = Bundle.Builder.withClass(EntityClass.USER_PROFILE)
                     .addDataValue(Ontology.IDENTIFIER_KEY, ident)

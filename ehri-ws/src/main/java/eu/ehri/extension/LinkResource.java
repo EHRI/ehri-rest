@@ -84,7 +84,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ItemNotFound, ValidationError, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -116,7 +116,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             if (source == null || target == null) {
                 throw new DeserializationError("Both source and target must be provided");
             }
@@ -134,7 +134,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }

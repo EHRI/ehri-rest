@@ -105,7 +105,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
             Bundle bundle)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, SerializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             if (id == null) {
                 throw new DeserializationError("Target must be provided");
             }
@@ -123,7 +123,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ItemNotFound, ValidationError, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response response = updateItem(id, bundle);
             tx.success();
             return response;
@@ -135,7 +135,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }

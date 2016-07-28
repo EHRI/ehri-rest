@@ -144,7 +144,7 @@ public class ImportResource extends AbstractResource {
             throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             // Get the current user from the Authorization header and the scope
             // from the query params...
             UserProfile user = getCurrentUser();
@@ -232,7 +232,7 @@ public class ImportResource extends AbstractResource {
             throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler
                     = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
@@ -331,7 +331,7 @@ public class ImportResource extends AbstractResource {
             throws ItemNotFound, ValidationError,
             IOException, DeserializationError {
 
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Class<? extends AbstractImporter> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
@@ -384,7 +384,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
             @QueryParam(LOG_PARAM) String logMessage, InputStream inputStream)
             throws IOException, ItemNotFound, ValidationError, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = getCurrentUser();
             PermissionScope scope = scopeId != null
                     ? manager.getEntity(scopeId, PermissionScope.class)
@@ -417,7 +417,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(ID_PARAM) List<String> ids)
             throws IOException, ItemNotFound, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = getCurrentUser();
             PermissionScope scope = scopeId != null
                     ? manager.getEntity(scopeId, PermissionScope.class)

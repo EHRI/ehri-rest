@@ -61,7 +61,7 @@ public class PermissionGrantResource extends AbstractResource implements DeleteR
     @Path("{id:[^/]+}")
     @Override
     public Response get(@PathParam("id") String id) throws ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             PermissionGrant grant = manager.getEntity(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class);
             Response response = single(grant);
@@ -81,7 +81,7 @@ public class PermissionGrantResource extends AbstractResource implements DeleteR
     @Path("{id:[^/]+}")
     @Override
     public void delete(@PathParam("id") String id) throws ItemNotFound, PermissionDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             api().acl().revokePermissionGrant(manager.getEntity(id,
                     EntityClass.PERMISSION_GRANT, PermissionGrant.class));
             tx.success();

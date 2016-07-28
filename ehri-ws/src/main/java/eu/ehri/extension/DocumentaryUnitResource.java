@@ -93,16 +93,14 @@ public class DocumentaryUnitResource
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             DocumentaryUnit parent = manager.getEntity(id, DocumentaryUnit.class);
             Iterable<DocumentaryUnit> units = all
                     ? parent.getAllChildren()
                     : parent.getChildren();
-            return streamingPage(getQuery().page(units, cls), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery().page(units, cls));
+            tx.success();
+            return response;
         }
     }
 
@@ -114,7 +112,7 @@ public class DocumentaryUnitResource
     public Response update(@PathParam("id") String id,
             Bundle bundle) throws PermissionDenied,
             ValidationError, DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response response = updateItem(id, bundle);
             tx.success();
             return response;
@@ -126,7 +124,7 @@ public class DocumentaryUnitResource
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -141,7 +139,7 @@ public class DocumentaryUnitResource
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final DocumentaryUnit parent = api().detail(id, cls);
             Response resource = createItem(bundle, accessors,
                     parent::addChild,
@@ -166,7 +164,7 @@ public class DocumentaryUnitResource
     public Response exportEad(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             DocumentaryUnit unit = api().detail(id, cls);
             EadExporter eadExporter = new Ead2002Exporter(graph, api());
             final Document document = eadExporter.export(unit, lang);
