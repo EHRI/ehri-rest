@@ -92,7 +92,7 @@ public class GroupResource
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Api.Acl acl = api().acl();
             final Set<Accessor> groupMembers = Sets.newHashSet();
             for (String member : members) {
@@ -117,7 +117,7 @@ public class GroupResource
     @Override
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -132,7 +132,7 @@ public class GroupResource
     public void addMember(@PathParam("id") String id,
             @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
             api().acl().addAccessorToGroup(group, accessor);
@@ -147,7 +147,7 @@ public class GroupResource
     @Path("{id:[^/]+}/{aid:[^/]+}")
     public void removeMember(@PathParam("id") String id, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getEntity(aid, Accessor.class);
             api().acl().removeAccessorFromGroup(group, accessor);
@@ -165,17 +165,15 @@ public class GroupResource
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
             Iterable<Accessible> members = all
                     ? group.getAllUserProfileMembers()
                     : group.getMembersAsEntities();
-            return streamingPage(getQuery()
-                    .page(members, Accessible.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(members, Accessible.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -184,7 +182,7 @@ public class GroupResource
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }

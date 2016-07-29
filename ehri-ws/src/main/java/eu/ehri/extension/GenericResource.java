@@ -22,7 +22,6 @@ package eu.ehri.extension;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Charsets;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
@@ -77,6 +76,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Provides a means of fetching items and lists of items
@@ -115,30 +116,26 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response list(@QueryParam("id") List<String> ids,
             @QueryParam("gid") List<Long> gids) throws ItemNotFound {
 
-        Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (Tx tx = beginTx()) {
             for (Long id : gids) {
                 if (graph.getVertex(id) == null) {
                     throw new ItemNotFound(String.valueOf(id));
                 }
             }
 
-            FluentIterable<Vertex> verticesByGids = FluentIterable
-                    .from(gids)
-                    .transform(graph::getVertex);
+            Stream<Vertex> verticesByGids = gids.stream().map(graph::getVertex);
 
             // Object a lazily-computed view of the ids->vertices...
             Iterable<Vertex> verticesByIds = manager.getVertices(ids);
-            Iterable<Vertex> allVertices = Iterables.concat(verticesByIds, verticesByGids);
+            Iterable<Vertex> allVertices = Iterables.concat(verticesByIds, verticesByGids.collect(Collectors.toList()));
 
             PipeFunction<Vertex, Boolean> filter = AclManager
                     .getAclFilterFunction(getRequesterUserProfile());
             GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(allVertices)
                     .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-            return streamingVertexList(filtered, getSerializer(), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingVertexList(filtered);
+            tx.success();
+            return response;
         }
     }
 
@@ -171,7 +168,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}")
     public Response get(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Vertex item = manager.getVertex(id);
 
             // If the item doesn't exist or isn't a content type throw 404
@@ -201,14 +198,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + ACCESS)
     public Response visibility(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, SerializationError {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Accessible item = manager.getEntity(id, Accessible.class);
             Iterable<Accessor> accessors = item.getAccessors();
-            return streamingList(accessors, tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingList(accessors);
+            tx.success();
+            return response;
         }
     }
 
@@ -228,7 +223,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessible item = api().detail(id, Accessible.class);
             Accessor current = getRequesterUserProfile();
             Set<Accessor> accessors = getAccessors(accessorIds, current);
@@ -252,7 +247,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + PROMOTE)
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().promote(id));
             tx.success();
             return item;
@@ -275,7 +270,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + PROMOTE)
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response response = single(api().removePromotion(id));
             tx.success();
             return response;
@@ -295,7 +290,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + DEMOTE)
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().demote(id));
             tx.success();
             return item;
@@ -318,7 +313,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + DEMOTE)
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response item = single(api().removeDemotion(id));
             tx.success();
             return item;
@@ -340,15 +335,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @PathParam("id") String id,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Accessible item = api().detail(id, Accessible.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            return streamingListOfLists(eventsApi.aggregateForItem(item), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingListOfLists(eventsApi.aggregateForItem(item));
+            tx.success();
+            return response;
         }
     }
 
@@ -364,15 +357,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + ANNOTATIONS)
     public Response annotations(
             @PathParam("id") String id) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Annotatable entity = manager.getEntity(id, Annotatable.class);
-            return streamingPage(getQuery().page(
+            Response response = streamingPage(getQuery().page(
                     entity.getAnnotations(),
-                    Annotation.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+                    Annotation.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -387,15 +378,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/" + LINKS)
     public Response links(@PathParam("id") String id) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Linkable entity = manager.getEntity(id, Linkable.class);
-            return streamingPage(getQuery().page(
+            Response response = streamingPage(getQuery().page(
                     entity.getLinks(),
-                    Link.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+                    Link.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -411,15 +400,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + PERMISSION_GRANTS)
     public Response permissionGrants(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             PermissionGrantTarget target = manager.getEntity(id, PermissionGrantTarget.class);
-            return streamingPage(getQuery()
+            Response response = streamingPage(getQuery()
                     .page(target.getPermissionGrants(),
-                            PermissionGrant.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+                            PermissionGrant.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -434,15 +421,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/" + SCOPE_PERMISSION_GRANTS)
     public Response permissionGrantsAsScope(@PathParam("id") String id)
             throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
-            return streamingPage(getQuery()
+            Response response = streamingPage(getQuery()
                     .page(scope.getPermissionGrants(),
-                            PermissionGrant.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+                            PermissionGrant.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -464,7 +449,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response createDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Described item = api().detail(id, Described.class);
             Description desc = api().createDependent(id, bundle,
                     Description.class, getLogMessage());
@@ -495,7 +480,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response updateDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, SerializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Described item = api().detail(id, Described.class);
             Mutation<Description> desc = api().updateDependent(id, bundle,
                     Description.class, getLogMessage());
@@ -545,7 +530,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public void deleteDescription(
             @PathParam("id") String id, @PathParam("did") String did)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             api().deleteDependent(id, did, getLogMessage());
             tx.success();
         } catch (SerializationError serializationError) {
@@ -573,7 +558,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response createAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Described item = api().detail(id, Described.class);
             Description desc = api().detail(did, Description.class);
             AccessPoint rel = api().createDependent(id, bundle,
@@ -599,14 +584,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @GET
     @Path("{id:[^/]+}/" + VERSIONS)
     public Response listVersions(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Versioned item = api().detail(id, Versioned.class);
-            return streamingPage(getQuery().setStream(true)
-                    .page(item.getAllPriorVersions(), Version.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery().setStream(true)
+                    .page(item.getAllPriorVersions(), Version.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -629,7 +612,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             api().deleteDependent(id, apid, getLogMessage());
             tx.success();
         } catch (SerializationError serializationError) {
@@ -643,7 +626,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @PathParam("id") String id,
             @QueryParam("lang") String langCode)
             throws AccessDenied, ItemNotFound, IOException {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Described item = api().detail(id, Described.class);
             DublinCoreExporter exporter = new DublinCore11Exporter(graph, api());
             Document doc = exporter.export(item, langCode);
@@ -662,10 +645,10 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private static class IdSet {
-        public final List<String> ids;
-        public final List<Long> gids;
+        final List<String> ids;
+        final List<Long> gids;
 
-        public IdSet(List<String> ids, List<Long> gids) {
+        IdSet(List<String> ids, List<Long> gids) {
             this.ids = ids;
             this.gids = gids;
         }

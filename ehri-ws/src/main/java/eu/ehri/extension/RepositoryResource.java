@@ -95,16 +95,14 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Repository repository = api().detail(id, cls);
             Iterable<DocumentaryUnit> units = all
                     ? repository.getAllDocumentaryUnits()
                     : repository.getTopLevelDocumentaryUnits();
-            return streamingPage(getQuery().page(units, DocumentaryUnit.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery().page(units, DocumentaryUnit.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -116,7 +114,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Response response = updateItem(id, bundle);
             tx.success();
             return response;
@@ -128,7 +126,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -154,7 +152,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             final Repository repository = api().detail(id, cls);
             Response response = createItem(bundle, accessors,
                     repository::addTopLevelDocumentaryUnit,
@@ -179,7 +177,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public Response exportEag(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Repository repo = api().detail(id, cls);
             EagExporter eagExporter = new Eag2012Exporter(graph, api());
             final Document document = eagExporter.export(repo, lang);
@@ -210,15 +208,12 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public Response exportEad(@PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             final Repository repo = api().detail(id, cls);
             final EadExporter eadExporter = new Ead2002Exporter(graph, api());
-            return exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang, tx);
-        } catch (Exception e) {
-            tx.failure();
-            tx.close();
-            throw e;
+            Response response = exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang);
+            tx.success();
+            return response;
         }
     }
 }

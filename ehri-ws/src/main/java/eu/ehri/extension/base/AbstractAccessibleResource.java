@@ -117,12 +117,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @return a list of entities
      */
     public Response listItems() {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
-            return streamingPage(getQuery().page(cls), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+        try (final Tx tx = beginTx()) {
+            Response response = streamingPage(getQuery().page(cls));
+            tx.success();
+            return response;
         }
     }
 
@@ -199,7 +197,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @throws ItemNotFound
      */
     public Response getItem(String id) throws ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             E entity = api().detail(id, cls);
             if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
                 throw new ItemNotFound(id);
@@ -292,29 +290,23 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     // Helpers
 
-    protected <T extends Entity> Response exportItemsAsZip(XmlExporter<T> exporter,
-            Iterable<T> items, String lang, final Tx tx) throws IOException {
-        if (isHeadRequest()) {
-            tx.close();
-            return Response.noContent().build();
-        } else {
-            return Response.ok((StreamingOutput) outputStream -> {
-                try (ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-                    for (T item : items) {
-                        ZipEntry zipEntry = new ZipEntry(item.getId() + ".xml");
-                        zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
-                        zos.putNextEntry(zipEntry);
-                        exporter.export(item, zos, lang);
-                        zos.closeEntry();
-                    }
-                    tx.success();
-                } catch (TransformerException e) {
-                    throw new WebApplicationException(e);
-                } finally {
-                    tx.close();
+    protected <T extends Entity> Response exportItemsAsZip(XmlExporter<T> exporter, Iterable<T> items, String lang)
+            throws IOException {
+        return Response.ok((StreamingOutput) outputStream -> {
+            try (final Tx tx = beginTx();
+                 ZipOutputStream zos = new ZipOutputStream(outputStream)) {
+                for (T item : items) {
+                    ZipEntry zipEntry = new ZipEntry(item.getId() + ".xml");
+                    zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
+                    zos.putNextEntry(zipEntry);
+                    exporter.export(item, zos, lang);
+                    zos.closeEntry();
                 }
-            }).type("application/zip").build();
-        }
+                tx.success();
+            } catch (TransformerException e) {
+                throw new WebApplicationException(e);
+            }
+        }).type("application/zip").build();
     }
 
     /**

@@ -139,7 +139,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
             throws ItemNotFound, ValidationError,
             PermissionDenied, DeserializationError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             UserProfile user = getCurrentUser();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
             Vocabulary vocabulary = manager.getEntity(vocabularyId, Vocabulary.class);
@@ -188,7 +188,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessible item = manager.getEntity(id, Accessible.class);
             Optional<List<String>> remap = new IdRegenerator(graph)
                     .withActualRename(commit)
@@ -230,7 +230,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, IdRegenerator.IdCollisionError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             EntityClass entityClass = EntityClass.withName(type);
             try (CloseableIterable<Accessible> frames = manager
                     .getEntities(entityClass, Accessible.class)) {
@@ -276,7 +276,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
             List<List<String>> lists = new IdRegenerator(graph)
                     .withActualRename(commit)
@@ -306,7 +306,7 @@ public class ToolsResource extends AbstractResource {
                 .REPOSITORY_DESCRIPTION};
         Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
         int done = 0;
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             for (EntityClass entityClass : types) {
                 try (CloseableIterable<Description> descriptions = manager.getEntities(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
@@ -346,7 +346,7 @@ public class ToolsResource extends AbstractResource {
     public String setLabels()
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         long done = 0;
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             for (Vertex v : graph.getVertices()) {
                 try {
                     ((Neo4jGraphManager) manager).setLabels(v);
@@ -370,7 +370,7 @@ public class ToolsResource extends AbstractResource {
     @Produces("text/plain")
     @Path("set-constraints")
     public void setConstraints() {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             logger.info("Initializing graph schema...");
             manager.initialize();
             tx.success();
@@ -382,7 +382,7 @@ public class ToolsResource extends AbstractResource {
     @Path("upgrade-1to2")
     public String upgradeDb1to2() throws IOException {
         final AtomicInteger done = new AtomicInteger();
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             logger.info("Upgrading DB schema...");
             DbUpgrader1to2 upgrader1to2 = new DbUpgrader1to2(graph, () -> {
                 if (done.getAndIncrement() % 100000 == 0) {
@@ -407,7 +407,7 @@ public class ToolsResource extends AbstractResource {
         upgradeDb1to2();
         setLabels();
         setConstraints();
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             new DbUpgrader1to2(graph, () -> {
             }).setDbSchemaVersion();
             tx.success();

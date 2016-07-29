@@ -90,14 +90,12 @@ public class CountryResource
     @Override
     public Response listChildren(@PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Country country = api().detail(id, cls);
-            return streamingPage(getQuery()
-                    .page(country.getRepositories(), Repository.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(country.getRepositories(), Repository.class));
+            tx.success();
+            return response;
         }
     }
 
@@ -108,7 +106,7 @@ public class CountryResource
     public Response create(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             Response item = createItem(bundle, accessors);
             tx.success();
             return item;
@@ -123,7 +121,7 @@ public class CountryResource
     public Response update(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
@@ -135,7 +133,7 @@ public class CountryResource
     @Override
     public void delete(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
         }
@@ -161,7 +159,7 @@ public class CountryResource
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
-        try (Tx tx = graph.getBaseGraph().beginTx()) {
+        try (Tx tx = beginTx()) {
             final Country country = api().detail(id, cls);
             Response item = createItem(bundle, accessors,
                     repository -> repository.setCountry(country),
@@ -188,15 +186,12 @@ public class CountryResource
             @PathParam("id") String id,
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             final Country country = api().detail(id, cls);
             final EagExporter eagExporter = new Eag2012Exporter(graph, api());
-            return exportItemsAsZip(eagExporter, country.getRepositories(), lang, tx);
-        } catch (Exception e) {
-            tx.failure();
-            tx.close();
-            throw e;
+            Response response = exportItemsAsZip(eagExporter, country.getRepositories(), lang);
+            tx.success();
+            return response;
         }
     }
 }

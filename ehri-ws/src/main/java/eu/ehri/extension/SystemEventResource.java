@@ -109,14 +109,12 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     @Produces(MediaType.APPLICATION_JSON)
     public Response list(
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation) {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            return streamingListOfLists(eventsApi.aggregate(), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingListOfLists(eventsApi.aggregate());
+            tx.success();
+            return response;
         }
     }
 
@@ -132,16 +130,14 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     @Path("{id:[^/]+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             SystemEvent event = api().detail(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...
-            return streamingPage(getQuery()
-                    .page(event.getSubjects(), Accessible.class),
-                        getSerializer().withDepth(1).withCache(), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                            .page(event.getSubjects(), Accessible.class),
+                    getSerializer().withDepth(1).withCache());
+            tx.success();
+            return response;
         }
     }
 }

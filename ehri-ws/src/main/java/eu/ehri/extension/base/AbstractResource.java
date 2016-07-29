@@ -28,7 +28,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
@@ -160,6 +159,15 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     public FramedGraph<? extends TxGraph> getGraph() {
         return graph;
+    }
+
+    /**
+     * Open a transaction on the graph.
+     *
+     * @return the transaction object
+     */
+    protected Tx beginTx() {
+        return graph.getBaseGraph().beginTx();
     }
 
     /**
@@ -347,56 +355,10 @@ public abstract class AbstractResource implements TxCheckedResource {
      * Stream a single page with total, limit, and offset info.
      *
      * @param page A page of data
-     * @param tx   the current transaction
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingPage(QueryApi.Page<T> page, Tx tx) {
-        return streamingPage(page, getSerializer(), tx);
-    }
-
-    protected boolean isHeadRequest() {
-        return request.getMethod().equalsIgnoreCase("HEAD");
-    }
-
-    /**
-     * An abstraction class that handles streaming responses that
-     * need to manage a transaction.
-     * <p>
-     * We cannot just return a regular StreamingResponse here
-     * because then HEAD requests will leak the transaction.
-     */
-    abstract class TransactionalStreamWrapper {
-        protected final Tx tx;
-
-        public TransactionalStreamWrapper(final Tx tx) {
-            this.tx = tx;
-        }
-
-        protected Map<String, Object> getHeaders() {
-            return Maps.newHashMap();
-        }
-
-        abstract StreamingOutput getStreamingOutput();
-
-        public Response getResponse() {
-            if (isHeadRequest()) {
-                try {
-                    Response.ResponseBuilder r = Response.ok();
-                    for (Map.Entry<String, Object> entry : getHeaders().entrySet()) {
-                        r = r.header(entry.getKey(), entry.getValue());
-                    }
-                    return r.build();
-                } finally {
-                    tx.close();
-                }
-            } else {
-                Response.ResponseBuilder r = Response.ok(getStreamingOutput());
-                for (Map.Entry<String, Object> entry : getHeaders().entrySet()) {
-                    r = r.header(entry.getKey(), entry.getValue());
-                }
-                return r.build();
-            }
-        }
+    protected <T extends Entity> Response streamingPage(QueryApi.Page<T> page) {
+        return streamingPage(page, getSerializer());
     }
 
     /**
@@ -405,12 +367,34 @@ public abstract class AbstractResource implements TxCheckedResource {
      *
      * @param page       a page of data
      * @param serializer a custom serializer instance
-     * @param tx         the current transaction
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingPage(
-            final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
-        return getStreamingJsonOutput(page, serializer, tx).getResponse();
+            final QueryApi.Page<T> page, final Serializer serializer) {
+        return streamingList(page.getIterable(), serializer, streamingResponseBuilder(page));
+    }
+
+    /**
+     * Stream an iterable of vertices.
+     *
+     * @param vertices an iterable of vertices
+     *
+     * @return a streaming response
+     */
+    protected Response streamingVertexList(Iterable<Vertex> vertices) {
+        return streamingVertexList(vertices, getSerializer());
+    }
+
+    /**
+     * Stream an iterable of vertices.
+     *
+     * @param vertices an iterable of vertices
+     * @param serializer a serializer instance
+     *
+     * @return a streaming response
+     */
+    protected Response streamingVertexList(Iterable<Vertex> vertices, Serializer serializer) {
+        return streamingVertexList(vertices, serializer, Response.ok());
     }
 
     /**
@@ -419,21 +403,18 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param list A list of framed items
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingList(
-            Iterable<T> list, Tx tx) {
-        return streamingList(list, getSerializer(), tx);
+    protected <T extends Entity> Response streamingList(Iterable<T> list) {
+        return streamingList(list, getSerializer());
     }
 
     /**
      * Return a streaming response from an iterable of item lists.
      *
      * @param lists an iterable of item groups
-     * @param tx    the transaction
      * @return a streaming response
      */
-    protected <T extends Entity> Response streamingListOfLists(
-            Iterable<? extends Collection<T>> lists, Tx tx) {
-        return getStreamingJsonGroupOutput(lists, getSerializer(), tx);
+    protected <T extends Entity> Response streamingListOfLists(Iterable<? extends Collection<T>> lists) {
+        return streamingGroup(lists, getSerializer(), Response.ok());
     }
 
     /**
@@ -443,45 +424,8 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param list A list of framed items
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingList(
-            Iterable<T> list, Serializer serializer, Tx tx) {
-        return getStreamingJsonOutput(list, serializer, tx)
-                .getResponse();
-    }
-
-    /**
-     * Return a streaming response from an iterable, using the given
-     * entity converter.
-     *
-     * @param list       an iterable of vertices
-     * @param serializer a serializer object
-     * @return a streaming response
-     */
-    protected Response streamingVertexList(
-            final Iterable<Vertex> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(tx) {
-            @Override
-            StreamingOutput getStreamingOutput() {
-                final Serializer cacheSerializer = serializer.withCache();
-                return stream -> {
-                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                        g.writeStartArray();
-                        for (Vertex item : list) {
-                            jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));
-                            g.writeRaw('\n');
-                        }
-                        g.writeEndArray();
-
-                        tx.success();
-                    } catch (SerializationError e) {
-                        tx.failure();
-                        throw new RuntimeException(e);
-                    } finally {
-                        tx.close();
-                    }
-                };
-            }
-        }.getResponse();
+    protected <T extends Entity> Response streamingList(Iterable<T> list, Serializer serializer) {
+        return streamingList(list, serializer, Response.ok());
     }
 
     /**
@@ -554,105 +498,80 @@ public abstract class AbstractResource implements TxCheckedResource {
         }
     }
 
-    private abstract class TransactionalPageStreamWrapper<T> extends TransactionalStreamWrapper {
-        protected final QueryApi.Page<T> page;
-
-        public TransactionalPageStreamWrapper(final QueryApi.Page<T> page, final Tx tx) {
-            super(tx);
-            this.page = page;
+    private Response.ResponseBuilder streamingResponseBuilder(QueryApi.Page<?> page) {
+        Response.ResponseBuilder builder = Response.ok();
+        for (Map.Entry<String, Object> entry : getHeaders(page).entrySet()) {
+            builder = builder.header(entry.getKey(), entry.getValue());
         }
-
-        protected Map<String, Object> getHeaders() {
-            return ImmutableMap.<String, Object>of(
-                    RANGE_HEADER_NAME,
-                    String.format("offset=%d; limit=%d; total=%d",
-                            page.getOffset(), page.getLimit(), page.getTotal()));
-        }
+        return builder;
     }
 
-    private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
-            final Iterable<T> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(tx) {
-            @Override
-            StreamingOutput getStreamingOutput() {
-                final Serializer cacheSerializer = serializer.withCache();
-                return stream -> {
-                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                        g.writeStartArray();
-                        for (T item : list) {
-                            g.writeRaw('\n');
-                            jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
-                        }
-                        g.writeEndArray();
-                        tx.success();
-                    } catch (SerializationError e) {
-                        e.printStackTrace();
-                        tx.failure();
-                        throw new RuntimeException(e);
-                    } finally {
-                        tx.close();
-                    }
-                };
-            }
-        };
+    private Map<String, Object> getHeaders(QueryApi.Page<?> page) {
+        return ImmutableMap.<String, Object>of(
+                RANGE_HEADER_NAME,
+                String.format("offset=%d; limit=%d; total=%d",
+                        page.getOffset(), page.getLimit(), page.getTotal()));
     }
 
-    private <T extends Entity> TransactionalStreamWrapper getStreamingJsonOutput(
-            final QueryApi.Page<T> page, final Serializer serializer, final Tx tx) {
-        return new TransactionalPageStreamWrapper<T>(page, tx) {
-            @Override
-            public StreamingOutput getStreamingOutput() {
-                final Serializer cacheSerializer = serializer.withCache();
-                return stream -> {
-                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                        g.writeStartArray();
-                        for (T item : page.getIterable()) {
-                            jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
-                            g.writeRaw('\n');
-                        }
-                        g.writeEndArray();
-
-                        tx.success();
-                    } catch (SerializationError e) {
-                        tx.failure();
-                        throw new RuntimeException(e);
-                    } finally {
-                        tx.close();
-                    }
-                };
+    private <T extends Entity> Response streamingVertexList(
+            Iterable<Vertex> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+        return responseBuilder.entity((StreamingOutput) outputStream -> {
+            final Serializer cacheSerializer = serializer.withCache();
+            try (Tx tx = beginTx();
+                 JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
+                g.writeStartArray();
+                for (Vertex item : page) {
+                    g.writeRaw('\n');
+                    jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));
+                }
+                g.writeEndArray();
+                tx.success();
+            } catch (SerializationError e) {
+                throw new RuntimeException(e);
             }
-        };
+        }).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    private <T extends Entity> Response getStreamingJsonGroupOutput(
-            final Iterable<? extends Collection<T>> list, final Serializer serializer, final Tx tx) {
-        return new TransactionalStreamWrapper(tx) {
-            @Override
-            StreamingOutput getStreamingOutput() {
-                final Serializer cacheSerializer = serializer.withCache();
-                return stream -> {
-                    try (JsonGenerator g = jsonFactory.createGenerator(stream)) {
-                        g.writeStartArray();
-                        for (Collection<T> collect : list) {
-                            g.writeStartArray();
-                            for (T item : collect) {
-                                jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
-                            }
-                            g.writeEndArray();
-                            g.writeRaw('\n');
-                        }
-                        g.writeEndArray();
-
-                        tx.success();
-                    } catch (SerializationError e) {
-                        e.printStackTrace();
-                        tx.failure();
-                        throw new RuntimeException(e);
-                    } finally {
-                        tx.close();
-                    }
-                };
+    private <T extends Entity> Response streamingList(
+            Iterable<T> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+        return responseBuilder.entity((StreamingOutput) outputStream -> {
+            final Serializer cacheSerializer = serializer.withCache();
+            try (Tx tx = beginTx();
+                 JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
+                g.writeStartArray();
+                for (T item : page) {
+                    g.writeRaw('\n');
+                    jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
+                }
+                g.writeEndArray();
+                tx.success();
+            } catch (SerializationError e) {
+                throw new RuntimeException(e);
             }
-        }.getResponse();
+        }).type(MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
+    private <T extends Entity> Response streamingGroup(
+            Iterable<? extends Collection<T>> groups, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+        return responseBuilder.entity((StreamingOutput) outputStream -> {
+            final Serializer cacheSerializer = serializer.withCache();
+            try (Tx tx = beginTx();
+                 JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
+                g.writeStartArray();
+                for (Collection<T> collect : groups) {
+                    g.writeStartArray();
+                    for (T item : collect) {
+                        jsonMapper.writeValue(g, cacheSerializer.entityToData(item));
+                    }
+                    g.writeEndArray();
+                    g.writeRaw('\n');
+                }
+                g.writeEndArray();
+
+                tx.success();
+            } catch (SerializationError e) {
+                throw new RuntimeException(e);
+            }
+        }).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

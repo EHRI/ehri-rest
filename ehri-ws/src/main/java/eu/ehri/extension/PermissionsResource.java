@@ -81,7 +81,7 @@ public class PermissionsResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public InheritedGlobalPermissionSet getGlobalMatrix() throws PermissionDenied,
             ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             InheritedGlobalPermissionSet matrix = getGlobalMatrix(getRequesterUserProfile().getId());
             tx.success();
             return matrix;
@@ -101,7 +101,7 @@ public class PermissionsResource extends AbstractResource {
     @Path("{userOrGroup:[^/]+}")
     public InheritedGlobalPermissionSet getGlobalMatrix(@PathParam("userOrGroup") String userId)
             throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             InheritedGlobalPermissionSet set = api()
                     .aclManager()
@@ -127,7 +127,7 @@ public class PermissionsResource extends AbstractResource {
     public InheritedGlobalPermissionSet setGlobalMatrix(
             @PathParam("userOrGroup") String userId,
             GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             InheritedGlobalPermissionSet newPerms
                     = api().acl().setGlobalPermissionMatrix(accessor, globals);
@@ -151,7 +151,7 @@ public class PermissionsResource extends AbstractResource {
     public InheritedItemPermissionSet getEntityMatrix(
             @PathParam("userOrGroup") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             Accessible entity = manager.getEntity(id, Accessible.class);
             AclManager acl = api().withScope(entity.getPermissionScope()).aclManager();
@@ -178,7 +178,7 @@ public class PermissionsResource extends AbstractResource {
             @PathParam("userOrGroup") String userId,
             @PathParam("id") String id,
             ItemPermissionSet itemPerms) throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             Accessible item = manager.getEntity(id, Accessible.class);
             InheritedItemPermissionSet set = api().acl()
@@ -201,7 +201,7 @@ public class PermissionsResource extends AbstractResource {
     @Path("{userOrGroup:[^/]+}/scope/{id:[^/]+}")
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userOrGroup") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
             InheritedGlobalPermissionSet set = api()
@@ -231,7 +231,7 @@ public class PermissionsResource extends AbstractResource {
             @PathParam("userOrGroup") String userId,
             @PathParam("id") String id,
             GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
-        try (final Tx tx = graph.getBaseGraph().beginTx()) {
+        try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
             InheritedGlobalPermissionSet matrix = api()
@@ -254,14 +254,12 @@ public class PermissionsResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userOrGroup:[^/]+}/" + GenericResource.PERMISSION_GRANTS)
     public Response listPermissionGrants(@PathParam("userOrGroup") String id) throws ItemNotFound {
-        final Tx tx = graph.getBaseGraph().beginTx();
-        try {
+        try (final Tx tx = beginTx()) {
             Accessor user = manager.getEntity(id, Accessor.class);
-            return streamingPage(getQuery()
-                    .page(user.getPermissionGrants(), PermissionGrant.class), tx);
-        } catch (Exception e) {
-            tx.close();
-            throw e;
+            Response response = streamingPage(getQuery()
+                    .page(user.getPermissionGrants(), PermissionGrant.class));
+            tx.success();
+            return response;
         }
     }
 }
