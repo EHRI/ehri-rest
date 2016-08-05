@@ -19,6 +19,8 @@
 
 package eu.ehri.extension;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -36,11 +38,13 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
@@ -62,7 +66,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -280,7 +287,6 @@ public class ToolsResource extends AbstractResource {
 
     /**
      * Regenerate description IDs.
-     *
      */
     @POST
     @Produces("text/plain")
@@ -402,6 +408,47 @@ public class ToolsResource extends AbstractResource {
         }
     }
 
+    /**
+     * Takes a CSV file containing a mapping from one item to
+     * another and moves changes the link target of anything linked
+     * to <code>from</code> to <code>to</code>.
+     *
+     * @param csvData a comma-separated TSV file, including headers, with
+     *                the first headers being 'from' and 'to'.
+     * @return CSV data with each row indicating the source, target, and how many items
+     * were relinked for each
+     */
+    @POST
+    @Produces("text/csv")
+    @Path("relink-targets")
+    public String relink(InputStream csvData) throws IOException, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            List<List<String>> done = Lists.newArrayList();
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
+            try (MappingIterator<Map<String, String>> valueIterator = reader
+                    .readValues(new InputStreamReader(csvData, "UTF-8"))) {
+                while (valueIterator.hasNext()) {
+                    Map<String, String> remap = valueIterator.next();
+                    String fromId = remap.get("from");
+                    String toId = remap.get("to");
+
+                    Linkable from = manager.getEntity(fromId, Linkable.class);
+                    Linkable to = manager.getEntity(toId, Linkable.class);
+                    int relinked = 0;
+                    for (Link link : from.getLinks()) {
+                        link.addLinkTarget(to);
+                        link.removeLinkTarget(from);
+                        relinked++;
+                    }
+                    done.add(Lists.newArrayList(fromId, toId, String.valueOf(relinked)));
+                }
+            }
+
+            tx.success();
+            return makeCsv(done);
+        }
+    }
 
     // Helpers
 

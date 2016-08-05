@@ -85,4 +85,14 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         // 1 Concept description
         assertEquals("13", out);
     }
+    
+    @Test
+    public void testRelinking() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "relink-targets"));
+        String data = "from,to,label\na1,a2,Test\n";
+        ClientResponse response = resource.entity(data).post(ClientResponse.class);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertEquals("a1,a2,2\n", out);
+    }
 }
