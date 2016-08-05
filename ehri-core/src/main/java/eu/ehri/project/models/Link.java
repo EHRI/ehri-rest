@@ -53,6 +53,9 @@ public interface Link extends Promotable, Temporal, Annotatable {
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
     void addLinkTarget(Linkable entity);
 
+    @Adjacency(label = Ontology.LINK_HAS_TARGET)
+    void removeLinkTarget(Linkable entity);
+
     @Fetch(Ontology.LINK_HAS_BODY)
     @Adjacency(label = Ontology.LINK_HAS_BODY)
     Iterable<Accessible> getLinkBodies();

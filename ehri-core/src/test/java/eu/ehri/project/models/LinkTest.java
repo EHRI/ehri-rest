@@ -24,6 +24,7 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -41,6 +42,15 @@ public class LinkTest extends AbstractFixtureTest {
         DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
         assertTrue(Iterables.contains(link.getLinkTargets(), c1));
         assertTrue(Iterables.contains(link.getLinkTargets(), c4));
+    }
+
+    @Test
+    public void testRemoveLinkTarget() throws Exception {
+        Link link = manager.getEntity("link1", Link.class);
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        assertTrue(Iterables.contains(link.getLinkTargets(), c1));
+        link.removeLinkTarget(c1);
+        assertFalse(Iterables.contains(link.getLinkTargets(), c1));
     }
 
     @Test

@@ -533,41 +533,40 @@
       - moderators
 
 --- # Links
- - id: link1
-   type: Link
-   data:
-     type: associative
-     body: Test link
-   relationships:
-     hasLinkTarget:
-      - c1
-      - c4
-     hasLinker: mike
+- id: link1
+  type: Link
+  data:
+    type: associative
+    body: Test link
+  relationships:
+    hasLinkTarget:
+     - c1
+     - c4
+    hasLinker: mike
 
- - id: link2
-   type: Link
-   data:
-     type: associative
-     body: Test access point link
-   relationships:
-     hasLinkTarget:
-      - c1
-      - a1
-     hasLinkBody: ur1
-     hasLinker: mike
+- id: link2
+  type: Link
+  data:
+    type: associative
+    body: Test access point link
+  relationships:
+    hasLinkTarget:
+     - c1
+     - a1
+    hasLinkBody: ur1
+    hasLinker: mike
 
- - id: link3
-   type: Link
-   data:
-     type: associative
-     body: Test access point link
-   relationships:
-     hasLinkTarget:
-      - c3
-      - a1
-     hasLinkBody: ur1
-     hasLinker: mike
-
+- id: link3
+  type: Link
+  data:
+    type: associative
+    body: Test access point link
+  relationships:
+    hasLinkTarget:
+     - c3
+     - a1
+    hasLinkBody: ur1
+    hasLinker: mike
 
 --- # Permission grants
 
