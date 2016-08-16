@@ -19,8 +19,8 @@ if [ ! -e $NEO4JPATH -o ! -d $NEO4JPATH ]; then
 fi
 
 
-if [ ! -e $NEO4JPATH/plugins -o ! -e $NEO4JPATH/system/lib ]; then
-    echo "Cannot detect 'plugins' or 'system/lib' directories in '$NEO4JPATH'. Are you sure this is the right dir?"
+if [ ! -e $NEO4JPATH/plugins -o ! -e $NEO4JPATH/data ]; then
+    echo "Cannot detect 'plugins' or 'data' directories in '$NEO4JPATH'. Are you sure this is the right dir?"
     exit 2
 fi
 
