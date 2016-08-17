@@ -1,0 +1,16 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+# Init script for Neo4j 3.x
+dir=/opt/webapps/neo4j-version/bin
+su -c "cd $dir && ./neo4j $1" -m neo4j
+
+exit 0

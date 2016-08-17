@@ -30,26 +30,23 @@ echo "Attempting package..."
 mvn clean package -P sparql  -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
 # find archive and untar it...
-archive=`ls assembly/target/assembly*tar.gz`
-if [ "$archive" == "" ]; then
-    echo "Error: archive not found in dist/target... aborting..."
+jar=`ls build/target/ehri-data-*.jar`
+if [ "$jar" == "" ]; then
+    echo "Error: uberjar not found in build/target... aborting..."
     exit 3
 fi
 
-echo "Extracting file: $archive"
-outpath=$NEO4JPATH/plugins/ehri
+outpath=$NEO4JPATH/plugins
 if [ -e $outpath ]; then
-    rm $outpath/*jar
-    rmdir --ignore-fail-on-non-empty $outpath
+    rm $outpath/ehri-data-*.jar
 fi
-mkdir -p $outpath
-tar -C $outpath -zxvf $archive
+cp $jar $outpath
 
-echo "EHRI libs installed..."
+echo "EHRI lib installed..."
 
 echo
-echo "IMPORTANT: You must manually ensure the $NEO4JPATH/conf/neo4j-server.properties configuration contains the line:"
-echo "   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri"
+echo "IMPORTANT: You must manually ensure the $NEO4JPATH/conf/neo4j.conf configuration contains the line:"
+echo "   dbms.unmanaged_extension_classes=eu.ehri.extension=/ehri"
 echo
 
 

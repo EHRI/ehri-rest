@@ -10,36 +10,63 @@
     <name>Packaging</name>
     <description>Packaging.</description>
 
-    <artifactId>assembly</artifactId>
-    <version>0.1</version>
+    <artifactId>build</artifactId>
 
     <properties>
         <maven-site-plugin.skip>true</maven-site-plugin.skip>
     </properties>
 
     <build>
+        <finalName>${parent.artifactId}-${parent.version}</finalName>
         <plugins>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/unix-dist.xml</descriptor>
-                    </descriptors>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <!-- this is used for inheritance merges -->
                         <phase>package</phase>
-                        <!-- bind to the packaging phase -->
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>ehri-project:*</include>
+                            <include>com.tinkerpop:*</include>
+                            <include>com.tinkerpop.*:*</include>
+                            <include>stax:stax-api</include>
+                            <include>org.javassist:javassist</include>
+                            <include>org.codehaus.jettison:jettison</include>
+                            <include>org.neo4j:neo4j-graphviz</include>
+                            <include>org.slf4j:slf4j-api</include>
+
+                            <!-- Additional EHRI deps -->
+                            <include>joda-time:joda-time</include>
+                            <include>org.yaml:snakeyaml</include>
+                            <include>com.fasterxml.uuid:*</include>
+                            <include>com.fasterxml.jackson.core:*</include>
+                            <include>com.fasterxml.jackson.dataformat:*</include>
+                            <include>com.google.guava:guava</include>
+                            <include>commons-cli:commons-cli</include>
+                            <include>org.apache.jena:*</include>
+                            <include>xerces:xercesImpl</include>
+                            <include>xml-apis:xml-apis</include>
+                            <include>org.apache.commons:commons-lang3</include>
+                            <include>org.apache.commons:commons-compress</include>
+
+                            <!-- Sparql/OpenRDF stuff that will be ignored if
+                             we're not building under the sparql profile -->
+                            <include>org.openrdf.sesame:sesame-queryalgebra-evaluation</include>
+                            <include>org.openrdf.*</include>
+                            <include>net.fortytwo.sesametools:*</include>
+                        </includes>
+                    </artifactSet>
+                </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
                 <configuration>
@@ -93,20 +120,6 @@
                     <version>0.13.5-SNAPSHOT</version>
                 </dependency>
             </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/unix-dist-sparql.xml</descriptor>
-                            </descriptors>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 </project>

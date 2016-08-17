@@ -108,7 +108,7 @@
         <module>ehri-io</module>
         <module>ehri-cli</module>
         <module>ehri-definitions</module>
-        <module>assembly</module>
+        <module>build</module>
     </modules>
 
     <properties>
