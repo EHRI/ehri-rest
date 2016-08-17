@@ -6,13 +6,13 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.4-SNAPSHOT</version>
+        <version>0.13.5-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-core</artifactId>
     <packaging>jar</packaging>
 
 
-    <version>0.13.4-SNAPSHOT</version>
+    <version>0.13.5-SNAPSHOT</version>
 
     <name>EHRI Core API</name>
     <description>Java API for data access and permissions.</description>
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

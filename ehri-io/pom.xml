@@ -4,10 +4,10 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.4-SNAPSHOT</version>
+        <version>0.13.5-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-io</artifactId>
-    <version>0.13.4-SNAPSHOT</version>
+    <version>0.13.5-SNAPSHOT</version>
 
     <name>Import/Export Tools</name>
     <description>Classes for importing and exporting data in various formats.</description>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
