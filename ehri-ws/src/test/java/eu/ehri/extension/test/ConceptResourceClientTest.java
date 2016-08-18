@@ -41,8 +41,8 @@ import static org.junit.Assert.assertTrue;
 
 
 public class ConceptResourceClientTest extends AbstractResourceClientTest {
-    static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
-    static final String TEST_CVOC_CONCEPT_ID = "cvocc1";
+    private static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
+    private static final String TEST_CVOC_CONCEPT_ID = "cvocc1";
 
     private String jsonApplesTestStr;
 
@@ -77,11 +77,6 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
 
     }
 
-    /**
-     * Add and remove narrower concept
-     *
-     * @throws Exception
-     */
     @Test
     public void testNarrowerCvocConcepts() throws Exception {
         String jsonFruitTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"fruit\"}}";
@@ -144,21 +139,13 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         assertFalse(containsIdentifier(response, "apple"));
     }
 
-    /**
-     * Add and remove related concept Similar to the narrower/broader
-     * 'relationships'
-     *
-     * @throws Exception
-     */
     @Test
     public void testRelatedCvocConcepts() throws Exception {
         String jsonTreeTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"tree\"}}";
         String jsonAppleTestStr = "{\"type\":\"CvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
 
-        ClientResponse response;
-
         // Create fruit
-        response = testCreateConcept(jsonTreeTestStr);
+        ClientResponse response = testCreateConcept(jsonTreeTestStr);
         // Get created entity via the response location
         URI treeLocation = response.getLocation();
 
@@ -239,7 +226,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
      * helpers **
      */
 
-    public boolean containsIdentifier(final ClientResponse response,
+    private boolean containsIdentifier(final ClientResponse response,
             final String idStr) throws IOException {
         String json = response.getEntity(String.class);
         JsonNode rootNode = jsonMapper.readTree(json);
@@ -252,7 +239,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         return testGet(url.toString());
     }
 
-    public ClientResponse testGet(String url) {
+    private ClientResponse testGet(String url) {
         WebResource resource = client.resource(url);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -263,7 +250,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         return response;
     }
 
-    public ClientResponse testDelete(URI url) {
+    private ClientResponse testDelete(URI url) {
         WebResource resource = client.resource(url);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -275,7 +262,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
         return response;
     }
 
-    public ClientResponse testCreateConcept(String json) {
+    private ClientResponse testCreateConcept(String json) {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
                 .entity(json)
@@ -294,6 +281,6 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
 
     private URI getCreationUri() {
         // always create Concepts under a Vocabulary
-        return entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, Entities.CVOC_CONCEPT);
+        return entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
     }
 }

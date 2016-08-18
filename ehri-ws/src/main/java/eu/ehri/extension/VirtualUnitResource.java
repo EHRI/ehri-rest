@@ -219,7 +219,7 @@ public final class VirtualUnitResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.VIRTUAL_UNIT)
+    @Path("{id:[^/]+}")
     public Response createChildVirtualUnit(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(ID_PARAM) List<String> includedIds)

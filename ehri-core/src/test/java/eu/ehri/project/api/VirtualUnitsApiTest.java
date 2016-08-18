@@ -22,6 +22,7 @@ package eu.ehri.project.api;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -63,9 +64,8 @@ public class VirtualUnitsApiTest extends AbstractFixtureTest {
     @Test
     public void testGetVirtualCollectionsForUser() throws Exception {
         VirtualUnit vc1 = manager.getEntity("vc1", VirtualUnit.class);
-        Accessor linda = manager.getEntity("linda", Accessor.class);
-        Iterable<VirtualUnit> virtualCollectionsForUser
-                = views(validUser).getVirtualCollectionsForUser(linda);
+        UserProfile linda = manager.getEntity("linda", UserProfile.class);
+        Iterable<VirtualUnit> virtualCollectionsForUser = linda.getVirtualUnits();
         assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForUser));
     }
 

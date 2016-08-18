@@ -21,8 +21,6 @@ package eu.ehri.project.api;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -48,14 +46,6 @@ import static org.junit.Assert.assertTrue;
 
 public class ApiLoggingTest extends AbstractFixtureTest {
 
-    /**
-     * Test updating an item.
-     *
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws IntegrityError
-     */
     @Test
     public void testUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
@@ -81,14 +71,6 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         assertEquals(desc.asVertex(), datePeriod.getEntity().asVertex());
     }
 
-    /**
-     * Test updating a user.
-     *
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws IntegrityError
-     */
     @Test
     public void testUserUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
@@ -135,15 +117,6 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         }
     }
 
-    /**
-     * Tests that deleting a collection will also delete its dependent
-     * relations. NB: This test will break of other @Dependent relations are
-     * added to DocumentaryUnit.
-     *
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws SerializationError
-     */
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError, ItemNotFound {

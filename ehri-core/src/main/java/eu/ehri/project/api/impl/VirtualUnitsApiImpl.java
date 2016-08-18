@@ -123,14 +123,4 @@ class VirtualUnitsApiImpl implements VirtualUnitsApi {
 
         return graph.frameVertices(out, VirtualUnit.class);
     }
-
-    @Override
-    public Iterable<VirtualUnit> getVirtualCollectionsForUser(Entity user) {
-        GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<>();
-        Pipeline<Vertex, Vertex> filtered = pipe.start(user.asVertex())
-                .in(Ontology.VC_HAS_AUTHOR)
-                .filter(AclManager.getAclFilterFunction(accessor));
-
-        return graph.frameVertices(filtered, VirtualUnit.class);
-    }
 }

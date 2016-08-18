@@ -39,10 +39,10 @@ import static org.junit.Assert.assertFalse;
 
 public class RepositoryResourceClientTest extends AbstractResourceClientTest {
 
-    static final String COUNTRY_CODE = "nl";
-    static final String ID = "r1";
-    static final String LIMITED_USER_NAME = "reto";
-    static final String UPDATED_NAME = "UpdatedNameTEST";
+    private static final String COUNTRY_CODE = "nl";
+    private static final String ID = "r1";
+    private static final String LIMITED_USER_NAME = "reto";
+    private static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String agentTestData;
     private String docTestData;
@@ -57,7 +57,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testCreateRepository() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE))
                 .entity(agentTestData)
                 .post(ClientResponse.class);
 
@@ -72,7 +72,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testCreateRepositoryWithExistingIdentifier() throws Exception {
         String json = Bundle.fromString(agentTestData)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
-        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY);
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 uri).entity(json)
                 .post(ClientResponse.class);
@@ -89,7 +89,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testUpdateRepositoryByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE))
                 .entity(agentTestData)
                 .post(ClientResponse.class);
         assertStatus(CREATED, response);
@@ -109,7 +109,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         // Create
         String badRepositoryTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE))
                 .entity(badRepositoryTestData)
                 .post(ClientResponse.class);
 
@@ -127,8 +127,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     public void testDeleteRepository() throws Exception {
         // Create
         URI uri = entityUri(Entities.REPOSITORY, ID);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                uri)
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
 
         assertStatus(NO_CONTENT, response);
@@ -209,6 +208,6 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     }
 
     private URI getCreationUriFor(String id) {
-        return entityUri(Entities.REPOSITORY, id, Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, id);
     }
 }

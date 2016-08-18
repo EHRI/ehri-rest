@@ -54,12 +54,12 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     private String jsonDocumentaryUnitTestStr;
     private String invalidJsonDocumentaryUnitTestStr;
     private String partialJsonDocumentaryUnitTestStr;
-    static final String UPDATED_NAME = "UpdatedNameTEST";
-    static final String PARTIAL_NAME = "PatchNameTest";
-    static final String TEST_JSON_IDENTIFIER = "c1";
-    static final String FIRST_DOC_ID = "c1";
-    static final String TEST_HOLDER_IDENTIFIER = "r1";
-    static final String CREATED_ID = "some-id";
+    private static final String UPDATED_NAME = "UpdatedNameTEST";
+    private static final String PARTIAL_NAME = "PatchNameTest";
+    private static final String TEST_JSON_IDENTIFIER = "c1";
+    private static final String FIRST_DOC_ID = "c1";
+    private static final String TEST_HOLDER_IDENTIFIER = "r1";
+    private static final String CREATED_ID = "some-id";
 
     @Before
     public void setUp() throws Exception {
@@ -120,7 +120,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     public void testCreateDeleteChildDocumentaryUnit() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, Entities.DOCUMENTARY_UNIT))
+                entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID))
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
@@ -357,7 +357,6 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     }
 
     private URI getCreationUri() {
-        return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER,
-                Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER);
     }
 }

@@ -19,9 +19,6 @@
 
 package eu.ehri.project.acl;
 
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.PermissionUtils;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.PermissionDenied;

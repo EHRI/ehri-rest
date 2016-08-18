@@ -81,9 +81,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
         String locationStr = location.getPath();
         String vocIdStr = locationStr.substring(locationStr.lastIndexOf('/') + 1);
 
-        response = testCreate(
-                entityUri(Entities.CVOC_VOCABULARY, vocIdStr, Entities.CVOC_CONCEPT),
-                jsonApplesTestStr);
+        response = testCreate(entityUri(Entities.CVOC_VOCABULARY, vocIdStr), jsonApplesTestStr);
         location = response.getLocation();
 
         response = testGet(location);

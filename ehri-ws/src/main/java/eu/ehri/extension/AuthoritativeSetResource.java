@@ -171,7 +171,7 @@ public class AuthoritativeSetResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.HISTORICAL_AGENT)
+    @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -195,8 +195,6 @@ public class AuthoritativeSetResource extends
      * @param id   the set ID
      * @param lang a three-letter ISO639-2 code
      * @return a zip containing the set's historical agents as EAC
-     * @throws IOException
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}/eac")
