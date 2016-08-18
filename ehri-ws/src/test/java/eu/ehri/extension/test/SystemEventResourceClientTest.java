@@ -44,7 +44,7 @@ import static org.junit.Assert.assertFalse;
 
 public class SystemEventResourceClientTest extends AbstractResourceClientTest {
 
-    static final String COUNTRY_CODE = "nl";
+    private static final String COUNTRY_CODE = "nl";
 
     private static final String jsonAgentTestString = "{\"type\": \"Repository\", \"data\":{\"identifier\": \"jmp\"}}";
 
@@ -57,7 +57,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
                 uri, getAdminUserProfileId());
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE))
                 .entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
@@ -77,7 +77,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         // a corresponding action.
 
         jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+                entityUri(Entities.COUNTRY, COUNTRY_CODE))
                 .entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
@@ -104,10 +104,8 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
     public void testGetActionsForItem() throws Exception {
 
         // Create an item
-        client.resource(
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY));
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
+        URI uri = entityUri(Entities.COUNTRY, COUNTRY_CODE);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 

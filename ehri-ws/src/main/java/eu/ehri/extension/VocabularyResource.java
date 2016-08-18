@@ -178,7 +178,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.CVOC_CONCEPT)
+    @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -201,8 +201,6 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
      * @param format  the RDF format. Can be one of: RDF/XML, N3, TTL
      * @param baseUri the base URI for exported items
      * @return a SKOS vocabulary
-     * @throws IOException
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}/export")

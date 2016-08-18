@@ -55,8 +55,8 @@ import static eu.ehri.extension.PermissionsResource.ENDPOINT;
  */
 public class PermissionResourceClientTest extends AbstractResourceClientTest {
 
-    static final String LIMITED_USER_NAME = "reto";
-    static final String TEST_HOLDER_IDENTIFIER = "r2";
+    private static final String LIMITED_USER_NAME = "reto";
+    private static final String TEST_HOLDER_IDENTIFIER = "r2";
 
     private String jsonDocumentaryUnitTestStr;
 
@@ -145,8 +145,9 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testSettingGlobalPermissions() throws Exception {
 
-        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                getCreationUri()).entity(jsonDocumentaryUnitTestStr)
+        URI uri = getCreationUriFor(TEST_HOLDER_IDENTIFIER);
+        ClientResponse response = jsonCallAs(LIMITED_USER_NAME, uri)
+                .entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
         assertStatus(UNAUTHORIZED, response);
 
@@ -159,7 +160,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         assertStatus(OK, response);
 
         // Retry the create action
-        response = jsonCallAs(LIMITED_USER_NAME, getCreationUri())
+        response = jsonCallAs(LIMITED_USER_NAME, uri)
                 .entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
 
@@ -301,11 +302,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         );
     }
 
-    private URI getCreationUri() {
-        return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER, Entities.DOCUMENTARY_UNIT);
-    }
-
     private URI getCreationUriFor(String id) {
-        return entityUri(Entities.REPOSITORY, id, Entities.DOCUMENTARY_UNIT);
+        return entityUri(Entities.REPOSITORY, id);
     }
 }

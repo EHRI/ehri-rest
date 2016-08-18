@@ -125,7 +125,7 @@ public class CvocConceptResource
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.CVOC_CONCEPT)
+    @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -147,9 +147,6 @@ public class CvocConceptResource
      *
      * @param id       the item ID
      * @param narrower the narrower item IDs
-     * @throws AccessDenied
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Path("{id:[^/]+}/narrower")
@@ -170,8 +167,6 @@ public class CvocConceptResource
      *
      * @param id       the item ID
      * @param narrower the narrower item IDs
-     * @throws AccessDenied
-     * @throws ItemNotFound
      */
     @DELETE
     @Path("{id:[^/]+}/narrower")
@@ -192,8 +187,6 @@ public class CvocConceptResource
      *
      * @param id The item ID
      * @return A list of broader resources
-     * @throws ItemNotFound
-     * @throws AccessDenied
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -213,7 +206,6 @@ public class CvocConceptResource
      *
      * @param id The item ID
      * @return A list of related resources
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -234,7 +226,6 @@ public class CvocConceptResource
      *
      * @param id The item ID
      * @return A list of related resources
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -254,9 +245,6 @@ public class CvocConceptResource
      *
      * @param id      the item ID
      * @param related the related item IDs
-     * @throws AccessDenied
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Path("{id:[^/]+}/related")
@@ -278,9 +266,6 @@ public class CvocConceptResource
      *
      * @param id      the item ID
      * @param related the related item ID
-     * @throws AccessDenied
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @DELETE
     @Path("{id:[^/]+}/related")

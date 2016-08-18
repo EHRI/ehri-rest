@@ -47,11 +47,11 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
 
     private String jsonVirtualUnitStr;
     private String partialJsonVirtualUnitTestStr;
-    static final String UPDATED_NAME = "UpdatedNameTEST";
-    static final String PARTIAL_DESC = "Changing the description";
-    static final String TEST_JSON_IDENTIFIER = "vc1";
-    static final String FIRST_DOC_ID = "vc1";
-    static final String CREATED_ID = "some-id-supplied-by-frontend";
+    private static final String UPDATED_NAME = "UpdatedNameTEST";
+    private static final String PARTIAL_DESC = "Changing the description";
+    private static final String TEST_JSON_IDENTIFIER = "vc1";
+    private static final String FIRST_DOC_ID = "vc1";
+    private static final String CREATED_ID = "some-id-supplied-by-frontend";
 
     @Before
     public void setUp() throws Exception {
@@ -93,7 +93,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
         // Create
         String currentUserId = getAdminUserProfileId();
         ClientResponse response = jsonCallAs(currentUserId,
-                entityUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID, Entities.VIRTUAL_UNIT))
+                entityUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID))
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);

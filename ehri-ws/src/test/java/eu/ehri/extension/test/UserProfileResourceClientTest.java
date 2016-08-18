@@ -48,8 +48,8 @@ import static org.junit.Assert.assertTrue;
 
 public class UserProfileResourceClientTest extends AbstractResourceClientTest {
 
-    static final String FETCH_NAME = "mike";
-    static final String UPDATED_NAME = "UpdatedNameTEST";
+    private static final String FETCH_NAME = "mike";
+    private static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private static final String jsonUserProfileTestString = "{\"type\":\"UserProfile\", \"data\":{\"identifier\": " +
             "\"test-user\", \"name\":\"testUserName1\"}}";

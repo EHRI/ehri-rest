@@ -154,8 +154,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + FOLLOWERS)
-    public Response listFollowers(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + FOLLOWERS)
+    public Response listFollowers(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -167,8 +167,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + FOLLOWING)
-    public Response listFollowing(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + FOLLOWING)
+    public Response listFollowing(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -180,9 +180,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + IS_FOLLOWING + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/" + IS_FOLLOWING + "/{otherId:[^/]+}")
     public boolean isFollowing(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -196,9 +196,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + IS_FOLLOWER + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/" + IS_FOLLOWER + "/{otherId:[^/]+}")
     public boolean isFollower(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -210,9 +210,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{userId:[^/]+}/" + FOLLOWING)
+    @Path("{id:[^/]+}/" + FOLLOWING)
     public void followUserProfile(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -222,9 +222,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{userId:[^/]+}/" + FOLLOWING)
+    @Path("{id:[^/]+}/" + FOLLOWING)
     public void unfollowUserProfile(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -235,8 +235,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + BLOCKED)
-    public Response listBlocked(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + BLOCKED)
+    public Response listBlocked(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -248,9 +248,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + IS_BLOCKING + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/" + IS_BLOCKING + "/{otherId:[^/]+}")
     public boolean isBlocking(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -262,9 +262,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{userId:[^/]+}/" + BLOCKED)
+    @Path("{id:[^/]+}/" + BLOCKED)
     public void blockUserProfile(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -274,9 +274,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{userId:[^/]+}/" + BLOCKED)
+    @Path("{id:[^/]+}/" + BLOCKED)
     public void unblockUserProfile(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -287,8 +287,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + WATCHING)
-    public Response listWatching(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + WATCHING)
+    public Response listWatching(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -299,9 +299,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{userId:[^/]+}/" + WATCHING)
+    @Path("{id:[^/]+}/" + WATCHING)
     public void watchItem(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -311,9 +311,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{userId:[^/]+}/" + WATCHING)
+    @Path("{id:[^/]+}/" + WATCHING)
     public void unwatchItem(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -324,9 +324,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + IS_WATCHING + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/" + IS_WATCHING + "/{otherId:[^/]+}")
     public boolean isWatching(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -339,8 +339,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + GenericResource.ANNOTATIONS)
-    public Response listAnnotations(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + GenericResource.ANNOTATIONS)
+    public Response listAnnotations(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -352,8 +352,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + GenericResource.LINKS)
-    public Response pageLinks(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + GenericResource.LINKS)
+    public Response pageLinks(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -365,8 +365,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + Entities.VIRTUAL_UNIT)
-    public Response pageVirtualUnits(@PathParam("userId") String userId) throws ItemNotFound {
+    @Path("{id:[^/]+}/" + Entities.VIRTUAL_UNIT)
+    public Response pageVirtualUnits(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
             Response response = streamingPage(getQuery()
@@ -388,9 +388,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + ACTIONS)
+    @Path("{id:[^/]+}/" + ACTIONS)
     public Response aggregateUserActions(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -416,9 +416,9 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + EVENTS)
+    @Path("{id:[^/]+}/" + EVENTS)
     public Response aggregateEventsForUser(
-            @PathParam("userId") String userId,
+            @PathParam("id") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -433,8 +433,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userId:[^/]+}/" + VIRTUAL_UNITS)
-    public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
+    @Path("{id:[^/]+}/" + VIRTUAL_UNITS)
+    public Response listVirtualUnitsForUser(@PathParam("id") String userId)
             throws AccessDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);

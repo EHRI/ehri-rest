@@ -145,15 +145,11 @@ public class CountryResource
      * @param id     The country id
      * @param bundle The new repository data
      * @return The new repository
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.REPOSITORY)
+    @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -176,8 +172,6 @@ public class CountryResource
      * @param id   the country ID
      * @param lang a three-letter ISO639-2 code
      * @return a zip containing the country's repositories as EAG
-     * @throws IOException
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}/eag")

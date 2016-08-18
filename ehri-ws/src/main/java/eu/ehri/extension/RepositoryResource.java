@@ -138,15 +138,11 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @param id     The repository ID
      * @param bundle The new unit data
      * @return The new unit
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.DOCUMENTARY_UNIT)
+    @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
@@ -168,8 +164,6 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAG XML Document
-     * @throws IOException
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}/eag")
@@ -199,8 +193,6 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAD XML Document
-     * @throws IOException
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}/ead")
