@@ -7,7 +7,7 @@ First, make sure there is no Neo4j server running that uses the graph DB you're 
 The **NEO4J_HOME** env var must be set and point to the Neo4j instance with the EHRI libs [installed](INSTALL.md).
 
 A second var that _may_ be set is **NEO4J_DB**, which should point to the actual database directory. If not set,
-this will default to `$NEO4J_HOME/data/graph.db`.
+this will default to `$NEO4J_HOME/data/databases/graph.db`.
 
 ## Make sure the Neo4j Server is stopped
 

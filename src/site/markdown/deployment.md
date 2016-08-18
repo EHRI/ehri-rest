@@ -4,18 +4,19 @@
 
 The EHRI REST backend is deployed as a Neo4j unmanaged extension. In practice, this means:
 
- - it compiles to a bunch of Jars which live in the `plugins/ehri` directory of a Neo4j installation
- - the following setting in `neo4j-server.conf` maps our Jersey web URIs to a path (/ehri):
-   * `org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri`
+ - it compiles to an "uberjar" (all dependencies in one jar) which live in the `plugins` directory of a Neo4j
+ installation
+ - the following setting in `neo4j.conf` maps our Jersey web URIs to a path (/ehri):
+   * `dbms.unmanaged_extension_classes=eu.ehri.extension=/ehri`
 
 In practice, a set of symlinks are used to allow easier versioning of releases:
 
-The symlink `$NEO4J_HOME/plugins/ehri` points to `/opt/webapps/ehri-rest/current`,
-which is itself a symlink to `/opt/webapps/ehri-rest/deploys/[TIMESTAMP]_[GIT-REV]`.
+The symlink `$NEO4J_HOME/plugins/ehri-rest.jar` points to `/opt/webapps/ehri-rest/current`,
+which is itself a symlink to `/opt/webapps/ehri-rest/deploys/ehri-data-[TIMESTAMP]_[GIT-REV].jar`.
 
-When new versions of the EHRI code are released the Jars are uploaded to a directory in
-`/opt/webapps/ehri-rest/deploys` that is named with the timestamp and the code's git revision. Then the `current`
-symlink is updated to point to the new deployment and the Neo4j service restarted.
+When new versions of the EHRI code is released the uberjar is uploaded to the `/opt/webapps/ehri-rest/deploys`
+directory, named with the timestamp and the code's git revision. Then the `current` symlink is updated to point to
+the new deployment and the Neo4j service restarted.
 
 ## Using the Fabfile for automated deployment tasks
 

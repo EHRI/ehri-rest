@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-Install Oracle JDK 7. For Ubuntu this can be done via the Webupd8team PPA:
+Install Oracle JDK 8. For Ubuntu this can be done via the Webupd8team PPA:
 
 	sudo add-apt-repository ppa:webupd8team/java
 	sudo apt-get update
-	sudo apt-get install oracle-java7-installer 
+	sudo apt-get install oracle-java8-installer
 
 Install Git:
 
@@ -49,11 +49,11 @@ Clone the EHRI server code from Github:
 
 While Maven is doing its thing, we can install a standalone version of the Neo4j server. Once the code has been built, we can enable the EHRI REST service within the standalone Neo4j server.
 
-	curl -L -0 http://neo4j.com/artifact.php?name=neo4j-community-2.3.2-unix.tar.gz | tar zx
+	curl -L -0 http://neo4j.com/artifact.php?name=neo4j-community-3.0.4-unix.tar.gz | tar zx
 	
 We'll need to refer to the installation location a lot so save it as an environment variable:
 
-	export NEO4J_HOME=neo4j-community-2.3.2
+	export NEO4J_HOME=neo4j-community-3.0.4
 
 Once both the EHRI server code has been compiled and Neo4j standalone has been downloaded and extracted, we can install the former into the latter. The following script ensures the code is packaged and then installs the EHRI jars and
 various other dependencies into the `$NEO4J_HOME/plugin/ehri` directory:
@@ -62,8 +62,8 @@ various other dependencies into the `$NEO4J_HOME/plugin/ehri` directory:
 
 Once that has completed the script will warn us that we have to make one configuation change manually:
 
-> **IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j-server.properties configuration contains the line:
->   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri
+> **IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j.conf configuration contains the line:
+>   dmbs.unmanaged_extension_classes=eu.ehri.extension=/ehri
 
 Open that file and add that line below the point where a similar example config is commented out. This step is vital so Neo4j knows to load our EHRI extension code.
 
