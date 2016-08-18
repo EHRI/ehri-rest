@@ -24,7 +24,6 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
-import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
@@ -196,6 +195,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
 
     /**
      * Ascertain whether this user is blocking another user.
+     *
      * @param user a user frame
      * @return whther the other user is on this user's block list
      */

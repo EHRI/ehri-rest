@@ -365,7 +365,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + Entities.VIRTUAL_UNIT)
+    @Path("{id:[^/]+}/" + VIRTUAL_UNITS)
     public Response pageVirtualUnits(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -384,7 +384,6 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>strict</b>.
      * @return a list of event ranges
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -412,7 +411,6 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>user</b>.
      * @return a list of event ranges
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -426,21 +424,6 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
             Response response = streamingListOfLists(eventsApi.aggregateAsUser(asUser));
-            tx.success();
-            return response;
-        }
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + VIRTUAL_UNITS)
-    public Response listVirtualUnitsForUser(@PathParam("id") String userId)
-            throws AccessDenied, ItemNotFound {
-        try (final Tx tx = beginTx()) {
-            Accessor accessor = manager.getEntity(userId, Accessor.class);
-            Iterable<VirtualUnit> units = api().virtualUnits()
-                    .getVirtualCollectionsForUser(accessor);
-            Response response = streamingPage(getQuery().page(units, VirtualUnit.class));
             tx.success();
             return response;
         }
