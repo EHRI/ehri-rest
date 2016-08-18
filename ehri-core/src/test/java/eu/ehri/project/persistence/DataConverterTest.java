@@ -23,10 +23,10 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 
 import static eu.ehri.project.persistence.DataConverter.isEmptySequence;
@@ -68,7 +68,11 @@ public class DataConverterTest extends AbstractFixtureTest {
         Object t3 = Lists.newArrayList();
         Object[] t4 = {"not", "empty"};
         Object[] t5 = {};
-        Object t6 = Iterables.empty();
+        Object t6 = new Iterable() {
+            @Override public Iterator iterator() {
+                return Lists.newArrayList().iterator();
+            }
+        };
         assertFalse(isEmptySequence(t1));
         assertFalse(isEmptySequence(t2));
         assertTrue(isEmptySequence(t3));

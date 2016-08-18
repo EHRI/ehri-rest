@@ -51,7 +51,7 @@ def deploy():
     Deploy the latest version of the site to the servers, install any
     required third party modules, and then restart the webserver
     """
-    with settings(version = get_version_stamp()):
+    with settings(version = get_version_stamp(), artifact = get_artifact_version()):
         copy_to_server()
         symlink_current()
         restart()
@@ -111,7 +111,9 @@ def latest():
 @task
 def online_backup(remote_dir, tar = True):
     """
-    Do an online backup to a particular directory on the server.
+    Do an online backup to a particular directory on the server. The
+    directory will be tar/gzipped but the supplied path should not
+    include the gzip extension.
 
     online_backup:/path/on/server/backup.graph.db
     """
@@ -129,15 +131,14 @@ def update_properties():
     """
     Put a fresh copy of the working copy .properties files on the server.
     """
-
-    srcname = "props.tgz" # FIXME: Get this programatically...
+    srcname = "props.tgz"
     dstpath = env.properties_location
     dstfile = os.path.join(dstpath, srcname)
 
     with lcd("ehri-io/src/main/resources/"):
         local("tar -czf %s *.properties" % srcname)
 
-        # upload the assembly gzip
+        # upload the gzip
         print("Running put")
         put(srcname, dstfile)
         # extract it
@@ -481,6 +482,13 @@ def current_version_log():
     _, revision = current_version()
     local("git log %s..HEAD" % revision)
 
+def get_artifact_version():
+    """Get the current artifact version from Maven"""
+    return local(
+        "mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate" +
+        " -Dexpression=project.version|grep -Ev '(^\[|Download\w+:)'",
+        capture=True).strip()
+
 def get_version_stamp():
     "Get a dated and revision stamped version string"
     rev = subprocess.check_output(["git","rev-parse", "--short", "HEAD"]).strip()
@@ -494,25 +502,22 @@ def copy_to_server():
     # Ensure the deployment directory is there...
 
     with cd(env.path):
-        srcdir = "assembly/target"
-        srcname = "assembly-0.1.tar.gz" # FIXME: Get this programatically...
-        dstpath = "deploys/%(version)s" % env
-        dstfile = os.path.join(dstpath, srcname)
+        srcdir = "build/target"
+        srcname = "ehri-data-%(artifact)s.jar" % env
+        dstname = "ehri-data-%(version)s.jar" % env
+        dstdir = "deploys"
+        dstfile = os.path.join(dstdir, dstname)
 
         # make the deploy dir
-        run("mkdir -p deploys/%(version)s" % env)
-        # upload the assembly gzip
+        run("mkdir -p deploys")
+        # upload the uber jar
         print("Running put")
         put(os.path.join(srcdir, srcname), dstfile)
-        # extract it
-        with cd(dstpath):
-            run("tar --extract --gzip --file %s" % srcname)
-        # delete the zip
-        run("rm %s" % dstfile)
 
 def symlink_current():
     with cd(env.path):
-        run("ln --force --no-dereference --symbolic deploys/%(version)s current" % env)
+        dstname = "ehri-data-%(version)s.jar" % env
+        run("ln --force --no-dereference --symbolic deploys/%s current" % dstname)
 
 @task
 def copy_lib_sh():

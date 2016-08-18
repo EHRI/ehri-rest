@@ -38,8 +38,7 @@ import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class CsvConceptImporterTest extends AbstractImporterTest {
     
     private static final Logger logger = LoggerFactory.getLogger(CsvConceptImporterTest.class);

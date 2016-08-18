@@ -25,8 +25,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.tooling.GlobalGraphOperations;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -109,7 +109,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
 
     public Neo4j2Graph(String directory, Map<String, String> configuration) {
         try {
-            GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(directory);
+            GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(directory));
             if (null != configuration)
                 this.rawGraph = builder.setConfig(configuration).newGraphDatabase();
             else
@@ -176,7 +176,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     @Override
     public Iterable<Vertex> getVertices() {
         this.autoStartTransaction(false);
-        return new Neo4j2VertexIterable(GlobalGraphOperations.at(rawGraph).getAllNodes(), this);
+        return new Neo4j2VertexIterable(rawGraph.getAllNodes(), this);
     }
 
     public CloseableIterable<Vertex> getVerticesByLabel(final String label) {
@@ -184,8 +184,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
             @Override
             public ResourceIterator<Node> iterator() {
-                return rawGraph.<Node>findNodes(DynamicLabel
-                        .label(label));
+                return rawGraph.<Node>findNodes(DynamicLabel.label(label));
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -197,8 +196,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             @Override
             public ResourceIterator<Node> iterator() {
                 autoStartTransaction(false);
-                return rawGraph.<Node>findNodes(DynamicLabel
-                        .label(label), key, value);
+                return rawGraph.<Node>findNodes(DynamicLabel.label(label), key, value);
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -225,7 +223,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     @Override
     public Iterable<Edge> getEdges() {
         this.autoStartTransaction(false);
-        return new Neo4j2EdgeIterable(GlobalGraphOperations.at(rawGraph).getAllRelationships(), this);
+        return new Neo4j2EdgeIterable(rawGraph.getAllRelationships(), this);
     }
 
     @Override

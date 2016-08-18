@@ -32,7 +32,6 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.annotations.Unique;
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -221,7 +220,7 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getPropertyKeysInternal(s));
+            out.addAll(getPropertyKeysInternal(s));
         }
 
         return ImmutableSet.copyOf(out);
@@ -242,7 +241,7 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getMandatoryPropertyKeysInternal(s));
+            out.addAll(getMandatoryPropertyKeysInternal(s));
         }
 
         return ImmutableSet.copyOf(out);
@@ -261,7 +260,7 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getUniquePropertyKeysInternal(s));
+            out.addAll(getUniquePropertyKeysInternal(s));
         }
 
         return ImmutableSet.copyOf(out);

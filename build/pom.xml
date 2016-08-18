@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>ehri-project</groupId>
+        <artifactId>ehri-data</artifactId>
+        <version>0.13.5-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>Packaging</name>
+    <description>Packaging.</description>
+
+    <artifactId>build</artifactId>
+
+    <properties>
+        <maven-site-plugin.skip>true</maven-site-plugin.skip>
+    </properties>
+
+    <build>
+        <finalName>${parent.artifactId}-${parent.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>ehri-project:*</include>
+                            <include>com.tinkerpop:*</include>
+                            <include>com.tinkerpop.*:*</include>
+                            <include>stax:stax-api</include>
+                            <include>org.javassist:javassist</include>
+                            <include>org.codehaus.jettison:jettison</include>
+                            <include>org.neo4j:neo4j-graphviz</include>
+                            <include>org.slf4j:slf4j-api</include>
+
+                            <!-- Additional EHRI deps -->
+                            <include>joda-time:joda-time</include>
+                            <include>org.yaml:snakeyaml</include>
+                            <include>com.fasterxml.uuid:*</include>
+                            <include>com.fasterxml.jackson.core:*</include>
+                            <include>com.fasterxml.jackson.dataformat:*</include>
+                            <include>com.google.guava:guava</include>
+                            <include>commons-cli:commons-cli</include>
+                            <include>org.apache.jena:*</include>
+                            <include>xerces:xercesImpl</include>
+                            <include>xml-apis:xml-apis</include>
+                            <include>org.apache.commons:commons-lang3</include>
+                            <include>org.apache.commons:commons-compress</include>
+
+                            <!-- Sparql/OpenRDF stuff that will be ignored if
+                             we're not building under the sparql profile -->
+                            <include>org.openrdf.sesame:sesame-queryalgebra-evaluation</include>
+                            <include>org.openrdf.*</include>
+                            <include>net.fortytwo.sesametools:*</include>
+                        </includes>
+                    </artifactSet>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <generateReports>false</generateReports>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-definitions</artifactId>
+            <version>0.13.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-core</artifactId>
+            <version>0.13.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-cli</artifactId>
+            <version>0.13.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-ws</artifactId>
+            <version>0.13.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-io</artifactId>
+            <version>0.13.5-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+    <profiles>
+        <profile>
+            <id>sparql</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ehri-project</groupId>
+                    <artifactId>ehri-ws-sparql</artifactId>
+                    <version>0.13.5-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>

@@ -16,18 +16,18 @@ In one of them, tail the following file, which will give us some information
 about what goes wrong, when something inevitably goes wrong the first few times
 we try:
 
-    tail -f /opt/webapps/neo4j-version/data/log/console.log
+    tail -f /opt/webapps/neo4j-version/logs/log/neo4j.log
 
 ### Back up the database
 
-The Neo4j DB lives in /opt/webapps/data/graph.db. You can back it up without shutting 
+The Neo4j DB lives in /opt/webapps/data/neo4j/databases/graph.db. You can back it up without shutting
 down the server by running:
 
     /opt/webapps/neo4j-backup.sh graph.db.BAK
 
 To restore the DB the procedure is:
  - shut down Neo4j
- - replace /opt/webapps/data/graph.db with backup directory you specified previously
+ - replace /opt/webapps/data/neo4j/databases/graph.db with backup directory you specified previously
  - ensure all files in the graph.db directory are owned and writable by the `webadm` group:
     - chgrp -R webadm graph.db
     - chmod -R g+rw graph.db
@@ -90,7 +90,7 @@ These parameters are:
 
 **Note**: when importing a single EAD containing ~50,000 items in a single transaction the
 staging server might run out of memory. If it does the only option is to increase the
-Neo4j heap size  by uncommenting and setting the `wrapper.java.maxmemory=MORE_MB` (say,
+Neo4j heap size  by uncommenting and setting the `dbms.memory.heap.max_size=MORE_MB` (say,
  3500) in `$NEO4J_HOME/conf/neo4j-wrapper.conf` and restarting Neo4j by running:
 
     sudo service neo4j-service restart

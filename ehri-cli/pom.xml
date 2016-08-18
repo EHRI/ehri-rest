@@ -4,12 +4,12 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.4-SNAPSHOT</version>
+        <version>0.13.5-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-cli</artifactId>
     <name>Command Line Tools</name>
     <description>Command line tools for interacting with the backend graph DB.</description>
-    <version>0.13.4-SNAPSHOT</version>
+    <version>0.13.5-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graphviz</artifactId>
-            <version>2.3.4</version>
+            <version>3.0.4</version>
         </dependency>
 
         <!-- Command line parsing -->
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -75,14 +75,14 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>2.3.4</version>
+            <version>3.0.4</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>2.3.4</version>
+            <version>3.0.4</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
         </dependency>
 
         <!-- RDF export -->

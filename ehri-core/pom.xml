@@ -6,13 +6,13 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.4-SNAPSHOT</version>
+        <version>0.13.5-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-core</artifactId>
     <packaging>jar</packaging>
 
 
-    <version>0.13.4-SNAPSHOT</version>
+    <version>0.13.5-SNAPSHOT</version>
 
     <name>EHRI Core API</name>
     <description>Java API for data access and permissions.</description>
@@ -117,12 +117,12 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>2.3.4</version>
+            <version>3.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>2.3.4</version>
+            <version>3.0.4</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -130,7 +130,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>2.3.4</version>
+            <version>3.0.4</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>0.13.4-SNAPSHOT</version>
+            <version>0.13.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

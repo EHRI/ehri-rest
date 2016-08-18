@@ -19,6 +19,7 @@
 
 package eu.ehri.project.models.base;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -28,7 +29,6 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
                 manager.getEntity("c1", PermissionScope.class),
                 manager.getEntity("r1", PermissionScope.class),
                 manager.getEntity("nl", PermissionScope.class));
-        assertEquals(scopes, Iterables.toList(doc.getPermissionScopes()));
+        assertEquals(scopes, Lists.newArrayList(doc.getPermissionScopes()));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
         PermissionScope c1 = manager.getEntity("c1", PermissionScope.class);
         PermissionScope c2 = manager.getEntity("c2", PermissionScope.class);
         Iterable<Accessible> containedItems = c1.getContainedItems();
-        assertEquals(1L, Iterables.count(containedItems));
+        assertEquals(1L, Iterables.size(containedItems));
         assertEquals(c2, containedItems.iterator().next());
     }
 
