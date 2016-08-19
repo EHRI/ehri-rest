@@ -25,8 +25,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
@@ -96,6 +94,23 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     @JavaHandler
     Iterable<DocumentaryUnit> getAncestors();
+
+    /**
+     * Get an iterable of ancestors, prefixed by this item.
+     *
+     * @return an iterable of DocumentaryUnit items including
+     * the current item
+     */
+    @JavaHandler
+    Iterable<DocumentaryUnit> getAncestorsAndSelf();
+
+    /**
+     * Get virtual collections to which this documentary unit belongs.
+     *
+     * @return an iterable of virtual unit objects at the top level
+     */
+    @JavaHandler
+    Iterable<VirtualUnit> getVirtualCollections();
 
     /**
      * Count the number of child units at the immediate lower
@@ -169,7 +184,7 @@ public interface DocumentaryUnit extends AbstractUnit {
             Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").out(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops,
                             vertexLoopBundle -> !vertexLoopBundle.getObject().getVertices(Direction.OUT,
-                            Ontology.DOC_IS_CHILD_OF).iterator().hasNext());
+                                    Ontology.DOC_IS_CHILD_OF).iterator().hasNext());
 
             GremlinPipeline<Vertex, Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);
@@ -181,6 +196,46 @@ public interface DocumentaryUnit extends AbstractUnit {
             return frameVertices(gremlin().as("n")
                     .out(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc));
+        }
+
+        public Iterable<DocumentaryUnit> getAncestorsAndSelf() {
+            GremlinPipeline<Vertex, Vertex> ancestors = gremlin()
+                    .as("n")
+                    .out(Ontology.DOC_IS_CHILD_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc);
+
+            GremlinPipeline<Vertex, Vertex> all = gremlin().cast(Vertex.class)
+                    .copySplit(gremlin(), ancestors).exhaustMerge().cast(Vertex.class);
+
+            return frameVertices(all);
+        }
+
+        public Iterable<VirtualUnit> getVirtualCollections() {
+            GremlinPipeline<Vertex, ?> ancestors = gremlin()
+                    .as("n")
+                    .out(Ontology.DOC_IS_CHILD_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc);
+
+            GremlinPipeline<Vertex, ?> ancestorsAndSelf = gremlin()
+                    .cast(Vertex.class)
+                    .copySplit(gremlin(), ancestors)
+                    .exhaustMerge();
+
+
+            Pipeline<Vertex, Vertex> all = ancestorsAndSelf
+                    .in(Ontology.VC_INCLUDES_UNIT)
+                    .as("n").out(Ontology.VC_IS_PART_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, vertexLoopBundle ->
+                            (!vertexLoopBundle.getObject()
+                                    .getEdges(Direction.OUT, Ontology.VC_IS_PART_OF)
+                                    .iterator().hasNext())
+                                    && EntityClass.VIRTUAL_UNIT
+                                    .getName()
+                                    .equals(vertexLoopBundle.getObject()
+                                            .getProperty(EntityType.TYPE_KEY)))
+                    .cast(Vertex.class);
+
+            return frameVertices(all);
         }
     }
 }

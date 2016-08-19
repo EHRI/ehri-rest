@@ -3,7 +3,6 @@ package eu.ehri.project.api;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.VirtualUnit;
-import eu.ehri.project.models.base.Entity;
 
 public interface VirtualUnitsApi {
 
@@ -36,12 +35,4 @@ public interface VirtualUnitsApi {
      */
     VirtualUnit removeIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included)
             throws PermissionDenied;
-
-    /**
-     * Find virtual collections to which this item belongs.
-     *
-     * @param item an item (typically a documentary unit)
-     * @return a set of top-level virtual units
-     */
-    Iterable<VirtualUnit> getVirtualCollections(Entity item);
 }

@@ -20,18 +20,47 @@
 package eu.ehri.project.models;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class DocumentaryUnitTest extends AbstractFixtureTest {
+
+    @Test
+    public void testGetAncestorsAndSelf() throws Exception {
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getEntity("c3", DocumentaryUnit.class);
+        Iterable<DocumentaryUnit> ancestorsAndSelf = c3.getAncestorsAndSelf();
+        assertEquals(Lists.newArrayList(c3, c2, c1), Lists.newArrayList(ancestorsAndSelf));
+    }
+
+    @Test
+    public void testGetVirtualCollections() throws Exception {
+        VirtualUnit vc1 = manager.getEntity("vc1", VirtualUnit.class);
+        // All of these units belong to vc1 except nl-r1-m19
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getEntity("c3", DocumentaryUnit.class);
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
+        DocumentaryUnit c5 = manager.getEntity("nl-r1-m19", DocumentaryUnit.class);
+
+        Iterable<VirtualUnit> virtualCollectionsForC1 = c1.getVirtualCollections();
+        Iterable<VirtualUnit> virtualCollectionsForC2 = c2.getVirtualCollections();
+        Iterable<VirtualUnit> virtualCollectionsForC3 = c3.getVirtualCollections();
+        Iterable<VirtualUnit> virtualCollectionsForC4 = c4.getVirtualCollections();
+        Iterable<VirtualUnit> virtualCollectionsForC5 = c5.getVirtualCollections();
+        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC1));
+        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC2));
+        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC3));
+        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC4));
+        assertEquals(Lists.newArrayList(), Lists.newArrayList(virtualCollectionsForC5));
+    }
+
 
     @Test
     public void testCollectionHelpByRepo() throws ItemNotFound {
