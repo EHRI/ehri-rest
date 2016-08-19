@@ -88,7 +88,8 @@ def restart():
 def rollback():
     "Rollback to the last versioned dir and restart."
     with cd(env.path):
-        output = run("ls -1rt deploys | tail -n 2 | head -n 1").strip()
+        # get the version number from ehri-data-YYYYMMddHHMMSS_123456.jar
+        output = run("ls -1rt deploys | tail -n 2 | head -n 1 | cut -c 11-32").strip()
         if output == "":
             raise Exception("Unable to get previous version for rollback!")
         with settings(version=output):
@@ -100,7 +101,7 @@ def rollback():
 def latest():
     "Point symlink at latest version."
     with cd(env.path):
-        output = run("ls -1rt deploys | tail -n 1").strip()
+        output = run("ls -1rt deploys | tail -n 1 | cut -c 11-32").strip()
         if output == "":
             raise Exception("Unable to get latest version for rollback!")
         with settings(version=output):
@@ -516,8 +517,7 @@ def copy_to_server():
 
 def symlink_current():
     with cd(env.path):
-        dstname = "ehri-data-%(version)s.jar" % env
-        run("ln --force --no-dereference --symbolic deploys/%s current" % dstname)
+        run("ln --force --no-dereference --symbolic deploys/ehri-data-%(version)s.jar current" % env)
 
 @task
 def copy_lib_sh():
