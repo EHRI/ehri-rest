@@ -32,3 +32,13 @@ The options are:
  
 The follow on command `./scripts/cmd gen-schema` is necessary to instantiate the Neo4j indexes
 and constraints.
+
+### WARNING!
+
+Neo4j's lax read isolation can cause problems with GraphSON dumps, since it's possible for edges to exist
+in the GraphSON that refer to non-existent nodes (this can happen if the data changes while the export is
+taking place.) In this case, loading the dump will subsequently fail with the following error:
+
+    Error: Given element was not created in this baseGraph
+
+If in doubt, prevent graph modification from taking place, or use online backup instead.

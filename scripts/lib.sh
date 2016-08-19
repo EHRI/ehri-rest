@@ -10,10 +10,10 @@ checkenv() {
         export NEO4J_HOME=${NEO4J_HOME%/}
     fi
 
-    # Default the graph db directory to $NEO4J_HOME/data/graph.db unless
+    # Default the graph db directory to $NEO4J_HOME/data/databases/graph.db unless
     # NEO4J_DB is explicitly set
     if [ "$NEO4J_DB" = "" ]; then
-        export NEO4J_DB=$NEO4J_HOME/data/graph.db
+        export NEO4J_DB=$NEO4J_HOME/data/databases/graph.db
     else
         export NEO4J_DB=${NEO4J_DB%/}
         if [ -e $NEO4J_DB ] && [ ! -d $NEO4J_DB ]; then
@@ -31,26 +31,20 @@ buildclasspath() {
   fi
 
   # confirm system jars
-  SYSLIBDIR="$NEO4J_HOME"/system/lib
-  if [ ! -e "$SYSLIBDIR" ] ; then
-    echo "Error: missing Neo4j System Library, expected at $SYSLIBDIR"
-  fi
-
-  # confirm system jars
-  EHRILIBDIR="$NEO4J_HOME"/plugins/ehri
-  if [ ! -e "$EHRILIBDIR" ] ; then
-    echo "Error: missing EHRI libs, expected at $EHRILIBDIR"
+  PLUGINDIR="$NEO4J_HOME"/plugins
+  if [ ! -e "$PLUGINDIR" ] ; then
+    echo "Error: missing EHRI libs, expected at $PLUGINDIR"
   fi
 
   ALL_JARS=""
-  for jar in "$LIBDIR"/*.jar "$SYSLIBDIR"/*.jar "$EHRILIBDIR"/*.jar ; do
+  for jar in "$LIBDIR"/*.jar "$PLUGINDIR"/*.jar ; do
     [ -z "$ALL_JARS" ] && ALL_JARS="$jar" || ALL_JARS="$ALL_JARS":"$jar"
   done
 
   CLASSPATH=${ALL_JARS}
   #echo "CLASPATH: $CLASSPATH"
   # add useful conf stuff to classpath - always a good idea
-  CLASSPATH="$CLASSPATH":"$NEO4J_HOME"/conf/
+  CLASSPATH="$CLASSPATH":"$NEO4J_HOME"/conf
 }
 
 
