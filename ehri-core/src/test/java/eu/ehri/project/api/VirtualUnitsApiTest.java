@@ -26,9 +26,6 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.api.VirtualUnitsApi;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -38,27 +35,8 @@ import static org.junit.Assert.assertTrue;
 
 public class VirtualUnitsApiTest extends AbstractFixtureTest {
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     private VirtualUnitsApi views(Accessor accessor) {
         return api(accessor).virtualUnits();
-    }
-
-    @Test
-    @Ignore
-    public void testGetVirtualCollections() throws Exception {
-        VirtualUnit vc1 = manager.getEntity("vc1", VirtualUnit.class);
-        // Both of these units are present in vc1
-        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
-        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
-
-        Iterable<VirtualUnit> virtualCollectionsForC1 = views(validUser).getVirtualCollections(c1);
-        Iterable<VirtualUnit> virtualCollectionsForC2 = views(validUser).getVirtualCollections(c4);
-        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC1));
-        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC2));
     }
 
     @Test
