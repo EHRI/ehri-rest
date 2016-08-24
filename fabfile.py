@@ -19,10 +19,12 @@ env.project_name = 'ehri-rest'
 env.service_name = 'neo4j-service'
 env.prod = False
 env.path = '/opt/webapps/' + env.project_name
-env.neo4j_install = '/opt/webapps/' + 'neo4j-version'
-env.data_dir = '/opt/webapps/data'
+env.neo4j_install = '/opt/webapps/neo4j-version'
+env.data_dir = '/opt/webapps/data/neo4j/databases'
 env.index_helper = "/opt/webapps/docview/bin/indexer.jar"
 env.properties_location = '/opt/webapps/data/import-data/properties/'
+env.solr_url = 'http://localhost:8983/solr/portal'
+env.service_url = 'http://localhost:7474/ehri'
 env.user = os.getenv("USER")
 env.use_ssh_config = True
 
@@ -176,7 +178,7 @@ def import_ead(scope, log, properties, file_dir):
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -m 7200 -X POST -H \"X-User: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
+    run("curl -m 7200 -X POST -H X-User:$USER --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s\"" % (file_list, scope, log_file, properties_file) )
 
 @task
 def import_ead_with_handler(scope, log, properties, file_dir, handler):
@@ -195,7 +197,7 @@ def import_ead_with_handler(scope, log, properties, file_dir, handler):
     log_file = "/opt/webapps/data/import-data/logs/%s" % log
     properties_file = "/opt/webapps/data/import-data/properties/%s" % properties
     file_list = "/opt/webapps/data/import-metadata/%s.txt" % scope
-    run("curl -m 7200 -X POST -H \"X-User: $USER\" --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
+    run("curl -m 7200 -X POST -H X-User:$USER --data-binary @%s -H \"Content-Type: text/plain\" \"http://localhost:7474/ehri/import/ead?scope=%s&log=%s&tolerant=true&properties=%s&handler=%s\"" % (file_list, scope, log_file, properties_file, handler) )
 
 @task
 def import_large_ead_with_handler(scope, log, properties, file_dir, handler):
@@ -229,7 +231,7 @@ def import_skos(scope, log, file):
     fab stage import_skos:scope=ehri-camps,log=This+list+of+camps+has+been+compiled+by+EHRI+in+2014,file=authoritativeSet/camps-import.rdf"""
 
     full_file_path = "/opt/webapps/data/import-data/" + file
-    run("curl -X POST -H \"X-User: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
+    run("curl -X POST -H X-User:$USER --data-binary @%s \"http://localhost:7474/ehri/import/skos?scope=%s&log=%s&tolerant=true\"" % (full_file_path, scope, log) )
 
 @task
 def import_csv(scope, log, importer, file):
@@ -246,7 +248,7 @@ def import_csv(scope, log, importer, file):
 
     full_file_path = "/opt/webapps/data/import-data/" + file
     full_log_path= "/opt/webapps/data/import-data/logs/" + log
-    run("curl -X POST -H \"X-User: $USER\" --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, full_log_path, importer) )
+    run("curl -X POST -H X-User:$USER --data-binary @%s \"http://localhost:7474/ehri/import/csv?scope=%s&log=%s&importer=%s\"" % (full_file_path, scope, full_log_path, importer) )
 
 @task
 def online_clone_db(local_dir):
@@ -398,8 +400,8 @@ def reindex_users():
         "--index",
         "-H", "X-User=admin",
         "--stats",
-        "--solr", "http://localhost:8080/ehri/portal",
-        "--rest", "http://localhost:7474/ehri",
+        "--solr", env.solr_url,
+        "--rest", env.service_url,
     ] + all_types
     run(" ".join(indexer_cmd))
 
@@ -413,8 +415,8 @@ def reindex_concepts():
         "--index",
         "-H", "X-User=admin",
         "--stats",
-        "--solr", "http://localhost:8080/ehri/portal",
-        "--rest", "http://localhost:7474/ehri",
+        "--solr", env.solr_url,
+        "--rest", env.service_url,
     ] + all_types
     run(" ".join(indexer_cmd))
 
@@ -427,8 +429,8 @@ def reindex_virtualcollections():
         "--index",
         "-H", "X-User=admin",
         "--stats",
-        "--solr", "http://localhost:8080/ehri/portal",
-        "--rest", "http://localhost:7474/ehri",
+        "--solr", env.solr_url,
+        "--rest", env.service_url,
     ] + all_types
     run(" ".join(indexer_cmd))
 
@@ -442,8 +444,8 @@ def reindex_repository(repo_id):
         "--index",
         "-H", "X-User=admin",
         "--stats",
-        "--solr", "http://localhost:8080/ehri/portal",
-        "--rest", "http://localhost:7474/ehri",
+        "--solr", env.solr_url,
+        "--rest", env.service_url,
         "'Repository|%s'" % repo_id,
     ]
     run(" ".join(indexer_cmd))
@@ -461,8 +463,8 @@ def reindex_all():
         "--index",
         "-H", "X-User=admin",
         "--stats",
-        "--solr", "http://localhost:8080/ehri/portal",
-        "--rest", "http://localhost:7474/ehri",
+        "--solr", env.solr_url,
+        "--rest", env.service_url,
     ] + all_types
     run(" ".join(indexer_cmd))
 
