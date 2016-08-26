@@ -30,8 +30,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
@@ -135,10 +135,10 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
             indexDefinition.drop();
         }
 
-        schema.constraintFor(DynamicLabel.label(BASE_LABEL))
+        schema.constraintFor(Label.label(BASE_LABEL))
                 .assertPropertyIsUnique(EntityType.ID_KEY)
                 .create();
-        schema.indexFor(DynamicLabel.label(BASE_LABEL))
+        schema.indexFor(Label.label(BASE_LABEL))
                 .on(EntityType.TYPE_KEY)
                 .create();
 
@@ -149,7 +149,7 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
             for (String prop : mandPropertyKeys) {
                 logger.trace("Creating index on mandatory property: {} -> {}",
                         cls.getName(), prop);
-                schema.indexFor(DynamicLabel.label(cls.getName()))
+                schema.indexFor(Label.label(cls.getName()))
                         .on(prop)
                         .create();
             }
@@ -158,7 +158,7 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
             for (String unique : uniquePropertyKeys) {
                 logger.trace("Creating constraint on unique property: {} -> {}",
                         cls.getName(), unique);
-                schema.constraintFor(DynamicLabel.label(cls.getName()))
+                schema.constraintFor(Label.label(cls.getName()))
                         .assertPropertyIsUnique(unique)
                         .create();
             }
