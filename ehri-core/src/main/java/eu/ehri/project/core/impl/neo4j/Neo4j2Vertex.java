@@ -7,11 +7,10 @@ import com.tinkerpop.blueprints.util.DefaultVertexQuery;
 import com.tinkerpop.blueprints.util.MultiIterable;
 import com.tinkerpop.blueprints.util.StringFactory;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,12 +61,12 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
 
     public void addLabel(String label) {
         graph.autoStartTransaction(true);
-        getRawVertex().addLabel(DynamicLabel.label(label));
+        getRawVertex().addLabel(Label.label(label));
     }
 
     public void removeLabel(String label) {
         graph.autoStartTransaction(true);
-        getRawVertex().removeLabel(DynamicLabel.label(label));
+        getRawVertex().removeLabel(Label.label(label));
     }
 
     public VertexQuery query() {
@@ -91,15 +90,15 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
         private final Neo4j2Graph graph;
         private final Node node;
         private final Direction direction;
-        private final DynamicRelationshipType[] labels;
+        private final RelationshipType[] labels;
 
         public Neo4jVertexVertexIterable(Neo4j2Graph graph, Node node, Direction direction, String... labels) {
             this.graph = graph;
             this.node = node;
             this.direction = direction;
-            this.labels = new DynamicRelationshipType[labels.length];
+            this.labels = new RelationshipType[labels.length];
             for (int i = 0; i < labels.length; i++) {
-                this.labels[i] = DynamicRelationshipType.withName(labels[i]);
+                this.labels[i] = RelationshipType.withName(labels[i]);
             }
         }
 
@@ -135,15 +134,15 @@ public class Neo4j2Vertex extends Neo4j2Element implements Vertex {
         private final Neo4j2Graph graph;
         private final Node node;
         private final Direction direction;
-        private final DynamicRelationshipType[] labels;
+        private final RelationshipType[] labels;
 
         public Neo4jVertexEdgeIterable(Neo4j2Graph graph, Node node, Direction direction, String... labels) {
             this.graph = graph;
             this.node = node;
             this.direction = direction;
-            this.labels = new DynamicRelationshipType[labels.length];
+            this.labels = new RelationshipType[labels.length];
             for (int i = 0; i < labels.length; i++) {
-                this.labels[i] = DynamicRelationshipType.withName(labels[i]);
+                this.labels[i] = RelationshipType.withName(labels[i]);
             }
         }
 

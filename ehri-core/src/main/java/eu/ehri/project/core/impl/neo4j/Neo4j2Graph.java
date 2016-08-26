@@ -16,9 +16,11 @@ import org.apache.commons.configuration.ConfigurationConverter;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
@@ -184,7 +186,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
             @Override
             public ResourceIterator<Node> iterator() {
-                return rawGraph.<Node>findNodes(DynamicLabel.label(label));
+                return rawGraph.<Node>findNodes(Label.label(label));
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -196,7 +198,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             @Override
             public ResourceIterator<Node> iterator() {
                 autoStartTransaction(false);
-                return rawGraph.<Node>findNodes(DynamicLabel.label(label), key, value);
+                return rawGraph.<Node>findNodes(Label.label(label), key, value);
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -254,7 +256,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
 
         this.autoStartTransaction(true);
         return new Neo4j2Edge(((Neo4j2Vertex) outVertex).getRawVertex().createRelationshipTo(((Neo4j2Vertex) inVertex).getRawVertex(),
-                DynamicRelationshipType.withName(label)), this);
+                RelationshipType.withName(label)), this);
     }
 
     @Override
