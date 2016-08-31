@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ehri-ws-sparql</artifactId>
-    <version>0.13.5-SNAPSHOT</version>
 
     <name>Web Service SparQL Extension</name>
     <description>SparQL endpoint for web service.</description>
@@ -19,29 +18,17 @@
         <sesame.version>2.7.10</sesame.version>
     </properties>
 
-
-
     <dependencies>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-            </exclusions>
+            <version>${project.parent.version} </version>
         </dependency>
 
         <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-sail-graph</artifactId>
-            <version>2.6.0</version>
+            <version>${blueprints.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>neo4j-ha</artifactId>
@@ -56,7 +43,7 @@
         <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-graph-sail</artifactId>
-            <version>2.6.0</version>
+            <version>${blueprints.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>neo4j-ha</artifactId>
@@ -93,45 +80,35 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
             <type>test-jar</type>
             <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.neo4j.app</groupId>
             <artifactId>neo4j-server</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>

@@ -15,19 +15,19 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
 
         <dependency>
             <groupId>org.neo4j.test</groupId>
             <artifactId>neo4j-harness</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
