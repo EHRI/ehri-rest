@@ -458,4 +458,14 @@ public class LanguageHelpers {
         }
         return code;
     }
+
+    /**
+     * Convert an ISO 3166-1 country code to its (English) name.
+     * @param code the 2-letter country code
+     * @return the country name, or the code as a fallback
+     */
+    public static String iso3166dashOneCodeToName(String code) {
+        return new Locale(Locale.ENGLISH.getLanguage(), code)
+                .getDisplayCountry(Locale.ENGLISH);
+    }
 }

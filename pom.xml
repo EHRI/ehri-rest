@@ -108,6 +108,7 @@
         <module>ehri-io</module>
         <module>ehri-cli</module>
         <module>ehri-definitions</module>
+        <module>ehri-cypher</module>
         <module>build</module>
     </modules>
 
