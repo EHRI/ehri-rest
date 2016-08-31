@@ -9,7 +9,6 @@
     <artifactId>ehri-cli</artifactId>
     <name>Command Line Tools</name>
     <description>Command line tools for interacting with the backend graph DB.</description>
-    <version>0.13.5-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -37,7 +36,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graphviz</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
         </dependency>
 
         <!-- Command line parsing -->
@@ -56,25 +55,49 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
             <exclusions>
                 <exclusion>
                     <artifactId>neo4j-management</artifactId>
                     <groupId>org.neo4j</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
+            <artifactId>ehri-io</artifactId>
+            <version>${project.parent.version} </version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
@@ -82,30 +105,25 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>3.0.4</version>
+            <version>${neo4j.version}</version>
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ehri-project</groupId>
-            <artifactId>ehri-io</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
         </dependency>
 
         <!-- RDF export -->
         <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-graph-sail</artifactId>
-            <version>2.6.0</version>
+            <version>${blueprints.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>log4j</artifactId>
                     <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
                     <artifactId>neo4j-ha</artifactId>
@@ -120,8 +138,16 @@
         <dependency>
             <groupId>com.tinkerpop.blueprints</groupId>
             <artifactId>blueprints-sail-graph</artifactId>
-            <version>2.6.0</version>
+            <version>${blueprints.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
                 <exclusion>
                     <artifactId>neo4j-ha</artifactId>
                     <groupId>org.neo4j</groupId>

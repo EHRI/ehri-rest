@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -43,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +63,8 @@ class DataConverter {
     /**
      * Convert an error set to a generic data structure.
      *
-     * @param errorSet An ErrorSet instance
-     * @return A map containing the error set data
+     * @param errorSet an ErrorSet instance
+     * @return a map containing the error set data
      */
     public static Map<String, Object> errorSetToData(ErrorSet errorSet) {
         Map<String, Object> data = Maps.newHashMap();
@@ -85,9 +85,9 @@ class DataConverter {
     /**
      * Convert an error set to JSON.
      *
-     * @param errorSet An ErrorSet instance
-     * @return A JSON string representing the error set
-     * @throws SerializationError
+     * @param errorSet an ErrorSet instance
+     * @return a JSON string representing the error set
+     * @throws SerializationError when the error set cannot be converted to valid JSON
      */
     public static String errorSetToJson(ErrorSet errorSet) throws SerializationError {
         try {
@@ -101,8 +101,8 @@ class DataConverter {
     /**
      * Convert a bundle to a generic data structure.
      *
-     * @param bundle The bundle
-     * @return A data map
+     * @param bundle the bundle
+     * @return a data map
      */
     public static Map<String, Object> bundleToData(Bundle bundle) {
         Map<String, Object> data = Maps.newLinkedHashMap();
@@ -129,9 +129,9 @@ class DataConverter {
     /**
      * Convert a bundle to JSON.
      *
-     * @param bundle The bundle
-     * @return A JSON string representing the bundle
-     * @throws SerializationError
+     * @param bundle the bundle
+     * @return a JSON string representing the bundle
+     * @throws SerializationError when the bundle cannot be converted to valid JSON
      */
     public static String bundleToJson(Bundle bundle) throws SerializationError {
         try {
@@ -145,9 +145,10 @@ class DataConverter {
     /**
      * Convert some JSON into an EntityBundle.
      *
-     * @param inputStream An input stream containing JSON representing the bundle
-     * @return The bundle
-     * @throws DeserializationError
+     * @param inputStream an input stream containing JSON representing the bundle
+     * @return the bundle
+     * @throws DeserializationError when the stream data cannot be converted to
+     *                              a valid bundle
      */
     public static Bundle streamToBundle(InputStream inputStream) throws DeserializationError {
         try {
@@ -163,7 +164,7 @@ class DataConverter {
      *
      * @param bundle       the bundle
      * @param outputStream the stream
-     * @throws SerializationError
+     * @throws SerializationError when the bundle cannot be converted to valid JSON
      */
     public static void bundleToStream(Bundle bundle, OutputStream outputStream) throws SerializationError {
         try {
@@ -174,6 +175,15 @@ class DataConverter {
         }
     }
 
+    /**
+     * Parse an input stream containing a JSON array of bundle objects into
+     * an iterable of bundles.
+     *
+     * @param inputStream a JSON input stream
+     * @return an iterable of bundle objects
+     * @throws DeserializationError when the stream data cannot be converted to
+     *                              a valid bundle
+     */
     public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
         Preconditions.checkNotNull(inputStream);
         try {
@@ -184,7 +194,7 @@ class DataConverter {
                 throw new DeserializationError("Stream should be an array of objects, was: " + jsonToken);
             }
             final Iterator<Bundle> iterator = parser.nextValue() == JsonToken.END_ARRAY
-                    ? Iterators.<Bundle>emptyIterator()
+                    ? Collections.<Bundle>emptyIterator()
                     : parser.readValuesAs(Bundle.class);
             return new CloseableIterable<Bundle>() {
                 @Override
@@ -209,9 +219,10 @@ class DataConverter {
     /**
      * Convert some JSON into an EntityBundle.
      *
-     * @param json A JSON string representing the bundle
-     * @return The bundle
-     * @throws DeserializationError
+     * @param json a JSON string representing the bundle
+     * @return the bundle
+     * @throws DeserializationError when the stream data cannot be converted to
+     *                              a valid bundle
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
         try {
@@ -230,7 +241,10 @@ class DataConverter {
      * <p>
      * NB: We also strip out all NULL property values at this stage.
      *
-     * @throws DeserializationError
+     * @param rawData an map object
+     * @return a bundle
+     * @throws DeserializationError when the stream data cannot be converted to
+     *                              a valid bundle
      */
     public static Bundle dataToBundle(Object rawData)
             throws DeserializationError {
@@ -254,9 +268,10 @@ class DataConverter {
     /**
      * Extract relationships from the bundle data.
      *
-     * @param data A plain map
-     * @return A
-     * @throws DeserializationError
+     * @param data a plain map
+     * @return a multi-map of string -> bundle list
+     * @throws DeserializationError when the stream data cannot be converted to
+     *                              valid relationships
      */
     private static Multimap<String, Bundle> getRelationships(Map<?, ?> data)
             throws DeserializationError {
@@ -299,14 +314,6 @@ class DataConverter {
         }
     }
 
-    /**
-     * Get the type key, which should correspond the one of the EntityTypes enum
-     * values.
-     *
-     * @param data The data, as an untyped map
-     * @return A type, extracted from the data
-     * @throws DeserializationError
-     */
     private static EntityClass getType(Map<?, ?> data)
             throws DeserializationError {
         try {

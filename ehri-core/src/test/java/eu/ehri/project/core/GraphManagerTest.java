@@ -44,6 +44,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -206,7 +207,7 @@ public class GraphManagerTest {
             manager.updateVertex(TEST_ID1, TEST_TYPE, data);
 
             assertEquals(NEW_TEST_VALUE, vertex.getProperty(NEW_TEST_KEY));
-            assertEquals(null, vertex.getProperty(TEST_KEY));
+            assertNull(vertex.getProperty(TEST_KEY));
         }
 
         @Test

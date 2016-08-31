@@ -17,7 +17,7 @@
     </properties>
 
     <build>
-        <finalName>${parent.artifactId}-${parent.version}</finalName>
+        <finalName>${project.parent.artifactId}-${project.parent.version} </finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -88,32 +88,32 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-cli</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-cypher</artifactId>
-            <version>0.13.5-SNAPSHOT</version>
+            <version>${project.parent.version} </version>
         </dependency>
     </dependencies>
     <profiles>
@@ -123,7 +123,7 @@
                 <dependency>
                     <groupId>ehri-project</groupId>
                     <artifactId>ehri-ws-sparql</artifactId>
-                    <version>0.13.5-SNAPSHOT</version>
+                    <version>${project.parent.version} </version>
                 </dependency>
             </dependencies>
         </profile>

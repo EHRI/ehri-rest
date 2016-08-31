@@ -41,6 +41,7 @@ import org.junit.Test;
 import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -179,7 +180,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
         // This shouldn't barf because the collection does not need a name.
         DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
-        assertEquals(null, unit.getProperty("name"));
+        assertNull(unit.getProperty("name"));
     }
 
     @Test

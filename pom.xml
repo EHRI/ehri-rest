@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -8,7 +7,7 @@
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
     <version>0.13.5-SNAPSHOT</version>
-   <name>EHRI Backend</name>
+    <name>EHRI Backend</name>
     <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
     <url>https://github.com/EHRI</url>
     <organization>
@@ -94,7 +93,7 @@
         <connection>scm:git:git://github.com/EHRI/ehri-rest</connection>
         <url>https://github.com/EHRI/ehri-rest</url>
     </scm>
-    
+
     <licenses>
         <license>
             <name>European Union Public Licence (EUPL) version 1.1</name>
@@ -117,6 +116,9 @@
 
         <!-- Overridden by child poms we don't want to create a site for -->
         <maven-site-plugin.skip>false</maven-site-plugin.skip>
+
+        <neo4j.version>3.0.4</neo4j.version>
+        <blueprints.version>2.6.0</blueprints.version>
     </properties>
 
     <build>
