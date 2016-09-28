@@ -1,0 +1,10 @@
+query FirstN($n: Int!, $from: Cursor) {
+    test: documentaryUnits(first: $n, from: $from) {
+        items {
+            id
+        }
+        pageInfo {
+            nextPage
+        }
+    }
+}

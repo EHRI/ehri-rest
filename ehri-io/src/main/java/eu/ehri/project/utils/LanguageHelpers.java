@@ -468,4 +468,15 @@ public class LanguageHelpers {
         return new Locale(Locale.ENGLISH.getLanguage(), code)
                 .getDisplayCountry(Locale.ENGLISH);
     }
+
+    /**
+     * Convert and ISO639-2 code to its (English) name.
+     *
+     * @param code the 2-letter country code
+     * @return the country name
+     */
+    public static String countryCodeToName(String code) {
+        return new java.util.Locale(Locale.ENGLISH.getLanguage(), code)
+                .getDisplayCountry();
+    }
 }

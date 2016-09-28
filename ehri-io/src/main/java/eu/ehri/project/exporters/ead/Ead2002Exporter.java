@@ -303,8 +303,7 @@ public final class Ead2002Exporter implements EadExporter {
                 Country country = repository.getCountry();
                 Element lineElem = doc.createElement("addressline");
                 addrElem.appendChild(lineElem);
-                lineElem.setTextContent(new java.util.Locale(Locale.ENGLISH.getLanguage(), country.getCode())
-                        .getDisplayCountry());
+                lineElem.setTextContent(LanguageHelpers.countryCodeToName(country.getId()));
             }
         }
     }

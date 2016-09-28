@@ -3,7 +3,7 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.5-SNAPSHOT</version>
+        <version>0.13.6-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -63,6 +63,10 @@
                             <include>org.openrdf.sesame:sesame-queryalgebra-evaluation</include>
                             <include>org.openrdf.*</include>
                             <include>net.fortytwo.sesametools:*</include>
+
+                            <!-- GraphQL deps -->
+                            <include>org.antlr:*</include>
+                            <include>com.graphql-java:*</include>
                         </includes>
                     </artifactSet>
                 </configuration>
@@ -108,6 +112,11 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
+            <version>${project.parent.version} </version>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-ws-graphql</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
