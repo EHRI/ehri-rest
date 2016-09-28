@@ -77,28 +77,28 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         JsonNode data = response.getEntity(JsonNode.class);
         //System.out.println(data);
-        assertEquals("c1",
-                data.path("data").path("c1").path("id").textValue());
-        assertEquals("c2",
-                data.path("data").path("c1")
-                        .path("children").path("items").path(0)
-                        .path("id").textValue());
-        assertEquals("c3",
-                data.path("data").path("c1")
-                        .path("children").path("items").path(0)
-                        .path("children").path("items").path(0)
-                        .path("id").textValue());
-        assertEquals("Amsterdam",
-                data.path("data").path("c1").path("repository")
-                        .path("english").path("addresses").path(0)
-                        .path("municipality").textValue());
-        assertEquals("test@example.com",
-                data.path("data").path("c1").path("repository")
-                        .path("english").path("addresses").path(0)
-                        .path("email").path(0).textValue());
-
-        assertEquals("ann7",
-                data.path("data").path("c4").path("annotations").path(0).path("id").textValue());
+        assertEquals("c1", data.path("data").path("c1").path("id").textValue());
+        assertEquals(0, data.path("data").path("c1").path("ancestors").size());
+        assertEquals("c2", data.path("data").path("c1")
+                .path("children").path("items").path(0)
+                .path("id").textValue());
+        assertEquals("c3", data.path("data").path("c1")
+                .path("children").path("items").path(0)
+                .path("children").path("items").path(0)
+                .path("id").textValue());
+        assertEquals("Amsterdam", data.path("data").path("c1").path("repository")
+                .path("english").path("addresses").path(0)
+                .path("municipality").textValue());
+        assertEquals("test@example.com", data.path("data").path("c1")
+                .path("repository").path("english").path("addresses").path(0)
+                .path("email").path(0).textValue());
+        assertEquals(2, data.path("data").path("c3").path("ancestors").size());
+        assertEquals("c2", data.path("data").path("c3").path("ancestors")
+                .path(0).path("id").textValue());
+        assertEquals("c1", data.path("data").path("c3").path("ancestors")
+                .path(1).path("id").textValue());
+        assertEquals("ann7", data.path("data").path("c4")
+                .path("annotations").path(0).path("id").textValue());
         assertStatus(OK, response);
     }
 
