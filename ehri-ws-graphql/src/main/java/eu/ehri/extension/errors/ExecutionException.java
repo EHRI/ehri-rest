@@ -42,7 +42,7 @@ public class ExecutionException extends WebApplicationException {
         try {
             Map<String, Object> error = ImmutableMap.of(
                     "message", cause.getMessage(),
-                    "type", "ExecutionException"
+                    "type", ExecutionException.class.getSimpleName()
             );
             return mapper.writeValueAsString(
                     ImmutableMap.of("errors", ImmutableList.of(error))

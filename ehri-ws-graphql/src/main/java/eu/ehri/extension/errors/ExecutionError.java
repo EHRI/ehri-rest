@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import graphql.GraphQLError;
 
 import javax.ws.rs.WebApplicationException;
@@ -24,7 +25,8 @@ public class ExecutionError extends WebApplicationException {
             return mapper.writeValueAsString(
                     ImmutableMap.of("errors", errors.stream().map(e -> ImmutableMap.of(
                             "message", e.getMessage(),
-                            "location", e.getLocations().stream().map(s -> ImmutableMap.of(
+                            "location", e.getLocations() == null ? Lists.newArrayList() : e.getLocations()
+                                        .stream().map(s -> ImmutableMap.of(
                                     "line", s.getLine(),
                                     "column", s.getColumn()
                             )).collect(Collectors.toList()),
