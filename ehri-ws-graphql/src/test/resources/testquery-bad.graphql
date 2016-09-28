@@ -1,0 +1,12 @@
+{
+    DocumentaryUnit(NO_PARAM: "c1") {
+        id
+        type
+        identifier
+        description(languageCode: "eng", identifier: "c1-desc2") {
+            name
+            languageCode
+            scopeAndContent
+        }
+    }
+}

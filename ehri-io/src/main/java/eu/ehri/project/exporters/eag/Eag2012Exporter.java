@@ -133,7 +133,7 @@ public final class Eag2012Exporter implements EagExporter {
                 locationElem.appendChild(countryElem);
                 String cc = Optional.fromNullable(((String) address.getProperty("countryCode")))
                         .or(country.getCode());
-                countryElem.setTextContent(new Locale("en", cc).getDisplayCountry());
+                countryElem.setTextContent(LanguageHelpers.countryCodeToName(cc));
                 Element postCodeElem = doc.createElement("municipalityPostalcode");
                 locationElem.appendChild(postCodeElem);
                 postCodeElem.setTextContent(address.getProperty("postalcode"));

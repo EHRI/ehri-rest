@@ -146,7 +146,7 @@
               data:
                 name: An Address
                 street: 1 Some St.
-                city: Amsterdam
+                municipality: Amsterdam
                 email:
                   - test@example.com
                 webpage:
@@ -518,6 +518,19 @@
       - moderators
     promotedBy: tim
     demotedBy: linda
+
+- id: ann7
+  type: Annotation
+  data:
+    identifier: ann7
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c4
+    hasAnnotationBody: mike
+    access:
+      - mike
+      - moderators
 
 --- # Links
  - id: link1

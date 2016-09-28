@@ -262,7 +262,7 @@ public final class QueryApiImpl implements QueryApi {
      * for the given page/count.
      */
     @Override
-    public <E extends Entity> Page<E> page(Iterable<E> entities, Class<E> cls) {
+    public <E extends Entity> Page<E> page(Iterable<? extends E> entities, Class<E> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
                 .getAclFilterFunction(accessor);
 

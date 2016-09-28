@@ -63,7 +63,23 @@ import java.util.zip.ZipInputStream;
  */
 public class AbstractResourceClientTest extends RunningServerTest {
 
-    protected static final Client client;
+    protected Client client;
+
+    AbstractResourceClientTest(Class<?> ... additionalProviders) {
+        ClientConfig config = new DefaultClientConfig();
+        List<Class<?>> providers = Lists.newArrayList(
+                GlobalPermissionSetProvider.class,
+                BundleProvider.class,
+                ImportLogProvider.class
+        );
+        for (Class<?> provider : providers) {
+            config.getClasses().add(provider);
+        }
+        for (Class<?> provider : additionalProviders) {
+            config.getClasses().add(provider);
+        }
+        client = Client.create(config);
+    }
 
     protected List<ZipEntry> readZip(InputStream stream) throws IOException {
         File tmp = File.createTempFile("test", ".zip");
@@ -78,14 +94,6 @@ public class AbstractResourceClientTest extends RunningServerTest {
             }
         }
         return entries;
-    }
-
-    static {
-        ClientConfig config = new DefaultClientConfig();
-        config.getClasses().add(GlobalPermissionSetProvider.class);
-        config.getClasses().add(BundleProvider.class);
-        config.getClasses().add(ImportLogProvider.class);
-        client = Client.create(config);
     }
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();

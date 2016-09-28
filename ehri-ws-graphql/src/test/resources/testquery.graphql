@@ -1,0 +1,111 @@
+{
+    c1: DocumentaryUnit(id: "c1") {
+        id
+        type
+        identifier
+        firstEnglishDescription: description(languageCode: "eng", identifier: "c1-desc") {
+            identifier
+            dates {
+                startDate
+                endDate
+            }
+            accessPoints {
+                name
+                type
+            }
+        }
+        description(languageCode: "eng", identifier: "c1-desc2") {
+            name
+            languageCode
+            scopeAndContent
+        }
+        repository {
+            id
+            english: description(languageCode: "eng") {
+                name
+                addresses {
+                    municipality
+                    email
+                }
+            }
+            frenchDescription: description(languageCode: "fra") {
+                identifier
+            }
+            country {
+                name
+            }
+        }
+        children {
+            items {
+                id
+                description(languageCode: "eng") {
+                    name
+                }
+                children {
+                    items {
+                        id
+                        description(languageCode: "eng") {
+                            name
+                            rulesAndConventions
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    c4: DocumentaryUnit(id: "c4") {
+        annotations {
+            id
+            body
+        }
+    }
+
+    CvocConcept(id: "cvoc1") {
+        identifier
+        description {
+            name
+        }
+    }
+
+    AuthoritativeSet(id: "auths") {
+        name
+        authorities {
+            items {
+                identifier
+                description {
+                    name
+                }
+            }
+        }
+    }
+
+    firstAgentDesc: HistoricalAgent(id: "a1") {
+        description {
+            name
+        }
+    }
+
+    secondDocDesc: DocumentaryUnit(id: "c1") {
+        description(at: 2) {
+            identifier
+        }
+    }
+
+    countries {
+        items {
+            id
+            name
+        }
+    }
+
+    annotations {
+        items {
+            body
+            targets {
+                id
+                type
+            }
+        }
+    }
+}
