@@ -212,27 +212,27 @@ public class GraphQLImpl {
         // once here, and once by the connection data fetcher, which also
         // applies pagination.
         return connectionDataFetcher(api().query()
-                .setStream(true).setLimit(-1).page(type, Accessible.class));
+                .setStream(true).setLimit(-1).page(type, Entity.class));
     }
 
-    private DataFetcher oneToManyRelationshipConnectionFetcher(Function<Accessible, Iterable<? extends Accessible>> f) {
+    private DataFetcher oneToManyRelationshipConnectionFetcher(Function<Entity, Iterable<? extends Entity>> f) {
         return env -> {
-            Iterable<? extends Accessible> iter = f.apply(((Accessible) env.getSource()));
+            Iterable<? extends Entity> iter = f.apply(((Entity) env.getSource()));
             return connectionDataFetcher(iter).get(env);
         };
     }
 
-    private DataFetcher connectionDataFetcher(Iterable<? extends Accessible> iter) {
+    private DataFetcher connectionDataFetcher(Iterable<? extends Entity> iter) {
         return env -> {
             int limit = getLimit(env.getArgument(FIRST_PARAM));
             int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
 
-            QueryApi.Page<Accessible> page = api()
+            QueryApi.Page<Entity> page = api()
                     .query()
                     .setLimit(limit)
                     .setOffset(offset)
-                    .page(iter, Accessible.class);
-            List<Accessible> items = Lists.newArrayList(page.getIterable());
+                    .page(iter, Entity.class);
+            List<Entity> items = Lists.newArrayList(page.getIterable());
 
             boolean hasNext = page.getOffset() + items.size() < page.getTotal();
             boolean hasPrev = page.getOffset() > 0;
@@ -327,18 +327,18 @@ public class GraphQLImpl {
         return environment -> transformer.apply(fetcher.get(environment));
     }
 
-    private DataFetcher oneToManyRelationshipFetcher(Function<Accessible, Iterable<? extends Entity>> f) {
+    private DataFetcher oneToManyRelationshipFetcher(Function<Entity, Iterable<? extends Entity>> f) {
         return environment -> {
-            Iterable<? extends Entity> elements = f.apply(((Accessible) environment.getSource()));
+            Iterable<? extends Entity> elements = f.apply(((Entity) environment.getSource()));
             QueryApi.Page<Entity> page = api()
                     .query().setStream(true).setLimit(-1).page(elements, Entity.class);
             return Lists.newArrayList(page);
         };
     }
 
-    private DataFetcher manyToOneRelationshipFetcher(Function<Accessible, Accessible> f) {
+    private DataFetcher manyToOneRelationshipFetcher(Function<Entity, Entity> f) {
         return environment -> {
-            Accessible elem = f.apply((Accessible) environment.getSource());
+            Entity elem = f.apply((Entity) environment.getSource());
             Boolean visible = AclManager.getAclFilterFunction(api().accessor()).compute(elem.asVertex());
             return visible ? elem : null;
         };
