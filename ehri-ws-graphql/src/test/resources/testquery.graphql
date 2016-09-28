@@ -52,6 +52,15 @@
                 }
             }
         }
+        ancestors {
+            id
+        }
+    }
+
+    c3: DocumentaryUnit(id: "c3") {
+        ancestors {
+            id
+        }
     }
 
     c4: DocumentaryUnit(id: "c4") {
