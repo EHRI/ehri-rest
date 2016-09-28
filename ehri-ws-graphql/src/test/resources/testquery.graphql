@@ -63,6 +63,11 @@
             description {
                 name
             }
+            repository {
+                description {
+                    name
+                }
+            }
         }
     }
 
