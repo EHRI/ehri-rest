@@ -59,7 +59,13 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
             return executionResult;
         } catch (GraphQLException e) {
-            throw new ExecutionException(e);
+            // Hack: handle non validation of null variables by
+            // returning a proper error...
+            if (e.getMessage().contains("Null value")) {
+                throw new ExecutionException(e);
+            } else {
+                throw e;
+            }
         }
     }
 

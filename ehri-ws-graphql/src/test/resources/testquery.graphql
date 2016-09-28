@@ -60,6 +60,9 @@
     c3: DocumentaryUnit(id: "c3") {
         ancestors {
             id
+            description {
+                name
+            }
         }
     }
 

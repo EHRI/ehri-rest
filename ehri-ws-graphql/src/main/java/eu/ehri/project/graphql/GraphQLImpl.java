@@ -298,7 +298,7 @@ public class GraphQLImpl {
         String lang = environment.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
         String code = environment.getArgument(Ontology.IDENTIFIER_KEY);
 
-        Accessible source = (Accessible) environment.getSource();
+        Entity source = (Entity) environment.getSource();
         Iterable<Description> descriptions = source.as(Described.class).getDescriptions();
 
         if (lang == null && code == null) {
@@ -339,8 +339,8 @@ public class GraphQLImpl {
     private DataFetcher manyToOneRelationshipFetcher(Function<Accessible, Accessible> f) {
         return environment -> {
             Accessible elem = f.apply((Accessible) environment.getSource());
-            Boolean visable = AclManager.getAclFilterFunction(api().accessor()).compute(elem.asVertex());
-            return visable ? elem : null;
+            Boolean visible = AclManager.getAclFilterFunction(api().accessor()).compute(elem.asVertex());
+            return visible ? elem : null;
         };
     }
 
