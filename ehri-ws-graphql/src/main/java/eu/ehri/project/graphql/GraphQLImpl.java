@@ -33,6 +33,7 @@ import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Isdiah;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -56,6 +57,7 @@ import eu.ehri.project.utils.LanguageHelpers;
 import graphql.relay.Base64;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLList;
@@ -76,6 +78,7 @@ import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLArgument.newArgument;
+import static graphql.schema.GraphQLEnumType.newEnum;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
@@ -687,11 +690,28 @@ public class GraphQLImpl {
             .withInterface(entityInterface)
             .build();
 
+    private final GraphQLEnumType accessPointTypeEnum = newEnum()
+            .name(AccessPointType.class.getSimpleName())
+            .description("Access point types")
+            .value(AccessPointType.person.name())
+            .value(AccessPointType.family.name())
+            .value(AccessPointType.corporateBody.name())
+            .value(AccessPointType.subject.name())
+            .value(AccessPointType.creator.name())
+            .value(AccessPointType.place.name())
+            .value(AccessPointType.genre.name())
+            .build();
+
     private final GraphQLObjectType accessPointType = newObject()
             .name(Entities.ACCESS_POINT)
             .description("An access point")
             .field(nonNullAttr(Ontology.NAME_KEY, "The access point's text"))
-            .field(nonNullAttr(Ontology.ACCESS_POINT_TYPE, "The access point's type"))
+            .field(newFieldDefinition()
+                .name(Ontology.ACCESS_POINT_TYPE)
+                .description("The access point's type")
+                .type(new GraphQLNonNull(accessPointTypeEnum))
+                .dataFetcher(attributeDataFetcher)
+                .build())
             .build();
 
     private final GraphQLObjectType datePeriodType = newObject()
