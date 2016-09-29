@@ -45,12 +45,12 @@ import org.slf4j.LoggerFactory;
 public class Eag2896Test extends AbstractImporterTest {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Eag2896Test.class);
-    protected final String SINGLE_UNIT = "eag-2896.xml";
+    private final String SINGLE_UNIT = "eag-2896.xml";
     // Depends on fixtures
-    protected final String TEST_COUNTRY = "nl";
+    private final String TEST_COUNTRY = "nl";
     // Depends on SINGLE_UNIT
-    protected final String IMPORTED_ITEM_ID = "NL-002896";
-    protected final String AGENT_DESC_ID = "NL-002896#desc";
+    private final String IMPORTED_ITEM_ID = "NL-002896";
+    private final String AGENT_DESC_ID = "NL-002896#desc";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -112,6 +112,7 @@ public class Eag2896Test extends AbstractImporterTest {
         // Check we've only got one action
         assertEquals(1, log.getCreated());
         SystemEvent ev = actionManager.getLatestGlobalEvent();
+        assertNotNull(ev);
         assertEquals(logMessage, ev.getLogMessage());
 
         // Ensure the import action has the right number of subjects.

@@ -28,7 +28,7 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEventType;
-import eu.ehri.project.persistence.utils.BundleUtils;
+import eu.ehri.project.persistence.utils.DataUtils;
 import eu.ehri.project.test.TestData;
 import org.junit.After;
 import org.junit.Before;
@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 
 import static org.junit.Assert.*;
 
@@ -138,20 +139,19 @@ public class BundleTest {
 
         // Add a new date period to both and ensure that have a
         // different structural ordering
-        System.out.println(bundle1);
         Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
                 .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
                 .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
-        Bundle currentDp = BundleUtils.getBundle(bundle1, "describes[0]/hasDate[0]");
-        Bundle b1_2 = BundleUtils
-                .setBundle(bundle1, "describes[0]/hasDate[-1]", currentDp);
-        Bundle b1_3 = BundleUtils.setBundle(b1_2, "describes[0]/hasDate[0]", dp);
+        Bundle currentDp = DataUtils.getItem(bundle1, "describes[0]/hasDate[0]");
+        Bundle b1_2 = DataUtils
+                .setItem(bundle1, "describes[0]/hasDate[-1]", currentDp);
+        Bundle b1_3 = DataUtils.setItem(b1_2, "describes[0]/hasDate[0]", dp);
 
-        Bundle b2_2 = BundleUtils.setBundle(bundle2, "describes[0]/hasDate[-1]", dp);
-        assertEquals(BundleUtils.getBundle(b1_3, "describes[0]/hasDate[1]"),
-                BundleUtils.getBundle(b2_2, "describes[0]/hasDate[0]"));
-        assertEquals(BundleUtils.getBundle(b1_3, "describes[0]/hasDate[0]"),
-                BundleUtils.getBundle(b2_2, "describes[0]/hasDate[1]"));
+        Bundle b2_2 = DataUtils.setItem(bundle2, "describes[0]/hasDate[-1]", dp);
+        assertEquals(DataUtils.getItem(b1_3, "describes[0]/hasDate[1]"),
+                DataUtils.getItem(b2_2, "describes[0]/hasDate[0]"));
+        assertEquals(DataUtils.getItem(b1_3, "describes[0]/hasDate[0]"),
+                DataUtils.getItem(b2_2, "describes[0]/hasDate[1]"));
         assertEquals(b1_3, b2_2);
     }
 
@@ -204,17 +204,17 @@ public class BundleTest {
                                         MaintenanceEventType.created.toString()));
 
         Bundle withIds = start.generateIds(Sets.<String>newHashSet());
-        Bundle toMerge = BundleUtils.setBundle(withIds, "describes[0]/hasDate[-1]", nested)
+        Bundle toMerge = DataUtils.setItem(withIds, "describes[0]/hasDate[-1]", nested)
                 .generateIds(Sets.<String>newHashSet());
-        Bundle patch = BundleUtils.set(withIds, "describes[0]/name", "Foobar 2");
+        Bundle patch = DataUtils.set(withIds, "describes[0]/name", "Foobar 2");
         Bundle merged = toMerge.mergeDataWith(patch);
         assertNotSame(merged, bundle);
         assertEquals("Foobar 2",
-                BundleUtils.get(merged, "describes[0]/name"));
+                DataUtils.get(merged, "describes[0]/name"));
         assertEquals("created",
-                BundleUtils.get(merged, "describes[1]/eventType"));
+                DataUtils.get(merged, "describes[1]/eventType"));
         assertEquals("2001-01-01",
-                BundleUtils.get(merged, "describes[0]/hasDate[0]/startDate"));
+                DataUtils.get(merged, "describes[0]/hasDate[0]/startDate"));
     }
 
     @Test
@@ -231,7 +231,7 @@ public class BundleTest {
     @Test
     public void testFilterRelations() throws Exception {
         // Remove descriptions with languageCode = "en"
-        Bundle.Filter filter = (relationLabel, bundle1) -> {
+        BiPredicate<String, Bundle> filter = (relationLabel, bundle1) -> {
             String lang = bundle1.getDataValue(Ontology.LANGUAGE);
             return bundle1.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                     && ("en".equals(lang));
@@ -323,7 +323,7 @@ public class BundleTest {
         Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
                 .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
                 .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
-        Bundle deeperBundle = BundleUtils.setBundle(bundle, "describes[0]/hasDate[-1]", dp);
+        Bundle deeperBundle = DataUtils.setItem(bundle, "describes[0]/hasDate[-1]", dp);
         assertEquals(2, deeperBundle.depth());
     }
 

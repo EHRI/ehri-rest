@@ -20,7 +20,6 @@
 package eu.ehri.project.persistence;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -46,6 +45,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -59,7 +59,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * where the secondary bundle's null data values will indicate that
  * the key/value should be removed from the primary bundle's data.
  */
-public final class Bundle {
+public final class Bundle implements NestableData<Bundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(Bundle.class);
 
@@ -78,20 +78,6 @@ public final class Bundle {
     public static final String DATA_KEY = "data";
     public static final String TYPE_KEY = "type";
     public static final String META_KEY = "meta";
-
-    /**
-     * Filter predicate function interface.
-     */
-    public interface Filter {
-        /**
-         * Filter (remove) items in a Bundle tree that
-         * match this predicate.
-         *
-         * @param bundle The bundle
-         * @return Whether to remove the item
-         */
-        boolean remove(String relationLabel, Bundle bundle);
-    }
 
     /**
      * Properties that are "managed", i.e. automatically set
@@ -281,6 +267,7 @@ public final class Bundle {
      *                            type requested
      */
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T getDataValue(String key) throws ClassCastException {
         checkNotNull(key);
         return (T) data.get(key);
@@ -294,6 +281,7 @@ public final class Bundle {
      * @param value The data value
      * @return A new bundle with value as key
      */
+    @Override
     public Bundle withDataValue(String key, Object value) {
         Map<String, Object> newData = Maps.newHashMap(data);
         newData.put(key, value);
@@ -323,6 +311,7 @@ public final class Bundle {
      * @param key The data key to remove
      * @return A new bundle
      */
+    @Override
     public Bundle removeDataValue(String key) {
         Map<String, Object> newData = Maps.newHashMap(data);
         newData.remove(key);
@@ -382,6 +371,7 @@ public final class Bundle {
      *
      * @return The full set of relations
      */
+    @Override
     public Multimap<String, Bundle> getRelations() {
         return relations;
     }
@@ -412,6 +402,7 @@ public final class Bundle {
      * @param relations A full set of relations
      * @return The new bundle
      */
+    @Override
     public Bundle replaceRelations(Multimap<String, Bundle> relations) {
         return new Bundle(id, type, data, relations, meta, temp);
     }
@@ -422,6 +413,7 @@ public final class Bundle {
      * @param others Additional relationship map
      * @return The new bundle
      */
+    @Override
     public Bundle withRelations(Multimap<String, Bundle> others) {
         Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
@@ -435,6 +427,7 @@ public final class Bundle {
      * @param relation A relationship key
      * @return A given set of relations
      */
+    @Override
     public List<Bundle> getRelations(String relation) {
         return relations.get(relation);
     }
@@ -446,6 +439,7 @@ public final class Bundle {
      * @param others   A set of relations for the given key
      * @return A new bundle
      */
+    @Override
     public Bundle withRelations(String relation, List<Bundle> others) {
         Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
@@ -460,6 +454,7 @@ public final class Bundle {
      * @param other    A related bundle
      * @return A new bundle
      */
+    @Override
     public Bundle withRelation(String relation, Bundle other) {
         Multimap<String, Bundle> tmp = ArrayListMultimap
                 .create(relations);
@@ -555,17 +550,17 @@ public final class Bundle {
      * Filter relations, removing items that *match* the given
      * filter function.
      *
-     * @param filter A Filter function instance
-     * @return A bundle with relations matching the
-     * given predicate function removed.
+     * @param filter a predicate taking a string relation name
+     *               and a bundle item
+     * @return a bundle with relations matching the given predicate function removed.
      */
-    public Bundle filterRelations(Filter filter) {
+    public Bundle filterRelations(BiPredicate<String, Bundle> filter) {
         Builder builder = new Builder(type)
                 .addData(data)
                 .addMetaData(meta)
                 .setId(id);
         for (Map.Entry<String, Bundle> rel : relations.entries()) {
-            if (!filter.remove(rel.getKey(), rel.getValue())) {
+            if (!filter.test(rel.getKey(), rel.getValue())) {
                 builder.addRelation(rel.getKey(), rel.getValue()
                         .filterRelations(filter));
             }

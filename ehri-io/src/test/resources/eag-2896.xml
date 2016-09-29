@@ -7,7 +7,7 @@
         <respevent>
           <surnames>Bryant</surnames>
           <firstname>Mike</firstname>
-          <charge>Researcher</charge>
+          <charge>human</charge>
         </respevent>
         <source>Imported from EHRI spreadsheet</source>
       </mainevent>
@@ -16,7 +16,7 @@
         <respevent>
           <surnames>Bryant</surnames>
           <firstname>Mike</firstname>
-          <charge>Researcher</charge>
+          <charge>human</charge>
         </respevent>
         <source>Exported from ICA-AtoM</source>
       </mainevent>

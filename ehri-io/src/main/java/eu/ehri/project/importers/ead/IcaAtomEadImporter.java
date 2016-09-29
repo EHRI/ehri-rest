@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
@@ -165,7 +166,7 @@ public class IcaAtomEadImporter extends SaxXmlImporter {
                         .vertexToBundle(manager.getVertex(withIds.getId()));
 
                 //filter out dependents that a) are descriptions, b) have the same language/code
-                Bundle.Filter filter = (relationLabel, bundle) -> {
+                BiPredicate<String, Bundle> filter = (relationLabel, bundle) -> {
                     String lang = bundle.getDataValue(Ontology.LANGUAGE);
                     return bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                             && (lang != null

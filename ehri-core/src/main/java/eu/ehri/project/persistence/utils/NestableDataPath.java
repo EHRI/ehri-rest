@@ -38,16 +38,16 @@ import java.util.NoSuchElementException;
  * Everything before the final slash is a PathSection and must indicate the
  * relation name and the index of the desired item.
  */
-final class BundlePath {
+final class NestableDataPath {
 
     public static final String PATH_SEP = "/";
     private static Splitter splitter = Splitter.on(PATH_SEP).omitEmptyStrings();
 
     private final List<PathSection> sections;
     private final Optional<String> terminus;
-    private final BundlePath prev;
+    private final NestableDataPath prev;
 
-    private BundlePath(List<PathSection> sections, Optional<String> terminus, BundlePath prev) {
+    private NestableDataPath(List<PathSection> sections, Optional<String> terminus, NestableDataPath prev) {
         Preconditions.checkNotNull(terminus);
         this.sections = ImmutableList.copyOf(sections);
         this.terminus = terminus;
@@ -74,15 +74,15 @@ final class BundlePath {
         return sections.isEmpty();
     }
     
-    public BundlePath next() {
+    public NestableDataPath next() {
         if (sections.isEmpty())
             throw new NoSuchElementException();
         List<PathSection> ns = Lists.newArrayList(sections);
         ns.remove(0);
-        return new BundlePath(ns, terminus, this);
+        return new NestableDataPath(ns, terminus, this);
     }
 
-    public static BundlePath fromString(String path) {
+    public static NestableDataPath fromString(String path) {
         List<PathSection> sections = Lists.newArrayList();
         List<String> ps = Lists.newArrayList(splitter.split(path));
         String terminus = ps.remove(ps.size() - 1);
@@ -92,9 +92,9 @@ final class BundlePath {
         // the pattern something[1]
         try {
             sections.add(PathSection.fromString(terminus));
-            return new BundlePath(sections, Optional.<String>absent(), null);
+            return new NestableDataPath(sections, Optional.<String>absent(), null);
         } catch (Exception e) {
-            return new BundlePath(sections, Optional.of(terminus), null);
+            return new NestableDataPath(sections, Optional.of(terminus), null);
         }
     }
     

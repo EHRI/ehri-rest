@@ -33,6 +33,7 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class responsible for validating bundles.
@@ -68,7 +69,6 @@ public final class BundleValidator {
     /**
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for updating in the graph.
-     * 
      *
      * @return A new bundle with generated IDs.
      * @throws ValidationError
@@ -106,8 +106,8 @@ public final class BundleValidator {
      * ensure it is fit for updating in the graph.
      *
      * @param bundle the Bundle to validate
-     * @return errors an ErrorSet that is empty when no errors were found, 
-     * 		or containing found errors
+     * @return errors an ErrorSet that is empty when no errors were found,
+     * or containing found errors
      */
     private ErrorSet validateTreeForUpdate(Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
@@ -124,8 +124,8 @@ public final class BundleValidator {
      * ensure it is fit for creating in the graph.
      *
      * @param bundle the Bundle to validate
-     * @return errors an ErrorSet that is empty when no errors were found, 
-     * 		or containing found errors
+     * @return errors an ErrorSet that is empty when no errors were found,
+     * or containing found errors
      */
     private ErrorSet validateTreeForCreate(Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
@@ -140,7 +140,7 @@ public final class BundleValidator {
      * and entity type annotations must be present in the bundle's entity type class.
      *
      * @return errors an ErrorSet that may contain errors for missing/empty mandatory fields
-     * 		and missing entity types
+     * and missing entity types
      */
     private ErrorSet validateTreeData(Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
@@ -174,6 +174,20 @@ public final class BundleValidator {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleJavaClass())) {
             checkField(bundle, builder, key);
         }
+        Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(bundle.getBundleJavaClass());
+        for (Map.Entry<String, Set<String>> entry : enumPropertyKeys.entrySet()) {
+            checkValueInRange(bundle, builder, entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void checkValueInRange(Bundle bundle, ErrorSet.Builder builder, String key, Collection<String> values) {
+        Object dataValue = bundle.getDataValue(key);
+        if (dataValue != null) {
+            if (!values.contains(dataValue.toString())) {
+                builder.addError(key,
+                        MessageFormat.format(Messages.getString("BundleValidator.invalidFieldValue"), values, dataValue));
+            }
+        }
     }
 
     /**
@@ -203,7 +217,7 @@ public final class BundleValidator {
         EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
         if (annotation == null) {
             builder.addError(Bundle.TYPE_KEY, MessageFormat.format(Messages
-                    .getString("BundleValidator.missingTypeAnnotation"), //$NON-NLS-1$
+                            .getString("BundleValidator.missingTypeAnnotation"), //$NON-NLS-1$
                     bundle.getBundleJavaClass().getName()));
         }
     }
@@ -244,7 +258,7 @@ public final class BundleValidator {
     }
 
     /**
-     * Check uniqueness constraints for a bundle's fields: add errors for node references whose referent is 
+     * Check uniqueness constraints for a bundle's fields: add errors for node references whose referent is
      * not already in the graph.
      */
     private void checkUniquenessOnUpdate(Bundle bundle, ErrorSet.Builder builder) {
