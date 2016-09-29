@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.BiPredicate;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
@@ -231,7 +232,7 @@ public class EadImporter extends SaxXmlImporter {
 
                 // filter out dependents that a) are descriptions, b) have the same language/code,
                 // and c) have the same source file ID
-                Bundle.Filter filter = (relationLabel, bundle) -> {
+                BiPredicate<String, Bundle> filter = (relationLabel, bundle) -> {
                     String lang = bundle.getDataValue(Ontology.LANGUAGE);
                     String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
                     return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)

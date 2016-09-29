@@ -23,6 +23,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import eu.ehri.project.exceptions.SerializationError;
@@ -36,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Class that represents a set of validation errors associated with a bundle.
  */
-public final class ErrorSet {
+public final class ErrorSet implements NestableData<ErrorSet> {
     private final Multimap<String, String> errors;
     private final Multimap<String, ErrorSet> relations;
 
@@ -53,12 +54,12 @@ public final class ErrorSet {
         private final ListMultimap<String, String> errors = ArrayListMultimap.create();
         private final ListMultimap<String, ErrorSet> relations = ArrayListMultimap.create();
 
-        public Builder addError(String key, String error) {
+        Builder addError(String key, String error) {
             errors.put(key, error);
             return this;
         }
 
-        public Builder addRelation(String relation, ErrorSet errorSet) {
+        Builder addRelation(String relation, ErrorSet errorSet) {
             relations.put(relation, errorSet);
             return this;
         }
@@ -79,7 +80,7 @@ public final class ErrorSet {
     /**
      * Factory constructor.
      *
-     * @param key The property key in error
+     * @param key   The property key in error
      * @param error The string description of the property error
      */
     public static ErrorSet fromError(String key, String error) {
@@ -100,7 +101,7 @@ public final class ErrorSet {
     /**
      * Constructor.
      *
-     * @param errors A map of top-level errors
+     * @param errors    A map of top-level errors
      * @param relations A map of relations
      */
     public ErrorSet(Multimap<String, String> errors, Multimap<String, ErrorSet> relations) {
@@ -114,26 +115,11 @@ public final class ErrorSet {
      * @param key A property key
      * @return A list of errors associated with a property key
      */
-    public Collection<String> getErrorValue(String key) {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<String> getDataValue(String key) {
         checkNotNull(key);
         return errors.get(key);
-    }
-
-    /**
-     * Set a value in the bundle's data.
-     *
-     * @param key A property key
-     * @param err A description of the error
-     * @return A new error set
-     */
-    public ErrorSet withErrorValue(String key, String err) {
-        if (err == null) {
-            return this;
-        } else {
-            Multimap<String, String> errs = ArrayListMultimap.create(errors);
-            errs.put(key, err);
-            return withErrors(errs);
-        }
     }
 
     /**
@@ -146,32 +132,26 @@ public final class ErrorSet {
     }
 
     /**
-     * Set the entire data map for this bundle.
-     *
-     * @param errors A set of errors
-     * @return A new error set
-     */
-    public ErrorSet withErrors(Multimap<String, String> errors) {
-        return new ErrorSet(errors, relations);
-    }
-
-    /**
      * Get the bundle's relation bundles.
      *
      * @return A set of relations
      */
+    @Override
     public Multimap<String, ErrorSet> getRelations() {
         return relations;
     }
 
     /**
-     * Set entire set of relations.
+     * Add entire set of relations.
      *
-     * @param relations A map of relations
+     * @param newRelations A map of relations
      * @return A new error set
      */
-    public ErrorSet withRelations(Multimap<String, ErrorSet> relations) {
-        return new ErrorSet(errors, relations);
+    @Override
+    public ErrorSet withRelations(Multimap<String, ErrorSet> newRelations) {
+        Multimap<String, ErrorSet> tmp = ArrayListMultimap.create(relations);
+        tmp.putAll(newRelations);
+        return new ErrorSet(errors, tmp);
     }
 
     /**
@@ -180,17 +160,54 @@ public final class ErrorSet {
      * @param relation A relation label
      * @return A new error set
      */
-    public Collection<ErrorSet> getRelations(String relation) {
-        return relations.get(relation);
+    @Override
+    public List<ErrorSet> getRelations(String relation) {
+        return Lists.newArrayList(relations.get(relation));
+    }
+
+    @Override
+    public boolean hasRelations(String relation) {
+        return relations.containsKey(relation);
+    }
+
+    @Override
+    public ErrorSet replaceRelations(Multimap<String, ErrorSet> relations) {
+        return new ErrorSet(errors, relations);
+    }
+
+    /**
+     * Set a value in the bundle's data.
+     *
+     * @param key A property key
+     * @param err A description of the error
+     * @return A new error set
+     */
+    @Override
+    public ErrorSet withDataValue(String key, Object err) {
+        if (err == null) {
+            return this;
+        } else {
+            Multimap<String, String> tmp = ArrayListMultimap.create(errors);
+            tmp.put(key, err.toString());
+            return new ErrorSet(tmp, relations);
+        }
+    }
+
+    @Override
+    public ErrorSet removeDataValue(String key) {
+        Multimap<String, String> tmp = ArrayListMultimap.create(errors);
+        tmp.removeAll(key);
+        return new ErrorSet(tmp, relations);
     }
 
     /**
      * Set bundles for a particular relation.
      *
      * @param relation A relation label
-     * @param others A set of relation error sets
+     * @param others   A set of relation error sets
      * @return A new error set
      */
+    @Override
     public ErrorSet withRelations(String relation, List<ErrorSet> others) {
         Multimap<String, ErrorSet> tmp = ArrayListMultimap
                 .create(relations);
@@ -202,8 +219,9 @@ public final class ErrorSet {
      * Add a bundle for a particular relation.
      *
      * @param relation A relation label
-     * @param other An error set relation
+     * @param other    An error set relation
      */
+    @Override
     public ErrorSet withRelation(String relation, ErrorSet other) {
         Multimap<String, ErrorSet> tmp = ArrayListMultimap
                 .create(relations);
@@ -247,7 +265,7 @@ public final class ErrorSet {
 
         return errors.equals(other.errors)
                 && unorderedRelations(relations)
-                    .equals(unorderedRelations(other.relations));
+                .equals(unorderedRelations(other.relations));
 
     }
 

@@ -33,7 +33,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-import eu.ehri.project.api.EventsApi;
 import org.junit.Before;
 import org.junit.Test;
 

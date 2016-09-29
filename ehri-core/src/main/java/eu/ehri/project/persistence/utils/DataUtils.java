@@ -22,33 +22,24 @@ package eu.ehri.project.persistence.utils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.NestableData;
 
 import java.util.List;
-import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
- * Helpers for working with the {@link Bundle} format.
+ * Helpers for working with the {@link NestableData} format.
  */
-public class BundleUtils {
-
-    private interface SetOperation {
-        Bundle run(Bundle bundle, BundlePath path);
-    }
-
-    private interface GetOperation<T> {
-        T run(Bundle bundle, BundlePath path);
-    }
+public class DataUtils {
 
     public static class BundlePathError extends NullPointerException {
-        public BundlePathError(String message) {
+        BundlePathError(String message) {
             super(message);
         }
     }
 
-    public static class BundleIndexError extends IndexOutOfBoundsException {
-        public BundleIndexError(String message) {
+    static class BundleIndexError extends IndexOutOfBoundsException {
+        BundleIndexError(String message) {
             super(message);
         }
     }
@@ -58,36 +49,36 @@ public class BundleUtils {
      * <p>
      * <pre>
      * {@code
-     * String lang = BundleUtils.get(bundle, "describes[0]/languageCode"));
+     * String lang = DataUtils.get(item, "describes[0]/languageCode"));
      * }
      * </pre>
      *
-     * @param bundle the bundle
+     * @param item the item
      * @param path   a path string
      * @param <T>    the type to fetch
      * @return a property of type T
      */
-    public static <T> T get(Bundle bundle, String path) {
-        return fetchAttribute(bundle, BundlePath.fromString(path),
+    public static <T, N extends NestableData<N>> T get(N item, String path) {
+        return fetchAttribute(item, NestableDataPath.fromString(path),
                 (subjectNode, subjectPath) -> subjectNode.getDataValue(subjectPath
                         .getTerminus()));
     }
 
     /**
-     * XPath-like method for getting a bundle at a given path.
+     * XPath-like method for getting a item at a given path.
      * <p>
      * <pre>
      * {@code
-     * Bundle description = BundleUtils.getBundle(bundle, "describes[0]"));
+     * Bundle description = DataUtils.getItem(item, "describes[0]"));
      * }
      * </pre>
      *
-     * @param bundle the bundle
+     * @param item the item
      * @param path   a path string
-     * @return a bundle found at the given path
+     * @return a item found at the given path
      */
-    public static Bundle getBundle(Bundle bundle, String path) {
-        return fetchNode(bundle, BundlePath.fromString(path));
+    public static <N extends NestableData<N>> N getItem(N item, String path) {
+        return fetchNode(item, NestableDataPath.fromString(path));
     }
 
     /**
@@ -96,22 +87,17 @@ public class BundleUtils {
      * <p>
      * <pre>
      * {@code
-     * Bundle newBundle = BundleUtils.delete(bundle, "describes[0]/languageCode"));
+     * Bundle newBundle = DataUtils.delete(item, "describes[0]/languageCode"));
      * }
      * </pre>
      *
-     * @param bundle the bundle
+     * @param item the item
      * @param path   a path string
-     * @return the bundle with the item at the given path deleted
+     * @return the item with the item at the given path deleted
      */
-    public static Bundle delete(Bundle bundle, String path) {
-        return mutateAttribute(bundle, BundlePath.fromString(path),
-                (subject, p) -> {
-                    Map<String, Object> data = Maps.newHashMap(subject
-                            .getData());
-                    data.remove(p.getTerminus());
-                    return subject.withData(data);
-                });
+    public static <N extends NestableData<N>> N delete(N item, String path) {
+        return mutateAttribute(item, NestableDataPath.fromString(path),
+                (subject, p) -> subject.removeDataValue(p.getTerminus()));
     }
 
 
@@ -120,57 +106,60 @@ public class BundleUtils {
      * <p>
      * <pre>
      * {@code
-     * Bundle newBundle = BundleUtils.deleteBundle(bundle, "describes[0]"));
+     * Bundle newBundle = DataUtils.deleteItem(item, "describes[0]"));
      * }
      * </pre>
      *
-     * @param bundle the bundle
+     * @param item the item
      * @param path   a path string
-     * @return the bundle with the bundle at the given path deleted
+     * @return the item with the item at the given path deleted
      */
-    public static Bundle deleteBundle(Bundle bundle, String path) {
-        return deleteNode(bundle, BundlePath.fromString(path));
+    public static <N extends NestableData<N>> N deleteItem(N item, String path) {
+        return deleteNode(item, NestableDataPath.fromString(path));
     }
 
     /**
-     * Xpath-like method for creating a new bundle by updating a nested relation
-     * of an existing bundle.
+     * Xpath-like method for creating a new item by updating a nested relation
+     * of an existing item.
      * <p>
      * <pre>
      * {@code
-     * Bundle newBundle = BundleUtils.set(oldBundle, "hasDate[0]/startDate", "1923-10-10");
+     * Bundle newBundle = DataUtils.set(oldBundle, "hasDate[0]/startDate", "1923-10-10");
      * }
      * </pre>
      *
-     * @param bundle the bundle
+     * @param item the item
      * @param path   a path string
      * @param value  the value being set
      * @param <T>    the type of property being set
-     * @return the bundle with the property at the given path set
+     * @return the item with the property at the given path set
      */
-    public static <T> Bundle set(Bundle bundle, String path, final T value) {
-        return mutateAttribute(bundle, BundlePath.fromString(path),
+    public static <T, N extends NestableData<N>> N set(N item, String path, final T value) {
+        return mutateAttribute(item, NestableDataPath.fromString(path),
                 (subject, p) -> subject.withDataValue(p.getTerminus(), value));
     }
 
     /**
-     * Xpath-like method for creating a new bundle by updating a nested relation
-     * of an existing bundle.
+     * Xpath-like method for creating a new item by updating a nested relation
+     * of an existing item.
      * <p>
      * <pre>
      * {@code
      * Bundle dateBundle = ...
-     * Bundle newBundle = BundleUtils.setBundle(oldBundle, "hasDate[0]", dateBundle);
+     * Bundle newItem = DataUtils.setItem(oldBundle, "hasDate[0]", dateBundle);
      * }
      * </pre>
+     * <p>
+     * Use an index of -1 to create a relationship set or append to
+     * an existing one.
      *
-     * @param bundle    the bundle
+     * @param item    the item
      * @param path      a path string
-     * @param newBundle the new bundle to set at the path
-     * @return a bundle with the given bundle set at the given path
+     * @param newItem the new item to set at the path
+     * @return a item with the given item set at the given path
      */
-    public static Bundle setBundle(Bundle bundle, String path, Bundle newBundle) {
-        return setNode(bundle, BundlePath.fromString(path), newBundle);
+    public static <N extends NestableData<N>> N setItem(N item, String path, N newItem) {
+        return setNode(item, NestableDataPath.fromString(path), newItem);
     }
 
     /**
@@ -178,33 +167,33 @@ public class BundleUtils {
      * <p>
      * <pre>
      * {@code
-     * List<Bundle> dates = BundleUtils.getRelations(bundle, "hasDate");
+     * List<Bundle> dates = DataUtils.getRelations(item, "hasDate");
      * }
      * </pre>
      *
-     * @param bundle the bundle
+     * @param item the item
      * @param path   a path string
      * @return a list of bundles at the given relationship path
      */
-    public static List<Bundle> getRelations(Bundle bundle, String path) {
-        return fetchAttribute(bundle, BundlePath.fromString(path),
-                (subjectNode, subjectPath) -> subjectNode.getRelations(subjectPath
-                        .getTerminus()));
+    public static <N extends NestableData<N>> List<N> getRelations(N item, String path) {
+        return fetchAttribute(item, NestableDataPath.fromString(path),
+                (subjectNode, subjectPath) -> Lists.newArrayList(subjectNode.getRelations(subjectPath
+                        .getTerminus())));
     }
 
     // Private implementation helpers.
 
-    private static <T> T fetchAttribute(Bundle bundle, BundlePath path,
-            GetOperation<T> op) {
+    private static <T, N extends NestableData<N>> T fetchAttribute(N bundle, NestableDataPath path,
+            BiFunction<N, NestableDataPath, T> op) {
         if (path.isEmpty()) {
-            return op.run(bundle, path);
+            return op.apply(bundle, path);
         } else {
             PathSection section = path.current();
             if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
                         "Relation path '%s' not found", section.getPath()));
             try {
-                List<Bundle> relations = bundle.getRelations(section.getPath());
+                List<N> relations = bundle.getRelations(section.getPath());
                 return fetchAttribute(relations.get(section.getIndex()),
                         path.next(), op);
             } catch (IndexOutOfBoundsException e) {
@@ -215,7 +204,7 @@ public class BundleUtils {
         }
     }
 
-    private static Bundle fetchNode(Bundle bundle, BundlePath path) {
+    private static <N extends NestableData<N>> N fetchNode(N bundle, NestableDataPath path) {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
@@ -227,9 +216,9 @@ public class BundleUtils {
             if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
                         "Relation path '%s' not found", section.getPath()));
-            List<Bundle> relations = bundle.getRelations(section.getPath());
+            List<N> relations = bundle.getRelations(section.getPath());
             try {
-                Bundle next = relations.get(section.getIndex());
+                N next = relations.get(section.getIndex());
                 return fetchNode(next, path.next());
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
@@ -239,24 +228,24 @@ public class BundleUtils {
         }
     }
 
-    private static Bundle mutateAttribute(Bundle bundle, BundlePath path,
-            SetOperation op) {
+    private static <N extends NestableData<N>> N mutateAttribute(N bundle, NestableDataPath path,
+            BiFunction<N, NestableDataPath, N> op) {
         // Case one: the main path is empty, so we *only* run
         // the op on the top-level node.
         if (path.isEmpty()) {
-            return op.run(bundle, path);
+            return op.apply(bundle, path);
         } else {
-            // Case two:            
+            // Case two:
             PathSection section = path.current();
             if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
                         "Relation path '%s' not found", section.getPath()));
-            ListMultimap<String, Bundle> allRelations = ArrayListMultimap
+            ListMultimap<String, N> allRelations = ArrayListMultimap
                     .create(bundle.getRelations());
             try {
-                List<Bundle> relations = Lists.newArrayList(allRelations
+                List<N> relations = Lists.newArrayList(allRelations
                         .removeAll(section.getPath()));
-                Bundle subject = relations.get(section.getIndex());
+                N subject = relations.get(section.getIndex());
                 relations.set(section.getIndex(),
                         mutateAttribute(subject, path.next(), op));
                 allRelations.putAll(section.getPath(), relations);
@@ -269,7 +258,7 @@ public class BundleUtils {
         }
     }
 
-    private static Bundle setNode(Bundle bundle, BundlePath path, Bundle newNode) {
+    private static <N extends NestableData<N>> N setNode(N bundle, NestableDataPath path, N newNode) {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
@@ -277,16 +266,16 @@ public class BundleUtils {
             throw new IllegalArgumentException("Path must refer to a nested node.");
 
         PathSection section = path.current();
-        BundlePath next = path.next();
+        NestableDataPath next = path.next();
 
         if (section.getIndex() != -1 && !bundle.hasRelations(section.getPath())) {
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
         }
-        ListMultimap<String, Bundle> allRelations = ArrayListMultimap
+        ListMultimap<String, N> allRelations = ArrayListMultimap
                 .create(bundle.getRelations());
         try {
-            List<Bundle> relations = Lists.newArrayList(allRelations
+            List<N> relations = Lists.newArrayList(allRelations
                     .removeAll(section.getPath()));
             if (next.isEmpty()) {
                 // If the index is negative, add to the end...
@@ -296,7 +285,7 @@ public class BundleUtils {
                     relations.set(section.getIndex(), newNode);
                 }
             } else {
-                Bundle subject = relations.get(section.getIndex());
+                N subject = relations.get(section.getIndex());
                 relations.set(section.getIndex(),
                         setNode(subject, next, newNode));
             }
@@ -309,7 +298,7 @@ public class BundleUtils {
         }
     }
 
-    private static Bundle deleteNode(Bundle bundle, BundlePath path) {
+    private static <N extends NestableData<N>> N deleteNode(N bundle, NestableDataPath path) {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
@@ -317,20 +306,20 @@ public class BundleUtils {
             throw new IllegalArgumentException("Path must refer to a nested node.");
 
         PathSection section = path.current();
-        BundlePath next = path.next();
+        NestableDataPath next = path.next();
 
         if (!bundle.hasRelations(section.getPath()))
             throw new BundlePathError(String.format(
                     "Relation path '%s' not found", section.getPath()));
-        ListMultimap<String, Bundle> allRelations = ArrayListMultimap
+        ListMultimap<String, N> allRelations = ArrayListMultimap
                 .create(bundle.getRelations());
         try {
-            List<Bundle> relations = Lists.newArrayList(allRelations
+            List<N> relations = Lists.newArrayList(allRelations
                     .removeAll(section.getPath()));
             if (next.isEmpty()) {
                 relations.remove(section.getIndex());
             } else {
-                Bundle subject = relations.get(section.getIndex());
+                N subject = relations.get(section.getIndex());
                 relations.set(section.getIndex(),
                         deleteNode(subject, next));
             }

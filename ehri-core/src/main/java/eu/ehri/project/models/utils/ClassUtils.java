@@ -22,6 +22,7 @@ package eu.ehri.project.models.utils;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
@@ -39,6 +40,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Helper functions for managing EntityType classes via reflection.
@@ -51,6 +53,7 @@ public class ClassUtils {
 
     private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
     private static Map<Class<?>,Map<String,Method>> metaMethodCache = Maps.newHashMap();
+    private static Map<Class<?>,Map<String,Set<String>>> enumPropertyValuesCache = Maps.newHashMap();
     private static Map<Class<?>,Collection<String>> propertyKeysCache = Maps.newHashMap();
     private static Map<Class<?>,Collection<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
     private static Map<Class<?>,Collection<String>> uniquePropertyKeysCache = Maps.newHashMap();
@@ -152,6 +155,39 @@ public class ClassUtils {
         return uniquePropertyKeysCache.get(cls);
     }
 
+    /**
+     * Get a collection of names for methods marked as unique properties.
+     *
+     * @param cls the entity's Java class
+     * @return a collection of property names
+     */
+
+    public static Map<String,Set<String>> getEnumPropertyKeys(Class<?> cls) {
+        if (!enumPropertyValuesCache.containsKey(cls)) {
+            enumPropertyValuesCache.put(cls, getEnumPropertyKeysInternal(cls));
+        }
+        return enumPropertyValuesCache.get(cls);
+    }
+
+    private static Map<String, Set<String>> getEnumPropertyKeysInternal(Class<?> cls) {
+        Map<String, Set<String>> out = Maps.newHashMap();
+        for (Method method : cls.getMethods()) {
+            Property ann = method.getAnnotation(Property.class);
+            if (ann != null) {
+                String name = ann.value();
+                Class<?> returnType = method.getReturnType();
+                if (Enum.class.isAssignableFrom(returnType)) {
+                    Object[] values = returnType.getEnumConstants();
+                    Set<String> strings = Sets.newHashSet();
+                    for (Object v : values) {
+                        strings.add(v.toString());
+                    }
+                    out.put(name, strings);
+                }
+            }
+        }
+        return out;
+    }
 
     private static EntityClass getEntityTypeInternal(Class<?> cls) {
         EntityType ann = cls.getAnnotation(EntityType.class);

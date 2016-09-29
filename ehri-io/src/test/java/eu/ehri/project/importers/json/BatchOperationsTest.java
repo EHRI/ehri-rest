@@ -68,7 +68,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
                     validUser.as(Actioner.class), Optional.of("Test create"));
             fail("Import with validation error succeeded when it should have failed");
         } catch (ValidationError e) {
-            assertEquals(1, e.getErrorSet().getErrorValue("identifier").size());
+            assertEquals(1, e.getErrorSet().getDataValue("identifier").size());
         }
 
         int nodesAfter = getNodeCount(graph);
@@ -140,7 +140,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
             fail("Import with validation error succeeded when it should have failed");
         } catch (ValidationError e) {
             Collection<ErrorSet> describes = e.getErrorSet().getRelations("describes");
-            assertEquals(1, Lists.newArrayList(describes).get(0).getErrorValue("name").size());
+            assertEquals(1, Lists.newArrayList(describes).get(0).getDataValue("name").size());
         }
 
         int nodesAfter = getNodeCount(graph);

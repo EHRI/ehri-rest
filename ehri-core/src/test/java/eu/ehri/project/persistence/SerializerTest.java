@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.VirtualUnit;
-import eu.ehri.project.persistence.utils.BundleUtils;
+import eu.ehri.project.persistence.utils.DataUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
@@ -44,17 +44,17 @@ public class SerializerTest extends AbstractFixtureTest {
 
         // Name of repository should be serialized
         assertEquals("Documentary Unit 1",
-                BundleUtils.get(serialized, "describes[0]/name"));
-        assertNotNull(BundleUtils.get(serialized, "describes[0]/scopeAndContent"));
+                DataUtils.get(serialized, "describes[0]/name"));
+        assertNotNull(DataUtils.get(serialized, "describes[0]/scopeAndContent"));
         System.out.println(serialized);
         assertEquals("NIOD Description",
-                BundleUtils.get(serialized, "heldBy[0]/describes[0]/name"));
+                DataUtils.get(serialized, "heldBy[0]/describes[0]/name"));
 
         // But the address data shouldn't
         try {
-            BundleUtils.get(serialized, "heldBy[0]/describes[0]/hasAddress[0]/street");
+            DataUtils.get(serialized, "heldBy[0]/describes[0]/hasAddress[0]/street");
             fail("Default serializer should not serialize addresses in repository descriptions");
-        } catch (BundleUtils.BundlePathError e) {
+        } catch (DataUtils.BundlePathError e) {
             // okay
         }
     }
@@ -68,12 +68,12 @@ public class SerializerTest extends AbstractFixtureTest {
 
         // Name of vu1 and repository should be serialized
         assertEquals("Documentary Unit 1",
-                BundleUtils.get(serialized, "describes[0]/name"));
+                DataUtils.get(serialized, "describes[0]/name"));
         // Not mandatory properties should be null...
-        assertNull(BundleUtils.get(serialized, "describes[0]/scopeAndContent"));
+        assertNull(DataUtils.get(serialized, "describes[0]/scopeAndContent"));
 
         assertEquals("NIOD Description",
-                BundleUtils.get(serialized, "heldBy[0]/describes[0]/name"));
+                DataUtils.get(serialized, "heldBy[0]/describes[0]/name"));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class SerializerTest extends AbstractFixtureTest {
         
         System.out.println(serialized);
         assertEquals("vc1",
-                BundleUtils.get(serialized, "isPartOf[0]/identifier"));
+                DataUtils.get(serialized, "isPartOf[0]/identifier"));
 
         // Name of includedUnit and repository should NOT be serialized, since they can be multiple
 //        assertNull(BundleUtils.get(serialized, "includesUnit[0]/name"));
@@ -96,7 +96,7 @@ public class SerializerTest extends AbstractFixtureTest {
                 .entityToBundle(vc1);
         
         assertEquals("vcd1",
-                BundleUtils.get(serializedVc1, "describes[0]/identifier"));
+                DataUtils.get(serializedVc1, "describes[0]/identifier"));
         
     }
 
@@ -105,17 +105,17 @@ public class SerializerTest extends AbstractFixtureTest {
         Link link1 = manager.getEntity("link3", Link.class);
         Serializer serializer = new Serializer.Builder(graph).build();
         Bundle serialized = serializer.entityToBundle(link1);
-        Bundle target0 = BundleUtils.getBundle(serialized, "hasLinkTarget[0]");
+        Bundle target0 = DataUtils.getItem(serialized, "hasLinkTarget[0]");
         assertEquals(1, target0.depth());
-        String t1 = BundleUtils.get(serialized, "hasLinkTarget[0]/identifier");
-        String t2 = BundleUtils.get(serialized, "hasLinkTarget[1]/identifier");
+        String t1 = DataUtils.get(serialized, "hasLinkTarget[0]/identifier");
+        String t2 = DataUtils.get(serialized, "hasLinkTarget[1]/identifier");
         assertNotEquals(t1, t2);
         assertTrue(Lists.newArrayList("c3", "a1").contains(t1));
         assertTrue(Lists.newArrayList("c3", "a1").contains(t2));
         try {
-            BundleUtils.getBundle(serialized, "hasLinkTarget[0]/childOf[0]/describes[0]");
+            DataUtils.getItem(serialized, "hasLinkTarget[0]/childOf[0]/describes[0]");
             fail("Max ifBelowLevel serialization should ignore childOf relation for item c3");
-        } catch (BundleUtils.BundlePathError e) {
+        } catch (DataUtils.BundlePathError e) {
             // okay
         }
     }
@@ -128,14 +128,14 @@ public class SerializerTest extends AbstractFixtureTest {
         Bundle serialized = serializer.entityToBundle(doc);
 
         // Name of vu1 and repository should be serialized
-        assertEquals("Documentary Unit 1", BundleUtils.get(serialized, "describes[0]/name"));
+        assertEquals("Documentary Unit 1", DataUtils.get(serialized, "describes[0]/name"));
         // Not mandatory properties should be null...
-        assertNull(BundleUtils.get(serialized, "describes[0]/scopeAndContent"));
+        assertNull(DataUtils.get(serialized, "describes[0]/scopeAndContent"));
 
         Serializer withProps = serializer.withIncludedProperties(Lists.newArrayList("scopeAndContent"));
         Bundle serialized2 = withProps
                 .entityToBundle(doc);
-        assertNotNull(BundleUtils.get(serialized2, "describes[0]/scopeAndContent"));
+        assertNotNull(DataUtils.get(serialized2, "describes[0]/scopeAndContent"));
 
         // Ensure `withCache` preserves includedProperties (#31)
         Serializer withPropsAndCache = withProps.withCache();
@@ -143,6 +143,6 @@ public class SerializerTest extends AbstractFixtureTest {
                 withPropsAndCache.getIncludedProperties());
         Bundle serialized3 = withPropsAndCache
                 .entityToBundle(doc);
-        assertNotNull(BundleUtils.get(serialized3, "describes[0]/scopeAndContent"));
+        assertNotNull(DataUtils.get(serialized3, "describes[0]/scopeAndContent"));
     }
 }

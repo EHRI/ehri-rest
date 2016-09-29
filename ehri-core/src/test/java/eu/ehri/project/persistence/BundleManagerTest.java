@@ -27,14 +27,14 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.persistence.utils.BundleUtils;
+import eu.ehri.project.persistence.utils.DataUtils;
 import eu.ehri.project.test.ModelTestBase;
 import eu.ehri.project.test.TestData;
 import org.junit.Before;
@@ -142,11 +142,9 @@ public class BundleManagerTest extends ModelTestBase {
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
         assertEquals(2, Iterables.size(cd1.getDatePeriods()));
 
-        System.out.println("Orig bundle: " + bundle);
-
         String deletePath = "hasDate[0]";
-        String dpid = BundleUtils
-                .getBundle(bundle, deletePath).getId();
+        String dpid = DataUtils
+                .getItem(bundle, deletePath).getId();
         try {
             manager.getEntity(dpid, DatePeriod.class);
         } catch (ItemNotFound e) {
@@ -155,7 +153,7 @@ public class BundleManagerTest extends ModelTestBase {
         }
 
         // Delete the *second* date period from the first description...
-        Bundle newBundle = BundleUtils.deleteBundle(
+        Bundle newBundle = DataUtils.deleteItem(
                 bundle, deletePath);
         System.out.println("Delete bundle: " + newBundle);
         BundleManager persister = new BundleManager(graph);
@@ -166,10 +164,6 @@ public class BundleManagerTest extends ModelTestBase {
 
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
 
-        for (DatePeriod dp : manager.getEntity("cd1", DocumentaryUnitDescription.class)
-                .getDatePeriods()) {
-            System.out.println("Got dp: " + dp.getId());
-        }
         assertEquals(1, Iterables.size(manager.getEntity("cd1", DocumentaryUnitDescription.class)
                 .getDatePeriods()));
 
@@ -217,7 +211,7 @@ public class BundleManagerTest extends ModelTestBase {
             ValidationError, ItemNotFound, IntegrityError {
         DocumentaryUnit c1 = manager.getEntity(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.entityToBundle(c1);
-        Bundle desc = BundleUtils.getBundle(bundle, "describes[0]");
+        Bundle desc = DataUtils.getItem(bundle, "describes[0]");
         Bundle newBundle = desc.removeDataValue(Ontology.NAME_KEY);
 
         BundleManager persister = new BundleManager(graph);

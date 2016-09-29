@@ -23,18 +23,22 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
-public class ClassUtilsTest extends AbstractFixtureTest {
+public class ClassUtilsTest {
 
     @Test
     public void testGetEntityType() throws Exception {
@@ -44,7 +48,7 @@ public class ClassUtilsTest extends AbstractFixtureTest {
 
     @Test
     public void testGetDependentRelations() throws Exception {
-        Map<String,Direction> deps = Maps.newHashMap();
+        Map<String, Direction> deps = Maps.newHashMap();
         deps.put(Ontology.DESCRIPTION_FOR_ENTITY, Direction.IN);
         assertEquals(deps, ClassUtils.getDependentRelations(DocumentaryUnit.class));
     }
@@ -83,5 +87,13 @@ public class ClassUtilsTest extends AbstractFixtureTest {
     public void testGetUniquePropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet();
         assertEquals(keys, ClassUtils.getUniquePropertyKeys(DocumentaryUnit.class));
+    }
+
+    @Test
+    public void testGetEnumMethods() throws Exception {
+        Map<String, Set<String>> enumPropertyKeys = ClassUtils.getEnumPropertyKeys(AccessPoint.class);
+        Set<String> values = enumPropertyKeys.get(Ontology.ACCESS_POINT_TYPE);
+        assertNotNull(values);
+        assertFalse(values.isEmpty());
     }
 }

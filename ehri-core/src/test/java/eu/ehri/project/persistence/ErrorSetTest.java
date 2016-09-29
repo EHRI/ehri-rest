@@ -45,14 +45,14 @@ public class ErrorSetTest {
     @Test
     public void testGetErrorValue() {
         ErrorSet es = ErrorSet.fromError("foo", "bad");
-        assertEquals(Lists.newArrayList("bad"), es.getErrorValue("foo"));
+        assertEquals(Lists.newArrayList("bad"), es.getDataValue("foo"));
     }
 
     @Test
     public void testWithErrorValue() {
         ErrorSet es = ErrorSet.fromError("foo", "bad")
-                .withErrorValue("test", "test");
-        assertEquals(Lists.newArrayList("test"), es.getErrorValue("test"));
+                .withDataValue("test", "test");
+        assertEquals(Lists.newArrayList("test"), es.getDataValue("test"));
     }
 
     @Test
