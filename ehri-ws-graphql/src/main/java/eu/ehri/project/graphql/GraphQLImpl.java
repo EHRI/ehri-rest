@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.DefinitionList;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Isaar;
@@ -174,22 +175,6 @@ public class GraphQLImpl {
             .put("situation", "")
             .put("summary", "")
             .put("extensive", "")
-            .build();
-
-    private final Map<String, String> addressStringFields = ImmutableMap.<String, String>builder()
-            .put("contactPerson", "")
-            .put("street", "")
-            .put("municipality", "")
-            .put("firstdem", "")
-            .put("countryCode", "")
-            .put("postalCode", "")
-            .build();
-
-    private final Map<String, String> addressListStringFields = ImmutableMap.<String, String>builder()
-            .put("email", "")
-            .put("telephone", "")
-            .put("fax", "")
-            .put("webpage", "")
             .build();
 
     // Argument helpers...
@@ -362,15 +347,6 @@ public class GraphQLImpl {
         return nullAttr(name, description, GraphQLString);
     }
 
-    private GraphQLFieldDefinition listAttr(String name, String description) {
-        return newFieldDefinition()
-                .type(new GraphQLList(GraphQLString))
-                .name(name)
-                .description(description)
-                .dataFetcher(listDataFetcher(attributeDataFetcher))
-                .build();
-    }
-
     private GraphQLFieldDefinition nonNullAttr(String name, String description, GraphQLOutputType type) {
         return newFieldDefinition()
                 .type(type)
@@ -412,11 +388,6 @@ public class GraphQLImpl {
 
     private List<GraphQLFieldDefinition> nullStringAttrs(Map<String, String> attrMap) {
         return attrMap.entrySet().stream().map(e -> nullAttr(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
-    }
-
-    private List<GraphQLFieldDefinition> listStringAttrs(Map<String, String> attrMap) {
-        return attrMap.entrySet().stream().map(e -> listAttr(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
 
@@ -724,8 +695,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType addressType = newObject()
             .name(Entities.ADDRESS)
             .description("An address")
-            .fields(nullStringAttrs(addressStringFields))
-            .fields(listStringAttrs(addressListStringFields))
+            .fields(nullStringAttrs(ContactInfo.values()))
+            .fields(listStringAttrs(ContactInfo.values()))
             .build();
 
     private final GraphQLObjectType documentaryUnitDescriptionType = newObject()

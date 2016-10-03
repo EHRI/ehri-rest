@@ -7,6 +7,7 @@ public enum Isaar implements DefinitionList {
     source,
     typeOfEntity,
     otherFormsOfName(true),
+    parallelFormsOfName(true),
     datesOfExistence,
     biographicalHistory,
     place(true),

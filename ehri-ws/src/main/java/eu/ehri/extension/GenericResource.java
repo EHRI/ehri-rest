@@ -38,7 +38,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.exporters.dc.DublinCore11Exporter;
+import eu.ehri.project.exporters.dc.DublinCore11StreamExporter;
 import eu.ehri.project.exporters.dc.DublinCoreExporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Annotation;
@@ -628,7 +628,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             throws AccessDenied, ItemNotFound, IOException {
         try (final Tx tx = beginTx()) {
             Described item = api().detail(id, Described.class);
-            DublinCoreExporter exporter = new DublinCore11Exporter(graph, api());
+            DublinCoreExporter exporter = new DublinCore11StreamExporter(api());
             Document doc = exporter.export(item, langCode);
             tx.success();
             return doc;

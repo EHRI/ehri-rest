@@ -71,6 +71,10 @@ public interface Entity extends VertexFrame {
     @JavaHandler
     <T> T getProperty(String key);
 
+    @JavaHandler
+    <T> T getProperty(Enum<?> key);
+
+
     /**
      * Get the property keys from the underlying vertex.
      *
@@ -89,6 +93,11 @@ public interface Entity extends VertexFrame {
         @Override
         public <T> T getProperty(String key) {
             return it().getProperty(key);
+        }
+
+        @Override
+        public <T> T getProperty(Enum<?> key) {
+            return it().getProperty(key.name());
         }
 
         @Override

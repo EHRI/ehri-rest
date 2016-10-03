@@ -11,9 +11,6 @@ import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.CDATASection;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.List;
@@ -64,15 +61,6 @@ public class LanguageHelpers {
             .put("fre", "fra") // french
             .put("cze", "ces") // czech
             .build();
-
-
-    public static Element createCDataElement(Document doc, Element element, String tag, String charData) {
-        Element ele = doc.createElement(tag);
-        element.appendChild(ele);
-        CDATASection cdataSection = doc.createCDATASection(Helpers.escapeCData(charData));
-        ele.appendChild(cdataSection);
-        return ele;
-    }
 
     /**
      * Continent names as defined by the EAG schema
@@ -461,6 +449,7 @@ public class LanguageHelpers {
 
     /**
      * Convert an ISO 3166-1 country code to its (English) name.
+     *
      * @param code the 2-letter country code
      * @return the country name, or the code as a fallback
      */

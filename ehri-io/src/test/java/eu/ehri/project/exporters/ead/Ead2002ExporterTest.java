@@ -99,10 +99,11 @@ public class Ead2002ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {
-        Ead2002Exporter exporter = new Ead2002Exporter(graph, api(validUser));
+        Ead2002Exporter exporter = new Ead2002Exporter(api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
+        //System.out.println(xml);
         isValidEad(xml);
         return xml;
     }
@@ -112,12 +113,10 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
         new SaxImportManager(graph, repository, validUser,
                 IcaAtomEadImporter.class, IcaAtomEadHandler.class)
-                //.allowUpdates(true)
                 .importInputStream(ios, "Testing import/export");
-
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
-        Ead2002Exporter exporter = new Ead2002Exporter(graph, api(validUser));
+        Ead2002Exporter exporter = new Ead2002Exporter(api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(fonds, baos, lang);
         String xml = baos.toString("UTF-8");

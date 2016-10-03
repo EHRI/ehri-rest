@@ -1,4 +1,4 @@
-package eu.ehri.project.exporters;
+package eu.ehri.project.exporters.xml;
 
 import org.w3c.dom.Document;
 

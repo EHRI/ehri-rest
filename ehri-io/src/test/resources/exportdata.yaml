@@ -83,7 +83,7 @@
                 name: An Address
                 street: 1 Example Street
                 city: The Hague
-                postalcode: !!str 001122
+                postalCode: !!str 001122
                 email:
                   - test@example.com
                 webpage:
@@ -124,6 +124,7 @@
             Example text
           place:
             - Example text
+            - More example text
           legalStatus: >
             Example text
           functions: >

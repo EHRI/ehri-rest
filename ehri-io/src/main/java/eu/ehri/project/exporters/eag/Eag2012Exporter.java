@@ -1,14 +1,34 @@
+/*
+ * Copyright 2015 Data Archiving and Networked Services (an institute of
+ * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
+ * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.ehri.project.exporters.eag;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
-import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
-import eu.ehri.project.exporters.DocumentWriter;
+import eu.ehri.project.definitions.ContactInfo;
+import eu.ehri.project.definitions.Isdiah;
+import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -16,6 +36,7 @@ import eu.ehri.project.models.MaintenanceEventAgentType;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
@@ -24,363 +45,227 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Comment;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
+import java.util.stream.Collectors;
 
 /**
  * Export EAG 2012 XML.
  */
-public final class Eag2012Exporter implements EagExporter {
+public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Repository> implements EagExporter {
     private static final Logger logger = LoggerFactory.getLogger(Eag2012Exporter.class);
+    private static final String DEFAULT_NAMESPACE = "http://www.archivesportaleurope.net/Portal/profiles/eag_2012/";
 
-    private final FramedGraph<?> framedGraph;
     private final Api api;
-    private final DocumentBuilder documentBuilder;
 
-    public static final Map<String, String> descriptiveTextMappings = ImmutableMap.<String, String>builder()
-            .put("history", "repositorhist")
-            .put("geoculturalContext", "repositorhist")
-            .put("mandates", "repositorhist")
-            .put("buildings", "buildinginfo/building")
-            .put("holdings", "holdings")
-            .put("conditions", "termsOfUse") // added to mandatory access
-            .put("researchServices", "services/searchroom/researchServices")
+    private static final Map<Isdiah, String> descriptiveTextMappings = ImmutableMap.<Isdiah, String>builder()
+            .put(Isdiah.buildings, "buildinginfo/building")
+            .put(Isdiah.holdings, "holdings")
+            .put(Isdiah.conditions, "termsOfUse") // added to mandatory access
+            .put(Isdiah.researchServices, "services/searchroom/researchServices")
             .build();
 
-    public Eag2012Exporter(final FramedGraph<?> framedGraph, Api api) {
-        this.framedGraph = framedGraph;
+    private static final List<Isdiah> historyElements = ImmutableList.of(
+            Isdiah.history, Isdiah.geoculturalContext, Isdiah.mandates);
+
+    private static final Map<String, String> NAMESPACES = namespaces(
+            "xlink", "http://www.w3.org/1999/xlink",
+            "ape", "http://www.archivesportaleurope.eu/functions",
+            "xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+    private static final Map<String, String> ATTRS = attrs(
+            "audience", "external"
+    );
+
+    public Eag2012Exporter(final Api api) {
         this.api = api;
-        try {
-            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    @Override
-    public void export(Repository repository, OutputStream outputStream, String langCode)
-            throws IOException, TransformerException {
-        new DocumentWriter(export(repository, langCode)).write(outputStream);
     }
 
     @Override
-    public Document export(Repository repository, String langCode) throws IOException {
-        Document doc = documentBuilder.newDocument();
+    public void export(XMLStreamWriter sw, Repository repository, String langCode) {
 
-        Comment boilerplateComment = doc.createComment(Resources.toString(
-                Resources.getResource("export-boilerplate.txt"), StandardCharsets.UTF_8));
-        doc.appendChild(boilerplateComment);
+        comment(sw, resourceAsString("export-boilerplate.txt"));
 
         Country country = repository.getCountry();
 
-        Element rootElem = doc.createElement("eag");
-        rootElem.setAttribute("audience", "external");
-        rootElem.setAttribute("xmlns", "http://www.archivesportaleurope.net/Portal/profiles/eag_2012/");
-        rootElem.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-        rootElem.setAttribute("xmlns:ape", "http://www.archivesportaleurope.eu/functions");
-        rootElem.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance",
-                "xs:schemaLocation",
-                "http://www.archivesportaleurope.net/Portal/profiles/eag_2012/ http://schemas.archivesportaleurope.net/profiles/eag.xsd");
-        doc.appendChild(rootElem);
+        root(sw, "eag", DEFAULT_NAMESPACE, ATTRS, NAMESPACES, () -> {
 
+            attribute(sw, "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",
+                    DEFAULT_NAMESPACE + " http://schemas.archivesportaleurope.net/profiles/eag.xsd");
 
-        for (Description desc : LanguageHelpers.getBestDescription(
-                repository, Optional.<Description>absent(), langCode).asSet()) {
+            for (Description desc : LanguageHelpers.getBestDescription(
+                    repository, Optional.absent(), langCode).asSet()) {
 
-            addControlSection(doc, rootElem, repository, country, desc);
+                addControlSection(sw, repository, country, desc);
 
-            Element archGuideElem = doc.createElement("archguide");
-            rootElem.appendChild(archGuideElem);
+                tag(sw, "archguide", () -> {
+                    addIdentitySection(sw, repository, desc);
 
-            addIdentitySection(doc, archGuideElem, desc);
+                    tag(sw, ImmutableList.of("desc", "repositories", "repository"), () -> {
+                        tag(sw, "geogarea", LanguageHelpers.countryCodeToContinent(country.getCode()).or("Europe"));
 
-            Element descElem = doc.createElement("desc");
-            archGuideElem.appendChild(descElem);
-
-            Element repositoriesElem = doc.createElement("repositories");
-            descElem.appendChild(repositoriesElem);
-
-            Element repoElem = doc.createElement("repository");
-            repositoriesElem.appendChild(repoElem);
-
-            Element geogAreaElem = doc.createElement("geogarea");
-            geogAreaElem.setTextContent(LanguageHelpers.countryCodeToContinent(country.getCode())
-                    .or("Europe")); // FIXME: Default???
-            repoElem.appendChild(geogAreaElem);
-
-            for (Address address : (desc.as(RepositoryDescription.class)).getAddresses()) {
-                Element locationElem = doc.createElement("location");
-                locationElem.setAttribute("localType", "postal address");
-                repoElem.appendChild(locationElem);
-                Element countryElem = doc.createElement("country");
-                locationElem.appendChild(countryElem);
-                String cc = Optional.fromNullable(((String) address.getProperty("countryCode")))
-                        .or(country.getCode());
-                countryElem.setTextContent(LanguageHelpers.countryCodeToName(cc));
-                Element postCodeElem = doc.createElement("municipalityPostalcode");
-                locationElem.appendChild(postCodeElem);
-                postCodeElem.setTextContent(address.getProperty("postalcode"));
-
-                Element streetElem = doc.createElement("street");
-                locationElem.appendChild(streetElem);
-                streetElem.setTextContent(address.getProperty("street"));
-
-                for (String contact : new String[]{"telephone", "fax"}) {
-                    for (Object strOrList : Optional.fromNullable(address.getProperty(contact)).asSet()) {
-                        List values = strOrList instanceof List
-                                ? (List) strOrList : Lists.newArrayList(strOrList);
-                        for (Object value : values) {
-                            Element elem = doc.createElement(contact);
-                            elem.setTextContent(value.toString());
-                            repoElem.appendChild(elem);
+                        List<Address> addresses = Lists.newArrayList(desc.as(RepositoryDescription.class).getAddresses());
+                        if (addresses.isEmpty()) {
+                            // NB: A location tag is always needed ¯\_(ツ)_/¯
+                            tag(sw, "location", attrs("localType", "postal address"), () -> {
+                                tag(sw, "country", LanguageHelpers.countryCodeToName(country.getCode()));
+                                tag(sw, "municipalityPostalcode", (String)null);
+                                tag(sw, "street", (String)null);
+                            });
+                        } else {
+                            for (Address address : addresses) {
+                                tag(sw, "location", attrs("localType", "postal address"), () -> {
+                                    String cc = Optional.fromNullable(((String) address.getProperty(ContactInfo.countryCode)))
+                                            .or(country.getCode());
+                                    tag(sw, "country", LanguageHelpers.countryCodeToName(cc));
+                                    tag(sw, "municipalityPostalcode", address.<String>getProperty(ContactInfo.postalCode));
+                                    tag(sw, "street", address.<String>getProperty(ContactInfo.street));
+                                });
+                            }
                         }
-                    }
-                }
-                for (String ref : new String[]{"email", "webpage"}) {
-                    for (Object strOrList : Optional.fromNullable(address.getProperty(ref)).asSet()) {
-                        List values = strOrList instanceof List
-                                ? (List) strOrList : Lists.newArrayList(strOrList);
-                        for (Object value : values) {
-                            Element elem = doc.createElement(ref);
-                            elem.setAttribute("href", value.toString());
-                            repoElem.appendChild(elem);
+
+                        for (ContactInfo contact : new ContactInfo[]{ContactInfo.telephone, ContactInfo.fax}) {
+                            for (Address address : (desc.as(RepositoryDescription.class)).getAddresses()) {
+                                for (Object value : coerceList(address.getProperty(contact))) {
+                                    tag(sw, contact.name(), value.toString());
+                                }
+                            }
                         }
-                    }
+                        for (ContactInfo ref : new ContactInfo[]{ContactInfo.email, ContactInfo.webpage}) {
+                            for (Address address : (desc.as(RepositoryDescription.class)).getAddresses()) {
+                                for (Object value : coerceList(address.getProperty(ref))) {
+                                    tag(sw, ref.name(), value.toString(), attrs("href", value.toString()));
+                                }
+                            }
+                        }
+
+                        List<String> elems = historyElements
+                                .stream().<String>map(desc::getProperty)
+                                .filter(v -> v != null).collect(Collectors.toList());
+                        if (!elems.isEmpty()) {
+                            tag(sw, ImmutableList.of("repositorhist", "descriptiveNote"), () -> {
+                                for (String e : elems) {
+                                    tag(sw, "p",
+                                            attrs("xml:lang", desc.getLanguageOfDescription()), () -> cData(sw, e));
+                                }
+                            });
+                        }
+
+                        addTextElements(sw, desc, Isdiah.buildings, Isdiah.holdings);
+
+                        tag(sw, ImmutableList.of("timetable", "opening"), desc.<String>getProperty(Isdiah.openingTimes));
+
+                        tag(sw, "access", attrs("question", "yes"), () -> {
+                            for (String terms : Optional.fromNullable(desc.<String>getProperty(Isdiah.conditions)).asSet()) {
+                                tag(sw, "termsOfUse", terms);
+                            }
+                        });
+
+                        tag(sw, "accessibility", desc.getProperty(Isdiah.accessibility), attrs("question", "yes"));
+                        addTextElements(sw, desc, Isdiah.researchServices);
+                    });
+
+                });
+            }
+        });
+    }
+
+    private void addControlSection(XMLStreamWriter sw, Repository repository, Country country, Description desc) {
+        tag(sw, "control", () -> {
+            tag(sw, "recordId", String.format("%s-%s", country.getCode().toUpperCase(),
+                    repository.getIdentifier()));
+
+            tag(sw, "otherRecordId", repository.getId(), attrs("localType", "yes"));
+
+            tag(sw, "maintenanceAgency", () -> {
+                tag(sw, "agencyCode", "EHRI");
+                tag(sw, "agencyName", "The EHRI Consortium");
+            });
+            tag(sw, "maintenanceStatus", "revised");
+
+            addRevisionDesc(sw, repository, desc);
+        });
+    }
+
+    private void addIdentitySection(XMLStreamWriter sw, Repository repository, Description desc) {
+
+        tag(sw, "identity", () -> {
+            tag(sw, "repositorid", null,
+                    attrs("countrycode", repository.getCountry().getCode().toUpperCase()));
+            tag(sw, "autform", desc.getName(), attrs("xml:lang", desc.getLanguageOfDescription()));
+
+            for (Object parNames : Optional.fromNullable(desc.getProperty(Isdiah.parallelFormsOfName)).asSet()) {
+                List values = parNames instanceof List ? (List) parNames : ImmutableList.of(parNames);
+                for (Object value : values) {
+                    tag(sw, "parform", value.toString());
                 }
-
             }
-
-            addTextElements(doc, repoElem, desc, "history", "geoculturalContext",
-                    "mandates", "buildings", "holdings");
-
-            Element timetableElem = doc.createElement("timetable");
-            repoElem.appendChild(timetableElem);
-            Element openingElem = doc.createElement("opening");
-            timetableElem.appendChild(openingElem);
-            openingElem.setTextContent(desc.getProperty("openingTimes"));
-
-            Element accessElem = doc.createElement("access");
-            accessElem.setAttribute("question", "yes"); // ???
-            repoElem.appendChild(accessElem);
-
-            for (String terms : Optional.fromNullable(desc.<String>getProperty("conditions")).asSet()) {
-                Element termsElem = doc.createElement("termsOfUse");
-                accessElem.appendChild(termsElem);
-                termsElem.setTextContent(terms);
+            for (Object parNames : Optional.fromNullable(desc.getProperty(Isdiah.otherFormsOfName)).asSet()) {
+                List values = parNames instanceof List ? (List) parNames : ImmutableList.of(parNames);
+                for (Object value : values) {
+                    tag(sw, "parform", value.toString());
+                }
             }
-
-            Element accessibilityElem = doc.createElement("accessibility");
-            accessibilityElem.setAttribute("question", "yes");
-            accessibilityElem.setTextContent((desc.getProperty("accessibility")));
-            repoElem.appendChild(accessibilityElem);
-
-            addTextElements(doc, repoElem, desc, "researchServices");
-        }
-
-        return doc;
+        });
     }
 
-    private void addControlSection(Document doc, Element rootElem, Repository repository, Country country, Description desc) {
-        Element controlElem = doc.createElement("control");
-        rootElem.appendChild(controlElem);
+    private void addRevisionDesc(XMLStreamWriter sw, Described entity, Description desc) {
+        tag(sw, "maintenanceHistory", () -> {
 
-        Element recordIdElem = doc.createElement("recordId");
-        recordIdElem.setTextContent(String.format("%s-%s", country.getCode().toUpperCase(),
-                repository.getIdentifier()));
-        controlElem.appendChild(recordIdElem);
+            List<MaintenanceEvent> maintenanceEvents = ImmutableList.copyOf(desc.getMaintenanceEvents());
+            for (MaintenanceEvent event : maintenanceEvents) {
+                tag(sw, "maintenanceEvent", () -> {
+                    tag(sw, "agent", "EHRI");
+                    tag(sw, "agentType", MaintenanceEventAgentType.human.name());
+                    tag(sw, "eventDateTime", event.<String>getProperty("date"));
+                    tag(sw, "eventType", event.getEventType().name());
+                });
+            }
 
-        Element otherRecordIdElem = doc.createElement("otherRecordId");
-        otherRecordIdElem.setTextContent(repository.getId());
-        otherRecordIdElem.setAttribute("localType", "yes");
-        controlElem.appendChild(otherRecordIdElem);
+            List<List<SystemEvent>> systemEvents = ImmutableList.copyOf(api.events().aggregateForItem(entity));
+            for (List<SystemEvent> agg : Lists.reverse(systemEvents)) {
+                SystemEvent event = agg.get(0);
 
-        Element mainAgencyElem = doc.createElement("maintenanceAgency");
-        Element agencyCodeElem = doc.createElement("agencyCode");
-        agencyCodeElem.setTextContent("EHRI");
-        Element agencyNameElem = doc.createElement("agencyName");
-        agencyNameElem.setTextContent("The EHRI Consortium");
-        mainAgencyElem.appendChild(agencyCodeElem);
-        mainAgencyElem.appendChild(agencyNameElem);
-        controlElem.appendChild(mainAgencyElem);
+                tag(sw, "maintenanceEvent", () -> {
+                    tag(sw, "agent", Optional.fromNullable(event.getActioner())
+                            .transform(Actioner::getName).orNull());
+                    tag(sw, "agentType", MaintenanceEventAgentType.human.name());
+                    DateTime dateTime = new DateTime(event.getTimestamp());
+                    tag(sw, "eventDateTime", DateTimeFormat.longDateTime().print(dateTime), attrs(
+                            "standardDateTime", dateTime.toString()));
+                    tag(sw, "eventType", MaintenanceEventType
+                            .fromSystemEventType(event.getEventType()).name());
+                });
+            }
 
-        Element mainStatusElem = doc.createElement("maintenanceStatus");
-        mainStatusElem.setTextContent("revised");
-        controlElem.appendChild(mainStatusElem);
+            // We must provide a default event
+            if (maintenanceEvents.isEmpty() && systemEvents.isEmpty()) {
+                logger.debug("No events found for element {}, using fallback", entity.getId());
 
-        addRevisionDesc(doc, controlElem, repository, desc);
+                tag(sw, "maintenanceEvent", () -> {
+                    tag(sw, "agent", entity.getId());
+                    tag(sw, "agentType", MaintenanceEventAgentType.machine.name());
+                    DateTime dateTime = DateTime.now();
+                    tag(sw, "eventDateTime", DateTimeFormat.longDateTime().print(dateTime), attrs(
+                            "standardDateTime", dateTime.toString()));
+                    tag(sw, "eventType", MaintenanceEventType.created.name());
+                });
+            }
+        });
     }
 
-    private void addIdentitySection(Document doc, Element archGuideElem, Description desc) {
-        Element identityElem = doc.createElement("identity");
-        archGuideElem.appendChild(identityElem);
-
-        Element autFormElem = doc.createElement("autform");
-        autFormElem.setAttribute("xml:lang", desc.getLanguageOfDescription());
-        autFormElem.setTextContent(desc.getName());
-        identityElem.appendChild(autFormElem);
-
-        for (Object parNames : Optional.fromNullable(desc.getProperty("parallelFormsOfName")).asSet()) {
-            List values = parNames instanceof List
-                    ? (List) parNames
-                    : Lists.newArrayList(parNames);
-            for (Object value : values) {
-                Element parFormElem = doc.createElement("parform");
-                parFormElem.setTextContent(value.toString());
-                identityElem.appendChild(parFormElem);
-            }
-        }
-        for (Object parNames : Optional.fromNullable(desc.getProperty("otherFormsOfName")).asSet()) {
-            List values = parNames instanceof List
-                    ? (List) parNames
-                    : Lists.newArrayList(parNames);
-            for (Object value : values) {
-                Element parFormElem = doc.createElement("parform");
-                parFormElem.setTextContent(value.toString());
-                identityElem.appendChild(parFormElem);
-            }
-        }
-    }
-
-    private void addRevisionDesc(Document doc, Element controlElem,
-            Described entity, Description desc) {
-
-        // NB: We could share all this horrible code with the EAC exporter
-        // if the SCHEMAS DIDN'T HAVE THE ELEMENTS IN AN ARBITRARILY
-        // DIFFERENT ORDER!!! Hurruph.
-
-        Element revDescElem = doc.createElement("maintenanceHistory");
-        controlElem.appendChild(revDescElem);
-
-        List<MaintenanceEvent> maintenanceEvents = Lists
-                .newArrayList(desc.getMaintenanceEvents());
-        for (MaintenanceEvent event : maintenanceEvents) {
-            Element eventElem = doc.createElement("maintenanceEvent");
-
-            Element agent = doc.createElement("agent");
-            agent.setTextContent("EHRI");
-            eventElem.appendChild(agent);
-
-            Element agentType = doc.createElement("agentType");
-            agentType.setTextContent(MaintenanceEventAgentType.human.name());
-            eventElem.appendChild(agentType);
-
-            Element eventDateTime = doc.createElement("eventDateTime");
-            eventDateTime.setTextContent(event.getProperty("date"));
-            eventElem.appendChild(eventDateTime);
-
-            Element eventType = doc.createElement("eventType");
-            eventType.setTextContent(event.getEventType().name());
-            eventElem.appendChild(eventType);
-
-            revDescElem.appendChild(eventElem);
-        }
-
-        List<List<SystemEvent>> systemEvents = Lists.newArrayList(
-                api.events().aggregateForItem(entity));
-        for (int i = systemEvents.size() - 1; i >= 0; i--) {
-            List<SystemEvent> agg = systemEvents.get(i);
-            SystemEvent event = agg.get(0);
-
-            Element eventElem = doc.createElement("maintenanceEvent");
-
-            Element agentElem = doc.createElement("agent");
-            if (event.getActioner() != null) {
-                agentElem.setTextContent(event.getActioner().getName());
-            }
-            eventElem.appendChild(agentElem);
-
-            Element agentTypeElem = doc.createElement("agentType");
-            agentTypeElem.setTextContent(MaintenanceEventAgentType.human.name());
-            eventElem.appendChild(agentTypeElem);
-
-            Element eventDateTimeElem = doc.createElement("eventDateTime");
-            DateTime dateTime = new DateTime(event.getTimestamp());
-            eventDateTimeElem.setTextContent(DateTimeFormat.longDateTime().print(dateTime));
-            eventDateTimeElem.setAttribute("standardDateTime", dateTime.toString());
-            eventElem.appendChild(eventDateTimeElem);
-
-            Element eventTypeElem = doc.createElement("eventType");
-            eventTypeElem.setTextContent(MaintenanceEventType
-                    .fromSystemEventType(event.getEventType()).name());
-            eventElem.appendChild(eventTypeElem);
-
-            revDescElem.appendChild(eventElem);
-        }
-
-        // We must provide a default event
-        if (maintenanceEvents.isEmpty() && systemEvents.isEmpty()) {
-            logger.debug("No events found for element {}, using fallback", entity.getId());
-            Element eventElem = doc.createElement("maintenanceEvent");
-
-            Element agentElem = doc.createElement("agent");
-            agentElem.setTextContent(entity.getId());
-            eventElem.appendChild(agentElem);
-
-            Element agentTypeElem = doc.createElement("agentType");
-            agentTypeElem.setTextContent(MaintenanceEventAgentType.machine.name());
-            eventElem.appendChild(agentTypeElem);
-
-            Element eventDateTimeElem = doc.createElement("eventDateTime");
-            DateTime dateTime = DateTime.now();
-            eventDateTimeElem.setTextContent(DateTimeFormat.longDateTime().print(dateTime));
-            eventDateTimeElem.setAttribute("standardDateTime", dateTime.toString());
-            eventElem.appendChild(eventDateTimeElem);
-
-            Element eventTypeElem = doc.createElement("eventType");
-            eventTypeElem.setTextContent(MaintenanceEventType.created.name());
-            eventElem.appendChild(eventTypeElem);
-
-            revDescElem.appendChild(eventElem);
-        }
-    }
-
-    private void addTextElements(Document doc, Element parent, Description desc, String... toAdd)
-            throws IOException {
-        Set<String> adding = Sets.newHashSet(toAdd);
-        for (Map.Entry<String, String> entry : descriptiveTextMappings.entrySet()) {
+    private void addTextElements(XMLStreamWriter sw, Description desc, Isdiah... toAdd) {
+        Set<Isdiah> adding = Sets.newHashSet(toAdd);
+        final Map<String, String> paraAttrs = attrs("xml:lang", desc.getLanguageOfDescription());
+        for (Map.Entry<Isdiah, String> entry : descriptiveTextMappings.entrySet()) {
             if (adding.contains(entry.getKey())) {
                 for (String prop : Optional.fromNullable(desc.<String>getProperty(entry.getKey())).asSet()) {
-                    String elemName = entry.getValue();
-                    Element topElem = parent;
-                    if (elemName.contains("/")) {
-                        List<String> strings = Splitter.on("/").splitToList(elemName);
-                        for (int i = 0; i < strings.size() - 1; i++) {
-                            Element next = doc.createElement(strings.get(i));
-                            topElem.appendChild(next);
-                            topElem = next;
-                        }
-                        elemName = strings.get(strings.size() - 1);
-                    }
-
-                    NodeList elements = parent.getElementsByTagName(elemName);
-                    Element descNoteElem;
-                    if (elements.getLength() == 0) {
-                        Element propElem = (Element) topElem
-                                .appendChild(doc.createElement(elemName));
-                        descNoteElem = doc.createElement("descriptiveNote");
-                        propElem.appendChild(descNoteElem);
-                    } else {
-                        descNoteElem = (Element) elements.item(0).getFirstChild();
-                    }
-
-                    createCDataElement(doc, descNoteElem, "p", prop);
+                    List<String> tags = Splitter.on("/").splitToList(entry.getValue());
+                    tag(sw, tags, () ->
+                            tag(sw, ImmutableList.of("descriptiveNote", "p"), paraAttrs, () -> cData(sw, prop)));
                 }
             }
         }
