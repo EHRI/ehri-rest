@@ -182,7 +182,7 @@ public class CountryResource
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Country country = api().detail(id, cls);
-            final EagExporter eagExporter = new Eag2012Exporter(graph, api());
+            final EagExporter eagExporter = new Eag2012Exporter(api());
             Response response = exportItemsAsZip(eagExporter, country.getRepositories(), lang);
             tx.success();
             return response;

@@ -104,6 +104,11 @@ public enum AnonymousAccessor implements Accessor {
     }
 
     @Override
+    public <T> T getProperty(Enum<?> key) {
+        return null;
+    }
+
+    @Override
     public java.util.Set<String> getPropertyKeys() {
         return Sets.newHashSet();
     }

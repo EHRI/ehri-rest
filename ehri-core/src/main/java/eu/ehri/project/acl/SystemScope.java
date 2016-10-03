@@ -103,6 +103,11 @@ public enum SystemScope implements PermissionScope {
     }
 
     @Override
+    public <T> T getProperty(Enum<?> key) {
+        return null;
+    }
+
+    @Override
     public java.util.Set<String> getPropertyKeys() {
         return Sets.newHashSet();
     }

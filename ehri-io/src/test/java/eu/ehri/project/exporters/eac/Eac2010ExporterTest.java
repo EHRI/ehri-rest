@@ -82,7 +82,9 @@ public class Eac2010ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text\n",
                 "//eac-cpf/cpfDescription/description/existDates/descriptiveNote/p");
         assertXPath(doc, "Example text",
-                "//eac-cpf/cpfDescription/description/places/place/placeEntry");
+                "//eac-cpf/cpfDescription/description/place/placeEntry");
+        assertXPath(doc, "More example text",
+                "//eac-cpf/cpfDescription/description/place[2]/placeEntry");
         assertXPath(doc, "Example text\n",
                 "//eac-cpf/cpfDescription/description/legalStatus/term");
         assertXPath(doc, "Example text\n",
@@ -98,10 +100,11 @@ public class Eac2010ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(HistoricalAgent agent, String lang) throws Exception {
-        Eac2010Exporter exporter = new Eac2010Exporter(graph, api(validUser));
+        Eac2010Exporter exporter = new Eac2010Exporter(api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(agent, baos, lang);
         String xml = baos.toString("UTF-8");
+        //System.out.println(xml);
         isValidEac(xml);
         return xml;
     }
@@ -109,5 +112,4 @@ public class Eac2010ExporterTest extends XmlExporterTest {
     private void isValidEac(String eacXml) throws IOException, SAXException {
         validatesSchema(eacXml, "eac.xsd");
     }
-
 }

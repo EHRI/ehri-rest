@@ -32,13 +32,10 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
-import eu.ehri.project.exporters.eac.EacExporter;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.w3c.dom.Document;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -143,12 +140,11 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             HistoricalAgent agent = api().detail(id, HistoricalAgent.class);
-            EacExporter eacExporter = new Eac2010Exporter(graph, api());
-            final Document document = eacExporter.export(agent, lang);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
-                try {
-                    new DocumentWriter(document).write(outputStream);
+                try (final Tx tx2 = beginTx()) {
+                    new Eac2010Exporter(api()).export(agent, outputStream, lang);
+                    tx2.success();
                 } catch (TransformerException e) {
                     throw new WebApplicationException(e);
                 }

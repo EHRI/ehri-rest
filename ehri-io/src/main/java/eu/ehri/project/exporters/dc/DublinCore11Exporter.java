@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
-import eu.ehri.project.exporters.DocumentWriter;
+import eu.ehri.project.exporters.xml.DocumentWriter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.base.Described;

@@ -32,16 +32,13 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
-import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.w3c.dom.Document;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -172,13 +169,12 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam("lang") @DefaultValue("eng") String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Repository repo = api().detail(id, cls);
-            EagExporter eagExporter = new Eag2012Exporter(graph, api());
-            final Document document = eagExporter.export(repo, lang);
+            Repository repository = api().detail(id, cls);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
-                try {
-                    new DocumentWriter(document).write(outputStream);
+                try (final Tx tx2 = beginTx()) {
+                    new Eag2012Exporter(api()).export(repository, outputStream, lang);
+                    tx2.success();
                 } catch (TransformerException e) {
                     throw new WebApplicationException(e);
                 }
@@ -202,7 +198,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Repository repo = api().detail(id, cls);
-            final EadExporter eadExporter = new Ead2002Exporter(graph, api());
+            final EadExporter eadExporter = new Ead2002Exporter(api());
             Response response = exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang);
             tx.success();
             return response;

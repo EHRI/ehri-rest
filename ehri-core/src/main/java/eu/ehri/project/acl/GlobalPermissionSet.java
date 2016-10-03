@@ -29,8 +29,6 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * User: mike
- *
  * Convenience wrapper for the permission set data structure, which
  * looks like:
  *

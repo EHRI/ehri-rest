@@ -5,16 +5,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.Resources;
-import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.definitions.ContactInfo;
+import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exporters.DocumentWriter;
+import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Country;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -29,62 +29,52 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static eu.ehri.project.utils.LanguageHelpers.createCDataElement;
 
-/**
- * EAD 2002 Export.
- */
-public final class Ead2002Exporter implements EadExporter {
+public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
+
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
 
-    private final FramedGraph<?> framedGraph;
-    private final Api api;
-    private final DocumentBuilder documentBuilder;
+    private static final String DEFAULT_NAMESPACE = "urn:isbn:1-931666-22-9";
+    private static final Map<String, String> NAMESPACES = namespaces(
+            "xlink", "http://www.w3.org/1999/xlink",
+            "xsi", "http://www.w3.org/2001/XMLSchema-instance"
+    );
 
-    public static final Map<String, String> multiValueTextMappings = ImmutableMap.<String, String>builder()
-            .put("scopeAndContent", "scopecontent")
-            .put("datesOfDescriptions", "processinfo")
-            .put("systemOfArrangement", "arrangement")
-            .put("publicationNote", "bibliography")
-            .put("locationOfCopies", "altformavail")
-            .put("locationOfOriginals", "originalsloc")
-            .put("biographicalHistory", "bioghist")
-            .put("conditionsOfAccess", "accessrestrict")
-            .put("conditionsOfReproduction", "userestrict")
-            .put("findingAids", "otherfindaid")
-            .put("accruals", "accruals")
-            .put("acquisition", "acqinfo")
-            .put("appraisal", "appraisal")
-            .put("archivalHistory", "custodhist")
-            .put("physicalCharacteristics", "phystech")
-            .put("relatedUnitsOfDescription", "relatedmaterial")
-            .put("separatedUnitsOfDescription", "separatedmaterial")
-            .put("notes", "odd") // controversial!
+    private static final Map<IsadG, String> multiValueTextMappings = ImmutableMap.<IsadG, String>builder()
+            .put(IsadG.scopeAndContent, "scopecontent")
+            .put(IsadG.datesOfDescriptions, "processinfo")
+            .put(IsadG.systemOfArrangement, "arrangement")
+            .put(IsadG.publicationNote, "bibliography")
+            .put(IsadG.locationOfCopies, "altformavail")
+            .put(IsadG.locationOfOriginals, "originalsloc")
+            .put(IsadG.biographicalHistory, "bioghist")
+            .put(IsadG.conditionsOfAccess, "accessrestrict")
+            .put(IsadG.conditionsOfReproduction, "userestrict")
+            .put(IsadG.findingAids, "otherfindaid")
+            .put(IsadG.accruals, "accruals")
+            .put(IsadG.acquisition, "acqinfo")
+            .put(IsadG.appraisal, "appraisal")
+            .put(IsadG.archivalHistory, "custodhist")
+            .put(IsadG.physicalCharacteristics, "phystech")
+            .put(IsadG.relatedUnitsOfDescription, "relatedmaterial")
+            .put(IsadG.separatedUnitsOfDescription, "separatedmaterial")
+            .put(IsadG.notes, "odd") // controversial!
             .build();
 
-    public static final Map<String, String> textDidMappings = ImmutableMap.<String, String>builder()
-            .put("extentAndMedium", "physdesc")
-            .put("abstract", "abstract")
-            .put("unitDates", "unitdate")
+    private static final Map<IsadG, String> textDidMappings = ImmutableMap.<IsadG, String>builder()
+            .put(IsadG.extentAndMedium, "physdesc")
+            .put(IsadG.unitDates, "unitdate")
             .build();
 
-    public static final Map<AccessPointType, String> controlAccessMappings = ImmutableMap.<AccessPointType, String>builder()
+    private static final Map<AccessPointType, String> controlAccessMappings = ImmutableMap.<AccessPointType, String>builder()
             .put(AccessPointType.subject, "subject")
             .put(AccessPointType.person, "persname")
             .put(AccessPointType.family, "famname")
@@ -93,317 +83,211 @@ public final class Ead2002Exporter implements EadExporter {
             .put(AccessPointType.genre, "genreform")
             .build();
 
-    public static final List<String> addressKeys = ImmutableList
-            .of("street",
-                    "postalcode",
-                    "municipality",
-                    "firstdem",
-                    "countryCode",
-                    "telephone",
-                    "fax",
-                    "webpage",
-                    "email");
+    private static final List<ContactInfo> addressKeys = ImmutableList
+            .of(ContactInfo.street,
+                    ContactInfo.postalCode,
+                    ContactInfo.municipality,
+                    ContactInfo.firstdem,
+                    ContactInfo.countryCode,
+                    ContactInfo.telephone,
+                    ContactInfo.fax,
+                    ContactInfo.webpage,
+                    ContactInfo.email);
 
-    public Ead2002Exporter(final FramedGraph<?> framedGraph, final Api api) {
-        this.framedGraph = framedGraph;
+    private final Api api;
+
+    public Ead2002Exporter(Api api) {
         this.api = api;
-        try {
-            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
-    public void export(DocumentaryUnit unit, OutputStream outputStream, String langCode)
-            throws IOException, TransformerException {
-        new DocumentWriter(export(unit, langCode)).write(outputStream);
-    }
+    public void export(XMLStreamWriter sw, DocumentaryUnit unit, String langCode) {
 
-    public Document export(DocumentaryUnit unit, String langCode) throws IOException {
-        // Root
-        Document doc = documentBuilder.newDocument();
+        root(sw, "ead", DEFAULT_NAMESPACE, attrs(), NAMESPACES, () -> {
+            attribute(sw, "http://www.w3.org/2001/XMLSchema-instance",
+                    "schemaLocation", DEFAULT_NAMESPACE + " http://www.loc.gov/ead/ead.xsd");
 
-        Element rootElem = doc.createElement("ead");
-        rootElem.setAttribute("xmlns", "urn:isbn:1-931666-22-9");
-        rootElem.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-        rootElem.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance",
-                "xs:schemaLocation", "urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd");
-        doc.appendChild(rootElem);
+            Repository repository = unit.getRepository();
+            Optional<Description> descOpt = LanguageHelpers.getBestDescription(
+                    unit, Optional.<Description>absent(), langCode);
 
-        Element eadHeaderElem = doc.createElement("eadheader");
-        eadHeaderElem.setAttribute("relatedencoding", "DC");
-        eadHeaderElem.setAttribute("scriptencoding", "iso15924");
-        eadHeaderElem.setAttribute("repositoryencoding", "iso15511");
-        eadHeaderElem.setAttribute("dateencoding", "iso8601");
-        eadHeaderElem.setAttribute("countryencoding", "iso3166-1");
+            tag(sw, "eadheader", attrs("relatedencoding", "DC",
+                    "scriptencoding", "iso15924",
+                    "repositoryencoding", "iso15511",
+                    "dateencoding", "iso8601",
+                    "countryencoding", "iso3166-1"), () -> {
 
-        rootElem.appendChild(eadHeaderElem);
-        Element eadIdElem = doc.createElement("eadid");
-        eadIdElem.setTextContent(unit.getId());
-        eadHeaderElem.appendChild(eadIdElem);
-
-        Repository repository = unit.getRepository();
-        Optional<Description> descOpt = LanguageHelpers.getBestDescription(
-                unit, Optional.<Description>absent(), langCode);
-
-        for (Description desc : descOpt.asSet()) {
-            addFileDesc(doc, eadHeaderElem, repository, desc, langCode);
-            addProfileDesc(doc, eadHeaderElem, unit, desc);
-        }
-
-        addRevisionDesc(doc, eadHeaderElem, unit);
-
-        //
-        // Archdesc section
-        //
-        Element archDescElem = doc.createElement("archdesc");
-        rootElem.appendChild(archDescElem);
-
-        for (Description desc : descOpt.asSet()) {
-            String level = Optional
-                    .fromNullable(desc.<String>getProperty("levelOfDescription"))
-                    .or("otherlevel");
-            archDescElem.setAttribute("level", level);
-            Element didElem = addDataSection(doc, archDescElem, unit, desc);
-
-            for (Description repoDesc : LanguageHelpers.getBestDescription(repository,
-                    Optional.<Description>absent(), langCode).asSet()) {
-                Element repoElem = doc.createElement("repository");
-                didElem.appendChild(repoElem);
-                Element corpElem = doc.createElement("corpname");
-                repoElem.appendChild(corpElem);
-                corpElem.setTextContent(repoDesc.getName());
-            }
-
-            addPropertyValues(doc, archDescElem, desc);
-        }
-
-        Element dscElem = doc.createElement("dsc");
-        archDescElem.appendChild(dscElem);
-        for (DocumentaryUnit child : getOrderedChildren(unit)) {
-            addEadLevel(doc, dscElem, 1, child, descOpt, langCode);
-        }
-
-        for (Description desc : descOpt.asSet()) {
-            addControlAccess(doc, archDescElem, desc);
-        }
-
-        return doc;
-    }
-
-    // Sort the children by identifier. FIXME: This might be a bad assumption!
-    private Iterable<DocumentaryUnit> getOrderedChildren(DocumentaryUnit unit) {
-        return api
-                .query()
-                .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC)
-                .setLimit(-1)
-                .setStream(true)
-                .page(unit.getChildren(), DocumentaryUnit.class)
-                .getIterable();
-    }
-
-    private void addRevisionDesc(Document doc, Element eadHeaderElem, DocumentaryUnit unit) {
-        List<List<SystemEvent>> eventList = Lists.newArrayList(
-                api.events().aggregateForItem(unit));
-        if (!eventList.isEmpty()) {
-            Element revDescElem = doc.createElement("revisiondesc");
-            eadHeaderElem.appendChild(revDescElem);
-
-            for (int i = eventList.size() - 1; i >= 0; i--) {
-                List<SystemEvent> agg = eventList.get(i);
-                SystemEvent event = agg.get(0);
-                Element changeElem = doc.createElement("change");
-                revDescElem.appendChild(changeElem);
-                Element dateElem = doc.createElement("date");
-                changeElem.appendChild(dateElem);
-                dateElem.setTextContent(new DateTime(event.getTimestamp()).toString());
-                Element itemElem = doc.createElement("item");
-                changeElem.appendChild(itemElem);
-                if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
-                    itemElem.setTextContent(event.getEventType().name());
-                } else {
-                    itemElem.setTextContent(String.format("%s [%s]",
-                            event.getLogMessage(), event.getEventType()));
+                tag(sw, "eadid", unit.getId());
+                for (Description desc : descOpt.asSet()) {
+                    addFileDesc(sw, langCode, repository, desc);
+                    addProfileDesc(sw, desc);
                 }
-            }
-        }
-    }
+                addRevisionDesc(sw, unit);
+            });
 
-    private void addFileDesc(Document doc, Element eadHeaderElem,
-            Repository repository, Description desc, String langCode) {
-        Element fileDescElem = doc.createElement("filedesc");
-        eadHeaderElem.appendChild(fileDescElem);
-
-        Element titleStmtElem = doc.createElement("titlestmt");
-        Element properElem = doc.createElement("titleproper");
-        properElem.setTextContent(desc.getName());
-        titleStmtElem.appendChild(properElem);
-        fileDescElem.appendChild(titleStmtElem);
-        addPublicationStatement(doc, fileDescElem, repository, langCode);
-    }
-
-    private void addProfileDesc(Document doc, Element eadHeaderElem,
-            DocumentaryUnit unit, Description desc) throws IOException {
-        Element profDescElem = doc.createElement("profiledesc");
-        eadHeaderElem.appendChild(profDescElem);
-
-        Element creationElem = doc.createElement("creation");
-        profDescElem.appendChild(creationElem);
-        creationElem.setTextContent(
-                Resources.toString(Resources.getResource("export-boilerplate.txt"),
-                        StandardCharsets.UTF_8));
-        Element creationDateElem = doc.createElement("date");
-        creationElem.appendChild(creationDateElem);
-        DateTime now = DateTime.now();
-        creationDateElem.setAttribute("normal", unitDateNormalFormat.print(now));
-        creationDateElem.setTextContent(now.toString());
-
-        Element langUsageElem = doc.createElement("langusage");
-        profDescElem.appendChild(langUsageElem);
-        Element languageElem = doc.createElement("language");
-        langUsageElem.appendChild(languageElem);
-        languageElem.setAttribute("langcode", desc.getLanguageOfDescription());
-        languageElem.setTextContent(LanguageHelpers.codeToName(desc.getLanguageOfDescription()));
-
-        for (String value : Optional.fromNullable(
-                desc.<String>getProperty("rulesAndConventions")).asSet()) {
-            Element rulesElem = doc.createElement("descrules");
-            profDescElem.appendChild(rulesElem);
-            rulesElem.setAttribute("encodinganalog", "3.7.2");
-            rulesElem.setTextContent(value);
-        }
-    }
-
-    private void addPublicationStatement(Document doc, Element fileDescElem,
-            Repository repository, String langCode) {
-        Element pubStmtElem = doc.createElement("publicationstmt");
-        fileDescElem.appendChild(pubStmtElem);
-
-        for (Description repoDesc : LanguageHelpers.getBestDescription(repository,
-                Optional.<Description>absent(), langCode).asSet()) {
-            Element publisherElem = doc.createElement("publisher");
-            publisherElem.setTextContent(repoDesc.getName());
-            pubStmtElem.appendChild(publisherElem);
-            for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
-                Element addrElem = doc.createElement("address");
-                pubStmtElem.appendChild(addrElem);
-                for (String key : addressKeys) {
-                    Object value = address.getProperty(key);
-                    if (value != null) {
-                        List values = value instanceof List
-                                ? (List) value : Lists.newArrayList(value);
-                        for (Object v : values) {
-                            Element line = doc.createElement("addressline");
-                            addrElem.appendChild(line);
-                            line.setTextContent(v.toString());
+            for (Description desc : descOpt.asSet()) {
+                tag(sw, "archdesc", getLevelAttrs(descOpt, Optional.of("collection")), () -> {
+                    addDataSection(sw, repository, unit, desc, langCode);
+                    addPropertyValues(sw, desc);
+                        Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
+                        if (orderedChildren.iterator().hasNext()) {
+                            tag(sw, "dsc", () -> {
+                                for (DocumentaryUnit child : orderedChildren) {
+                                    addEadLevel(sw, 1, child, descOpt, langCode);
+                                }
+                            });
                         }
+                    addControlAccess(sw, desc);
+                });
+            }
+        });
+    }
+
+    private void addProfileDesc(XMLStreamWriter sw, Description desc) {
+        tag(sw, "profiledesc", () -> {
+            tag(sw, "creation", () -> {
+                characters(sw, resourceAsString("export-boilerplate.txt"));
+                DateTime now = DateTime.now();
+                tag(sw, "date", now.toString(), attrs("normal", unitDateNormalFormat.print(now)
+                ));
+            });
+            tag(sw, "langusage", () -> tag(sw, "language",
+                    LanguageHelpers.codeToName(desc.getLanguageOfDescription()),
+                    attrs("langcode", desc.getLanguageOfDescription())
+            ));
+            for (String value : Optional.fromNullable(
+                    desc.<String>getProperty("rulesAndConventions")).asSet()) {
+                tag(sw, "descrules", value, attrs("encodinganalog", "3.7.2"));
+            }
+        });
+    }
+
+    private void addFileDesc(XMLStreamWriter sw, String langCode, Repository repository, Description desc) {
+        tag(sw, "filedesc", () -> {
+            tag(sw, "titlestmt", () -> tag(sw, "titleproper", desc.getName()));
+            tag(sw, "publicationstmt", () -> {
+                for (Description repoDesc : LanguageHelpers.getBestDescription(
+                        repository, Optional.absent(), langCode).asSet()) {
+                    tag(sw, "publisher", repoDesc.getName());
+                    for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
+                        tag(sw, "address", () -> {
+                            for (ContactInfo key : addressKeys) {
+                                for (Object v : coerceList(address.getProperty(key))) {
+                                    tag(sw, "addressline", v.toString());
+                                }
+                            }
+                            tag(sw, "addressline",
+                                    LanguageHelpers.countryCodeToName(
+                                            repository.getCountry().getId()));
+                        });
                     }
                 }
-                Country country = repository.getCountry();
-                Element lineElem = doc.createElement("addressline");
-                addrElem.appendChild(lineElem);
-                lineElem.setTextContent(LanguageHelpers.countryCodeToName(country.getId()));
-            }
+            });
+        });
+    }
+
+    private void addRevisionDesc(XMLStreamWriter sw, DocumentaryUnit unit) {
+        List<List<SystemEvent>> eventList = Lists.newArrayList(api.events().aggregateForItem(unit));
+        if (!eventList.isEmpty()) {
+            tag(sw, "revisiondesc", () -> {
+                for (int i = eventList.size() - 1; i >= 0; i--) {
+                    List<SystemEvent> agg = eventList.get(i);
+                    SystemEvent event = agg.get(0);
+                    tag(sw, "change", () -> {
+                        tag(sw, "date", new DateTime(event.getTimestamp()).toString());
+                        if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
+                            tag(sw, "item", event.getEventType().name());
+                        } else {
+                            tag(sw, "item", String.format("%s [%s]",
+                                    event.getLogMessage(), event.getEventType()));
+                        }
+                    });
+                }
+            });
         }
     }
 
-    public void addEadLevel(Document doc, Element base, int num, DocumentaryUnit subUnit,
-            Optional<Description> priorDescOpt, String langCode) throws IOException {
-        logger.trace("Adding EAD sublevel: c" + num + " -> " + base.getTagName());
+    private void addDataSection(XMLStreamWriter sw, Repository repository, DocumentaryUnit subUnit,
+            Description desc, String langCode) {
+        tag(sw, "did", () -> {
+            tag(sw, "unitid", subUnit.getIdentifier());
+            tag(sw, "unittitle", desc.getName());
+
+            for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
+                if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
+                    String start = datePeriod.getStartDate();
+                    String end = datePeriod.getEndDate();
+                    if (start != null && end != null) {
+                        DateTime startDateTime = new DateTime(start);
+                        DateTime endDateTime = new DateTime(end);
+                        String normal = String.format("%s/%s",
+                                unitDateNormalFormat.print(startDateTime),
+                                unitDateNormalFormat.print(endDateTime));
+                        String text = String.format("%s/%s",
+                                startDateTime.year().get(), endDateTime.year().get());
+                        tag(sw, "unitdate", text, attrs("normal", normal));
+                    } else if (start != null) {
+                        DateTime startDateTime = new DateTime(start);
+                        String normal = String.format("%s",
+                                unitDateNormalFormat.print(startDateTime));
+                        String text = String.format("%s", startDateTime.year().get());
+                        tag(sw, "unitdate", text, attrs("normal", normal));
+                    }
+                }
+            }
+
+            Set<String> propertyKeys = desc.getPropertyKeys();
+            for (Map.Entry<IsadG, String> pair : textDidMappings.entrySet()) {
+                if (propertyKeys.contains(pair.getKey().name())) {
+                    for (Object v : coerceList(desc.getProperty(pair.getKey()))) {
+                        tag(sw, pair.getValue(), v.toString());
+                    }
+                }
+            }
+
+            if (propertyKeys.contains(IsadG.languageOfMaterial.name())) {
+                tag(sw, "langmaterial", () -> {
+                    for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
+                        String langName = LanguageHelpers.codeToName(v.toString());
+                        if (v.toString().length() != 3) {
+                            tag(sw, "language", langName);
+                        } else {
+                            tag(sw, "language", langName, attrs("langcode", v.toString()));
+                        }
+                    }
+                });
+            }
+
+            for (Repository repo : Optional.fromNullable(repository).asSet()) {
+                for (Description repoDesc : LanguageHelpers.getBestDescription(repo,
+                        Optional.<Description>absent(), langCode).asSet()) {
+                    tag(sw, "repository", () -> {
+                        tag(sw, "corpname", repoDesc.getName());
+                    });
+                }
+            }
+        });
+    }
+
+    private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit,
+            Optional<Description> priorDescOpt, String langCode) {
+        logger.trace("Adding EAD sublevel: c" + num);
         Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);
-        Element levelElem = doc.createElement(levelTag);
-        base.appendChild(levelElem);
-
-        for (Description desc : descOpt.asSet()) {
-            for (String level : Optional.fromNullable(
-                    desc.<String>getProperty("levelOfDescription")).asSet()) {
-                levelElem.setAttribute("level", level);
+        tag(sw, levelTag, getLevelAttrs(descOpt, Optional.absent()), () -> {
+            for (Description desc : descOpt.asSet()) {
+                addDataSection(sw, null, subUnit, desc, langCode);
+                addPropertyValues(sw, desc);
+                addControlAccess(sw, desc);
             }
-        }
 
-        for (Description desc : descOpt.asSet()) {
-            addDataSection(doc, levelElem, subUnit, desc);
-            addPropertyValues(doc, levelElem, desc);
-            addControlAccess(doc, levelElem, desc);
-        }
-
-        for (DocumentaryUnit child : getOrderedChildren(subUnit)) {
-            addEadLevel(doc, levelElem, num + 1, child, descOpt, langCode);
-        }
+            for (DocumentaryUnit child : getOrderedChildren(subUnit)) {
+                addEadLevel(sw, num + 1, child, descOpt, langCode);
+            }
+        });
     }
 
-    private Element addDataSection(Document doc, Element levelElem, DocumentaryUnit subUnit, Description desc)
-            throws IOException {
-        Element didElem = doc.createElement("did");
-        levelElem.appendChild(didElem);
-        Element unitIdElem = doc.createElement("unitid");
-        didElem.appendChild(unitIdElem);
-        unitIdElem.setTextContent(subUnit.getIdentifier());
-
-        Set<String> propertyKeys = desc.getPropertyKeys();
-
-        Element unitTitleElem = doc.createElement("unittitle");
-        didElem.appendChild(unitTitleElem);
-        unitTitleElem.setTextContent(desc.getName());
-
-        for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
-            if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
-                String start = datePeriod.getStartDate();
-                String end = datePeriod.getEndDate();
-                Element dateElem = doc.createElement("unitdate");
-                if (start != null && end != null) {
-                    DateTime startDateTime = new DateTime(start);
-                    DateTime endDateTime = new DateTime(end);
-                    dateElem.setAttribute("normal", String.format("%s/%s",
-                            unitDateNormalFormat.print(startDateTime),
-                            unitDateNormalFormat.print(endDateTime)));
-                    dateElem.setTextContent(String.format("%s/%s",
-                            startDateTime.year().get(), endDateTime.year().get()));
-                    didElem.appendChild(dateElem);
-                } else if (start != null) {
-                    DateTime startDateTime = new DateTime(start);
-                    dateElem.setAttribute("normal", String.format("%s",
-                            unitDateNormalFormat.print(startDateTime)));
-                    dateElem.setTextContent(String.format("%s", startDateTime.year().get()));
-                    didElem.appendChild(dateElem);
-                }
-            }
-        }
-
-        for (Map.Entry<String, String> pair : textDidMappings.entrySet()) {
-            if (propertyKeys.contains(pair.getKey())) {
-                Object value = desc.getProperty(pair.getKey());
-                List values = value instanceof List ? (List) value : Lists.newArrayList(value);
-                for (Object v : values) {
-                    Element elem = doc.createElement(pair.getValue());
-                    didElem.appendChild(elem);
-                    elem.setTextContent(v.toString());
-                }
-            }
-        }
-
-        if (propertyKeys.contains("languageOfMaterial")) {
-            Element langMatElem = doc.createElement("langmaterial");
-            didElem.appendChild(langMatElem);
-            Object value = desc.getProperty("languageOfMaterial");
-            List values = value instanceof List
-                    ? (List) value : Lists.newArrayList(value);
-            for (Object v : values) {
-                Element lang = doc.createElement("language");
-                lang.setTextContent(LanguageHelpers.codeToName(v.toString()));
-                // Only add the language if its a 3-letter string
-                if (v.toString().length() == 3) {
-                    lang.setAttribute("langcode", v.toString());
-                }
-                langMatElem.appendChild(lang);
-            }
-        }
-        return didElem;
-    }
-
-    private void addControlAccess(Document doc, Element element, Description desc) {
+    private void addControlAccess(XMLStreamWriter sw, Description desc) {
         Map<AccessPointType, List<AccessPoint>> byType = Maps.newHashMap();
         for (AccessPoint accessPoint : desc.getAccessPoints()) {
             AccessPointType type = accessPoint.getRelationshipType();
@@ -417,32 +301,45 @@ public final class Ead2002Exporter implements EadExporter {
         }
 
         for (Map.Entry<AccessPointType, List<AccessPoint>> entry : byType.entrySet()) {
-            AccessPointType type = entry.getKey();
-            Element ctrlElem = doc.createElement("controlaccess");
-            element.appendChild(ctrlElem);
-            for (AccessPoint accessPoint : entry.getValue()) {
-                Element apElem = doc.createElement(controlAccessMappings.get(type));
-                apElem.setTextContent(accessPoint.getName());
-                ctrlElem.appendChild(apElem);
+            tag(sw, "controlaccess", () -> {
+                AccessPointType type = entry.getKey();
+                for (AccessPoint accessPoint : entry.getValue()) {
+                    tag(sw, controlAccessMappings.get(type), accessPoint.getName());
+                }
+            });
+        }
+    }
+
+    private void addPropertyValues(XMLStreamWriter sw, Entity item) {
+        Set<String> available = item.getPropertyKeys();
+        for (Map.Entry<IsadG, String> pair : multiValueTextMappings.entrySet()) {
+            if (available.contains(pair.getKey().name())) {
+                Object value = item.getProperty(pair.getKey());
+                List values = coerceList(value);
+                for (Object v : values) {
+                    tag(sw, pair.getValue(),
+                            () -> tag(sw, "p", () -> cData(sw, v.toString()))
+                    );
+                }
             }
         }
     }
 
-    private void addPropertyValues(Document doc, Element base, Entity item) throws IOException {
-        Set<String> available = item.getPropertyKeys();
+    private Map<String, String> getLevelAttrs(Optional<Description> descOpt, Optional<String> defaultLevel) {
+        return descOpt.asSet().stream()
+                .map(d -> Optional.fromNullable(d.<String>getProperty(IsadG.levelOfDescription)).or(defaultLevel))
+                .filter(Optional::isPresent)
+                .map(p -> ImmutableList.of("level", p.get()))
+                .collect(Collectors.toMap(l -> l.get(0), l -> l.get(1)));
+    }
 
-        for (Map.Entry<String, String> pair : multiValueTextMappings.entrySet()) {
-            if (available.contains(pair.getKey())) {
-                Object value = item.getProperty(pair.getKey());
-                List values = value instanceof List
-                        ? (List) value
-                        : Lists.newArrayList(value);
-                for (Object v : values) {
-                    Element elem = doc.createElement(pair.getValue());
-                    base.appendChild(elem);
-                    createCDataElement(doc, elem, "p", v.toString());
-                }
-            }
-        }
+    // Sort the children by identifier. FIXME: This might be a bad assumption!
+    private Iterable<DocumentaryUnit> getOrderedChildren(DocumentaryUnit unit) {
+        return api
+                .query()
+                .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC)
+                .setLimit(-1)
+                .setStream(true)
+                .page(unit.getChildren(), DocumentaryUnit.class);
     }
 }

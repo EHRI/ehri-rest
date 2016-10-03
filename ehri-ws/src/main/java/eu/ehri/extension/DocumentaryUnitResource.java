@@ -32,13 +32,10 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.exporters.DocumentWriter;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
-import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.w3c.dom.Document;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -164,12 +161,11 @@ public class DocumentaryUnitResource
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             DocumentaryUnit unit = api().detail(id, cls);
-            EadExporter eadExporter = new Ead2002Exporter(graph, api());
-            final Document document = eadExporter.export(unit, lang);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
-                try {
-                    new DocumentWriter(document).write(outputStream);
+                try (final Tx tx2 = beginTx()) {
+                    new Ead2002Exporter(api()).export(unit, outputStream, lang);
+                    tx2.success();
                 } catch (TransformerException e) {
                     throw new WebApplicationException(e);
                 }

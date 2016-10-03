@@ -16,8 +16,6 @@ public interface XmlExporter<T extends Entity> {
      * @param outputStream the output stream to write to.
      * @param langCode     the preferred language code when multiple
      *                     descriptions are available
-     * @throws IOException
-     * @throws TransformerException
      */
     void export(T item, OutputStream outputStream, String langCode)
             throws IOException, TransformerException;
@@ -29,7 +27,6 @@ public interface XmlExporter<T extends Entity> {
      * @param langCode the preferred language code when multiple
      *                 descriptions are available
      * @return a DOM document
-     * @throws IOException
      */
     Document export(T item, String langCode) throws IOException;
 }

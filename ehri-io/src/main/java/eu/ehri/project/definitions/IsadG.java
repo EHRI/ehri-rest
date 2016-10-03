@@ -15,6 +15,7 @@ public enum IsadG implements DefinitionList {
     extentAndMedium,
     findingAids(true),
     languageOfMaterial(true),
+    levelOfDescription,
     locationOfOriginals(true),
     locationOfCopies(true),
     relatedUnitsOfDescription,
@@ -27,7 +28,8 @@ public enum IsadG implements DefinitionList {
     scriptOfMaterial(true),
     separatedUnitsOfDescription,
     sources(true),
-    systemOfArrangement;
+    systemOfArrangement,
+    unitDates(true);
 
     private final Boolean multiValued;
 

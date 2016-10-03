@@ -99,7 +99,7 @@ public class AuthoritativeSetResource extends
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
 
-        try(final Tx tx = beginTx()) {
+        try (final Tx tx = beginTx()) {
             AuthoritativeSet set = api().detail(id, cls);
             Response response = streamingPage(getQuery().page(set.getAuthoritativeItems(),
                     AuthoritativeItem.class));
@@ -204,7 +204,7 @@ public class AuthoritativeSetResource extends
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final AuthoritativeSet set = api().detail(id, cls);
-            final EacExporter eacExporter = new Eac2010Exporter(graph, api());
+            final EacExporter eacExporter = new Eac2010Exporter(api());
             Iterable<HistoricalAgent> agents = Iterables
                     .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));
             Response response = exportItemsAsZip(eacExporter, agents, lang);
