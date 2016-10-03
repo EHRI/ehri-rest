@@ -1,143 +1,143 @@
+/*
+ * Copyright 2015 Data Archiving and Networked Services (an institute of
+ * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
+ * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.ehri.project.exporters.dc;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
-import eu.ehri.project.exporters.xml.DocumentWriter;
+import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
+import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Temporal;
 import eu.ehri.project.utils.LanguageHelpers;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.xml.stream.XMLStreamWriter;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class DublinCore11Exporter implements DublinCoreExporter {
-
-    private final FramedGraph<?> framedGraph;
-    private final Api api;
-    private final DocumentBuilder documentBuilder;
+public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described> implements DublinCoreExporter {
 
     private static final String OAI_NS = "http://www.openarchives.org/OAI/2.0/oai_dc/";
     private static final String DC_NS = "http://purl.org/dc/elements/1.1/";
 
-    // Mappings of output tags to internal keys.
+    private static final Map<String, String> NAMESPACES = namespaces(
+            "oai_dc", OAI_NS,
+            "xsi", "http://www.w3.org/2001/XMLSchema-instance",
+            "dc", DC_NS);
+
+    // Mappings of output tags to internal keys. All values found are accepted.
     private static final Multimap<String, String> propertyMappings = ImmutableMultimap
-                .<String, String>builder()
-            .putAll("description", Lists.<String>newArrayList("abstract", "scopeAndContent", "biographicalHistory",
-                    "history"))
-            .putAll("type", Lists.<String>newArrayList("typeOfEntity", "levelOfDescription"))
-            .putAll("format", Lists.<String>newArrayList("extentAndMedium"))
-            .putAll("language", Lists.<String>newArrayList("languageOfMaterials"))
+            .<String, String>builder()
+            .putAll("description", ImmutableList.of("abstract", "scopeAndContent", "biographicalHistory",
+                    "history", "geoculturalContext", "generalContext"))
+            .putAll("type", ImmutableList.of("typeOfEntity", "levelOfDescription"))
+            .putAll("format", ImmutableList.of("extentAndMedium"))
+            .putAll("language", ImmutableList.of("languageOfMaterials"))
             .build();
 
     // A function to transform values with a given tag
-    private static final Map<String, Function<Object, String>> valueTransformers = ImmutableMap
-                .<String, Function<Object, String>>builder()
-            .put("language", s -> LanguageHelpers.codeToName(s.toString()))
+    private static final Map<String, Function<String, String>> valueTransformers = ImmutableMap
+            .<String, Function<String, String>>builder()
+            .put("language", LanguageHelpers::codeToName)
             .build();
 
-    public DublinCore11Exporter(final FramedGraph<?> framedGraph, Api api) {
-        this.framedGraph = framedGraph;
+
+    private final Api api;
+
+    public DublinCore11Exporter(Api api) {
         this.api = api;
-        try {
-            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    @Override
-    public void export(Described item, OutputStream outputStream, String langCode)
-            throws IOException, TransformerException {
-        new DocumentWriter(export(item, langCode)).write(outputStream);
     }
 
     @Override
-    public Document export(Described item, String langCode)
-            throws IOException {
+    public void export(XMLStreamWriter sw, Described item, String langCode) {
+        root(sw, "oai_dc:dc", OAI_NS, attrs(), NAMESPACES, () -> {
+            attribute(sw, "http://www.w3.org/2001/XMLSchema-instance",
+                    "schemaLocation", OAI_NS + " http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
 
-        // Root
-        Document doc = documentBuilder.newDocument();
+            tag(sw, "dc:identifier", item.getIdentifier());
+            Optional<Description> descOpt = LanguageHelpers
+                    .getBestDescription(item, Optional.absent(), langCode);
 
-        Element rootElem = doc.createElementNS(OAI_NS, "oai_dc:dc");
-        rootElem.setAttribute("xmlns:oai_dc", OAI_NS);
-        rootElem.setAttribute("xmlns:dc", DC_NS);
-        rootElem.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        rootElem.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance",
-                "xs:schemaLocation", OAI_NS + " http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
-        doc.appendChild(rootElem);
+            for (Description desc : descOpt.asSet()) {
+                tag(sw, "dc:title", desc.getName());
 
-        addElement(doc, rootElem, "identifier", item.getIdentifier());
+                for (Repository repository : Optional
+                        .fromNullable(item.as(DocumentaryUnit.class).getRepository()).asSet()) {
+                    for (Description d : LanguageHelpers.getBestDescription(repository, langCode).asSet()) {
+                        tag(sw, "dc:publisher", d.getName());
+                    }
+                }
 
-        Optional<Description> descOpt = LanguageHelpers.getBestDescription(
-                item, Optional.<Description>absent(), langCode);
+                for (DatePeriod datePeriod : desc.as(Temporal.class).getDatePeriods()) {
+                    String start = datePeriod.getStartDate();
+                    String end = datePeriod.getEndDate();
+                    if (start != null && end != null) {
+                        tag(sw, "dc:coverage", String.format("%s - %s", start, end));
+                    } else if (start != null) {
+                        tag(sw, "dc:coverage", start);
+                    }
+                }
 
-        for (Description desc : descOpt.asSet()) {
-            addElement(doc, rootElem, "title", desc.getName());
-
-            for (String attr : propertyMappings.keySet()) {
-                Collection<String> mappedKeys = propertyMappings.get(attr);
-                for (String key : mappedKeys) {
-                    Object value = desc.getProperty(key);
-                    if (value != null) {
-                        if (value instanceof String) {
-                            addElement(doc, rootElem, attr, value);
-                        } else if (value instanceof List) {
-                            for (Object v : (List) value) {
-                                addElement(doc, rootElem, attr, v);
-                            }
+                for (String attr : propertyMappings.keySet()) {
+                    Collection<String> mappedKeys = propertyMappings.get(attr);
+                    for (String key : mappedKeys) {
+                        for (Object value : coerceList(desc.getProperty(key))) {
+                            tag(sw, "dc:" + attr, transform(attr, value));
                         }
-                        break;
+                    }
+                }
+
+                for (AccessPoint accessPoint : desc.getAccessPoints()) {
+                    AccessPointType type = accessPoint.getRelationshipType();
+                    switch (type) {
+                        case creator:
+                        case subject:
+                            tag(sw, "dc:" + type.name(), accessPoint.getName());
+                            break;
+                        case person:
+                        case corporateBody:
+                        case family:
+                            tag(sw, "dc:relation", accessPoint.getName());
+                            break;
+                        case place:
+                            tag(sw, "dc:coverage", accessPoint.getName());
+                            break;
+                        default:
                     }
                 }
             }
-
-            for (AccessPoint accessPoint : desc.getAccessPoints()) {
-                AccessPointType type = accessPoint.getRelationshipType();
-                switch (type) {
-                    case creator:
-                    case subject:
-                        addElement(doc, rootElem, type.name(), accessPoint.getName());
-                        break;
-                    case person:
-                    case corporateBody:
-                    case family:
-                        addElement(doc, rootElem, "relation", accessPoint.getName());
-                        break;
-                    case place:
-                        addElement(doc, rootElem, "coverage", accessPoint.getName());
-                        break;
-                    default:
-                }
-            }
-        }
-
-        return doc;
+        });
     }
 
-    private void addElement(Document doc, Element parent, String tag, Object value) {
-        Element elem = doc.createElementNS(DC_NS, "dc:" + tag);
-        String text = valueTransformers.containsKey(tag)
-                ? valueTransformers.get(tag).apply(value)
+    private String transform(String key, Object value) {
+        return valueTransformers.containsKey(key)
+                ? valueTransformers.get(key).apply(value.toString())
                 : value.toString();
-        elem.setTextContent(text);
-        parent.appendChild(elem);
     }
 }

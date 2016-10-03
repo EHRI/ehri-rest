@@ -23,18 +23,14 @@ import eu.ehri.project.exporters.test.XmlExporterTest;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Described;
-import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 
-import static org.junit.Assert.*;
-
-public class DublinCore11StreamExporterTest extends XmlExporterTest {
+public class DublinCore11ExporterTest extends XmlExporterTest {
 
     @Test
     public void testExport1() throws Exception {
@@ -57,7 +53,7 @@ public class DublinCore11StreamExporterTest extends XmlExporterTest {
     }
 
     private String testExport(Described item, String lang) throws Exception {
-        DublinCoreExporter exporter = new DublinCore11StreamExporter(api(validUser));
+        DublinCoreExporter exporter = new DublinCore11Exporter(api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(item, baos, lang);
         String xml = baos.toString("UTF-8");
