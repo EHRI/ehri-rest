@@ -97,6 +97,14 @@
         }
     }
 
+    documentaryUnits(first: 10) {
+        items {
+            parent {
+                id
+            }
+        }
+    }
+
     firstAgentDesc: HistoricalAgent(id: "a1") {
         description {
             name

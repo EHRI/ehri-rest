@@ -327,8 +327,13 @@ public class GraphQLImpl {
     private DataFetcher manyToOneRelationshipFetcher(Function<Entity, Entity> f) {
         return environment -> {
             Entity elem = f.apply((Entity) environment.getSource());
-            Boolean visible = AclManager.getAclFilterFunction(api().accessor()).compute(elem.asVertex());
-            return visible ? elem : null;
+            if (elem != null &&
+                    AclManager.getAclFilterFunction(api().accessor())
+                            .compute(elem.asVertex())) {
+                return elem;
+            }
+
+            return null;
         };
     }
 
@@ -678,11 +683,11 @@ public class GraphQLImpl {
             .description("An access point")
             .field(nonNullAttr(Ontology.NAME_KEY, "The access point's text"))
             .field(newFieldDefinition()
-                .name(Ontology.ACCESS_POINT_TYPE)
-                .description("The access point's type")
-                .type(new GraphQLNonNull(accessPointTypeEnum))
-                .dataFetcher(attributeDataFetcher)
-                .build())
+                    .name(Ontology.ACCESS_POINT_TYPE)
+                    .description("The access point's type")
+                    .type(new GraphQLNonNull(accessPointTypeEnum))
+                    .dataFetcher(attributeDataFetcher)
+                    .build())
             .build();
 
     private final GraphQLObjectType datePeriodType = newObject()
