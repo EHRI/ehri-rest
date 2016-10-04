@@ -1,6 +1,7 @@
 package eu.ehri.project.exporters.ead;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -11,7 +12,6 @@ import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
-import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Address;
@@ -129,14 +129,14 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 tag(sw, "archdesc", getLevelAttrs(descOpt, Optional.of("collection")), () -> {
                     addDataSection(sw, repository, unit, desc, langCode);
                     addPropertyValues(sw, desc);
-                        Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
-                        if (orderedChildren.iterator().hasNext()) {
-                            tag(sw, "dsc", () -> {
-                                for (DocumentaryUnit child : orderedChildren) {
-                                    addEadLevel(sw, 1, child, descOpt, langCode);
-                                }
-                            });
-                        }
+                    Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
+                    if (orderedChildren.iterator().hasNext()) {
+                        tag(sw, "dsc", () -> {
+                            for (DocumentaryUnit child : orderedChildren) {
+                                addEadLevel(sw, 1, child, descOpt, langCode);
+                            }
+                        });
+                    }
                     addControlAccess(sw, desc);
                 });
             }
@@ -156,7 +156,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     attrs("langcode", desc.getLanguageOfDescription())
             ));
             for (String value : Optional.fromNullable(
-                    desc.<String>getProperty("rulesAndConventions")).asSet()) {
+                    desc.<String>getProperty(IsadG.rulesAndConventions)).asSet()) {
                 tag(sw, "descrules", value, attrs("encodinganalog", "3.7.2"));
             }
         });
@@ -211,7 +211,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             Description desc, String langCode) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
-            tag(sw, "unittitle", desc.getName());
+            tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
 
             for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
                 if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
@@ -225,13 +225,13 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                                 unitDateNormalFormat.print(endDateTime));
                         String text = String.format("%s/%s",
                                 startDateTime.year().get(), endDateTime.year().get());
-                        tag(sw, "unitdate", text, attrs("normal", normal));
+                        tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
                     } else if (start != null) {
                         DateTime startDateTime = new DateTime(start);
                         String normal = String.format("%s",
                                 unitDateNormalFormat.print(startDateTime));
                         String text = String.format("%s", startDateTime.year().get());
-                        tag(sw, "unitdate", text, attrs("normal", normal));
+                        tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
                     }
                 }
             }
@@ -240,7 +240,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             for (Map.Entry<IsadG, String> pair : textDidMappings.entrySet()) {
                 if (propertyKeys.contains(pair.getKey().name())) {
                     for (Object v : coerceList(desc.getProperty(pair.getKey()))) {
-                        tag(sw, pair.getValue(), v.toString());
+                        tag(sw, pair.getValue(), v.toString(), textFieldAttrs(pair.getKey()));
                     }
                 }
             }
@@ -250,9 +250,10 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     for (Object v : coerceList(desc.getProperty(IsadG.languageOfMaterial))) {
                         String langName = LanguageHelpers.codeToName(v.toString());
                         if (v.toString().length() != 3) {
-                            tag(sw, "language", langName);
+                            tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial));
                         } else {
-                            tag(sw, "language", langName, attrs("langcode", v.toString()));
+                            tag(sw, "language", langName, textFieldAttrs(IsadG.languageOfMaterial, "langcode", v
+                                    .toString()));
                         }
                     }
                 });
@@ -314,10 +315,8 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         Set<String> available = item.getPropertyKeys();
         for (Map.Entry<IsadG, String> pair : multiValueTextMappings.entrySet()) {
             if (available.contains(pair.getKey().name())) {
-                Object value = item.getProperty(pair.getKey());
-                List values = coerceList(value);
-                for (Object v : values) {
-                    tag(sw, pair.getValue(),
+                for (Object v : coerceList(item.getProperty(pair.getKey()))) {
+                    tag(sw, pair.getValue(), textFieldAttrs(pair.getKey()),
                             () -> tag(sw, "p", () -> cData(sw, v.toString()))
                     );
                 }
@@ -325,12 +324,21 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         }
     }
 
+    private Map<String, String> textFieldAttrs(IsadG field, String... kvs) {
+        Preconditions.checkArgument(kvs.length % 2 == 0);
+        Map<String, String> attrs = field.getAnalogueEncoding().asSet()
+                .stream().collect(Collectors.toMap(e -> "encodinganalog", e -> e));
+        for (int i = 0; i < kvs.length; i += 2) {
+            attrs.put(kvs[0], kvs[i + 1]);
+        }
+        return attrs;
+    }
+
     private Map<String, String> getLevelAttrs(Optional<Description> descOpt, Optional<String> defaultLevel) {
         return descOpt.asSet().stream()
                 .map(d -> Optional.fromNullable(d.<String>getProperty(IsadG.levelOfDescription)).or(defaultLevel))
                 .filter(Optional::isPresent)
-                .map(p -> ImmutableList.of("level", p.get()))
-                .collect(Collectors.toMap(l -> l.get(0), l -> l.get(1)));
+                .collect(Collectors.toMap(l -> "level", Optional::orNull));
     }
 
     // Sort the children by identifier. FIXME: This might be a bad assumption!
