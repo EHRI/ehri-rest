@@ -19,7 +19,6 @@
 
 package eu.ehri.project.exporters.xml;
 
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**

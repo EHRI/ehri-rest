@@ -24,7 +24,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.AbstractSkosTest;
 import eu.ehri.project.importers.cvoc.JenaSkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporter;
-import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;

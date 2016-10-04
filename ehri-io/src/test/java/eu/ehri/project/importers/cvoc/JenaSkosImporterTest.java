@@ -20,20 +20,15 @@
 package eu.ehri.project.importers.cvoc;
 
 import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.persistence.Serializer;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Ignore;
 
 import java.util.Comparator;
 import java.util.List;
