@@ -22,7 +22,7 @@ package eu.ehri.extension;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.hp.hpl.jena.shared.NoReaderForLangException;
+import org.apache.jena.shared.NoReaderForLangException;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;

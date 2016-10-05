@@ -19,7 +19,7 @@
 
 package eu.ehri.extension;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.CreateResource;

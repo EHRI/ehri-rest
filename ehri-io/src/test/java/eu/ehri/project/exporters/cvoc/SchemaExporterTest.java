@@ -1,7 +1,7 @@
 package eu.ehri.project.exporters.cvoc;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
