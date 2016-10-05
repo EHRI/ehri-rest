@@ -19,6 +19,7 @@
 
 package eu.ehri.project.test;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -237,5 +238,11 @@ public abstract class GraphTestBase {
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
             throw new RuntimeException("Too many edge items in graph to fit into an integer!");
         return (int) l;
+    }
+
+    protected String readResourceFileAsString(String resourceName)
+            throws java.io.IOException {
+        URL url = Resources.getResource(resourceName);
+        return Resources.toString(url, Charsets.UTF_8);
     }
 }

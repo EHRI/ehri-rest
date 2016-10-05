@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.base;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -42,7 +43,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public abstract class AbstractImporter<T> {
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
-    protected final List<ImportCallback> callbacks = Lists.newArrayList();
+    private final List<ImportCallback> callbacks = Lists.newArrayList();
 
     private NodeProperties pc;
 
@@ -89,7 +89,7 @@ public abstract class AbstractImporter<T> {
         return actioner;
     }
 
-    public BundleManager getPersister(List<String> scopeIds) {
+    protected BundleManager getPersister(List<String> scopeIds) {
         return new BundleManager(framedGraph,
                 Lists.newArrayList(Iterables.concat(permissionScope.idPath(), scopeIds)));
     }
@@ -142,7 +142,7 @@ public abstract class AbstractImporter<T> {
      * @throws ValidationError when the item representation does not validate
      */
     public abstract Accessible importItem(T itemData,
-                                          List<String> scopeIds) throws ValidationError;
+            List<String> scopeIds) throws ValidationError;
 
     /**
      * Extract a list of DatePeriod bundles from an item's data.
@@ -182,7 +182,7 @@ public abstract class AbstractImporter<T> {
 
     private NodeProperties loadNodeProperties() {
         try (InputStream fis = getClass().getClassLoader().getResourceAsStream(NODE_PROPERTIES);
-             BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")))) {
+             BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charsets.UTF_8))) {
             NodeProperties nodeProperties = new NodeProperties();
             String headers = br.readLine();
             nodeProperties.setTitles(headers);

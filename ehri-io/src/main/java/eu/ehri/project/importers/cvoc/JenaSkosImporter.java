@@ -23,16 +23,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.util.iterator.ExtendedIterator;
-import org.apache.jena.util.iterator.Filter;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
@@ -59,6 +49,15 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.LanguageHelpers;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.util.iterator.ExtendedIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -336,12 +335,10 @@ public final class JenaSkosImporter implements SkosImporter {
     private List<RDFNode> getObjectWithPredicate(Resource item, final URI propUri) {
         // NB: this should be possible with simply item.listProperties(propUri)
         // but for some reason that doesn't work... I can't grok why.
-        return item.listProperties().filterKeep(new Filter<Statement>() {
-            @Override
-            public boolean accept(Statement statement) {
-                return statement.getPredicate().hasURI(propUri.toString());
-            }
-        }).mapWith(Statement::getObject).toList();
+        return item.listProperties().filterKeep(statement ->
+                statement.getPredicate()
+                        .hasURI(propUri.toString()))
+                .mapWith(Statement::getObject).toList();
     }
 
     private void connectRelation(Concept current, Resource item, Map<Resource, Concept> others,
