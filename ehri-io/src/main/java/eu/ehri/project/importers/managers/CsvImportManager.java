@@ -23,20 +23,18 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
-import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.util.Helpers;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,14 +50,14 @@ import java.util.Map;
  */
 public class CsvImportManager extends AbstractImportManager {
 
-    public static final Character VALUE_DELIMITER = ';';
+    private static final Character VALUE_DELIMITER = ';';
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
     public CsvImportManager(FramedGraph<?> framedGraph,
-                            PermissionScope permissionScope, Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates, Class<? extends AbstractImporter> importerClass) {
+            PermissionScope permissionScope, Actioner actioner,
+            boolean tolerant,
+            boolean allowUpdates, Class<? extends AbstractImporter> importerClass) {
         super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass);
     }
 
@@ -74,7 +72,7 @@ public class CsvImportManager extends AbstractImportManager {
      */
     @Override
     protected void importInputStream(InputStream stream, final ActionManager.EventContext context,
-                                     final ImportLog log) throws IOException, ValidationError, InputParseError {
+            final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {
             AbstractImporter importer = importerClass
@@ -108,7 +106,7 @@ public class CsvImportManager extends AbstractImportManager {
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
 
             try (MappingIterator<Map<String, String>> valueIterator = reader
-                    .readValues(new InputStreamReader(stream, "UTF-8"))) {
+                    .readValues(new InputStreamReader(stream, Charsets.UTF_8))) {
                 while (valueIterator.hasNext()) {
                     Map<String, String> rawData = valueIterator.next();
                     Map<String, Object> dataMap = Maps.newHashMap();

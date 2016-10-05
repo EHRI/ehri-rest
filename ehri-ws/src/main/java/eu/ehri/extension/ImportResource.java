@@ -19,10 +19,10 @@
 
 package eu.ehri.extension;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import org.apache.jena.shared.NoReaderForLangException;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -54,6 +54,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.jena.shared.NoReaderForLangException;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -527,7 +528,7 @@ public class ImportResource extends AbstractResource {
         } else {
             File fileTest = new File(logMessagePathOrText);
             if (fileTest.exists()) {
-                return Optional.of(FileUtils.readFileToString(fileTest, "UTF-8"));
+                return Optional.of(FileUtils.readFileToString(fileTest, Charsets.UTF_8));
             } else {
                 return Optional.of(logMessagePathOrText);
             }

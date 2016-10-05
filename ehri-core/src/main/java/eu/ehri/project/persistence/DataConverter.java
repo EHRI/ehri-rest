@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -188,7 +189,7 @@ class DataConverter {
         Preconditions.checkNotNull(inputStream);
         try {
             final JsonParser parser = factory
-                    .createParser(new InputStreamReader(inputStream, "UTF-8"));
+                    .createParser(new InputStreamReader(inputStream, Charsets.UTF_8));
             JsonToken jsonToken = parser.nextValue();
             if (!parser.isExpectedStartArrayToken()) {
                 throw new DeserializationError("Stream should be an array of objects, was: " + jsonToken);

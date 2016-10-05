@@ -142,7 +142,7 @@ public class GraphQLImpl {
         }
     }
 
-    private int getLimit(Integer limitArg) {
+    private static int getLimit(Integer limitArg) {
         if (limitArg == null) {
             return DEFAULT_LIST_LIMIT;
         } else if (limitArg < 0) {
@@ -152,7 +152,7 @@ public class GraphQLImpl {
         }
     }
 
-    private int getOffset(String afterCursor, String fromCursor) {
+    private static int getOffset(String afterCursor, String fromCursor) {
         if (afterCursor != null) {
             return decodeCursor(afterCursor, -1) + 1;
         } else if (fromCursor != null) {
@@ -164,13 +164,13 @@ public class GraphQLImpl {
 
     // Field definitions
 
-    private final Map<String, String> conceptDescStringFields = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> conceptDescStringFields = ImmutableMap.<String, String>builder()
             .put("otherFormsOfName", "")
             .put("definition", "A description of the subject resource")
             .put("scopeNote", "")
             .build();
 
-    private final Map<String, String> countryStringFields = ImmutableMap.<String, String>builder()
+    private static final Map<String, String> countryStringFields = ImmutableMap.<String, String>builder()
             .put("history", "")
             .put("situation", "")
             .put("summary", "")
@@ -179,14 +179,17 @@ public class GraphQLImpl {
 
     // Argument helpers...
 
-    private GraphQLScalarType wrappedString(String name, String description) {
+    private static final GraphQLList GraphQLStringList = new GraphQLList(GraphQLString);
+    private static final GraphQLNonNull GraphQLNonNullString = new GraphQLNonNull(GraphQLString);
+
+    private static GraphQLScalarType wrappedString(String name, String description) {
         return new GraphQLScalarType(name, description, GraphQLString.getCoercing());
     }
 
-    private final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
-    private final GraphQLScalarType CursorType = wrappedString("Cursor", "A connection cursor");
+    private static final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
+    private static final GraphQLScalarType CursorType = wrappedString("Cursor", "A connection cursor");
 
-    private final GraphQLArgument idArgument = newArgument()
+    private static final GraphQLArgument idArgument = newArgument()
             .name(Bundle.ID_KEY)
             .type(new GraphQLNonNull(IdType))
             .build();
@@ -259,17 +262,17 @@ public class GraphQLImpl {
         }
     };
 
-    private final DataFetcher idDataFetcher =
+    private static final DataFetcher idDataFetcher =
             environment -> ((Entity) environment.getSource()).getProperty(EntityType.ID_KEY);
 
-    private final DataFetcher typeDataFetcher =
+    private static final DataFetcher typeDataFetcher =
             environment -> ((Entity) environment.getSource()).getProperty(EntityType.TYPE_KEY);
 
-    private final DataFetcher attributeDataFetcher =
+    private static final DataFetcher attributeDataFetcher =
             environment -> ((Entity) environment.getSource())
                     .getProperty(environment.getFields().get(0).getName());
 
-    private DataFetcher listDataFetcher(DataFetcher fetcher) {
+    private static DataFetcher listDataFetcher(DataFetcher fetcher) {
         return environment -> {
             Object obj = fetcher.get(environment);
             if (obj == null) {
@@ -282,7 +285,7 @@ public class GraphQLImpl {
         };
     }
 
-    private final DataFetcher descriptionDataFetcher = environment -> {
+    private static final DataFetcher descriptionDataFetcher = environment -> {
         String lang = environment.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
         String code = environment.getArgument(Ontology.IDENTIFIER_KEY);
 
@@ -311,7 +314,7 @@ public class GraphQLImpl {
         }
     };
 
-    private DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
+    private static DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
         return environment -> transformer.apply(fetcher.get(environment));
     }
 
@@ -339,7 +342,7 @@ public class GraphQLImpl {
 
     // Field definition helpers...
 
-    private GraphQLFieldDefinition nullAttr(String name, String description, GraphQLOutputType type) {
+    private static GraphQLFieldDefinition nullAttr(String name, String description, GraphQLOutputType type) {
         return newFieldDefinition()
                 .type(type)
                 .name(name)
@@ -348,11 +351,11 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private GraphQLFieldDefinition nullAttr(String name, String description) {
+    private static GraphQLFieldDefinition nullAttr(String name, String description) {
         return nullAttr(name, description, GraphQLString);
     }
 
-    private GraphQLFieldDefinition nonNullAttr(String name, String description, GraphQLOutputType type) {
+    private static GraphQLFieldDefinition nonNullAttr(String name, String description, GraphQLOutputType type) {
         return newFieldDefinition()
                 .type(type)
                 .name(name)
@@ -361,11 +364,11 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private GraphQLFieldDefinition nonNullAttr(String name, String description) {
+    private static GraphQLFieldDefinition nonNullAttr(String name, String description) {
         return nonNullAttr(name, description, GraphQLString);
     }
 
-    private List<GraphQLFieldDefinition> nullStringAttrs(DefinitionList[] items) {
+    private static List<GraphQLFieldDefinition> nullStringAttrs(DefinitionList[] items) {
         return Lists.newArrayList(items)
                 .stream().filter(i -> !i.isMultiValued())
                 .map(f ->
@@ -378,12 +381,12 @@ public class GraphQLImpl {
                 ).collect(Collectors.toList());
     }
 
-    private List<GraphQLFieldDefinition> listStringAttrs(DefinitionList[] items) {
+    private static List<GraphQLFieldDefinition> listStringAttrs(DefinitionList[] items) {
         return Lists.newArrayList(items)
                 .stream().filter(DefinitionList::isMultiValued)
                 .map(f ->
                         newFieldDefinition()
-                                .type(new GraphQLList(GraphQLString))
+                                .type(GraphQLStringList)
                                 .name(f.name())
                                 .description(f.getDescription())
                                 .dataFetcher(listDataFetcher(attributeDataFetcher))
@@ -391,30 +394,26 @@ public class GraphQLImpl {
                 ).collect(Collectors.toList());
     }
 
-    private List<GraphQLFieldDefinition> nullStringAttrs(Map<String, String> attrMap) {
+    private static List<GraphQLFieldDefinition> nullStringAttrs(Map<String, String> attrMap) {
         return attrMap.entrySet().stream().map(e -> nullAttr(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
 
-    private GraphQLFieldDefinition idField() {
-        return newFieldDefinition()
-                .type(new GraphQLNonNull(GraphQLString))
-                .name(Bundle.ID_KEY)
-                .description("The item's EHRI id")
-                .dataFetcher(idDataFetcher)
-                .build();
-    }
+    private static GraphQLFieldDefinition idField = newFieldDefinition()
+            .type(GraphQLNonNullString)
+            .name(Bundle.ID_KEY)
+            .description("The item's EHRI id")
+            .dataFetcher(idDataFetcher)
+            .build();
 
-    private GraphQLFieldDefinition typeField() {
-        return newFieldDefinition()
-                .type(new GraphQLNonNull(GraphQLString))
-                .name(Bundle.TYPE_KEY)
-                .description("The item's EHRI type")
-                .dataFetcher(typeDataFetcher)
-                .build();
-    }
+    private static GraphQLFieldDefinition typeField = newFieldDefinition()
+            .type(new GraphQLNonNull(GraphQLString))
+            .name(Bundle.TYPE_KEY)
+            .description("The item's EHRI type")
+            .dataFetcher(typeDataFetcher)
+            .build();
 
-    private GraphQLFieldDefinition singleDescriptionFieldDefinition(GraphQLObjectType descriptionType) {
+    private static GraphQLFieldDefinition singleDescriptionFieldDefinition(GraphQLObjectType descriptionType) {
         return newFieldDefinition()
                 .type(descriptionType)
                 .name("description")
@@ -444,26 +443,7 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private GraphQLFieldDefinition descriptionsFieldDefinition(GraphQLObjectType descriptionType) {
-        return newFieldDefinition()
-                .type(new GraphQLList(descriptionType))
-                .name("descriptions")
-                .description("The item's descriptions")
-                .dataFetcher(oneToManyRelationshipFetcher(r -> r.as(Described.class).getDescriptions()))
-                .build();
-    }
-
-    private GraphQLFieldDefinition accessPointFieldDefinition() {
-        return listFieldDefinition("accessPoints", "Access points associated with this description",
-                accessPointType, oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
-    }
-
-    private GraphQLFieldDefinition datePeriodFieldDefinition() {
-        return listFieldDefinition("dates", "Date periods associated with this description",
-                datePeriodType, oneToManyRelationshipFetcher(d -> d.as(Temporal.class).getDatePeriods()));
-    }
-
-    private GraphQLFieldDefinition listFieldDefinition(String name, String description,
+    private static GraphQLFieldDefinition listFieldDefinition(String name, String description,
             GraphQLOutputType type, DataFetcher dataFetcher) {
         return newFieldDefinition()
                 .name(name)
@@ -473,7 +453,7 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private GraphQLFieldDefinition connectionFieldDefinition(String name, String description,
+    private static GraphQLFieldDefinition connectionFieldDefinition(String name, String description,
             GraphQLOutputType type, DataFetcher dataFetcher) {
         return newFieldDefinition()
                 .name(name)
@@ -502,6 +482,33 @@ public class GraphQLImpl {
                 .build();
     }
 
+    private static List<GraphQLFieldDefinition> descriptionFields() {
+        return Lists.newArrayList(
+                nonNullAttr(Ontology.LANGUAGE_OF_DESCRIPTION, "The description's language code"),
+                nonNullAttr(Ontology.NAME_KEY, "The description's title"),
+                nullAttr(Ontology.IDENTIFIER_KEY, "The description's (optional) identifier")
+        );
+    }
+
+    private GraphQLFieldDefinition descriptionsFieldDefinition(GraphQLObjectType descriptionType) {
+        return newFieldDefinition()
+                .type(new GraphQLList(descriptionType))
+                .name("descriptions")
+                .description("The item's descriptions")
+                .dataFetcher(oneToManyRelationshipFetcher(r -> r.as(Described.class).getDescriptions()))
+                .build();
+    }
+
+    private GraphQLFieldDefinition accessPointFieldDefinition() {
+        return listFieldDefinition("accessPoints", "Access points associated with this description",
+                accessPointType, oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
+    }
+
+    private GraphQLFieldDefinition datePeriodFieldDefinition() {
+        return listFieldDefinition("dates", "Date periods associated with this description",
+                datePeriodType, oneToManyRelationshipFetcher(d -> d.as(Temporal.class).getDatePeriods()));
+    }
+
     private GraphQLFieldDefinition itemFieldDefinition(String name, String description,
             GraphQLOutputType type, DataFetcher dataFetcher, GraphQLArgument... arguments) {
         return newFieldDefinition()
@@ -513,13 +520,84 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private List<GraphQLFieldDefinition> descriptionFields() {
-        return Lists.newArrayList(
-                nonNullAttr(Ontology.LANGUAGE_OF_DESCRIPTION, "The description's language code"),
-                nonNullAttr(Ontology.NAME_KEY, "The description's title"),
-                nullAttr(Ontology.IDENTIFIER_KEY, "The description's (optional) identifier")
-        );
+    // Type definitions...
+
+    private static GraphQLOutputType edgeType(GraphQLOutputType wrapped, String description) {
+        return newObject()
+                .name(wrapped.getName() + "Edge")
+                .description(description)
+                .field(newFieldDefinition()
+                        .name(NODE)
+                        .type(wrapped)
+                        .build()
+                )
+                .field(newFieldDefinition()
+                        .name(CURSOR)
+                        .type(GraphQLString)
+                        .build()
+                )
+                .build();
     }
+
+    private static GraphQLOutputType connectionType(GraphQLOutputType wrappedType, String name, String description) {
+        return newObject()
+                .name(name)
+                .description(description)
+                .field(newFieldDefinition()
+                        .name(ITEMS)
+                        .description("A sequence of type: " + wrappedType.getName())
+                        .type(new GraphQLList(wrappedType))
+                        .build()
+                ).field(newFieldDefinition()
+                        .name(EDGES)
+                        .description("A sequence of " + wrappedType.getName() + " edges")
+                        .type(new GraphQLList(edgeType(wrappedType, description)))
+                        .build()
+                ).field(newFieldDefinition()
+                        .name(PAGE_INFO)
+                        .description("Pagination information")
+                        .type(newObject()
+                                .name(PAGE_INFO)
+                                .field(newFieldDefinition()
+                                        .name(HAS_PREVIOUS_PAGE)
+                                        .description("If a previous page of data is available")
+                                        .type(GraphQLBoolean)
+                                        .build()
+                                )
+                                .field(newFieldDefinition()
+                                        .name(PREVIOUS_PAGE)
+                                        .description("A cursor pointing to the previous page of items")
+                                        .type(GraphQLString)
+                                        .build()
+                                )
+                                .field(newFieldDefinition()
+                                        .name(HAS_NEXT_PAGE)
+                                        .description("If another page of data is available")
+                                        .type(GraphQLBoolean)
+                                        .build()
+                                )
+                                .field(newFieldDefinition()
+                                        .name(NEXT_PAGE)
+                                        .description("A cursor pointing to the next page of items")
+                                        .type(GraphQLString)
+                                        .build()
+                                )
+                                .build())
+                        .build()
+                )
+                .build();
+    }
+
+    // NB: These are static since loading them, and all the resources, is quite
+    // slow to do per query.
+    private static final List<GraphQLFieldDefinition> documentaryUnitDescriptionNullFields = nullStringAttrs(IsadG.values());
+    private static final List<GraphQLFieldDefinition> documentaryUnitDescriptionListFields = listStringAttrs(IsadG.values());
+    private static final List<GraphQLFieldDefinition> repositoryDescriptionNullFields = nullStringAttrs(Isdiah.values());
+    private static final List<GraphQLFieldDefinition> repositoryDescriptionListFields = listStringAttrs(Isdiah.values());
+    private static final List<GraphQLFieldDefinition> historicalAgentDescriptionNullFields = nullStringAttrs(Isaar.values());
+    private static final List<GraphQLFieldDefinition> historicalAgentDescriptionListFields = listStringAttrs(Isaar.values());
+    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(conceptDescStringFields);
+
 
     // Interfaces and type resolvers...
 
@@ -578,8 +656,8 @@ public class GraphQLImpl {
     private final GraphQLInterfaceType entityInterface = newInterface()
             .name("Entity")
             .description("An entity")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .typeResolver(entityTypeResolver)
             .build();
 
@@ -590,79 +668,12 @@ public class GraphQLImpl {
             .typeResolver(descriptionTypeResolver)
             .build();
 
-    // Type definitions...
-
-    private GraphQLOutputType edgeType(GraphQLOutputType wrapped, String description) {
-        return newObject()
-                .name(wrapped.getName() + "Edge")
-                .description(description)
-                .field(newFieldDefinition()
-                        .name(NODE)
-                        .type(wrapped)
-                        .build()
-                )
-                .field(newFieldDefinition()
-                        .name(CURSOR)
-                        .type(GraphQLString)
-                        .build()
-                )
-                .build();
-    }
-
-    private GraphQLOutputType connectionType(GraphQLOutputType wrappedType, String name, String description) {
-        return newObject()
-                .name(name)
-                .description(description)
-                .field(newFieldDefinition()
-                        .name(ITEMS)
-                        .description("A sequence of type: " + wrappedType.getName())
-                        .type(new GraphQLList(wrappedType))
-                        .build()
-                ).field(newFieldDefinition()
-                        .name(EDGES)
-                        .description("A sequence of " + wrappedType.getName() + " edges")
-                        .type(new GraphQLList(edgeType(wrappedType, description)))
-                        .build()
-                ).field(newFieldDefinition()
-                        .name(PAGE_INFO)
-                        .description("Pagination information")
-                        .type(newObject()
-                                .name(PAGE_INFO)
-                                .field(newFieldDefinition()
-                                        .name(HAS_PREVIOUS_PAGE)
-                                        .description("If a previous page of data is available")
-                                        .type(GraphQLBoolean)
-                                        .build()
-                                )
-                                .field(newFieldDefinition()
-                                        .name(PREVIOUS_PAGE)
-                                        .description("A cursor pointing to the previous page of items")
-                                        .type(GraphQLString)
-                                        .build()
-                                )
-                                .field(newFieldDefinition()
-                                        .name(HAS_NEXT_PAGE)
-                                        .description("If another page of data is available")
-                                        .type(GraphQLBoolean)
-                                        .build()
-                                )
-                                .field(newFieldDefinition()
-                                        .name(NEXT_PAGE)
-                                        .description("A cursor pointing to the next page of items")
-                                        .type(GraphQLString)
-                                        .build()
-                                )
-                                .build())
-                        .build()
-                )
-                .build();
-    }
 
     private final GraphQLObjectType entityType = newObject()
             .name("Entity")
             .description("An EHRI entity")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .withInterface(entityInterface)
             .build();
 
@@ -710,8 +721,8 @@ public class GraphQLImpl {
             .fields(descriptionFields())
             .field(accessPointFieldDefinition())
             .field(datePeriodFieldDefinition())
-            .fields(nullStringAttrs(IsadG.values()))
-            .fields(listStringAttrs(IsadG.values()))
+            .fields(documentaryUnitDescriptionNullFields)
+            .fields(documentaryUnitDescriptionListFields)
             .withInterface(descriptionInterface)
             .build();
 
@@ -723,8 +734,8 @@ public class GraphQLImpl {
             .field(listFieldDefinition("addresses", "Addresses",
                     addressType, oneToManyRelationshipFetcher(d ->
                             d.as(RepositoryDescription.class).getAddresses())))
-            .fields(nullStringAttrs(Isdiah.values()))
-            .fields(listStringAttrs(Isdiah.values()))
+            .fields(repositoryDescriptionNullFields)
+            .fields(repositoryDescriptionListFields)
             .withInterface(descriptionInterface)
             .build();
 
@@ -734,8 +745,8 @@ public class GraphQLImpl {
             .fields(descriptionFields())
             .field(accessPointFieldDefinition())
             .field(datePeriodFieldDefinition())
-            .fields(nullStringAttrs(Isaar.values()))
-            .fields(listStringAttrs(Isaar.values()))
+            .fields(historicalAgentDescriptionNullFields)
+            .fields(historicalAgentDescriptionListFields)
             .withInterface(descriptionInterface)
             .build();
 
@@ -744,15 +755,15 @@ public class GraphQLImpl {
             .description("A concept description")
             .fields(descriptionFields())
             .field(accessPointFieldDefinition())
-            .fields(nullStringAttrs(conceptDescStringFields))
+            .fields(conceptDescriptionNullFields)
             .withInterface(descriptionInterface)
             .build();
 
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description("A repository / archival institution")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
@@ -775,8 +786,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType documentaryUnitType = newObject()
             .name(Entities.DOCUMENTARY_UNIT)
             .description("An archival unit")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
             .field(descriptionsFieldDefinition(documentaryUnitDescriptionType))
             .field(singleDescriptionFieldDefinition(documentaryUnitDescriptionType))
@@ -803,8 +814,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType historicalAgentType = newObject()
             .name(Entities.HISTORICAL_AGENT)
             .description("An historical agent")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The historical agent's EHRI identifier"))
             .field(singleDescriptionFieldDefinition(historicalAgentDescriptionType))
             .field(descriptionsFieldDefinition(historicalAgentDescriptionType))
@@ -820,8 +831,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType authoritativeSetType = newObject()
             .name(Entities.AUTHORITATIVE_SET)
             .description("An authority set")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The set's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The set's name"))
             .field(nullAttr("description", "The item's description"))
@@ -841,8 +852,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType countryType = newObject()
             .name(Entities.COUNTRY)
             .description("A country")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The country's ISO639-2 code"))
             .field(newFieldDefinition()
                     .name(Ontology.NAME_KEY)
@@ -868,8 +879,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType conceptType = newObject()
             .name(Entities.CVOC_CONCEPT)
             .description("A concept")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The concept's local identifier"))
             .field(descriptionsFieldDefinition(conceptDescriptionType))
             .field(singleDescriptionFieldDefinition(conceptDescriptionType))
@@ -899,8 +910,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType vocabularyType = newObject()
             .name(Entities.CVOC_VOCABULARY)
             .description("A vocabulary")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The vocabulary's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The vocabulary's name"))
             .field(nullAttr("description", "The item's description"))
@@ -919,8 +930,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType annotationType = newObject()
             .name(Entities.ANNOTATION)
             .description("An annotation")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, "The text of the annotation"))
             .field(listFieldDefinition("targets", "The annotation's target(s)", entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
@@ -933,8 +944,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType linkType = newObject()
             .name(Entities.LINK)
             .description("A link")
-            .field(idField())
-            .field(typeField())
+            .field(idField)
+            .field(typeField)
             .field(nonNullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
             .field(listFieldDefinition("targets", "The annotation's targets", entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))

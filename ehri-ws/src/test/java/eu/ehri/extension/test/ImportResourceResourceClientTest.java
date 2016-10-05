@@ -20,6 +20,7 @@
 package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -398,13 +399,13 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         }
         String payloadText = Joiner.on("\n").join(paths) + "\n";
         return new ByteArrayInputStream(
-                payloadText.getBytes("UTF-8"));
+                payloadText.getBytes(Charsets.UTF_8));
     }
 
     private String getTestLogFilePath(String text) throws IOException {
         File temp = File.createTempFile("test-log", ".tmp");
         temp.deleteOnExit();
-        FileUtils.writeStringToFile(temp, text);
+        FileUtils.writeStringToFile(temp, text, Charsets.UTF_8);
         return temp.getAbsolutePath();
     }
 }
