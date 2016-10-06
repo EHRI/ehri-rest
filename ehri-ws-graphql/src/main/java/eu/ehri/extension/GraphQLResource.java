@@ -30,6 +30,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+/**
+ * GraphQL implementation.
+ */
 @Path(GraphQLResource.ENDPOINT)
 public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
@@ -46,6 +49,11 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     // Helpers
 
+    /**
+     * Fetch the introspected GraphQL schema.
+     *
+     * @return JSON data describing the schema.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ExecutionResult describe() throws Exception {
@@ -56,6 +64,13 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         }
     }
 
+    /**
+     * Run a GraphQL query.
+     *
+     * @param q a query object containing <code>query</code> and <code>variables</code>
+     *          fields
+     * @return the results of the query as JSON
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -78,6 +93,12 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         }
     }
 
+    /**
+     * Run a GraphQL query.
+     *
+     * @param q a GraphQL query as text.
+     * @return the results of the query as JSON
+     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
