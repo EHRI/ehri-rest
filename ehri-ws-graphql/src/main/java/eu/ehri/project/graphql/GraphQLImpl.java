@@ -526,6 +526,15 @@ public class GraphQLImpl {
                 .build();
     }
 
+    private GraphQLFieldDefinition itemCountFieldDefinition(Function<Entity, Integer> f) {
+        return newFieldDefinition()
+                .type(new GraphQLNonNull(GraphQLInt))
+                .name("itemCount")
+                .description("The number of child items this item contains")
+                .dataFetcher(env -> Math.toIntExact(f.apply((Entity) env.getSource())))
+                .build();
+    }
+
     private GraphQLFieldDefinition accessPointFieldDefinition() {
         return listFieldDefinition("accessPoints", "Access points associated with this description",
                 accessPointType, oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
@@ -803,6 +812,7 @@ public class GraphQLImpl {
             .field(idField)
             .field(typeField)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
+            .field(itemCountFieldDefinition(r -> r.as(Repository.class).getChildCount()))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -833,6 +843,7 @@ public class GraphQLImpl {
             .field(singleDescriptionFieldDefinition(documentaryUnitDescriptionType))
             .field(itemFieldDefinition("repository", "The unit's repository, if top level", repositoryType,
                     manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository())))
+            .field(itemCountFieldDefinition(d -> d.as(DocumentaryUnit.class).getChildCount()))
             .field(connectionFieldDefinition("children", "The unit's child items",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -879,6 +890,7 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The set's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The set's name"))
             .field(nullAttr("description", "The item's description"))
+            .field(itemCountFieldDefinition(a -> a.as(AuthoritativeSet.class).getChildCount()))
             .field(connectionFieldDefinition("authorities", "Item's contained in this vocabulary", historicalAgentType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())))
@@ -908,6 +920,7 @@ public class GraphQLImpl {
             )
             .fields(countryDescriptionNullFields)
             .fields(countryDescriptionListFields)
+            .field(itemCountFieldDefinition(c -> c.as(Country.class).getChildCount()))
             .field(connectionFieldDefinition("repositories", "Repositories located in the country", repositoryType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Country.class).getRepositories())))
@@ -932,6 +945,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.CVOC_CONCEPT),
                     oneToManyRelationshipFetcher(
                             c -> c.as(Concept.class).getRelatedConcepts())))
+            .field(itemCountFieldDefinition(c -> c.as(Concept.class).getChildCount()))
             .field(listFieldDefinition("broader", "Broader concepts, as a list",
                     new GraphQLTypeReference(Entities.CVOC_CONCEPT),
                     oneToManyRelationshipFetcher(c -> c.as(Concept.class).getBroaderConcepts())))
@@ -959,6 +973,7 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The vocabulary's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The vocabulary's name"))
             .field(nullAttr("description", "The item's description"))
+            .field(itemCountFieldDefinition(r -> r.as(Vocabulary.class).getChildCount()))
             .field(connectionFieldDefinition("concepts", "Concepts contained in this vocabulary", conceptType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Vocabulary.class).getConcepts())))
