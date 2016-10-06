@@ -33,6 +33,7 @@ import eu.ehri.project.definitions.Isaar;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Isdiah;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.definitions.Skos;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
@@ -163,12 +164,6 @@ public class GraphQLImpl {
     }
 
     // Field definitions
-
-    private static final Map<String, String> conceptDescStringFields = ImmutableMap.<String, String>builder()
-            .put("otherFormsOfName", "")
-            .put("definition", "A description of the subject resource")
-            .put("scopeNote", "")
-            .build();
 
     private static final Map<String, String> countryStringFields = ImmutableMap.<String, String>builder()
             .put("history", "")
@@ -596,7 +591,8 @@ public class GraphQLImpl {
     private static final List<GraphQLFieldDefinition> repositoryDescriptionListFields = listStringAttrs(Isdiah.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionNullFields = nullStringAttrs(Isaar.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionListFields = listStringAttrs(Isaar.values());
-    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(conceptDescStringFields);
+    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(Skos.values());
+    private static final List<GraphQLFieldDefinition> conceptDescriptionListFields = listStringAttrs(Skos.values());
 
 
     // Interfaces and type resolvers...
@@ -756,6 +752,7 @@ public class GraphQLImpl {
             .fields(descriptionFields())
             .field(accessPointFieldDefinition())
             .fields(conceptDescriptionNullFields)
+            .fields(conceptDescriptionListFields)
             .withInterface(descriptionInterface)
             .build();
 

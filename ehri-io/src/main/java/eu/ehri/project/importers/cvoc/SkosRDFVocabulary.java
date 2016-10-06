@@ -21,14 +21,14 @@ package eu.ehri.project.importers.cvoc;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.definitions.Skos;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 /**
-*/ // Borrowed from https://github.com/simonjupp/java-skos-api
+ */ // Borrowed from https://github.com/simonjupp/java-skos-api
 public enum SkosRDFVocabulary {
     LABEL_RELATED("labelRelated"),
     MEMBER("member"),
@@ -74,15 +74,15 @@ public enum SkosRDFVocabulary {
     public static final String DEFAULT_BASE_URI = "http://data.ehri-project.eu#";
     public static final String NAMESPACE_URI = "http://www.w3.org/2004/02/skos/core#";
 
-    public static final Map<String, String> NAMESPACES = ImmutableMap.<String,String>builder()
-        .put("skos", "http://www.w3.org/2004/02/skos/core#")
-        .put("dc",   "http://purl.org/dc/elements/1.1/name")
-        .put("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
-        .put("foaf", "http://xmlns.com/foaf/0.1/")
-        .put("sem",  "http://semanticweb.cs.vu.nl/2009/11/sem/")
-        .put("geo",  "http://www.w3.org/2003/01/geo/wgs84_pos#")
-        .put("owl",  "http://www.w3.org/2002/07/owl#")
-        .build();
+    public static final Map<String, String> NAMESPACES = ImmutableMap.<String, String>builder()
+            .put("skos", "http://www.w3.org/2004/02/skos/core#")
+            .put("dc", "http://purl.org/dc/elements/1.1/name")
+            .put("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
+            .put("foaf", "http://xmlns.com/foaf/0.1/")
+            .put("sem", "http://semanticweb.cs.vu.nl/2009/11/sem/")
+            .put("geo", "http://www.w3.org/2003/01/geo/wgs84_pos#")
+            .put("owl", "http://www.w3.org/2002/07/owl#")
+            .build();
 
     // Language-agnostic properties.
     public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
@@ -106,14 +106,14 @@ public enum SkosRDFVocabulary {
             .put("sem:place", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .build();
 
-    public static final Map<String, List<URI>> LANGUAGE_PROPS = ImmutableMap.<String,List<URI>>builder()
-            .put(Ontology.CONCEPT_ALTLABEL, Lists.newArrayList(ALT_LABEL.getURI()))
-            .put(Ontology.CONCEPT_HIDDENLABEL, Lists.newArrayList(HIDDEN_LABEL.getURI()))
-            .put(Ontology.CONCEPT_DEFINITION, Lists.newArrayList(DEFINITION.getURI()))
-            .put(Ontology.CONCEPT_SCOPENOTE, Lists.newArrayList(SCOPE_NOTE.getURI(),
+    public static final Map<String, List<URI>> LANGUAGE_PROPS = ImmutableMap.<String, List<URI>>builder()
+            .put(Skos.altLabel.name(), Lists.newArrayList(ALT_LABEL.getURI()))
+            .put(Skos.hiddenLabel.name(), Lists.newArrayList(HIDDEN_LABEL.getURI()))
+            .put(Skos.definition.name(), Lists.newArrayList(DEFINITION.getURI()))
+            .put(Skos.scopeNote.name(), Lists.newArrayList(SCOPE_NOTE.getURI(),
                     URI.create("http://www.w3.org/2000/01/rdf-schema#comment")))
-            .put(Ontology.CONCEPT_NOTE, Lists.newArrayList(NOTE.getURI()))
-            .put(Ontology.CONCEPT_EDITORIAL_NOTE, Lists.newArrayList(EDITORIAL_NOTE.getURI()))
+            .put(Skos.note.name(), Lists.newArrayList(NOTE.getURI()))
+            .put(Skos.editorialNote.name(), Lists.newArrayList(EDITORIAL_NOTE.getURI()))
             .build();
 
     private final URI uri;

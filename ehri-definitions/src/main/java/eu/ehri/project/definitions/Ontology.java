@@ -97,16 +97,9 @@ public class Ontology {
     public static final String ITEM_IN_AUTHORITATIVE_SET = "inAuthoritativeSet";
 
     // Concepts!
-    public static final String CONCEPT_ALTLABEL = "altLabel";
-    public static final String CONCEPT_HIDDENLABEL = "hiddenLabel";
-    public static final String CONCEPT_DEFINITION = "definition";
-    public static final String CONCEPT_NOTE = "note";
-    public static final String CONCEPT_EDITORIAL_NOTE = "editoralNote";
-    public static final String CONCEPT_SCOPENOTE = "scopeNote";
     public static final String CONCEPT_HAS_BROADER = "broader";
     public static final String CONCEPT_HAS_NARROWER = "narrower";
     public static final String CONCEPT_HAS_RELATED = "related";
-    public static final String CONCEPT_EDITORIALNOTE = "provenance";
 
     // System events
     public static final String ENTITY_HAS_EVENT = "hasEvent";

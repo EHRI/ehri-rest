@@ -108,7 +108,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         
         Concept bloodForGoods = manager.getEntity("cvoc1-1", Concept.class);
         for(Description desc : bloodForGoods.getDescriptions()){
-            assertTrue(desc.getPropertyKeys().contains(Ontology.CONCEPT_SCOPENOTE));
+            assertTrue(desc.getPropertyKeys().contains("scopeNote"));
         }
         Concept teheranChildren = manager.getEntity("cvoc1-2", Concept.class);
         for(Description desc : teheranChildren.getDescriptions()){

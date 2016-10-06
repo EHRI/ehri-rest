@@ -140,8 +140,8 @@ public class CvocConceptTest extends ModelTestBase {
                             put(Ontology.PREFLABEL, "pref1");
                             // other properties are optional, but we put them in
                             put("altLabel", Lists.newArrayList("alt1", "alt2"));
-                            put(Ontology.CONCEPT_DEFINITION, Lists.newArrayList("def1")); // allow multiple
-                            put(Ontology.CONCEPT_SCOPENOTE, Lists.newArrayList("sn1")); // allow multiple
+                            put("definition", Lists.newArrayList("def1")); // allow multiple
+                            put("scopeNote", Lists.newArrayList("sn1")); // allow multiple
                         }});
                     }});
                 }});
@@ -176,7 +176,7 @@ public class CvocConceptTest extends ModelTestBase {
         //String[] altLabels = descr.getAltLabels();
         //assertEquals("alt2", altLabels[1]);
         // NOTE we can't call getAltLabels() on the interface, because it is optional
-        List<String> altLabels = descr.getProperty(Ontology.CONCEPT_ALTLABEL);
+        List<String> altLabels = descr.getProperty("altLabel");
         assertFalse(altLabels == null);
         assertEquals(2, altLabels.size());
         assertEquals("alt2", altLabels.get(1));
