@@ -149,7 +149,7 @@ public class NiodEadXsdTest extends AbstractImporterTest {
             assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
         }
         //test hierarchy
-        assertEquals(1L, archdesc.getChildCount());
+        assertEquals(1, archdesc.getChildCount());
         for (DocumentaryUnit d : archdesc.getChildren()) {
             assertEquals(C01, d.getIdentifier());
         }

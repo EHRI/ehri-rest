@@ -51,7 +51,7 @@ public interface SystemEvent extends Accessible {
 
     @Meta(ItemHolder.CHILD_COUNT)
     @JavaHandler
-    long subjectCount();
+    int subjectCount();
 
     /**
      * Fetch the time stamp of this event.
@@ -148,18 +148,17 @@ public interface SystemEvent extends Accessible {
     abstract class Impl implements JavaHandlerContext<Vertex>, SystemEvent {
 
         @Override
-        public long subjectCount() {
-            return gremlin().inE(Ontology.ENTITY_HAS_EVENT).count();
+        public int subjectCount() {
+            return Math.toIntExact(gremlin().inE(Ontology.ENTITY_HAS_EVENT).count());
         }
 
         @Override
         public Iterable<Accessible> getSubjects() {
             return frameVertices(gremlin().in(Ontology.ENTITY_HAS_EVENT)
                     .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
-                    .loop("n", JavaHandlerUtils.noopLoopFunc, vertexLoopBundle -> {
-                        return isValidEndpoint(vertexLoopBundle.getObject(),
-                                Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
-                    }));
+                    .loop("n", JavaHandlerUtils.noopLoopFunc,
+                            vertexLoopBundle -> isValidEndpoint(vertexLoopBundle.getObject(),
+                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT)));
         }
 
         @Override
@@ -169,10 +168,9 @@ public interface SystemEvent extends Accessible {
             // with Frames not being thinking it has an iterable???
             GremlinPipeline<Vertex, Vertex> subjects = gremlin().in(Ontology.ENTITY_HAS_EVENT)
                     .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
-                    .loop("n", JavaHandlerUtils.noopLoopFunc, vertexLoopBundle -> {
-                        return isValidEndpoint(vertexLoopBundle.getObject(),
-                                Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
-                    });
+                    .loop("n", JavaHandlerUtils.noopLoopFunc,
+                            vertexLoopBundle -> isValidEndpoint(vertexLoopBundle.getObject(),
+                            Ontology.ENTITY_HAS_LIFECYCLE_EVENT));
             return (Accessible) (subjects.iterator().hasNext()
                     ? frame(subjects.iterator().next())
                     : null);
@@ -182,10 +180,9 @@ public interface SystemEvent extends Accessible {
         public Actioner getActioner() {
             GremlinPipeline<Vertex, Vertex> actioners = gremlin().in(Ontology.ACTION_HAS_EVENT)
                     .as("n").in(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
-                    .loop("n", JavaHandlerUtils.noopLoopFunc, vertexLoopBundle -> {
-                        return isValidEndpoint(vertexLoopBundle.getObject(),
-                                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
-                    });
+                    .loop("n", JavaHandlerUtils.noopLoopFunc,
+                            vertexLoopBundle -> isValidEndpoint(vertexLoopBundle.getObject(),
+                            Ontology.ACTIONER_HAS_LIFECYCLE_ACTION));
             return (Actioner) (actioners.iterator().hasNext()
                     ? frame(actioners.iterator().next())
                     : null);

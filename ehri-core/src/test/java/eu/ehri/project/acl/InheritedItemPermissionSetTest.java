@@ -59,6 +59,6 @@ public class InheritedItemPermissionSetTest extends AbstractFixtureTest {
         );
         List<Map<String,List<PermissionType>>> serialized = permissions.serialize();
         // Should contain Reto and Kcl
-        assertEquals(2L, serialized.size());
+        assertEquals(2, serialized.size());
     }
 }

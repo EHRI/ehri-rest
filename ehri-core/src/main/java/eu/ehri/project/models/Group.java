@@ -81,7 +81,7 @@ public interface Group extends Accessor, Accessible,
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    long getChildCount();
+    int getChildCount();
 
     /**
      * Adds a Accessor as a member to this Group, so it has the permissions of the Group.
@@ -113,8 +113,8 @@ public interface Group extends Accessor, Accessible,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Group {
 
-        public long getChildCount() {
-            return gremlin().inE(Ontology.ACCESSOR_BELONGS_TO_GROUP).count();
+        public int getChildCount() {
+            return Math.toIntExact(gremlin().inE(Ontology.ACCESSOR_BELONGS_TO_GROUP).count());
         }
 
         public void addMember(Accessor accessor) {
@@ -129,11 +129,10 @@ public interface Group extends Accessor, Accessible,
 
         public Iterable<Accessible> getAllUserProfileMembers() {
             GremlinPipeline<Vertex,Vertex> pipe = gremlin().as("n").in(Ontology.ACCESSOR_BELONGS_TO_GROUP)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, vertexLoopBundle -> {
-                        return vertexLoopBundle.getObject()
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops,
+                            vertexLoopBundle -> vertexLoopBundle.getObject()
                                 .getProperty(EntityType.TYPE_KEY)
-                                .equals(Entities.USER_PROFILE);
-                    });
+                                    .equals(Entities.USER_PROFILE));
             return frameVertices(pipe.dedup());
         }
     }

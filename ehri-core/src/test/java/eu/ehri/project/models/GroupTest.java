@@ -48,7 +48,7 @@ public class GroupTest extends AbstractFixtureTest {
         admin.addMember(validUser);
         assertEquals(numMembers, Iterables.size(admin.getMembers()));
         admin.addMember(invalidUser);
-        assertEquals(numMembers + 1L, Iterables.size(admin.getMembers()));
+        assertEquals(numMembers + 1, Iterables.size(admin.getMembers()));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class GroupTest extends AbstractFixtureTest {
         admin.removeMember(invalidUser);
         assertEquals(numMembers, Iterables.size(admin.getMembers()));
         admin.removeMember(validUser);
-        assertEquals(numMembers - 1L, Iterables.size(admin.getMembers()));
+        assertEquals(numMembers - 1, Iterables.size(admin.getMembers()));
     }
 
     @Test

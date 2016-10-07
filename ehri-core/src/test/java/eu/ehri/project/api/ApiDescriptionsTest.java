@@ -103,7 +103,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
-        long descCount = Iterables.size(unit.getDocumentDescriptions());
+        int descCount = Iterables.size(unit.getDocumentDescriptions());
         Bundle descBundle = new Serializer(graph).entityToBundle(unit)
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
                 .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
@@ -137,7 +137,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
-        long descCount = Iterables.size(unit.getDocumentDescriptions());
+        int descCount = Iterables.size(unit.getDocumentDescriptions());
 
         DocumentaryUnitDescription d = Iterables.getFirst(unit.getDocumentDescriptions(), null);
         assertNotNull(d);

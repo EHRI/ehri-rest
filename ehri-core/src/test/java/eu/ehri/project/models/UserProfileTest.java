@@ -71,17 +71,17 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(Iterables.isEmpty(reto.getFollowing()));
 
         reto.addFollowing(mike);
-        assertEquals(1L, Iterables.size(mike.getFollowers()));
-        assertEquals(1L, Iterables.size(reto.getFollowing()));
+        assertEquals(1, Iterables.size(mike.getFollowers()));
+        assertEquals(1, Iterables.size(reto.getFollowing()));
 
         reto.addFollowing(linda);
-        assertEquals(1L, Iterables.size(mike.getFollowers()));
-        assertEquals(2L, Iterables.size(reto.getFollowing()));
+        assertEquals(1, Iterables.size(mike.getFollowers()));
+        assertEquals(2, Iterables.size(reto.getFollowing()));
 
         // Get count caching
-        assertEquals(2L, reto.getFollowingCount());
-        assertEquals(1L, mike.getFollowerCount());
-        assertEquals(1L, linda.getFollowerCount());
+        assertEquals(2, reto.getFollowingCount());
+        assertEquals(1, mike.getFollowerCount());
+        assertEquals(1, linda.getFollowerCount());
 
         assertFalse(Iterables.isEmpty(reto.getFollowing()));
         assertTrue(Iterables.contains(reto.getFollowing(), mike));
@@ -90,8 +90,8 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(Iterables.isEmpty(mike.getFollowers()));
         assertFalse(Iterables.isEmpty(reto.getFollowing()));
 
-        assertEquals(1L, reto.getFollowingCount());
-        assertEquals(0L, mike.getFollowerCount());
+        assertEquals(1, reto.getFollowingCount());
+        assertEquals(0, mike.getFollowerCount());
     }
 
     @Test
@@ -109,9 +109,9 @@ public class UserProfileTest extends AbstractFixtureTest {
         // Do this twice and ensure the follower count isn't altered...
         reto.addFollowing(mike);
         reto.addFollowing(mike);
-        assertEquals(1L, Iterables.size(reto.getFollowing()));
+        assertEquals(1, Iterables.size(reto.getFollowing()));
         reto.addFollowing(linda);
-        assertEquals(2L, Iterables.size(reto.getFollowing()));
+        assertEquals(2, Iterables.size(reto.getFollowing()));
     }
 
     @Test
@@ -121,20 +121,20 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertFalse(mike.isWatching(c1));
         mike.addWatching(c1);
         assertTrue(mike.isWatching(c1));
-        assertEquals(1L, mike.getWatchingCount());
+        assertEquals(1, mike.getWatchingCount());
         assertTrue(Iterables.contains(c1.getWatchers(), mike));
-        assertEquals(1L, c1.getWatchedCount());
+        assertEquals(1, c1.getWatchedCount());
         assertTrue(Iterables.contains(mike.getWatching(), c1));
 
         mike.addWatching(c2);
-        assertEquals(2L, mike.getWatchingCount());
+        assertEquals(2, mike.getWatchingCount());
         mike.removeWatching(c2);
-        assertEquals(1L, mike.getWatchingCount());
+        assertEquals(1, mike.getWatchingCount());
 
         mike.removeWatching(c1);
         assertFalse(mike.isWatching(c1));
-        assertEquals(0L, mike.getWatchingCount());
-        assertEquals(0L, c1.getWatchedCount());
+        assertEquals(0, mike.getWatchingCount());
+        assertEquals(0, c1.getWatchedCount());
     }
 
     @Test

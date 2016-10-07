@@ -54,7 +54,7 @@ public interface VirtualUnit extends AbstractUnit {
 
     @Meta(CHILD_COUNT)
     @JavaHandler
-    long getChildCount();
+    int getChildCount();
 
     @Fetch(Ontology.VC_IS_PART_OF)
     @Adjacency(label = Ontology.VC_IS_PART_OF)
@@ -166,18 +166,22 @@ public interface VirtualUnit extends AbstractUnit {
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, VirtualUnit {
 
+        @Override
         public void setAuthor(Accessor accessor) {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
+        @Override
         public void removeIncludedUnit(DocumentaryUnit unit) {
             removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
+        @Override
         public Iterable<VirtualUnit> getChildren() {
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF));
         }
 
+        @Override
         public boolean addChild(VirtualUnit child) {
             if (child.asVertex().equals(it())) {
                 // Self-referential.
@@ -193,6 +197,7 @@ public interface VirtualUnit extends AbstractUnit {
             return addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
         }
 
+        @Override
         public boolean removeChild(VirtualUnit child) {
             return removeAllRelationships(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
         }
@@ -203,6 +208,7 @@ public interface VirtualUnit extends AbstractUnit {
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc);
         }
 
+        @Override
         public Iterable<VirtualUnit> getAllChildren() {
             Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").in(Ontology.VC_IS_PART_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
@@ -211,18 +217,21 @@ public interface VirtualUnit extends AbstractUnit {
                     .fairMerge().cast(Vertex.class));
         }
 
+        @Override
         public Iterable<VirtualUnit> getAncestors() {
             return frameVertices(traverseAncestors());
         }
 
+        @Override
         public boolean addIncludedUnit(DocumentaryUnit unit) {
             return addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
-        public long getChildCount() {
+        @Override
+        public int getChildCount() {
             long incCount = gremlin().outE(Ontology.VC_INCLUDES_UNIT).count();
             long vcCount = gremlin().inE(Ontology.VC_IS_PART_OF).count();
-            return incCount + vcCount;
+            return Math.toIntExact(incCount + vcCount);
         }
     }
 }

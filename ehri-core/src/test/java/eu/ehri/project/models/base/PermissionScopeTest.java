@@ -59,7 +59,7 @@ public class PermissionScopeTest extends AbstractFixtureTest {
         PermissionScope c1 = manager.getEntity("c1", PermissionScope.class);
         PermissionScope c2 = manager.getEntity("c2", PermissionScope.class);
         Iterable<Accessible> containedItems = c1.getContainedItems();
-        assertEquals(1L, Iterables.size(containedItems));
+        assertEquals(1, Iterables.size(containedItems));
         assertEquals(c2, containedItems.iterator().next());
     }
 
@@ -71,14 +71,14 @@ public class PermissionScopeTest extends AbstractFixtureTest {
         PermissionScope c3 = manager.getEntity("c3", PermissionScope.class);
         PermissionScope c4 = manager.getEntity("c4", PermissionScope.class);
         List<Accessible> r1contained = Lists.newArrayList(r1.getAllContainedItems());
-        assertEquals(5L, r1contained.size());
+        assertEquals(5, r1contained.size());
         assertTrue(r1contained.contains(c1.as(Accessible.class)));
         assertTrue(r1contained.contains(c2.as(Accessible.class)));
         assertTrue(r1contained.contains(c3.as(Accessible.class)));
         assertTrue(r1contained.contains(c4.as(Accessible.class)));
 
         List<Accessible> c1contained = Lists.newArrayList(c1.getAllContainedItems());
-        assertEquals(2L, c1contained.size());
+        assertEquals(2, c1contained.size());
         assertTrue(c1contained.contains(c2.as(Accessible.class)));
         assertTrue(c1contained.contains(c3.as(Accessible.class)));
     }

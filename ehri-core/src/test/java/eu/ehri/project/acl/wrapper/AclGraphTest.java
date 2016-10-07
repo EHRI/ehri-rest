@@ -61,14 +61,14 @@ public class AclGraphTest extends AbstractFixtureTest {
     public void testGetVerticesAsValidUser() throws Exception {
         Iterable<Vertex> vertices = validUserGraph.getVertices(Ontology.IDENTIFIER_KEY, "c1");
         assertTrue(vertices.iterator().hasNext());
-        assertEquals(1L, Iterables.size(vertices));
+        assertEquals(1, Iterables.size(vertices));
     }
 
     @Test
     public void testGetVerticesAsInvalidUser() throws Exception {
         Iterable<Vertex> vertices = invalidUserGraph.getVertices(Ontology.IDENTIFIER_KEY, "c1");
         assertFalse(vertices.iterator().hasNext());
-        assertEquals(0L, Iterables.size(vertices));
+        assertEquals(0, Iterables.size(vertices));
     }
 
     @Test

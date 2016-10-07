@@ -34,7 +34,7 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {
         VirtualUnit vc1 = manager.getEntity("vc1", VirtualUnit.class);
-        assertEquals(1L, vc1.getChildCount());
+        assertEquals(1, vc1.getChildCount());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     public void testAddChild() throws Exception {
         VirtualUnit vu2 = manager.getEntity("vu2", VirtualUnit.class);
         VirtualUnit vu3 = manager.getEntity("vu3", VirtualUnit.class);
-        Long childCount = vu2.getChildCount();
+        int childCount = vu2.getChildCount();
         assertTrue(vu2.addChild(vu3));
         assertEquals(childCount + 1, vu2.getChildCount());
         // Doing the same thing twice should return false
@@ -80,8 +80,8 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
         assertTrue(vu1.getAllChildren().iterator().hasNext());
         assertTrue(vu1.getIncludedUnits().iterator().hasNext());
-        long childCount = vu1.getChildCount();
-        assertEquals(2L, childCount);
+        int childCount = vu1.getChildCount();
+        assertEquals(2, childCount);
         vu1.addIncludedUnit(c4);
         assertEquals(childCount + 1, vu1.getChildCount());
         vu1.removeIncludedUnit(c4);
@@ -97,13 +97,13 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     public void testAddIncludedUnit() throws Exception {
         VirtualUnit vu1 = manager.getEntity("vu1", VirtualUnit.class);
         DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
-        assertEquals(1L, Iterables.size(vu1.getIncludedUnits()));
+        assertEquals(1, Iterables.size(vu1.getIncludedUnits()));
         vu1.addIncludedUnit(c4);
 //        vu1.addReferencedDescription(cd4);
-        assertEquals(2L, Iterables.size(vu1.getIncludedUnits()));
+        assertEquals(2, Iterables.size(vu1.getIncludedUnits()));
         // check we can't add it twice
         vu1.addIncludedUnit(c4);
-        assertEquals(2L, Iterables.size(vu1.getIncludedUnits()));
+        assertEquals(2, Iterables.size(vu1.getIncludedUnits()));
     }
 
     @Test

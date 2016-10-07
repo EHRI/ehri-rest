@@ -120,7 +120,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    long getChildCount();
+    int getChildCount();
 
     /**
      * Get child documentary units
@@ -152,8 +152,8 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
 
-        public long getChildCount() {
-            return gremlin().inE(Ontology.DOC_IS_CHILD_OF).count();
+        public int getChildCount() {
+            return Math.toIntExact(gremlin().inE(Ontology.DOC_IS_CHILD_OF).count());
         }
 
         public Iterable<DocumentaryUnit> getChildren() {

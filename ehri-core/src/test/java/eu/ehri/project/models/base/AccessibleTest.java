@@ -41,7 +41,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         Accessible c1 = manager.getEntity("c1", Accessible.class);
         Accessible admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessible.class);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
-        assertEquals(2L, accessors.size());
+        assertEquals(2, accessors.size());
         assertTrue(accessors.contains(validUser)); // mike
         assertTrue(accessors.contains(admin));
     }
@@ -51,11 +51,11 @@ public class AccessibleTest extends AbstractFixtureTest {
         Accessible c1 = manager.getEntity("c1", Accessible.class);
         Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
-        assertEquals(2L, accessors.size());
+        assertEquals(2, accessors.size());
         c1.addAccessor(admin);
-        assertEquals(2L, Iterables.size(c1.getAccessors())); // same size
+        assertEquals(2, Iterables.size(c1.getAccessors())); // same size
         c1.addAccessor(invalidUser);
-        assertEquals(3L, Iterables.size(c1.getAccessors()));
+        assertEquals(3, Iterables.size(c1.getAccessors()));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         Accessor admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessor.class);
         c1.removeAccessor(admin);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
-        assertEquals(1L, accessors.size());
+        assertEquals(1, accessors.size());
         assertTrue(accessors.contains(validUser));
     }
 
@@ -93,7 +93,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         PermissionScope nl = manager.getEntity("nl", PermissionScope.class);
         assertEquals(r1, c1.getPermissionScope());
         List<PermissionScope> scopes = Lists.newArrayList(c2.getPermissionScopes());
-        assertEquals(3L, scopes.size());
+        assertEquals(3, scopes.size());
         assertTrue(scopes.contains(c1));
         assertTrue(scopes.contains(r1));
         assertTrue(scopes.contains(nl));
@@ -105,7 +105,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         Mutation<DocumentaryUnit> update = doUpdate(c1);
         assertTrue(update.updated());
         Iterable<SystemEvent> history = c1.getHistory();
-        assertEquals(1L, Iterables.size(history));
+        assertEquals(1, Iterables.size(history));
     }
 
     @Test
