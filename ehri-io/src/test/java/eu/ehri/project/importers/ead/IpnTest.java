@@ -88,7 +88,7 @@ public class IpnTest extends AbstractImporterTest {
                 getVertexByIdentifier(graph, "ipn vc"),
                 VirtualUnit.class);
 
-        assertEquals(2L, archdesc.getChildCount());
+        assertEquals(2, archdesc.getChildCount());
 
 
     }
@@ -163,7 +163,7 @@ public class IpnTest extends AbstractImporterTest {
             assertFalse(desc.getPropertyKeys().contains("unitDates"));
         }
         //test hierarchy
-        assertEquals(2L, archdesc.getChildCount());
+        assertEquals(2, archdesc.getChildCount());
 
         //test level-of-desc
         for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {
@@ -246,7 +246,7 @@ public class IpnTest extends AbstractImporterTest {
             assertEquals("Areszt Śledczy Sądowy w Poznaniu [Untersuchungshaftanstalt Posen]", desc.getName());
         }
         //test hierarchy
-        assertEquals(2L, archdesc.getChildCount());
+        assertEquals(2, archdesc.getChildCount());
 
         //test level-of-desc
         for (DocumentaryUnitDescription d : c1_1.getDocumentDescriptions()) {

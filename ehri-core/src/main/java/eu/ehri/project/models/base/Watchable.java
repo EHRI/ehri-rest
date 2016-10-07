@@ -40,13 +40,13 @@ public interface Watchable extends Accessible {
 
     @Meta(WATCHED_COUNT)
     @JavaHandler
-    long getWatchedCount();
+    int getWatchedCount();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, Watchable {
 
         @Override
-        public long getWatchedCount() {
-            return gremlin().inE(USER_WATCHING_ITEM).count();
+        public int getWatchedCount() {
+            return Math.toIntExact(gremlin().inE(USER_WATCHING_ITEM).count());
         }
     }
 }

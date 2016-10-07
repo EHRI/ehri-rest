@@ -59,6 +59,6 @@ public class InheritedGlobalPermissionSetTest extends AbstractFixtureTest {
         InheritedGlobalPermissionSet permissions
                 = aclManager.getInheritedGlobalPermissions(invalidUser);
         List<Map<String,GlobalPermissionSet>> list = permissions.serialize();
-        assertEquals(2L, list.size());
+        assertEquals(2, list.size());
     }
 }

@@ -66,58 +66,65 @@ public interface Promotable extends Accessible {
     boolean isPromotable();
 
     @JavaHandler
-    long getPromotionScore();
-
-    @JavaHandler
-    void updatePromotionScoreCache();
+    int getPromotionScore();
 
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Promotable {
 
-        public void updatePromotionScoreCache() {
-            long score = gremlin().out(Ontology.PROMOTED_BY).count() - gremlin().out(Ontology.DEMOTED_BY).count();
+        private void updatePromotionScoreCache() {
+            int score = Math.toIntExact(gremlin().out(Ontology.PROMOTED_BY).count()
+                    - gremlin().out(Ontology.DEMOTED_BY).count());
             it().setProperty(PROMOTION_SCORE, score);
         }
 
+        @Override
         public void addPromotion(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
             updatePromotionScoreCache();
         }
 
+        @Override
         public void removePromotion(UserProfile user) {
             removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
             updatePromotionScoreCache();
         }
 
+        @Override
         public void addDemotion(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.DEMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
             updatePromotionScoreCache();
         }
 
+        @Override
         public void removeDemotion(UserProfile user) {
             removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
             updatePromotionScoreCache();
         }
 
+        @Override
         public boolean isPromoted() {
             return gremlin().out(Ontology.PROMOTED_BY).count() > gremlin().out(Ontology.DEMOTED_BY).count();
         }
 
-        public long getPromotionScore() {
-            Long score = it().getProperty(PROMOTION_SCORE);
+        @Override
+        public int getPromotionScore() {
+            Integer score = it().getProperty(PROMOTION_SCORE);
             return score == null
-                    ?gremlin().out(Ontology.PROMOTED_BY).count() - gremlin().out(Ontology.DEMOTED_BY).count()
+                    ? Math.toIntExact(gremlin().out(Ontology.PROMOTED_BY).count()
+                            - gremlin().out(Ontology.DEMOTED_BY).count())
                     : score;
         }
 
+        @Override
         public boolean isPromotedBy(UserProfile user) {
             return hasRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
         }
 
+        @Override
         public boolean isPromotable() {
             Boolean promotable = it().getProperty(Ontology.IS_PROMOTABLE);
             return promotable != null && promotable;

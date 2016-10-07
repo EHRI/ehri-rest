@@ -37,21 +37,21 @@ public class CountryTest extends AbstractFixtureTest {
                 .create(Bundle.fromData(TestData.getTestAgentBundle()), Repository.class);
         country.addRepository(repo);
         // 2 nl repositories in the fixtures, plus the one we just made...
-        assertEquals(3L, country.getChildCount());
+        assertEquals(3, country.getChildCount());
     }
 
     @Test
     public void testGetChildCountOnDeletion() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
-        assertEquals(2L, country.getChildCount());
+        assertEquals(2, country.getChildCount());
         api(validUser).delete("r1");
-        assertEquals(1L, country.getChildCount());
+        assertEquals(1, country.getChildCount());
     }
 
     @Test
     public void testGetRepositories() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
-        assertEquals(2L, Iterables.size(country.getRepositories()));
+        assertEquals(2, Iterables.size(country.getRepositories()));
     }
 
     @Test
@@ -63,6 +63,6 @@ public class CountryTest extends AbstractFixtureTest {
         // increments the country count...
         repo.setCountry(country);
         // 2 nl repositories in the fixtures, plus the one we just made...
-        assertEquals(3L, country.getChildCount());
+        assertEquals(3, country.getChildCount());
     }
 }

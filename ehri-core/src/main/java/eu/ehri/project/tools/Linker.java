@@ -109,7 +109,7 @@ public class Linker {
      * @throws ValidationError
      * @throws PermissionDenied
      */
-    public long createAndLinkRepositoryVocabulary(
+    public int createAndLinkRepositoryVocabulary(
             Repository repository,
             Vocabulary vocabulary,
             UserProfile user)
@@ -149,7 +149,7 @@ public class Linker {
         // Abort if we've got no concepts - this avoids creating
         // an event unnecessarily...
         if (!willCreateItems(identifierCount, excludeSingles)) {
-            return 0L;
+            return 0;
         }
 
         // Now create concepts for all the names
@@ -206,7 +206,7 @@ public class Linker {
         // which the concept originally derived.
         ActionManager.EventContext linkEvent = actionManager
                 .newEventContext(user, EventTypes.creation, logMessage);
-        long linkCount = 0L;
+        int linkCount = 0;
         for (DocumentaryUnit doc : repository.getAllDocumentaryUnits()) {
             for (DocumentaryUnitDescription description : doc.getDocumentDescriptions()) {
                 for (AccessPoint relationship : description.getAccessPoints()) {

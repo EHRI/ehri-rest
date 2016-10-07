@@ -50,45 +50,45 @@ public class RelationAddTest extends GraphTestBase {
 
     @Test
     public void testAddRelationWithDuplicates() throws Exception {
-        assertEquals(0L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(0, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
         CommandLine commandLine = relationAdd.getCmdLine(new String[]{"mike", "knows", "linda", "--allow-duplicates"});
         int retVal = relationAdd.execWithOptions(graph, commandLine);
         assertEquals(0, retVal);
-        assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        assertEquals(1L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
+        assertEquals(1, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(1, Iterables.size(linda.getVertices(Direction.IN, "knows")));
 
         relationAdd.execWithOptions(graph, commandLine);
-        assertEquals(2L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        assertEquals(2L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
+        assertEquals(2, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(2, Iterables.size(linda.getVertices(Direction.IN, "knows")));
     }
 
     @Test
     public void testAddRelation() throws Exception {
-        assertEquals(0L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(0, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
         CommandLine commandLine = relationAdd.getCmdLine(new String[]{"mike", "knows", "linda"});
         int retVal = relationAdd.execWithOptions(graph, commandLine);
         assertEquals(0, retVal);
-        assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        assertEquals(1L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
+        assertEquals(1, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(1, Iterables.size(linda.getVertices(Direction.IN, "knows")));
 
         relationAdd.execWithOptions(graph, commandLine);
-        assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        assertEquals(1L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
+        assertEquals(1, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(1, Iterables.size(linda.getVertices(Direction.IN, "knows")));
     }
 
     @Test
     public void testAddSingleRelation() throws Exception {
-        assertEquals(0L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(0, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
         CommandLine commandLine1 = relationAdd.getCmdLine(new String[]{"mike", "knows", "linda"});
         int retVal = relationAdd.execWithOptions(graph, commandLine1);
         assertEquals(0, retVal);
-        assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        assertEquals(1L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
+        assertEquals(1, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(1, Iterables.size(linda.getVertices(Direction.IN, "knows")));
 
         CommandLine commandLine2 = relationAdd.getCmdLine(new String[]{"--single", "mike", "knows", "reto"});
         relationAdd.execWithOptions(graph, commandLine2);
-        assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        assertEquals(0L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
-        assertEquals(1L, Iterables.size(reto.getVertices(Direction.IN, "knows")));
+        assertEquals(1, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
+        assertEquals(0, Iterables.size(linda.getVertices(Direction.IN, "knows")));
+        assertEquals(1, Iterables.size(reto.getVertices(Direction.IN, "knows")));
     }
 }

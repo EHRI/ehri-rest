@@ -52,15 +52,15 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
 
     @Meta(FOLLOWER_COUNT)
     @JavaHandler
-    long getFollowerCount();
+    int getFollowerCount();
 
     @Meta(FOLLOWING_COUNT)
     @JavaHandler
-    long getFollowingCount();
+    int getFollowingCount();
 
     @Meta(WATCHING_COUNT)
     @JavaHandler
-    long getWatchingCount();
+    int getWatchingCount();
 
     /**
      * Get the groups to which this user belongs.
@@ -223,18 +223,18 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
 
         @Override
-        public long getFollowerCount() {
-            return gremlin().inE(USER_FOLLOWS_USER).count();
+        public int getFollowerCount() {
+            return Math.toIntExact(gremlin().inE(USER_FOLLOWS_USER).count());
         }
 
         @Override
-        public long getFollowingCount() {
-            return gremlin().outE(USER_FOLLOWS_USER).count();
+        public int getFollowingCount() {
+            return Math.toIntExact(gremlin().outE(USER_FOLLOWS_USER).count());
         }
 
         @Override
-        public long getWatchingCount() {
-            return gremlin().outE(USER_WATCHING_ITEM).count();
+        public int getWatchingCount() {
+            return Math.toIntExact(gremlin().outE(USER_WATCHING_ITEM).count());
         }
 
         @Override

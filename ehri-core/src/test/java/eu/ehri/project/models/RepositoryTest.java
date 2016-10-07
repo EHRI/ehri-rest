@@ -32,10 +32,10 @@ public class RepositoryTest extends AbstractFixtureTest {
     @Test
     public void testGetCollections() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
-        assertEquals(3L, Iterables.size(r1.getTopLevelDocumentaryUnits()));
+        assertEquals(3, Iterables.size(r1.getTopLevelDocumentaryUnits()));
 
         // Check the cached size
-        assertEquals(3L, r1.getChildCount());
+        assertEquals(3, r1.getChildCount());
     }
 
     @Test

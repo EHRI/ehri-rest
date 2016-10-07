@@ -60,7 +60,7 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     void setVocabulary(Vocabulary vocabulary);
 
     @Property(CHILD_COUNT)
-    long getChildCount();
+    int getChildCount();
 
     // relations to other concepts
     
@@ -100,8 +100,8 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
 
         @Override
-        public long getChildCount() {
-            return gremlin().outE(Ontology.CONCEPT_HAS_NARROWER).count();
+        public int getChildCount() {
+            return Math.toIntExact(gremlin().outE(Ontology.CONCEPT_HAS_NARROWER).count());
         }
 
         @Override

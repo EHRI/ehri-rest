@@ -84,7 +84,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         for (Description d : unit.getDocumentDescriptions())
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
 
-        assertEquals(2L, unit.getChildCount());
+        assertEquals(2, unit.getChildCount());
         List<DocumentaryUnit> children = Lists.newArrayList(unit.getChildren());
         DocumentaryUnit child1 = children.get(0);
         DocumentaryUnit child2 = children.get(1);

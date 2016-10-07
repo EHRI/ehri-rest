@@ -50,7 +50,7 @@ public class LinkerTest extends AbstractFixtureTest {
         // The doc c1 contains two access point nodes which should be made
         // into links
         String logMessage = "This is a test!";
-        long newLinkCount = linker
+        int newLinkCount = linker
                 .withExcludeSingles(false)
                 .withLogMessage(logMessage)
                 .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
@@ -68,7 +68,7 @@ public class LinkerTest extends AbstractFixtureTest {
 
         // This won't create any links because the access point type
         // won't match any existing access points.
-        long newLinkCount = linker
+        int newLinkCount = linker
                 .withExcludeSingles(false)
                 .withAccessPointType("IDontExist")
                 .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
@@ -86,7 +86,7 @@ public class LinkerTest extends AbstractFixtureTest {
 
         // This won't create any links because all of the access points only point
         // to single items
-        long newLinkCount = linker.withExcludeSingles(true)
+        int newLinkCount = linker.withExcludeSingles(true)
             .createAndLinkRepositoryVocabulary(repository, vocabulary,
                     validUser);
         assertEquals(0, newLinkCount);

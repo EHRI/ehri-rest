@@ -151,7 +151,7 @@ public class QueryApiTest extends AbstractFixtureTest {
         // Query for document identifier c1.
         QueryApi.Page<DocumentaryUnit> list = query.setLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", DocumentaryUnit.class);
-        assertEquals(-1L, list.getTotal());
+        assertEquals(-1, list.getTotal());
     }
 
     @Test

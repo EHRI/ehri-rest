@@ -53,7 +53,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    long getChildCount();
+    int getChildCount();
 
     /**
      * Fetch all top-level documentary unit items within this
@@ -105,8 +105,8 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Repository {
 
-        public long getChildCount() {
-            return gremlin().inE(Ontology.DOC_HELD_BY_REPOSITORY).count();
+        public int getChildCount() {
+            return Math.toIntExact(gremlin().inE(Ontology.DOC_HELD_BY_REPOSITORY).count());
         }
 
         public void addTopLevelDocumentaryUnit(DocumentaryUnit unit) {

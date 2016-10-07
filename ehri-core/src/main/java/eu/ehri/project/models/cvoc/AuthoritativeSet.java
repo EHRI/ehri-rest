@@ -63,10 +63,12 @@ public interface AuthoritativeSet extends Accessible,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, AuthoritativeSet {
 
-        public long getChildCount() {
-            return gremlin().inE(Ontology.ITEM_IN_AUTHORITATIVE_SET).count();
+        @Override
+        public int getChildCount() {
+            return Math.toIntExact(gremlin().inE(Ontology.ITEM_IN_AUTHORITATIVE_SET).count());
         }
 
+        @Override
         public void addItem(AuthoritativeItem item) {
             JavaHandlerUtils.addSingleRelationship(item.asVertex(), it(),
                     Ontology.ITEM_IN_AUTHORITATIVE_SET);

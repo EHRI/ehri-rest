@@ -107,13 +107,13 @@ public class AdminResourceClientTest extends AbstractResourceClientTest {
         Bundle bundle2 = response.getEntity(Bundle.class);
         String ident2 = (String) bundle2.getData().get(
                 Ontology.IDENTIFIER_KEY);
-        assertEquals(parseUserId(ident) + 1L, parseUserId(ident2));
+        assertEquals(parseUserId(ident) + 1, parseUserId(ident2));
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
     }
 
     // Helpers
-    private long parseUserId(String ident) {
-        return Long.parseLong(ident.replace(
+    private int parseUserId(String ident) {
+        return Integer.parseInt(ident.replace(
                 AdminResource.DEFAULT_USER_ID_PREFIX, ""));
     }
 }

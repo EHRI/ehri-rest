@@ -244,7 +244,7 @@ public class BundleTest {
     @Test
     public void testGetRelations() throws Exception {
         List<Bundle> relations = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
-        assertEquals(1L, relations.size());
+        assertEquals(1, relations.size());
     }
 
     @Test
@@ -255,7 +255,7 @@ public class BundleTest {
         Multimap<String, Bundle> rels = ImmutableListMultimap
                 .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
         Bundle bundle2 = bundle.replaceRelations(rels);
-        assertEquals(1L, bundle2.getRelations(
+        assertEquals(1, bundle2.getRelations(
                 Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
@@ -267,7 +267,7 @@ public class BundleTest {
         Multimap<String, Bundle> rels = ImmutableListMultimap
                 .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
         Bundle bundle2 = bundle.withRelations(rels);
-        assertEquals(2L, bundle2.getRelations(
+        assertEquals(2, bundle2.getRelations(
                 Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
@@ -278,7 +278,7 @@ public class BundleTest {
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = bundle.withRelations(
                 Ontology.DESCRIPTION_FOR_ENTITY, Lists.newArrayList(newDesc));
-        assertEquals(2L, bundle2.getRelations(
+        assertEquals(2, bundle2.getRelations(
                 Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
@@ -288,7 +288,7 @@ public class BundleTest {
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
-        assertEquals(2L, bundle2.getRelations(
+        assertEquals(2, bundle2.getRelations(
                 Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
@@ -311,7 +311,7 @@ public class BundleTest {
     @Test
     public void testRemoveRelation() throws Exception {
         List<Bundle> relations = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
-        assertEquals(1L, relations.size());
+        assertEquals(1, relations.size());
         Bundle bundle2 = bundle.removeRelation(
                 Ontology.DESCRIPTION_FOR_ENTITY, relations.get(0));
         assertFalse(bundle2.hasRelations(Ontology.DESCRIPTION_FOR_ENTITY));

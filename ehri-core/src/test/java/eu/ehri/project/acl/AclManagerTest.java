@@ -229,7 +229,7 @@ public class AclManagerTest extends GraphTestBase {
         GremlinPipeline<Vertex, Vertex> pipeline = new GremlinPipeline<>(frames);
         List<Vertex> filtered = pipeline
                 .filter(acl.getContentTypeFilterFunction()).toList();
-        assertEquals(2L, filtered.size());
+        assertEquals(2, filtered.size());
         assertFalse(filtered.contains(cd1));
     }
 
@@ -248,7 +248,7 @@ public class AclManagerTest extends GraphTestBase {
         PipeFunction<Vertex,Boolean> aclFilter = AclManager.getAclFilterFunction(user);
         List<Vertex> filtered = new GremlinPipeline<Vertex,Vertex>(
                 Lists.newArrayList(ann3v.asVertex(), ann4v.asVertex())).filter(aclFilter).toList();
-        assertEquals(1L, filtered.size());
+        assertEquals(1, filtered.size());
         assertFalse(filtered.contains(ann3v.asVertex()));
     }
 

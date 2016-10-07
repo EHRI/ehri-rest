@@ -72,7 +72,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         // Check exactly one Event was created
         assertEquals(1, Iterables.size(second.getSubjects()));
         // Check item cache is correct...
-        assertEquals(1L, second.subjectCount());
+        assertEquals(1, second.subjectCount());
         assertNotNull(second.getActioner());
 
         // Check the user is correctly linked

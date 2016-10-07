@@ -58,33 +58,33 @@ public class PromotableTest extends AbstractFixtureTest {
     @Test
     public void testAddPromotion() throws Exception {
         Promotable promotable = manager.getEntity("ann5", Promotable.class);
-        assertEquals(0L, promotable.getPromotionScore());
+        assertEquals(0, promotable.getPromotionScore());
         promotable.addPromotion(user1);
-        assertEquals(1L, promotable.getPromotionScore());
+        assertEquals(1, promotable.getPromotionScore());
     }
 
     @Test
     public void testAddDemotion() throws Exception {
         Promotable promotable = manager.getEntity("ann5", Promotable.class);
-        assertEquals(0L, promotable.getPromotionScore());
+        assertEquals(0, promotable.getPromotionScore());
         promotable.addDemotion(user1);
-        assertEquals(-1L, promotable.getPromotionScore());
+        assertEquals(-1, promotable.getPromotionScore());
     }
 
     @Test
     public void testRemovePromotion() throws Exception {
         Promotable promotable = manager.getEntity("ann6", Promotable.class);
-        assertEquals(0L, promotable.getPromotionScore());
+        assertEquals(0, promotable.getPromotionScore());
         promotable.removePromotion(user1);
-        assertEquals(-1L, promotable.getPromotionScore());
+        assertEquals(-1, promotable.getPromotionScore());
     }
 
     @Test
     public void testRemoveDemotion() throws Exception {
         Promotable promotable = manager.getEntity("ann6", Promotable.class);
-        assertEquals(0L, promotable.getPromotionScore());
+        assertEquals(0, promotable.getPromotionScore());
         promotable.removeDemotion(user2);
-        assertEquals(1L, promotable.getPromotionScore());
+        assertEquals(1, promotable.getPromotionScore());
     }
 
     @Test

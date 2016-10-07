@@ -42,15 +42,13 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 @EntityType(EntityClass.COUNTRY)
 public interface Country extends PermissionScope, ItemHolder, Versioned, Annotatable {
 
-    String COUNTRY_CODE = Ontology.IDENTIFIER_KEY;
-
     /**
      * Alias function for fetching the country code identifier.
      *
      * @return The country code
      */
     @Mandatory
-    @Property(COUNTRY_CODE)
+    @Property(Ontology.IDENTIFIER_KEY)
     String getCode();
 
     /**
@@ -60,7 +58,7 @@ public interface Country extends PermissionScope, ItemHolder, Versioned, Annotat
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    long getChildCount();
+    int getChildCount();
 
     /**
      * Fetch all repositories in this country.
@@ -83,10 +81,12 @@ public interface Country extends PermissionScope, ItemHolder, Versioned, Annotat
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Country {
 
-        public long getChildCount() {
-            return gremlin().inE(Ontology.REPOSITORY_HAS_COUNTRY).count();
+        @Override
+        public int getChildCount() {
+            return Math.toIntExact(gremlin().inE(Ontology.REPOSITORY_HAS_COUNTRY).count());
         }
 
+        @Override
         public void addRepository(Repository repository) {
             JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
                     Ontology.REPOSITORY_HAS_COUNTRY);

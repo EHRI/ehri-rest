@@ -70,10 +70,10 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         Link link = api(validUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
                 linkBundle, Lists.<Accessor>newArrayList());
         assertEquals(linkDesc, link.getDescription());
-        assertEquals(2L, Iterables.size(link.getLinkTargets()));
+        assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
-        assertEquals(1L, Iterables.size(link.getLinkBodies()));
+        assertEquals(1, Iterables.size(link.getLinkBodies()));
         assertTrue(Iterables.contains(link.getLinkBodies(), rel));
         assertTrue(Lists.newArrayList(api(validUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
@@ -99,10 +99,10 @@ public class ApiLinkingTest extends AbstractFixtureTest {
                 linkDesc, AccessPointType.subject, linkBundle,
                 Lists.<Accessor>newArrayList(validUser, invalidUser));
         assertEquals(linkDesc, link.getDescription());
-        assertEquals(2L, Iterables.size(link.getLinkTargets()));
+        assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
-        assertEquals(1L, Iterables.size(link.getLinkBodies()));
+        assertEquals(1, Iterables.size(link.getLinkBodies()));
         AccessPoint rel = link.getLinkBodies().iterator().next().as(AccessPoint.class);
         assertEquals(rel.getName(), linkDesc);
         assertEquals(rel.getRelationshipType(), AccessPointType.subject);
