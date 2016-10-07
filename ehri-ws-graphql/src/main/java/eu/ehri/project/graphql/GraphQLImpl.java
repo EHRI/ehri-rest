@@ -20,7 +20,9 @@
 package eu.ehri.project.graphql;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.acl.AclManager;
@@ -74,6 +76,7 @@ import graphql.schema.TypeResolver;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -110,9 +113,15 @@ public class GraphQLImpl {
     private static final int MAX_LIST_LIMIT = 100;
 
     private final Api _api;
+    private final boolean stream;
+
+    public GraphQLImpl(Api api, boolean stream) {
+        this._api = api;
+        this.stream = stream;
+    }
 
     public GraphQLImpl(Api api) {
-        this._api = api;
+        this(api, false);
     }
 
     private Api api() {
@@ -144,13 +153,13 @@ public class GraphQLImpl {
         }
     }
 
-    private static int getLimit(Integer limitArg) {
+    private static int getLimit(Integer limitArg, boolean stream) {
         if (limitArg == null) {
-            return DEFAULT_LIST_LIMIT;
+            return stream ? -1 : DEFAULT_LIST_LIMIT;
         } else if (limitArg < 0) {
-            return MAX_LIST_LIMIT;
+            return stream ? limitArg : MAX_LIST_LIMIT;
         } else {
-            return Math.min(MAX_LIST_LIMIT, limitArg);
+            return stream ? limitArg : Math.min(MAX_LIST_LIMIT, limitArg);
         }
     }
 
@@ -198,56 +207,75 @@ public class GraphQLImpl {
         // However, this means that ACL filtering will be applied twice,
         // once here, and once by the connection data fetcher, which also
         // applies pagination.
-        return connectionDataFetcher(api().query()
+        return connectionDataFetcher(() -> api().query()
                 .setStream(true).setLimit(-1).page(type, Entity.class));
     }
 
     private DataFetcher oneToManyRelationshipConnectionFetcher(Function<Entity, Iterable<? extends Entity>> f) {
+        return env -> connectionDataFetcher(() -> f.apply(((Entity) env.getSource()))).get(env);
+    }
+
+    private DataFetcher connectionDataFetcher(Supplier<Iterable<? extends Entity>> iter) {
         return env -> {
-            Iterable<? extends Entity> iter = f.apply(((Entity) env.getSource()));
-            return connectionDataFetcher(iter).get(env);
+            int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
+            int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
+            return stream && limit < 0
+                    ? lazyConnectionDataFetcher(iter, limit, offset)
+                    : strictConnectionDataFetcher(iter, limit, offset);
         };
     }
 
-    private DataFetcher connectionDataFetcher(Iterable<? extends Entity> iter) {
-        return env -> {
-            int limit = getLimit(env.getArgument(FIRST_PARAM));
-            int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
+    private Map<String, Object> connectionData(Iterable<Entity> items, Iterable<Map<String, Object>> edges, String nextCursor, String prevCursor) {
+        return mapOf(
+                ITEMS, items,
+                EDGES, edges,
+                PAGE_INFO, mapOf(
+                        HAS_NEXT_PAGE, nextCursor != null,
+                        NEXT_PAGE, nextCursor,
+                        HAS_PREVIOUS_PAGE, prevCursor != null,
+                        PREVIOUS_PAGE, prevCursor
+                )
+        );
+    }
 
-            QueryApi.Page<Entity> page = api()
-                    .query()
-                    .setLimit(limit)
-                    .setOffset(offset)
-                    .page(iter, Entity.class);
-            List<Entity> items = Lists.newArrayList(page.getIterable());
+    private Map<String, Object> strictConnectionDataFetcher(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
+        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        QueryApi.Page<Entity> page = query.page(iter.get(), Entity.class);
+        List<Entity> items = Lists.newArrayList(page);
 
-            boolean hasNext = page.getOffset() + items.size() < page.getTotal();
-            boolean hasPrev = page.getOffset() > 0;
+        // Create a list of edges, with the cursor taking into
+        // account each item's offset
+        List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
+        for (int i = 0; i < items.size(); i++) {
+            edges.add(mapOf(
+                    CURSOR, Base64.toBase64(String.valueOf(offset + i)),
+                    NODE, items.get(i)
+            ));
+        }
 
-            // Create a list of edges, with the cursor taking into
-            // account each item's offset
-            List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
-            for (int i = 0; i < items.size(); i++) {
-                edges.add(mapOf(
-                        CURSOR, Base64.toBase64(String.valueOf(offset + i)),
-                        NODE, items.get(i)
+        boolean hasNext = page.getOffset() + items.size() < page.getTotal();
+        boolean hasPrev = page.getOffset() > 0;
+        String nextCursor = Base64.toBase64(String.valueOf(offset + limit));
+        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        return connectionData(items, edges, hasNext ? nextCursor : null, hasPrev ? prevCursor : null);
+    }
+
+    private Map<String, Object> lazyConnectionDataFetcher(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
+        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        QueryApi.Page<Entity> items = query.page(iter.get(), Entity.class);
+        boolean hasPrev = items.getOffset() > 0;
+
+        // Create a list of edges, with the cursor taking into
+        // account each item's offset
+        final AtomicInteger index = new AtomicInteger();
+        Iterable<Map<String, Object>> edges = Iterables.transform(
+                query.page(iter.get(), Entity.class), item -> mapOf(
+                        CURSOR, Base64.toBase64(String.valueOf(offset + index.getAndIncrement())),
+                        NODE, item
                 ));
-            }
 
-            String nextCursor = Base64.toBase64(String.valueOf(offset + limit));
-            String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
-
-            return mapOf(
-                    ITEMS, items,
-                    EDGES, edges,
-                    PAGE_INFO, mapOf(
-                            HAS_NEXT_PAGE, hasNext,
-                            NEXT_PAGE, hasNext ? nextCursor : null,
-                            HAS_PREVIOUS_PAGE, hasPrev,
-                            PREVIOUS_PAGE, hasPrev ? prevCursor : null
-                    )
-            );
-        };
+        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        return connectionData(items, edges, null, hasPrev ? prevCursor : null);
     }
 
     private final DataFetcher entityIdDataFetcher = env -> {
@@ -317,9 +345,7 @@ public class GraphQLImpl {
     private DataFetcher oneToManyRelationshipFetcher(Function<Entity, Iterable<? extends Entity>> f) {
         return environment -> {
             Iterable<? extends Entity> elements = f.apply(((Entity) environment.getSource()));
-            QueryApi.Page<Entity> page = api()
-                    .query().setStream(true).setLimit(-1).page(elements, Entity.class);
-            return Lists.newArrayList(page);
+            return api().query().setStream(true).setLimit(-1).page(elements, Entity.class);
         };
     }
 
@@ -460,7 +486,6 @@ public class GraphQLImpl {
                         .name(FIRST_PARAM)
                         .type(GraphQLInt)
                         .description("The number of items after the cursor")
-                        .defaultValue(DEFAULT_LIST_LIMIT)
                         .build()
                 )
                 .argument(newArgument()

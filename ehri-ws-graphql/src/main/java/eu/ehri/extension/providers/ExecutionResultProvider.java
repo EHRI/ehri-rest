@@ -20,6 +20,7 @@
 package eu.ehri.extension.providers;
 
 import com.google.common.collect.ImmutableMap;
+import eu.ehri.project.persistence.Bundle;
 import graphql.ExecutionResult;
 
 import javax.ws.rs.Produces;
@@ -56,7 +57,7 @@ public class ExecutionResultProvider implements MessageBodyWriter<ExecutionResul
 
         if (executionResult.getData() != null) {
             mapper.writeValue(outputStream, ImmutableMap.of(
-                    "data", executionResult.getData()));
+                    Bundle.DATA_KEY, executionResult.getData()));
         }
     }
 }
