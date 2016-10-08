@@ -123,7 +123,6 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      *
      * @param id the event id
      * @return a list of subject items
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -173,7 +173,6 @@ public class VirtualEadImporter extends EadImporter {
      *
      * @param itemData Map of all extracted information
      * @return a Map representing a Documentary Unit node
-     * @throws ValidationError
      */
     protected Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();

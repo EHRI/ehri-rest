@@ -129,8 +129,6 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAD XML Document
-     * @throws IOException
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}/eac")

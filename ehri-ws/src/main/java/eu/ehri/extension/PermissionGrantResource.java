@@ -54,7 +54,6 @@ public class PermissionGrantResource extends AbstractResource implements DeleteR
      *
      * @param id The ID of the permission grant
      * @return The permission grant
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,8 +73,6 @@ public class PermissionGrantResource extends AbstractResource implements DeleteR
      * Revoke a particular permission grant.
      *
      * @param id The ID of the permission grant
-     * @throws ItemNotFound
-     * @throws PermissionDenied
      */
     @DELETE
     @Path("{id:[^/]+}")

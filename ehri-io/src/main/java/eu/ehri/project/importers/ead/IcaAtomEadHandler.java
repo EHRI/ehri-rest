@@ -47,8 +47,6 @@ public class IcaAtomEadHandler extends EadHandler {
      * @param publicId the public component of the EAD DTD
      * @param systemId the system component of the EAD DTD
      * @return returns essentially an empty dtd file
-     * @throws org.xml.sax.SAXException
-     * @throws java.io.IOException
      */
     public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
             throws org.xml.sax.SAXException, java.io.IOException {

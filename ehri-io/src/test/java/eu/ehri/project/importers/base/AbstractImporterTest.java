@@ -84,7 +84,6 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     /**
      * Resets the shared import manager after a Test.
      *
-     * @throws Exception
      */
     @After
     @Override

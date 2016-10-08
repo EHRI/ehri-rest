@@ -62,7 +62,6 @@ public final class PermissionUtils {
      * @param accessor The user/group
      * @param contentType The content type
      * @param permissionType The permission type
-     * @throws PermissionDenied
      */
     public void checkContentPermission(Accessor accessor, ContentTypes contentType,
             PermissionType permissionType) throws PermissionDenied {
@@ -77,7 +76,6 @@ public final class PermissionUtils {
      * @param entity The item
      * @param accessor The user/group
      * @param permissionType The permission type
-     * @throws PermissionDenied
      */
     public void checkEntityPermission(Accessible entity,
             Accessor accessor, PermissionType permissionType) throws PermissionDenied {
@@ -92,7 +90,6 @@ public final class PermissionUtils {
      *
      * @param entity The item
      * @param accessor The accessor/group
-     * @throws AccessDenied
      */
     public void checkReadAccess(Accessible entity, Accessor accessor)
             throws AccessDenied {

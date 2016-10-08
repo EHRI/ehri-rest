@@ -206,9 +206,6 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param stream  the InputStream to import
      * @param context the event that this import is part of
      * @param log     an import log to write to
-     * @throws IOException
-     * @throws ValidationError
-     * @throws InputParseError
      */
     protected abstract void importInputStream(InputStream stream,
                                               ActionManager.EventContext context, ImportLog log)

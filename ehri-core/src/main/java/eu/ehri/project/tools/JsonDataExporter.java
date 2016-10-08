@@ -51,7 +51,6 @@ public class JsonDataExporter {
      *
      * @param graph  the graph database
      * @param stream the output stream
-     * @throws IOException
      */
     public static void outputGraph(Graph graph, OutputStream stream)
             throws IOException {

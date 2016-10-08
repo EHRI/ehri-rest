@@ -82,8 +82,6 @@ public final class BundleManager {
      * @param bundle The bundle to create or update
      * @param cls The frame class of the return type
      * @return A framed vertex mutation
-     * @throws ValidationError
-     * @throws ItemNotFound
      */
     public <T extends Entity> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
@@ -99,7 +97,6 @@ public final class BundleManager {
      * @param bundle The bundle to create or update
      * @param cls The frame class of the return type
      * @return A framed vertex
-     * @throws ValidationError
      */
     public <T extends Entity> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {
@@ -113,7 +110,6 @@ public final class BundleManager {
      * @param bundle The bundle to create or update
      * @param cls The frame class of the return type
      * @return A frame mutation
-     * @throws ValidationError
      */
     public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
@@ -200,7 +196,6 @@ public final class BundleManager {
      *
      * @param bundle The bundle to update
      * @return A vertex mutation
-     * @throws ItemNotFound
      */
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
         Vertex node = manager.getVertex(bundle.getId());

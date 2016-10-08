@@ -601,7 +601,6 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param data A raw data object
      * @return A bundle
-     * @throws DeserializationError
      */
     public static Bundle fromData(Object data) throws DeserializationError {
         return DataConverter.dataToBundle(data);
@@ -621,7 +620,6 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param json A JSON representation
      * @return A bundle
-     * @throws DeserializationError
      */
     public static Bundle fromString(String json) throws DeserializationError {
         return DataConverter.jsonToBundle(json);
@@ -632,7 +630,6 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param stream A JSON stream
      * @return A bundle
-     * @throws DeserializationError
      */
     public static Bundle fromStream(InputStream stream) throws DeserializationError {
         return DataConverter.streamToBundle(stream);
@@ -643,7 +640,6 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param bundle the bundle
      * @param stream the output stream
-     * @throws SerializationError
      */
     public static void toStream(Bundle bundle, OutputStream stream) throws SerializationError {
         DataConverter.bundleToStream(bundle, stream);

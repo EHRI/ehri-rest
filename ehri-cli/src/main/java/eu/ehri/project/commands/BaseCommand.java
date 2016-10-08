@@ -70,7 +70,6 @@ public abstract class BaseCommand implements Command {
      * @param graph the graph database
      * @param args  the raw command line arguments
      * @return a command return code
-     * @throws Exception
      */
     public final int exec(FramedGraph<?> graph, String[] args) throws Exception {
         setCustomOptions(options);
@@ -96,7 +95,6 @@ public abstract class BaseCommand implements Command {
      * @param graph   the graph database
      * @param cmdLine the parsed command line object
      * @return a command return code
-     * @throws Exception
      */
     public abstract int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception;

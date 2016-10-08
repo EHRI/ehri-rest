@@ -88,7 +88,6 @@ class DataConverter {
      *
      * @param errorSet an ErrorSet instance
      * @return a JSON string representing the error set
-     * @throws SerializationError when the error set cannot be converted to valid JSON
      */
     public static String errorSetToJson(ErrorSet errorSet) throws SerializationError {
         try {
@@ -132,7 +131,6 @@ class DataConverter {
      *
      * @param bundle the bundle
      * @return a JSON string representing the bundle
-     * @throws SerializationError when the bundle cannot be converted to valid JSON
      */
     public static String bundleToJson(Bundle bundle) throws SerializationError {
         try {
@@ -148,7 +146,6 @@ class DataConverter {
      *
      * @param inputStream an input stream containing JSON representing the bundle
      * @return the bundle
-     * @throws DeserializationError when the stream data cannot be converted to
      *                              a valid bundle
      */
     public static Bundle streamToBundle(InputStream inputStream) throws DeserializationError {
@@ -165,7 +162,6 @@ class DataConverter {
      *
      * @param bundle       the bundle
      * @param outputStream the stream
-     * @throws SerializationError when the bundle cannot be converted to valid JSON
      */
     public static void bundleToStream(Bundle bundle, OutputStream outputStream) throws SerializationError {
         try {
@@ -182,7 +178,6 @@ class DataConverter {
      *
      * @param inputStream a JSON input stream
      * @return an iterable of bundle objects
-     * @throws DeserializationError when the stream data cannot be converted to
      *                              a valid bundle
      */
     public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
@@ -222,7 +217,6 @@ class DataConverter {
      *
      * @param json a JSON string representing the bundle
      * @return the bundle
-     * @throws DeserializationError when the stream data cannot be converted to
      *                              a valid bundle
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
@@ -244,7 +238,6 @@ class DataConverter {
      *
      * @param rawData an map object
      * @return a bundle
-     * @throws DeserializationError when the stream data cannot be converted to
      *                              a valid bundle
      */
     public static Bundle dataToBundle(Object rawData)
@@ -271,7 +264,6 @@ class DataConverter {
      *
      * @param data a plain map
      * @return a multi-map of string -> bundle list
-     * @throws DeserializationError when the stream data cannot be converted to
      *                              valid relationships
      */
     private static Multimap<String, Bundle> getRelationships(Map<?, ?> data)

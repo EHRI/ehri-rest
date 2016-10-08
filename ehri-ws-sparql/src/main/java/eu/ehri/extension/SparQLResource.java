@@ -98,7 +98,6 @@ public class SparQLResource extends AbstractResource {
      *
      * @param q A valid SparQL query string
      * @return A JSON-formatted response
-     * @throws Exception
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -36,9 +36,6 @@ public interface CreateResource {
      * @param bundle    The resource data.
      * @param accessors The users/groups who can initially access this resource.
      * @return A serialized resource representation.
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
      */
     Response create(Bundle bundle, List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError;

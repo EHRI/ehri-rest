@@ -19,17 +19,15 @@
 
 package eu.ehri.project.acl;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.utils.EmptyIterable;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Singleton class representing the system scope for
@@ -75,26 +73,26 @@ public enum SystemScope implements PermissionScope {
 
     @Override
     public Iterable<PermissionGrant> getPermissionGrants() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     public Iterable<PermissionScope> getPermissionScopes() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     @Override
     public Iterable<Accessible> getContainedItems() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     @Override
     public Iterable<Accessible> getAllContainedItems() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     @Override
     public Collection<String> idPath() {
-        return Lists.newArrayList();
+        return Collections.emptyList();
     }
 
     @Override
@@ -109,6 +107,6 @@ public enum SystemScope implements PermissionScope {
 
     @Override
     public java.util.Set<String> getPropertyKeys() {
-        return Sets.newHashSet();
+        return Collections.emptySet();
     }
 }

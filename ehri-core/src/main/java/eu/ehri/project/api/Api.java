@@ -24,7 +24,6 @@ import eu.ehri.project.models.base.Promotable;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.api.impl.ApiImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -63,7 +62,6 @@ public interface Api {
      * @param id  the item id
      * @param cls the item's class
      * @return the given framed vertex
-     * @throws ItemNotFound
      */
     <E extends Accessible> E detail(String id, Class<E> cls) throws ItemNotFound;
 
@@ -73,9 +71,6 @@ public interface Api {
      * @param bundle the item's data bundle
      * @param cls    the item's class
      * @return the updated framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws ItemNotFound
      */
     <E extends Accessible> Mutation<E> update(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError;
@@ -87,8 +82,6 @@ public interface Api {
      * @param bundle the item's data bundle
      * @param cls    the item's class
      * @return the created framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <E extends Accessible> E create(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, DeserializationError;
@@ -100,8 +93,6 @@ public interface Api {
      * @param bundle the item's data bundle
      * @param cls    the item's class
      * @return the created framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, DeserializationError;
@@ -112,10 +103,6 @@ public interface Api {
      *
      * @param id the item ID
      * @return the number of vertices deleted.
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws SerializationError
      */
     int delete(String id) throws PermissionDenied,
             ValidationError, SerializationError, ItemNotFound;
@@ -128,8 +115,6 @@ public interface Api {
      * @param cls        the item's class
      * @param logMessage a log message
      * @return the created framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <E extends Accessible> Mutation<E> update(Bundle bundle, Class<E> cls, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError;
@@ -142,8 +127,6 @@ public interface Api {
      * @param cls        the item's class
      * @param logMessage a log message
      * @return the created framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <E extends Accessible> E create(Bundle bundle, Class<E> cls, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError;
@@ -156,8 +139,6 @@ public interface Api {
      * @param cls        the item's class
      * @param logMessage a log message
      * @return the created framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError;
@@ -169,10 +150,6 @@ public interface Api {
      * @param id         the item ID
      * @param logMessage a log message
      * @return the number of vertices deleted.
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws SerializationError
      */
     int delete(String id, Optional<String> logMessage) throws PermissionDenied,
             ValidationError, SerializationError, ItemNotFound;
@@ -184,9 +161,6 @@ public interface Api {
      * @param id         the dependent item's ID
      * @param logMessage an optional log message
      * @return the number of vertices deleted
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws SerializationError
      */
     int deleteDependent(String parentId, String id, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError;
@@ -200,9 +174,6 @@ public interface Api {
      * @param logMessage an optional log message
      * @param <T>        the dependent item's generic class
      * @return the dependent item frame
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <T extends Accessible> T createDependent(String parentId, Bundle data,
             Class<T> cls, Optional<String> logMessage)
@@ -217,9 +188,6 @@ public interface Api {
      * @param logMessage an optional log message
      * @param <T>        the dependent item's generic class
      * @return the dependent item frame
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws ValidationError
      */
     <T extends Accessible> Mutation<T> updateDependent(String parentId, Bundle data,
             Class<T> cls, Optional<String> logMessage)
@@ -232,9 +200,6 @@ public interface Api {
      * @param targetId2 the identifier of a Annotator source of this Annotation
      * @param bundle    the annotation itself
      * @return a new link
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws PermissionDenied
      */
     Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
             Collection<Accessor> accessibleTo) throws ItemNotFound, ValidationError,
@@ -247,9 +212,6 @@ public interface Api {
      * @param targetId2 the identifier of a Annotator source of this Annotation
      * @param bundle    the annotation itself
      * @return a new link
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws PermissionDenied
      */
     Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
             AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
@@ -264,10 +226,6 @@ public interface Api {
      * @param bundle       the annotation itself
      * @param accessibleTo users or groups who can access this annotation
      * @return the created annotation
-     * @throws PermissionDenied
-     * @throws AccessDenied
-     * @throws ValidationError
-     * @throws ItemNotFound
      */
 
     Annotation createAnnotation(String id, String did, Bundle bundle, Collection<Accessor> accessibleTo)
@@ -278,9 +236,6 @@ public interface Api {
      *
      * @param id the promotable item's ID
      * @return the promotable item
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws NotPromotableError
      */
     Promotable promote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError;
 
@@ -289,8 +244,6 @@ public interface Api {
      *
      * @param id the promotable item's ID
      * @return the promotable item
-     * @throws ItemNotFound
-     * @throws PermissionDenied
      */
     Promotable removePromotion(String id) throws ItemNotFound, PermissionDenied;
 
@@ -299,9 +252,6 @@ public interface Api {
      *
      * @param id the promotable item's ID
      * @return the promotable item
-     * @throws ItemNotFound
-     * @throws PermissionDenied
-     * @throws NotPromotableError
      */
     Promotable demote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError;
 
@@ -310,8 +260,6 @@ public interface Api {
      *
      * @param id the promotable item's ID
      * @return the promotable item
-     * @throws ItemNotFound
-     * @throws PermissionDenied
      */
     Promotable removeDemotion(String id) throws ItemNotFound, PermissionDenied;
 
@@ -331,8 +279,7 @@ public interface Api {
          *
          * @param userOrGroup   the user or group
          * @param permissionSet the new permissions
-         * @throws PermissionDenied
-         */
+             */
         InheritedGlobalPermissionSet setGlobalPermissionMatrix(Accessor userOrGroup,
                 GlobalPermissionSet permissionSet) throws PermissionDenied;
 
@@ -346,8 +293,7 @@ public interface Api {
          * @param accessor       the accessor
          * @param permissionList the set of permissions to grant
          * @return the new inherited item permission set
-         * @throws PermissionDenied
-         */
+             */
         InheritedItemPermissionSet setItemPermissions(Accessible item, Accessor accessor,
                 Set<PermissionType> permissionList)
                 throws PermissionDenied;
@@ -356,8 +302,7 @@ public interface Api {
          * Revoke a permission grant.
          *
          * @param grant the permission grant
-         * @throws PermissionDenied
-         */
+             */
         void revokePermissionGrant(PermissionGrant grant)
                 throws PermissionDenied;
 
@@ -368,8 +313,7 @@ public interface Api {
          *
          * @param group       the group
          * @param userOrGroup the user to add to the group
-         * @throws PermissionDenied
-         */
+             */
         void addAccessorToGroup(Group group, Accessor userOrGroup) throws PermissionDenied;
 
         /**
@@ -378,8 +322,7 @@ public interface Api {
          *
          * @param group       the group
          * @param userOrGroup the user to add to the group
-         * @throws PermissionDenied
-         */
+             */
         void removeAccessorFromGroup(Group group, Accessor userOrGroup) throws PermissionDenied;
     }
 

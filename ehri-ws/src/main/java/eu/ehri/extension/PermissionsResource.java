@@ -74,8 +74,6 @@ public class PermissionsResource extends AbstractResource {
      * on the Authorization header.
      *
      * @return The current user's global permissions
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,8 +91,6 @@ public class PermissionsResource extends AbstractResource {
      *
      * @param userId The user ID
      * @return The user's global permissions
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -117,8 +113,6 @@ public class PermissionsResource extends AbstractResource {
      * @param userId  The user ID
      * @param globals The permission matrix data
      * @return The new permissions
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -142,8 +136,6 @@ public class PermissionsResource extends AbstractResource {
      * @param userId The user's ID
      * @param id     The item id
      * @return The user's permissions for that item
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -167,8 +159,6 @@ public class PermissionsResource extends AbstractResource {
      * @param id        the item id
      * @param userId    the user id
      * @param itemPerms the serialized permission list
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -220,8 +210,6 @@ public class PermissionsResource extends AbstractResource {
      * @param id      the scope id
      * @param globals the serialized permission list
      * @return The new permission matrix
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -248,7 +236,6 @@ public class PermissionsResource extends AbstractResource {
      *
      * @param id the user's id
      * @return a list of permission grants for the user
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

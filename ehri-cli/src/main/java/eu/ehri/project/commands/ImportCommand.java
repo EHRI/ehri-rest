@@ -177,7 +177,6 @@ public abstract class ImportCommand extends BaseCommand {
      * @param listFile  A path to a local file
      * @param filePaths An output parameter for file paths contained in
      *                  the given file.
-     * @throws Exception
      */
     protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
         InputStream stream = listFile.contentEquals("-")

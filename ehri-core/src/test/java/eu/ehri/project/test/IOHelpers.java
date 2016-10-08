@@ -24,8 +24,6 @@ public class IOHelpers {
      *
      * @param file      a file object (typically a temp file)
      * @param resources the resource names
-     * @throws URISyntaxException
-     * @throws IOException
      */
     public static void createZipFromResources(File file, String... resources)
             throws URISyntaxException, IOException {
@@ -46,8 +44,6 @@ public class IOHelpers {
      *
      * @param file      a file object (typically a temp file)
      * @param resources the resource names
-     * @throws URISyntaxException
-     * @throws IOException
      */
     public static void createTarFromResources(File file, String... resources)
             throws URISyntaxException, IOException {

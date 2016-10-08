@@ -370,10 +370,6 @@ public class ImportResource extends AbstractResource {
      * @param inputStream a JSON document containing partial bundles containing
      *                    the needed data transformations
      * @return an import log describing the changes committed
-     * @throws IOException
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws DeserializationError
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -406,9 +402,6 @@ public class ImportResource extends AbstractResource {
      * @param version    whether to create a version prior to delete
      * @param logMessage an optional log message.
      * @param ids        a list of IDs to delete
-     * @throws IOException
-     * @throws ItemNotFound
-     * @throws DeserializationError
      */
     @DELETE
     @Path("batch")

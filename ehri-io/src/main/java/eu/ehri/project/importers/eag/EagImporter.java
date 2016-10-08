@@ -93,7 +93,6 @@ public class EagImporter extends SaxXmlImporter {
 
     /**
      * @param itemData A data tree
-     * @throws ValidationError
      */
     @Override
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {

@@ -109,7 +109,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param ids  a list of string IDs
      * @param gids a list of graph number IDs
      * @return A serialized list of items
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -145,8 +144,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param json a JSON-encoded list of IDs, which can consist of
      *             either strings or (if a number) graph (long) ids.
      * @return A serialized list of items
-     * @throws ItemNotFound
-     * @throws PermissionDenied
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -162,7 +159,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the item's ID
      * @return A serialized representation.
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -190,8 +186,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item
      * @return a list of accessor frames
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -214,8 +208,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id          the ID of the item
      * @param accessorIds the IDs of the users who can access this item.
      * @return the updated object
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -239,8 +231,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to promote.
      * @return 200 response
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -262,8 +252,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to remove
      * @return 200 response
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
@@ -282,8 +270,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to promote.
      * @return 200 response
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -305,8 +291,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to remove
      * @return 200 response
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
@@ -326,7 +310,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id          the event id
      * @param aggregation the aggregation strategy
      * @return A list of events
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -350,7 +333,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the item ID
      * @return a list of annotations on the item
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -372,7 +354,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the item ID
      * @return a list of links with the item as a target
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -392,8 +373,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * List all the permission grants that relate specifically to this item.
      *
      * @return a list of grants for this item
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -414,7 +393,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * List all the permission grants that relate specifically to this scope.
      *
      * @return a list of grants for which this item is the scope
-     * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -437,10 +415,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id     the item ID
      * @param bundle the description bundle
      * @return the new description
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -468,10 +442,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id     the item ID
      * @param bundle the description bundle
      * @return the new description
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -499,10 +469,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param did    the description ID
      * @param bundle the description bundle
      * @return the new description
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -520,10 +486,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id  the item ID
      * @param did the description ID
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws SerializationError
      */
     @DELETE
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}")
@@ -546,10 +508,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param did    the description's ID
      * @param bundle the access point data
      * @return the new access point
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -578,8 +536,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the event id
      * @return a list of versions
-     * @throws ItemNotFound
-     * @throws AccessDenied
      */
     @GET
     @Path("{id:[^/]+}/" + VERSIONS)
@@ -600,11 +556,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id   the parent item's ID
      * @param did  the description's ID
      * @param apid the access point's ID
-     * @throws AccessDenied
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @DELETE
     @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}/" + ACCESS_POINTS + "/{apid:[^/]+}")

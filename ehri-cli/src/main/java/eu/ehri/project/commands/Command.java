@@ -55,7 +55,6 @@ public interface Command {
      * @param graph   the graph database
      * @param cmdLine the command line options
      * @return a status code (0 = success)
-     * @throws Exception
      */
     int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception;
 
@@ -65,7 +64,6 @@ public interface Command {
      * @param graph the graph database
      * @param args  the raw argument strings
      * @return a status code (0 = success)
-     * @throws Exception
      */
     int exec(FramedGraph<?> graph, String[] args) throws Exception;
 }

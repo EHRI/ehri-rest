@@ -49,7 +49,6 @@ public class CvocConceptTest extends ModelTestBase {
      * NOTE: Better wait for the improved testing 'fixture' before doing
      * extensive testing on Concepts
      *
-     * @throws Exception
      */
     @SuppressWarnings("serial")
     @Test

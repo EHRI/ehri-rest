@@ -167,7 +167,6 @@ public class AbstractResourceClientTest extends RunningServerTest {
      * @param type the item's type
      * @param id   the items ID
      * @return a bundle
-     * @throws Exception
      */
     protected Bundle getEntity(String type, String id, String userId) throws Exception {
         return jsonMapper.readValue(getJson(

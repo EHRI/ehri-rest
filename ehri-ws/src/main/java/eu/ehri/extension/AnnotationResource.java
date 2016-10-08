@@ -89,11 +89,6 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
      * @param bundle    the JSON representation of the annotation
      * @param accessors user IDs who can access the annotation
      * @return the annotation
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws SerializationError
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

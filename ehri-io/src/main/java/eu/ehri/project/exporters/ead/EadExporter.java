@@ -20,8 +20,6 @@ public interface EadExporter extends XmlExporter<DocumentaryUnit> {
      * @param outputStream the output stream to write to.
      * @param langCode     the preferred language code when multiple
      *                     descriptions are available
-     * @throws IOException
-     * @throws TransformerException
      */
     void export(DocumentaryUnit unit,
             OutputStream outputStream, String langCode) throws IOException, TransformerException;
@@ -33,7 +31,6 @@ public interface EadExporter extends XmlExporter<DocumentaryUnit> {
      * @param langCode     the preferred language code when multiple
      *                     descriptions are available
      * @return a DOM document
-     * @throws IOException
      */
     Document export(DocumentaryUnit unit, String langCode) throws IOException;
 }
