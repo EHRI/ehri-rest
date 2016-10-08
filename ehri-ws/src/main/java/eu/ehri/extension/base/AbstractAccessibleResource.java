@@ -140,9 +140,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param <T>          the generic type of class T
      * @return the response of the create request, the 'location' will contain
      * the url of the newly created instance.
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
      */
     public <T extends Accessible> Response createItem(
             Bundle entityBundle,
@@ -174,9 +171,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *                     relationships to the new item.
      * @return the response of the create request, the 'location' will contain
      * the url of the newly created instance.
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
      */
     public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, DeserializationError {
@@ -194,7 +188,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param id the Entities identifier string
      * @return the response of the request, which contains the json
      * representation
-     * @throws ItemNotFound
      */
     public Response getItem(String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -213,9 +206,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param entityBundle the bundle
      * @return the response of the update request
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
      */
     public Response updateItem(Bundle entityBundle)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError {
@@ -232,10 +222,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param id        the item's ID
      * @param rawBundle the bundle
      * @return the response of the update request
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     public Response updateItem(String id, Bundle rawBundle)
             throws PermissionDenied, ValidationError,
@@ -260,9 +246,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param id         the item's ID
      * @param preProcess a handler to run before deleting the item
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
      */
     protected void deleteItem(String id, Handler<E> preProcess)
             throws PermissionDenied, ItemNotFound, ValidationError {
@@ -279,9 +262,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * Delete (remove) an instance of the 'entity' in the database
      *
      * @param id the item's ID
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
      */
     protected void deleteItem(String id)
             throws PermissionDenied, ItemNotFound, ValidationError {

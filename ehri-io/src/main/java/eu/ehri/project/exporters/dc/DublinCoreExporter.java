@@ -16,8 +16,6 @@ public interface DublinCoreExporter extends XmlExporter<Described> {
      * @param outputStream the output stream to write to.
      * @param langCode     the preferred language code when multiple
      *                     descriptions are available
-     * @throws IOException
-     * @throws TransformerException
      */
     void export(Described item,
             OutputStream outputStream, String langCode) throws IOException, TransformerException;
@@ -29,7 +27,6 @@ public interface DublinCoreExporter extends XmlExporter<Described> {
      * @param langCode the preferred language code when multiple
      *                 descriptions are available
      * @return a DOM document
-     * @throws IOException
      */
     Document export(Described item, String langCode) throws IOException;
 }

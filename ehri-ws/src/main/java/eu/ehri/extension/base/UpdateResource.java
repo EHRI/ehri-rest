@@ -35,10 +35,6 @@ public interface UpdateResource {
      * @param id     The resource ID.
      * @param bundle A resource bundle, with or without an ID.
      * @return A serialized representation of the updated resource.
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     Response update(String id, Bundle bundle)
             throws PermissionDenied,

@@ -71,6 +71,7 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.TypeResolver;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -271,7 +272,7 @@ public class GraphQLImpl {
         return environment -> {
             Object obj = fetcher.get(environment);
             if (obj == null) {
-                return Lists.newArrayList();
+                return Collections.emptyList();
             } else if (obj instanceof List) {
                 return obj;
             } else {

@@ -110,7 +110,6 @@ public class AdminResource extends AbstractResource {
      * @param jsonData Additional key/value data for the created object
      * @param groups   IDs for groups to which the user should belong
      * @return A new user
-     * @throws Exception
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)

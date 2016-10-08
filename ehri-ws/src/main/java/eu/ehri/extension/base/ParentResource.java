@@ -47,8 +47,7 @@ public interface ParentResource {
      *
      * @return A list of serialized item representations
      */
-    Response listChildren(String id, boolean all)
-            throws ItemNotFound;
+    Response listChildren(String id, boolean all) throws ItemNotFound;
 
     /**
      * Create a subordinate resource.
@@ -57,13 +56,8 @@ public interface ParentResource {
      * @param bundle    A resource bundle.
      * @param accessors The users/groups who can access this item.
      * @return A serialized representation of the created resource.
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     Response createChild(String id,
-                         Bundle bundle, List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound;
+            Bundle bundle, List<String> accessors)
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
 }

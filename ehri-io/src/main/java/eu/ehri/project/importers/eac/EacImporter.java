@@ -84,7 +84,6 @@ public class EacImporter extends SaxXmlImporter {
 
     /**
      * @param itemData the item data map
-     * @throws ValidationError
      */
     @Override
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {

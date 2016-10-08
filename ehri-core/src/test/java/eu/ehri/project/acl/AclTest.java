@@ -70,7 +70,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Ensure user 'Reto' can't access collection 'c3'.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testAdminRead() throws ItemNotFound {
@@ -84,7 +83,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test KCL group has no access to items with admin perms.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testNiodGroup() throws ItemNotFound {
@@ -100,7 +98,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Group permissions override user permissions.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testUserGroupPermOverride() throws ItemNotFound {
@@ -112,7 +109,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test user accessing profile.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testUserCanAccessOwnProfile() throws ItemNotFound {
@@ -158,7 +154,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test user accessing other profile.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testUserCannotWriteOtherProfile() throws ItemNotFound {
@@ -170,7 +165,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test user accessing other profile as anonymous.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testUserAccessAsAnonymous() throws ItemNotFound {
@@ -181,7 +175,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test a member of a group DOES NOT have write access to the group.
      * 
-     * @throws ItemNotFound
      */
     @Test
     public void testUserCannotChangeGroupJustByBeingAMemberOfIt()
@@ -196,8 +189,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test changing permissions on an item.
      * 
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @Test
     public void testChangingItemAccessibility() throws PermissionDenied,
@@ -216,8 +207,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test removing permissions.
      * 
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @Test
     public void testRemovingItemAccessibility() throws PermissionDenied,
@@ -240,8 +229,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test the global permission matrix.
      * 
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @Test
     public void testGlobalPermissionMatrix() throws PermissionDenied,
@@ -298,8 +285,6 @@ public class AclTest extends ModelTestBase {
     /**
      * Test admin perms cannot be set.
      * 
-     * @throws PermissionDenied
-     * @throws ItemNotFound
      */
     @Test(expected = PermissionDenied.class)
     public void testPermissionSetForAdmin() throws PermissionDenied,

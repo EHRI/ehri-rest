@@ -157,8 +157,6 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param filePath   The SKOS file path
      * @param logMessage A log message
      * @return A log of imported nodes
-     * @throws IOException
-     * @throws ValidationError
      */
     @Override
     public ImportLog importFile(String filePath, String logMessage)
@@ -174,8 +172,6 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param ios        The SKOS file input stream
      * @param logMessage A log message
      * @return A log of imported nodes
-     * @throws IOException
-     * @throws ValidationError
      */
     @Override
     public ImportLog importFile(InputStream ios, String logMessage)

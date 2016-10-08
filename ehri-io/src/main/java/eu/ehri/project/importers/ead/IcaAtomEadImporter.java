@@ -148,7 +148,6 @@ public class IcaAtomEadImporter extends SaxXmlImporter {
      * @param unit       - the DocumentaryUnit to be saved
      * @param descBundle - the documentsDescription to replace any previous ones with this language
      * @return A bundle with description relationships merged.
-     * @throws ValidationError
      */
 
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {

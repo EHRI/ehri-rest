@@ -54,7 +54,6 @@ public final class BundleValidator {
      * ensure it is fit for creating in the graph.
      *
      * @return A new bundle with generated IDs.
-     * @throws ValidationError
      */
     public Bundle validateForCreate(Bundle bundle) throws ValidationError {
         validateData(bundle);
@@ -71,7 +70,6 @@ public final class BundleValidator {
      * ensure it is fit for updating in the graph.
      *
      * @return A new bundle with generated IDs.
-     * @throws ValidationError
      */
     public Bundle validateForUpdate(Bundle bundle) throws ValidationError {
         validateData(bundle);

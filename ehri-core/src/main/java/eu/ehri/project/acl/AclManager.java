@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -219,7 +220,6 @@ public final class AclManager {
      * @param item          The item
      * @param accessor      The user/group
      * @param permissionSet A set of permissions
-     * @throws PermissionDenied
      */
     public void setItemPermissions(Accessible item, Accessor accessor,
             Set<PermissionType> permissionSet) throws PermissionDenied {
@@ -269,7 +269,6 @@ public final class AclManager {
      *
      * @param accessor The user/group
      * @param globals  global permission map
-     * @throws PermissionDenied
      */
     public void setPermissionMatrix(Accessor accessor, GlobalPermissionSet globals)
             throws PermissionDenied {
@@ -543,7 +542,7 @@ public final class AclManager {
             Accessible entity) {
         // If we're admin, add it regardless.
         if (belongsToAdmin(accessor)) {
-            return Lists.newArrayList(PermissionType.values());
+            return ImmutableList.copyOf(PermissionType.values());
         } else {
             List<PermissionType> list = Lists.newArrayList();
             // Cache a set of permission scopes. This is the hierarchy on which
@@ -551,7 +550,6 @@ public final class AclManager {
             // entries and thus be pretty fast, but for deeply nested
             // documentary units there might be quite a few.
             HashSet<PermissionScope> scopes = Sets.newHashSet(entity.getPermissionScopes());
-
             PermissionGrantTarget target = entity.as(PermissionGrantTarget.class);
 
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
@@ -594,7 +592,7 @@ public final class AclManager {
                     EntityClass.PERMISSION_GRANT.getIdGen()
                             .generateId(Lists.<String>newArrayList(), null),
                     EntityClass.PERMISSION_GRANT,
-                    Maps.<String, Object>newHashMap());
+                    Maps.newHashMap());
             return graph.frame(vertex, PermissionGrant.class);
         } catch (IntegrityError e) {
             e.printStackTrace();

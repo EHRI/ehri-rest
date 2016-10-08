@@ -100,10 +100,6 @@ public class LinkResource extends AbstractAccessibleResource<Link>
      * @param bodies    optional list of entities to provide the body
      * @param accessors The IDs of accessors who can see this link
      * @return the created link item
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

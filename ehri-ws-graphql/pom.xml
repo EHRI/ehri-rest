@@ -9,6 +9,9 @@
 
     <artifactId>ehri-ws-graphql</artifactId>
 
+    <name>Web Service GraphQL Extension</name>
+    <description>GraphQL endpoint for web service.</description>
+
     <dependencies>
         <dependency>
             <groupId>ehri-project</groupId>

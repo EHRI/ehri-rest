@@ -48,7 +48,6 @@ public class VersionResource extends AbstractAccessibleResource<Version> impleme
      *
      * @param id the version id
      * @return a version item
-     * @throws ItemNotFound
      */
     @GET
     @Path("{id:[^/]+}")

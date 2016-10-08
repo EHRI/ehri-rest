@@ -19,14 +19,14 @@
 
 package eu.ehri.project.acl;
 
-import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.utils.EmptyIterable;
+
+import java.util.Collections;
 
 /**
  * Implementation of an anonymous user singleton.
@@ -80,17 +80,17 @@ public enum AnonymousAccessor implements Accessor {
 
     @Override
     public Iterable<Accessor> getParents() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     @Override
     public Iterable<Accessor> getAllParents() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     @Override
     public Iterable<PermissionGrant> getPermissionGrants() {
-        return new EmptyIterable<>();
+        return Collections.emptyList();
     }
 
     @Override
@@ -110,6 +110,6 @@ public enum AnonymousAccessor implements Accessor {
 
     @Override
     public java.util.Set<String> getPropertyKeys() {
-        return Sets.newHashSet();
+        return Collections.emptySet();
     }
 }

@@ -92,7 +92,6 @@ public class ToolsResource extends AbstractResource {
      * @param format  the RDF format
      * @param baseUri the RDF base URI
      * @return a streaming response
-     * @throws IOException
      */
     @GET
     @Path("schema")
@@ -105,7 +104,7 @@ public class ToolsResource extends AbstractResource {
                 .inverse().get(rdfFormat));
         final SchemaExporter schemaExporter = new SchemaExporter(rdfFormat);
         return Response.ok((StreamingOutput) outputStream ->
-                    schemaExporter.dumpSchema(outputStream, baseUri))
+                schemaExporter.dumpSchema(outputStream, baseUri))
                 .type(mediaType + "; charset=utf-8").build();
     }
 
@@ -122,10 +121,6 @@ public class ToolsResource extends AbstractResource {
      * @param excludeSingle    don't create concepts/links for access points that
      *                         are unique to a single item
      * @return the number of links created
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -176,8 +171,6 @@ public class ToolsResource extends AbstractResource {
      * @param commit     whether or not to rename the item
      * @return a tab old-to-new mapping, or an empty
      * body if nothing was changed
-     * @throws ItemNotFound
-     * @throws IOException
      */
     @POST
     @Produces("text/csv")
@@ -219,7 +212,6 @@ public class ToolsResource extends AbstractResource {
      * @param commit     whether or not to rename the items
      * @return a tab list old-to-new mappings, or an empty
      * body if nothing was changed
-     * @throws IOException
      */
     @POST
     @Produces("text/csv")
@@ -264,8 +256,6 @@ public class ToolsResource extends AbstractResource {
      * @param commit     whether or not to rename the items
      * @return a tab list old-to-new mappings, or an empty
      * body if nothing was changed
-     * @throws ItemNotFound
-     * @throws IOException
      */
     @POST
     @Produces("text/csv")
@@ -291,8 +281,6 @@ public class ToolsResource extends AbstractResource {
     /**
      * Regenerate description IDs.
      *
-     * @throws ItemNotFound
-     * @throws IOException
      */
     @POST
     @Produces("text/plain")

@@ -106,8 +106,6 @@ public class Linker {
      * @param vocabulary an existing (presumably empty) vocabulary
      * @param user       the user to whom to attribute the operation
      * @return the number of new links created
-     * @throws ValidationError
-     * @throws PermissionDenied
      */
     public int createAndLinkRepositoryVocabulary(
             Repository repository,

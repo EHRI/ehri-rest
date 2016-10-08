@@ -20,8 +20,6 @@ public interface EagExporter extends XmlExporter<Repository> {
      * @param outputStream the output stream to write to.
      * @param langCode     the preferred language code when multiple
      *                     descriptions are available
-     * @throws IOException
-     * @throws TransformerException
      */
     void export(Repository repository,
             OutputStream outputStream, String langCode) throws IOException, TransformerException;
@@ -33,7 +31,6 @@ public interface EagExporter extends XmlExporter<Repository> {
      * @param langCode   the preferred language code when multiple
      *                   descriptions are available
      * @return a DOM document
-     * @throws IOException
      */
     Document export(Repository repository, String langCode) throws IOException;
 }

@@ -62,7 +62,7 @@ public interface GraphManager {
      *
      * @return a map of property objects
      */
-    Map<String,Object> getProperties(Vertex vertex);
+    Map<String, Object> getProperties(Vertex vertex);
 
     /**
      * Get the type of an arbitrary vertex.
@@ -162,7 +162,7 @@ public interface GraphManager {
      * @param type The entity type
      * @param data The data map
      * @return The new vertex
-     * @throws IntegrityError
+     * @throws IntegrityError if an item with the given id already exists
      */
     Vertex createVertex(String id, EntityClass type,
             Map<String, ?> data) throws IntegrityError;
@@ -174,7 +174,6 @@ public interface GraphManager {
      * @param type The entity type
      * @param data The data map
      * @return The updated vertex
-     * @throws ItemNotFound
      */
     Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data) throws ItemNotFound;
@@ -192,7 +191,7 @@ public interface GraphManager {
      * Rename an existing vertex, changing its ID.
      *
      * @param vertex the vertex
-     * @param oldId the old ID
+     * @param oldId  the old ID
      * @param newId  the new ID
      */
     void renameVertex(Vertex vertex, String oldId, String newId);

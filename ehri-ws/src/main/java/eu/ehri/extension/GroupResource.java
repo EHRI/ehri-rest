@@ -25,6 +25,7 @@ import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
 import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.ParentResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;

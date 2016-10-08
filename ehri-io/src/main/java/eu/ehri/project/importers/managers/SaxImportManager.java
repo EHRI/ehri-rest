@@ -140,10 +140,6 @@ public class SaxImportManager extends AbstractImportManager {
      * @param stream  an input stream
      * @param context the event context
      * @param log     a logger object
-     * @throws IOException
-     * @throws ValidationError
-     * @throws InputParseError
-     * @throws InvalidXmlDocument
      */
     @Override
     protected void importInputStream(final InputStream stream, final ActionManager.EventContext context,

@@ -29,9 +29,6 @@ public interface DeleteResource {
      * Delete a resource.
      *
      * @param id The resource ID.
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
      */
     void delete(String id)
             throws PermissionDenied, ItemNotFound, ValidationError;

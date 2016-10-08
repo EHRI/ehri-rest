@@ -148,7 +148,6 @@ public class EadImporter extends SaxXmlImporter {
      *
      * @param itemData the raw data map
      * @return a description bundle
-     * @throws ValidationError
      */
     protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
         List<Map<String, Object>> extractedDates = extractDates(itemData);
@@ -206,7 +205,6 @@ public class EadImporter extends SaxXmlImporter {
      * @param descBundle the documentsDescription to replace any previous ones with this language
      * @param idPath     the ID path of this bundle (will be relative to the ID path of the permission scope)
      * @return A bundle with description relationships merged.
-     * @throws ValidationError
      */
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
@@ -268,7 +266,6 @@ public class EadImporter extends SaxXmlImporter {
      * it works in unison with the extractRelations() method.
      *
      * @param unit the current unit
-     * @throws ValidationError
      */
     protected void solveUndeterminedRelationships(DocumentaryUnit unit) throws ValidationError {
         // Try to resolve the undetermined relationships
@@ -390,7 +387,6 @@ public class EadImporter extends SaxXmlImporter {
      *
      * @param itemData Map of all extracted information
      * @return a Map representing a Documentary Unit node
-     * @throws ValidationError
      */
     @Override
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {

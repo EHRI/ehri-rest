@@ -564,7 +564,6 @@ public class ApiImpl implements Api {
      *
      * @param accessor      the user
      * @param permissionSet the user's permissions.
-     * @throws PermissionDenied
      */
     private void checkGrantPermission(Accessor accessor,
             GlobalPermissionSet permissionSet)

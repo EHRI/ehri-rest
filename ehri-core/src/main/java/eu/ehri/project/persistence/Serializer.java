@@ -211,7 +211,6 @@ public final class Serializer {
      *
      * @param item The framed item
      * @return A map of data
-     * @throws SerializationError
      */
     public <T extends Entity> Map<String, Object> entityToData(T item)
             throws SerializationError {
@@ -223,7 +222,6 @@ public final class Serializer {
      *
      * @param item The item vertex
      * @return A map of data
-     * @throws SerializationError
      */
     public Map<String, Object> vertexToData(Vertex item)
             throws SerializationError {
@@ -236,7 +234,6 @@ public final class Serializer {
      *
      * @param item The framed item
      * @return A data bundle
-     * @throws SerializationError
      */
     public <T extends Entity> Bundle entityToBundle(T item)
             throws SerializationError {
@@ -249,7 +246,6 @@ public final class Serializer {
      *
      * @param item The item vertex
      * @return A data bundle
-     * @throws SerializationError
      */
     public Bundle vertexToBundle(Vertex item)
             throws SerializationError {
@@ -261,7 +257,6 @@ public final class Serializer {
      *
      * @param item The framed item
      * @return A JSON string
-     * @throws SerializationError
      */
     public <T extends Entity> String entityToJson(T item)
             throws SerializationError {
@@ -273,7 +268,6 @@ public final class Serializer {
      *
      * @param item The item vertex
      * @return A JSON string
-     * @throws SerializationError
      */
     public String vertexToJson(Vertex item)
             throws SerializationError {
@@ -299,7 +293,6 @@ public final class Serializer {
      * @param item  The item vertex
      * @param depth The maximum serialization depth
      * @return A data bundle
-     * @throws SerializationError
      */
     private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite)
             throws SerializationError {

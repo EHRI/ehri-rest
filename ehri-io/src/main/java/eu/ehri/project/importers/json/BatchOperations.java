@@ -114,9 +114,6 @@ public class BatchOperations {
      * @param actioner    the current user
      * @param logMessage  a log message
      * @return an import log
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws ValidationError
      */
     public ImportLog batchImport(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
             throws DeserializationError, ItemNotFound, ValidationError {
@@ -167,9 +164,6 @@ public class BatchOperations {
      * @param actioner    the current user
      * @param logMessage  a log message
      * @return an import log
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws ValidationError
      */
     public ImportLog batchUpdate(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
             throws DeserializationError, ItemNotFound, ValidationError {
@@ -224,7 +218,6 @@ public class BatchOperations {
      * @param actioner   the current user
      * @param logMessage an optional log message
      * @return the number of items deleted
-     * @throws ItemNotFound
      */
     public int batchDelete(List<String> ids, Actioner actioner, Optional<String> logMessage)
             throws ItemNotFound {

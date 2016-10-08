@@ -241,6 +241,16 @@ public class GraphManagerTest {
             assertEquals("foo", vertex.getProperty(TEST_KEY));
         }
 
+        @Test
+        public void testGetProperties() throws Exception {
+            Map<String, String> data = Maps
+                    .newHashMap(ImmutableMap.of(TEST_KEY, TEST_VALUE));
+            Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+            manager.setProperty(vertex, TEST_KEY, "foo");
+            Map<String, Object> properties = manager.getProperties(vertex);
+            assertEquals("foo", properties.get(TEST_KEY));
+        }
+
         @Test(expected = IllegalArgumentException.class)
         public void testSetPropertyWithBlankPropArg() throws Exception {
             Map<String, String> data = Maps
