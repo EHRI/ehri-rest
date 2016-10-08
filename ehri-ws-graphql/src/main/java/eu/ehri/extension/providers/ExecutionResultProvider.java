@@ -19,6 +19,7 @@
 
 package eu.ehri.extension.providers;
 
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.persistence.Bundle;
 import graphql.ExecutionResult;
@@ -38,6 +39,8 @@ import java.lang.reflect.Type;
 @Produces(MediaType.APPLICATION_JSON)
 public class ExecutionResultProvider implements MessageBodyWriter<ExecutionResult>, JsonMessageBodyHandler {
 
+    private static final ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
         return ExecutionResult.class.isAssignableFrom(aClass);
@@ -52,11 +55,10 @@ public class ExecutionResultProvider implements MessageBodyWriter<ExecutionResul
     @Override
     public void writeTo(ExecutionResult executionResult,
             Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType,
-            MultivaluedMap<String, Object> headers, OutputStream outputStream) throws IOException,
-            WebApplicationException {
-
+            MultivaluedMap<String, Object> headers, OutputStream outputStream)
+            throws IOException, WebApplicationException {
         if (executionResult.getData() != null) {
-            mapper.writeValue(outputStream, ImmutableMap.of(
+            writer.writeValue(outputStream, ImmutableMap.of(
                     Bundle.DATA_KEY, executionResult.getData()));
         }
     }
