@@ -85,6 +85,10 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         //System.out.println(data);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
+        assertEquals(1, data.path("data").path("c1")
+                .path("children").path("items").size());
+        assertEquals(2, data.path("data").path("c1")
+                .path("allChildren").path("items").size());
         assertEquals("c2", data.path("data").path("c1")
                 .path("children").path("items").path(0)
                 .path("id").textValue());

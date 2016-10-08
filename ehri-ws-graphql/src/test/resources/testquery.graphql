@@ -35,6 +35,11 @@
                 name
             }
         }
+        allChildren: children(all: true) {
+            items {
+                id
+            }
+        }
         children {
             items {
                 id
