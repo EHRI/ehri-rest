@@ -58,14 +58,8 @@
                             <include>org.apache.commons:commons-lang3</include>
                             <include>org.apache.commons:commons-compress</include>
 
-                            <!-- Sparql/OpenRDF stuff that will be ignored if
-                             we're not building under the sparql profile -->
-                            <include>org.openrdf.sesame:sesame-queryalgebra-evaluation</include>
-                            <include>org.openrdf.*</include>
-                            <include>net.fortytwo.sesametools:*</include>
-
                             <!-- GraphQL deps -->
-                            <include>org.antlr:*</include>
+                            <include>org.antlr:antlr4-runtime</include>
                             <include>com.graphql-java:*</include>
                         </includes>
                     </artifactSet>
@@ -125,16 +119,4 @@
             <version>${project.parent.version} </version>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>sparql</id>
-            <dependencies>
-                <dependency>
-                    <groupId>ehri-project</groupId>
-                    <artifactId>ehri-ws-sparql</artifactId>
-                    <version>${project.parent.version} </version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>

@@ -55,7 +55,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>${project.parent.version} </version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>neo4j-management</artifactId>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
-            <version>${project.parent.version} </version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>${project.parent.version} </version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -109,54 +109,6 @@
             <type>test-jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
-        </dependency>
-
-        <!-- RDF export -->
-        <dependency>
-            <groupId>com.tinkerpop.blueprints</groupId>
-            <artifactId>blueprints-graph-sail</artifactId>
-            <version>${blueprints.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>neo4j-ha</artifactId>
-                    <groupId>org.neo4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>neo4j-management</artifactId>
-                    <groupId>org.neo4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.tinkerpop.blueprints</groupId>
-            <artifactId>blueprints-sail-graph</artifactId>
-            <version>${blueprints.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>neo4j-ha</artifactId>
-                    <groupId>org.neo4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>neo4j-management</artifactId>
-                    <groupId>org.neo4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>

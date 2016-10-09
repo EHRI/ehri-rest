@@ -28,7 +28,9 @@ import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
 import graphql.validation.Validator;
-//import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.RecognitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -40,6 +42,8 @@ import static graphql.Assert.assertNotNull;
 
 public class StreamingGraphQL {
 
+    private static final Logger log = LoggerFactory.getLogger(StreamingGraphQL.class);
+
     private final GraphQLSchema graphQLSchema;
 
     public StreamingGraphQL(GraphQLSchema schema) {
@@ -50,14 +54,14 @@ public class StreamingGraphQL {
     public void execute(JsonGenerator generator, Document document, String operationName, Object context, Map<String, Object>
             arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        //log.info("Executing request. operation name: {}. Request: {} ", operationName, requestString);
+        log.info("Executing request. operation name: {}. Request: {} ", operationName, document);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy());
         execution.execute(generator, graphQLSchema, context, document, operationName, arguments);
     }
 
     public void execute(JsonGenerator generator, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        //log.info("Executing request. operation name: {}. Request: {} ", operationName, requestString);
+        log.info("Executing request. operation name: {}. Request: {} ", operationName, requestString);
         Document document = parseAndValidate(requestString);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy());
         execution.execute(generator, graphQLSchema, context, document, operationName, arguments);
@@ -69,11 +73,9 @@ public class StreamingGraphQL {
         try {
             document = parser.parseDocument(requestString);
         } catch (Exception e) {
-            // FIXME: Antlr maven problems
-            // RecognitionException recognitionException = (RecognitionException) e.getCause();
-            //int line = recognitionException.getOffendingToken().getLine();
-            //int positionInLine = recognitionException.getOffendingToken().getCharPositionInLine();
-            SourceLocation sourceLocation = new SourceLocation(0, 0);
+            RecognitionException recognitionException = (RecognitionException) e.getCause();
+            SourceLocation sourceLocation = new SourceLocation(recognitionException.getOffendingToken().getLine(),
+                    recognitionException.getOffendingToken().getCharPositionInLine());
             InvalidSyntaxError invalidSyntaxError = new InvalidSyntaxError(sourceLocation);
             throw new ExecutionError(Collections.singletonList(invalidSyntaxError));
         }

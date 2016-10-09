@@ -218,14 +218,4 @@
             </plugin>
         </plugins>
     </reporting>
-
-    <profiles>
-        <!-- Build Sparql extension -->
-        <profile>
-            <id>sparql</id>
-            <modules>
-                <module>ehri-ws-sparql</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
