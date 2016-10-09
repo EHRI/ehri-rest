@@ -7,12 +7,14 @@ import eu.ehri.extension.errors.ExecutionException;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
+import eu.ehri.project.graphql.LazyExecutionStrategy;
 import eu.ehri.project.graphql.StreamingGraphQL;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Bundle;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLException;
+import graphql.execution.ExecutionStrategy;
 import graphql.introspection.IntrospectionQuery;
 import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
@@ -33,6 +35,11 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "graphql";
 
+    // NB: We need a custom execution strategy to handle data fetchers
+    // with value type Iterable. This should be remove if/when the fix is
+    // made to graphql-java: https://git.io/vPBZy
+    private static final ExecutionStrategy executionStrategy = new LazyExecutionStrategy();
+
     public GraphQLResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
     }
@@ -45,7 +52,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             GraphQLSchema schema = new GraphQLImpl(api()).getSchema();
             tx.success();
-            return new GraphQL(schema).execute(IntrospectionQuery.INTROSPECTION_QUERY);
+            return new GraphQL(schema, executionStrategy).execute(IntrospectionQuery.INTROSPECTION_QUERY);
         }
     }
 
@@ -80,7 +87,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-        ExecutionResult executionResult = new GraphQL(schema).execute(
+        ExecutionResult executionResult = new GraphQL(schema, executionStrategy).execute(
                 q.getQuery(), (Object) null, q.getVariablesAsMap());
 
         if (!executionResult.getErrors().isEmpty()) {

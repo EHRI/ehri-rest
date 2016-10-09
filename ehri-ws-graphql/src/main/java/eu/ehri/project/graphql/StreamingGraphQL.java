@@ -70,7 +70,7 @@ public class StreamingGraphQL {
             document = parser.parseDocument(requestString);
         } catch (Exception e) {
             // FIXME: Antlr maven problems
-            //RecognitionException recognitionException = (RecognitionException) e.getCause();
+            // RecognitionException recognitionException = (RecognitionException) e.getCause();
             //int line = recognitionException.getOffendingToken().getLine();
             //int positionInLine = recognitionException.getOffendingToken().getCharPositionInLine();
             SourceLocation sourceLocation = new SourceLocation(0, 0);
