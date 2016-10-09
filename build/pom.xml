@@ -6,11 +6,9 @@
         <version>0.13.6-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <artifactId>build</artifactId>
     <name>Packaging</name>
     <description>Packaging.</description>
-
-    <artifactId>build</artifactId>
 
     <properties>
         <maven-site-plugin.skip>true</maven-site-plugin.skip>
@@ -25,6 +23,7 @@
                 <version>2.4.3</version>
                 <executions>
                     <execution>
+                        <id>shaded-packaging</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
