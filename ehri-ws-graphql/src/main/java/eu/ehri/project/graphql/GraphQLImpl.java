@@ -19,14 +19,17 @@
 
 package eu.ehri.project.graphql;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Supplier;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.ContactInfo;
+import eu.ehri.project.definitions.CountryInfo;
 import eu.ehri.project.definitions.DefinitionList;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Isaar;
@@ -74,6 +77,7 @@ import graphql.schema.TypeResolver;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -95,6 +99,7 @@ public class GraphQLImpl {
     private static final String FIRST_PARAM = "first";
     private static final String FROM_PARAM = "from";
     private static final String AFTER_PARAM = "after";
+    private static final String ALL_PARAM = "all";
 
     private static final String HAS_PREVIOUS_PAGE = "hasPreviousPage";
     private static final String HAS_NEXT_PAGE = "hasNextPage";
@@ -110,9 +115,15 @@ public class GraphQLImpl {
     private static final int MAX_LIST_LIMIT = 100;
 
     private final Api _api;
+    private final boolean stream;
+
+    public GraphQLImpl(Api api, boolean stream) {
+        this._api = api;
+        this.stream = stream;
+    }
 
     public GraphQLImpl(Api api) {
-        this._api = api;
+        this(api, false);
     }
 
     private Api api() {
@@ -144,13 +155,13 @@ public class GraphQLImpl {
         }
     }
 
-    private static int getLimit(Integer limitArg) {
+    private static int getLimit(Integer limitArg, boolean stream) {
         if (limitArg == null) {
-            return DEFAULT_LIST_LIMIT;
+            return stream ? -1 : DEFAULT_LIST_LIMIT;
         } else if (limitArg < 0) {
-            return MAX_LIST_LIMIT;
+            return stream ? limitArg : MAX_LIST_LIMIT;
         } else {
-            return Math.min(MAX_LIST_LIMIT, limitArg);
+            return stream ? limitArg : Math.min(MAX_LIST_LIMIT, limitArg);
         }
     }
 
@@ -163,15 +174,6 @@ public class GraphQLImpl {
             return 0;
         }
     }
-
-    // Field definitions
-
-    private static final Map<String, String> countryStringFields = ImmutableMap.<String, String>builder()
-            .put("history", "")
-            .put("situation", "")
-            .put("summary", "")
-            .put("extensive", "")
-            .build();
 
     // Argument helpers...
 
@@ -197,57 +199,93 @@ public class GraphQLImpl {
         // type via the API alone is to run a query as a stream w/ no limit.
         // However, this means that ACL filtering will be applied twice,
         // once here, and once by the connection data fetcher, which also
-        // applies pagination.
-        return connectionDataFetcher(api().query()
+        // applies pagination. This is a bit gross but the speed difference
+        // appears to be negligible.
+        return connectionDataFetcher(() -> api().query()
                 .setStream(true).setLimit(-1).page(type, Entity.class));
     }
 
-    private DataFetcher oneToManyRelationshipConnectionFetcher(Function<Entity, Iterable<? extends Entity>> f) {
+    private DataFetcher hierarchicalOneToManyRelationshipConnectionFetcher(
+            Function<Entity, Iterable<? extends Entity>> top, Function<Entity, Iterable<? extends Entity>> all) {
+        // Depending on the value of the "all" argument, return either just
+        // the top level items or everything in the tree.
         return env -> {
-            Iterable<? extends Entity> iter = f.apply(((Entity) env.getSource()));
-            return connectionDataFetcher(iter).get(env);
+            boolean allOrTop = (Boolean) Optional.fromNullable(env.getArgument(ALL_PARAM)).or(false);
+            Function<Entity, Iterable<? extends Entity>> func = allOrTop ? all : top;
+            return connectionDataFetcher(() -> func.apply(((Entity) env.getSource()))).get(env);
         };
     }
 
-    private DataFetcher connectionDataFetcher(Iterable<? extends Entity> iter) {
+    private DataFetcher oneToManyRelationshipConnectionFetcher(Function<Entity, Iterable<? extends Entity>> f) {
+        return env -> connectionDataFetcher(() -> f.apply(((Entity) env.getSource()))).get(env);
+    }
+
+    private DataFetcher connectionDataFetcher(Supplier<Iterable<? extends Entity>> iter) {
+        // NB: The data fetcher takes a supplier here so lazily generated
+        // streams can be invoked more than one (if, e.g. both the items array
+        // and the edges array is needed.) Otherwise we would have to somehow
+        // reset the Iterable.
         return env -> {
-            int limit = getLimit(env.getArgument(FIRST_PARAM));
+            int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
             int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
-
-            QueryApi.Page<Entity> page = api()
-                    .query()
-                    .setLimit(limit)
-                    .setOffset(offset)
-                    .page(iter, Entity.class);
-            List<Entity> items = Lists.newArrayList(page.getIterable());
-
-            boolean hasNext = page.getOffset() + items.size() < page.getTotal();
-            boolean hasPrev = page.getOffset() > 0;
-
-            // Create a list of edges, with the cursor taking into
-            // account each item's offset
-            List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
-            for (int i = 0; i < items.size(); i++) {
-                edges.add(mapOf(
-                        CURSOR, Base64.toBase64(String.valueOf(offset + i)),
-                        NODE, items.get(i)
-                ));
-            }
-
-            String nextCursor = Base64.toBase64(String.valueOf(offset + limit));
-            String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
-
-            return mapOf(
-                    ITEMS, items,
-                    EDGES, edges,
-                    PAGE_INFO, mapOf(
-                            HAS_NEXT_PAGE, hasNext,
-                            NEXT_PAGE, hasNext ? nextCursor : null,
-                            HAS_PREVIOUS_PAGE, hasPrev,
-                            PREVIOUS_PAGE, hasPrev ? prevCursor : null
-                    )
-            );
+            return stream && limit < 0
+                    ? lazyConnectionDataFetcher(iter, limit, offset)
+                    : strictConnectionDataFetcher(iter, limit, offset);
         };
+    }
+
+    private Map<String, Object> connectionData(Iterable<Entity> items,
+            Iterable<Map<String, Object>> edges, String nextCursor, String prevCursor) {
+        return mapOf(
+                ITEMS, items,
+                EDGES, edges,
+                PAGE_INFO, mapOf(
+                        HAS_NEXT_PAGE, nextCursor != null,
+                        NEXT_PAGE, nextCursor,
+                        HAS_PREVIOUS_PAGE, prevCursor != null,
+                        PREVIOUS_PAGE, prevCursor
+                )
+        );
+    }
+
+    private Map<String, Object> strictConnectionDataFetcher(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
+        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        QueryApi.Page<Entity> page = query.page(iter.get(), Entity.class);
+        List<Entity> items = Lists.newArrayList(page);
+
+        // Create a list of edges, with the cursor taking into
+        // account each item's offset
+        List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
+        for (int i = 0; i < items.size(); i++) {
+            edges.add(mapOf(
+                    CURSOR, Base64.toBase64(String.valueOf(offset + i)),
+                    NODE, items.get(i)
+            ));
+        }
+
+        boolean hasNext = page.getOffset() + items.size() < page.getTotal();
+        boolean hasPrev = page.getOffset() > 0;
+        String nextCursor = Base64.toBase64(String.valueOf(offset + limit));
+        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        return connectionData(items, edges, hasNext ? nextCursor : null, hasPrev ? prevCursor : null);
+    }
+
+    private Map<String, Object> lazyConnectionDataFetcher(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
+        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        QueryApi.Page<Entity> items = query.page(iter.get(), Entity.class);
+        boolean hasPrev = items.getOffset() > 0;
+
+        // Create a list of edges, with the cursor taking into
+        // account each item's offset
+        final AtomicInteger index = new AtomicInteger();
+        Iterable<Map<String, Object>> edges = Iterables.transform(
+                query.page(iter.get(), Entity.class), item -> mapOf(
+                        CURSOR, Base64.toBase64(String.valueOf(offset + index.getAndIncrement())),
+                        NODE, item
+                ));
+
+        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        return connectionData(items, edges, null, hasPrev ? prevCursor : null);
     }
 
     private final DataFetcher entityIdDataFetcher = env -> {
@@ -317,9 +355,7 @@ public class GraphQLImpl {
     private DataFetcher oneToManyRelationshipFetcher(Function<Entity, Iterable<? extends Entity>> f) {
         return environment -> {
             Iterable<? extends Entity> elements = f.apply(((Entity) environment.getSource()));
-            QueryApi.Page<Entity> page = api()
-                    .query().setStream(true).setLimit(-1).page(elements, Entity.class);
-            return Lists.newArrayList(page);
+            return api().query().setStream(true).setLimit(-1).page(elements, Entity.class);
         };
     }
 
@@ -390,11 +426,6 @@ public class GraphQLImpl {
                 ).collect(Collectors.toList());
     }
 
-    private static List<GraphQLFieldDefinition> nullStringAttrs(Map<String, String> attrMap) {
-        return attrMap.entrySet().stream().map(e -> nullAttr(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
-    }
-
     private static GraphQLFieldDefinition idField = newFieldDefinition()
             .type(GraphQLNonNullString)
             .name(Bundle.ID_KEY)
@@ -450,7 +481,7 @@ public class GraphQLImpl {
     }
 
     private static GraphQLFieldDefinition connectionFieldDefinition(String name, String description,
-            GraphQLOutputType type, DataFetcher dataFetcher) {
+            GraphQLOutputType type, DataFetcher dataFetcher, GraphQLArgument... arguments) {
         return newFieldDefinition()
                 .name(name)
                 .description(description)
@@ -460,7 +491,6 @@ public class GraphQLImpl {
                         .name(FIRST_PARAM)
                         .type(GraphQLInt)
                         .description("The number of items after the cursor")
-                        .defaultValue(DEFAULT_LIST_LIMIT)
                         .build()
                 )
                 .argument(newArgument()
@@ -475,6 +505,7 @@ public class GraphQLImpl {
                         .type(CursorType)
                         .build()
                 )
+                .argument(Lists.newArrayList(arguments))
                 .build();
     }
 
@@ -594,6 +625,8 @@ public class GraphQLImpl {
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionListFields = listStringAttrs(Isaar.values());
     private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(Skos.values());
     private static final List<GraphQLFieldDefinition> conceptDescriptionListFields = listStringAttrs(Skos.values());
+    private static final List<GraphQLFieldDefinition> countryDescriptionNullFields = nullStringAttrs(CountryInfo.values());
+    private static final List<GraphQLFieldDefinition> countryDescriptionListFields = listStringAttrs(CountryInfo.values());
 
 
     // Interfaces and type resolvers...
@@ -757,6 +790,13 @@ public class GraphQLImpl {
             .withInterface(descriptionInterface)
             .build();
 
+    private static final GraphQLArgument allArgument = newArgument()
+            .name(ALL_PARAM)
+            .description("Fetch all lower level items, not just those at the next level.")
+            .type(GraphQLBoolean)
+            .defaultValue(false)
+            .build();
+
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description("A repository / archival institution")
@@ -765,8 +805,10 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
-                    oneToManyRelationshipConnectionFetcher(
-                            r -> r.as(Repository.class).getTopLevelDocumentaryUnits())))
+                    hierarchicalOneToManyRelationshipConnectionFetcher(
+                            r -> r.as(Repository.class).getTopLevelDocumentaryUnits(),
+                            r -> r.as(Repository.class).getAllDocumentaryUnits()),
+                    allArgument))
             .field(singleDescriptionFieldDefinition(repositoryDescriptionType))
             .field(descriptionsFieldDefinition(repositoryDescriptionType))
             .field(itemFieldDefinition("country", "The repository's country",
@@ -793,7 +835,10 @@ public class GraphQLImpl {
                     manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository())))
             .field(connectionFieldDefinition("children", "The unit's child items",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
-                    oneToManyRelationshipConnectionFetcher(d -> d.as(DocumentaryUnit.class).getChildren())))
+                    hierarchicalOneToManyRelationshipConnectionFetcher(
+                            d -> d.as(DocumentaryUnit.class).getChildren(),
+                            d -> d.as(DocumentaryUnit.class).getAllChildren()),
+                    allArgument))
             .field(itemFieldDefinition("parent", "The unit's parent item, if applicable",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getParent())))
@@ -861,7 +906,8 @@ public class GraphQLImpl {
                             obj -> LanguageHelpers.countryCodeToName(obj.toString())))
                     .build()
             )
-            .fields(nullStringAttrs(countryStringFields))
+            .fields(countryDescriptionNullFields)
+            .fields(countryDescriptionListFields)
             .field(connectionFieldDefinition("repositories", "Repositories located in the country", repositoryType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Country.class).getRepositories())))

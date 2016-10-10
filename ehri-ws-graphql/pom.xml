@@ -58,8 +58,8 @@
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
             <version>${neo4j.version}</version>
-            <type>test-jar</type>
             <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
 
@@ -87,6 +87,11 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.5.1</version>
         </dependency>
     </dependencies>
 </project>

@@ -52,7 +52,7 @@
         </testResources>
         <plugins>
             <!--  use surefire instead of maven-jar-plugin 2.2
-                  surfire plugin worked better with eclipse
+                  surefire plugin worked better with eclipse
                   also used by ehri-io project-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -60,6 +60,7 @@
                 <version>2.2</version>
                 <executions>
                     <execution>
+                        <id>testing</id>
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
@@ -120,16 +121,16 @@
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
             <version>${neo4j.version}</version>
-            <type>test-jar</type>
             <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
             <version>${neo4j.version}</version>
-            <type>test-jar</type>
             <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -137,7 +138,6 @@
             <artifactId>gremlin-java</artifactId>
             <version>${blueprints.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

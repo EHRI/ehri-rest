@@ -7,12 +7,9 @@
         <artifactId>ehri-data</artifactId>
         <version>0.13.6-SNAPSHOT</version>
     </parent>
-
+    <artifactId>ehri-ws</artifactId>
     <name>Web Service</name>
     <description>Web service layer exposed via a Neo4j extension at path: /ehri</description>
-    <artifactId>ehri-ws</artifactId>
-
-    <!-- TODO add license info and more -->
 
     <build>
         <plugins>
@@ -23,6 +20,7 @@
                 <version>2.2</version>
                 <executions>
                     <execution>
+                        <id>testing</id>
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
@@ -89,11 +87,6 @@
     <dependencies>
         <dependency>
             <groupId>ehri-project</groupId>
-            <artifactId>ehri-definitions</artifactId>
-            <version>${project.parent.version} </version>
-        </dependency>
-        <dependency>
-            <groupId>ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
             <version>${project.parent.version} </version>
             <exclusions>
@@ -121,13 +114,6 @@
                     <groupId>log4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>ehri-project</groupId>
-            <artifactId>ehri-core</artifactId>
-            <version>${project.parent.version} </version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
 
         <!-- neo4j -->
@@ -164,8 +150,8 @@
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
             <version>${neo4j.version}</version>
-            <type>test-jar</type>
             <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <!-- logging -->
@@ -185,6 +171,13 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-core</artifactId>
+            <version>${project.parent.version} </version>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
 

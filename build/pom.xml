@@ -6,11 +6,9 @@
         <version>0.13.6-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <artifactId>build</artifactId>
     <name>Packaging</name>
     <description>Packaging.</description>
-
-    <artifactId>build</artifactId>
 
     <properties>
         <maven-site-plugin.skip>true</maven-site-plugin.skip>
@@ -25,6 +23,7 @@
                 <version>2.4.3</version>
                 <executions>
                     <execution>
+                        <id>shaded-packaging</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -58,14 +57,8 @@
                             <include>org.apache.commons:commons-lang3</include>
                             <include>org.apache.commons:commons-compress</include>
 
-                            <!-- Sparql/OpenRDF stuff that will be ignored if
-                             we're not building under the sparql profile -->
-                            <include>org.openrdf.sesame:sesame-queryalgebra-evaluation</include>
-                            <include>org.openrdf.*</include>
-                            <include>net.fortytwo.sesametools:*</include>
-
                             <!-- GraphQL deps -->
-                            <include>org.antlr:*</include>
+                            <include>org.antlr:antlr4-runtime</include>
                             <include>com.graphql-java:*</include>
                         </includes>
                     </artifactSet>
@@ -125,16 +118,4 @@
             <version>${project.parent.version} </version>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>sparql</id>
-            <dependencies>
-                <dependency>
-                    <groupId>ehri-project</groupId>
-                    <artifactId>ehri-ws-sparql</artifactId>
-                    <version>${project.parent.version} </version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>

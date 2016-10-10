@@ -82,7 +82,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     public static final String RESOURCE_ENDPOINT_PREFIX = "classes";
 
     protected static final ObjectMapper jsonMapper = new ObjectMapper();
-    protected static final JsonFactory jsonFactory = new JsonFactory();
+    protected static final JsonFactory jsonFactory = jsonMapper.getFactory();
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());

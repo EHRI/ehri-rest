@@ -44,6 +44,9 @@ import java.util.Set;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ItemPermissionSetProvider implements MessageBodyReader<ItemPermissionSet>, JsonMessageBodyHandler {
 
+    private static final TypeReference<HashSet<PermissionType>> typeRef = new TypeReference<HashSet<PermissionType>>() {
+    };
+
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
         return aClass == ItemPermissionSet.class;
@@ -51,9 +54,8 @@ public class ItemPermissionSetProvider implements MessageBodyReader<ItemPermissi
 
     @Override
     public ItemPermissionSet readFrom(Class<ItemPermissionSet> bundleClass, Type type, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String,
-            String> headers, InputStream stream) throws IOException, WebApplicationException {
-
+            MediaType mediaType, MultivaluedMap<String, String> headers, InputStream stream)
+                throws IOException, WebApplicationException {
         try {
             return parseMatrix(stream);
         } catch (DeserializationError deserializationError) {
@@ -63,8 +65,6 @@ public class ItemPermissionSetProvider implements MessageBodyReader<ItemPermissi
 
     private ItemPermissionSet parseMatrix(InputStream json) throws DeserializationError {
         try {
-            TypeReference<HashSet<PermissionType>> typeRef = new TypeReference<HashSet<PermissionType>>() {
-            };
             Set<PermissionType> set = mapper.readValue(json, typeRef);
             return ItemPermissionSet.from(set);
         } catch (JsonMappingException e) {

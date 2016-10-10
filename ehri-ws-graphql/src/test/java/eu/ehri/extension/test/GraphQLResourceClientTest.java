@@ -27,12 +27,14 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import eu.ehri.extension.GraphQLResource;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.providers.GraphQLQueryProvider;
 import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 
@@ -40,6 +42,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -75,10 +78,17 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .entity(testQuery)
                 .post(ClientResponse.class);
 
+        // Without the X-Stream header we should get strict execution.
+        assertNull(response.getHeaders().getFirst("Transfer-Encoding"));
+
         JsonNode data = response.getEntity(JsonNode.class);
         //System.out.println(data);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
+        assertEquals(1, data.path("data").path("c1")
+                .path("children").path("items").size());
+        assertEquals(2, data.path("data").path("c1")
+                .path("allChildren").path("items").size());
         assertEquals("c2", data.path("data").path("c1")
                 .path("children").path("items").path(0)
                 .path("id").textValue());
@@ -200,5 +210,33 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         JsonNode nextData = nextResponse.getEntity(JsonNode.class);
         assertEquals(1, nextData.path("data").path("test").path("items").size());
         assertStatus(OK, nextResponse);
+    }
+
+    @Test
+    public void testGraphQLStreaming() throws Exception {
+        String testQuery = readResourceFileAsString("testquery.graphql");
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .header(AbstractResource.STREAM_HEADER_NAME, "true")
+                .entity(testQuery)
+                .post(ClientResponse.class);
+
+        assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("c1", data.path("data").path("c1").path("id").textValue());
+    }
+
+    @Test
+    public void testGraphQLStreamingWithError() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-bad.graphql");
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .header(AbstractResource.STREAM_HEADER_NAME, "true")
+                .entity(testQuery)
+                .post(ClientResponse.class);
+
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("ValidationError",
+                data.path("errors").path(0).path("type").textValue());
     }
 }
