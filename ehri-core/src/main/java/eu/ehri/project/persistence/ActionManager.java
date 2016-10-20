@@ -126,7 +126,6 @@ public final class ActionManager {
     /**
      * EventContext is a handle to a particular action to which additional
      * subjects can be added.
-     *
      */
     public class EventContext {
         private final Actioner actioner;
@@ -138,14 +137,15 @@ public final class ActionManager {
 
         /**
          * Create a new event context.
-         * @param actioner      The actioner
-         * @param type          The event type
-         * @param logMessage    An optional log message
+         *
+         * @param actioner   The actioner
+         * @param type       The event type
+         * @param logMessage An optional log message
          */
         EventContext(Actioner actioner,
-                EventTypes type,
-                String timestamp, Optional<String> logMessage,
-                Set<Pair<Entity, Bundle>> toVersion) {
+                     EventTypes type,
+                     String timestamp, Optional<String> logMessage,
+                     Set<Pair<Entity, Bundle>> toVersion) {
             this.actionType = type;
             this.actioner = actioner;
             this.logMessage = logMessage;
@@ -277,20 +277,23 @@ public final class ActionManager {
         }
     }
 
+    public SystemEventQueue getEventRoot() {
+        try {
+            return manager.getEntity(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
+        } catch (ItemNotFound itemNotFound) {
+            throw new RuntimeException("Fatal error: system node (id: 'system') was not found. " +
+                    "Perhaps the graph was incorrectly initialised?");
+        }
+    }
+
     /**
      * Get the latest global event.
      *
      * @return The latest event node
      */
     public SystemEvent getLatestGlobalEvent() {
-        try {
-            SystemEventQueue sys = manager.getEntity(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
-            Iterable<SystemEvent> latest = sys.getSystemEvents();
-            return latest.iterator().hasNext() ? latest.iterator().next() : null;
-        } catch (ItemNotFound itemNotFound) {
-            throw new RuntimeException("Fatal error: system node (id: 'system') was not found. " +
-                    "Perhaps the graph was incorrectly initialised?");
-        }
+        Iterable<SystemEvent> latest = getEventRoot().getSystemEvents();
+        return latest.iterator().hasNext() ? latest.iterator().next() : null;
     }
 
     /**
@@ -324,8 +327,8 @@ public final class ActionManager {
     /**
      * Create an action node describing something that user U has done.
      *
-     * @param user       The actioner
-     * @param type       The event type
+     * @param user The actioner
+     * @param type The event type
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type) {
@@ -342,7 +345,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Accessible subject, Actioner user,
-            EventTypes type) {
+                                        EventTypes type) {
         return newEventContext(subject, user, type, Optional.<String>absent());
     }
 
@@ -356,7 +359,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Accessible subject, Actioner user,
-            EventTypes type, Optional<String> logMessage) {
+                                        EventTypes type, Optional<String> logMessage) {
         EventContext context = newEventContext(user, type, logMessage);
         context.addSubjects(subject);
         return context;
@@ -379,19 +382,18 @@ public final class ActionManager {
      * definition:
      * <p>
      * <ol>
-     *     <li>They have the same scope and subject</li>
-     *     <li>They have the same actioner</li>
-     *     <li>They are both of the same type</li>
-     *     <li>They have the same log message, if any</li>
+     * <li>They have the same scope and subject</li>
+     * <li>They have the same actioner</li>
+     * <li>They are both of the same type</li>
+     * <li>They have the same log message, if any</li>
      * </ol>
      * <p>
      * This function allows filtering an event stream for duplicates,
      * like someone repeatedly updating the same item.
      *
-     * @param event1 the first event
-     * @param event2 the second event
+     * @param event1            the first event
+     * @param event2            the second event
      * @param timeDiffInSeconds the elapsed time between the events
-     *
      * @return whether or not the events are effectively the same.
      */
     public static boolean canAggregate(SystemEvent event1, SystemEvent event2, int timeDiffInSeconds) {
@@ -445,7 +447,7 @@ public final class ActionManager {
      * Test if two events are sequential with the same actioner. This is used
      * for aggregating repeated events.
      *
-     * @param first the first temporal event
+     * @param first  the first temporal event
      * @param second the second temporal event
      * @return whether events can be aggregated by user
      */
@@ -505,8 +507,8 @@ public final class ActionManager {
     private Vertex getLinkNode(String linkType) {
         try {
             return dao.create(Bundle.Builder.withClass(EntityClass.EVENT_LINK)
-                    .addDataValue(DEBUG_TYPE, EVENT_LINK)
-                    .addDataValue(LINK_TYPE, linkType).build(),
+                            .addDataValue(DEBUG_TYPE, EVENT_LINK)
+                            .addDataValue(LINK_TYPE, linkType).build(),
                     EventLink.class).asVertex();
         } catch (ValidationError e) {
             throw new RuntimeException(e);

@@ -55,6 +55,13 @@ public class CountryTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testGetTopLevelDocumentaryUnits() throws Exception {
+        Country country = manager.getEntity("nl", Country.class);
+        // Expecting c1, c4, and m1-19
+        assertEquals(3, Iterables.size(country.getTopLevelDocumentaryUnits()));
+    }
+
+    @Test
     public void testAddRepository() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
         Repository repo = new BundleManager(graph)

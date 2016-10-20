@@ -33,6 +33,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static eu.ehri.project.test.XmlTestHelpers.assertXPath;
+import static eu.ehri.project.test.XmlTestHelpers.parseDocument;
+import static eu.ehri.project.test.XmlTestHelpers.validatesSchema;
+
 
 public class Eac2010ExporterTest extends XmlExporterTest {
     @Test

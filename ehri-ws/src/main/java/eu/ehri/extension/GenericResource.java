@@ -573,6 +573,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     @GET
     @Path("{id:[^/]+}/dc")
+    @Produces(MediaType.TEXT_XML)
     public Document exportDc(
             @PathParam("id") String id,
             @QueryParam("lang") String langCode)

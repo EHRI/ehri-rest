@@ -257,6 +257,15 @@ public abstract class AbstractResource implements TxCheckedResource {
     }
 
     /**
+     * Fetch an instance of the API for anonymous access.
+     *
+     * @return an Api instance
+     */
+    protected Api anonymousApi() {
+        return ApiFactory.noLogging(graph, AnonymousAccessor.getInstance());
+    }
+
+    /**
      * Retrieve the profile of the current user, throwing a
      * BadRequest if it's invalid.
      *

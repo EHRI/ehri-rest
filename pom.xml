@@ -111,6 +111,7 @@
         <module>ehri-cypher</module>
         <module>build</module>
         <module>ehri-ws-graphql</module>
+        <module>ehri-ws-oaipmh</module>
     </modules>
 
     <properties>

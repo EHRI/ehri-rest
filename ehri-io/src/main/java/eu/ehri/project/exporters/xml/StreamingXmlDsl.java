@@ -33,18 +33,20 @@ import java.util.Map;
  * A helper base class for writing XML as a stream, using
  * lambdas for hierarchical nesting of elements.
  */
-abstract class StreamingXmlDsl {
-    protected static Map<String, String> attrs(String... kv) {
+public abstract class StreamingXmlDsl {
+    protected static Map<String, String> attrs(Object... kv) {
         Preconditions.checkArgument(kv.length % 2 == 0,
                 "Attrs must be pairs of key/value");
         Map<String, String> m = Maps.newHashMap();
         for (int i = 0; i < kv.length; i += 2) {
-            m.put(kv[i], kv[i + 1]);
+            if (kv[i + 1] != null) {
+                m.put(String.valueOf(kv[i]), String.valueOf(kv[i + 1]));
+            }
         }
         return m;
     }
 
-    protected static Map<String, String> namespaces(String... kv) {
+    protected static Map<String, String> namespaces(Object... kv) {
         Preconditions.checkArgument(kv.length % 2 == 0,
                 "Namespaces must be pairs of key/value");
         return attrs(kv);
@@ -74,7 +76,9 @@ abstract class StreamingXmlDsl {
             Runnable runnable) {
         try {
             sw.writeStartElement(tag);
-            sw.writeDefaultNamespace(defaultNamespace);
+            if (defaultNamespace != null) {
+                sw.writeDefaultNamespace(defaultNamespace);
+            }
             for (Map.Entry<String, String> ns : namespaces.entrySet()) {
                 sw.writeNamespace(ns.getKey(), ns.getValue());
             }
@@ -105,9 +109,7 @@ abstract class StreamingXmlDsl {
             for (String tag : tags) {
                 sw.writeStartElement(tag);
             }
-            for (Map.Entry<String, String> entry : attrs.entrySet()) {
-                sw.writeAttribute(entry.getKey(), entry.getValue());
-            }
+            attributes(sw, attrs);
             runnable.run();
             for (int i = 0; i < tags.size(); i++) {
                 sw.writeEndElement();
@@ -134,9 +136,7 @@ abstract class StreamingXmlDsl {
             for (String key : keys) {
                 sw.writeStartElement(key);
             }
-            for (Map.Entry<String, String> attr : attrs.entrySet()) {
-                sw.writeAttribute(attr.getKey(), attr.getValue());
-            }
+            attributes(sw, attrs);
             if (value != null) {
                 sw.writeCharacters(value);
             }
@@ -167,6 +167,18 @@ abstract class StreamingXmlDsl {
     protected void cData(XMLStreamWriter sw, String chars) {
         try {
             sw.writeCData(Helpers.escapeCData(chars));
+        } catch (XMLStreamException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void attributes(XMLStreamWriter sw, Map<String, String> attrs) {
+        try {
+            for (Map.Entry<String, String> attr : attrs.entrySet()) {
+                if (attr.getValue() != null) {
+                    sw.writeAttribute(attr.getKey(), attr.getValue());
+                }
+            }
         } catch (XMLStreamException e) {
             throw new RuntimeException(e);
         }

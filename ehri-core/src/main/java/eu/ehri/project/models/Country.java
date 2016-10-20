@@ -68,6 +68,9 @@ public interface Country extends PermissionScope, ItemHolder, Versioned, Annotat
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN)
     Iterable<Repository> getRepositories();
 
+    @JavaHandler
+    Iterable<DocumentaryUnit> getTopLevelDocumentaryUnits();
+
     /**
      * Add a repository to this country.
      *
@@ -90,6 +93,12 @@ public interface Country extends PermissionScope, ItemHolder, Versioned, Annotat
         public void addRepository(Repository repository) {
             JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
                     Ontology.REPOSITORY_HAS_COUNTRY);
+        }
+
+        @Override
+        public Iterable<DocumentaryUnit> getTopLevelDocumentaryUnits() {
+            return frameVertices(gremlin().in(Ontology.REPOSITORY_HAS_COUNTRY)
+                    .in(Ontology.DOC_HELD_BY_REPOSITORY), DocumentaryUnit.class);
         }
     }
 }

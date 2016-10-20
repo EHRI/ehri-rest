@@ -21,12 +21,14 @@ package eu.ehri.project.models.events;
 
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -38,6 +40,15 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 public interface SystemEventQueue extends Entity {
 
     String STREAM_START = Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream";
+
+    /**
+     * Fetch the time stamp of the queue initialisation.
+     *
+     * @return a UTF timestamp string
+     */
+    @Mandatory
+    @Property(Ontology.EVENT_TIMESTAMP)
+    String getTimestamp();
 
     /**
      * Fetch the latest global event.

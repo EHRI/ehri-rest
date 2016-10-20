@@ -138,11 +138,12 @@ public interface GraphManager {
      * Get a CloseableIterable of vertices with the given type, and the given
      * key/value property.
      *
-     * @param type The entity type
-     * @return An iterable of vertices with the given key/value properties
+     * @param key   the property key
+     * @param value property value
+     * @param type  the entity type
+     * @return an iterable of vertices with the given key/value properties
      */
-    CloseableIterable<Vertex> getVertices(String key,
-            Object value, EntityClass type);
+    CloseableIterable<Vertex> getVertices(String key, Object value, EntityClass type);
 
     /**
      * Get an Iterable of vertices of the given type, frames with the given
@@ -152,6 +153,17 @@ public interface GraphManager {
      * @return An iterable of framed vertices with the given framed class.
      */
     <T> CloseableIterable<T> getEntities(EntityClass type, Class<T> cls);
+
+    /**
+     * Get a CloseableIterable of entities with the given type, and the given
+     * key/value property.
+     *
+     * @param key   the property key
+     * @param value property value
+     * @param type  the entity type
+     * @return an iterable of entities with the given key/value properties
+     */
+    <T> CloseableIterable<T> getEntities(String key, Object value, EntityClass type, Class<T> cls);
 
     // CRUD functions
 
