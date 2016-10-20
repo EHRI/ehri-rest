@@ -41,7 +41,7 @@ public interface OaiPmhRenderer {
      * @param langCode the language code to prefer
      * @return a renderer object
      */
-    public static OaiPmhRenderer defaultRenderer(Api api, String langCode) {
+    static OaiPmhRenderer defaultRenderer(Api api, String langCode) {
         return (w, mp, item) -> {
             if (MetadataPrefix.ead.equals(mp)) {
                 new Ead2002Exporter(api).export(w, item, langCode);

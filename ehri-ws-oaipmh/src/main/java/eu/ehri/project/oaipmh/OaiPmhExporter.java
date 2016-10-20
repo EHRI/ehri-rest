@@ -108,6 +108,9 @@ public class OaiPmhExporter extends StreamingXmlDsl {
                 tag(sw, "earliestDatestamp", formatDate(data.getEarliestTimestamp()));
                 tag(sw, "deletedRecord", "persistent");
                 tag(sw, "granularity", "YYYY-MM-DDThh:mm:ssZ");
+                if (config.hasPath("oaipmh.compression")) {
+                    tag(sw, "compression", config.getString("oaipmh.compression"));
+                }
             });
         });
     }
