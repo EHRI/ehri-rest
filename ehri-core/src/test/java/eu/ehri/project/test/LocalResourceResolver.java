@@ -1,4 +1,4 @@
-package eu.ehri.project.exporters.test;
+package eu.ehri.project.test;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;

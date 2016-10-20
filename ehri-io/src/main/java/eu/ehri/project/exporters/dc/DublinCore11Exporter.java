@@ -20,11 +20,14 @@
 package eu.ehri.project.exporters.dc;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import eu.ehri.project.api.Api;
+import eu.ehri.project.definitions.Isaar;
+import eu.ehri.project.definitions.IsadG;
+import eu.ehri.project.definitions.Isdiah;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
@@ -54,11 +57,17 @@ public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described
     // Mappings of output tags to internal keys. All values found are accepted.
     private static final Multimap<String, String> propertyMappings = ImmutableMultimap
             .<String, String>builder()
-            .putAll("description", ImmutableList.of("abstract", "scopeAndContent", "biographicalHistory",
-                    "history", "geoculturalContext", "generalContext"))
-            .putAll("type", ImmutableList.of("typeOfEntity", "levelOfDescription"))
-            .putAll("format", ImmutableList.of("extentAndMedium"))
-            .putAll("language", ImmutableList.of("languageOfMaterials"))
+            .putAll("type", ImmutableSet.of(Isaar.typeOfEntity.name(), IsadG.levelOfDescription.name()))
+            .putAll("format", ImmutableSet.of(IsadG.extentAndMedium.name()))
+            .putAll("language", ImmutableSet.of(IsadG.languageOfMaterial.name()))
+            .build();
+
+    private static final Multimap<String, String> textPropertyMappings = ImmutableMultimap
+            .<String, String>builder()
+            .putAll("description", ImmutableSet.of("abstract",
+                    IsadG.scopeAndContent.name(), IsadG.biographicalHistory.name(),
+                    Isdiah.history.name(), Isdiah.geoculturalContext.name(),
+                    Isaar.generalContext.name()))
             .build();
 
     // A function to transform values with a given tag
@@ -85,6 +94,8 @@ public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described
                     .getBestDescription(item, Optional.absent(), langCode);
 
             for (Description desc : descOpt.asSet()) {
+                String langCode639_1 = LanguageHelpers.iso639DashOneCode(desc.getLanguageOfDescription());
+
                 tag(sw, "dc:title", desc.getName());
 
                 for (Repository repository : Optional
@@ -104,11 +115,21 @@ public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described
                     }
                 }
 
-                for (String attr : propertyMappings.keySet()) {
-                    Collection<String> mappedKeys = propertyMappings.get(attr);
-                    for (String key : mappedKeys) {
+                for (Map.Entry<String, Collection<String>> attr :
+                        propertyMappings.asMap().entrySet()) {
+                    for (String key : attr.getValue()) {
                         for (Object value : coerceList(desc.getProperty(key))) {
-                            tag(sw, "dc:" + attr, transform(attr, value));
+                            tag(sw, "dc:" + attr.getKey(), transform(attr.getKey(), value));
+                        }
+                    }
+                }
+
+                for (Map.Entry<String, Collection<String>> attr :
+                        textPropertyMappings.asMap().entrySet()) {
+                    for (String key : attr.getValue()) {
+                        for (Object value : coerceList(desc.getProperty(key))) {
+                            tag(sw, "dc:" + attr.getKey(),
+                                    transform(attr.getKey(), value), attrs("xml:lang", langCode639_1));
                         }
                     }
                 }

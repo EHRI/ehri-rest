@@ -183,6 +183,9 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     }
                 }
             });
+            if (Description.CreationProcess.IMPORT.equals(desc.getCreationProcess())) {
+                tag(sw, ImmutableList.of("notestmt", "note", "p"), resourceAsString("creationprocess-boilerplate.txt"));
+            }
         });
     }
 

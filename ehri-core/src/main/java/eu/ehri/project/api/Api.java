@@ -1,3 +1,22 @@
+/*
+ * Copyright 2015 Data Archiving and Networked Services (an institute of
+ * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
+ * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.ehri.project.api;
 
 import com.google.common.base.Optional;
@@ -24,6 +43,7 @@ import eu.ehri.project.models.base.Promotable;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.VersionManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +71,8 @@ public interface Api {
     Acl acl();
 
     AclManager aclManager();
+
+    VersionManager versionManager();
 
     EventsApi events();
 
@@ -149,7 +171,7 @@ public interface Api {
      *
      * @param id         the item ID
      * @param logMessage a log message
-     * @return the number of vertices deleted.
+     * @return the number of vertices deleted
      */
     int delete(String id, Optional<String> logMessage) throws PermissionDenied,
             ValidationError, SerializationError, ItemNotFound;
@@ -279,7 +301,7 @@ public interface Api {
          *
          * @param userOrGroup   the user or group
          * @param permissionSet the new permissions
-             */
+         */
         InheritedGlobalPermissionSet setGlobalPermissionMatrix(Accessor userOrGroup,
                 GlobalPermissionSet permissionSet) throws PermissionDenied;
 
@@ -293,7 +315,7 @@ public interface Api {
          * @param accessor       the accessor
          * @param permissionList the set of permissions to grant
          * @return the new inherited item permission set
-             */
+         */
         InheritedItemPermissionSet setItemPermissions(Accessible item, Accessor accessor,
                 Set<PermissionType> permissionList)
                 throws PermissionDenied;
@@ -302,7 +324,7 @@ public interface Api {
          * Revoke a permission grant.
          *
          * @param grant the permission grant
-             */
+         */
         void revokePermissionGrant(PermissionGrant grant)
                 throws PermissionDenied;
 
@@ -313,7 +335,7 @@ public interface Api {
          *
          * @param group       the group
          * @param userOrGroup the user to add to the group
-             */
+         */
         void addAccessorToGroup(Group group, Accessor userOrGroup) throws PermissionDenied;
 
         /**
@@ -322,7 +344,7 @@ public interface Api {
          *
          * @param group       the group
          * @param userOrGroup the user to add to the group
-             */
+         */
         void removeAccessorFromGroup(Group group, Accessor userOrGroup) throws PermissionDenied;
     }
 

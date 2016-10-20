@@ -218,6 +218,7 @@
             - ead-1.xml
           relatedUnitsOfDescription:
             - c1
+          creationProcess: IMPORT
         relationships:
           hasDate:
             - id: example-date-2

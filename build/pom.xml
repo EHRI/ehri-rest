@@ -56,6 +56,7 @@
                             <include>xml-apis:xml-apis</include>
                             <include>org.apache.commons:commons-lang3</include>
                             <include>org.apache.commons:commons-compress</include>
+                            <include>com.typesafe:config</include>
 
                             <!-- GraphQL deps -->
                             <include>org.antlr:antlr4-runtime</include>
@@ -110,6 +111,11 @@
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-ws-graphql</artifactId>
+            <version>${project.parent.version} </version>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-ws-oaipmh</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>

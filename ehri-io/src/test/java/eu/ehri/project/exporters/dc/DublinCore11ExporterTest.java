@@ -30,6 +30,10 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static eu.ehri.project.test.XmlTestHelpers.assertXPath;
+import static eu.ehri.project.test.XmlTestHelpers.parseDocument;
+import static eu.ehri.project.test.XmlTestHelpers.validatesSchema;
+
 public class DublinCore11ExporterTest extends XmlExporterTest {
 
     @Test

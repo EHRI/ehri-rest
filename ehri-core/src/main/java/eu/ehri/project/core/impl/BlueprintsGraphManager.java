@@ -117,6 +117,12 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
+    public <E> CloseableIterable<E> getEntities(String key, Object value, EntityClass type, Class<E> cls) {
+        return new WrappingCloseableIterable<>(
+                graph.frameVertices(getVertices(key, value, type), cls));
+    }
+
+    @Override
     public Vertex getVertex(String id) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");

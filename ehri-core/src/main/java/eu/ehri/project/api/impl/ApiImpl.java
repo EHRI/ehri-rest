@@ -2,6 +2,8 @@ package eu.ehri.project.api.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
@@ -40,6 +42,8 @@ import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.Promotable;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
@@ -52,6 +56,7 @@ import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.api.UserProfilesApi;
 import eu.ehri.project.api.VirtualUnitsApi;
+import eu.ehri.project.persistence.VersionManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -68,6 +73,7 @@ public class ApiImpl implements Api {
     private final PermissionUtils helper;
     private final AclManager aclManager;
     private final ActionManager actionManager;
+    private final VersionManager versionManager;
     private final VirtualUnitsApiImpl virtualUnitViews;
     private final UserProfilesApiImpl userProfilesApi;
     private final ConceptsApi conceptsApi;
@@ -84,6 +90,7 @@ public class ApiImpl implements Api {
         this.helper = new PermissionUtils(graph, scope);
         this.aclManager = new AclManager(graph, scope);
         this.actionManager = new ActionManager(graph, scope);
+        this.versionManager = new VersionManager(graph);
         this.virtualUnitViews = new VirtualUnitsApiImpl(graph, accessor);
         this.conceptsApi = new ConceptsApiImpl(graph, accessor, logging);
         this.userProfilesApi = new UserProfilesApiImpl(graph, this);
@@ -105,6 +112,11 @@ public class ApiImpl implements Api {
     @Override
     public ActionManager actionManager() {
         return actionManager;
+    }
+
+    @Override
+    public VersionManager versionManager() {
+        return versionManager;
     }
 
     @Override

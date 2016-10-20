@@ -1,3 +1,22 @@
+/*
+ * Copyright 2015 Data Archiving and Networked Services (an institute of
+ * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
+ * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 package eu.ehri.project.exporters.ead;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
@@ -13,6 +32,10 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import static eu.ehri.project.test.XmlTestHelpers.assertXPath;
+import static eu.ehri.project.test.XmlTestHelpers.parseDocument;
+import static eu.ehri.project.test.XmlTestHelpers.validatesSchema;
 
 
 public class Ead2002ExporterTest extends XmlExporterTest {
@@ -70,10 +93,14 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "nl-000001-1", "/ead/eadheader/eadid");
         assertXPath(doc, "Example Documentary Unit 1",
                 "//ead/eadheader/filedesc/titlestmt/titleproper");
+        assertXPath(doc, readResourceFileAsString("creationprocess-boilerplate.txt"),
+                "//ead/eadheader/filedesc/notestmt/note/p");
         assertXPath(doc, "Institution Example",
                 "//ead/eadheader/filedesc/publicationstmt/publisher");
         assertXPath(doc, "Netherlands",
                 "//ead/eadheader/filedesc/publicationstmt/address/addressline[8]");
+        assertXPath(doc, "Example text",
+                "//ead/eadheader/profiledesc/descrules[1]");
         assertXPath(doc, "eng", "//ead/eadheader/profiledesc/langusage/language/@langcode");
         assertXPath(doc, "1", "//ead/archdesc/did/unitid");
         assertXPath(doc, "Example Documentary Unit 1", "//ead/archdesc/did/unittitle");
@@ -96,6 +123,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text", "//ead/archdesc/odd/p");
         assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname");
         assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject");
+
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {

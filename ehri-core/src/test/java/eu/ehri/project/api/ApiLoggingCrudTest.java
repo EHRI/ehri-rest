@@ -19,8 +19,12 @@
 
 package eu.ehri.project.api;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
@@ -30,6 +34,8 @@ import eu.ehri.project.test.TestData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -95,5 +101,10 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(before, old);
+        Optional<Version> r1v = loggingApi(validUser).versionManager().versionAtDeletion("r1");
+        assertTrue(r1v.isPresent());
+        List<Version> r1vl = Lists.newArrayList(loggingApi(validUser).versionManager()
+                .versionsAtDeletion(EntityClass.REPOSITORY, null, null));
+        assertEquals(1, r1vl.size());
     }
 }

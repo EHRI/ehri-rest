@@ -33,6 +33,10 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static eu.ehri.project.test.XmlTestHelpers.assertXPath;
+import static eu.ehri.project.test.XmlTestHelpers.parseDocument;
+import static eu.ehri.project.test.XmlTestHelpers.validatesSchema;
+
 
 public class Eag2012ExporterTest extends XmlExporterTest {
 
