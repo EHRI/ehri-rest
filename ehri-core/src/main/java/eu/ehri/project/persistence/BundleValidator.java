@@ -19,7 +19,6 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -33,6 +32,7 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -45,8 +45,8 @@ public final class BundleValidator {
 
     public BundleValidator(GraphManager manager, Collection<String> scopes) {
         this.manager = manager;
-        this.scopes = Lists.newArrayList(Optional.fromNullable(scopes)
-                .or(Lists.<String>newArrayList()));
+        this.scopes = Lists.newArrayList(Optional.ofNullable(scopes)
+                .orElse(Lists.newArrayList()));
     }
 
     /**
@@ -55,7 +55,7 @@ public final class BundleValidator {
      *
      * @return A new bundle with generated IDs.
      */
-    public Bundle validateForCreate(Bundle bundle) throws ValidationError {
+    Bundle validateForCreate(Bundle bundle) throws ValidationError {
         validateData(bundle);
         Bundle withIds = bundle.generateIds(scopes);
         ErrorSet createErrors = validateTreeForCreate(withIds);
@@ -71,7 +71,7 @@ public final class BundleValidator {
      *
      * @return A new bundle with generated IDs.
      */
-    public Bundle validateForUpdate(Bundle bundle) throws ValidationError {
+    Bundle validateForUpdate(Bundle bundle) throws ValidationError {
         validateData(bundle);
         Bundle withIds = bundle.generateIds(scopes);
         ErrorSet updateErrors = validateTreeForUpdate(withIds);

@@ -19,7 +19,6 @@
 
 package eu.ehri.project.api.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -28,6 +27,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -42,12 +42,12 @@ import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.utils.pipes.AggregatorPipe;
-import eu.ehri.project.api.EventsApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -97,8 +97,8 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
         private Set<String> ids = Sets.newHashSet();
         private Set<EntityClass> entityTypes = Sets.newHashSet();
         private Set<EventTypes> eventTypes = Sets.newHashSet();
-        private Optional<String> from = Optional.absent();
-        private Optional<String> to = Optional.absent();
+        private Optional<String> from = Optional.empty();
+        private Optional<String> to = Optional.empty();
         private Set<ShowType> showType = Sets.newHashSet();
         private Aggregation aggregation = Aggregation.strict;
 
@@ -149,12 +149,12 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
         }
 
         public Builder from(String from) {
-            this.from = Optional.fromNullable(from);
+            this.from = Optional.ofNullable(from);
             return this;
         }
 
         public Builder to(String to) {
-            this.to = Optional.fromNullable(to);
+            this.to = Optional.ofNullable(to);
             return this;
         }
 
@@ -224,8 +224,8 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
                 Lists.<String>newArrayList(),
                 Lists.<EntityClass>newArrayList(),
                 Lists.<EventTypes>newArrayList(),
-                Optional.<String>absent(),
-                Optional.<String>absent(),
+                Optional.empty(),
+                Optional.empty(),
                 Lists.<ShowType>newArrayList(),
                 Aggregation.strict);
     }
@@ -296,7 +296,7 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
     /**
      * Aggregate a user's actions.
      *
-     * @param byUser   the user
+     * @param byUser the user
      * @return an event stream
      */
     @Override
@@ -313,7 +313,7 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
     /**
      * List a user's actions.
      *
-     * @param byUser   the user
+     * @param byUser the user
      * @return an event stream
      */
     @Override

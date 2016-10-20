@@ -1,9 +1,6 @@
 package eu.ehri.project.api.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
@@ -11,7 +8,14 @@ import eu.ehri.project.acl.GlobalPermissionSet;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
 import eu.ehri.project.acl.InheritedItemPermissionSet;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.PermissionUtils;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ConceptsApi;
+import eu.ehri.project.api.EventsApi;
+import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.api.UserProfilesApi;
+import eu.ehri.project.api.VirtualUnitsApi;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -42,25 +46,17 @@ import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.Promotable;
-import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.acl.PermissionUtils;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ConceptsApi;
-import eu.ehri.project.api.EventsApi;
-import eu.ehri.project.api.QueryApi;
-import eu.ehri.project.api.UserProfilesApi;
-import eu.ehri.project.api.VirtualUnitsApi;
 import eu.ehri.project.persistence.VersionManager;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class ApiImpl implements Api {
@@ -84,7 +80,7 @@ public class ApiImpl implements Api {
     public ApiImpl(FramedGraph<?> graph, Accessor accessor, PermissionScope scope, boolean logging) {
         this.graph = graph;
         this.accessor = accessor;
-        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
+        this.scope = Optional.ofNullable(scope).orElse(SystemScope.getInstance());
         this.logging = logging;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.helper = new PermissionUtils(graph, scope);
@@ -151,8 +147,8 @@ public class ApiImpl implements Api {
 
     @Override
     public Api withScope(PermissionScope scope) {
-        return new ApiImpl(graph, accessor, Optional.fromNullable(scope)
-                .or(SystemScope.getInstance()), logging);
+        return new ApiImpl(graph, accessor, Optional.ofNullable(scope)
+                .orElse(SystemScope.getInstance()), logging);
     }
 
     @Override
@@ -173,24 +169,24 @@ public class ApiImpl implements Api {
     @Override
     public <E extends Accessible> Mutation<E> update(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError {
-        return update(bundle, cls, Optional.<String>absent());
+        return update(bundle, cls, Optional.<String>empty());
     }
 
     @Override
     public <E extends Accessible> E create(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, DeserializationError {
-        return create(bundle, cls, Optional.<String>absent());
+        return create(bundle, cls, Optional.<String>empty());
     }
 
     @Override
     public <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls)
             throws PermissionDenied, ValidationError, DeserializationError {
-        return createOrUpdate(bundle, cls, Optional.<String>absent());
+        return createOrUpdate(bundle, cls, Optional.<String>empty());
     }
 
     @Override
     public int delete(String id) throws PermissionDenied, ValidationError, SerializationError, ItemNotFound {
-        return delete(id, Optional.<String>absent());
+        return delete(id, Optional.<String>empty());
     }
 
     @Override
@@ -390,7 +386,7 @@ public class ApiImpl implements Api {
         aclManager.setAccessors(link, accessibleTo);
         ActionManager.EventContext eventContext = actionManager.setScope(t1).newEventContext(
                 accessor.as(Actioner.class),
-                EventTypes.link, Optional.<String>absent())
+                EventTypes.link, Optional.empty())
                 .addSubjects(link)
                 .addSubjects(t2);
         for (String body : bodies) {
@@ -458,7 +454,7 @@ public class ApiImpl implements Api {
         actionManager.setScope(entity)
                 .newEventContext(annotation,
                         accessor.as(Actioner.class),
-                        EventTypes.annotation, Optional.<String>absent())
+                        EventTypes.annotation, Optional.empty())
                 .commit();
         return annotation;
     }

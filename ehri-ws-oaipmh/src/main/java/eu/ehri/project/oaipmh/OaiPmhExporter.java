@@ -160,21 +160,21 @@ public class OaiPmhExporter extends StreamingXmlDsl {
 
     private void getRecord(XMLStreamWriter sw, OaiPmhState state) throws OaiPmhError {
         OaiPmhRecordResult record = data.getRecord(state);
-        for (DocumentaryUnit item : record.doc().asSet()) {
-            withDoc(sw, () -> {
-                preamble(sw, Verb.GetRecord.name(), state.toMap());
-                tag(sw, Verb.GetRecord.name(), () ->
-                        tag(sw, "record", () -> {
-                            tag(sw, "header", () -> writeRecordHeader(sw, state.getIdentifier(), item));
-                            tag(sw, "metadata", () -> renderer.render(sw, state.getMetadataPrefix(), item));
-                        }));
-            });
-        }
+        record.doc().ifPresent(item ->
+                withDoc(sw, () -> {
+                    preamble(sw, Verb.GetRecord.name(), state.toMap());
+                    tag(sw, Verb.GetRecord.name(), () ->
+                            tag(sw, "record", () -> {
+                                tag(sw, "header", () -> writeRecordHeader(sw, state.getIdentifier(), item));
+                                tag(sw, "metadata", () -> renderer.render(sw, state.getMetadataPrefix(), item));
+                            }));
+                })
+        );
 
-        for (OaiPmhDeleted deleted : record.deleted().asSet()) {
-            writeDeletedRecord(sw, deleted.getId(),
-                    formatDate(deleted.getDatestamp()), deleted.getSets());
-        }
+        record.deleted().ifPresent(deleted ->
+                writeDeletedRecord(sw, deleted.getId(),
+                        formatDate(deleted.getDatestamp()), deleted.getSets())
+        );
 
         if (record.isInvalid()) {
             throw new OaiPmhError(ErrorCode.idDoesNotExist,

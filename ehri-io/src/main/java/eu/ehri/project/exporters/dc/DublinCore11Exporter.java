@@ -19,7 +19,6 @@
 
 package eu.ehri.project.exporters.dc;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -33,7 +32,6 @@ import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Temporal;
@@ -42,7 +40,9 @@ import eu.ehri.project.utils.LanguageHelpers;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+
 
 public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described> implements DublinCoreExporter {
 
@@ -91,19 +91,18 @@ public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described
 
             tag(sw, "dc:identifier", item.getIdentifier());
             Optional<Description> descOpt = LanguageHelpers
-                    .getBestDescription(item, Optional.absent(), langCode);
+                    .getBestDescription(item, Optional.<Description>empty(), langCode);
 
-            for (Description desc : descOpt.asSet()) {
+            descOpt.ifPresent(desc -> {
                 String langCode639_1 = LanguageHelpers.iso639DashOneCode(desc.getLanguageOfDescription());
 
                 tag(sw, "dc:title", desc.getName());
 
-                for (Repository repository : Optional
-                        .fromNullable(item.as(DocumentaryUnit.class).getRepository()).asSet()) {
-                    for (Description d : LanguageHelpers.getBestDescription(repository, langCode).asSet()) {
-                        tag(sw, "dc:publisher", d.getName());
-                    }
-                }
+                Optional.ofNullable(item.as(DocumentaryUnit.class).getRepository()).ifPresent(repository -> {
+                    LanguageHelpers.getBestDescription(repository, langCode).ifPresent(d ->
+                            tag(sw, "dc:publisher", d.getName())
+                    );
+                });
 
                 for (DatePeriod datePeriod : desc.as(Temporal.class).getDatePeriods()) {
                     String start = datePeriod.getStartDate();
@@ -152,7 +151,7 @@ public class DublinCore11Exporter extends AbstractStreamingXmlExporter<Described
                         default:
                     }
                 }
-            }
+            });
         });
     }
 

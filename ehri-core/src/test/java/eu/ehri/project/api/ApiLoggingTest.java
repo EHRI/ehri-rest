@@ -19,7 +19,6 @@
 
 package eu.ehri.project.api;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -39,6 +38,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

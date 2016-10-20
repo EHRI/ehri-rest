@@ -20,7 +20,6 @@
 package eu.ehri.project.oaipmh;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -45,6 +44,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.Optional;
 
 
 /**
@@ -128,7 +128,7 @@ public class OaiPmhData {
         }
     }
 
-    OaiPmhDeleted getDeletedRecord(Version version) {
+    private OaiPmhDeleted getDeletedRecord(Version version) {
         // FIXME: This is terrible but the only current way to determine set membership
         // for deleted items - rely on the global ID to determine country and repository
         log.trace("Calculating deleted item for {}", version.getEntityId());
@@ -187,8 +187,8 @@ public class OaiPmhData {
 
     private static <E extends Accessible> Predicate<E> timeFilterItems(String from, String until, String defaultTimestamp) {
         return d -> {
-            String ts = Optional.fromNullable(d.getLatestEvent())
-                    .transform(SystemEvent::getTimestamp).or(defaultTimestamp);
+            String ts = Optional.ofNullable(d.getLatestEvent())
+                    .map(SystemEvent::getTimestamp).orElse(defaultTimestamp);
             return filterByTimestamp(from, until, ts);
         };
     }

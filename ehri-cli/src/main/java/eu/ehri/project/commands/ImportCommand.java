@@ -20,7 +20,6 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -45,6 +44,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Superclass of all import command-line tools.
@@ -137,7 +137,7 @@ public abstract class ImportCommand extends BaseCommand {
             UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            Optional<XmlImportProperties> optionalProperties = Optional.absent();
+            Optional<XmlImportProperties> optionalProperties = Optional.empty();
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
                 logMessage += " Using properties file : " + cmdLine.getOptionValue("properties");

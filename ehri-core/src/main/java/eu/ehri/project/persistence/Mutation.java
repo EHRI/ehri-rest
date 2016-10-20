@@ -19,7 +19,8 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  * Class holding information about a create-or-update job. The item
@@ -37,11 +38,11 @@ public final class Mutation<T> {
     }
 
     public Mutation(T node, MutationState state) {
-        this(node, state, Optional.<Bundle>absent());
+        this(node, state, Optional.empty());
     }
 
     public Mutation(T node, MutationState state, Bundle bundle) {
-        this(node, state, Optional.fromNullable(bundle));
+        this(node, state, Optional.ofNullable(bundle));
     }
 
     public T getNode() {

@@ -19,23 +19,19 @@
 
 package eu.ehri.project.importers.managers;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -48,6 +44,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -69,13 +66,13 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-                            PermissionScope scope,
-                            Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates,
-                            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
-                            Optional<XmlImportProperties> properties,
-                            List<ImportCallback> callbacks) {
+            PermissionScope scope,
+            Actioner actioner,
+            boolean tolerant,
+            boolean allowUpdates,
+            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Optional<XmlImportProperties> properties,
+            List<ImportCallback> callbacks) {
         super(graph, scope, actioner, tolerant, allowUpdates, importerClass);
         this.handlerClass = handlerClass;
         this.properties = properties;
@@ -92,13 +89,13 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-                            PermissionScope scope, Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates,
-                            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
-                            List<ImportCallback> callbacks) {
+            PermissionScope scope, Actioner actioner,
+            boolean tolerant,
+            boolean allowUpdates,
+            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            List<ImportCallback> callbacks) {
         this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, Optional
-                        .<XmlImportProperties>absent(),
+                        .<XmlImportProperties>empty(),
                 callbacks);
     }
 
@@ -110,13 +107,13 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-                            PermissionScope scope, Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates,
-                            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
-                            XmlImportProperties properties) {
-        this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, Optional.fromNullable
-                        (properties),
+            PermissionScope scope, Actioner actioner,
+            boolean tolerant,
+            boolean allowUpdates,
+            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            XmlImportProperties properties) {
+        this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass,
+                Optional.ofNullable(properties),
                 Lists.<ImportCallback>newArrayList());
     }
 
@@ -128,8 +125,8 @@ public class SaxImportManager extends AbstractImportManager {
      * @param actioner the actioner
      */
     public SaxImportManager(FramedGraph<?> graph,
-                            PermissionScope scope, Actioner actioner,
-                            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            PermissionScope scope, Actioner actioner,
+            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this(graph, scope, actioner, false, false, importerClass, handlerClass, Lists
                 .<ImportCallback>newArrayList());
     }
@@ -143,7 +140,7 @@ public class SaxImportManager extends AbstractImportManager {
      */
     @Override
     protected void importInputStream(final InputStream stream, final ActionManager.EventContext context,
-                                     final ImportLog log) throws IOException, ValidationError, InputParseError {
+            final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
             AbstractImporter<Map<String, Object>> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class,
@@ -206,7 +203,7 @@ public class SaxImportManager extends AbstractImportManager {
     public SaxImportManager withProperties(String properties) {
         if (properties == null) {
             return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates,
-                    importerClass, handlerClass, Optional.<XmlImportProperties>absent(), extraCallbacks);
+                    importerClass, handlerClass, Optional.<XmlImportProperties>empty(), extraCallbacks);
         } else {
             XmlImportProperties xmlImportProperties = new XmlImportProperties(properties);
             return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass,

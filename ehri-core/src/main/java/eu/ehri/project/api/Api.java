@@ -19,7 +19,6 @@
 
 package eu.ehri.project.api;
 
-import com.google.common.base.Optional;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.GlobalPermissionSet;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
@@ -48,6 +47,8 @@ import eu.ehri.project.persistence.VersionManager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
+
 
 public interface Api {
 

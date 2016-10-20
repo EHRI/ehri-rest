@@ -19,9 +19,7 @@
 
 package eu.ehri.project.graphql;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -77,8 +75,10 @@ import graphql.schema.TypeResolver;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static graphql.Scalars.GraphQLBoolean;
@@ -131,7 +131,7 @@ public class GraphQLImpl {
     }
 
     public GraphQLSchema getSchema() {
-        return graphql.schema.GraphQLSchema.newSchema()
+        return GraphQLSchema.newSchema()
                 .query(queryType())
                 .build();
     }
@@ -210,7 +210,7 @@ public class GraphQLImpl {
         // Depending on the value of the "all" argument, return either just
         // the top level items or everything in the tree.
         return env -> {
-            boolean allOrTop = (Boolean) Optional.fromNullable(env.getArgument(ALL_PARAM)).or(false);
+            boolean allOrTop = (Boolean) Optional.ofNullable(env.getArgument(ALL_PARAM)).orElse(false);
             Function<Entity, Iterable<? extends Entity>> func = allOrTop ? all : top;
             return connectionDataFetcher(() -> func.apply(((Entity) env.getSource()))).get(env);
         };

@@ -19,7 +19,6 @@
 
 package eu.ehri.project.tools;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -41,6 +40,7 @@ import eu.ehri.project.persistence.Serializer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Util class for re-generating the IDs for a given
@@ -62,7 +62,7 @@ public class IdRegenerator {
     private final boolean collisionMode;
 
     public static class IdCollisionError extends Exception {
-        public IdCollisionError(String from, String to) {
+        IdCollisionError(String from, String to) {
             super(String.format("Renaming %s to %s collide with existing item",
                     from, to));
         }
@@ -85,7 +85,7 @@ public class IdRegenerator {
     public List<List<String>> reGenerateIds(PermissionScope scope, Iterable<? extends Entity> items) throws
             IdCollisionError {
         List<List<String>> remaps = Lists.newArrayList();
-        for (Entity item: items) {
+        for (Entity item : items) {
             Optional<List<String>> optionalRemap = reGenerateId(scope, item);
             if (optionalRemap.isPresent()) {
                 remaps.add(optionalRemap.get());
@@ -96,7 +96,7 @@ public class IdRegenerator {
 
     public List<List<String>> reGenerateIds(Iterable<? extends Accessible> items) throws IdCollisionError {
         List<List<String>> remaps = Lists.newArrayList();
-        for (Accessible item: items) {
+        for (Accessible item : items) {
             Optional<List<String>> optionalRemap = reGenerateId(item);
             if (optionalRemap.isPresent()) {
                 remaps.add(optionalRemap.get());
@@ -109,7 +109,7 @@ public class IdRegenerator {
         return reGenerateId(item.getPermissionScope(), item);
     }
 
-    public Optional<List<String>> reGenerateId(PermissionScope permissionScope, Entity item)
+    Optional<List<String>> reGenerateId(PermissionScope permissionScope, Entity item)
             throws IdCollisionError {
         String currentId = item.getId();
         Collection<String> idChain = Lists.newArrayList();
@@ -127,7 +127,7 @@ public class IdRegenerator {
                     List<String> collision = Lists.newArrayList(currentId, newId);
                     return Optional.of(collision);
                 } else {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
             } else {
                 if (!newId.equals(currentId)) {
@@ -135,7 +135,7 @@ public class IdRegenerator {
                         if (!skipCollisions) {
                             throw new IdCollisionError(currentId, newId);
                         } else {
-                            return Optional.absent();
+                            return Optional.empty();
                         }
                     } else {
                         if (!dryrun) {
@@ -160,7 +160,7 @@ public class IdRegenerator {
                         return Optional.of(remap);
                     }
                 } else {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
             }
         } catch (SerializationError e) {
@@ -173,7 +173,6 @@ public class IdRegenerator {
      * step.
      *
      * @param doIt whether to actually commit changes
-     *
      * @return a new, more dangerous, re-generator
      */
     public IdRegenerator withActualRename(boolean doIt) {
@@ -185,7 +184,6 @@ public class IdRegenerator {
      * with existing items.
      *
      * @param skipCollisions whether or not to error on an ID collision
-     *
      * @return a new, more tolerant, re-generator
      */
     public IdRegenerator skippingCollisions(boolean skipCollisions) {
@@ -197,7 +195,6 @@ public class IdRegenerator {
      * would collide with another item's ID.
      *
      * @param collisionMode only output items that would collide if renamed
-     *
      * @return a new, more tolerant, re-generator
      */
     public IdRegenerator collisionMode(boolean collisionMode) {

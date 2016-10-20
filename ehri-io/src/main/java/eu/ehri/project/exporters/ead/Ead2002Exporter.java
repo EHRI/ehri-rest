@@ -1,6 +1,5 @@
 package eu.ehri.project.exporters.ead;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -31,8 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamWriter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -109,7 +110,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
             Repository repository = unit.getRepository();
             Optional<Description> descOpt = LanguageHelpers.getBestDescription(
-                    unit, Optional.<Description>absent(), langCode);
+                    unit, Optional.empty(), langCode);
 
             tag(sw, "eadheader", attrs("relatedencoding", "DC",
                     "scriptencoding", "iso15924",
@@ -118,15 +119,15 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     "countryencoding", "iso3166-1"), () -> {
 
                 tag(sw, "eadid", unit.getId());
-                for (Description desc : descOpt.asSet()) {
+                descOpt.ifPresent(desc -> {
                     addFileDesc(sw, langCode, repository, desc);
                     addProfileDesc(sw, desc);
-                }
+                });
                 addRevisionDesc(sw, unit);
             });
 
-            for (Description desc : descOpt.asSet()) {
-                tag(sw, "archdesc", getLevelAttrs(descOpt, Optional.of("collection")), () -> {
+            descOpt.ifPresent(desc -> {
+                tag(sw, "archdesc", getLevelAttrs(descOpt, "collection"), () -> {
                     addDataSection(sw, repository, unit, desc, langCode);
                     addPropertyValues(sw, desc);
                     Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
@@ -139,7 +140,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     }
                     addControlAccess(sw, desc);
                 });
-            }
+            });
         });
     }
 
@@ -155,10 +156,9 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     LanguageHelpers.codeToName(desc.getLanguageOfDescription()),
                     attrs("langcode", desc.getLanguageOfDescription())
             ));
-            for (String value : Optional.fromNullable(
-                    desc.<String>getProperty(IsadG.rulesAndConventions)).asSet()) {
-                tag(sw, "descrules", value, attrs("encodinganalog", "3.7.2"));
-            }
+            Optional.ofNullable(desc.<String>getProperty(IsadG.rulesAndConventions)).ifPresent(value ->
+                    tag(sw, "descrules", value, attrs("encodinganalog", "3.7.2"))
+            );
         });
     }
 
@@ -166,8 +166,8 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         tag(sw, "filedesc", () -> {
             tag(sw, "titlestmt", () -> tag(sw, "titleproper", desc.getName()));
             tag(sw, "publicationstmt", () -> {
-                for (Description repoDesc : LanguageHelpers.getBestDescription(
-                        repository, Optional.absent(), langCode).asSet()) {
+                LanguageHelpers.getBestDescription(
+                        repository, Optional.empty(), langCode).ifPresent(repoDesc -> {
                     tag(sw, "publisher", repoDesc.getName());
                     for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
                         tag(sw, "address", () -> {
@@ -181,7 +181,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                                             repository.getCountry().getId()));
                         });
                     }
-                }
+                });
             });
             if (Description.CreationProcess.IMPORT.equals(desc.getCreationProcess())) {
                 tag(sw, ImmutableList.of("notestmt", "note", "p"), resourceAsString("creationprocess-boilerplate.txt"));
@@ -262,14 +262,12 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 });
             }
 
-            for (Repository repo : Optional.fromNullable(repository).asSet()) {
-                for (Description repoDesc : LanguageHelpers.getBestDescription(repo,
-                        Optional.<Description>absent(), langCode).asSet()) {
-                    tag(sw, "repository", () -> {
-                        tag(sw, "corpname", repoDesc.getName());
-                    });
-                }
-            }
+            Optional.ofNullable(repository).ifPresent(repo -> {
+                LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode).ifPresent(repoDesc ->
+                        tag(sw, "repository", () ->
+                                tag(sw, "corpname", repoDesc.getName()))
+                );
+            });
         });
     }
 
@@ -278,12 +276,12 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         logger.trace("Adding EAD sublevel: c" + num);
         Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);
-        tag(sw, levelTag, getLevelAttrs(descOpt, Optional.absent()), () -> {
-            for (Description desc : descOpt.asSet()) {
+        tag(sw, levelTag, getLevelAttrs(descOpt, null), () -> {
+            descOpt.ifPresent(desc -> {
                 addDataSection(sw, null, subUnit, desc, langCode);
                 addPropertyValues(sw, desc);
                 addControlAccess(sw, desc);
-            }
+            });
 
             for (DocumentaryUnit child : getOrderedChildren(subUnit)) {
                 addEadLevel(sw, num + 1, child, descOpt, langCode);
@@ -329,7 +327,9 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
     private Map<String, String> textFieldAttrs(IsadG field, String... kvs) {
         Preconditions.checkArgument(kvs.length % 2 == 0);
-        Map<String, String> attrs = field.getAnalogueEncoding().asSet()
+        Map<String, String> attrs = field.getAnalogueEncoding()
+                .map(Collections::singleton)
+                .orElse(Collections.emptySet())
                 .stream().collect(Collectors.toMap(e -> "encodinganalog", e -> e));
         for (int i = 0; i < kvs.length; i += 2) {
             attrs.put(kvs[0], kvs[i + 1]);
@@ -337,11 +337,11 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         return attrs;
     }
 
-    private Map<String, String> getLevelAttrs(Optional<Description> descOpt, Optional<String> defaultLevel) {
-        return descOpt.asSet().stream()
-                .map(d -> Optional.fromNullable(d.<String>getProperty(IsadG.levelOfDescription)).or(defaultLevel))
-                .filter(Optional::isPresent)
-                .collect(Collectors.toMap(l -> "level", Optional::orNull));
+    private Map<String, String> getLevelAttrs(Optional<Description> descOpt, String defaultLevel) {
+        String level = descOpt
+                .map(d -> d.<String>getProperty(IsadG.levelOfDescription))
+                .orElse(defaultLevel);
+        return level != null ? ImmutableMap.of("level", level) : Collections.emptyMap();
     }
 
     // Sort the children by identifier. FIXME: This might be a bad assumption!

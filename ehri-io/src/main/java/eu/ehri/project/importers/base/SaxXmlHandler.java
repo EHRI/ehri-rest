@@ -19,7 +19,6 @@
 
 package eu.ehri.project.importers.base;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -33,6 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
@@ -236,7 +236,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 return Optional.of(attributes.getValue(attr));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

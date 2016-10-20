@@ -1,7 +1,6 @@
 package eu.ehri.project.importers.json;
 
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -54,7 +54,7 @@ public class BatchOperations {
      */
     public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant) {
         this.graph = graph;
-        this.scope = Optional.fromNullable(scopeOpt).or(SystemScope.getInstance());
+        this.scope = Optional.ofNullable(scopeOpt).orElse(SystemScope.getInstance());
         this.version = version;
         this.tolerant = tolerant;
 

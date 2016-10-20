@@ -19,7 +19,6 @@
 
 package eu.ehri.project.api;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -36,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

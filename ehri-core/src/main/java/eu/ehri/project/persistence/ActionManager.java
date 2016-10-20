@@ -19,7 +19,6 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -51,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -109,7 +109,7 @@ public final class ActionManager {
     public ActionManager(FramedGraph<?> graph, Entity scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
+        this.scope = Optional.ofNullable(scope).orElse(SystemScope.getInstance());
         this.versionSerializer = new Serializer.Builder(graph).dependentOnly().build();
         this.dao = new BundleManager(graph);
     }
@@ -143,9 +143,9 @@ public final class ActionManager {
          * @param logMessage An optional log message
          */
         EventContext(Actioner actioner,
-                     EventTypes type,
-                     String timestamp, Optional<String> logMessage,
-                     Set<Pair<Entity, Bundle>> toVersion) {
+                EventTypes type,
+                String timestamp, Optional<String> logMessage,
+                Set<Pair<Entity, Bundle>> toVersion) {
             this.actionType = type;
             this.actioner = actioner;
             this.logMessage = logMessage;
@@ -332,7 +332,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type) {
-        return new EventContext(user, type, getTimestamp(), Optional.<String>absent(),
+        return new EventContext(user, type, getTimestamp(), Optional.<String>empty(),
                 Sets.<Pair<Entity, Bundle>>newHashSet());
     }
 
@@ -345,8 +345,8 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Accessible subject, Actioner user,
-                                        EventTypes type) {
-        return newEventContext(subject, user, type, Optional.<String>absent());
+            EventTypes type) {
+        return newEventContext(subject, user, type, Optional.<String>empty());
     }
 
     /**
@@ -359,7 +359,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Accessible subject, Actioner user,
-                                        EventTypes type, Optional<String> logMessage) {
+            EventTypes type, Optional<String> logMessage) {
         EventContext context = newEventContext(user, type, logMessage);
         context.addSubjects(subject);
         return context;
@@ -373,7 +373,7 @@ public final class ActionManager {
      */
     public ActionManager setScope(Entity frame) {
         return new ActionManager(graph,
-                Optional.fromNullable(frame).or(SystemScope.getInstance()));
+                Optional.ofNullable(frame).orElse(SystemScope.getInstance()));
     }
 
 
@@ -481,7 +481,7 @@ public final class ActionManager {
             Bundle ge = Bundle.Builder.withClass(EntityClass.SYSTEM_EVENT)
                     .addDataValue(Ontology.EVENT_TYPE, type.toString())
                     .addDataValue(Ontology.EVENT_TIMESTAMP, timestamp)
-                    .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))
+                    .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.orElse(""))
                     .build();
             SystemEvent ev = dao.create(ge, SystemEvent.class);
             if (!scope.equals(SystemScope.getInstance())) {
@@ -540,7 +540,7 @@ public final class ActionManager {
      * @param direction The direction of the relationship
      */
     private void replaceAtHead(Vertex head, Vertex newHead, String headRelation,
-                               String relation, Direction direction) {
+            String relation, Direction direction) {
         Iterator<Vertex> iter = head.getVertices(direction, headRelation).iterator();
         if (iter.hasNext()) {
             Vertex current = iter.next();

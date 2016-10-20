@@ -19,8 +19,9 @@
 
 package eu.ehri.project.utils;
 
-import com.google.common.base.Optional;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 

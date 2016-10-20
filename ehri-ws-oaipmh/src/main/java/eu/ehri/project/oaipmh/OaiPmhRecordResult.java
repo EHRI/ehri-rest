@@ -19,8 +19,9 @@
 
 package eu.ehri.project.oaipmh;
 
-import com.google.common.base.Optional;
 import eu.ehri.project.models.DocumentaryUnit;
+
+import java.util.Optional;
 
 class OaiPmhRecordResult {
 
@@ -45,11 +46,11 @@ class OaiPmhRecordResult {
     }
 
     Optional<DocumentaryUnit> doc() {
-        return Optional.fromNullable(doc);
+        return Optional.ofNullable(doc);
     }
 
     Optional<OaiPmhDeleted> deleted() {
-        return Optional.fromNullable(deleted);
+        return Optional.ofNullable(deleted);
     }
 
     boolean isInvalid() {

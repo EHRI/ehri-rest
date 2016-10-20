@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -68,8 +67,10 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -196,7 +197,8 @@ public class ToolsResource extends AbstractResource {
                     .skippingCollisions(tolerant)
                     .reGenerateId(item);
             tx.success();
-            return makeCsv(Lists.newArrayList(remap.asSet()));
+            return makeCsv(Lists.newArrayList(remap.map(Collections::singleton)
+                    .orElse(Collections.emptySet())));
         }
     }
 

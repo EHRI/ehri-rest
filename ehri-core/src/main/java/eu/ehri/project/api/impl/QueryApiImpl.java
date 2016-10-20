@@ -19,7 +19,6 @@
 
 package eu.ehri.project.api.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
@@ -44,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.SortedMap;
 
 /**
@@ -91,9 +91,8 @@ public final class QueryApiImpl implements QueryApi {
      */
     public QueryApiImpl(FramedGraph<?> graph, Accessor accessor) {
         this(graph, accessor, 0, DEFAULT_LIMIT,
-                ImmutableSortedMap.<String, Sort>of(), Optional
-                        .<Pair<String, Sort>>absent(), ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, Object>>of(), false);
+                ImmutableSortedMap.of(), Optional
+                        .empty(), ImmutableSortedMap.of(), false);
     }
 
     /**
@@ -105,7 +104,7 @@ public final class QueryApiImpl implements QueryApi {
         private int offset;
         private int limit = DEFAULT_LIMIT;
         private SortedMap<String, Sort> sort = ImmutableSortedMap.of();
-        private Optional<Pair<String, Sort>> defSort = Optional.absent();
+        private Optional<Pair<String, Sort>> defSort = Optional.empty();
         private SortedMap<String, Pair<FilterPredicate, Object>> filters = ImmutableSortedMap.of();
         private boolean stream;
 

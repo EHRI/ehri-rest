@@ -19,13 +19,12 @@
 
 package eu.ehri.project.importers.managers;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -40,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Base ImportManager.
@@ -208,14 +208,14 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param log     an import log to write to
      */
     protected abstract void importInputStream(InputStream stream,
-                                              ActionManager.EventContext context, ImportLog log)
+            ActionManager.EventContext context, ImportLog log)
             throws IOException, ValidationError, InputParseError;
 
     // Helpers
 
     private Optional<String> getLogMessage(String msg) {
         return (msg == null || msg.trim().isEmpty())
-                ? Optional.<String>absent()
+                ? Optional.empty()
                 : Optional.of(msg);
     }
 

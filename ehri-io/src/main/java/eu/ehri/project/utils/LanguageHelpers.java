@@ -1,6 +1,5 @@
 package eu.ehri.project.utils;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
@@ -16,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -331,9 +331,9 @@ public class LanguageHelpers {
     public static Optional<String> countryCodeToContinent(String countryCode) {
         String continentCode = countryCodesToContinents.get(countryCode.toUpperCase());
         if (continentCode != null) {
-            return Optional.fromNullable(continentCodes.get(continentCode));
+            return Optional.ofNullable(continentCodes.get(continentCode));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -356,8 +356,9 @@ public class LanguageHelpers {
             // First of all, check the description code (usually set to the
             // EAD file ID.) If this is the same as the parent, return the
             // current description.
-            for (Description parent : priorDescOpt.asSet()) {
-                for (String code : Optional.fromNullable(parent.getDescriptionCode()).asSet()) {
+            for (Description parent : priorDescOpt.map(Collections::singleton).orElse(Collections.emptySet())) {
+                for (String code : Optional.ofNullable(parent.getDescriptionCode())
+                        .map(Collections::singleton).orElse(Collections.emptySet())) {
                     if (code.equals(description.getDescriptionCode())) {
                         return Optional.of(description);
                     }
@@ -369,11 +370,11 @@ public class LanguageHelpers {
                 return Optional.of(description);
             }
         }
-        return Optional.fromNullable(fallBack);
+        return Optional.ofNullable(fallBack);
     }
 
     public static Optional<Description> getBestDescription(Described item, String langCode) {
-        return getBestDescription(item, Optional.<Description>absent(), langCode);
+        return getBestDescription(item, Optional.empty(), langCode);
     }
 
     /**

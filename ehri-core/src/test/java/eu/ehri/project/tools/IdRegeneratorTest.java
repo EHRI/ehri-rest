@@ -19,7 +19,6 @@
 
 package eu.ehri.project.tools;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
@@ -36,6 +35,7 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 

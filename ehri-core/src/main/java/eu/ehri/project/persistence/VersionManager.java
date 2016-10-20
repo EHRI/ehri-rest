@@ -1,6 +1,5 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
@@ -13,6 +12,8 @@ import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class VersionManager {
 
@@ -43,7 +44,7 @@ public class VersionManager {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

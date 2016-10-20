@@ -19,7 +19,6 @@
 
 package eu.ehri.project.acl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -53,6 +52,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -105,8 +105,7 @@ public final class AclManager {
     public AclManager(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = Optional.fromNullable(scope).or(
-                SystemScope.getInstance());
+        this.scope = Optional.ofNullable(scope).orElse(SystemScope.getInstance());
         this.scopes = getAllScopes();
     }
 
@@ -583,7 +582,7 @@ public final class AclManager {
                 return Optional.of(grant);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private PermissionGrant createPermissionGrant() {

@@ -131,7 +131,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
-        //System.out.println(xml);
+        System.out.println(xml);
         isValidEad(xml);
         return xml;
     }
