@@ -110,6 +110,35 @@ public class OaiPmhData {
         }
     }
 
+    Iterable<OaiPmhDeleted> getFilteredDeletedDocumentaryUnits(final OaiPmhState state) {
+        String setSpec = state.getSetSpec();
+        if (setSpec == null || setSpec.trim().isEmpty()) {
+            return getDeletedDocumentaryUnits(state.getFrom(), state.getUntil());
+        } else {
+            List<String> specParts = Splitter.on(':').splitToList(setSpec);
+            return Iterables.filter(getDeletedDocumentaryUnits(state.getFrom(), state.getUntil()), d -> {
+                List<String> sets = d.getSets();
+                if (specParts.size() == 1 && sets.get(0).equals(specParts.get(0))) {
+                    return true;
+                } else if (specParts.size() == 2 && sets.get(1).equals(specParts.get(1))) {
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    OaiPmhDeleted getDeletedRecord(Version version) {
+        // FIXME: This is terrible but the only current way to determine set membership
+        // for deleted items - rely on the global ID to determine country and repository
+        log.trace("Calculating deleted item for {}", version.getEntityId());
+        List<String> countryAndRepo = hierarchySplitter.limit(2).splitToList(version.getEntityId());
+        List<String> sets = ImmutableList.of(countryAndRepo.get(0),
+                setSpecJoiner.join(countryAndRepo.get(0), hierarchyJoiner.join(countryAndRepo)));
+        ZonedDateTime deletedAt = ZonedDateTime.parse(version.getTriggeringEvent().getTimestamp());
+        return new OaiPmhDeleted(version.getEntityId(), deletedAt, sets);
+    }
+
     String getEarliestTimestamp() {
         return api.actionManager().getEventRoot().getTimestamp();
     }
@@ -141,35 +170,6 @@ public class OaiPmhData {
     private QueryApi getQuery() {
         return api.query().setStream(true).setLimit(-1)
                 .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC);
-    }
-
-    Iterable<OaiPmhDeleted> getFilteredDeletedDocumentaryUnits(final OaiPmhState state) {
-        String setSpec = state.getSetSpec();
-        if (setSpec == null || setSpec.trim().isEmpty()) {
-            return getDeletedDocumentaryUnits(state.getFrom(), state.getUntil());
-        } else {
-            List<String> specParts = Splitter.on(':').splitToList(setSpec);
-            return Iterables.filter(getDeletedDocumentaryUnits(state.getFrom(), state.getUntil()), d -> {
-                List<String> sets = d.getSets();
-                if (specParts.size() == 1 && sets.get(0).equals(specParts.get(0))) {
-                    return true;
-                } else if (specParts.size() == 2 && sets.get(1).equals(specParts.get(1))) {
-                    return true;
-                }
-                return false;
-            });
-        }
-    }
-
-    OaiPmhDeleted getDeletedRecord(Version version) {
-        // FIXME: This is terrible but the only current way to determine set membership
-        // for deleted items - rely on the global ID to determine country and repository
-        log.debug("Calculating deleted item for {}", version.getEntityId());
-        List<String> countryAndRepo = hierarchySplitter.limit(2).splitToList(version.getEntityId());
-        List<String> sets = ImmutableList.of(countryAndRepo.get(0),
-                setSpecJoiner.join(countryAndRepo.get(0), hierarchyJoiner.join(countryAndRepo)));
-        ZonedDateTime deletedAt = ZonedDateTime.parse(version.getTriggeringEvent().getTimestamp());
-        return new OaiPmhDeleted(version.getEntityId(), deletedAt, sets);
     }
 
     private Iterable<OaiPmhDeleted> getDeletedDocumentaryUnits(String from, String until) {

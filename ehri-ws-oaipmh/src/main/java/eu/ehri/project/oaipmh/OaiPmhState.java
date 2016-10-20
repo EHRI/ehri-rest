@@ -243,7 +243,7 @@ public class OaiPmhState {
             }
 
             String tokenQueryString = decodeBase64(token);
-            log.debug("Decoding state: {}", tokenQueryString);
+            log.trace("Decoding state: {}", tokenQueryString);
             return buildState(decodeParams(tokenQueryString), defaultLimit);
         } else {
             return buildState(queryParams, defaultLimit);
@@ -308,7 +308,7 @@ public class OaiPmhState {
 
     private static String encodeToken(OaiPmhState state) {
         String stateParams = encodeParams(state.toParams());
-        log.debug("Encoding state: {}", stateParams);
+        log.trace("Encoding state: {}", stateParams);
         return encodeBase64(stateParams);
     }
 
