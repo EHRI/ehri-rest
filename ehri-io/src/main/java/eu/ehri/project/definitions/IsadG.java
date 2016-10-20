@@ -1,6 +1,7 @@
 package eu.ehri.project.definitions;
 
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 public enum IsadG implements DefinitionList {
 
@@ -59,6 +60,6 @@ public enum IsadG implements DefinitionList {
     }
 
     public Optional<String> getAnalogueEncoding() {
-        return Optional.fromNullable(analogueEncoding);
+        return Optional.ofNullable(analogueEncoding);
     }
 }

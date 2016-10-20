@@ -19,7 +19,6 @@
 
 package eu.ehri.project.importers.cvoc;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,7 +29,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.definitions.Skos;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -69,6 +67,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Import SKOS RDF.
@@ -321,7 +320,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private interface ConnectFunc {
@@ -380,9 +379,7 @@ public final class JenaSkosImporter implements SkosImporter {
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
                     .addDataValue(Ontology.LANGUAGE, langCode3Letter);
-            for (String code : descCode.asSet()) {
-                builder.addDataValue(Ontology.IDENTIFIER_KEY, code);
-            }
+            descCode.ifPresent(code -> builder.addDataValue(Ontology.IDENTIFIER_KEY, code));
 
             for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
@@ -448,7 +445,7 @@ public final class JenaSkosImporter implements SkosImporter {
 
     private static Optional<String> getScriptCode(String langCode) {
         List<String> parts = codeSplitter.splitToList(langCode);
-        return parts.size() > 1 ? Optional.of(parts.get(1)) : Optional.<String>absent();
+        return parts.size() > 1 ? Optional.of(parts.get(1)) : Optional.empty();
     }
 
     private String getId(URI uri) {
@@ -464,6 +461,6 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private Optional<String> getLogMessage(String msg) {
-        return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+        return msg.trim().isEmpty() ? Optional.empty() : Optional.of(msg);
     }
 }

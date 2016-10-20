@@ -1,6 +1,5 @@
 package eu.ehri.project.api.impl;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
@@ -19,6 +18,7 @@ import eu.ehri.project.acl.PermissionUtils;
 import eu.ehri.project.api.ConceptsApi;
 
 import java.util.List;
+import java.util.Optional;
 
 class ConceptsApiImpl implements ConceptsApi {
 
@@ -102,7 +102,7 @@ class ConceptsApiImpl implements ConceptsApi {
             }
             return Optional.of(ctx.commit());
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

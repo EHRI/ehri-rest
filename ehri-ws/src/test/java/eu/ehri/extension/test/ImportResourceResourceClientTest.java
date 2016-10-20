@@ -57,8 +57,8 @@ import static org.junit.Assert.*;
 public class ImportResourceResourceClientTest extends AbstractResourceClientTest {
     // NB: This file is *copied* into the extension test resources because
     // I can't figure out how to refer to resources in another module...
-    protected static final String SINGLE_EAD = "ead.xml";
-    protected static final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
+    private static final String SINGLE_EAD = "ead.xml";
+    private static final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
 
     @Test
     public void testImportSkos() throws Exception {
@@ -97,7 +97,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -224,7 +224,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -249,7 +249,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(6, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -276,7 +276,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(6, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -295,7 +295,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -314,7 +314,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -334,7 +334,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(0, log.getCreated());
         assertEquals(1, log.getUpdated());
         assertEquals(1, log.getUnchanged());
-        assertEquals(logText, log.getLogMessage().orNull());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test

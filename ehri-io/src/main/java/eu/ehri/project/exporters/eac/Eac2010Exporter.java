@@ -19,7 +19,6 @@
 
 package eu.ehri.project.exporters.eac;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -50,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -94,7 +94,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
         root(sw, "eac-cpf", DEFAULT_NAMESPACE, attrs(), NAMESPACES, () -> {
             attribute(sw, "http://www.w3.org/2001/XMLSchema-instance",
                     "schemaLocation", DEFAULT_NAMESPACE + "http://eac.staatsbibliothek-berlin.de/schema/cpf.xsd");
-            for (Description desc : LanguageHelpers.getBestDescription(agent, Optional.absent(), langCode).asSet()) {
+            LanguageHelpers.getBestDescription(agent, Optional.empty(), langCode).ifPresent(desc -> {
 
                 addControlSection(sw, agent, desc);
 
@@ -116,7 +116,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
 
                     addRelations(sw, agent, desc, langCode);
                 });
-            }
+            });
         });
     }
 
@@ -129,15 +129,15 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
                     tag(sw, "cpfRelation", attrs("cpfRelationType", "associative"), () -> {
 
                         // Look for a body which is an access point
-                        for (String id : getLinkEntityId(agent, link).asSet()) {
-                            attribute(sw, "http://www.w3.org/1999/xlink", "href", id);
-                        }
-                        for (String name : getLinkName(agent, desc, link, langCode).asSet()) {
-                            tag(sw, "relationEntry", name);
-                        }
-                        for (String name : getLinkDescription(link).asSet()) {
-                            tag(sw, ImmutableList.of("descriptiveNote", "p"), () -> cData(sw, name));
-                        }
+                        getLinkEntityId(agent, link).ifPresent(id ->
+                                attribute(sw, "http://www.w3.org/1999/xlink", "href", id)
+                        );
+                        getLinkName(agent, desc, link, langCode).ifPresent(name ->
+                                tag(sw, "relationEntry", name)
+                        );
+                        getLinkDescription(link).ifPresent(name ->
+                                tag(sw, ImmutableList.of("descriptiveNote", "p"), () -> cData(sw, name))
+                        );
                     });
                 }
             });
@@ -145,18 +145,18 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
     }
 
     private void addPureTextElements(XMLStreamWriter sw, Description desc, String key, String path) {
-        for (Object prop : Optional.fromNullable(desc.getProperty(key)).asSet()) {
-            tag(sw, ImmutableList.of(path, "p"), prop.toString());
-        }
+        Optional.ofNullable(desc.getProperty(key)).ifPresent(prop ->
+                tag(sw, ImmutableList.of(path, "p"), prop.toString())
+        );
     }
 
     private void addTextElements(XMLStreamWriter sw, Description desc, String key, String path) {
-        for (Object prop : Optional.fromNullable(desc.getProperty(key)).asSet()) {
+        Optional.ofNullable(desc.getProperty(key)).ifPresent(prop -> {
             List<String> keys = Splitter.on("/").splitToList(path);
             for (Object value : coerceList(prop)) {
                 tag(sw, keys, value.toString());
             }
-        }
+        });
     }
 
     private void addDatesOfExistence(XMLStreamWriter sw, Description desc) {
@@ -206,13 +206,13 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
             });
 
             for (Map.Entry<Isaar, String> entry : nameMappings.entrySet()) {
-                for (String value : Optional.fromNullable(desc.<String>getProperty(entry.getKey())).asSet()) {
-                    tag(sw, ImmutableList.of("nameEntry", "part"),
-                            value, attrs("localType", entry.getValue()));
-                }
+                Optional.ofNullable(desc.<String>getProperty(entry.getKey())).ifPresent(value ->
+                        tag(sw, ImmutableList.of("nameEntry", "part"),
+                                value, attrs("localType", entry.getValue()))
+                );
             }
 
-            for (Object parNames : Optional.fromNullable(desc.getProperty(Isaar.otherFormsOfName)).asSet()) {
+            Optional.ofNullable(desc.getProperty(Isaar.otherFormsOfName)).ifPresent(parNames -> {
                 List values = coerceList(parNames);
                 if (!values.isEmpty()) {
                     for (Object value : values) {
@@ -222,9 +222,9 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
                         });
                     }
                 }
-            }
+            });
 
-            for (Object parNames : Optional.fromNullable(desc.getProperty(Isaar.parallelFormsOfName)).asSet()) {
+            Optional.ofNullable(desc.getProperty(Isaar.parallelFormsOfName)).ifPresent(parNames -> {
                 List values = coerceList(parNames);
                 if (!values.isEmpty()) {
                     tag(sw, "nameEntryParallel", () -> {
@@ -237,7 +237,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
                         }
                     });
                 }
-            }
+            });
         });
     }
 
@@ -261,14 +261,14 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
 
             addRevisionDesc(sw, agent, desc);
 
-            for (Object sources : Optional.fromNullable(desc.getProperty(Isaar.source)).asSet()) {
+            Optional.ofNullable(desc.getProperty(Isaar.source)).ifPresent(sources -> {
                 List sourceValues = coerceList(sources);
                 tag(sw, "sources", () -> {
                     for (Object value : sourceValues) {
                         tag(sw, "source", () -> tag(sw, "sourceEntry", value.toString()));
                     }
                 });
-            }
+            });
         });
     }
 
@@ -302,8 +302,8 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
                     tag(sw, "eventDateTime", DateTimeFormat.longDateTime().print(dateTime),
                             attrs("standardDateTime", dateTime.toString()));
                     tag(sw, "agentType", MaintenanceEventAgentType.human.name());
-                    tag(sw, "agent", Optional.fromNullable(event.getActioner())
-                            .transform(Named::getName).or("EHRI"));
+                    tag(sw, "agent", Optional.ofNullable(event.getActioner())
+                            .map(Named::getName).orElse("EHRI"));
                     if (event.getLogMessage() != null && !event.getLogMessage().isEmpty()) {
                         tag(sw, "eventDescription", event.getLogMessage());
                     }
@@ -338,7 +338,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
         if (desc != null && !desc.trim().isEmpty()) {
             return Optional.of(desc);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private Optional<String> getLinkName(Described entity,
@@ -362,7 +362,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private Optional<String> getLinkEntityId(Described entity, Link link) {
@@ -371,12 +371,12 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
                 return Optional.of(other.getId());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private String getEntityName(Described entity, String lang) {
         return LanguageHelpers.getBestDescription(entity, lang)
-                .transform(Description::getName)
-                .or(entity.getIdentifier()); // Fallback
+                .map(Description::getName)
+                .orElse(entity.getIdentifier()); // Fallback
     }
 }

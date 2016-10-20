@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -27,6 +26,8 @@ import eu.ehri.project.models.UserProfile;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+
+import java.util.Optional;
 
 /**
  * Delete a single item via the command line.

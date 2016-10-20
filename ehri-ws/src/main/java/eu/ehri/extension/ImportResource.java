@@ -20,7 +20,6 @@
 package eu.ehri.extension;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
@@ -76,6 +75,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -156,7 +156,7 @@ public class ImportResource extends AbstractResource {
                     .setFormat(format)
                     .setTolerant(tolerant)
                     .setBaseURI(baseURI)
-                    .importFile(stream, getLogMessage(logMessage).orNull());
+                    .importFile(stream, getLogMessage(logMessage).orElse(null));
             logger.debug("Committing SKOS import transaction...");
             tx.success();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
@@ -246,7 +246,7 @@ public class ImportResource extends AbstractResource {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
-            String message = getLogMessage(logMessage).orNull();
+            String message = getLogMessage(logMessage).orElse(null);
             ImportManager importManager = new SaxImportManager(
                     graph, scope, user, importer, handler)
                     .allowUpdates(allowUpdates)
@@ -342,7 +342,7 @@ public class ImportResource extends AbstractResource {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
-            String message = getLogMessage(logMessage).orNull();
+            String message = getLogMessage(logMessage).orElse(null);
             ImportManager importManager = new CsvImportManager(
                     graph, scope, user, tolerant, allowUpdates, importer);
             ImportLog log = importDataStream(importManager, message, data,

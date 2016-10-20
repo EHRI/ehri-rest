@@ -19,7 +19,6 @@
 
 package eu.ehri.project.commands;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.api.Api;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 
 /**
  * Abstract base class for commands. Provides the main
@@ -123,8 +123,6 @@ public abstract class BaseCommand implements Command {
      * @return an optional message string
      */
     protected Optional<String> getLogMessage(String msg) {
-        return (msg == null || msg.trim().isEmpty())
-                ? Optional.<String>absent()
-                : Optional.of(msg);
+        return (msg == null || msg.trim().isEmpty()) ? Optional.empty() : Optional.of(msg);
     }
 }

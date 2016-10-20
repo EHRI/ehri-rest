@@ -22,10 +22,10 @@ package eu.ehri.project.importers;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Class that serves as a manifest for an import batch,
@@ -57,7 +57,7 @@ public class ImportLog {
             @JsonProperty("updated") int updated,
             @JsonProperty("unchanged") int unchanged,
             @JsonProperty("errors") Map<String, String> errors) {
-        this(Optional.fromNullable(logMessage));
+        this(Optional.ofNullable(logMessage));
         this.created = created;
         this.unchanged = unchanged;
         this.updated = updated;
@@ -155,7 +155,7 @@ public class ImportLog {
         data.put("updated", updated);
         data.put("unchanged", unchanged);
         data.put("errors", errors);
-        data.put("message", logMessage.orNull());
+        data.put("message", logMessage.orElse(null));
         return data;
     }
 

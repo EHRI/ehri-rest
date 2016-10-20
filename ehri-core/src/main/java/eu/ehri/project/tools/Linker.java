@@ -19,10 +19,11 @@
 
 package eu.ehri.project.tools;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -40,13 +41,12 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Slugify;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -83,8 +83,8 @@ public class Linker {
     }
 
     public Linker(FramedGraph<?> graph) {
-        this(graph, Sets.<String>newHashSet(),
-                DEFAULT_LANG, Optional.<String>absent(), false, true);
+        this(graph, Sets.newHashSet(),
+                DEFAULT_LANG, Optional.empty(), false, true);
     }
 
     /**
@@ -133,7 +133,7 @@ public class Linker {
                                     prior);
                         } else {
                             conceptIdentifierNames.put(identifier, trimmedName);
-                            identifierConcept.put(identifier, Optional.<Concept>absent());
+                            identifierConcept.put(identifier, Optional.empty());
                             int count = identifierCount.containsKey(identifier)
                                     ? identifierCount.get(identifier)
                                     : 0;
@@ -178,7 +178,7 @@ public class Linker {
             try {
                 Concept concept = api.create(conceptBundle, Concept.class);
                 concept.setVocabulary(vocabulary);
-                identifierConcept.put(identifier, Optional.fromNullable(concept));
+                identifierConcept.put(identifier, Optional.of(concept));
                 conceptEvent.addSubjects(concept);
             } catch (ValidationError validationError) {
                 // If this happens it is most likely because two access points
@@ -286,9 +286,9 @@ public class Linker {
      * @param logMessage a descriptive string
      * @return a new linker object
      */
-    public Linker withLogMessage(String logMessage) {
+    Linker withLogMessage(String logMessage) {
         return new Linker(graph, accessPointTypes, checkNotNull(defaultLanguageCode),
-                Optional.fromNullable(logMessage), tolerant, excludeSingles);
+                Optional.ofNullable(logMessage), tolerant, excludeSingles);
     }
 
     /**
@@ -322,7 +322,7 @@ public class Linker {
      * @param accessPointType an access point type string
      * @return a new linker object
      */
-    public Linker withAccessPointType(String accessPointType) {
+    Linker withAccessPointType(String accessPointType) {
         Set<String> tmp = Sets.newHashSet(checkNotNull(accessPointTypes));
         tmp.add(accessPointType);
         return new Linker(graph, tmp, defaultLanguageCode,

@@ -1,6 +1,5 @@
 package eu.ehri.project.api.impl;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.GraphManager;
@@ -17,6 +16,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.api.UserProfilesApi;
 
 import java.util.List;
+import java.util.Optional;
 
 
 class UserProfilesApiImpl implements UserProfilesApi {
@@ -101,7 +101,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
             }
             return Optional.of(ctx.commit());
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

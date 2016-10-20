@@ -19,7 +19,6 @@
 
 package eu.ehri.project.api;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -39,6 +38,8 @@ import eu.ehri.project.test.TestData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -67,7 +68,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
 
         DocumentaryUnitDescription changedDesc = api(validUser)
                 .createDependent(unit.getId(), descBundle,
-                        DocumentaryUnitDescription.class, Optional.<String>absent());
+                        DocumentaryUnitDescription.class, Optional.empty());
         unit.addDescription(changedDesc);
 
         // The order in which items are serialized is undefined, so we just have to throw
@@ -93,7 +94,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
         api(validUser).createDependent(unit.getId(), descBundle,
-                DocumentaryUnitDescription.class, Optional.<String>absent());
+                DocumentaryUnitDescription.class, Optional.empty());
         fail("Creating a dependent should have thrown a validation error");
     }
 
@@ -110,7 +111,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
 
         DocumentaryUnitDescription changedDesc = api(validUser)
                 .updateDependent(unit.getId(), descBundle,
-                        DocumentaryUnitDescription.class, Optional.<String>absent())
+                        DocumentaryUnitDescription.class, Optional.empty())
                 .getNode();
         assertEquals(descCount, Iterables.size(unit.getDocumentDescriptions()));
         assertEquals("some-new-title", changedDesc.getName());
@@ -127,7 +128,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
                 .get(0).removeDataValue(Ontology.NAME_KEY);
 
         api(validUser).updateDependent(unit.getId(), descBundle,
-                DocumentaryUnitDescription.class, Optional.<String>absent()).getNode();
+                DocumentaryUnitDescription.class, Optional.empty()).getNode();
         fail("Updating a dependent should have thrown a validation error");
     }
 
@@ -142,7 +143,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         DocumentaryUnitDescription d = Iterables.getFirst(unit.getDocumentDescriptions(), null);
         assertNotNull(d);
         int delCount = api(validUser).deleteDependent(unit.getId(), d.getId(),
-                Optional.<String>absent());
+                Optional.empty());
         Assert.assertTrue(delCount >= 1);
         assertEquals(descCount - 1, Iterables.size(unit.getDocumentDescriptions()));
     }
@@ -150,7 +151,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
     @Test
     public void testDeleteDependentDescription() throws Exception {
         // This should throw permission denied since c1 is not in the new item's subtree...
-        int delete = api(validUser).deleteDependent("c1", "cd1", Optional.<String>absent());
+        int delete = api(validUser).deleteDependent("c1", "cd1", Optional.empty());
         // the number of items deleted should be 1 desc, 2 dates, 2 access points = 5
         assertEquals(5, delete);
     }
@@ -158,14 +159,14 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
     @Test
     public void testDeleteDependentAccessPoint() throws Exception {
         // This should throw permission denied since c1 is not in the new item's subtree...
-        int delete = api(validUser).deleteDependent("c1", "ur1", Optional.<String>absent());
+        int delete = api(validUser).deleteDependent("c1", "ur1", Optional.empty());
         assertEquals(1, delete);
     }
 
     @Test(expected = PermissionDenied.class)
     public void testDeleteNonDependent() throws Exception {
         // This should throw permission denied since c1 is not in the new item's subtree...
-        api(validUser).deleteDependent("c1", "cd2", Optional.<String>absent());
+        api(validUser).deleteDependent("c1", "cd2", Optional.empty());
     }
 
     @Test
@@ -175,7 +176,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         Bundle desc = depSerializer.entityToBundle(description);
         Mutation<RepositoryDescription> cou = loggingApi(validUser)
                 .updateDependent("r1", desc.withDataValue("name", "changed"),
-                        RepositoryDescription.class, Optional.<String>absent());
+                        RepositoryDescription.class, Optional.empty());
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(cou.updated());
         assertTrue(event.getPriorVersions().iterator().hasNext());
@@ -190,7 +191,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         Bundle desc = Bundle.fromData(TestData.getTestAgentBundle())
                 .getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
         loggingApi(validUser).createDependent("r1", desc, RepositoryDescription.class,
-                Optional.<String>absent());
+                Optional.empty());
         assertEquals(r1, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
     }
@@ -200,7 +201,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         Repository r1 = manager.getEntity("r1", Repository.class);
         Description description = r1.getDescriptions().iterator().next();
         Bundle desc = depSerializer.entityToBundle(description);
-        loggingApi(validUser).deleteDependent("r1", description.getId(), Optional.<String>absent());
+        loggingApi(validUser).deleteDependent("r1", description.getId(), Optional.empty());
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());

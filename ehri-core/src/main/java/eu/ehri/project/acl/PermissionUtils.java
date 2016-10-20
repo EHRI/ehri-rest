@@ -19,7 +19,6 @@
 
 package eu.ehri.project.acl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -33,6 +32,8 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
+
+import java.util.Optional;
 
 /**
  * Messy stopgap class to hold a bunch of sort-of view/sort-of acl functions.
@@ -59,8 +60,8 @@ public final class PermissionUtils {
     /**
      * Check permissions for a given type.
      *
-     * @param accessor The user/group
-     * @param contentType The content type
+     * @param accessor       The user/group
+     * @param contentType    The content type
      * @param permissionType The permission type
      */
     public void checkContentPermission(Accessor accessor, ContentTypes contentType,
@@ -73,22 +74,22 @@ public final class PermissionUtils {
     /**
      * Check permissions for a given entity.
      *
-     * @param entity The item
-     * @param accessor The user/group
+     * @param entity         The item
+     * @param accessor       The user/group
      * @param permissionType The permission type
      */
     public void checkEntityPermission(Accessible entity,
             Accessor accessor, PermissionType permissionType) throws PermissionDenied {
         if (!acl.hasPermission(entity, permissionType, accessor)) {
             throw new PermissionDenied(accessor.getId(), entity.getId(),
-                        permissionType.toString(), scope.getId());
+                    permissionType.toString(), scope.getId());
         }
     }
 
     /**
      * Ensure an item is readable by the given accessor
      *
-     * @param entity The item
+     * @param entity   The item
      * @param accessor The accessor/group
      */
     public void checkReadAccess(Accessible entity, Accessor accessor)
@@ -126,13 +127,6 @@ public final class PermissionUtils {
     }
 
     /**
-     * @return the acl
-     */
-    public AclManager getAclManager() {
-        return acl;
-    }
-
-    /**
      * Set the scope under which ACL and permission operations will take place.
      * This is, for example, an Repository instance, where the objects being
      * manipulated are DocumentaryUnits. The given scope is used to compare
@@ -142,7 +136,7 @@ public final class PermissionUtils {
      * @return A new view helper
      */
     public PermissionUtils setScope(PermissionScope scope) {
-        return new PermissionUtils(graph, Optional
-                .fromNullable(scope).or(SystemScope.INSTANCE));
+        return new PermissionUtils(graph,
+                Optional.ofNullable(scope).orElse(SystemScope.INSTANCE));
     }
 }

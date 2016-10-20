@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
@@ -69,6 +68,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -179,7 +179,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @return a vertex serializer
      */
     protected Serializer getSerializer() {
-        Optional<List<String>> includeProps = Optional.fromNullable(uriInfo.getQueryParameters(true)
+        Optional<List<String>> includeProps = Optional.ofNullable(uriInfo.getQueryParameters(true)
                 .get(INCLUDE_PROPS_PARAM));
         return includeProps.isPresent()
                 ? serializer.withIncludedProperties(includeProps.get())
@@ -292,10 +292,10 @@ public abstract class AbstractResource implements TxCheckedResource {
                 return Optional.of(URLDecoder.decode(list.get(0), StandardCharsets.UTF_8.name()));
             } catch (UnsupportedEncodingException e) {
                 logger.error("Unsupported encoding in header: {}", e);
-                return Optional.absent();
+                return Optional.empty();
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -336,9 +336,9 @@ public abstract class AbstractResource implements TxCheckedResource {
     private Optional<String> getRequesterIdentifier() {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
-            return Optional.fromNullable(list.get(0));
+            return Optional.ofNullable(list.get(0));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -522,7 +522,7 @@ public abstract class AbstractResource implements TxCheckedResource {
                         page.getOffset(), page.getLimit(), page.getTotal()));
     }
 
-    private <T extends Entity> Response streamingVertexList(
+    private Response streamingVertexList(
             Iterable<Vertex> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();

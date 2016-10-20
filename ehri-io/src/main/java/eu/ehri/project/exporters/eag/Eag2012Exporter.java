@@ -19,7 +19,6 @@
 
 package eu.ehri.project.exporters.eag;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,8 +96,7 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
             attribute(sw, "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",
                     DEFAULT_NAMESPACE + " http://schemas.archivesportaleurope.net/profiles/eag.xsd");
 
-            for (Description desc : LanguageHelpers.getBestDescription(
-                    repository, Optional.absent(), langCode).asSet()) {
+            LanguageHelpers.getBestDescription(repository, Optional.empty(), langCode).ifPresent(desc -> {
 
                 addControlSection(sw, repository, country, desc);
 
@@ -105,21 +104,21 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
                     addIdentitySection(sw, repository, desc);
 
                     tag(sw, ImmutableList.of("desc", "repositories", "repository"), () -> {
-                        tag(sw, "geogarea", LanguageHelpers.countryCodeToContinent(country.getCode()).or("Europe"));
+                        tag(sw, "geogarea", LanguageHelpers.countryCodeToContinent(country.getCode()).orElse("Europe"));
 
                         List<Address> addresses = Lists.newArrayList(desc.as(RepositoryDescription.class).getAddresses());
                         if (addresses.isEmpty()) {
                             // NB: A location tag is always needed ¯\_(ツ)_/¯
                             tag(sw, "location", attrs("localType", "postal address"), () -> {
                                 tag(sw, "country", LanguageHelpers.countryCodeToName(country.getCode()));
-                                tag(sw, "municipalityPostalcode", (String)null);
-                                tag(sw, "street", (String)null);
+                                tag(sw, "municipalityPostalcode", (String) null);
+                                tag(sw, "street", (String) null);
                             });
                         } else {
                             for (Address address : addresses) {
                                 tag(sw, "location", attrs("localType", "postal address"), () -> {
-                                    String cc = Optional.fromNullable(((String) address.getProperty(ContactInfo.countryCode)))
-                                            .or(country.getCode());
+                                    String cc = Optional.ofNullable(((String) address.getProperty(ContactInfo.countryCode)))
+                                            .orElse(country.getCode());
                                     tag(sw, "country", LanguageHelpers.countryCodeToName(cc));
                                     tag(sw, "municipalityPostalcode", address.<String>getProperty(ContactInfo.postalCode));
                                     tag(sw, "street", address.<String>getProperty(ContactInfo.street));
@@ -158,18 +157,18 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
 
                         tag(sw, ImmutableList.of("timetable", "opening"), desc.<String>getProperty(Isdiah.openingTimes));
 
-                        tag(sw, "access", attrs("question", "yes"), () -> {
-                            for (String terms : Optional.fromNullable(desc.<String>getProperty(Isdiah.conditions)).asSet()) {
-                                tag(sw, "termsOfUse", terms);
-                            }
-                        });
+                        tag(sw, "access", attrs("question", "yes"), () ->
+                                Optional.ofNullable(desc.<String>getProperty(Isdiah.conditions)).ifPresent(terms ->
+                                        tag(sw, "termsOfUse", terms)
+                                )
+                        );
 
                         tag(sw, "accessibility", desc.getProperty(Isdiah.accessibility), attrs("question", "yes"));
                         addTextElements(sw, desc, Isdiah.researchServices);
                     });
 
                 });
-            }
+            });
         });
     }
 
@@ -197,18 +196,18 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
                     attrs("countrycode", repository.getCountry().getCode().toUpperCase()));
             tag(sw, "autform", desc.getName(), attrs("xml:lang", desc.getLanguageOfDescription()));
 
-            for (Object parNames : Optional.fromNullable(desc.getProperty(Isdiah.parallelFormsOfName)).asSet()) {
+            Optional.ofNullable(desc.getProperty(Isdiah.parallelFormsOfName)).ifPresent(parNames -> {
                 List values = parNames instanceof List ? (List) parNames : ImmutableList.of(parNames);
                 for (Object value : values) {
                     tag(sw, "parform", value.toString());
                 }
-            }
-            for (Object parNames : Optional.fromNullable(desc.getProperty(Isdiah.otherFormsOfName)).asSet()) {
+            });
+            Optional.ofNullable(desc.getProperty(Isdiah.otherFormsOfName)).ifPresent(parNames -> {
                 List values = parNames instanceof List ? (List) parNames : ImmutableList.of(parNames);
                 for (Object value : values) {
                     tag(sw, "parform", value.toString());
                 }
-            }
+            });
         });
     }
 
@@ -230,8 +229,8 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
                 SystemEvent event = agg.get(0);
 
                 tag(sw, "maintenanceEvent", () -> {
-                    tag(sw, "agent", Optional.fromNullable(event.getActioner())
-                            .transform(Actioner::getName).orNull());
+                    tag(sw, "agent", Optional.ofNullable(event.getActioner())
+                            .map(Actioner::getName).orElse(null));
                     tag(sw, "agentType", MaintenanceEventAgentType.human.name());
                     DateTime dateTime = new DateTime(event.getTimestamp());
                     tag(sw, "eventDateTime", DateTimeFormat.longDateTime().print(dateTime), attrs(
@@ -262,11 +261,11 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
         final Map<String, String> paraAttrs = attrs("xml:lang", desc.getLanguageOfDescription());
         for (Map.Entry<Isdiah, String> entry : descriptiveTextMappings.entrySet()) {
             if (adding.contains(entry.getKey())) {
-                for (String prop : Optional.fromNullable(desc.<String>getProperty(entry.getKey())).asSet()) {
+                Optional.ofNullable(desc.<String>getProperty(entry.getKey())).ifPresent(prop -> {
                     List<String> tags = Splitter.on("/").splitToList(entry.getValue());
                     tag(sw, tags, () ->
                             tag(sw, ImmutableList.of("descriptiveNote", "p"), paraAttrs, () -> cData(sw, prop)));
-                }
+                });
             }
         }
     }

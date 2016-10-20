@@ -19,7 +19,6 @@
 
 package eu.ehri.project.importers.base;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
@@ -41,6 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -126,9 +126,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
         Map<String, String> dateValues = returnDatesAsString(data, dates);
         for (String s : dateValues.keySet()) {
-            for (Map<String, Object> dp : extractDate(s).asSet()) {
-                extractedDates.add(dp);
-            }
+            extractDate(s).ifPresent(extractedDates::add);
         }
         return extractedDates;
     }
@@ -222,7 +220,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      */
     private Optional<Map<String, Object>> extractDate(String date) {
         Map<String, Object> data = matchDate(date);
-        return data.isEmpty() ? Optional.<Map<String, Object>>absent() : Optional.of(data);
+        return data.isEmpty() ? Optional.empty() : Optional.of(data);
     }
 
     private Map<String, Object> matchDate(String date) {
