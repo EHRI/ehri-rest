@@ -54,13 +54,13 @@ import java.util.List;
 @Path(OaiPmhResource.ENDPOINT)
 public class OaiPmhResource extends AbstractResource {
 
-    public static final String ENDPOINT = "oaipmh";
-    public static final String LIMIT_HEADER_NAME = "X-Limit";
-    private static final int NUM_RESPONSES = 200;
-    private static final String DEFAULT_LANG_CODE = "eng";
-
     private static final Config config = ConfigFactory.load();
     private static final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
+
+    public static final String ENDPOINT = "oaipmh";
+    public static final String LIMIT_HEADER_NAME = "X-Limit";
+    private static final String DEFAULT_LANG_CODE = "eng";
+
 
 
     public OaiPmhResource(@Context GraphDatabaseService database) {
@@ -77,6 +77,7 @@ public class OaiPmhResource extends AbstractResource {
     @GET
     @Produces(MediaType.TEXT_XML)
     public Response oaiGet() {
+        final int limit = isStreaming() ? -1 : limit(config.getInt("oaipmh.numResponses"));
         return Response.ok((StreamingOutput) out -> {
             try (final Tx tx = beginTx();
                  final BufferedOutputStream bufferedOut = new BufferedOutputStream(out);
@@ -88,7 +89,7 @@ public class OaiPmhResource extends AbstractResource {
                         OaiPmhRenderer.defaultRenderer(api, DEFAULT_LANG_CODE),
                         config);
                 try {
-                    OaiPmhState state = OaiPmhState.parse(uriInfo.getRequestUri().getQuery(), limit());
+                    OaiPmhState state = OaiPmhState.parse(uriInfo.getRequestUri().getQuery(), limit);
                     oaiPmh.performVerb(sw, state);
                     tx.success();
                 } catch (OaiPmhError error) {
@@ -108,17 +109,17 @@ public class OaiPmhResource extends AbstractResource {
         return oaiGet();
     }
 
-    private int limit() {
+    private int limit(int defaultLimit) {
         // Allow overriding the limit via a header. This is safe since
         // we stream requests. It's also very handy for testing.
         List<String> limit = requestHeaders.getRequestHeader(LIMIT_HEADER_NAME);
         if (limit == null || limit.size() < 1) {
-            return NUM_RESPONSES;
+            return defaultLimit;
         } else {
             try {
                 return Integer.parseInt(limit.get(0));
             } catch (NumberFormatException e) {
-                return NUM_RESPONSES;
+                return defaultLimit;
             }
         }
     }

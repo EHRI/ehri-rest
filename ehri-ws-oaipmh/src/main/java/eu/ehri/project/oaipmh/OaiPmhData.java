@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import java.util.Optional;
 
 
 /**
@@ -68,25 +68,16 @@ public class OaiPmhData {
         return new OaiPmhData(api);
     }
 
-    Stream<OaiPmhSet> getSets() {
-        Stream<Country> stream = streamOf(getQuery().page(EntityClass.COUNTRY, Country.class));
-        return stream
-                .filter(c -> c.getTopLevelDocumentaryUnits().iterator().hasNext())
-                .flatMap(ct -> {
-                    String countryId = ct.getId();
-                    String countryName = LanguageHelpers.countryCodeToName(countryId);
-                    OaiPmhSet countrySet = new OaiPmhSet(countryId, countryName,
-                            "All items in repositories within country: " + countryName);
-                    Stream<OaiPmhSet> repoSets = streamOf(getQuery().page(ct.getRepositories(), Repository.class))
-                            .filter(r -> r.getTopLevelDocumentaryUnits().iterator().hasNext())
-                            .map(r -> {
-                                String repoName = r.getDescriptions().iterator().hasNext()
-                                        ? r.getDescriptions().iterator().next().getName()
-                                        : null;
-                                return new OaiPmhSet(countryId + ":" + r.getId(), repoName, "All items within repository: " + repoName);
-                            });
-                    return Stream.concat(Stream.of(countrySet), repoSets);
-                });
+    QueryApi.Page<OaiPmhSet> getSets(OaiPmhState state) {
+        Stream<OaiPmhSet> setStream = getSets();
+        long count = state.hasLimit() ? getSets().count() : -1L;
+
+        Stream<OaiPmhSet> offsetStream = setStream.skip(state.getOffset());
+        Stream<OaiPmhSet> limitedSetStream = state.hasLimit()
+                ? offsetStream.limit(state.getLimit())
+                : offsetStream;
+        return new QueryApi.Page<>(limitedSetStream::iterator,
+                state.getOffset(), state.getLimit(), count);
     }
 
     QueryApi.Page<DocumentaryUnit> getFilteredDocumentaryUnits(OaiPmhState state) throws OaiPmhError {
@@ -177,6 +168,27 @@ public class OaiPmhData {
                 api.versionManager().versionsAtDeletion(EntityClass.DOCUMENTARY_UNIT, from, until),
                 this::getDeletedRecord);
         return transform;
+    }
+
+    private Stream<OaiPmhSet> getSets() {
+        Stream<Country> stream = streamOf(getQuery().page(EntityClass.COUNTRY, Country.class));
+        return stream
+                .filter(c -> c.getTopLevelDocumentaryUnits().iterator().hasNext())
+                .flatMap(ct -> {
+                    String countryId = ct.getId();
+                    String countryName = LanguageHelpers.countryCodeToName(countryId);
+                    OaiPmhSet countrySet = new OaiPmhSet(countryId, countryName,
+                            "All items in repositories within country: " + countryName);
+                    Stream<OaiPmhSet> repoSets = streamOf(getQuery().page(ct.getRepositories(), Repository.class))
+                            .filter(r -> r.getTopLevelDocumentaryUnits().iterator().hasNext())
+                            .map(r -> {
+                                String repoName = r.getDescriptions().iterator().hasNext()
+                                        ? r.getDescriptions().iterator().next().getName()
+                                        : null;
+                                return new OaiPmhSet(countryId + ":" + r.getId(), repoName, "All items within repository: " + repoName);
+                            });
+                    return Stream.concat(Stream.of(countrySet), repoSets);
+                });
     }
 
     // Helpers...

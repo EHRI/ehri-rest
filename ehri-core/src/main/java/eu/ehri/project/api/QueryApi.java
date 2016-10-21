@@ -129,15 +129,15 @@ public interface QueryApi {
      */
     class Page<T> implements Iterable<T> {
         private final Iterable<T> iterable;
-        private final int page;
-        private final int count;
+        private final int offset;
+        private final int limit;
         private final long total;
 
-        public Page(Iterable<T> iterable, int page, int count, long total) {
+        public Page(Iterable<T> iterable, int offset, int limit, long total) {
             this.iterable = iterable;
             this.total = total;
-            this.page = page;
-            this.count = count;
+            this.offset = offset;
+            this.limit = limit;
         }
 
         public Iterable<T> getIterable() {
@@ -149,11 +149,11 @@ public interface QueryApi {
         }
 
         public Integer getOffset() {
-            return page;
+            return offset;
         }
 
         public Integer getLimit() {
-            return count;
+            return limit;
         }
 
         @Override
@@ -163,7 +163,7 @@ public interface QueryApi {
 
         @Override
         public String toString() {
-            return String.format("<Page[...] %d %d (%d)", page, count, total);
+            return String.format("<Page[...] %d %d (%d)", offset, limit, total);
         }
     }
 }

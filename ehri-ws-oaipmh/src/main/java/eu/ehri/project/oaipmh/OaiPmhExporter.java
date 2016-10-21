@@ -39,7 +39,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 
 public class OaiPmhExporter extends StreamingXmlDsl {
@@ -137,18 +136,18 @@ public class OaiPmhExporter extends StreamingXmlDsl {
     }
 
     private void listSets(XMLStreamWriter sw, OaiPmhState state) throws OaiPmhError {
-        Stream<OaiPmhSet> stream = data.getSets();
-        long count = data.getSets().count();
+        QueryApi.Page<OaiPmhSet> sets = data.getSets(state);
+        long count = sets.getTotal();
         withDoc(sw, () -> {
             preamble(sw, Verb.ListSets.name(), state.toMap());
             tag(sw, Verb.ListSets.name(), () -> {
-                stream.skip(state.getOffset()).limit(state.getLimit()).forEach(set ->
-                        tag(sw, "set", () -> {
-                            tag(sw, "setSpec", set.getId());
-                            tag(sw, "setName", set.getName());
-                            tag(sw, "setDescription", () -> dcDescription(sw, set.getDescription()));
-                        })
-                );
+                for (OaiPmhSet set: sets) {
+                    tag(sw, "set", () -> {
+                        tag(sw, "setSpec", set.getId());
+                        tag(sw, "setName", set.getName());
+                        tag(sw, "setDescription", () -> dcDescription(sw, set.getDescription()));
+                    });
+                }
                 if (state.shouldResume(Math.toIntExact(count))) {
                     tag(sw, "resumptionToken", state.nextState());
                 } else if (state.hasResumed()) {
