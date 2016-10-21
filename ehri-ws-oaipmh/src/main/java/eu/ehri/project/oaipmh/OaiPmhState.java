@@ -148,6 +148,10 @@ public class OaiPmhState {
         return limit;
     }
 
+    boolean hasLimit() {
+        return limit >= 0;
+    }
+
     Verb getVerb() {
         return verb;
     }

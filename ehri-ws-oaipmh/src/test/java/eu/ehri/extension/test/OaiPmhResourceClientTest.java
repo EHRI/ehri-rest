@@ -40,6 +40,28 @@ public class OaiPmhResourceClientTest extends AbstractResourceClientTest {
         assertXPath(document, "2.0", "/OAI-PMH/Identify/protocolVersion");
     }
 
+    @Test
+    public void testListSetsWithLimit() throws Exception {
+        // With the stream header the limit will be overridden
+        Document document = get("verb=" + Verb.ListSets, 1);
+        assertXPath(document, "nl", "/OAI-PMH/ListSets/set[1]/setSpec");
+        assertXPath(document, "", "/OAI-PMH/ListSets/set[2]/setSpec");
+    }
+
+    @Test
+    public void testListSetsWithStreaming() throws Exception {
+        // With the stream header the limit will be overridden
+        String xml = callAs(getRegularUserProfileId(), getUri("verb=" + Verb.ListSets))
+                .accept(MediaType.TEXT_XML_TYPE)
+                .header(OaiPmhResource.LIMIT_HEADER_NAME, 1)
+                .header(OaiPmhResource.STREAM_HEADER_NAME, "true")
+                .get(String.class);
+        System.out.println(xml);
+        Document document = parseDocument(xml);
+        assertXPath(document, "nl", "/OAI-PMH/ListSets/set[1]/setSpec");
+        assertXPath(document, "nl:r1", "/OAI-PMH/ListSets/set[2]/setSpec");
+    }
+
     // Helpers
 
     private Document get(String params) throws Exception {
@@ -47,8 +69,7 @@ public class OaiPmhResourceClientTest extends AbstractResourceClientTest {
     }
 
     private Document get(String params, int limit) throws Exception {
-        URI queryUri = URI.create(
-                ehriUriBuilder(OaiPmhResource.ENDPOINT).build().toString() + "?" + params);
+        URI queryUri = getUri(params);
         ClientResponse response = callAs(getRegularUserProfileId(), queryUri)
                 .accept(MediaType.TEXT_XML_TYPE)
                 .header(OaiPmhResource.LIMIT_HEADER_NAME, limit)
@@ -56,5 +77,10 @@ public class OaiPmhResourceClientTest extends AbstractResourceClientTest {
         String entity = response.<String>getEntity(String.class);
         //System.out.println(entity);
         return parseDocument(entity);
+    }
+
+    private URI getUri(String params) {
+        return URI.create(
+                ehriUriBuilder(OaiPmhResource.ENDPOINT).build().toString() + "?" + params);
     }
 }
