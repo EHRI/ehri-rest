@@ -25,8 +25,8 @@ package eu.ehri.project.exceptions;
 public class AccessDenied extends Exception {
 
     private static final long serialVersionUID = -7496196761160357738L;
-    private String accessor;
-    private String entity;
+    private final String accessor;
+    private final String entity;
 
     public AccessDenied(String accessor, String entity) {
         super(String.format(

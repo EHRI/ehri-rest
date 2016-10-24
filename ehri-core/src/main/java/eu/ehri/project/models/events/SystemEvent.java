@@ -26,8 +26,6 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;

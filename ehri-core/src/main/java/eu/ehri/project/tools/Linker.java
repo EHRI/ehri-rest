@@ -30,6 +30,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
@@ -44,7 +45,6 @@ import eu.ehri.project.utils.Slugify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -67,11 +67,11 @@ public class Linker {
     private final FramedGraph<?> graph;
     private final boolean tolerant;
     private final boolean excludeSingles;
-    private final Set<String> accessPointTypes;
+    private final Set<AccessPointType> accessPointTypes;
     private final String defaultLanguageCode;
     private final Optional<String> logMessage;
 
-    private Linker(FramedGraph<?> graph, Set<String> accessPointTypes,
+    private Linker(FramedGraph<?> graph, Set<AccessPointType> accessPointTypes,
             String defaultLanguageCode, Optional<String> logMessage,
             boolean tolerant, boolean excludeSingles) {
         this.graph = graph;
@@ -310,7 +310,7 @@ public class Linker {
      * @param accessPointTypes a list of access point types
      * @return a new linker object
      */
-    public Linker withAccessPointTypes(List<String> accessPointTypes) {
+    public Linker withAccessPointTypes(Set<AccessPointType> accessPointTypes) {
         return new Linker(graph, Sets.newHashSet(checkNotNull(accessPointTypes)),
                 defaultLanguageCode, logMessage, tolerant, excludeSingles);
     }
@@ -322,8 +322,8 @@ public class Linker {
      * @param accessPointType an access point type string
      * @return a new linker object
      */
-    Linker withAccessPointType(String accessPointType) {
-        Set<String> tmp = Sets.newHashSet(checkNotNull(accessPointTypes));
+    Linker withAccessPointType(AccessPointType accessPointType) {
+        Set<AccessPointType> tmp = Sets.newHashSet(checkNotNull(accessPointTypes));
         tmp.add(accessPointType);
         return new Linker(graph, tmp, defaultLanguageCode,
                 logMessage, tolerant, excludeSingles);

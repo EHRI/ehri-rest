@@ -21,7 +21,6 @@ package eu.ehri.project.utils.fixtures.impl;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.TxGraph;
 import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;

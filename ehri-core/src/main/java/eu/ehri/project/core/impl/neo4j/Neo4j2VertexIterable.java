@@ -2,7 +2,6 @@ package eu.ehri.project.core.impl.neo4j;
 
 
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Vertex;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.index.IndexHits;

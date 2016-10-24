@@ -54,8 +54,8 @@ public class DataUtils {
      * </pre>
      *
      * @param item the item
-     * @param path   a path string
-     * @param <T>    the type to fetch
+     * @param path a path string
+     * @param <T>  the type to fetch
      * @return a property of type T
      */
     public static <T, N extends NestableData<N>> T get(N item, String path) {
@@ -74,7 +74,7 @@ public class DataUtils {
      * </pre>
      *
      * @param item the item
-     * @param path   a path string
+     * @param path a path string
      * @return a item found at the given path
      */
     public static <N extends NestableData<N>> N getItem(N item, String path) {
@@ -92,7 +92,7 @@ public class DataUtils {
      * </pre>
      *
      * @param item the item
-     * @param path   a path string
+     * @param path a path string
      * @return the item with the item at the given path deleted
      */
     public static <N extends NestableData<N>> N delete(N item, String path) {
@@ -111,7 +111,7 @@ public class DataUtils {
      * </pre>
      *
      * @param item the item
-     * @param path   a path string
+     * @param path a path string
      * @return the item with the item at the given path deleted
      */
     public static <N extends NestableData<N>> N deleteItem(N item, String path) {
@@ -128,10 +128,10 @@ public class DataUtils {
      * }
      * </pre>
      *
-     * @param item the item
-     * @param path   a path string
-     * @param value  the value being set
-     * @param <T>    the type of property being set
+     * @param item  the item
+     * @param path  a path string
+     * @param value the value being set
+     * @param <T>   the type of property being set
      * @return the item with the property at the given path set
      */
     public static <T, N extends NestableData<N>> N set(N item, String path, final T value) {
@@ -154,7 +154,7 @@ public class DataUtils {
      * an existing one.
      *
      * @param item    the item
-     * @param path      a path string
+     * @param path    a path string
      * @param newItem the new item to set at the path
      * @return a item with the given item set at the given path
      */
@@ -172,7 +172,7 @@ public class DataUtils {
      * </pre>
      *
      * @param item the item
-     * @param path   a path string
+     * @param path a path string
      * @return a list of bundles at the given relationship path
      */
     public static <N extends NestableData<N>> List<N> getRelations(N item, String path) {
@@ -205,10 +205,10 @@ public class DataUtils {
     }
 
     private static <N extends NestableData<N>> N fetchNode(N bundle, NestableDataPath path) {
-        if (path.hasTerminus())
+        if (path.getTerminus() == null) {
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
-
+        }
         if (path.isEmpty()) {
             return bundle;
         } else {
@@ -259,9 +259,10 @@ public class DataUtils {
     }
 
     private static <N extends NestableData<N>> N setNode(N bundle, NestableDataPath path, N newNode) {
-        if (path.hasTerminus())
+        if (path.getTerminus() == null) {
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
+        }
         if (path.isEmpty())
             throw new IllegalArgumentException("Path must refer to a nested node.");
 
@@ -299,12 +300,13 @@ public class DataUtils {
     }
 
     private static <N extends NestableData<N>> N deleteNode(N bundle, NestableDataPath path) {
-        if (path.hasTerminus())
+        if (path.getTerminus() == null) {
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
-        if (path.isEmpty())
+        }
+        if (path.isEmpty()) {
             throw new IllegalArgumentException("Path must refer to a nested node.");
-
+        }
         PathSection section = path.current();
         NestableDataPath next = path.next();
 

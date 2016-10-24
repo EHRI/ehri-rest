@@ -19,11 +19,9 @@
 
 package eu.ehri.project.persistence;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -44,6 +42,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -84,7 +83,7 @@ public final class Bundle implements NestableData<Bundle> {
      * date/time strings or cache values should begin with a
      * prefix and are ignored Bundle equality calculations.
      */
-    public static final String MANAGED_PREFIX = "_";
+    static final String MANAGED_PREFIX = "_";
 
     public static class Builder {
         private String id;
@@ -519,8 +518,9 @@ public final class Bundle implements NestableData<Bundle> {
                 Collection<Bundle> otherRelations = entry.getValue();
                 Set<Bundle> updated = Sets.newHashSet();
                 for (final Bundle otherRel : otherRelations) {
-                    Optional<Bundle> toUpdate = Iterables.tryFind(relations,
-                            bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()));
+                    Optional<Bundle> toUpdate = relations.stream().filter(
+                            bundle -> bundle.getId() != null && bundle.getId().equals(otherRel.getId()))
+                            .findFirst();
                     if (toUpdate.isPresent()) {
                         Bundle up = toUpdate.get();
                         updated.add(up);

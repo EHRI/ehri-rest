@@ -211,11 +211,11 @@ public final class QueryApiImpl implements QueryApi {
      *
      * @param <T>
      */
-    public static class FramedVertexIterableAdaptor<T extends Entity>
+    private static class FramedVertexIterableAdaptor<T extends Entity>
             implements Iterable<Vertex> {
         final Iterable<T> iterable;
 
-        public FramedVertexIterableAdaptor(Iterable<T> iterable) {
+        FramedVertexIterableAdaptor(Iterable<T> iterable) {
             this.iterable = iterable;
         }
 
@@ -331,8 +331,7 @@ public final class QueryApiImpl implements QueryApi {
 
     // Helpers
 
-    private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(
-            GremlinPipeline<EE, Vertex> filter) {
+    private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(GremlinPipeline<EE, Vertex> filter) {
         int low = Math.max(0, offset);
         if (limit < 0) {
             // No way to skip a bunch of items in Gremlin without

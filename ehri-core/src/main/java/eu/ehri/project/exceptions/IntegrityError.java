@@ -26,7 +26,7 @@ package eu.ehri.project.exceptions;
  * graph (e.g. identifiers.)
  */
 public class IntegrityError extends Exception {
-    private String idValue;
+    private final String idValue;
     public IntegrityError(String idValue) {
         super("Integrity error for id value: " + idValue);
         this.idValue = idValue;

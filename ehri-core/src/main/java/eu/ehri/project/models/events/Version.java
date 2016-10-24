@@ -25,8 +25,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;

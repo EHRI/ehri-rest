@@ -36,6 +36,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
@@ -71,6 +72,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -83,11 +85,12 @@ public class ToolsResource extends AbstractResource {
     private final Linker linker;
 
     public static final String ENDPOINT = "tools";
-    public static final String TOLERANT_PARAM = "tolerant";
-    public static final String SINGLE_PARAM = "single";
-    public static final String LANG_PARAM = "lang";
-    public static final String ACCESS_POINT_TYPE_PARAM = "apt";
-    public static final String DEFAULT_LANG = "eng";
+
+    private static final String TOLERANT_PARAM = "tolerant";
+    private static final String SINGLE_PARAM = "single";
+    private static final String LANG_PARAM = "lang";
+    private static final String ACCESS_POINT_TYPE_PARAM = "apt";
+    private static final String DEFAULT_LANG = "eng";
 
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);
@@ -136,7 +139,7 @@ public class ToolsResource extends AbstractResource {
     public long autoLinkRepositoryDocs(
             @PathParam("repositoryId") String repositoryId,
             @PathParam("vocabularyId") String vocabularyId,
-            @QueryParam(ACCESS_POINT_TYPE_PARAM) List<String> accessPointTypes,
+            @QueryParam(ACCESS_POINT_TYPE_PARAM) Set<AccessPointType> accessPointTypes,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String languageCode,
             @QueryParam(SINGLE_PARAM) @DefaultValue("true") boolean excludeSingle,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
