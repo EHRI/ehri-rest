@@ -19,7 +19,6 @@
 
 package eu.ehri.project.persistence;
 
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 

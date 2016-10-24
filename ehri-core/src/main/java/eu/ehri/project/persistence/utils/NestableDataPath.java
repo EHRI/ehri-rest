@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
  * Class representing a path which points to some data in a bundle, i.e.
@@ -41,30 +40,21 @@ import java.util.Optional;
  */
 final class NestableDataPath {
 
-    public static final String PATH_SEP = "/";
-    private static Splitter splitter = Splitter.on(PATH_SEP).omitEmptyStrings();
+    private static final String PATH_SEP = "/";
+    private static final Splitter splitter = Splitter.on(PATH_SEP).omitEmptyStrings();
+    private static final Joiner joiner = Joiner.on(PATH_SEP).skipNulls();
 
     private final List<PathSection> sections;
-    private final Optional<String> terminus;
-    private final NestableDataPath prev;
+    private final String terminus;
 
-    private NestableDataPath(List<PathSection> sections, Optional<String> terminus, NestableDataPath prev) {
+    private NestableDataPath(List<PathSection> sections, String terminus) {
         Preconditions.checkNotNull(terminus);
         this.sections = ImmutableList.copyOf(sections);
         this.terminus = terminus;
-        this.prev = prev;
     }
 
-    public String getTerminus() {
-        return terminus.get();
-    }
-
-    public boolean hasTerminus() {
-        return terminus.isPresent();
-    }
-
-    public List<PathSection> getSections() {
-        return sections;
+    String getTerminus() {
+        return terminus;
     }
 
     public PathSection current() {
@@ -80,7 +70,7 @@ final class NestableDataPath {
             throw new NoSuchElementException();
         List<PathSection> ns = Lists.newArrayList(sections);
         ns.remove(0);
-        return new NestableDataPath(ns, terminus, this);
+        return new NestableDataPath(ns, terminus);
     }
 
     public static NestableDataPath fromString(String path) {
@@ -93,14 +83,13 @@ final class NestableDataPath {
         // the pattern something[1]
         try {
             sections.add(PathSection.fromString(terminus));
-            return new NestableDataPath(sections, Optional.empty(), null);
+            return new NestableDataPath(sections, null);
         } catch (Exception e) {
-            return new NestableDataPath(sections, Optional.of(terminus), null);
+            return new NestableDataPath(sections, terminus);
         }
     }
 
     public String toString() {
-        Joiner joiner = Joiner.on("/");
-        return joiner.join(joiner.join(sections), terminus.orElse(""));
+        return joiner.join(joiner.join(sections), terminus);
     }
 }

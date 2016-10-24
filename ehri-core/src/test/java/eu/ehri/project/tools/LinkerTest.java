@@ -20,6 +20,7 @@
 package eu.ehri.project.tools;
 
 import com.google.common.collect.Iterables;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
@@ -70,7 +71,7 @@ public class LinkerTest extends AbstractFixtureTest {
         // won't match any existing access points.
         int newLinkCount = linker
                 .withExcludeSingles(false)
-                .withAccessPointType("IDontExist")
+                .withAccessPointType(AccessPointType.genre)
                 .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
         assertEquals(0, newLinkCount);
         // No new events should have been created...

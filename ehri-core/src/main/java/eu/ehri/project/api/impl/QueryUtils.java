@@ -23,8 +23,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.pipes.util.structures.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +36,8 @@ import java.util.SortedMap;
  */
 class QueryUtils {
 
-    public static final Logger logger = LoggerFactory.getLogger(QueryUtils.class);
+    private static final Splitter predicateSplitter = Splitter.on("__").limit(2);
+    private static final Splitter valueSplitter = Splitter.on(":").limit(2);
 
     /**
      * Parse a list of string filter specifications.
@@ -46,24 +45,22 @@ class QueryUtils {
      * @param filterList A list of filter spec strings
      * @return A map of filter specs
      */
-    public static SortedMap<String, Pair<QueryApiImpl.FilterPredicate, Object>> parseFilters(Collection<String>
+    static SortedMap<String, Pair<QueryApiImpl.FilterPredicate, Object>> parseFilters(Collection<String>
             filterList) {
         ImmutableSortedMap.Builder<String, Pair<QueryApiImpl.FilterPredicate, Object>> builder =
                 new ImmutableSortedMap.Builder<>(Ordering.natural());
-        Splitter psplit = Splitter.on("__");
-        Splitter vsplit = Splitter.on(":");
         for (String filter : filterList) {
-            List<String> kv = vsplit.splitToList(filter);
+            List<String> kv = valueSplitter.splitToList(filter);
             if (kv.size() == 2) {
                 String ppred = kv.get(0);
                 String value = kv.get(1);
-                List<String> pp = psplit.splitToList(ppred);
+                List<String> pp = predicateSplitter.splitToList(ppred);
                 if (pp.size() == 1) {
                     builder.put(pp.get(0), new Pair<>(
-                            QueryApiImpl.FilterPredicate.EQUALS, ((Object) value)));
+                            QueryApiImpl.FilterPredicate.EQUALS, value));
                 } else if (pp.size() > 1) {
                     builder.put(pp.get(0), new Pair<>(
-                            QueryApiImpl.FilterPredicate.valueOf(pp.get(1)), (Object)value));
+                            QueryApiImpl.FilterPredicate.valueOf(pp.get(1)), value));
                 }
             }
         }
@@ -76,12 +73,11 @@ class QueryUtils {
      * @param orderSpecs A list of order spec strings
      * @return A map of order specs
      */
-    public static SortedMap<String, QueryApiImpl.Sort> parseOrderSpecs(Collection<String> orderSpecs) {
+    static SortedMap<String, QueryApiImpl.Sort> parseOrderSpecs(Collection<String> orderSpecs) {
         ImmutableSortedMap.Builder<String, QueryApiImpl.Sort> builder =
                 new ImmutableSortedMap.Builder<>(Ordering.natural());
-        Splitter psplit = Splitter.on("__");
         for (String spec : orderSpecs) {
-            List<String> od = psplit.splitToList(spec);
+            List<String> od = predicateSplitter.splitToList(spec);
             if (od.size() == 1) {
                 builder.put(od.get(0), QueryApiImpl.Sort.ASC);
             } else if (od.size() > 1) {

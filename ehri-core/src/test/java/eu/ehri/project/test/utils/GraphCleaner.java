@@ -30,7 +30,7 @@ import com.tinkerpop.frames.FramedGraph;
  */
 public class GraphCleaner<T extends Graph> {
 
-    private FramedGraph<T> graph;
+    private final FramedGraph<T> graph;
 
     /**
      * Constructor.

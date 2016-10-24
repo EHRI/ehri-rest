@@ -26,8 +26,8 @@ package eu.ehri.project.exceptions;
 public class ItemNotFound extends Exception {
     private static final long serialVersionUID = -3562833443079995695L;
 
-    private String key;
-    private String value;
+    private final String key;
+    private final String value;
 
     public ItemNotFound(String id) {
         super(String.format("Item with id '%s' not found", id));

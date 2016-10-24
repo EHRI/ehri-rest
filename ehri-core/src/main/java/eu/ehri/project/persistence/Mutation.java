@@ -57,8 +57,8 @@ public final class Mutation<T> {
         return state;
     }
 
-    public boolean unchanged() {
-        return state == MutationState.UNCHANGED;
+    public boolean hasChanged() {
+        return state != MutationState.UNCHANGED;
     }
 
     public boolean created() {

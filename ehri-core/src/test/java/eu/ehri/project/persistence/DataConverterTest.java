@@ -68,11 +68,7 @@ public class DataConverterTest extends AbstractFixtureTest {
         Object t3 = Lists.newArrayList();
         Object[] t4 = {"not", "empty"};
         Object[] t5 = {};
-        Object t6 = new Iterable() {
-            @Override public Iterator iterator() {
-                return Lists.newArrayList().iterator();
-            }
-        };
+        Object t6 = (Iterable) () -> Lists.newArrayList().iterator();
         assertFalse(isEmptySequence(t1));
         assertFalse(isEmptySequence(t2));
         assertTrue(isEmptySequence(t3));

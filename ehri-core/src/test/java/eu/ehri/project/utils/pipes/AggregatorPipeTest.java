@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.pipes.Pipe;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

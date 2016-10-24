@@ -30,8 +30,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Entity;
@@ -89,7 +87,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     private final GraphManager manager;
     private final BundleManager dao;
     private final boolean initialize;
-    private GraphInitializer initializer;
+    private final GraphInitializer initializer;
 
     /**
      * Constructor

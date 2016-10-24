@@ -195,7 +195,7 @@ public class ApiImpl implements Api {
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, accessor, PermissionType.UPDATE);
         Mutation<E> out = bundleManager.withScopeIds(scope.idPath()).update(bundle, cls);
-        if (logging && !out.unchanged()) {
+        if (logging && out.hasChanged()) {
             actionManager.newEventContext(
                     out.getNode(), accessor.as(Actioner.class),
                     EventTypes.modification, logMessage)
@@ -544,7 +544,7 @@ public class ApiImpl implements Api {
         Described parent = detail(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         Mutation<T> out = bundleManager.withScopeIds(parent.idPath()).update(data, cls);
-        if (logging && !out.unchanged()) {
+        if (logging && out.hasChanged()) {
             actionManager
                     .newEventContext(parent, accessor.as(Actioner.class),
                             EventTypes.modifyDependent, logMessage)

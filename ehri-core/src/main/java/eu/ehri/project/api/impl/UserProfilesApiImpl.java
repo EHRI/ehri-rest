@@ -8,7 +8,6 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.models.events.SystemEvent;

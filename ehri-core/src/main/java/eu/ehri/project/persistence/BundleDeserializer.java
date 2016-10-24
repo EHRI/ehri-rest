@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class BundleDeserializer extends JsonDeserializer<Bundle> {
-    private static TypeReference<Map<String, Object>> tref = new TypeReference<Map<String, Object>>() {
+    private static final TypeReference<Map<String, Object>> tref = new TypeReference<Map<String, Object>>() {
     };
 
     @Override

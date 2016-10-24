@@ -25,7 +25,6 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
-import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.utils.JavaHandlerUtils;

@@ -51,14 +51,14 @@ public class ClassUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
 
-    private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
-    private static Map<Class<?>,Map<String,Method>> metaMethodCache = Maps.newHashMap();
-    private static Map<Class<?>,Map<String,Set<String>>> enumPropertyValuesCache = Maps.newHashMap();
-    private static Map<Class<?>,Collection<String>> propertyKeysCache = Maps.newHashMap();
-    private static Map<Class<?>,Collection<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
-    private static Map<Class<?>,Collection<String>> uniquePropertyKeysCache = Maps.newHashMap();
-    private static Map<Class<?>,Map<String, Direction>> dependentRelationsCache = Maps.newHashMap();
-    private static Map<Class<?>,EntityClass> entityClassCache = Maps.newHashMap();
+    private static final Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
+    private static final Map<Class<?>,Map<String,Method>> metaMethodCache = Maps.newHashMap();
+    private static final Map<Class<?>,Map<String,Set<String>>> enumPropertyValuesCache = Maps.newHashMap();
+    private static final Map<Class<?>,Collection<String>> propertyKeysCache = Maps.newHashMap();
+    private static final Map<Class<?>,Collection<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
+    private static final Map<Class<?>,Collection<String>> uniquePropertyKeysCache = Maps.newHashMap();
+    private static final Map<Class<?>,Map<String, Direction>> dependentRelationsCache = Maps.newHashMap();
+    private static final Map<Class<?>,EntityClass> entityClassCache = Maps.newHashMap();
 
     /**
      * Get the entity type string for a given class.

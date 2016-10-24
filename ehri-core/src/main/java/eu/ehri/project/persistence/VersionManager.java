@@ -2,6 +2,7 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -53,9 +54,10 @@ public class VersionManager {
      * @param type the entity class
      * @return an iterable of Version frames
      */
-    public Iterable<Version> versionsAtDeletion(EntityClass type, String from, String until) {
-        return Iterables.filter(manager.getEntities(Ontology.VERSION_ENTITY_CLASS, type.getName(),
-                EntityClass.VERSION, Version.class), v -> {
+    public CloseableIterable<Version> versionsAtDeletion(EntityClass type, String from, String until) {
+        CloseableIterable<Version> versions = manager.getEntities(Ontology.VERSION_ENTITY_CLASS, type.getName(),
+                EntityClass.VERSION, Version.class);
+        return new WrappingCloseableIterable<>(Iterables.filter(versions, v -> {
             SystemEvent latestEvent = v.getTriggeringEvent();
             try {
                 return latestEvent.getEventType().equals(EventTypes.deletion)
@@ -65,6 +67,6 @@ public class VersionManager {
                 // Shouldn't happen, but just to be safe...
                 return false;
             }
-        });
+        }));
     }
 }

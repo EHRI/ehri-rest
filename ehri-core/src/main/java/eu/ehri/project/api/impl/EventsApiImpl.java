@@ -53,7 +53,7 @@ import java.util.Set;
 /**
  * View class for handling event streams.
  */
-public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
+public class EventsApiImpl implements EventsApi {
 
     private static final Logger logger = LoggerFactory.getLogger(EventsApiImpl.class);
 
@@ -549,17 +549,11 @@ public class EventsApiImpl implements eu.ehri.project.api.EventsApi {
                 return pipeline.add(new AggregatorPipe<>(userAggregator));
             default:
                 // Default case: no aggregation, so simply wrap each event in a list
-                return pipeline.transform(new PipeFunction<SystemEvent, List<SystemEvent>>() {
-                    @Override
-                    public List<SystemEvent> compute(SystemEvent event) {
-                        return Lists.newArrayList(event);
-                    }
-                });
+                return pipeline.transform(Lists::newArrayList);
         }
     }
 
-    private <E, S> GremlinPipeline<E, S> setPipelineRange(
-            GremlinPipeline<E, S> filter) {
+    private <E, S> GremlinPipeline<E, S> setPipelineRange(GremlinPipeline<E, S> filter) {
         int low = Math.max(0, offset);
         if (limit < 0) {
             // No way to skip a bunch of items in Gremlin without
