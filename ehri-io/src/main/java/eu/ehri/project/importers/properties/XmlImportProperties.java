@@ -41,18 +41,10 @@ import java.util.Set;
 public class XmlImportProperties implements ImportProperties {
 
 
-    private final String configFileName;
-    private Properties cachedProperties;
+    private final Properties properties;
 
     public XmlImportProperties(String configFile) {
-        this.configFileName = configFile;
-    }
-
-    private Properties getProperties() {
-        if (cachedProperties == null) {
-            cachedProperties = PropertyLoader.loadProperties(this.configFileName);
-        }
-        return cachedProperties;
+        properties = PropertyLoader.loadProperties(configFile);
     }
 
     /**
@@ -60,7 +52,7 @@ public class XmlImportProperties implements ImportProperties {
      */
     @Override
     public String getProperty(String key) {
-        return getProperties().getProperty(key);
+        return properties.getProperty(key);
     }
 
     /**
@@ -69,10 +61,9 @@ public class XmlImportProperties implements ImportProperties {
      * @param value the value that requested properties must have
      * @return a set of key names that have the given value
      */
-    public Set<String> getPropertiesWithValue(String value) {
+    Set<String> getPropertiesWithValue(String value) {
         Set<String> ps = Sets.newHashSet();
-        Properties p = getProperties();
-        for (Entry<Object, Object> property : p.entrySet()) {
+        for (Entry<Object, Object> property : properties.entrySet()) {
             if (value.equals(property.getValue())) {
                 ps.add(property.getKey().toString());
             }
@@ -81,8 +72,7 @@ public class XmlImportProperties implements ImportProperties {
     }
 
     public String getFirstPropertyWithValue(String value) {
-        Properties p = getProperties();
-        for (Entry<Object, Object> property : p.entrySet()) {
+        for (Entry<Object, Object> property : properties.entrySet()) {
             if (value.equals(property.getValue().toString()))
                 return property.getKey().toString();
         }
@@ -90,28 +80,27 @@ public class XmlImportProperties implements ImportProperties {
     }
 
     public String getProperty(String key, String defaultValue) {
-        return getProperties().getProperty(key, defaultValue);
+        return properties.getProperty(key, defaultValue);
     }
 
     @Override
     public boolean containsPropertyValue(String value) {
-        return getProperties().containsValue(value);
+        return properties.containsValue(value);
     }
 
     @Override
     public Set<String> getAllNonAttributeValues() {
         Set<String> values = new HashSet<>();
-        Properties p = getProperties();
-        for (Object key : p.keySet()) {
+        for (Object key : properties.keySet()) {
             if (!key.toString().startsWith("@"))
-                values.add(p.getProperty(key.toString()));
+                values.add(properties.getProperty(key.toString()));
         }
         return values;
     }
 
     @Override
     public boolean containsProperty(String path) {
-        return getProperties().containsKey(path);
+        return properties.containsKey(path);
     }
 
     /**
@@ -160,7 +149,7 @@ abstract class PropertyLoader {
         }
     }
 
-    public static Properties loadPropertiesFromResourceOrFile(String name, ClassLoader loader) {
+    private static Properties loadPropertiesFromResourceOrFile(String name, ClassLoader loader) {
         Preconditions.checkNotNull(name, "Property resource name may not be null");
         if (loader == null) {
             loader = ClassLoader.getSystemClassLoader();
@@ -192,7 +181,7 @@ abstract class PropertyLoader {
      * @return resource converted to java.util.Properties
      * @throws IllegalArgumentException if the resource was not found
      */
-    public static Properties loadProperties(String name, ClassLoader loader) throws IllegalArgumentException {
+    private static Properties loadProperties(String name, ClassLoader loader) throws IllegalArgumentException {
         Properties result = loadPropertiesFromResourceOrFile(name, loader);
         if (result == null) {
             String err = String.format("could not load [%s] as a classpath resource", name);
@@ -205,7 +194,7 @@ abstract class PropertyLoader {
      * A convenience overload of {@link #loadProperties(String, ClassLoader)} that uses the current thread's context
      * ClassLoader.
      */
-    public static Properties loadProperties(String name) {
+    static Properties loadProperties(String name) {
         return loadProperties(name, Thread.currentThread().getContextClassLoader());
     }
 }
