@@ -6,7 +6,7 @@ import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class GraphQLImplTest extends AbstractFixtureTest {
     @Test
@@ -14,7 +14,7 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         GraphQLImpl graphQL = new GraphQLImpl(anonApi());
         GraphQLSchema schema = graphQL.getSchema();
         String testQuery = readResourceFileAsString("testquery.graphql");
-        ExecutionResult result = new GraphQL(schema, new LazyExecutionStrategy())
+        ExecutionResult result = new GraphQL(schema)
                 .execute(testQuery);
         assertTrue(result.getErrors().isEmpty());
     }

@@ -54,14 +54,14 @@ public class StreamingGraphQL {
     public void execute(JsonGenerator generator, Document document, String operationName, Object context, Map<String, Object>
             arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        log.info("Executing request. operation name: {}. Request: {} ", operationName, document);
+        log.debug("Executing request. operation name: {}. Request: {} ", operationName, document);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy());
         execution.execute(generator, graphQLSchema, context, document, operationName, arguments);
     }
 
     public void execute(JsonGenerator generator, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        log.info("Executing request. operation name: {}. Request: {} ", operationName, requestString);
+        log.debug("Executing request. operation name: {}. Request: {} ", operationName, requestString);
         Document document = parseAndValidate(requestString);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy());
         execution.execute(generator, graphQLSchema, context, document, operationName, arguments);
