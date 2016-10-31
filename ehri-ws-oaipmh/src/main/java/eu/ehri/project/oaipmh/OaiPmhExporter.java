@@ -138,6 +138,7 @@ public class OaiPmhExporter extends StreamingXmlDsl {
     private void listSets(XMLStreamWriter sw, OaiPmhState state) throws OaiPmhError {
         QueryApi.Page<OaiPmhSet> sets = data.getSets(state);
         long count = sets.getTotal();
+        Map<String, String> rtAttrs = getResumptionAttrs(sets);
         withDoc(sw, () -> {
             preamble(sw, Verb.ListSets.name(), state.toMap());
             tag(sw, Verb.ListSets.name(), () -> {
@@ -149,9 +150,9 @@ public class OaiPmhExporter extends StreamingXmlDsl {
                     });
                 }
                 if (state.shouldResume(Math.toIntExact(count))) {
-                    tag(sw, "resumptionToken", state.nextState());
+                    tag(sw, "resumptionToken", state.nextState(), rtAttrs);
                 } else if (state.hasResumed()) {
-                    tag(sw, "resumptionToken", (String) null);
+                    tag(sw, "resumptionToken", null, rtAttrs);
                 }
             });
         });
@@ -185,6 +186,7 @@ public class OaiPmhExporter extends StreamingXmlDsl {
         QueryApi.Page<DocumentaryUnit> items = data.getFilteredDocumentaryUnits(state);
         long count = items.getTotal();
         Iterable<OaiPmhDeleted> deleted = data.getFilteredDeletedDocumentaryUnits(state);
+        Map<String, String> rtAttrs = getResumptionAttrs(items);
         if (count == 0 && !deleted.iterator().hasNext()) {
             throw new OaiPmhError(ErrorCode.noRecordsMatch);
         }
@@ -196,13 +198,13 @@ public class OaiPmhExporter extends StreamingXmlDsl {
                     tag(sw, "header", () -> writeRecordHeader(sw, item.getId(), item));
                 }
                 if (state.shouldResume(Math.toIntExact(count))) {
-                    tag(sw, "resumptionToken", state.nextState());
+                    tag(sw, "resumptionToken", state.nextState(), rtAttrs);
                 } else {
                     for (OaiPmhDeleted item : deleted) {
                         writeDeletedRecord(sw, item.getId(), formatDate(item.getDatestamp()), item.getSets());
                     }
                     if (state.hasResumed()) {
-                        tag(sw, "resumptionToken", (String) null);
+                        tag(sw, "resumptionToken", null, rtAttrs);
                     }
                 }
             });
@@ -213,6 +215,7 @@ public class OaiPmhExporter extends StreamingXmlDsl {
         LocalDateTime before = LocalDateTime.now();
         QueryApi.Page<DocumentaryUnit> items = data.getFilteredDocumentaryUnits(state);
         long count = items.getTotal();
+        Map<String, String> rtAttrs = getResumptionAttrs(items);
         Iterable<OaiPmhDeleted> deleted = data.getFilteredDeletedDocumentaryUnits(state);
         if (count == 0 && !deleted.iterator().hasNext()) {
             throw new OaiPmhError(ErrorCode.noRecordsMatch);
@@ -230,14 +233,14 @@ public class OaiPmhExporter extends StreamingXmlDsl {
                     });
                 }
                 if (state.shouldResume(Math.toIntExact(count))) {
-                    tag(sw, "resumptionToken", state.nextState());
+                    tag(sw, "resumptionToken", state.nextState(), rtAttrs);
                 } else {
                     for (OaiPmhDeleted item : deleted) {
                         tag(sw, "record", () ->
                                 writeDeletedRecord(sw, item.getId(), formatDate(item.getDatestamp()), item.getSets()));
                     }
                     if (state.hasResumed()) {
-                        tag(sw, "resumptionToken", (String) null);
+                        tag(sw, "resumptionToken", null, rtAttrs);
                     }
                 }
             });
@@ -314,6 +317,10 @@ public class OaiPmhExporter extends StreamingXmlDsl {
             preamble(sw, verb != null ? verb.name() : null, attrs());
             tag(sw, "error", msg, attrs("code", code.name()));
         });
+    }
+
+    private Map<String, String> getResumptionAttrs(QueryApi.Page<?> page) {
+        return attrs("completeListSize", page.getTotal(), "cursor", page.getOffset());
     }
 
     private static String formatDate(String timestamp) {
