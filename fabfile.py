@@ -34,17 +34,17 @@ TIMESTAMP_FORMAT = "%Y%m%d%H%M%S"
 @task
 def test():
     "Use the remote testing server."
-    env.hosts = ['ehritest']
+    env.hosts = ['ehri-test-01']
 
 @task
 def stage():
     "Use the remote staging server."
-    env.hosts = ['ehristage']
+    env.hosts = ['ehri-stage-01']
 
 @task
 def prod():
     "Use the remote virtual server."
-    env.hosts = ['ehriprod']
+    env.hosts = ['ehri-portal-01']
     env.prod = True
 
 @task
@@ -61,7 +61,7 @@ def deploy():
 @task
 def clean_deploy():
     """Build a clean version and deploy."""
-    local('mvn clean package -P sparql  -DskipTests')
+    local('mvn clean package -DskipTests')
     deploy()
 
 @task
@@ -472,9 +472,10 @@ def reindex_all():
 def current_version():
     "Show the current date/revision"
     with cd(env.path):
+        import re
         path = run("readlink -f current")
-        deploy = os.path.split(path)
-        timestamp, revision = os.path.basename(deploy[-1]).split("_")
+        m = re.search("ehri-data-(?P<timestamp>\d{14})_(?P<revision>[a-f0-9]{6})", path)
+        timestamp, revision = m.groups()
         date = datetime.strptime(timestamp, TIMESTAMP_FORMAT)
         print("Timestamp: %s, revision: %s" % (date, revision))
         return date, revision
