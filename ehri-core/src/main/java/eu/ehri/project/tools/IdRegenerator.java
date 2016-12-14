@@ -87,9 +87,7 @@ public class IdRegenerator {
         List<List<String>> remaps = Lists.newArrayList();
         for (Entity item : items) {
             Optional<List<String>> optionalRemap = reGenerateId(scope, item);
-            if (optionalRemap.isPresent()) {
-                remaps.add(optionalRemap.get());
-            }
+            optionalRemap.ifPresent(remaps::add);
         }
         return remaps;
     }
@@ -98,9 +96,7 @@ public class IdRegenerator {
         List<List<String>> remaps = Lists.newArrayList();
         for (Accessible item : items) {
             Optional<List<String>> optionalRemap = reGenerateId(item);
-            if (optionalRemap.isPresent()) {
-                remaps.add(optionalRemap.get());
-            }
+            optionalRemap.ifPresent(remaps::add);
         }
         return remaps;
     }

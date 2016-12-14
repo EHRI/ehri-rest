@@ -68,12 +68,11 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Miscellaneous additional functionality that doesn't
@@ -164,8 +163,8 @@ public class ToolsResource extends AbstractResource {
     }
 
     /**
-     * Regenerate the hierarchical graph ID for a given item, optionally
-     * renaming it.
+     * Regenerate the hierarchical graph ID for a set of items, optionally
+     * renaming them.
      * <p>
      * The default mode is to output items whose IDs would change, without
      * actually changing them. The {@code collisions} parameter will <b>only</b>
@@ -174,7 +173,7 @@ public class ToolsResource extends AbstractResource {
      * <p>
      * The {@code commit} flag will cause renaming to take place.
      *
-     * @param id         the item's existing ID
+     * @param ids        the existing item IDs
      * @param collisions only output items that if renamed to the
      *                   regenerated ID would cause collisions
      * @param tolerant   skip items that could cause collisions rather
@@ -185,23 +184,29 @@ public class ToolsResource extends AbstractResource {
      */
     @POST
     @Produces("text/csv")
-    @Path("regenerate-id/{id:[^/]+}")
-    public String regenerateId(
-            @PathParam("id") String id,
+    @Path("regenerate-ids")
+    public String regenerateIds(
+            @QueryParam("id") List<String> ids,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
             @QueryParam("commit") @DefaultValue("false") boolean commit)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
-            Accessible item = manager.getEntity(id, Accessible.class);
-            Optional<List<String>> remap = new IdRegenerator(graph)
+            List<Accessible> items = ids.stream().map(id -> {
+                try {
+                    return manager.getEntity(id, Accessible.class);
+                } catch (ItemNotFound e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+
+            List<List<String>> remap = new IdRegenerator(graph)
                     .withActualRename(commit)
                     .collisionMode(collisions)
                     .skippingCollisions(tolerant)
-                    .reGenerateId(item);
+                    .reGenerateIds(items);
             tx.success();
-            return makeCsv(Lists.newArrayList(remap.map(Collections::singleton)
-                    .orElse(Collections.emptySet())));
+            return makeCsv(remap);
         }
     }
 
