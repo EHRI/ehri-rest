@@ -34,14 +34,17 @@ import static org.junit.Assert.assertTrue;
  */
 public class ToolsResourceClientTest extends AbstractResourceClientTest {
     @Test
-    public void testRegenerateId() throws Exception {
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-id", "c1"))
+    public void testRegenerateIds() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-ids"))
+                .queryParam("id", "c1")
+                .queryParam("id", "c4")
                 .queryParam("commit", "true");
         ClientResponse response = resource.post(ClientResponse.class);
         String out = response.getEntity(String.class);
         assertStatus(OK, response);
-        assertEquals(1, out.split("\r\n|\r|\n").length);
+        assertEquals(2, out.split("\r\n|\r|\n").length);
         assertTrue(out.contains("nl-r1-c1"));
+        assertTrue(out.contains("nl-r1-c4"));
     }
 
     @Test
