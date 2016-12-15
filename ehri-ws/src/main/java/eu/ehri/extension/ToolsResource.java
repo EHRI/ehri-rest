@@ -50,11 +50,14 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
+import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -68,6 +71,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,6 +98,45 @@ public class ToolsResource extends AbstractResource {
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);
         linker = new Linker(graph);
+    }
+
+    /**
+     * Find and replace text in descriptions for a given item type
+     * and description property name.
+     *
+     * Changes will be logged to the audit log.
+     *
+     * @param type     the type of entity
+     * @param property the property name
+     * @param from     the original text
+     * @param to       the replacement text
+     * @param commit   actually commit the changes
+     * @return a list of item IDs for those items changed
+     */
+    @POST
+    @Path("find-replace-in-description")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("text/csv")
+    public String findReplace(
+            final @FormParam("from") String from,
+            final @FormParam("to") String to,
+            final @QueryParam("type") String type,
+            final @QueryParam("property") String property,
+            final @FormParam("max") @DefaultValue("100") int maxItems,
+            final @QueryParam("commit") @DefaultValue("false") boolean commit) throws IOException {
+
+        try (final Tx tx = beginTx()) {
+            FindReplace fr = new FindReplace(graph, maxItems).withActualRename(commit);
+            List<Described> list = fr.findAndReplaceInDescription(EntityClass.withName(type), property, from, to,
+                    getCurrentUser(), getLogMessage()
+                            .orElseThrow(() -> new RuntimeException("A log message is required")));
+
+            List<List<String>> rows = list.stream()
+                    .map(a -> Collections.singletonList(a.getId()))
+                    .collect(Collectors.toList());
+            tx.success();
+            return makeCsv(rows);
+        }
     }
 
     /**
