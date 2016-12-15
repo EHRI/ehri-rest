@@ -104,10 +104,11 @@ public class ToolsResource extends AbstractResource {
     /**
      * Find and replace text in descriptions for a given item type
      * and description property name.
-     *
+     * <p>
      * Changes will be logged to the audit log.
      *
-     * @param type     the type of entity
+     * @param type     the parent entity type
+     * @param subType  the specific node type
      * @param property the property name
      * @param from     the original text
      * @param to       the replacement text
@@ -122,6 +123,7 @@ public class ToolsResource extends AbstractResource {
             final @FormParam("from") String from,
             final @FormParam("to") String to,
             final @QueryParam("type") String type,
+            final @QueryParam("subtype") String subType,
             final @QueryParam("property") String property,
             final @FormParam("max") @DefaultValue("100") int maxItems,
             final @QueryParam("commit") @DefaultValue("false") boolean commit) throws IOException {
@@ -134,8 +136,9 @@ public class ToolsResource extends AbstractResource {
 
         try (final Tx tx = beginTx()) {
             FindReplace fr = new FindReplace(graph, maxItems).withActualRename(commit);
-            List<Accessible> list = fr.findAndReplace(EntityClass.withName(type), property, from, to,
-                    getCurrentUser(), getLogMessage()
+            List<Accessible> list = fr.findAndReplace(EntityClass.withName(type),
+                        EntityClass.withName(subType), property, from, to,
+                        getCurrentUser(), getLogMessage()
                             .orElseThrow(() -> new RuntimeException("A log message is required")));
 
             List<List<String>> rows = list.stream()

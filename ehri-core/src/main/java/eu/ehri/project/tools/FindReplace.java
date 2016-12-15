@@ -1,7 +1,6 @@
 package eu.ehri.project.tools;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -21,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -43,7 +41,7 @@ public class FindReplace {
     private final Serializer depSerializer;
     private final BundleManager dao;
 
-    public FindReplace(FramedGraph<?> graph, boolean dryrun, int maxItems) {
+    FindReplace(FramedGraph<?> graph, boolean dryrun, int maxItems) {
         this.graph = graph;
         this.dryrun = dryrun;
         this.maxItems = maxItems;
@@ -62,7 +60,7 @@ public class FindReplace {
     }
 
     public List<Accessible> findAndReplace(
-            EntityClass entityClass, String property,
+            EntityClass parentType, EntityClass subType, String property,
             String find, String replace, Actioner actioner, String logMessage) {
 
         logger.info("Find: '{}'", find);
@@ -72,16 +70,17 @@ public class FindReplace {
         ActionManager.EventContext context = actionManager
                 .newEventContext(actioner, EventTypes.modification, Optional.of(logMessage));
 
-        try (CloseableIterable<Accessible> entities = manager.getEntities(entityClass, Accessible.class)) {
+        try (CloseableIterable<Accessible> entities = manager.getEntities(parentType, Accessible.class)) {
             for (Accessible entity : entities) {
                 if (todo.size() >= maxItems) {
                     break;
                 }
 
                 Bundle bundle = depSerializer.entityToBundle(entity);
-                boolean match = bundle.forAny(d -> find(find, d.getDataValue(property)));
+                boolean hasMatch = bundle.forAny(d ->
+                        d.getType().equals(subType) && find(find, d.getDataValue(property)));
 
-                if (match) {
+                if (hasMatch) {
                     todo.add(entity);
                     logger.info("Found in {}", entity.getId());
 
@@ -89,8 +88,13 @@ public class FindReplace {
                         context.createVersion(entity);
                         context.addSubjects(entity);
 
-                        Bundle newBundle = bundle.map(d -> d.withDataValue(property,
-                                replace(find, replace, d.getDataValue(property))));
+                        Bundle newBundle = bundle.map(d -> {
+                            if (d.getType().equals(subType)) {
+                                Object newValue = replace(find, replace, d.getDataValue(property));
+                                return d.withDataValue(property, newValue);
+                            }
+                            return d;
+                        });
                         dao.update(newBundle, Accessible.class);
                     }
                 }

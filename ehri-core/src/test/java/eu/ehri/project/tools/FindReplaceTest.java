@@ -22,8 +22,10 @@ public class FindReplaceTest extends AbstractFixtureTest {
     public void testFindAndReplace() throws Exception {
         FindReplace findReplace = new FindReplace(graph, false, 100);
         List<VertexProxy> before = getGraphState(graph);
-        List<Accessible> done = findReplace.findAndReplace(EntityClass.REPOSITORY,
-                "name", "Description", "Test", validUser, "This is a test");
+        List<Accessible> done = findReplace.findAndReplace(
+                EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
+                "name", "Description",
+                "Test", validUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
         assertEquals(10, diff.added.size());
@@ -46,8 +48,10 @@ public class FindReplaceTest extends AbstractFixtureTest {
     public void testFindAndReplaceMaxItems() throws Exception {
         FindReplace findReplace = new FindReplace(graph, false, 2);
         List<VertexProxy> before = getGraphState(graph);
-        List<Accessible> done = findReplace.findAndReplace(EntityClass.REPOSITORY,
-                "name", "Description", "Test", validUser, "This is a test");
+        List<Accessible> done = findReplace.findAndReplace(
+                EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
+                "name", "Description",
+                "Test", validUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
         assertEquals(6, diff.added.size());
@@ -59,12 +63,24 @@ public class FindReplaceTest extends AbstractFixtureTest {
     public void testFindAndReplaceDryRun() throws Exception {
         FindReplace findReplace = new FindReplace(graph, true, 100);
         List<VertexProxy> before = getGraphState(graph);
-        List<Accessible> todo = findReplace.findAndReplace(EntityClass.REPOSITORY,
-                "name", "Description", "Test", validUser, "This is a test");
+        List<Accessible> todo = findReplace.findAndReplace(
+                EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
+                "name", "Description",
+                "Test", validUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
-        assertEquals(00, diff.added.size());
+        assertEquals(0, diff.added.size());
         assertEquals(0, diff.removed.size());
         assertEquals(4, todo.size());
+    }
+
+    @Test
+    public void testFindAndReplaceNoneFound() throws Exception {
+        FindReplace findReplace = new FindReplace(graph, true, 100);
+        List<Accessible> todo = findReplace.findAndReplace(
+                EntityClass.REPOSITORY, EntityClass.ADDRESS,
+                "name", "Description",
+                "Test", validUser, "This is a test");
+        assertEquals(0, todo.size());
     }
 }
