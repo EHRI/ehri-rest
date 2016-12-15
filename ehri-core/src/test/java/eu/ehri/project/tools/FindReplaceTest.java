@@ -22,7 +22,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
     public void testFindAndReplace() throws Exception {
         FindReplace findReplace = new FindReplace(graph, false, 100);
         List<VertexProxy> before = getGraphState(graph);
-        List<Described> done = findReplace.findAndReplaceInDescription(EntityClass.REPOSITORY,
+        List<Accessible> done = findReplace.findAndReplace(EntityClass.REPOSITORY,
                 "name", "Description", "Test", validUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
@@ -31,7 +31,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
 
         List<String> names = done.stream()
                 .flatMap(p -> StreamSupport
-                        .stream(p.getDescriptions().spliterator(), false)
+                        .stream(p.as(Described.class).getDescriptions().spliterator(), false)
                         .map(d -> d.<String>getProperty(Ontology.NAME_KEY)))
                 .sorted()
                 .collect(Collectors.toList());
@@ -46,7 +46,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
     public void testFindAndReplaceMaxItems() throws Exception {
         FindReplace findReplace = new FindReplace(graph, false, 2);
         List<VertexProxy> before = getGraphState(graph);
-        List<Described> done = findReplace.findAndReplaceInDescription(EntityClass.REPOSITORY,
+        List<Accessible> done = findReplace.findAndReplace(EntityClass.REPOSITORY,
                 "name", "Description", "Test", validUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
@@ -59,7 +59,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
     public void testFindAndReplaceDryRun() throws Exception {
         FindReplace findReplace = new FindReplace(graph, true, 100);
         List<VertexProxy> before = getGraphState(graph);
-        List<Described> todo = findReplace.findAndReplaceInDescription(EntityClass.REPOSITORY,
+        List<Accessible> todo = findReplace.findAndReplace(EntityClass.REPOSITORY,
                 "name", "Description", "Test", validUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);

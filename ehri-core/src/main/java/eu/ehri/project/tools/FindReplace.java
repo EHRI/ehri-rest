@@ -1,23 +1,27 @@
 package eu.ehri.project.tools;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Described;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleManager;
+import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.security.krb5.internal.crypto.Des;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -36,6 +40,8 @@ public class FindReplace {
     private final int maxItems;
     private final GraphManager manager;
     private final ActionManager actionManager;
+    private final Serializer depSerializer;
+    private final BundleManager dao;
 
     public FindReplace(FramedGraph<?> graph, boolean dryrun, int maxItems) {
         this.graph = graph;
@@ -43,6 +49,8 @@ public class FindReplace {
         this.maxItems = maxItems;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.actionManager = new ActionManager(graph);
+        this.depSerializer = new Serializer.Builder(graph).dependentOnly().build();
+        this.dao = new BundleManager(graph);
     }
 
     public FindReplace(FramedGraph<?> graph, int maxItems) {
@@ -53,37 +61,42 @@ public class FindReplace {
         return new FindReplace(graph, !commit, maxItems);
     }
 
-    public List<Described> findAndReplaceInDescription(
+    public List<Accessible> findAndReplace(
             EntityClass entityClass, String property,
             String find, String replace, Actioner actioner, String logMessage) {
 
         logger.info("Find: '{}'", find);
         logger.info("Replace: '{}'", replace);
 
-        List<Described> todo = Lists.newArrayList();
+        List<Accessible> todo = Lists.newArrayList();
         ActionManager.EventContext context = actionManager
                 .newEventContext(actioner, EventTypes.modification, Optional.of(logMessage));
 
-        try (CloseableIterable<Described> entities = manager.getEntities(entityClass, Described.class)) {
-            for (Described entity : entities) {
+        try (CloseableIterable<Accessible> entities = manager.getEntities(entityClass, Accessible.class)) {
+            for (Accessible entity : entities) {
                 if (todo.size() >= maxItems) {
                     break;
                 }
 
-                for (Description description : entity.getDescriptions()) {
-                    Object value = description.getProperty(property);
-                    if (find(find, value)) {
-                        todo.add(entity);
-                        logger.info("Found in {}: {}", entity.getId(), description.getLanguageOfDescription());
+                Bundle bundle = depSerializer.entityToBundle(entity);
+                boolean match = bundle.forAny(d -> find(find, d.getDataValue(property)));
 
-                        if (!dryrun) {
-                            context.createVersion(entity);
-                            context.addSubjects(entity);
-                            description.asVertex().setProperty(property, replace(find, replace, value));
-                        }
+                if (match) {
+                    todo.add(entity);
+                    logger.info("Found in {}", entity.getId());
+
+                    if (!dryrun) {
+                        context.createVersion(entity);
+                        context.addSubjects(entity);
+
+                        Bundle newBundle = bundle.map(d -> d.withDataValue(property,
+                                replace(find, replace, d.getDataValue(property))));
+                        dao.update(newBundle, Accessible.class);
                     }
                 }
             }
+        } catch (SerializationError | ItemNotFound | ValidationError e) {
+            throw new RuntimeException(e);
         }
 
         if (!dryrun && !context.getSubjects().isEmpty()) {

@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
+import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -114,7 +115,7 @@ public class ToolsResource extends AbstractResource {
      * @return a list of item IDs for those items changed
      */
     @POST
-    @Path("find-replace-in-description")
+    @Path("find-replace")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("text/csv")
     public String findReplace(
@@ -125,9 +126,15 @@ public class ToolsResource extends AbstractResource {
             final @FormParam("max") @DefaultValue("100") int maxItems,
             final @QueryParam("commit") @DefaultValue("false") boolean commit) throws IOException {
 
+        try {
+            ContentTypes.withName(type);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid entity type (must be a content type)", e);
+        }
+
         try (final Tx tx = beginTx()) {
             FindReplace fr = new FindReplace(graph, maxItems).withActualRename(commit);
-            List<Described> list = fr.findAndReplaceInDescription(EntityClass.withName(type), property, from, to,
+            List<Accessible> list = fr.findAndReplace(EntityClass.withName(type), property, from, to,
                     getCurrentUser(), getLogMessage()
                             .orElseThrow(() -> new RuntimeException("A log message is required")));
 
