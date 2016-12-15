@@ -381,4 +381,24 @@ public class BundleTest {
         assertNotNull(desc.getId());
         assertEquals("test-foobar.en", desc.getId());
     }
+
+    @Test
+    public void testMapData() throws Exception {
+        Bundle n = bundle.map(d -> {
+           Map<String,Object> nd = Maps.newHashMap();
+           for (Map.Entry<String,Object> e : d.getData().entrySet()) {
+               nd.put(e.getKey() + "!", e.getValue());
+           }
+           return d.withData(nd);
+        });
+        assertEquals("foobar", DataUtils.get(n, "identifier!"));
+        assertEquals("Foobar", DataUtils.get(n, "describes[0]/name!"));
+    }
+
+    @Test
+    public void testForAnyData() throws Exception {
+        assertTrue(bundle.forAny(d -> d.getDataValue(Ontology.LANGUAGE) != null));
+        assertTrue(bundle.forAny(d -> "foobar".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))));
+        assertFalse(bundle.forAny(d -> "test".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))));
+    }
 }
