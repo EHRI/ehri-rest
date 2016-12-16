@@ -21,8 +21,12 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
+
+import javax.ws.rs.core.MultivaluedMap;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.ToolsResource.ENDPOINT;
@@ -33,6 +37,28 @@ import static org.junit.Assert.assertTrue;
  * Test web service miscellaneous functions.
  */
 public class ToolsResourceClientTest extends AbstractResourceClientTest {
+    @Test
+    public void testFindReplace() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "find-replace"))
+                .queryParam("type", Entities.REPOSITORY)
+                .queryParam("subtype", Entities.REPOSITORY_DESCRIPTION)
+                .queryParam("property", "name")
+                .queryParam("commit", "true");
+        MultivaluedMap<String,String> data = new MultivaluedMapImpl();
+        data.putSingle("from", "KCL Description");
+        data.putSingle("to", "NEW VALUE");
+        ClientResponse response = resource
+                .header(AbstractResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .header(AbstractResource.LOG_MESSAGE_HEADER_NAME,
+                        "This is a test!")
+                .post(ClientResponse.class, data);
+        String out = response.getEntity(String.class);
+        assertStatus(OK, response);
+        assertEquals(1, out.split("\r\n|\r|\n").length);
+        assertTrue(out.contains("r2"));
+    }
+
     @Test
     public void testRegenerateIds() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-ids"))

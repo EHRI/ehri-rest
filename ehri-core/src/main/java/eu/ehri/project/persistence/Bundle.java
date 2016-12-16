@@ -42,9 +42,12 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -323,7 +326,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @return The full data map
      */
     public Map<String, Object> getData() {
-        return ImmutableMap.copyOf(Maps.filterValues(data, value -> value != null));
+        return ImmutableMap.copyOf(Maps.filterValues(data, Objects::nonNull));
     }
 
     /**
@@ -555,17 +558,49 @@ public final class Bundle implements NestableData<Bundle> {
      * @return a bundle with relations matching the given predicate function removed.
      */
     public Bundle filterRelations(BiPredicate<String, Bundle> filter) {
-        Builder builder = new Builder(type)
-                .addData(data)
-                .addMetaData(meta)
-                .setId(id);
+        final Multimap<String, Bundle> newRels = ArrayListMultimap.create();
         for (Map.Entry<String, Bundle> rel : relations.entries()) {
             if (!filter.test(rel.getKey(), rel.getValue())) {
-                builder.addRelation(rel.getKey(), rel.getValue()
+                newRels.put(rel.getKey(), rel.getValue()
                         .filterRelations(filter));
             }
         }
-        return builder.build();
+        return replaceRelations(newRels);
+    }
+
+    /**
+     * Run a function transforming all items in the bundle, including the top level,
+     * returning a new bundle.
+     *
+     * @param f A (pure) function transforming the bundle
+     * @return A new bundle
+     */
+    public Bundle map(Function<Bundle, Bundle> f) {
+        Bundle me = f.apply(this);
+        final Multimap<String, Bundle> newRels = ArrayListMultimap.create();
+        for (Map.Entry<String, Bundle> rel : me.getRelations().entries()) {
+            newRels.put(rel.getKey(), rel.getValue().map(f));
+        }
+        return me.replaceRelations(newRels);
+    }
+
+    /**
+     * Test if a predicate function holds true for any item in the
+     * bundle, including the top level.
+     *
+     * @param f A predicate function
+     * @return If the predicate tested true
+     */
+    public boolean forAny(Predicate<Bundle> f) {
+        if (f.test(this)) {
+            return true;
+        }
+        for (Map.Entry<String, Bundle> rel : relations.entries()) {
+            if (rel.getValue().forAny(f)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
