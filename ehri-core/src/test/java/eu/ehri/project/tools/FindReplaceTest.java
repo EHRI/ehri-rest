@@ -20,7 +20,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
 
     @Test
     public void testFindAndReplace() throws Exception {
-        FindReplace findReplace = new FindReplace(graph, false, 100);
+        FindReplace findReplace = new FindReplace(graph, true, 100);
         List<VertexProxy> before = getGraphState(graph);
         List<Accessible> done = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
@@ -46,7 +46,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
 
     @Test
     public void testFindAndReplaceMaxItems() throws Exception {
-        FindReplace findReplace = new FindReplace(graph, false, 2);
+        FindReplace findReplace = new FindReplace(graph, true, 2);
         List<VertexProxy> before = getGraphState(graph);
         List<Accessible> done = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
@@ -61,7 +61,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
 
     @Test
     public void testFindAndReplaceDryRun() throws Exception {
-        FindReplace findReplace = new FindReplace(graph, true, 100);
+        FindReplace findReplace = new FindReplace(graph, false, 100);
         List<VertexProxy> before = getGraphState(graph);
         List<Accessible> todo = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
@@ -76,7 +76,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
 
     @Test
     public void testFindAndReplaceNoneFound() throws Exception {
-        FindReplace findReplace = new FindReplace(graph, true, 100);
+        FindReplace findReplace = new FindReplace(graph, false, 100);
         List<Accessible> todo = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.ADDRESS,
                 "name", "Description",

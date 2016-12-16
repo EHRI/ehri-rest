@@ -1,5 +1,6 @@
 package eu.ehri.project.tools;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
@@ -34,16 +35,16 @@ public class FindReplace {
     private static final Logger logger = LoggerFactory.getLogger(FindReplace.class);
 
     private final FramedGraph<?> graph;
-    private final boolean dryrun;
+    private final boolean commit;
     private final int maxItems;
     private final GraphManager manager;
     private final ActionManager actionManager;
     private final Serializer depSerializer;
     private final BundleManager dao;
 
-    FindReplace(FramedGraph<?> graph, boolean dryrun, int maxItems) {
+    public FindReplace(FramedGraph<?> graph, boolean commit, int maxItems) {
         this.graph = graph;
-        this.dryrun = dryrun;
+        this.commit = commit;
         this.maxItems = maxItems;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.actionManager = new ActionManager(graph);
@@ -51,26 +52,43 @@ public class FindReplace {
         this.dao = new BundleManager(graph);
     }
 
-    public FindReplace(FramedGraph<?> graph, int maxItems) {
-        this(graph, true, maxItems);
-    }
-
-    public FindReplace withActualRename(boolean commit) {
-        return new FindReplace(graph, !commit, maxItems);
-    }
-
+    /**
+     * Find and replace a string
+     *
+     * @param contentType the content type of the top-level item
+     * @param entityType  the entity type of the property-holding node
+     * @param property    the name of the property to search
+     * @param textToFind  the text to find
+     * @param replacement the replacement text
+     * @param actioner    the current user
+     * @param logMessage  a mandatory log message
+     * @return the number of items found, or those modified when running
+     * with commit enabled
+     */
     public List<Accessible> findAndReplace(
-            EntityClass parentType, EntityClass subType, String property,
-            String find, String replace, Actioner actioner, String logMessage) {
+            EntityClass contentType, EntityClass entityType,
+            String property, String textToFind, String replacement,
+            Actioner actioner, String logMessage) throws ValidationError {
 
-        logger.info("Find: '{}'", find);
-        logger.info("Replace: '{}'", replace);
+        Preconditions.checkNotNull(entityType, "Entity type cannot be null.");
+        Preconditions.checkNotNull(property, "Property name cannot be null.");
+        Preconditions.checkNotNull(textToFind, "Text to find cannot be null.");
+        Preconditions.checkArgument(!commit || replacement != null,
+                "Replacement text cannot be null if committing a replacement value.");
+        Preconditions.checkNotNull(logMessage, "Log message cannot be null.");
+
+        logger.info("Find:    '{}'", textToFind);
+        logger.info("Replace: '{}'", replacement);
 
         List<Accessible> todo = Lists.newArrayList();
-        ActionManager.EventContext context = actionManager
-                .newEventContext(actioner, EventTypes.modification, Optional.of(logMessage));
 
-        try (CloseableIterable<Accessible> entities = manager.getEntities(parentType, Accessible.class)) {
+        EventTypes eventType = contentType.equals(entityType)
+                ? EventTypes.modification
+                : EventTypes.modifyDependent;
+        ActionManager.EventContext context = actionManager
+                .newEventContext(actioner, eventType, Optional.of(logMessage));
+
+        try (CloseableIterable<Accessible> entities = manager.getEntities(contentType, Accessible.class)) {
             for (Accessible entity : entities) {
                 if (todo.size() >= maxItems) {
                     break;
@@ -78,19 +96,19 @@ public class FindReplace {
 
                 Bundle bundle = depSerializer.entityToBundle(entity);
                 boolean hasMatch = bundle.forAny(d ->
-                        d.getType().equals(subType) && find(find, d.getDataValue(property)));
+                        d.getType().equals(entityType) && find(textToFind, d.getDataValue(property)));
 
                 if (hasMatch) {
                     todo.add(entity);
                     logger.info("Found in {}", entity.getId());
 
-                    if (!dryrun) {
+                    if (commit) {
                         context.createVersion(entity);
                         context.addSubjects(entity);
 
                         Bundle newBundle = bundle.map(d -> {
-                            if (d.getType().equals(subType)) {
-                                Object newValue = replace(find, replace, d.getDataValue(property));
+                            if (d.getType().equals(entityType)) {
+                                Object newValue = replace(textToFind, replacement, d.getDataValue(property));
                                 return d.withDataValue(property, newValue);
                             }
                             return d;
@@ -99,11 +117,11 @@ public class FindReplace {
                     }
                 }
             }
-        } catch (SerializationError | ItemNotFound | ValidationError e) {
+        } catch (SerializationError | ItemNotFound e) {
             throw new RuntimeException(e);
         }
 
-        if (!dryrun && !context.getSubjects().isEmpty()) {
+        if (commit && !context.getSubjects().isEmpty()) {
             context.commit();
         }
 

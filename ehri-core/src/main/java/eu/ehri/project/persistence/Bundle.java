@@ -569,8 +569,8 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Run a function a top-level bundle
-     * and its relations.
+     * Run a function transforming all items in the bundle, including the top level,
+     * returning a new bundle.
      *
      * @param f A (pure) function transforming the bundle
      * @return A new bundle
@@ -585,8 +585,8 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Test if a predicate function passes for the data of the
-     * top-level bundle or its relations.
+     * Test if a predicate function holds true for any item in the
+     * bundle, including the top level.
      *
      * @param f A predicate function
      * @return If the predicate tested true

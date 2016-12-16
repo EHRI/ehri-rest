@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
@@ -112,6 +113,8 @@ public class ToolsResource extends AbstractResource {
      * @param property the property name
      * @param from     the original text
      * @param to       the replacement text
+     * @param maxItems the max number of items to change
+     *                 (defaults to 100)
      * @param commit   actually commit the changes
      * @return a list of item IDs for those items changed
      */
@@ -125,21 +128,21 @@ public class ToolsResource extends AbstractResource {
             final @QueryParam("type") String type,
             final @QueryParam("subtype") String subType,
             final @QueryParam("property") String property,
-            final @FormParam("max") @DefaultValue("100") int maxItems,
-            final @QueryParam("commit") @DefaultValue("false") boolean commit) throws IOException {
+            final @QueryParam("max") @DefaultValue("100") int maxItems,
+            final @QueryParam("commit") @DefaultValue("false") boolean commit) throws ValidationError {
 
         try {
             ContentTypes.withName(type);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid entity type (must be a content type)", e);
+            throw new IllegalArgumentException("Invalid entity type (must be a content type)");
         }
 
         try (final Tx tx = beginTx()) {
-            FindReplace fr = new FindReplace(graph, maxItems).withActualRename(commit);
+            FindReplace fr = new FindReplace(graph, commit, maxItems);
             List<Accessible> list = fr.findAndReplace(EntityClass.withName(type),
-                        EntityClass.withName(subType), property, from, to,
-                        getCurrentUser(), getLogMessage()
-                            .orElseThrow(() -> new RuntimeException("A log message is required")));
+                    EntityClass.withName(subType), property, from, to,
+                    getCurrentUser(), getLogMessage()
+                            .orElseThrow(() -> new IllegalArgumentException("A log message is required")));
 
             List<List<String>> rows = list.stream()
                     .map(a -> Collections.singletonList(a.getId()))
@@ -372,7 +375,7 @@ public class ToolsResource extends AbstractResource {
                             PermissionScope scope = entity.getPermissionScope();
                             List<String> idPath = scope != null
                                     ? Lists.newArrayList(scope.idPath())
-                                    : Lists.<String>newArrayList();
+                                    : Lists.newArrayList();
                             idPath.add(entity.getIdentifier());
                             Bundle descBundle = depSerializer.entityToBundle(desc);
                             String newId = entityClass.getIdGen().generateId(idPath, descBundle);
@@ -515,10 +518,14 @@ public class ToolsResource extends AbstractResource {
 
     // Helpers
 
-    private String makeCsv(List<List<String>> rows) throws IOException {
+    private String makeCsv(List<List<String>> rows) {
         CsvMapper mapper = new CsvMapper()
                 .enable(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING);
         CsvSchema schema = mapper.schemaFor(List.class).withoutHeader();
-        return mapper.writer(schema).writeValueAsString(rows);
+        try {
+            return mapper.writer(schema).writeValueAsString(rows);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
