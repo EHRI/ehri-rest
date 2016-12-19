@@ -73,7 +73,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,14 +138,10 @@ public class ToolsResource extends AbstractResource {
 
         try (final Tx tx = beginTx()) {
             FindReplace fr = new FindReplace(graph, commit, maxItems);
-            List<Accessible> list = fr.findAndReplace(EntityClass.withName(type),
+            List<List<String>> rows = fr.findAndReplace(EntityClass.withName(type),
                     EntityClass.withName(subType), property, from, to,
-                    getCurrentUser(), getLogMessage()
-                            .orElseThrow(() -> new IllegalArgumentException("A log message is required")));
+                    getCurrentUser(), getLogMessage().orElse(null));
 
-            List<List<String>> rows = list.stream()
-                    .map(a -> Collections.singletonList(a.getId()))
-                    .collect(Collectors.toList());
             tx.success();
             return makeCsv(rows);
         }
