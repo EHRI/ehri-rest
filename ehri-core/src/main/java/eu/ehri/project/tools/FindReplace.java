@@ -62,10 +62,10 @@ public class FindReplace {
      * @param replacement the replacement text
      * @param actioner    the current user
      * @param logMessage  a mandatory log message
-     * @return the number of items found, or those modified when running
-     * with commit enabled
+     * @return a list of lists each comprising: the parent item ID, the
+     * child item ID, and the current text value in which a match was found
      */
-    public List<Accessible> findAndReplace(
+    public List<List<String>> findAndReplace(
             EntityClass contentType, EntityClass entityType,
             String property, String textToFind, String replacement,
             Actioner actioner, String logMessage) throws ValidationError {
@@ -75,18 +75,19 @@ public class FindReplace {
         Preconditions.checkNotNull(textToFind, "Text to find cannot be null.");
         Preconditions.checkArgument(!commit || replacement != null,
                 "Replacement text cannot be null if committing a replacement value.");
-        Preconditions.checkNotNull(logMessage, "Log message cannot be null.");
+        Preconditions.checkArgument(!commit || logMessage != null,
+                "Log message cannot be null if committing a replacement value.");
 
         logger.info("Find:    '{}'", textToFind);
         logger.info("Replace: '{}'", replacement);
 
-        List<Accessible> todo = Lists.newArrayList();
+        List<List<String>> todo = Lists.newArrayList();
 
         EventTypes eventType = contentType.equals(entityType)
                 ? EventTypes.modification
                 : EventTypes.modifyDependent;
         ActionManager.EventContext context = actionManager
-                .newEventContext(actioner, eventType, Optional.of(logMessage));
+                .newEventContext(actioner, eventType, Optional.ofNullable(logMessage));
 
         try (CloseableIterable<Accessible> entities = manager.getEntities(contentType, Accessible.class)) {
             for (Accessible entity : entities) {
@@ -95,11 +96,20 @@ public class FindReplace {
                 }
 
                 Bundle bundle = depSerializer.entityToBundle(entity);
-                boolean hasMatch = bundle.forAny(d ->
-                        d.getType().equals(entityType) && find(textToFind, d.getDataValue(property)));
+                List<List<String>> matches = Lists.newArrayList();
+                bundle.map(d -> {
+                    if (d.getType().equals(entityType)) {
+                        Object v = d.getDataValue(property);
+                        if (find(textToFind, v)) {
+                            matches.add(Lists.newArrayList(entity.getId(),
+                                    d.getId(), v.toString()));
+                        }
+                    }
+                    return d;
+                });
 
-                if (hasMatch) {
-                    todo.add(entity);
+                if (!matches.isEmpty()) {
+                    todo.addAll(matches);
                     logger.info("Found in {}", entity.getId());
 
                     if (commit) {
