@@ -32,6 +32,7 @@ import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -511,6 +512,42 @@ public class ToolsResource extends AbstractResource {
         }
     }
 
+    /**
+     * Takes a CSV file containing two columns: the global id, and a new local
+     * identifier to rename an item to. A new global ID will be regenerated.
+     *
+     * @param csvData a comma-separated CSV file, including headers, with
+     *                the headers being 'id' and 'local'.
+     * @return CSV data containing two columns: the old global ID, and
+     * a newly generated global ID, derived from the new local identifier.
+     */
+    @POST
+    @Produces("text/csv")
+    @Path("rename")
+    public String rename(InputStream csvData)
+            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+        try (final Tx tx = beginTx()) {
+            List<List<String>> done = Lists.newArrayList();
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
+            IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(true);
+            try (MappingIterator<Map<String, String>> valueIterator = reader
+                    .readValues(new InputStreamReader(csvData, "UTF-8"))) {
+                while (valueIterator.hasNext()) {
+                    Map<String, String> remap = valueIterator.next();
+                    String currentId = remap.get("id");
+                    String newLocalIdentifier = remap.get("local");
+
+                    Accessible item = manager.getEntity(currentId, Accessible.class);
+                    item.asVertex().setProperty(Ontology.IDENTIFIER_KEY, newLocalIdentifier);
+                    idRegenerator.reGenerateId(item).ifPresent(done::add);
+                }
+            }
+
+            tx.success();
+            return makeCsv(done);
+        }
+    }
     // Helpers
 
     private String makeCsv(List<List<String>> rows) {
