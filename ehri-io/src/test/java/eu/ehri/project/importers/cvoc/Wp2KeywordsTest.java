@@ -45,7 +45,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
+        int vocCount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
@@ -63,7 +63,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
 
         int afterNodeCount = count + 1556;
         assertEquals(afterNodeCount, getNodeCount(graph));
-        assertEquals(voccount + 388, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 388, toList(vocabulary.getConcepts()).size());
 
         Concept concept = graph.frame(getVertexByIdentifier(graph, "KEYWORD.JMP.847"), Concept.class);
         assertEquals("KEYWORD.JMP.847", concept.getIdentifier());
@@ -74,8 +74,11 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         Concept c103 = graph.frame(getVertexByIdentifier(graph, "KEYWORD.JMP.103"), Concept.class);
         boolean found847 = false;
         for (Concept child : c103.getNarrowerConcepts()) {
-            if (child.<String>getIdentifier().equals("KEYWORD.JMP.847")) {
+            String identifier = child.<String>getIdentifier();
+            System.out.println(identifier);
+            if (identifier.equals("KEYWORD.JMP.847")) {
                 found847 = true;
+                break;
             }
         }
         assertTrue(found847);

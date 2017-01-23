@@ -111,8 +111,8 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         // 2 Historical agent descriptions
         // 4 Repository descriptions
         // 6 Doc Unit descriptions (total 7, 1 is okay in fixtures)
-        // 1 Concept description
-        assertEquals("13", out);
+        // 2 Concept descriptions
+        assertEquals("14", out);
     }
     
     @Test

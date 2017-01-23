@@ -78,9 +78,15 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     void addNarrowerConcept(Concept concept);
 
     @JavaHandler
+    void addBroaderConcept(Concept concept);
+
+    @JavaHandler
     void removeNarrowerConcept(Concept concept);
-    
-    // Related concepts, should be like a symmetric associative link... 
+
+    @JavaHandler
+    void removeBroaderConcept(Concept concept);
+
+    // Related concepts, should be like a symmetric associative link...
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
     Iterable<Concept> getRelatedConcepts();
 
@@ -119,8 +125,22 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
         }
 
         @Override
+        public void addBroaderConcept(Concept concept) {
+            if (!concept.asVertex().equals(it())) {
+                JavaHandlerUtils.addUniqueRelationship(concept.asVertex(),
+                        it(), Ontology.CONCEPT_HAS_NARROWER);
+            }
+        }
+
+        @Override
         public void removeNarrowerConcept(Concept concept) {
             JavaHandlerUtils.removeAllRelationships(it(), concept.asVertex(),
+                    Ontology.CONCEPT_HAS_NARROWER);
+        }
+
+        @Override
+        public void removeBroaderConcept(Concept concept) {
+            JavaHandlerUtils.removeAllRelationships(concept.asVertex(), it(),
                     Ontology.CONCEPT_HAS_NARROWER);
         }
     }

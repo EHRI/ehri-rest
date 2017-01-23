@@ -135,7 +135,7 @@ public class ImportResource extends AbstractResource {
 //    @Consumes({"application/rdf+xml","text/turtle","application/n-triples","application/trig","application/n-quads","application/ld+json"})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("skos")
-    public Response importSkos(
+    public ImportLog importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(BASE_URI_PARAM) String baseURI,
@@ -159,7 +159,7 @@ public class ImportResource extends AbstractResource {
                     .importFile(stream, getLogMessage(logMessage).orElse(null));
             logger.debug("Committing SKOS import transaction...");
             tx.success();
-            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+            return log;
         } catch (InputParseError e) {
             throw new DeserializationError("Unable to parse input: " + e.getMessage());
         } catch (NoReaderForLangException e) {

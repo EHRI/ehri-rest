@@ -127,10 +127,10 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
                 .setFormat("N3");
         ImportLog importLog = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE7), "simple 1");
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE7), "simple 1 XL");
         assertEquals(1, importLog.getCreated());
         ImportLog importLog2 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 1 XL");
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 1");
         assertEquals(1, importLog2.getUnchanged());
     }
 }

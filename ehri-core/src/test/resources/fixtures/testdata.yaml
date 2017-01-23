@@ -647,6 +647,22 @@
           name: Concept 1
           languageCode: eng
           altLabel: Another Name for Concept 1
+    narrower: cvocc2
+    inAuthoritativeSet: cvoc1
+
+- id: cvocc2
+  type: CvocConcept
+  data:
+    identifier: cvocc2
+  relationships:
+    describes:
+      - id: cvocc2-desc
+        type: CvocConceptDescription
+        data:
+          name: Concept 2
+          languageCode: eng
+          altLabel: Another Name for Concept 2
+    related: cvocc1
     inAuthoritativeSet: cvoc1
 
 --- # Virtual Units
