@@ -1,0 +1,46 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xl: <http://www.w3.org/2008/05/skos-xl#> .
+
+<http://www.my.com/#label1> a xl:Label ;
+    xl:literalForm "canals" .
+
+<http://www.my.com/#label2> a xl:Label ;
+    xl:literalForm "canal bends" .
+
+<http://www.my.com/#label3> a xl:Label ;
+    xl:literalForm "canalized streams" .
+
+<http://www.my.com/#label4> a xl:Label ;
+    xl:literalForm "ditch mouths" .
+
+<http://www.my.com/#label5> a xl:Label ;
+    xl:literalForm "ditches" .
+
+<http://www.my.com/#label6> a xl:Label ;
+    xl:literalForm "drainage canals" .
+
+<http://www.my.com/#label7> a xl:Label ;
+    xl:literalForm "drainage ditches" .
+
+<http://www.my.com/#canals> a skos:Concept ;
+    xl:prefLabel <http://www.my.com/#label1> ;
+    xl:altLabel <http://www.my.com/#label2> ,
+                <http://www.my.com/#label3> ,
+                <http://www.my.com/#label4> ,
+                <http://www.my.com/#label5> ,
+                <http://www.my.com/#label6> ,
+                <http://www.my.com/#label7> ;
+    skos:broader <http://www.my.com/#hydrographic%20structures> ;
+    skos:definition """A feature type category for places 
+        such as the Erie Canal""";
+    skos:related <http://www.my.com/#channels>,
+        <http://www.my.com/#locks>,
+        <http://www.my.com/#transportation%20features>,
+        <http://www.my.com/#tunnels> ;
+    skos:scopeNote """Manmade waterway used by watercraft
+        or for drainage, irrigation, mining, or water 
+        power""".

@@ -42,7 +42,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         assertEquals(1, importLog.getCreated());
     }
-    
+
     @Test
     public void testSetDefaultLang() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
@@ -66,15 +66,10 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE6), "lang test");
         assertEquals(1, importLog.getCreated());
         Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
-        List<Description> descriptions = Ordering.from(new Comparator<Description>() {
-            @Override
-            public int compare(Description d1, Description d2) {
-                return ComparisonChain.start()
-                        .compare(d1.getDescriptionCode(), d2.getDescriptionCode(),
-                                Ordering.natural().nullsLast())
-                        .result();
-            }
-        }).sortedCopy(concept.as(Concept.class).getDescriptions());
+        List<Description> descriptions = Ordering.from((Comparator<Description>) (d1, d2) -> ComparisonChain.start()
+                .compare(d1.getDescriptionCode(), d2.getDescriptionCode(),
+                        Ordering.natural().nullsLast())
+                .result()).sortedCopy(concept.as(Concept.class).getDescriptions());
         assertEquals(2, descriptions.size());
         assertEquals("eng", descriptions.get(0).getLanguageOfDescription());
         assertEquals("latn", descriptions.get(0).getDescriptionCode());
@@ -88,7 +83,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
     @Test
     public void testImportFile2() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
-            .setFormat("N3");
+                .setFormat("N3");
         ImportLog importLog = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 2");
         assertEquals(1, importLog.getCreated());
@@ -127,4 +122,15 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         assertEquals(2, importLog2.getUnchanged());
     }
 
+    @Test
+    public void testImportFile7SkosXL() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                .setFormat("N3");
+        ImportLog importLog = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE7), "simple 1");
+        assertEquals(1, importLog.getCreated());
+        ImportLog importLog2 = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 1 XL");
+        assertEquals(1, importLog2.getUnchanged());
+    }
 }

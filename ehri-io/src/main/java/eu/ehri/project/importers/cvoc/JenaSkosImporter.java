@@ -51,12 +51,14 @@ import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.SKOS;
+import org.apache.jena.vocabulary.SKOSXL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +87,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String format;
     private final String baseURI;
     private final String defaultLang;
-    public static final String DEFAULT_LANG = "eng";
+    private static final String DEFAULT_LANG = "eng";
 
     /**
      * Constructor
@@ -184,6 +186,10 @@ public final class JenaSkosImporter implements SkosImporter {
         ImportLog log = new ImportLog(logMsg);
 
         OntModel model = ModelFactory.createOntologyModel();
+        model.add(SKOSXL.prefLabel, RDFS.subPropertyOf, SKOS.prefLabel);
+        model.add(SKOSXL.altLabel, RDFS.subPropertyOf, SKOS.altLabel);
+        model.add(SKOSXL.hiddenLabel, RDFS.subPropertyOf, SKOS.hiddenLabel);
+
         model.read(ios, null, format);
         OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
         logger.debug("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
@@ -362,22 +368,36 @@ public final class JenaSkosImporter implements SkosImporter {
                 (it, other) -> it.addRelatedConcept(other));
     }
 
+    private String getLabelValue(RDFNode property) {
+        if (property.isLiteral()) {
+            return property.asLiteral().getString();
+        } else {
+            RDFNode literalForm = property.asResource().getProperty(SKOSXL.literalForm).getObject();
+            return literalForm == null ? "" : literalForm.asLiteral().getString();
+        }
+    }
+
+    private String getLabelLanguage(RDFNode property) {
+        if (property.isLiteral()) {
+            return property.asLiteral().getLanguage();
+        } else {
+            RDFNode literalForm = property.asResource().getProperty(SKOSXL.literalForm).getObject();
+            return literalForm == null ? "" : literalForm.asLiteral().getLanguage();
+        }
+    }
+
     private List<Bundle> getDescriptions(Resource item) {
         List<Bundle> descriptions = Lists.newArrayList();
 
         for (RDFNode property : getObjectWithPredicate(item, SkosRDFVocabulary.PREF_LABEL.getURI())) {
-            if (!property.isLiteral()) {
-                continue;
-            }
 
             Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
-            Literal literalPrefName = property.asLiteral();
-            String langCode2Letter = literalPrefName.getLanguage();
+            String langCode2Letter = getLabelLanguage(property);
             String langCode3Letter = getLanguageCode(langCode2Letter, defaultLang);
             Optional<String> descCode = getScriptCode(langCode2Letter);
 
-            builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
+            builder.addDataValue(Ontology.NAME_KEY, getLabelValue(property))
                     .addDataValue(Ontology.LANGUAGE, langCode3Letter);
             descCode.ifPresent(code -> builder.addDataValue(Ontology.IDENTIFIER_KEY, code));
 
@@ -403,14 +423,11 @@ public final class JenaSkosImporter implements SkosImporter {
                 List<String> values = Lists.newArrayList();
                 for (URI uri : prop.getValue()) {
                     for (RDFNode target : getObjectWithPredicate(item, uri)) {
-                        if (target.isLiteral()) {
-                            Literal literal = target.asLiteral();
-                            String propLang2Letter = literal.getLanguage();
-                            String propLanguageCode = getLanguageCode(propLang2Letter, defaultLang);
-                            Optional<String> propDescCode = getScriptCode(propLang2Letter);
-                            if (propLanguageCode.equals(langCode3Letter) && propDescCode.equals(descCode)) {
-                                values.add(literal.getString());
-                            }
+                        String propLang2Letter = getLabelLanguage(target);
+                        String propLanguageCode = getLanguageCode(propLang2Letter, defaultLang);
+                        Optional<String> propDescCode = getScriptCode(propLang2Letter);
+                        if (propLanguageCode.equals(langCode3Letter) && propDescCode.equals(descCode)) {
+                            values.add(getLabelValue(target));
                         }
                     }
                 }
