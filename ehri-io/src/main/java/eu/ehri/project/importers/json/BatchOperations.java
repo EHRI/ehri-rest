@@ -119,7 +119,7 @@ public class BatchOperations {
             throws DeserializationError, ItemNotFound, ValidationError {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
-        ImportLog log = new ImportLog(logMessage);
+        ImportLog log = new ImportLog(logMessage.orElse(null));
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle bundle : bundleIter) {
                 try {
@@ -169,7 +169,7 @@ public class BatchOperations {
             throws DeserializationError, ItemNotFound, ValidationError {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
-        ImportLog log = new ImportLog(logMessage);
+        ImportLog log = new ImportLog(logMessage.orElse(null));
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle bundle : bundleIter) {
                 Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());

@@ -64,11 +64,9 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -132,8 +130,6 @@ public class ImportResource extends AbstractResource {
      * updated, or unchanged.
      */
     @POST
-//    @Consumes({"application/rdf+xml","text/turtle","application/n-triples","application/trig","application/n-quads","application/ld+json"})
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("skos")
     public ImportLog importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -142,9 +138,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
             InputStream stream)
-            throws ItemNotFound, ValidationError,
-            IOException, DeserializationError {
-
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
             // Get the current user from the Authorization header and the scope
             // from the query params...
@@ -219,7 +213,6 @@ public class ImportResource extends AbstractResource {
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("ead")
     public ImportLog importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -230,8 +223,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream data)
-            throws ItemNotFound, ValidationError,
-            IOException, DeserializationError {
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
@@ -270,7 +262,6 @@ public class ImportResource extends AbstractResource {
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("eag")
     public ImportLog importEag(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -293,7 +284,6 @@ public class ImportResource extends AbstractResource {
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("eac")
     public ImportLog importEac(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -320,7 +310,6 @@ public class ImportResource extends AbstractResource {
     @POST
     @Consumes({MediaType.TEXT_PLAIN, CSV_MEDIA_TYPE,
             MediaType.APPLICATION_OCTET_STREAM})
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("csv")
     public ImportLog importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -329,8 +318,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream data)
-            throws ItemNotFound, ValidationError,
-            IOException, DeserializationError {
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
             Class<? extends AbstractImporter> importer
@@ -373,7 +361,6 @@ public class ImportResource extends AbstractResource {
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("batch")
     public ImportLog batchUpdate(
             @QueryParam(SCOPE_PARAM) String scopeId,

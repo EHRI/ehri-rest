@@ -113,7 +113,7 @@ public abstract class AbstractImportManager implements ImportManager {
                 framedGraph, permissionScope).newEventContext(actioner,
                 EventTypes.ingest, msg);
         // Create a manifest to store the results of the import.
-        ImportLog log = new ImportLog(msg);
+        ImportLog log = new ImportLog(msg.orElse(null));
 
         // Do the import...
         importInputStream(stream, action, log);
@@ -134,7 +134,7 @@ public abstract class AbstractImportManager implements ImportManager {
             ActionManager.EventContext action = new ActionManager(
                     framedGraph, permissionScope).newEventContext(actioner,
                     EventTypes.ingest, msg);
-            ImportLog log = new ImportLog(msg);
+            ImportLog log = new ImportLog(msg.orElse(null));
             for (String path : filePaths) {
                 try {
                     currentFile = path;
@@ -170,7 +170,7 @@ public abstract class AbstractImportManager implements ImportManager {
         ActionManager.EventContext action = new ActionManager(
                 framedGraph, permissionScope).newEventContext(actioner,
                 EventTypes.ingest, msg);
-        ImportLog log = new ImportLog(msg);
+        ImportLog log = new ImportLog(msg.orElse(null));
 
         ArchiveEntry entry;
         while ((entry = stream.getNextEntry()) != null) {

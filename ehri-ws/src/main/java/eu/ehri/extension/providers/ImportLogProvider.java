@@ -22,6 +22,7 @@ package eu.ehri.extension.providers;
 import eu.ehri.project.importers.ImportLog;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -31,11 +32,13 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 public class ImportLogProvider implements MessageBodyWriter<ImportLog>,
         MessageBodyReader<ImportLog>, JsonMessageBodyHandler {
     @Override
@@ -52,8 +55,12 @@ public class ImportLogProvider implements MessageBodyWriter<ImportLog>,
     public void writeTo(ImportLog importLog, Class<?> aClass, Type type,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream)
-                throws IOException, WebApplicationException {
-        mapper.writeValue(outputStream, importLog);
+            throws IOException, WebApplicationException {
+        if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+            mapper.writeValue(outputStream, importLog);
+        } else {
+            importLog.printReport(new PrintStream(outputStream));
+        }
     }
 
     @Override
@@ -65,7 +72,7 @@ public class ImportLogProvider implements MessageBodyWriter<ImportLog>,
     public ImportLog readFrom(Class<ImportLog> aClass, Type type,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> multivaluedMap, InputStream inputStream)
-                throws IOException, WebApplicationException {
+            throws IOException, WebApplicationException {
         return mapper.readValue(inputStream, ImportLog.class);
     }
 }

@@ -35,6 +35,7 @@ import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.providers.BundleProvider;
 import eu.ehri.extension.providers.GlobalPermissionSetProvider;
 import eu.ehri.extension.providers.ImportLogProvider;
+import eu.ehri.extension.providers.TableProvider;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDeserializer;
@@ -69,6 +70,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
         ClientConfig config = new DefaultClientConfig();
         List<Class<?>> providers = Lists.newArrayList(
                 GlobalPermissionSetProvider.class,
+                TableProvider.class,
                 BundleProvider.class,
                 ImportLogProvider.class
         );
