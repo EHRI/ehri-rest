@@ -19,52 +19,65 @@
 
 package eu.ehri.project.models.cvoc;
 
+import eu.ehri.project.test.AbstractFixtureTest;
+import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-public class ConceptTest {
-    @Test
-    public void testGetVocabulary() throws Exception {
 
+public class ConceptTest extends AbstractFixtureTest {
+
+    private Vocabulary v;
+    private Concept cv1;
+    private Concept cv2;
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        v = manager.getEntity("cvoc1", Vocabulary.class);
+        cv1 = manager.getEntity("cvocc1", Concept.class);
+        cv2 = manager.getEntity("cvocc2", Concept.class);
     }
 
     @Test
-    public void testSetVocabulary() throws Exception {
-
+    public void testGetVocabulary() throws Exception {
+        assertEquals(v, cv1.getVocabulary());
     }
 
     @Test
     public void testGetBroaderConcepts() throws Exception {
-
+        assertEquals(cv1, cv2.getBroaderConcepts().iterator().next());
     }
 
     @Test
     public void testGetNarrowerConcepts() throws Exception {
-
-    }
-
-    @Test
-    public void testAddNarrowerConcept() throws Exception {
-
+        assertEquals(cv2, cv1.getNarrowerConcepts().iterator().next());
     }
 
     @Test
     public void testRemoveNarrowerConcept() throws Exception {
-
+        cv1.removeNarrowerConcept(cv2);
+        assertFalse(cv2.getNarrowerConcepts().iterator().hasNext());
     }
 
     @Test
     public void testGetRelatedConcepts() throws Exception {
-
+        assertEquals(cv1, cv2.getRelatedConcepts().iterator().next());
+        assertEquals(cv2, cv1.getRelatedByConcepts().iterator().next());
     }
 
     @Test
-    public void testAddRelatedConcept() throws Exception {
-
+    public void testRemoveBroaderConcept() throws Exception {
+        cv2.removeBroaderConcept(cv1);
+        assertFalse(cv2.getBroaderConcepts().iterator().hasNext());
     }
 
     @Test
     public void testRemoveRelatedConcept() throws Exception {
-
+        cv2.removeRelatedConcept(cv1);
+        assertFalse(cv2.getRelatedConcepts().iterator().hasNext());
     }
 }

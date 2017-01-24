@@ -22,6 +22,7 @@ package eu.ehri.project.importers.cvoc;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
@@ -50,13 +51,17 @@ import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.SKOS;
+import org.apache.jena.vocabulary.SKOSXL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +72,12 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Import SKOS RDF.
@@ -85,7 +95,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String format;
     private final String baseURI;
     private final String defaultLang;
-    public static final String DEFAULT_LANG = "eng";
+    private static final String DEFAULT_LANG = "eng";
 
     /**
      * Constructor
@@ -173,8 +183,7 @@ public final class JenaSkosImporter implements SkosImporter {
      * @return A log of imported nodes
      */
     @Override
-    public ImportLog importFile(InputStream ios, String logMessage)
-            throws IOException, ValidationError {
+    public ImportLog importFile(InputStream ios, String logMessage) throws IOException, ValidationError {
 
         // Create a new action for this import
         Optional<String> logMsg = getLogMessage(logMessage);
@@ -183,57 +192,76 @@ public final class JenaSkosImporter implements SkosImporter {
         // Create a manifest to store the results of the import.
         ImportLog log = new ImportLog(logMsg);
 
-        OntModel model = ModelFactory.createOntologyModel();
-        model.read(ios, null, format);
-        OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-        logger.debug("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
-        ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
-        Map<Resource, Concept> imported = Maps.newHashMap();
+        // NB: We rely in inference here, despite a sketchy understanding of how it works ;)
+        // The RDFS.subPropertyOf lets us fetch SKOS-XL pref/alt/hidden labels using
+        // the same property name as the plain SKOS variants.
+        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RULE_INF);
+        try {
+            model.add(SKOSXL.prefLabel, RDFS.subPropertyOf, SKOS.prefLabel);
+            model.add(SKOSXL.altLabel, RDFS.subPropertyOf, SKOS.altLabel);
+            model.add(SKOSXL.hiddenLabel, RDFS.subPropertyOf, SKOS.hiddenLabel);
+            // Since we use the same graph label for narrower/broader, enabling inverse
+            // inference on the model means we get consistent behaviour when syncing
+            // these relationships, regardless of how they are defined in the RDF...
+            model.add(SKOS.broader, OWL.inverseOf, SKOS.narrower);
 
-        while (extendedIterator.hasNext()) {
-            Resource item = extendedIterator.next();
+            model.read(ios, null, format);
+            OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
+            logger.debug("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
+            Map<Resource, Concept> imported = Maps.newHashMap();
 
+            ExtendedIterator<? extends OntResource> itemIterator = conceptClass.listInstances();
             try {
-                Mutation<Concept> graphConcept = importConcept(item);
-                imported.put(item, graphConcept.getNode());
+                while (itemIterator.hasNext()) {
+                    Resource item = itemIterator.next();
 
-                switch (graphConcept.getState()) {
-                    case UNCHANGED:
-                        log.addUnchanged();
-                        break;
-                    case CREATED:
-                        log.addCreated();
-                        eventContext.addSubjects(graphConcept.getNode());
-                        break;
-                    case UPDATED:
-                        log.addUpdated();
-                        eventContext.addSubjects(graphConcept.getNode());
-                        break;
+                    try {
+                        Mutation<Concept> graphConcept = importConcept(item);
+                        imported.put(item, graphConcept.getNode());
+
+                        switch (graphConcept.getState()) {
+                            case UNCHANGED:
+                                log.addUnchanged();
+                                break;
+                            case CREATED:
+                                log.addCreated();
+                                eventContext.addSubjects(graphConcept.getNode());
+                                break;
+                            case UPDATED:
+                                log.addUpdated();
+                                eventContext.addSubjects(graphConcept.getNode());
+                                break;
+                        }
+                    } catch (ValidationError validationError) {
+                        if (tolerant) {
+                            logger.error(validationError.getMessage());
+                            log.addError(item.toString(), validationError.getMessage());
+                        } else {
+                            throw validationError;
+                        }
+                    }
                 }
-            } catch (ValidationError validationError) {
-                if (tolerant) {
-                    logger.error(validationError.getMessage());
-                    log.addError(item.toString(), validationError.getMessage());
-                } else {
-                    throw validationError;
-                }
+            } finally {
+                itemIterator.close();
             }
-        }
 
-        for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
-            hookupRelationships(pair.getKey(), pair.getValue(), imported);
-        }
+            for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
+                hookupRelationships(pair.getKey(), pair.getValue(), imported);
+            }
 
-        for (Concept concept : imported.values()) {
-            vocabulary.addItem(concept);
-            concept.setPermissionScope(vocabulary);
-        }
+            for (Concept concept : imported.values()) {
+                vocabulary.addItem(concept);
+                concept.setPermissionScope(vocabulary);
+            }
 
-        if (log.hasDoneWork()) {
-            eventContext.commit();
-        }
+            if (log.hasDoneWork()) {
+                eventContext.commit();
+            }
 
-        return log;
+            return log;
+        } finally {
+            model.close();
+        }
     }
 
     private Mutation<Concept> importConcept(Resource item) throws ValidationError {
@@ -323,11 +351,6 @@ public final class JenaSkosImporter implements SkosImporter {
         return Optional.empty();
     }
 
-    private interface ConnectFunc {
-
-        void connect(Concept current, Concept related);
-    }
-
     private List<RDFNode> getObjectWithPredicate(Resource item, final URI propUri) {
         // NB: this should be possible with simply item.listProperties(propUri)
         // but for some reason that doesn't work... I can't grok why.
@@ -338,46 +361,65 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private void connectRelation(Concept current, Resource item, Map<Resource, Concept> others,
-            URI propUri, ConnectFunc connectFunc) {
-        for (RDFNode other : getObjectWithPredicate(item, propUri)) {
-            if (other.isResource()) {
-                Concept related = others.get(other.asResource());
-                if (related != null) {
-                    connectFunc.connect(current, related);
-                }
-            }
+            URI propUri, Function<Concept, Iterable<Concept>> getter,
+            BiConsumer<Concept, Concept> addFunc, BiConsumer<Concept, Concept> dropFunc) {
+        Set<Concept> existingRelations = Sets.newHashSet(getter.apply(current));
+        Set<Concept> newRelations = getObjectWithPredicate(item, propUri)
+                .stream()
+                .filter(RDFNode::isResource)
+                .map(n -> others.get(n.asResource()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (!existingRelations.equals(newRelations)) {
+            logger.debug("Updating relations for concept: {}: {} -> {} => {}",
+                    propUri, current.getId(), existingRelations, newRelations);
+
+            Sets.difference(existingRelations, newRelations)
+                    .forEach(e -> dropFunc.accept(current, e));
+            Sets.difference(newRelations, existingRelations)
+                    .forEach(n -> addFunc.accept(current, n));
         }
     }
 
-    private void hookupRelationships(Resource item, Concept current,
-            Map<Resource, Concept> conceptMap) {
-
+    private void hookupRelationships(Resource item, Concept current, Map<Resource, Concept> conceptMap) {
         connectRelation(current, item, conceptMap, SkosRDFVocabulary.BROADER.getURI(),
-                (it, other) -> other.addNarrowerConcept(it));
-
+                Concept::getBroaderConcepts, Concept::addBroaderConcept, Concept::removeBroaderConcept);
         connectRelation(current, item, conceptMap, SkosRDFVocabulary.NARROWER.getURI(),
-                (it, other) -> it.addNarrowerConcept(other));
-
+                Concept::getNarrowerConcepts, Concept::addNarrowerConcept, Concept::removeNarrowerConcept);
         connectRelation(current, item, conceptMap, SkosRDFVocabulary.RELATED.getURI(),
-                (it, other) -> it.addRelatedConcept(other));
+                Concept::getRelatedConcepts, Concept::addRelatedConcept, Concept::removeRelatedConcept);
+    }
+
+    private String getLabelValue(RDFNode property) {
+        if (property.isLiteral()) {
+            return property.asLiteral().getString();
+        } else {
+            RDFNode literalForm = property.asResource().getProperty(SKOSXL.literalForm).getObject();
+            return literalForm == null ? "" : literalForm.asLiteral().getString();
+        }
+    }
+
+    private String getLabelLanguage(RDFNode property) {
+        if (property.isLiteral()) {
+            return property.asLiteral().getLanguage();
+        } else {
+            RDFNode literalForm = property.asResource().getProperty(SKOSXL.literalForm).getObject();
+            return literalForm == null ? "" : literalForm.asLiteral().getLanguage();
+        }
     }
 
     private List<Bundle> getDescriptions(Resource item) {
         List<Bundle> descriptions = Lists.newArrayList();
 
         for (RDFNode property : getObjectWithPredicate(item, SkosRDFVocabulary.PREF_LABEL.getURI())) {
-            if (!property.isLiteral()) {
-                continue;
-            }
 
             Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
-            Literal literalPrefName = property.asLiteral();
-            String langCode2Letter = literalPrefName.getLanguage();
+            String langCode2Letter = getLabelLanguage(property);
             String langCode3Letter = getLanguageCode(langCode2Letter, defaultLang);
             Optional<String> descCode = getScriptCode(langCode2Letter);
 
-            builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
+            builder.addDataValue(Ontology.NAME_KEY, getLabelValue(property))
                     .addDataValue(Ontology.LANGUAGE, langCode3Letter);
             descCode.ifPresent(code -> builder.addDataValue(Ontology.IDENTIFIER_KEY, code));
 
@@ -403,14 +445,11 @@ public final class JenaSkosImporter implements SkosImporter {
                 List<String> values = Lists.newArrayList();
                 for (URI uri : prop.getValue()) {
                     for (RDFNode target : getObjectWithPredicate(item, uri)) {
-                        if (target.isLiteral()) {
-                            Literal literal = target.asLiteral();
-                            String propLang2Letter = literal.getLanguage();
-                            String propLanguageCode = getLanguageCode(propLang2Letter, defaultLang);
-                            Optional<String> propDescCode = getScriptCode(propLang2Letter);
-                            if (propLanguageCode.equals(langCode3Letter) && propDescCode.equals(descCode)) {
-                                values.add(literal.getString());
-                            }
+                        String propLang2Letter = getLabelLanguage(target);
+                        String propLanguageCode = getLanguageCode(propLang2Letter, defaultLang);
+                        Optional<String> propDescCode = getScriptCode(propLang2Letter);
+                        if (propLanguageCode.equals(langCode3Letter) && propDescCode.equals(descCode)) {
+                            values.add(getLabelValue(target));
                         }
                     }
                 }

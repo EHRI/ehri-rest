@@ -37,7 +37,7 @@ public final class JavaHandlerUtils {
 
     public static final Logger logger = LoggerFactory.getLogger(JavaHandlerUtils.class);
 
-    public static final int LOOP_MAX = 20;
+    private static final int LOOP_MAX = 20;
 
     /**
      * Pipe function that quits after a certain number of loops.
@@ -45,7 +45,7 @@ public final class JavaHandlerUtils {
      * @param maxLoops The number of loops to run
      * @return A pipe function
      */
-    public static <S> PipeFunction<LoopPipe.LoopBundle<S>, Boolean> maxLoopFuncFactory(final int maxLoops) {
+    private static <S> PipeFunction<LoopPipe.LoopBundle<S>, Boolean> maxLoopFuncFactory(final int maxLoops) {
         return vertexLoopBundle -> vertexLoopBundle.getLoops() < maxLoops;
     }
 

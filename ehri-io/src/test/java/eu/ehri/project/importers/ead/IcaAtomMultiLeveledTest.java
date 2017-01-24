@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
@@ -85,7 +86,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
 
         assertEquals(2, unit.getChildCount());
-        List<DocumentaryUnit> children = Lists.newArrayList(unit.getChildren());
+        List<DocumentaryUnit> children = Ordering.usingToString().sortedCopy(unit.getChildren());
         DocumentaryUnit child1 = children.get(0);
         DocumentaryUnit child2 = children.get(1);
 
@@ -95,8 +96,8 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         assertEquals(unit, child2.getPermissionScope());
 
         // Check child IDs
-        assertEquals(targetUnitId + "-hr_hda_145", child1.getId());
-        assertEquals(targetUnitId + "-hr_hda_223", child2.getId());
+        assertEquals(targetUnitId + "-hr_hda_223", child1.getId());
+        assertEquals(targetUnitId + "-hr_hda_145", child2.getId());
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
