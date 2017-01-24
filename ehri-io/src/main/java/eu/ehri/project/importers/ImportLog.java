@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Maps;
 
+import java.io.PrintStream;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public class ImportLog {
     private int created;
     private int updated;
     private int unchanged;
-    private final Optional<String> logMessage;
+    private final String logMessage;
     private final Map<String, String> errors = Maps.newHashMap();
 
 
@@ -46,8 +47,12 @@ public class ImportLog {
      *
      * @param logMessage a log message
      */
-    public ImportLog(Optional<String> logMessage) {
+    public ImportLog(String logMessage) {
         this.logMessage = logMessage;
+    }
+
+    public ImportLog() {
+        this(null);
     }
 
     @JsonCreator
@@ -57,7 +62,7 @@ public class ImportLog {
             @JsonProperty("updated") int updated,
             @JsonProperty("unchanged") int unchanged,
             @JsonProperty("errors") Map<String, String> errors) {
-        this(Optional.ofNullable(logMessage));
+        this(logMessage);
         this.created = created;
         this.unchanged = unchanged;
         this.updated = updated;
@@ -155,16 +160,20 @@ public class ImportLog {
         data.put("updated", updated);
         data.put("unchanged", unchanged);
         data.put("errors", errors);
-        data.put("message", logMessage.orElse(null));
+        data.put("message", logMessage);
         return data;
     }
 
     public Optional<String> getLogMessage() {
-        return logMessage;
+        return Optional.of(logMessage);
     }
 
     public void printReport() {
-        System.out.println(
+        printReport(System.out);
+    }
+
+    public void printReport(PrintStream out) {
+        out.println(
                 String.format(
                         "Created: %d, Updated: %d, Unchanged: %d, Errors: %d",
                         created, updated, unchanged, errors.size()));

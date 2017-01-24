@@ -190,7 +190,7 @@ public final class JenaSkosImporter implements SkosImporter {
         ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).newEventContext(
                 actioner, EventTypes.ingest, logMsg);
         // Create a manifest to store the results of the import.
-        ImportLog log = new ImportLog(logMsg);
+        ImportLog log = new ImportLog(logMsg.orElse(null));
 
         // NB: We rely in inference here, despite a sketchy understanding of how it works ;)
         // The RDFS.subPropertyOf lets us fetch SKOS-XL pref/alt/hidden labels using

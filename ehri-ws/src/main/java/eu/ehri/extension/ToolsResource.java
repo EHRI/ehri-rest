@@ -19,16 +19,11 @@
 
 package eu.ehri.extension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
+import eu.ehri.extension.utils.Table;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
@@ -72,10 +67,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -121,8 +113,8 @@ public class ToolsResource extends AbstractResource {
     @POST
     @Path("find-replace")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces("text/csv")
-    public String findReplace(
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    public Table findReplace(
             final @FormParam("from") String from,
             final @FormParam("to") String to,
             final @QueryParam("type") String type,
@@ -144,7 +136,7 @@ public class ToolsResource extends AbstractResource {
                     getCurrentUser(), getLogMessage().orElse(null));
 
             tx.success();
-            return makeCsv(rows);
+            return Table.of(rows);
         }
     }
 
@@ -235,9 +227,9 @@ public class ToolsResource extends AbstractResource {
      * body if nothing was changed
      */
     @POST
-    @Produces("text/csv")
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
     @Path("regenerate-ids")
-    public String regenerateIds(
+    public Table regenerateIds(
             @QueryParam("id") List<String> ids,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
@@ -258,7 +250,7 @@ public class ToolsResource extends AbstractResource {
                     .skippingCollisions(tolerant)
                     .reGenerateIds(items);
             tx.success();
-            return makeCsv(remap);
+            return Table.of(remap);
         }
     }
 
@@ -283,9 +275,9 @@ public class ToolsResource extends AbstractResource {
      * body if nothing was changed
      */
     @POST
-    @Produces("text/csv")
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
     @Path("regenerate-ids-for-type/{type:[^/]+}")
-    public String regenerateIdsForType(
+    public Table regenerateIdsForType(
             @PathParam("type") String type,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
@@ -301,7 +293,7 @@ public class ToolsResource extends AbstractResource {
                         .skippingCollisions(tolerant)
                         .reGenerateIds(frames);
                 tx.success();
-                return makeCsv(lists);
+                return Table.of(lists);
             }
         }
     }
@@ -327,9 +319,9 @@ public class ToolsResource extends AbstractResource {
      * body if nothing was changed
      */
     @POST
-    @Produces("text/csv")
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
     @Path("regenerate-ids-for-scope/{scope:[^/]+}")
-    public String regenerateIdsForScope(
+    public Table regenerateIdsForScope(
             @PathParam("scope") String scopeId,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
@@ -343,7 +335,7 @@ public class ToolsResource extends AbstractResource {
                     .collisionMode(collisions)
                     .reGenerateIds(scope.getAllContainedItems());
             tx.success();
-            return makeCsv(lists);
+            return Table.of(lists);
         }
     }
 
@@ -360,9 +352,9 @@ public class ToolsResource extends AbstractResource {
         EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
                 .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
                 .REPOSITORY_DESCRIPTION};
-        Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
         int done = 0;
         try (final Tx tx = beginTx()) {
+            final Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
             for (EntityClass entityClass : types) {
                 try (CloseableIterable<Description> descriptions = manager.getEntities(entityClass, Description.class)) {
                     for (Description desc : descriptions) {
@@ -399,8 +391,7 @@ public class ToolsResource extends AbstractResource {
     @POST
     @Produces("text/plain")
     @Path("set-labels")
-    public String setLabels()
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+    public String setLabels() throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         long done = 0;
         try (final Tx tx = beginTx()) {
             for (Vertex v : graph.getVertices()) {
@@ -475,40 +466,39 @@ public class ToolsResource extends AbstractResource {
      * another and moves changes the link target of anything linked
      * to <code>from</code> to <code>to</code>.
      *
-     * @param csvData a comma-separated TSV file, including headers, with
-     *                the first headers being 'from' and 'to'.
+     * @param mapping a comma-separated TSV file, excluding headers
      * @return CSV data with each row indicating the source, target, and how many items
      * were relinked for each
      */
     @POST
-    @Produces("text/csv")
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
     @Path("relink-targets")
-    public String relink(InputStream csvData) throws IOException, ItemNotFound {
+    public Table relink(Table mapping) throws DeserializationError {
         try (final Tx tx = beginTx()) {
             List<List<String>> done = Lists.newArrayList();
-            CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
-            try (MappingIterator<Map<String, String>> valueIterator = reader
-                    .readValues(new InputStreamReader(csvData, "UTF-8"))) {
-                while (valueIterator.hasNext()) {
-                    Map<String, String> remap = valueIterator.next();
-                    String fromId = remap.get("from");
-                    String toId = remap.get("to");
-
-                    Linkable from = manager.getEntity(fromId, Linkable.class);
-                    Linkable to = manager.getEntity(toId, Linkable.class);
-                    int relinked = 0;
-                    for (Link link : from.getLinks()) {
-                        link.addLinkTarget(to);
-                        link.removeLinkTarget(from);
-                        relinked++;
-                    }
-                    done.add(Lists.newArrayList(fromId, toId, String.valueOf(relinked)));
+            for (List<String> row : mapping.data()) {
+                if (row.size() != 2) {
+                    throw new DeserializationError(
+                            "Invalid table data: must contain 2 columns only");
                 }
+                String fromId = row.get(0);
+                String toId = row.get(1);
+                Linkable from = manager.getEntity(fromId, Linkable.class);
+                Linkable to = manager.getEntity(toId, Linkable.class);
+                int relinked = 0;
+                for (Link link : from.getLinks()) {
+                    link.addLinkTarget(to);
+                    link.removeLinkTarget(from);
+                    relinked++;
+                }
+                done.add(Lists.newArrayList(fromId, toId, String.valueOf(relinked)));
             }
 
             tx.success();
-            return makeCsv(done);
+            return Table.of(done);
+        } catch (ItemNotFound e) {
+            throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
         }
     }
 
@@ -516,48 +506,36 @@ public class ToolsResource extends AbstractResource {
      * Takes a CSV file containing two columns: the global id, and a new local
      * identifier to rename an item to. A new global ID will be regenerated.
      *
-     * @param csvData a comma-separated CSV file, including headers, with
+     * @param mapping a comma-separated CSV file, including headers, with
      *                the headers being 'id' and 'local'.
      * @return CSV data containing two columns: the old global ID, and
      * a newly generated global ID, derived from the new local identifier.
      */
     @POST
-    @Produces("text/csv")
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
     @Path("rename")
-    public String rename(InputStream csvData)
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+    public Table rename(Table mapping)
+            throws IdRegenerator.IdCollisionError, DeserializationError {
         try (final Tx tx = beginTx()) {
             List<List<String>> done = Lists.newArrayList();
-            CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
             IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(true);
-            try (MappingIterator<Map<String, String>> valueIterator = reader
-                    .readValues(new InputStreamReader(csvData, "UTF-8"))) {
-                while (valueIterator.hasNext()) {
-                    Map<String, String> remap = valueIterator.next();
-                    String currentId = remap.get("id");
-                    String newLocalIdentifier = remap.get("local");
-
-                    Accessible item = manager.getEntity(currentId, Accessible.class);
-                    item.asVertex().setProperty(Ontology.IDENTIFIER_KEY, newLocalIdentifier);
-                    idRegenerator.reGenerateId(item).ifPresent(done::add);
+            for (List<String> row : mapping.data()) {
+                if (row.size() != 2) {
+                    throw new DeserializationError(
+                            "Invalid table data: must contain 2 columns only");
                 }
+                String currentId = row.get(0);
+                String newLocalIdentifier = row.get(1);
+                Accessible item = manager.getEntity(currentId, Accessible.class);
+                item.asVertex().setProperty(Ontology.IDENTIFIER_KEY, newLocalIdentifier);
+                idRegenerator.reGenerateId(item).ifPresent(done::add);
             }
 
             tx.success();
-            return makeCsv(done);
-        }
-    }
-    // Helpers
-
-    private String makeCsv(List<List<String>> rows) {
-        CsvMapper mapper = new CsvMapper()
-                .enable(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING);
-        CsvSchema schema = mapper.schemaFor(List.class).withoutHeader();
-        try {
-            return mapper.writer(schema).writeValueAsString(rows);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return Table.of(done);
+        } catch (ItemNotFound e) {
+            throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
         }
     }
 }
