@@ -59,6 +59,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.jena.vocabulary.SKOSXL;
@@ -78,6 +79,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Import SKOS RDF.
@@ -117,6 +119,30 @@ public final class JenaSkosImporter implements SkosImporter {
         this.format = format;
         this.defaultLang = defaultLang;
         this.dao = new BundleManager(framedGraph, vocabulary.idPath());
+    }
+
+    private static class StringValue {
+        private final String str;
+        private final String lang;
+
+        StringValue(String str, String lang) {
+            this.str = str;
+            this.lang = lang;
+        }
+
+        String getValue() {
+            return str;
+        }
+
+        String getLang() {
+            return lang;
+        }
+
+        @Override
+        public String toString() {
+            return "\"" + str + "\"" + (
+                    lang == null || lang.trim().isEmpty() ? "" : "@" + lang);
+        }
     }
 
     /**
@@ -390,36 +416,37 @@ public final class JenaSkosImporter implements SkosImporter {
                 Concept::getRelatedConcepts, Concept::addRelatedConcept, Concept::removeRelatedConcept);
     }
 
-    private String getLabelValue(RDFNode property) {
-        if (property.isLiteral()) {
-            return property.asLiteral().getString();
-        } else {
-            RDFNode literalForm = property.asResource().getProperty(SKOSXL.literalForm).getObject();
-            return literalForm == null ? "" : literalForm.asLiteral().getString();
+    private List<StringValue> getReifiedObjectValue(Resource item, URI propUri) {
+        List<StringValue> values = Lists.newArrayList();
+        for (RDFNode node : getObjectWithPredicate(item, propUri)) {
+            if (node.isLiteral()) {
+                values.add(new StringValue(node.asLiteral().getString(), node.asLiteral().getLanguage()));
+            } else {
+                Stream.of(SKOSXL.literalForm, RDF.value)
+                        .map(prop -> node.asResource().getProperty(prop))
+                        .filter(Objects::nonNull)
+                        .map(Statement::getObject)
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .ifPresent(object -> values.add(new StringValue(
+                                object.asLiteral().getString(), object.asLiteral().getLanguage())));
+            }
         }
-    }
-
-    private String getLabelLanguage(RDFNode property) {
-        if (property.isLiteral()) {
-            return property.asLiteral().getLanguage();
-        } else {
-            RDFNode literalForm = property.asResource().getProperty(SKOSXL.literalForm).getObject();
-            return literalForm == null ? "" : literalForm.asLiteral().getLanguage();
-        }
+        return values;
     }
 
     private List<Bundle> getDescriptions(Resource item) {
         List<Bundle> descriptions = Lists.newArrayList();
 
-        for (RDFNode property : getObjectWithPredicate(item, SkosRDFVocabulary.PREF_LABEL.getURI())) {
+        for (StringValue property : getReifiedObjectValue(item, SkosRDFVocabulary.PREF_LABEL.getURI())) {
 
             Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
-            String langCode2Letter = getLabelLanguage(property);
+            String langCode2Letter = property.getLang();
             String langCode3Letter = getLanguageCode(langCode2Letter, defaultLang);
             Optional<String> descCode = getScriptCode(langCode2Letter);
 
-            builder.addDataValue(Ontology.NAME_KEY, getLabelValue(property))
+            builder.addDataValue(Ontology.NAME_KEY, property.getValue())
                     .addDataValue(Ontology.LANGUAGE, langCode3Letter);
             descCode.ifPresent(code -> builder.addDataValue(Ontology.IDENTIFIER_KEY, code));
 
@@ -444,12 +471,12 @@ public final class JenaSkosImporter implements SkosImporter {
             for (Map.Entry<String, List<URI>> prop : SkosRDFVocabulary.LANGUAGE_PROPS.entrySet()) {
                 List<String> values = Lists.newArrayList();
                 for (URI uri : prop.getValue()) {
-                    for (RDFNode target : getObjectWithPredicate(item, uri)) {
-                        String propLang2Letter = getLabelLanguage(target);
+                    for (StringValue target : getReifiedObjectValue(item, uri)) {
+                        String propLang2Letter = target.getLang();
                         String propLanguageCode = getLanguageCode(propLang2Letter, defaultLang);
                         Optional<String> propDescCode = getScriptCode(propLang2Letter);
                         if (propLanguageCode.equals(langCode3Letter) && propDescCode.equals(descCode)) {
-                            values.add(getLabelValue(target));
+                            values.add(target.getValue());
                         }
                     }
                 }

@@ -173,9 +173,13 @@ public class ImportLog {
     }
 
     public void printReport(PrintStream out) {
-        out.println(
-                String.format(
-                        "Created: %d, Updated: %d, Unchanged: %d, Errors: %d",
-                        created, updated, unchanged, errors.size()));
+        out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Created: %d, Updated: %d, Unchanged: %d, Errors: %d",
+                created, updated, unchanged, errors.size());
     }
 }

@@ -26,6 +26,9 @@
 <http://www.my.com/#label7> a xl:Label ;
     xl:literalForm "drainage ditches" .
 
+<http://www.my.com/#def1> rdf:value """A feature type category for places
+        such as the Erie Canal""" .
+
 <http://www.my.com/#canals> a skos:Concept ;
     xl:prefLabel <http://www.my.com/#label1> ;
     xl:altLabel <http://www.my.com/#label2> ,
@@ -33,10 +36,12 @@
                 <http://www.my.com/#label4> ,
                 <http://www.my.com/#label5> ,
                 <http://www.my.com/#label6> ,
-                <http://www.my.com/#label7> ;
+                <http://www.my.com/#label7> ,
+                <http://www.my.com/#label8-missing-value-test> ;
     skos:broader <http://www.my.com/#hydrographic%20structures> ;
-    skos:definition """A feature type category for places 
-        such as the Erie Canal""";
+    skos:definition <http://www.my.com/#def1> ;
+    skos:definition <http://www.my.com/#def2-missing-value-test> ;
+
     skos:related <http://www.my.com/#channels>,
         <http://www.my.com/#locks>,
         <http://www.my.com/#transportation%20features>,
