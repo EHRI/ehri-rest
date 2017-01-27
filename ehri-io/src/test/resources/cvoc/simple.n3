@@ -12,7 +12,7 @@
         "drainage canals",
         "drainage ditches" ;
     skos:broader <http://www.my.com/#hydrographic%20structures> ;
-    skos:definition """A feature type category for places 
+    skos:definition """A feature type category for places
         such as the Erie Canal""";
     skos:prefLabel "canals" ;
     skos:related <http://www.my.com/#channels>,
