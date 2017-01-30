@@ -5,7 +5,7 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.7-SNAPSHOT</version>
+        <version>0.13.8-SNAPSHOT</version>
     </parent>
     <artifactId>ehri-ws</artifactId>
     <name>Web Service</name>

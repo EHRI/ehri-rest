@@ -19,44 +19,30 @@
 
 package eu.ehri.extension.errors.mappers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.AccessDenied;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import java.util.HashMap;
-import java.util.Map;
+
 
 /**
  * Maps the {@link AccessDenied} exception to the Unauthorized response.
  */
 @Provider
 public class AccessDeniedMapper implements ExceptionMapper<AccessDenied> {
-
-    @SuppressWarnings("serial")
     @Override
     public Response toResponse(final AccessDenied e) {
-        Map<String, Object> out = new HashMap<String, Object>() {
-            {
-                put("error", AccessDenied.class.getSimpleName());
-                put("details", new HashMap<String, String>() {
-                    {
-                        put("message", e.getMessage());
-                        put("item", e.getEntity());
-                        put("accessor", e.getAccessor());
-                    }
-                });
-            }
-        };
-        try {
-            return Response.status(Status.UNAUTHORIZED)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(new ObjectMapper().writeValueAsBytes(out)).build();
-        } catch (Exception e1) {
-            throw new RuntimeException(e1);
-        }
+        return WebDeserializationError.errorToJson(
+                Status.FORBIDDEN,
+                ImmutableMap.of(
+                        "message", e.getMessage(),
+                        "item", e.getEntity(),
+                        "accessor", e.getAccessor()
+                )
+        );
     }
 }

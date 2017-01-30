@@ -20,9 +20,6 @@
 package eu.ehri.extension.errors;
 
 public class MissingOrInvalidUser extends RuntimeException {
-
-    private static final long serialVersionUID = 2608176871477505511L;
-
     public MissingOrInvalidUser(String requester) {
         super(String.format("Requester missing or badly formed: '%s'", requester));
     }

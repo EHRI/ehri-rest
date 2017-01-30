@@ -119,8 +119,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
         JsonNode errValue = rootNode.path("error");
         assertFalse(errValue.isMissingNode());
-        assertEquals(DeserializationError.class.getSimpleName(),
-                errValue.asText());
+        assertEquals(BAD_REQUEST.getReasonPhrase(), errValue.asText());
     }
 
     @Test
@@ -160,13 +159,13 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 getCreationUriFor("r2")).entity(docTestData)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // Or r3...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor("r3"))
                 .entity(docTestData)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // Now grant the user permissions to create just within
         // the scope of r2
@@ -191,7 +190,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor("r3"))
                 .entity(docTestData)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // And the user himself should not be able to grant
         // others the ability to create within that scope.
@@ -203,8 +202,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
                 .entity(grantPermData)
                 .post(ClientResponse.class);
 
-        assertStatus(UNAUTHORIZED, response);
-
+        assertStatus(FORBIDDEN, response);
     }
 
     private URI getCreationUriFor(String id) {

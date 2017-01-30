@@ -44,7 +44,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
+import static com.sun.jersey.api.client.ClientResponse.Status.FORBIDDEN;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -119,7 +119,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(ENDPOINT, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
         // TODO: Figure out why no content ever seems to be returned here?
     }
 
@@ -149,7 +149,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME, uri)
                 .entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // Set the permission
         byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
@@ -186,13 +186,13 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 getCreationUriFor(r2)).entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // Or r3...
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor(r3))
                 .entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // Now grant the user permissions to create just within
         // the scope of r2
@@ -217,7 +217,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(LIMITED_USER_NAME, getCreationUriFor(r3))
                 .entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // And the user himself should not be able to grant
         // others the ability to create within that scope.
@@ -228,7 +228,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(LIMITED_USER_NAME, otherGrantUri).entity(grantPermData)
                 .post(ClientResponse.class);
 
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
     }
 
@@ -251,7 +251,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(LIMITED_USER_NAME, targetResourceUri)
                 .entity(testUpdateString)
                 .put(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(FORBIDDEN, response);
 
         // Now grant the user permissions to update and delete just on this item
         String permData = "[\"update\", \"delete\"]";

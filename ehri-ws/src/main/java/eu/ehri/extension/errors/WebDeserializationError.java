@@ -19,33 +19,32 @@
 
 package eu.ehri.extension.errors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import eu.ehri.project.exceptions.DeserializationError;
+import com.google.common.collect.ImmutableMap;
+import eu.ehri.extension.providers.JsonMessageBodyHandler;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.util.HashMap;
 
 
-
-public class WebDeserializationError extends WebApplicationException {
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    public WebDeserializationError(DeserializationError e) {
-        super(Response.status(Status.BAD_REQUEST)
-                .entity(errorToJson(e).getBytes(Charsets.UTF_8)).build());
+public class WebDeserializationError extends WebApplicationException implements JsonMessageBodyHandler {
+    public WebDeserializationError(Throwable e) {
+        super(errorToJson(Status.BAD_REQUEST, e));
     }
 
-    public static String errorToJson(final DeserializationError e) {
+    public static Response errorToJson(Status status, Throwable e) {
+        return errorToJson(status, e.getMessage());
+    }
+
+    public static Response errorToJson(Status status, Object details) {
         try {
-            return mapper.writeValueAsString(new HashMap<String, Object>() {
-                {
-                    put("error", DeserializationError.class.getSimpleName());
-                    put("details", e.getMessage());
-                }
-            });
+            return Response.status(status)
+                    .entity(mapper.writeValueAsString(ImmutableMap.of(
+                            "status", status.getStatusCode(),
+                            "error", status.getReasonPhrase(),
+                            "details", details
+                    )).getBytes(Charsets.UTF_8)).build();
         } catch (Exception err) {
             throw new RuntimeException(err);
         }

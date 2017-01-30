@@ -19,10 +19,9 @@
 
 package eu.ehri.extension.errors.mappers;
 
-import com.google.common.base.Charsets;
 import eu.ehri.extension.errors.MissingOrInvalidUser;
+import eu.ehri.extension.errors.WebDeserializationError;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -37,9 +36,6 @@ import javax.ws.rs.ext.Provider;
 public class MissingOrInvalidUserErrorMapper implements ExceptionMapper<MissingOrInvalidUser> {
     @Override
     public Response toResponse(MissingOrInvalidUser e) {
-        return Response
-                .status(Status.BAD_REQUEST)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(e.getMessage().getBytes(Charsets.UTF_8)).build();
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
     }
 }

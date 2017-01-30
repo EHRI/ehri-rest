@@ -19,10 +19,9 @@
 
 package eu.ehri.extension.errors.mappers;
 
-import com.google.common.base.Charsets;
+import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.ValidationError;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -30,43 +29,14 @@ import javax.ws.rs.ext.Provider;
 
 
 /**
- * Serialize a tree of validation errors to JSON. Like bundles,
- * ValidationErrors are a recursive structure with a 'relations'
- * map that contains lists of the errors found in each top-level
- * item's children. The end result should look like:
- * <p>
- * {
- * "errors":{},
- * "relations":{
- * "describes":[
- * {}
- * ],
- * "hasDate":[
- * {
- * "errors":{
- * "startDate":["Missing mandatory field"],
- * "endDate":["Missing mandatory field"]
- * },
- * "relations":{}
- * }
- * ]
- * }
- * }
- * <p>
- * The response is sent with HTTP status Bad Request.
+ * Serialize a tree of validation errors to JSON.
  */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
     @Override
     public Response toResponse(ValidationError e) {
-        try {
-            return Response.status(Status.BAD_REQUEST)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(e.getErrorSet().toJson()
-                            .getBytes(Charsets.UTF_8)).build();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            throw new RuntimeException(e1);
-        }
+        return WebDeserializationError.errorToJson(
+                Status.BAD_REQUEST,
+                e.getErrorSet().toData());
     }
 }
