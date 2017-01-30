@@ -150,7 +150,8 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         assertStatus(BAD_REQUEST, response);
 
         JsonNode rootNode = jsonMapper.readTree(errString);
-        JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
+        assertEquals(BAD_REQUEST.getReasonPhrase(), rootNode.path("error").asText());
+        JsonNode errValue = rootNode.path("details").path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
     }
@@ -169,7 +170,8 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         // In this case the start and end dates for the
         // first date relation should be missing
         JsonNode rootNode = jsonMapper.readTree(errorJson);
-        JsonNode errValue1 = rootNode.path(ErrorSet.REL_KEY)
+        JsonNode errValue1 = rootNode.path("details")
+                .path(ErrorSet.REL_KEY)
                 .path(Ontology.DESCRIPTION_FOR_ENTITY).path(0)
                 .path(ErrorSet.ERROR_KEY).path(Ontology.NAME_KEY);
         assertFalse(errValue1.isMissingNode());

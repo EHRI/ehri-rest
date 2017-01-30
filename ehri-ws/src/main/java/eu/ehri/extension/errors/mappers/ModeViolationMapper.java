@@ -19,10 +19,9 @@
 
 package eu.ehri.extension.errors.mappers;
 
-import com.google.common.base.Charsets;
+import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -32,9 +31,6 @@ import javax.ws.rs.ext.Provider;
 public class ModeViolationMapper implements ExceptionMapper<ModeViolation> {
     @Override
     public Response toResponse(ModeViolation e) {
-        return Response
-                .status(Status.BAD_REQUEST)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .entity(e.getMessage().getBytes(Charsets.UTF_8)).build();
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
     }
 }

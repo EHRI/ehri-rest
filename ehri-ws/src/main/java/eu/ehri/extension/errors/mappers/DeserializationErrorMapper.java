@@ -19,11 +19,9 @@
 
 package eu.ehri.extension.errors.mappers;
 
-import com.google.common.base.Charsets;
 import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.DeserializationError;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -33,14 +31,9 @@ import javax.ws.rs.ext.Provider;
  * Maps the {@link DeserializationError} exception to the Bad Request response.
  */
 @Provider
-public class DeserializationErrorMapper implements
-        ExceptionMapper<DeserializationError> {
+public class DeserializationErrorMapper implements ExceptionMapper<DeserializationError> {
     @Override
     public Response toResponse(DeserializationError e) {
-        return Response
-                .status(Status.BAD_REQUEST)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(WebDeserializationError.errorToJson(e)
-                        .getBytes(Charsets.UTF_8)).build();
+        return WebDeserializationError.errorToJson(Status.BAD_REQUEST, e);
     }
 }

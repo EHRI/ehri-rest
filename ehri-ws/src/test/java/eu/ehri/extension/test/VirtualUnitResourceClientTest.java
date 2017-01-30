@@ -123,7 +123,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
         assertStatus(BAD_REQUEST, response);
 
         JsonNode rootNode = jsonMapper.readTree(errString);
-        JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
+        JsonNode errValue = rootNode.path("details").path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
     }
