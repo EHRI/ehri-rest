@@ -43,8 +43,6 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -142,7 +140,7 @@ public class ImportResource extends AbstractResource {
         try (final Tx tx = beginTx()) {
             // Get the current user from the Authorization header and the scope
             // from the query params...
-            UserProfile user = getCurrentUser();
+            Actioner user = getCurrentActioner();
             Vocabulary scope = manager.getEntity(scopeId, Vocabulary.class);
             SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope);
 
@@ -234,7 +232,7 @@ public class ImportResource extends AbstractResource {
 
             // Get the current user from the Authorization header and the scope
             // from the query params...
-            UserProfile user = getCurrentUser();
+            Actioner user = getCurrentActioner();
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
@@ -326,7 +324,7 @@ public class ImportResource extends AbstractResource {
 
             // Get the current user from the Authorization header and the scope
             // from the query params...
-            UserProfile user = getCurrentUser();
+            Actioner user = getCurrentActioner();
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
@@ -369,13 +367,12 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage, InputStream inputStream)
             throws IOException, ItemNotFound, ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
-            Accessor accessor = getCurrentUser();
+            Actioner user = getCurrentActioner();
             PermissionScope scope = scopeId != null
                     ? manager.getEntity(scopeId, PermissionScope.class)
                     : null;
             ImportLog log = new BatchOperations(graph, scope, version, tolerant)
-                    .batchUpdate(inputStream,
-                            accessor.as(Actioner.class), getLogMessage(logMessage));
+                    .batchUpdate(inputStream, user, getLogMessage(logMessage));
             logger.debug("Committing batch update transaction...");
             tx.success();
             return log;
@@ -399,13 +396,12 @@ public class ImportResource extends AbstractResource {
             @QueryParam(ID_PARAM) List<String> ids)
             throws IOException, ItemNotFound, DeserializationError {
         try (final Tx tx = beginTx()) {
-            Accessor accessor = getCurrentUser();
+            Actioner user = getCurrentActioner();
             PermissionScope scope = scopeId != null
                     ? manager.getEntity(scopeId, PermissionScope.class)
                     : null;
             new BatchOperations(graph, scope, version, false)
-                    .batchDelete(ids,
-                            accessor.as(Actioner.class), getLogMessage(logMessage));
+                    .batchDelete(ids, user, getLogMessage(logMessage));
             logger.debug("Committing delete transaction...");
             tx.success();
         }

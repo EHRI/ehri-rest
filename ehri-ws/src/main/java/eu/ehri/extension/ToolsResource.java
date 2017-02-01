@@ -40,6 +40,7 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
@@ -133,7 +134,7 @@ public class ToolsResource extends AbstractResource {
             FindReplace fr = new FindReplace(graph, commit, maxItems);
             List<List<String>> rows = fr.findAndReplace(EntityClass.withName(type),
                     EntityClass.withName(subType), property, from, to,
-                    getCurrentUser(), getLogMessage().orElse(null));
+                    getCurrentActioner(), getLogMessage().orElse(null));
 
             tx.success();
             return Table.of(rows);
@@ -189,7 +190,7 @@ public class ToolsResource extends AbstractResource {
             throws ItemNotFound, ValidationError,
             PermissionDenied, DeserializationError {
         try (final Tx tx = beginTx()) {
-            UserProfile user = getCurrentUser();
+            Actioner user = getCurrentActioner();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
             Vocabulary vocabulary = manager.getEntity(vocabularyId, Vocabulary.class);
 

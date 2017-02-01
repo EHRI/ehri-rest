@@ -19,7 +19,6 @@
 
 package eu.ehri.extension;
 
-import org.apache.jena.rdf.model.Model;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.CreateResource;
@@ -40,11 +39,12 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
+import org.apache.jena.rdf.model.Model;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -152,10 +152,10 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     public void deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, PermissionDenied {
         try (final Tx tx = beginTx()) {
-            UserProfile user = getCurrentUser();
+            Actioner user = getCurrentActioner();
             Api api = api().enableLogging(false);
             Vocabulary vocabulary = api.detail(id, cls);
-            ActionManager actionManager = new ActionManager(graph, vocabulary);
+            ActionManager actionManager = api.actionManager().setScope(vocabulary);
             Iterable<Concept> concepts = vocabulary.getConcepts();
             if (concepts.iterator().hasNext()) {
                 ActionManager.EventContext context = actionManager
@@ -219,7 +219,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             final Model model = skosImporter.export(base);
             tx.success();
             return Response.ok((StreamingOutput) outputStream ->
-                        model.getWriter(rdfFormat).write(model, outputStream, base))
+                    model.getWriter(rdfFormat).write(model, outputStream, base))
                     .type(mediaType + "; charset=utf-8").build();
         }
     }

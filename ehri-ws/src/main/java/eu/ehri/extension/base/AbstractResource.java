@@ -47,6 +47,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -267,9 +268,9 @@ public abstract class AbstractResource implements TxCheckedResource {
 
     /**
      * Retrieve the profile of the current user, throwing a
-     * BadRequest if it's invalid.
+     * BadRequest if it's invalid or not a user.
      *
-     * @return The current user profile
+     * @return the current user profile
      */
     protected UserProfile getCurrentUser() {
         Accessor profile = getRequesterUserProfile();
@@ -277,11 +278,21 @@ public abstract class AbstractResource implements TxCheckedResource {
                 || !profile.getType().equals(Entities.USER_PROFILE)) {
             throw new MissingOrInvalidUser(profile.getId());
         }
-        return graph.frame(profile.asVertex(), UserProfile.class);
+        return profile.as(UserProfile.class);
     }
 
     /**
-     * Retreive an action log message from the request header.
+     * Retrieve the current actioner, which may be a user or
+     * a group, throwing a bad request if it's invalid.
+     *
+     * @return an actioner frame
+     */
+    protected Actioner getCurrentActioner() {
+        return getRequesterUserProfile().as(Actioner.class);
+    }
+
+    /**
+     * Retrieve an action log message from the request header.
      *
      * @return An optional log message
      */
@@ -387,7 +398,6 @@ public abstract class AbstractResource implements TxCheckedResource {
      * Stream an iterable of vertices.
      *
      * @param vertices an iterable of vertices
-     *
      * @return a streaming response
      */
     protected Response streamingVertexList(Iterable<Vertex> vertices) {
@@ -397,9 +407,8 @@ public abstract class AbstractResource implements TxCheckedResource {
     /**
      * Stream an iterable of vertices.
      *
-     * @param vertices an iterable of vertices
+     * @param vertices   an iterable of vertices
      * @param serializer a serializer instance
-     *
      * @return a streaming response
      */
     protected Response streamingVertexList(Iterable<Vertex> vertices, Serializer serializer) {
