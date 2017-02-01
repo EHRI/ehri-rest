@@ -36,7 +36,8 @@ import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
@@ -110,7 +111,7 @@ public class Linker {
     public int createAndLinkRepositoryVocabulary(
             Repository repository,
             Vocabulary vocabulary,
-            UserProfile user)
+            Actioner user)
             throws ValidationError, PermissionDenied {
 
         // First, build a map of access point names to (null) concepts
@@ -155,7 +156,7 @@ public class Linker {
         ActionManager.EventContext conceptEvent = actionManager
                 .setScope(vocabulary)
                 .newEventContext(user, EventTypes.creation, logMessage);
-        Api api = ApiFactory.noLogging(graph, user);
+        Api api = ApiFactory.noLogging(graph, user.as(Accessor.class));
 
         for (Map.Entry<String, String> idName : conceptIdentifierNames.entrySet()) {
             String identifier = idName.getKey();
