@@ -31,6 +31,8 @@ import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import java.util.Collections;
+
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static eu.ehri.extension.ToolsResource.ENDPOINT;
 import static org.junit.Assert.assertEquals;
@@ -68,9 +70,9 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
     public void testRegenerateIds() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "regenerate-ids"))
                 .queryParam("id", "c1")
-                .queryParam("id", "c4")
                 .queryParam("commit", "true");
-        ClientResponse response = resource.post(ClientResponse.class);
+        Table data = Table.of(Collections.singletonList(Collections.singletonList("c4")));
+        ClientResponse response = resource.post(ClientResponse.class, data);
         Table out = response.getEntity(Table.class);
         assertStatus(OK, response);
         assertEquals(2, out.data().size());
