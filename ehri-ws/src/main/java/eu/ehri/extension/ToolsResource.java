@@ -229,15 +229,22 @@ public class ToolsResource extends AbstractResource {
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
     @Path("regenerate-ids")
     public Table regenerateIds(
             @QueryParam("id") List<String> ids,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
-            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            @QueryParam("commit") @DefaultValue("false") boolean commit,
+            Table data)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
-            List<Accessible> items = ids.stream().map(id -> {
+            List<String> allIds = Lists.newArrayList(ids);
+            data.data().stream()
+                .filter(row -> row.size() == 1)
+                .forEach(row -> allIds.add(row.get(0)));
+
+            List<Accessible> items = allIds.stream().map(id -> {
                 try {
                     return manager.getEntity(id, Accessible.class);
                 } catch (ItemNotFound e) {
