@@ -43,7 +43,10 @@ public class Ead2002ExporterTest extends XmlExporterTest {
     @Test
     public void testExport1() throws Exception {
         DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
-        testExport(c1, "eng");
+        String xml = testExport(c1, "eng");
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "auths", "//controlaccess/subject/@source");
+        assertXPath(doc, "a1", "//controlaccess/subject/@authfilenumber");
     }
 
     @Test
@@ -131,7 +134,6 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
-        System.out.println(xml);
         isValidEad(xml);
         return xml;
     }
