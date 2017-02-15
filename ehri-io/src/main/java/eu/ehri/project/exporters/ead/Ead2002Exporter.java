@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.ContactInfo;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
@@ -17,10 +18,13 @@ import eu.ehri.project.models.Address;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
+import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.joda.time.DateTime;
@@ -306,10 +310,27 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             tag(sw, "controlaccess", () -> {
                 AccessPointType type = entry.getKey();
                 for (AccessPoint accessPoint : entry.getValue()) {
-                    tag(sw, controlAccessMappings.get(type), accessPoint.getName());
+                    Optional<AuthoritativeItem> target = getAccessPointTarget(accessPoint);
+                    Map<String, String> attrs = target.map(item -> ImmutableMap.of(
+                            "source", item.getAuthoritativeSet().getId(),
+                            "authfilenumber", item.getIdentifier()
+                    )).orElse(ImmutableMap.of());
+                    tag(sw, controlAccessMappings.get(type), accessPoint.getName(), attrs);
                 }
             });
         }
+    }
+
+    private Optional<AuthoritativeItem> getAccessPointTarget(AccessPoint accessPoint) {
+        for (Link link : accessPoint.getLinks()) {
+            for (Entity target : link.getLinkTargets()) {
+                if (target.getType().equals(Entities.CVOC_CONCEPT) ||
+                                target.getType().equals(Entities.HISTORICAL_AGENT)) {
+                    return Optional.of(target.as(AuthoritativeItem.class));
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private void addPropertyValues(XMLStreamWriter sw, Entity item) {
