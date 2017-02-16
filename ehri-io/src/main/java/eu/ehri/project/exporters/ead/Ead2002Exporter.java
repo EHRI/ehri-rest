@@ -21,7 +21,6 @@ import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
-import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
@@ -310,27 +309,31 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             tag(sw, "controlaccess", () -> {
                 AccessPointType type = entry.getKey();
                 for (AccessPoint accessPoint : entry.getValue()) {
-                    Optional<AuthoritativeItem> target = getAccessPointTarget(accessPoint);
-                    Map<String, String> attrs = target.map(item -> ImmutableMap.of(
-                            "source", item.getAuthoritativeSet().getId(),
-                            "authfilenumber", item.getIdentifier()
-                    )).orElse(ImmutableMap.of());
-                    tag(sw, controlAccessMappings.get(type), accessPoint.getName(), attrs);
+                    tag(sw, controlAccessMappings.get(type), accessPoint.getName(),
+                            getAccessPointAttributes(accessPoint));
                 }
             });
         }
     }
 
-    private Optional<AuthoritativeItem> getAccessPointTarget(AccessPoint accessPoint) {
+    private Map<String, String> getAccessPointAttributes(AccessPoint accessPoint) {
         for (Link link : accessPoint.getLinks()) {
             for (Entity target : link.getLinkTargets()) {
                 if (target.getType().equals(Entities.CVOC_CONCEPT) ||
                                 target.getType().equals(Entities.HISTORICAL_AGENT)) {
-                    return Optional.of(target.as(AuthoritativeItem.class));
+                    AuthoritativeItem item = target.as(AuthoritativeItem.class);
+                    try {
+                        return ImmutableMap.of(
+                                "source", item.getAuthoritativeSet().getId(),
+                                "authfilenumber", item.getIdentifier()
+                        );
+                    } catch (NullPointerException e) {
+                        logger.warn("Authoritative item with missing set: {}", item.getId());
+                    }
                 }
             }
         }
-        return Optional.empty();
+        return Collections.emptyMap();
     }
 
     private void addPropertyValues(XMLStreamWriter sw, Entity item) {
