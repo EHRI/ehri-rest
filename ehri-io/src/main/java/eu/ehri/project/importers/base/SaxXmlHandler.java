@@ -325,7 +325,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            String key = properties.getProperty(all + attribute + value);
+            String key = properties.getProperty(all + attribute + escapeValueForKey(value));
             if (key != null) {
                 return key;
             }
@@ -348,13 +348,17 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            String key = all + attribute + value;
+            String key = all + attribute + escapeValueForKey(value);
             if (properties.getProperty(key) != null) {
                 logger.trace(" FOUND Path key: {}", key);
                 return true;
             }
         }
         return false;
+    }
+
+    private String escapeValueForKey(String value) {
+        return value.replaceAll("[\\s=:]", "_");
     }
 
     /**
