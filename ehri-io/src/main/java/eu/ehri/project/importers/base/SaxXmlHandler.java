@@ -172,7 +172,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                     String path = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "");
                     putPropertyInCurrentGraph(path, attributes.getValue(attr));
                 } else if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
-                    this.attribute = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
+                    attribute = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
                 } else {
                     logger.debug("attribute {} not found in properties", attributeName);
                 }
@@ -214,9 +214,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         if (c.containsKey(key)) {
             ((List<Map<String, Object>>) c.get(key)).add(subgraph);
         } else {
-            List<Map<String, Object>> l = Lists.newArrayList();
-            l.add(subgraph);
-            c.put(key, l);
+            c.put(key, Lists.newArrayList(subgraph));
         }
     }
 
@@ -245,13 +243,8 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param qName an element QName that may have a namespace prefix
      * @return the element name without namespace prefix
      */
-    protected String withoutNamespace(String qName) {
-        String name = qName;
-        int colon = qName.indexOf(":");
-        if (colon > -1) {
-            name = qName.substring(colon + 1);
-        }
-        return name;
+    private String withoutNamespace(String qName) {
+        return qName.substring(qName.indexOf(":") + 1);
     }
 
     /**
@@ -287,12 +280,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value    new value for the property.
      */
     protected void overwritePropertyInCurrentGraph(String property, String value) {
-        overwritePropertyInCurrentGraph(currentGraphPath.peek(), property, value);
-    }
-
-    private void overwritePropertyInCurrentGraph(Map<String, Object> c, String property, String value) {
-        logger.debug("overwriteProp: {} {}", property, value);
-        c.put(property, value);
+        Helpers.overwritePropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
     /**

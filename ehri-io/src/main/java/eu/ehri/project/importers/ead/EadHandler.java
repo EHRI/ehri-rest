@@ -52,13 +52,13 @@ import java.util.regex.Pattern;
  */
 public class EadHandler extends SaxXmlHandler {
 
-    public static final String EADID = "eadId",
+    private static final String EADID = "eadId",
     //            SOURCEFILEID = "sourceFileId",
     MAINAGENCYCODE = "mainagencycode",
             AUTHOR = "author";
-    public static final String DEFAULT_PROPERTIES = "icaatom.properties";
+    private static final String DEFAULT_PROPERTIES = "icaatom.properties";
 
-    final List<Map<String,Object>> globalMaintenanceEvents = Lists.newArrayList();
+    private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes =
             ImmutableMap.<String, Class<? extends Entity>>builder()
@@ -74,7 +74,7 @@ public class EadHandler extends SaxXmlHandler {
      * Stack of identifiers of archival units. Push/pop the identifier of the current
      * node on top/from the top of the stack.
      */
-    protected final Stack<String> scopeIds = new Stack<>();
+    private final Stack<String> scopeIds = new Stack<>();
 
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
@@ -83,20 +83,16 @@ public class EadHandler extends SaxXmlHandler {
     private final static String ARCHDESC = "archdesc";
     private final static String DID = "did";
     private final static String DEFAULT_LANGUAGE = "eng";
-    /**
-     * used to attach the MaintenanceEvents to
-     */
-    protected DocumentaryUnit topLevel;
 
     /**
      * Default language to use in units without language
      */
-    protected String eadLanguage = DEFAULT_LANGUAGE;
+    private String eadLanguage = DEFAULT_LANGUAGE;
 
     /**
      * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
      */
-    final Map<String, String> eadfileValues;
+    private final Map<String, String> eadfileValues;
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -156,7 +152,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @return a List of Strings, i.e. identifiers, representing the path of the current node
      */
-    protected List<String> pathIds() {
+    private List<String> pathIds() {
         if (scopeIds.isEmpty()) {
             return scopeIds;
         } else {
@@ -250,7 +246,10 @@ public class EadHandler extends SaxXmlHandler {
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
 
-                    topLevel = current; // if it is not overwritten, the current DU is the topLevel
+                    /*
+      used to attach the MaintenanceEvents to
+     */
+                    DocumentaryUnit topLevel = current;
                     logger.debug("importer used: {}", importer.getClass());
                     if (depth > 0) { // if not on root level
                         children[depth - 1].add(current); // add child to parent offspring
@@ -296,7 +295,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @return the <code>&lt;eadid&gt;</code> or null if it was not parsed yet or empty
      */
-    protected String getEadId() {
+    private String getEadId() {
         if (eadfileValues.get(EADID) == null) {
             logger.error("EADID not set yet, or not given in eadfile");
         }
@@ -327,7 +326,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @param currentGraph Data at the current node level
      */
-    protected void useDefaultLanguage(Map<String, Object> currentGraph) {
+    private void useDefaultLanguage(Map<String, Object> currentGraph) {
         useDefaultLanguage(currentGraph, getDefaultLanguage());
     }
 
@@ -338,7 +337,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph    Data at the current node level
      * @param defaultLanguage Language code to use as default
      */
-    protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
+    private void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
             logger.debug("Using default language code: {}", defaultLanguage);
@@ -346,7 +345,7 @@ public class EadHandler extends SaxXmlHandler {
         }
     }
 
-    protected String getDefaultLanguage() {
+    private String getDefaultLanguage() {
         return eadLanguage;
     }
 
@@ -369,7 +368,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     @SuppressWarnings("unused")
-    protected void extractDate(Map<String, Object> currentGraph) {
+    private void extractDate(Map<String, Object> currentGraph) {
     }
 
     /**
@@ -379,18 +378,15 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     protected void extractIdentifier(Map<String, Object> currentGraph) {
-        if (eadfileValues.get(MAINAGENCYCODE) != null) {
-            if (eadfileValues.get(MAINAGENCYCODE).equals("NL-AsdNIOD")) {
-                if (currentGraph.containsKey("levelOfDescription")
-                        && currentGraph.get("levelOfDescription").equals("file")
-                        && currentGraph.get("inventarisNummer") != null) {
-                    //create new identifier
-                    //isil code / archiefnr / inventarisnr
-                    String newObjectId = eadfileValues.get(MAINAGENCYCODE) +
-                            "/" + eadfileValues.get(EADID) +
-                            "/" + currentGraph.get("inventarisNummer");
-                    currentGraph.remove("inventarisNummer");
-                    putPropertyInCurrentGraph(Ontology.OTHER_IDENTIFIERS, newObjectId);
+        // If there are multiple identifiers at this point, take the
+        // first and add the rest as alternate identifiers...
+        if (currentGraph.containsKey(OBJECT_IDENTIFIER)) {
+            Object idents = currentGraph.get(OBJECT_IDENTIFIER);
+            if (idents instanceof List) {
+                List identList = (List) idents;
+                currentGraph.put(OBJECT_IDENTIFIER, identList.get(0));
+                for (Object item: identList.subList(1, identList.size())) {
+                    addOtherIdentifier(currentGraph, ((String) item));
                 }
             }
         }
@@ -406,17 +402,17 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
         if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
-            logger.debug("adding alternative id: " + otherIdentifier);
+            logger.debug("adding alternative id: {}", otherIdentifier);
             Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
-            if (oids != null && oids instanceof List) {
+            if (oids instanceof List) {
                 ((List<String>) oids).add(otherIdentifier);
-                logger.debug("alternative ID added");
+            } else {
+                currentGraph.put(Ontology.OTHER_IDENTIFIERS,
+                        Lists.newArrayList(oids, otherIdentifier));
             }
         } else {
-            logger.debug("adding first alt id: " + otherIdentifier);
-            ArrayList<String> oids = Lists.newArrayList();
-            oids.add(otherIdentifier);
-            currentGraph.put(Ontology.OTHER_IDENTIFIERS, oids);
+            logger.debug("adding first alt id: {}", otherIdentifier);
+            currentGraph.put(Ontology.OTHER_IDENTIFIERS, Lists.newArrayList(otherIdentifier));
         }
     }
 
@@ -438,7 +434,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param elementName The XML element name
      * @return Whether or not we're moved to a new item
      */
-    protected static boolean isUnitDelimiter(String elementName) {
+    private static boolean isUnitDelimiter(String elementName) {
         return childItemPattern.matcher(elementName).matches() || elementName.equals(ARCHDESC);
     }
 

@@ -5,13 +5,12 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.ehri.project.models.base.Entity;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,8 +39,6 @@ public class LanguageHelpers {
         }
     }
 
-    public static final Logger logger = LoggerFactory.getLogger(Helpers.class);
-
     // Splitter for breaking up codes
     private static final Splitter codeSplitter = Splitter.on("-").omitEmptyStrings().limit(2);
 
@@ -65,7 +62,7 @@ public class LanguageHelpers {
     /**
      * Continent names as defined by the EAG schema
      */
-    public static final ImmutableBiMap<String, String> continentCodes = ImmutableBiMap.<String, String>builder()
+    private static final ImmutableBiMap<String, String> continentCodes = ImmutableBiMap.<String, String>builder()
             .put("AF", "Africa")
             .put("AN", "Antarctica")
             .put("AS", "Asia")
@@ -75,7 +72,7 @@ public class LanguageHelpers {
             .put("SA", "South America")
             .build();
 
-    public static final ImmutableMap<String, String> countryCodesToContinents = ImmutableMap.<String, String>builder()
+    private static final ImmutableMap<String, String> countryCodesToContinents = ImmutableMap.<String, String>builder()
             .put("AD", "EU")
             .put("AE", "AS")
             .put("AF", "AS")
@@ -347,7 +344,7 @@ public class LanguageHelpers {
      */
     public static Optional<Description> getBestDescription(Described item, Optional<Description> priorDescOpt, String langCode) {
         List<Description> descriptions = Lists.newArrayList(item.getDescriptions());
-        Collections.sort(descriptions, (d1, d2) -> d1.getId().compareTo(d2.getId()));
+        descriptions.sort(Comparator.comparing(Entity::getId));
         Description fallBack = null;
         for (Description description : descriptions) {
             if (fallBack == null) {

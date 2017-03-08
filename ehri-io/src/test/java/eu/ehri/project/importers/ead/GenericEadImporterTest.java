@@ -28,7 +28,7 @@ import java.util.List;
 
 public class GenericEadImporterTest extends AbstractImporterTest {
 
-    protected final String SINGLE_EAD = "genericEad.xml";
+    protected final String SINGLE_EAD = "generic-ead.xml";
 
     @Test
     public void testImportItemsT() throws Exception {

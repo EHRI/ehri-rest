@@ -143,7 +143,6 @@ public class NiodEadXsdTest extends AbstractImporterTest {
         }
         //test other identifiers
         assertNull(c1.getProperty(Ontology.OTHER_IDENTIFIERS));
-        assertEquals("NL-AsdNIOD/809/2", c2_1.getProperty(Ontology.OTHER_IDENTIFIERS));
 
         for (DocumentaryUnitDescription desc : c1.getDocumentDescriptions()) {
             assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
