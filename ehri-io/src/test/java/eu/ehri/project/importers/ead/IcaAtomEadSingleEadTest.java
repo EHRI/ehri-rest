@@ -19,7 +19,9 @@
 
 package eu.ehri.project.importers.ead;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -65,9 +67,11 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // - 2 more import Event links
         // - 1 more import Event
 
-        Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
+        assertEquals(Lists.newArrayList(IMPORTED_ITEM_ID + "-alt"),
+                unit.<List<String>>getProperty(Ontology.OTHER_IDENTIFIERS));
         for (Description d : unit.getDocumentDescriptions())
             assertEquals("Test EAD Item", d.getName());
 

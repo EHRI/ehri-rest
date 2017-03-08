@@ -22,6 +22,8 @@ package eu.ehri.project.importers.util;
 import com.google.common.collect.Lists;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -32,12 +34,31 @@ import java.util.regex.Pattern;
  */
 public class Helpers {
 
+    private static final Logger logger = LoggerFactory.getLogger(Helpers.class);
+
     /**
      * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
      */
-    public static final String LANGUAGE_KEY_PREFIX = "language";
+    private static final String LANGUAGE_KEY_PREFIX = "language";
 
     private static final Pattern cDataReplace = Pattern.compile("\\]\\]>");
+
+    private static String normaliseValue(String property, String value) {
+        String trimmedValue = StringUtils.normalizeSpace(value);
+        // Language codes are converted to their 3-letter alternates
+        return property.startsWith(LANGUAGE_KEY_PREFIX)
+                ? LanguageHelpers.iso639DashTwoCode(trimmedValue)
+                : trimmedValue;
+    }
+
+    public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
+        String normValue = normaliseValue(property, value);
+        if (normValue == null || normValue.isEmpty()) {
+            return;
+        }
+        logger.debug("overwrite property: {} {}", property, normValue);
+        c.put(property, normValue);
+    }
 
     /**
      * Stores this property value pair in the given graph node representation.
@@ -49,41 +70,25 @@ public class Helpers {
      * @param value    the value to store
      */
     public static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
-        if (value == null)
-            return;
-        String valuetrimmed = value.trim();
-        if (valuetrimmed.isEmpty()) {
+        String normValue = normaliseValue(property, value);
+        if (normValue == null || normValue.isEmpty()) {
             return;
         }
-
-        // Language properties
-
-        if (property.startsWith(LANGUAGE_KEY_PREFIX)) {
-            valuetrimmed = LanguageHelpers.iso639DashTwoCode(valuetrimmed);
-        }
-
-        valuetrimmed = StringUtils.normalizeSpace(valuetrimmed);
-
-        LanguageHelpers.logger.debug("putProp: " + property + " " + valuetrimmed);
-
-        Object propertyList;
+        logger.debug("putProp: {} -> {}", property, normValue);
         if (c.containsKey(property)) {
-            propertyList = c.get(property);
-            if (propertyList instanceof List) {
-                ((List<Object>) propertyList).add(valuetrimmed);
+            Object currentValue = c.get(property);
+            if (currentValue instanceof List) {
+                ((List) currentValue).add(normValue);
             } else {
-                List<Object> o = Lists.newArrayList();
-                o.add(c.get(property));
-                o.add(valuetrimmed);
-                c.put(property, o);
+                c.put(property, Lists.newArrayList(currentValue, normValue));
             }
         } else {
-            c.put(property, valuetrimmed);
+            c.put(property, normValue);
         }
     }
 
     /**
-     * Remove substrings that can not exist within an XML CDATA section.
+     * Remove sub-strings that can not exist within an XML CDATA section.
      *
      * @param data the input string
      * @return a string with CDATA escapes removed
