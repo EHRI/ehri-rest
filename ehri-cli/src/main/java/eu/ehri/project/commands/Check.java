@@ -23,17 +23,24 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Identifiable;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -45,6 +52,7 @@ import static eu.ehri.project.models.EntityClass.CVOC_CONCEPT;
 import static eu.ehri.project.models.EntityClass.DOCUMENTARY_UNIT;
 import static eu.ehri.project.models.EntityClass.HISTORICAL_AGENT;
 import static eu.ehri.project.models.EntityClass.REPOSITORY;
+import static eu.ehri.project.persistence.ActionManager.GLOBAL_EVENT_ROOT;
 
 /**
  * Sanity check various parts of the graph.
@@ -52,6 +60,7 @@ import static eu.ehri.project.models.EntityClass.REPOSITORY;
 public class Check extends BaseCommand {
 
     final static String NAME = "check";
+    private static final String QUICK = "quick";
 
     @Override
     public String getHelp() {
@@ -66,20 +75,52 @@ public class Check extends BaseCommand {
     @Override
     protected void setCustomOptions(Options options) {
         options.addOption(Option.builder()
-                .longOpt("quick")
-                .desc("Quick checks only")
+                .longOpt(QUICK)
+                .desc("Run fast, basic sanity checks only")
                 .build());
     }
 
     @Override
     public int execWithOptions(FramedGraph<?> graph,
-                               CommandLine cmdLine) throws Exception {
+            CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        checkPermissionScopes(graph, manager);
-        checkOwnerPermGrantsHaveNoScope(manager);
+        checkInitialization(graph, manager);
+        if (!cmdLine.hasOption(QUICK)) {
+            checkPermissionScopes(graph, manager);
+            checkOwnerPermGrantsHaveNoScope(manager);
+        }
 
         return 0;
+    }
+
+    private void checkInitialization(FramedGraph<?> graph, GraphManager manager) {
+        if (graph.getBaseGraph().getVertices().iterator().hasNext()) {
+            try {
+                SystemEventQueue queue =
+                        manager.getEntity(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
+                if (!queue.getSystemEvents().iterator().hasNext()) {
+                    System.err.println("Global event iterator is empty!");
+                }
+            } catch (ItemNotFound itemNotFound) {
+                System.err.println("Unable to read event root in graph!");
+            }
+
+            try {
+                manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+
+                for (PermissionType pt : PermissionType.values()) {
+                    manager.getEntity(pt.getName(), Permission.class);
+                }
+                for (ContentTypes ct : ContentTypes.values()) {
+                    manager.getEntity(ct.getName(), ContentType.class);
+                }
+            } catch (ItemNotFound itemNotFound) {
+                System.err.println("Unable to find item in graph with id: " + itemNotFound.getValue());
+            }
+        } else {
+            System.err.println("Graph contains no vertices (has it been initialized?)");
+        }
     }
 
     /**
@@ -94,7 +135,7 @@ public class Check extends BaseCommand {
      * @param manager The graph manager
      */
     private void checkPermissionScopes(FramedGraph<?> graph,
-                                      GraphManager manager) {
+            GraphManager manager) {
 
         List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
@@ -113,6 +154,10 @@ public class Check extends BaseCommand {
                             case REPOSITORY:
                                 checkIdGeneration(graph.frame(item.asVertex(), Repository.class), scope);
                                 break;
+                            case CVOC_CONCEPT:
+                                checkIdGeneration(graph.frame(item.asVertex(), Concept.class), scope);
+                            case HISTORICAL_AGENT:
+                                checkIdGeneration(graph.frame(item.asVertex(), Concept.class), scope);
                             default:
                         }
                     }
