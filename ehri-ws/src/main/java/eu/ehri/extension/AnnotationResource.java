@@ -106,7 +106,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
             }
             UserProfile user = getCurrentUser();
             Annotation ann = api().createAnnotation(id, did == null ? id : did,
-                    bundle, getAccessors(accessors, user));
+                    bundle, getAccessors(accessors, user), getLogMessage());
             Response response = creationResponse(ann);
             tx.success();
             return response;

@@ -25,7 +25,7 @@ public class Table {
         return headers != null && !headers.isEmpty();
     }
 
-    public List<List<String>> data() {
+    public List<List<String>> rows() {
         return data;
     }
 

@@ -33,6 +33,8 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static org.junit.Assert.assertEquals;
 
 public class ApiAnnotationTest extends AbstractFixtureTest {
@@ -52,7 +54,8 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
-                .createAnnotation("c4", "cd4", ann, Lists.<Accessor>newArrayList());
+                .createAnnotation("c4", "cd4", ann,
+                        Lists.<Accessor>newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 
@@ -62,7 +65,8 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
-                .createAnnotation("c1", "cd1", ann, Lists.<Accessor>newArrayList());
+                .createAnnotation("c1", "cd1", ann,
+                        Lists.<Accessor>newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 
@@ -72,7 +76,8 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
-                .createAnnotation("c4", "cd1", ann, Lists.<Accessor>newArrayList());
+                .createAnnotation("c4", "cd1", ann,
+                        Lists.<Accessor>newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 
@@ -82,7 +87,8 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
         Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
-                .createAnnotation("c4", "cd4", ann, Lists.<Accessor>newArrayList());
+                .createAnnotation("c4", "cd4", ann,
+                        Lists.<Accessor>newArrayList(), Optional.empty());
         assertEquals("test", annotation.getBody());
     }
 }

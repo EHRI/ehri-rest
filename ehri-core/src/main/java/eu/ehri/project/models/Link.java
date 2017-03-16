@@ -67,6 +67,9 @@ public interface Link extends Promotable, Temporal, Annotatable {
     @Property(Ontology.LINK_HAS_TYPE)
     String getLinkType();
 
+    @Property(Ontology.LINK_HAS_FIELD)
+    String getLinkField();
+
     @Property(Ontology.LINK_HAS_DESCRIPTION)
     String getDescription();
 }

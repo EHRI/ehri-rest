@@ -195,12 +195,11 @@ public class ApiImpl implements Api {
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, accessor, PermissionType.UPDATE);
         Mutation<E> out = bundleManager.withScopeIds(scope.idPath()).update(bundle, cls);
-        if (logging && out.hasChanged()) {
-            actionManager.newEventContext(
+        if (out.hasChanged()) {
+            commitEvent(actionManager.newEventContext(
                     out.getNode(), accessor.as(Actioner.class),
                     EventTypes.modification, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get())
-                    .commit();
+                    .createVersion(out.getNode(), out.getPrior().get()));
         }
         return out;
     }
@@ -225,13 +224,9 @@ public class ApiImpl implements Api {
             item.setPermissionScope(scope);
         }
 
-        if (logging) {
-            actionManager
-                    .newEventContext(item, accessor.as(Actioner.class),
-                            EventTypes.creation, logMessage)
-                    .commit();
-        }
-
+        commitEvent(actionManager
+                .newEventContext(item, accessor.as(Actioner.class),
+                        EventTypes.creation, logMessage));
         return item;
 
     }
@@ -244,12 +239,11 @@ public class ApiImpl implements Api {
         helper.checkContentPermission(accessor, helper.getContentTypeEnum(cls),
                 PermissionType.UPDATE);
         Mutation<E> out = bundleManager.withScopeIds(scope.idPath()).createOrUpdate(bundle, cls);
-        if (logging && out.updated()) {
-            actionManager
+        if (out.updated()) {
+            commitEvent(actionManager
                     .newEventContext(out.getNode(), accessor.as(Actioner.class),
                             EventTypes.modification, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get())
-                    .commit();
+                    .createVersion(out.getNode(), out.getPrior().get()));
         }
         return out;
     }
@@ -259,13 +253,10 @@ public class ApiImpl implements Api {
             throws PermissionDenied, ValidationError, SerializationError, ItemNotFound {
         Accessible item = manager.getEntity(id, Accessible.class);
         helper.checkEntityPermission(item, accessor, PermissionType.DELETE);
-        if (logging) {
-            actionManager
-                    .newEventContext(item, accessor.as(Actioner.class),
-                            EventTypes.deletion, logMessage)
-                    .createVersion(item)
-                    .commit();
-        }
+        commitEvent(actionManager
+                .newEventContext(item, accessor.as(Actioner.class),
+                        EventTypes.deletion, logMessage)
+                .createVersion(item));
         return bundleManager.withScopeIds(scope.idPath())
                 .delete(depSerializer.entityToBundle(item));
     }
@@ -293,7 +284,7 @@ public class ApiImpl implements Api {
                     if (scoped) {
                         context.addSubjects(scope.as(Accessible.class));
                     }
-                    context.commit();
+                    commitEvent(context);
                 }
                 return aclManager.getInheritedGlobalPermissions(userOrGroup);
             }
@@ -303,11 +294,8 @@ public class ApiImpl implements Api {
                 helper.checkEntityPermission(entity, accessor, PermissionType.UPDATE);
                 aclManager.setAccessors(entity, accessors);
                 // Log the action...
-                if (logging) {
-                    actionManager.newEventContext(
-                            entity, accessor.as(Actioner.class), EventTypes.setVisibility)
-                            .commit();
-                }
+                commitEvent(actionManager.newEventContext(
+                        entity, accessor.as(Actioner.class), EventTypes.setVisibility));
             }
 
             @Override
@@ -316,12 +304,9 @@ public class ApiImpl implements Api {
                 helper.checkEntityPermission(item, accessor, PermissionType.GRANT);
                 aclManager.setItemPermissions(item, userOrGroup, permissionList);
                 // Log the action...
-                if (logging) {
-                    actionManager.newEventContext(item,
-                            accessor.as(Actioner.class), EventTypes.setItemPermissions)
-                            .addSubjects(userOrGroup.as(Accessible.class))
-                            .commit();
-                }
+                commitEvent(actionManager.newEventContext(item,
+                        accessor.as(Actioner.class), EventTypes.setItemPermissions)
+                        .addSubjects(userOrGroup.as(Accessible.class)));
                 return aclManager.getInheritedItemPermissions(item, userOrGroup);
             }
 
@@ -348,12 +333,9 @@ public class ApiImpl implements Api {
                 ensureCanModifyGroupMembership(group, userOrGroup, accessor);
                 group.addMember(userOrGroup);
                 // Log the action...
-                if (logging) {
-                    actionManager.newEventContext(group,
-                            accessor.as(Actioner.class), EventTypes.addGroup)
-                            .addSubjects(userOrGroup.as(Accessible.class))
-                            .commit();
-                }
+                commitEvent(actionManager.newEventContext(group,
+                        accessor.as(Actioner.class), EventTypes.addGroup)
+                        .addSubjects(userOrGroup.as(Accessible.class)));
             }
 
             @Override
@@ -361,18 +343,16 @@ public class ApiImpl implements Api {
                 ensureCanModifyGroupMembership(group, userOrGroup, accessor);
                 group.removeMember(userOrGroup);
                 // Log the action...
-                if (logging) {
-                    actionManager.newEventContext(group,
-                            accessor.as(Actioner.class), EventTypes.removeGroup)
-                            .addSubjects(userOrGroup.as(Accessible.class))
-                            .commit();
-                }
+                commitEvent(actionManager.newEventContext(group,
+                        accessor.as(Actioner.class), EventTypes.removeGroup)
+                        .addSubjects(userOrGroup.as(Accessible.class)));
             }
         };
     }
 
     @Override
-    public Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle, Collection<Accessor> accessibleTo)
+    public Link createLink(String targetId1, String targetId2, List<String> bodies,
+            Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied {
         Linkable t1 = manager.getEntity(targetId1, Linkable.class);
         Linkable t2 = manager.getEntity(targetId2, Linkable.class);
@@ -386,7 +366,7 @@ public class ApiImpl implements Api {
         aclManager.setAccessors(link, accessibleTo);
         ActionManager.EventContext eventContext = actionManager.setScope(t1).newEventContext(
                 accessor.as(Actioner.class),
-                EventTypes.link, Optional.empty())
+                EventTypes.link, logMessage)
                 .addSubjects(link)
                 .addSubjects(t2);
         for (String body : bodies) {
@@ -394,13 +374,13 @@ public class ApiImpl implements Api {
             link.addLinkBody(item);
             eventContext.addSubjects(item);
         }
-        eventContext.commit();
+        commitEvent(eventContext);
         return link;
     }
 
     @Override
     public Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
+            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied {
         Linkable t1 = manager.getEntity(targetId1, Linkable.class);
         Linkable t2 = manager.getEntity(targetId2, Linkable.class);
@@ -422,14 +402,15 @@ public class ApiImpl implements Api {
         link.addLinkBody(rel);
         aclManager.setAccessors(link, accessibleTo);
         ActionManager.EventContext eventContext = actionManager.newEventContext(
-                t1, accessor.as(Actioner.class), EventTypes.link);
+                t1, accessor.as(Actioner.class), EventTypes.link, logMessage);
         eventContext.addSubjects(link).addSubjects(t2).addSubjects(rel);
-        eventContext.commit();
+        commitEvent(eventContext);
         return link;
     }
 
     @Override
-    public Annotation createAnnotation(String id, String did, Bundle bundle, Collection<Accessor> accessibleTo)
+    public Annotation createAnnotation(String id, String did, Bundle bundle,
+            Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound {
         Annotatable entity = manager.getEntity(id, Annotatable.class);
         Annotatable dep = manager.getEntity(did, Annotatable.class);
@@ -451,11 +432,10 @@ public class ApiImpl implements Api {
         aclManager.withScope(SystemScope.INSTANCE)
                 .grantPermission(annotation, PermissionType.OWNER, accessor);
 
-        actionManager.setScope(entity)
+        commitEvent(actionManager.setScope(entity)
                 .newEventContext(annotation,
                         accessor.as(Actioner.class),
-                        EventTypes.annotation, Optional.empty())
-                .commit();
+                        EventTypes.annotation, logMessage));
         return annotation;
     }
 
@@ -468,10 +448,7 @@ public class ApiImpl implements Api {
         }
         UserProfile user = accessor.as(UserProfile.class);
         item.addPromotion(user);
-        if (logging) {
-            actionManager.newEventContext(item, user, EventTypes.promotion)
-                    .commit();
-        }
+        commitEvent(actionManager.newEventContext(item, user, EventTypes.promotion));
         return item;
     }
 
@@ -491,10 +468,7 @@ public class ApiImpl implements Api {
         }
         UserProfile user = accessor.as(UserProfile.class);
         item.addDemotion(user);
-        if (logging) {
-            actionManager.newEventContext(item, user, EventTypes.demotion)
-                    .commit();
-        }
+        commitEvent(actionManager.newEventContext(item, user, EventTypes.demotion));
         return item;
     }
 
@@ -514,12 +488,9 @@ public class ApiImpl implements Api {
             throw new PermissionDenied("Given description does not belong to its parent item");
         }
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
-        if (logging) {
-            actionManager.newEventContext(parent, accessor.as(Actioner.class),
-                    EventTypes.deleteDependent, logMessage)
-                    .createVersion(dependentItem)
-                    .commit();
-        }
+        commitEvent(actionManager.newEventContext(parent, accessor.as(Actioner.class),
+                EventTypes.deleteDependent, logMessage)
+                .createVersion(dependentItem));
         return bundleManager.withScopeIds(parent.idPath())
                 .delete(depSerializer.entityToBundle(dependentItem));
     }
@@ -530,11 +501,8 @@ public class ApiImpl implements Api {
         Described parent = detail(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         T out = bundleManager.withScopeIds(parent.idPath()).create(data, cls);
-        if (logging) {
-            actionManager.newEventContext(parent, accessor.as(Actioner.class),
-                    EventTypes.createDependent, logMessage)
-                    .commit();
-        }
+        commitEvent(actionManager.newEventContext(parent, accessor.as(Actioner.class),
+                EventTypes.createDependent, logMessage));
         return out;
     }
 
@@ -544,12 +512,11 @@ public class ApiImpl implements Api {
         Described parent = detail(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         Mutation<T> out = bundleManager.withScopeIds(parent.idPath()).update(data, cls);
-        if (logging && out.hasChanged()) {
-            actionManager
+        if (out.hasChanged()) {
+            commitEvent(actionManager
                     .newEventContext(parent, accessor.as(Actioner.class),
                             EventTypes.modifyDependent, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get())
-                    .commit();
+                    .createVersion(out.getNode(), out.getPrior().get()));
         }
         return out;
     }
@@ -595,6 +562,12 @@ public class ApiImpl implements Api {
                         "Unable to get node for permission type '"
                                 + PermissionType.GRANT + "'", e);
             }
+        }
+    }
+
+    private void commitEvent(ActionManager.EventContext context) {
+        if (logging) {
+            context.commit();
         }
     }
 

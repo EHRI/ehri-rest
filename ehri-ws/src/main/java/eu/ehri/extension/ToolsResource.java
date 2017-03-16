@@ -242,7 +242,7 @@ public class ToolsResource extends AbstractResource {
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
             List<String> allIds = Lists.newArrayList(ids);
-            data.data().stream()
+            data.rows().stream()
                     .filter(row -> row.size() == 1)
                     .forEach(row -> allIds.add(row.get(0)));
 
@@ -487,7 +487,7 @@ public class ToolsResource extends AbstractResource {
     public Table relink(Table mapping) throws DeserializationError {
         try (final Tx tx = beginTx()) {
             List<List<String>> done = Lists.newArrayList();
-            for (List<String> row : mapping.data()) {
+            for (List<String> row : mapping.rows()) {
                 if (row.size() != 2) {
                     throw new DeserializationError(
                             "Invalid table data: must contain 2 columns only");
@@ -530,7 +530,7 @@ public class ToolsResource extends AbstractResource {
         try (final Tx tx = beginTx()) {
             List<List<String>> done = Lists.newArrayList();
             IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(true);
-            for (List<String> row : mapping.data()) {
+            for (List<String> row : mapping.rows()) {
                 if (row.size() != 2) {
                     throw new DeserializationError(
                             "Invalid table data: must contain 2 columns only");

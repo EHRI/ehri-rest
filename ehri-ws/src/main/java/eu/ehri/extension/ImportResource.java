@@ -23,9 +23,12 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
+import eu.ehri.extension.utils.Table;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
@@ -43,9 +46,12 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.persistence.Bundle;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -61,6 +67,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -70,6 +77,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
@@ -404,6 +412,82 @@ public class ImportResource extends AbstractResource {
                     .batchDelete(ids, user, getLogMessage(logMessage));
             logger.debug("Committing delete transaction...");
             tx.success();
+        }
+    }
+
+
+    /**
+     * Create multiple links via CSV or JSON tabular upload.
+     * <p>
+     * Each data row must consist of 5 columns:
+     * <ol>
+     * <li>the source item
+     * <li>the target item
+     * <li>the link type, e.g. associative, hierarchical
+     * <li>the link field (if applicable) e.g. relatedUnitsOfDescription
+     * <li>the link description
+     * </ol>
+     * <p>
+     * A separate log item will be created for each row.
+     *
+     * @param table the tabular data
+     * @return a single column table of link IDs
+     * @throws DeserializationError the problems are found with the import data
+     * @throws PermissionDenied     if the current user does not have permission to
+     *                              create links
+     */
+    @POST
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Path("links")
+    public Table importLinks(
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            Table table) throws DeserializationError, ItemNotFound,
+            PermissionDenied {
+        try (final Tx tx = beginTx()) {
+            if (!table.rows().isEmpty() && table.rows().get(0).size() != 5) {
+                throw new DeserializationError("Input CSV must have 5 columns: " +
+                        "source, target, type, field, description. Leave columns blank where " +
+                        "not applicable.");
+            }
+
+            List<List<String>> out = Lists.newArrayList();
+            for (int i = 0; i < table.rows().size(); i++) {
+                List<String> row = table.rows().get(i);
+                try {
+                    String from = row.get(0);
+                    String to = row.get(1);
+                    String type = row.get(2);
+                    String field = row.get(3);
+                    String desc = row.get(4);
+                    Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.LINK)
+                            .addDataValue(Ontology.LINK_HAS_TYPE, type);
+                    if (!field.trim().isEmpty()) {
+                        builder.addDataValue(Ontology.LINK_HAS_FIELD, field);
+                    }
+                    if (!desc.trim().isEmpty()) {
+                        builder.addDataValue(Ontology.LINK_HAS_DESCRIPTION, desc);
+                    }
+                    Link link = api().createLink(from, to, Collections.emptyList(), builder.build(),
+                            Collections.emptyList(), getLogMessage());
+                    out.add(Lists.newArrayList(link.getId()));
+                } catch (ItemNotFound e) {
+                    logger.error("Item not found at row {}: {}", i, e.getValue());
+                    if (!tolerant) {
+                        throw new DeserializationError(
+                                String.format("Item ID '%s' not found at row: %d", e.getValue(), i));
+                    }
+                } catch (ValidationError e) {
+                    logger.error("Deserialization error at row {}: {}", i, e.getMessage());
+                    if (!tolerant) {
+                        throw new DeserializationError(
+                                String.format("Error validating link at row %d: %s", i,
+                                        e.getMessage()));
+                    }
+                }
+            }
+            tx.success();
+            return Table.of(out);
         }
     }
 

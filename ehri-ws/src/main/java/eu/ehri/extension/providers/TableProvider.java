@@ -84,7 +84,7 @@ public class TableProvider implements MessageBodyWriter<Table>, MessageBodyReade
         ObjectWriter writer = mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)
                 ? mapper.writer()
                 : csvMapper.writer(csvSchema.withoutHeader());
-        writer.writeValue(outputStream, table.data());
+        writer.writeValue(outputStream, table.rows());
     }
 
     @Override
