@@ -194,6 +194,14 @@ public class GraphQLImpl {
 
     // Data fetchers...
 
+    private DataFetcher topLevelDocDataFetcher() {
+        Iterable<Country> countries = api().query()
+                .setStream(true).setLimit(-1).page(EntityClass.COUNTRY, Country.class);
+        Iterable<Iterable<Entity>> docs = Iterables.transform(countries, c ->
+                Iterables.transform(c.getTopLevelDocumentaryUnits(), d -> d.as(Entity.class)));
+        return connectionDataFetcher(() -> Iterables.concat(docs));
+    }
+
     private DataFetcher entityTypeConnectionDataFetcher(EntityClass type) {
         // FIXME: The only way to get a list of all items of a given
         // type via the API alone is to run a query as a stream w/ no limit.
@@ -1043,6 +1051,9 @@ public class GraphQLImpl {
                 .field(connectionFieldDefinition("documentaryUnits", "A page of documentary units",
                         documentaryUnitType,
                         entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT)))
+                .field(connectionFieldDefinition("topLevelDocumentaryUnits", "A page of top level documentary units",
+                        documentaryUnitType,
+                        topLevelDocDataFetcher()))
                 .field(connectionFieldDefinition("repositories", "A page of repositories",
                         repositoryType,
                         entityTypeConnectionDataFetcher(EntityClass.REPOSITORY)))

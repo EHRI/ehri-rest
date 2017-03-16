@@ -107,6 +107,12 @@
         }
     }
 
+    topLevelDocumentaryUnits {
+        items {
+            id
+        }
+    }
+
     documentaryUnits(first: 10) {
         items {
             parent {
