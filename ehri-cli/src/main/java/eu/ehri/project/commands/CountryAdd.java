@@ -95,18 +95,16 @@ public class CountryAdd extends BaseCommand {
         String countryId = cmdLine.getArgList().get(0);
         String countryName = cmdLine.getOptionValue("n", countryId);
 
-        Bundle bundle = new Bundle(EntityClass.COUNTRY,
+        Bundle bundle = Bundle.of(EntityClass.COUNTRY,
                 Maps.<String, Object>newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, countryId)
-                .withDataValue(Ontology.NAME_KEY, countryName);
-
-        String nodeId = EntityClass.COUNTRY.getIdGen().generateId(SystemScope.getInstance().idPath(), bundle);
-        bundle = bundle.withId(nodeId);
+                .withDataValue(Ontology.NAME_KEY, countryName)
+                .generateIds(SystemScope.getInstance().idPath());
 
         try {
             api(graph, admin).create(bundle, Country.class, getLogMessage(logMessage));
         } catch (ValidationError e) {
-            System.err.printf("A country with id: '%s' already exists%n", nodeId);
+            System.err.printf("A country with id: '%s' already exists%n", bundle.getId());
             return 9;
         } catch (Exception e) {
             throw new RuntimeException(e);

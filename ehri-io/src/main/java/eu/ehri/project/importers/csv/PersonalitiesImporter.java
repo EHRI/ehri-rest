@@ -67,12 +67,12 @@ public class PersonalitiesImporter extends MapImporter {
     public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+        Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
             .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);

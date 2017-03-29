@@ -43,10 +43,10 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        Bundle ukrainianBundle = new Bundle(EntityClass.COUNTRY)
+        Bundle ukrainianBundle = Bundle.of(EntityClass.COUNTRY)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "ua");
-        Bundle repoBundle = new Bundle(EntityClass.REPOSITORY).withDataValue(Ontology.IDENTIFIER_KEY, "ua-3311");
-        Bundle repoDescBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION)
+        Bundle repoBundle = Bundle.of(EntityClass.REPOSITORY).withDataValue(Ontology.IDENTIFIER_KEY, "ua-3311");
+        Bundle repoDescBundle = Bundle.of(EntityClass.REPOSITORY_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Центральний державний архів вищих органів влади і управління України")
                 .withDataValue("otherFormsOfName", "Central State Archive of Supreme Bodies of Power and Government of Ukraine")
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "uk");

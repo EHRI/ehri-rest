@@ -107,7 +107,7 @@ public class UserAdd extends BaseCommand {
             groups = cmdLine.getOptionValues("group");
         }
 
-        Bundle bundle = new Bundle(EntityClass.USER_PROFILE,
+        Bundle bundle = Bundle.of(EntityClass.USER_PROFILE,
                 Maps.<String, Object>newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, userId)
                 .withDataValue(Ontology.NAME_KEY, userName);

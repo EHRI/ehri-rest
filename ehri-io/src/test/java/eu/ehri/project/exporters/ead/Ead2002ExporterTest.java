@@ -20,12 +20,11 @@
 package eu.ehri.project.exporters.ead;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
-import eu.ehri.project.importers.ead.IcaAtomEadHandler;
-import eu.ehri.project.importers.ead.IcaAtomEadImporter;
+import eu.ehri.project.importers.ead.EadHandler;
+import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -154,7 +153,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
             String topLevelIdentifier, String lang) throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
         new SaxImportManager(graph, repository, validUser,
-                IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                EadImporter.class, EadHandler.class)
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);

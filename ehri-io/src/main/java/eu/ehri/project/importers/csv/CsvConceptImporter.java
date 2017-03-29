@@ -55,9 +55,9 @@ public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
     public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
-        Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION,
+        Bundle descBundle = Bundle.of(EntityClass.CVOC_CONCEPT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.CVOC_CONCEPT_DESCRIPTION));
-        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT, extractUnit(itemData))
+        Bundle unit = Bundle.of(EntityClass.CVOC_CONCEPT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<Concept> mutation = persister.createOrUpdate(unit, Concept.class);

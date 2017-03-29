@@ -93,7 +93,7 @@ public class VirtualEadImporter extends EadImporter {
 
         BundleManager persister = getPersister(idPath);
 
-        Bundle unit = new Bundle(EntityClass.VIRTUAL_UNIT, extractVirtualUnit(itemData));
+        Bundle unit = Bundle.of(EntityClass.VIRTUAL_UNIT, extractVirtualUnit(itemData));
 
         if (isVirtualLevel(itemData)) {
             // Check for missing identifier, throw an exception when there is no ID.

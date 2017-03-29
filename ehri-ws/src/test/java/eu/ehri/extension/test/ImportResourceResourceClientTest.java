@@ -29,7 +29,7 @@ import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.IcaAtomEadHandler;
+import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
 import org.apache.commons.io.FileUtils;
@@ -86,7 +86,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_PLAIN_TYPE)
@@ -107,7 +107,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
                 .getClassLoader().getResourceAsStream(SINGLE_EAD);
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -127,7 +127,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
                 .getClassLoader().getResourceAsStream(SINGLE_EAD);
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -153,7 +153,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
                 containsString("nl-r1-test_doc"));
 
         URI uri3 = getImportUrl("ead", "r1", logText, false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(ALLOW_UPDATES_PARAM, "true")
                 .build();
         ImportLog log2 = callAs(getAdminUserProfileId(), uri3)
@@ -213,7 +213,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_PLAIN_TYPE)
@@ -238,7 +238,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
@@ -265,7 +265,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
-                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)

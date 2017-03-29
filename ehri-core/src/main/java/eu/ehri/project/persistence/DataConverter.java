@@ -256,7 +256,7 @@ class DataConverter {
         // at the deserialization stage. I can't think of a use-case
         // where we'd need them.
         Map<String, Object> properties = getSanitisedProperties(data);
-        return new Bundle(id, type, properties, getRelationships(data));
+        return Bundle.of(id, type, properties, getRelationships(data));
     }
 
     /**

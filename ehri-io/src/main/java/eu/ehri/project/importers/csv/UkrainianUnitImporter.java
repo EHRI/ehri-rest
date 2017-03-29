@@ -66,25 +66,25 @@ public class UkrainianUnitImporter extends MapImporter {
         BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
 
         logger.debug("-----------------------------------");
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractUnit(itemData));
+        Bundle unit = Bundle.of(EntityClass.DOCUMENTARY_UNIT, extractUnit(itemData));
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
 
         String lang = itemData.get("language_of_description").toString();
         if (lang.indexOf(", ") > 0) {
             String[] langs = lang.split(", ");
             for (String l : langs) {
-                Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, l));
-                descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
+                Bundle descBundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, l));
+                descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
                 if (!unknowns.isEmpty()) {
-                    descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+                    descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
                 }
                 unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
             }
         } else {
-            Bundle descBundle = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, lang));
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
+            Bundle descBundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, extractUnitDescription(itemData, lang));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
             if (!unknowns.isEmpty()) {
-                descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+                descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
             }
 
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);

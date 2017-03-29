@@ -147,7 +147,7 @@ public final class Bundle implements NestableData<Bundle> {
         }
 
         public Bundle build() {
-            return new Bundle(id, type, data, relations, meta);
+            return of(id, type, data, relations, meta);
         }
     }
 
@@ -172,20 +172,20 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
-     * Constructor for bundle without existing id.
+     * Factory for bundle without existing id.
      *
      * @param id        The bundle's id
      * @param type      The bundle's type class
      * @param data      An initial map of data
      * @param relations An initial set of relations
      */
-    public Bundle(String id, EntityClass type, Map<String, Object> data,
+    public static Bundle of(String id, EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations) {
-        this(id, type, data, relations, Maps.<String, Object>newHashMap());
+        return of(id, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
     /**
-     * Constructor.
+     * Factory.
      *
      * @param id        The bundle's id
      * @param type      The bundle's type class
@@ -193,21 +193,21 @@ public final class Bundle implements NestableData<Bundle> {
      * @param relations An initial set of relations
      * @param meta      An initial map of metadata
      */
-    public Bundle(String id, EntityClass type, Map<String, Object> data,
+    public static Bundle of(String id, EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations, Map<String, Object> meta) {
-        this(id, type, data, relations, meta, false);
+        return new Bundle(id, type, data, relations, meta, false);
     }
 
     /**
-     * Constructor for bundle without existing id.
+     * Factory for bundle without existing id.
      *
      * @param type      The bundle's type class
      * @param data      An initial map of data
      * @param relations An initial set of relations
      */
-    public Bundle(EntityClass type, Map<String, Object> data,
+    public static Bundle of(EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations) {
-        this(null, type, data, relations, Maps.<String, Object>newHashMap());
+        return of(null, type, data, relations);
     }
 
     /**
@@ -215,8 +215,8 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param type The bundle's type class
      */
-    public Bundle(EntityClass type) {
-        this(null, type, Maps.<String, Object>newHashMap(), ArrayListMultimap
+    public static Bundle of(EntityClass type) {
+        return of(null, type, Maps.<String, Object>newHashMap(), ArrayListMultimap
                 .<String, Bundle>create(), Maps.<String, Object>newHashMap());
     }
 
@@ -226,8 +226,8 @@ public final class Bundle implements NestableData<Bundle> {
      * @param type The bundle's type class
      * @param data An initial map of data
      */
-    public Bundle(EntityClass type, Map<String, Object> data) {
-        this(null, type, data, ArrayListMultimap.<String, Bundle>create(),
+    public static Bundle of(EntityClass type, Map<String, Object> data) {
+        return of(null, type, data, ArrayListMultimap.<String, Bundle>create(),
                 Maps.<String, Object>newHashMap());
     }
 

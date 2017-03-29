@@ -410,7 +410,7 @@ public class ApiImpl implements Api {
         //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
         helper.checkEntityPermission(description.getEntity(), accessor, PermissionType.UPDATE);
         Link link = bundleManager.create(bundle, Link.class);
-        Bundle relBundle = new Bundle(EntityClass.ACCESS_POINT)
+        Bundle relBundle = Bundle.of(EntityClass.ACCESS_POINT)
                 .withDataValue(Ontology.NAME_KEY, bodyName)
                 .withDataValue(Ontology.ACCESS_POINT_TYPE, bodyType)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, link.getDescription());
