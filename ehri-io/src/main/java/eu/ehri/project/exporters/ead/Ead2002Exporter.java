@@ -53,6 +53,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     );
 
     private static final Map<IsadG, String> multiValueTextMappings = ImmutableMap.<IsadG, String>builder()
+            .put(IsadG.archivistNote, "processinfo")
             .put(IsadG.scopeAndContent, "scopecontent")
             .put(IsadG.datesOfDescriptions, "processinfo")
             .put(IsadG.systemOfArrangement, "arrangement")
@@ -320,7 +321,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         for (Link link : accessPoint.getLinks()) {
             for (Entity target : link.getLinkTargets()) {
                 if (target.getType().equals(Entities.CVOC_CONCEPT) ||
-                                target.getType().equals(Entities.HISTORICAL_AGENT)) {
+                        target.getType().equals(Entities.HISTORICAL_AGENT)) {
                     AuthoritativeItem item = target.as(AuthoritativeItem.class);
                     try {
                         return ImmutableMap.of(
@@ -346,6 +347,11 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                     );
                 }
             }
+        }
+        for (Object v : coerceList(item.getProperty(IsadG.datesOfDescriptions))) {
+            tag(sw, "processinfo", textFieldAttrs(IsadG.datesOfDescriptions), () -> {
+                tag(sw, Lists.newArrayList("p", "date"), () -> cData(sw, v.toString()));
+            });
         }
     }
 

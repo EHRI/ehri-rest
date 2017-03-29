@@ -21,7 +21,7 @@ public enum Isdiah implements DefinitionList {
     publicAreas,
     rulesAndConventions,
     status,
-    datesOfDescription,
+    datesOfDescriptions,
     languages(true),
     scripts(true),
     sources(true),

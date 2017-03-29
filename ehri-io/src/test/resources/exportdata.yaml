@@ -53,8 +53,10 @@
             Example text
           status: >
             Example text
-          datesOfDescription: >
+          archivistNote: >
             Example text
+          datesOfDescriptions: >
+            2000
           languages:
             - eng
             - fre
@@ -208,9 +210,9 @@
             - Example text
           publicationNote:
             - Example text
-          datesOfDescription:
-            - Example text
           archivistNote: Example text
+          datesOfDescriptions:
+            - 2000
           provenance: Example text
           sources:
             - Example text
