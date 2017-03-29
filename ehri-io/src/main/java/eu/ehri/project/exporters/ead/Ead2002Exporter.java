@@ -353,6 +353,15 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 tag(sw, Lists.newArrayList("p", "date"), () -> cData(sw, v.toString()));
             });
         }
+        if (available.contains(IsadG.sources.name())) {
+            tag(sw, "processinfo", textFieldAttrs(IsadG.sources, "type", "Sources"), () -> {
+                tag(sw, "p", () -> {
+                    for (Object v : coerceList(item.getProperty(IsadG.sources))) {
+                        tag(sw, "bibref", () -> cData(sw, v.toString()));
+                    }
+                });
+            });
+        }
     }
 
     private Map<String, String> textFieldAttrs(IsadG field, String... kvs) {

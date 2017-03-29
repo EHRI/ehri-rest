@@ -92,6 +92,8 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
         assertXPath(doc, "2000",
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
+        assertXPath(doc, "Source information |||",
+                "//ead/archdesc/processinfo/p/bibref");
     }
 
     @Test
@@ -133,6 +135,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text", "//ead/archdesc/odd/p");
         assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
         assertXPath(doc, "2000", "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
+        assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@type='Sources']/p/bibref");
         assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname");
         assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject");
 
