@@ -53,8 +53,8 @@ DocumentaryUnitDescription,notes,,,1
 DocumentaryUnitDescription,languageOfMaterial,,,1
 DocumentaryUnitDescription,findingAids,,,
 DocumentaryUnitDescription,publicationNote,,,
-DocumentaryUnitDescription,datesOfDescription,,,
-DocumentaryUnitDescription,archivistNote,,,
+DocumentaryUnitDescription,datesOfDescriptions,,,
+DocumentaryUnitDescription,archivistNote,,,1
 DocumentaryUnitDescription,processInfo,,,1
 DocumentaryUnitDescription,sources,,,1
 DocumentaryUnitDescription,sourceFileId,,1,
@@ -96,7 +96,7 @@ RepositoryDescription,reproductionServices,,,
 RepositoryDescription,publicAreas,,,
 RepositoryDescription,rulesAndConventions,,,
 RepositoryDescription,status,,,
-RepositoryDescription,datesOfDescription,,,
+RepositoryDescription,datesOfDescriptions,,,
 RepositoryDescription,languages,,,
 RepositoryDescription,scripts,,,
 RepositoryDescription,sources,,,

@@ -25,6 +25,7 @@ import eu.ehri.project.importers.ead.IcaAtomEadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -72,6 +73,8 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "//ead/eadheader/revisiondesc/change/item/text()");
         assertXPath(doc, "eng",
                 "//ead/eadheader/profiledesc/langusage/language/@langcode");
+        assertXPath(doc, "Local",
+                "//ead/eadheader/profiledesc/descrules");
         assertXPath(doc, "NIOD Description",
                 "//ead/eadheader/filedesc/publicationstmt/publisher/text()");
         assertXPath(doc, "NIOD Description",
@@ -85,6 +88,10 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",
                 "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
+        assertXPath(doc, "Processing information note no label |||",
+                "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
+        assertXPath(doc, "2000",
+                "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
     }
 
     @Test
@@ -124,6 +131,8 @@ public class Ead2002ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text", "//ead/archdesc/custodhist/p");
         assertXPath(doc, "Example text", "//ead/archdesc/phystech/p");
         assertXPath(doc, "Example text", "//ead/archdesc/odd/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
+        assertXPath(doc, "2000", "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
         assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname");
         assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject");
 
@@ -146,6 +155,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
+        System.out.println(new Serializer(graph).entityToJson(fonds));
         Ead2002Exporter exporter = new Ead2002Exporter(api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(fonds, baos, lang);

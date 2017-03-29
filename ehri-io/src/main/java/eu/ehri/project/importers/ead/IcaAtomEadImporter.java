@@ -81,7 +81,6 @@ public class IcaAtomEadImporter extends SaxXmlImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> data, List<String> idPath) throws ValidationError {
 
-
         BundleManager persister = getPersister(idPath);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(data));
 

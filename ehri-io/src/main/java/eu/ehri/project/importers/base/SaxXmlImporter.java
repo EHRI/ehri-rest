@@ -166,9 +166,6 @@ public abstract class SaxXmlImporter extends MapImporter {
         for (Entry<String, Object> itemProperty : itemData.entrySet()) {
             if (itemProperty.getKey().equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemProperty.getValue());
-            } else if (itemProperty.getKey().equals("conditionsOfAccess")) {
-                description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
-                        itemProperty.getKey(), itemProperty.getValue(), entity));
             } else if (!itemProperty.getKey().startsWith(SaxXmlHandler.UNKNOWN)
                     && !itemProperty.getKey().equals(OBJECT_IDENTIFIER)
                     && !itemProperty.getKey().equals(Ontology.IDENTIFIER_KEY)
