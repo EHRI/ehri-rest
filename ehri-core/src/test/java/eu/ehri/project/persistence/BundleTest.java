@@ -49,10 +49,10 @@ public class BundleTest {
 
     @Before
     public void setUp() throws Exception {
-        bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT)
+        bundle = Bundle.of(EntityClass.DOCUMENTARY_UNIT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
-                        new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                        Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                                 .withDataValue(Ontology.LANGUAGE, "en"));
     }
@@ -66,7 +66,7 @@ public class BundleTest {
     public void testCreationWithNullValues() throws Exception {
         Map<String, Object> data = Maps.newHashMap();
         data.put("identifier", null);
-        Bundle b2 = new Bundle(EntityClass.DOCUMENTARY_UNIT, data);
+        Bundle b2 = Bundle.of(EntityClass.DOCUMENTARY_UNIT, data);
         assertSame(data.get("identifier"), b2.getDataValue("identifier"));
     }
 
@@ -139,7 +139,7 @@ public class BundleTest {
 
         // Add a new date period to both and ensure that have a
         // different structural ordering
-        Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
+        Bundle dp = Bundle.of(EntityClass.DATE_PERIOD)
                 .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
                 .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
         Bundle currentDp = DataUtils.getItem(bundle1, "describes[0]/hasDate[0]");
@@ -172,7 +172,7 @@ public class BundleTest {
     @Test
     public void testMergeDataWith() throws Exception {
         Bundle target = bundle.withDataValue("remove", "test");
-        Bundle merge = new Bundle(target.getType())
+        Bundle merge = Bundle.of(target.getType())
                 .withDataValue("akey", "avalue")
                 .withDataValue("remove", null);
         Bundle merged = target.mergeDataWith(merge);
@@ -184,7 +184,7 @@ public class BundleTest {
 
     @Test
     public void testMergeDataWithSubtractingNullValues() throws Exception {
-        Bundle merge = new Bundle(bundle.getType())
+        Bundle merge = Bundle.of(bundle.getType())
                 .withDataValue("akey", "avalue");
         Bundle merged = bundle.mergeDataWith(merge);
         assertNotSame(merged, bundle);
@@ -194,12 +194,12 @@ public class BundleTest {
 
     @Test
     public void testMergeDataWithForTree() throws Exception {
-        Bundle nested = new Bundle(EntityClass.DATE_PERIOD)
+        Bundle nested = Bundle.of(EntityClass.DATE_PERIOD)
                 .withDataValue(Ontology.DATE_PERIOD_START_DATE, "2001-01-01");
         // Add a nested node to the bundle we're patching and generate IDs
         Bundle start = bundle
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
-                        new Bundle(EntityClass.MAINTENANCE_EVENT)
+                        Bundle.of(EntityClass.MAINTENANCE_EVENT)
                                 .withDataValue(Ontology.MAINTENANCE_EVENT_TYPE,
                                         MaintenanceEventType.created.toString()));
 
@@ -249,7 +249,7 @@ public class BundleTest {
 
     @Test
     public void testReplaceRelations() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Multimap<String, Bundle> rels = ImmutableListMultimap
@@ -261,7 +261,7 @@ public class BundleTest {
 
     @Test
     public void testWithRelationsMap() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Multimap<String, Bundle> rels = ImmutableListMultimap
@@ -273,7 +273,7 @@ public class BundleTest {
 
     @Test
     public void testWithRelations() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = bundle.withRelations(
@@ -284,7 +284,7 @@ public class BundleTest {
 
     @Test
     public void testWithRelation() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
@@ -294,7 +294,7 @@ public class BundleTest {
 
     @Test
     public void testWithMetaData() throws Exception {
-        Bundle newDesc = new Bundle(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
                 .withDataValue(Ontology.LANGUAGE, "en");
         Bundle bundle2 = newDesc.withMetaDataValue("key", "val");
@@ -320,7 +320,7 @@ public class BundleTest {
     @Test
     public void testBundleDepth() throws Exception {
         assertEquals(1, bundle.depth());
-        Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
+        Bundle dp = Bundle.of(EntityClass.DATE_PERIOD)
                 .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
                 .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
         Bundle deeperBundle = DataUtils.setItem(bundle, "describes[0]/hasDate[-1]", dp);

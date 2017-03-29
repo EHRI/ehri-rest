@@ -89,42 +89,42 @@ public class EacImporter extends SaxXmlImporter {
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+        Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
         // add the address to the description bundle
         Map<String, Object> address = extractAddress(itemData);
         if (!address.isEmpty()) {
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, Bundle.of(EntityClass.ADDRESS, address));
         }
 
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
-            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
             if (rel.containsKey(REL_TYPE) && rel.get(REL_TYPE).equals(AccessPointType.subject.name())) {
                 logger.debug("relation found");
                 descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT,
-                        new Bundle(EntityClass.ACCESS_POINT, rel));
+                        Bundle.of(EntityClass.ACCESS_POINT, rel));
             }
         }
 
-        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
+        Bundle unit = Bundle.of(EntityClass.HISTORICAL_AGENT, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
@@ -209,7 +209,7 @@ public class EacImporter extends SaxXmlImporter {
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
         //so they have id's.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
-        Bundle linkBundle = new Bundle(EntityClass.LINK)
+        Bundle linkBundle = Bundle.of(EntityClass.LINK)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
 
         for (Description unitdesc : unit.getDescriptions()) {

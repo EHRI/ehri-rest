@@ -315,7 +315,7 @@ public final class JenaSkosImporter implements SkosImporter {
         for (AuthoritativeItem concept : linkedConcepts.keySet()) {
             try {
                 String reltype = linkedConcepts.get(concept);
-                Bundle linkBundle = new Bundle(EntityClass.LINK)
+                Bundle linkBundle = Bundle.of(EntityClass.LINK)
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
                         .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, SaxXmlImporter.RESOLVED_LINK_DESC);

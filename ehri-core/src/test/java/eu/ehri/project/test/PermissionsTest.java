@@ -65,7 +65,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void createTestUser() throws ValidationError, IntegrityError,
             ItemNotFound {
         // Add a new, fresh user with no perms to test with...
-        user = new BundleManager(graph).create(new Bundle(EntityClass.USER_PROFILE,
+        user = new BundleManager(graph).create(Bundle.of(EntityClass.USER_PROFILE,
                         (Map<String, Object>) TestData.getTestUserBundle().get("data")),
                 UserProfile.class);
         viewHelper = new PermissionUtils(graph);

@@ -101,31 +101,31 @@ public class EagImporter extends SaxXmlImporter {
 
         Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
         descmap.put(Ontology.IDENTIFIER_KEY, descmap.get(Ontology.IDENTIFIER_KEY) + "#desc");
-        Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
+        Bundle descBundle = Bundle.of(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
         //add the address to the description bundle
         Map<String, Object> address = extractAddress(itemData);
         if (!address.isEmpty()) {
-            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, Bundle.of(EntityClass.ADDRESS, address));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
-            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
-        Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData))
+        Bundle unit = Bundle.of(EntityClass.REPOSITORY, extractUnit(itemData))
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         Mutation<Repository> mutation = persister.createOrUpdate(unit, Repository.class);

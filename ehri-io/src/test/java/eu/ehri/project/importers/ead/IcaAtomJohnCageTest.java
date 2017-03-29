@@ -38,7 +38,7 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(JOHNCAGEXML);
-        saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        saxImportManager(EadImporter.class, EadHandler.class)
                 .importInputStream(ios, logMessage);
         printGraph(graph);
 

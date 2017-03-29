@@ -49,7 +49,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateForWithoutPermission() throws Exception {
-        Bundle ann = new Bundle(EntityClass.ANNOTATION)
+        Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd4", ann, Lists.<Accessor>newArrayList());
@@ -59,7 +59,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
     @Test(expected = AccessDenied.class)
     public void testCreateForWithoutAccess() throws Exception {
         canAnnotate.addMember(user);
-        Bundle ann = new Bundle(EntityClass.ANNOTATION)
+        Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c1", "cd1", ann, Lists.<Accessor>newArrayList());
@@ -69,7 +69,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateForOutsideSubtree() throws Exception {
         canAnnotate.addMember(user);
-        Bundle ann = new Bundle(EntityClass.ANNOTATION)
+        Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd1", ann, Lists.<Accessor>newArrayList());
@@ -79,7 +79,7 @@ public class ApiAnnotationTest extends AbstractFixtureTest {
     @Test
     public void testCreateFor() throws Exception {
         canAnnotate.addMember(user);
-        Bundle ann = new Bundle(EntityClass.ANNOTATION)
+        Bundle ann = Bundle.of(EntityClass.ANNOTATION)
                 .withDataValue(Ontology.ANNOTATION_NOTES_BODY, "test");
         Annotation annotation = api(user)
                 .createAnnotation("c4", "cd4", ann, Lists.<Accessor>newArrayList());

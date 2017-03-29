@@ -52,12 +52,16 @@ import java.util.regex.Pattern;
  */
 public class EadHandler extends SaxXmlHandler {
 
-    private static final String EADID = "eadId",
-    //            SOURCEFILEID = "sourceFileId",
-    MAINAGENCYCODE = "mainagencycode",
+    // Constants for elements we need to watch for.
+    private static final String EADID = "eadid",
+            DESCRULES = "descrules",
+            MAINAGENCYCODE = "mainagencycode",
             AUTHOR = "author",
-            RULES = "rulesAndConventions";
-    private static final String DEFAULT_PROPERTIES = "icaatom.properties";
+            RULES = "rulesAndConventions",
+            ARCHDESC = "archdesc",
+            DID = "did";
+
+    private static final String DEFAULT_PROPERTIES = "ead2002.properties";
 
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
@@ -65,8 +69,7 @@ public class EadHandler extends SaxXmlHandler {
             ImmutableMap.<String, Class<? extends Entity>>builder()
                     .put("maintenanceEvent", MaintenanceEvent.class).build();
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(EadHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
 
     @SuppressWarnings("unchecked")
     protected final List<DocumentaryUnit>[] children = new ArrayList[12];
@@ -80,9 +83,6 @@ public class EadHandler extends SaxXmlHandler {
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    // Constants for elements we need to watch for.
-    private final static String ARCHDESC = "archdesc";
-    private final static String DID = "did";
     private final static String DEFAULT_LANGUAGE = "eng";
 
     /**
@@ -135,11 +135,11 @@ public class EadHandler extends SaxXmlHandler {
         if (isUnitDelimiter(qName)) { //a new DocumentaryUnit should be created
             children[depth] = Lists.newArrayList();
         }
-        if (qName.equals("change")) {
-            putPropertyInCurrentGraph("eventType", MaintenanceEventType.updated.toString());
-        }
         if (qName.equals("profiledesc")) {
-            putPropertyInCurrentGraph("eventType", MaintenanceEventType.created.toString());
+            putPropertyInCurrentGraph(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType.created.toString());
+        }
+        if (qName.equals("change")) {
+            putPropertyInCurrentGraph(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType.updated.toString());
         }
         if (attributes.getValue(MAINAGENCYCODE) != null) {
             eadfileValues.put(MAINAGENCYCODE, attributes.getValue(MAINAGENCYCODE));
@@ -190,15 +190,19 @@ public class EadHandler extends SaxXmlHandler {
         super.endElement(uri, localName, qName);
 
         // If this is the <eadid> element, store its content
-        if (localName.equals("eadid") || qName.equals("eadid")) {
-            eadfileValues.put(EADID, (String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
-            logger.debug("Found <{}>: {}", EADID, eadfileValues.get(EADID));
-        } else if (localName.equals("author") || qName.equals("author")) {
-            eadfileValues.put(AUTHOR, (String) currentGraphPath.peek().get(AUTHOR));
-            logger.debug("Found <{}>: {}", AUTHOR, eadfileValues.get(AUTHOR));
-        } else if (localName.equals("descrules") || qName.equals("descrules")) {
-            eadfileValues.put(RULES, (String) currentGraphPath.peek().get(RULES));
-            logger.debug("Found <{}>: {}", RULES, eadfileValues.get(RULES));
+        switch (qName) {
+            case EADID:
+                eadfileValues.put(EADID, (String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
+                logger.debug("Found <{}>: {}", EADID, eadfileValues.get(EADID));
+                break;
+            case AUTHOR:
+                eadfileValues.put(AUTHOR, (String) currentGraphPath.peek().get(AUTHOR));
+                logger.debug("Found <{}>: {}", AUTHOR, eadfileValues.get(AUTHOR));
+                break;
+            case DESCRULES:
+                eadfileValues.put(RULES, (String) currentGraphPath.peek().get(RULES));
+                logger.debug("Found <{}>: {}", RULES, eadfileValues.get(RULES));
+                break;
         }
 
         if (localName.equals("language") || qName.equals("language")) {
@@ -303,10 +307,11 @@ public class EadHandler extends SaxXmlHandler {
             return null;
         } else {
             String id = eadfileValues.get(EADID);
-            if (id.toLowerCase().endsWith("#" + getDefaultLanguage().toLowerCase())) {
+            String suffix = "#" + eadLanguage.toUpperCase();
+            if (id.toUpperCase().endsWith(suffix)) {
                 return id;
             }
-            return id + "#" + getDefaultLanguage().toUpperCase();
+            return id + suffix;
         }
     }
 
@@ -317,7 +322,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     private void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, getDefaultLanguage());
+        useDefaultLanguage(currentGraph, eadLanguage);
     }
 
     /**
@@ -328,15 +333,10 @@ public class EadHandler extends SaxXmlHandler {
      * @param defaultLanguage Language code to use as default
      */
     private void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
-
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
             logger.debug("Using default language code: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
         }
-    }
-
-    private String getDefaultLanguage() {
-        return eadLanguage;
     }
 
     /**
@@ -375,7 +375,7 @@ public class EadHandler extends SaxXmlHandler {
             if (idents instanceof List) {
                 List identList = (List) idents;
                 currentGraph.put(OBJECT_IDENTIFIER, identList.get(0));
-                for (Object item: identList.subList(1, identList.size())) {
+                for (Object item : identList.subList(1, identList.size())) {
                     addOtherIdentifier(currentGraph, ((String) item));
                 }
             }

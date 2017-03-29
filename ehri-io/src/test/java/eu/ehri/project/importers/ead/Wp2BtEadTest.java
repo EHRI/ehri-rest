@@ -64,10 +64,10 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     public void testImportItemsT() throws Exception {
 
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
-        Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
+        Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
                 .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
-        Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
+        Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");
         Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());

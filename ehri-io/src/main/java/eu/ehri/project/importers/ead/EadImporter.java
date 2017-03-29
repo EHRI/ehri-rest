@@ -104,7 +104,7 @@ public class EadImporter extends SaxXmlImporter {
         Bundle description = getDescription(itemData);
 
         // extractDocumentaryUnit does not throw ValidationError on missing ID
-        Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
+        Bundle unit = Bundle.of(unitEntity, extractDocumentaryUnit(itemData));
 
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -161,19 +161,19 @@ public class EadImporter extends SaxXmlImporter {
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractedDates) {
-            descBuilder.addRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBuilder.addRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
             logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
-            descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.ACCESS_POINT, rel));
+            descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
-                    new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+                    Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
@@ -184,7 +184,7 @@ public class EadImporter extends SaxXmlImporter {
             }
             logger.debug("Unknown Properties found: {}", unknownProperties);
             descBuilder.addRelation(Ontology.HAS_UNKNOWN_PROPERTY,
-                    new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+                    Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
         // Set the description identifier same as the source file ID,
@@ -273,7 +273,7 @@ public class EadImporter extends SaxXmlImporter {
         // and its Description have been added to the graph,
         // so they have IDs.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
-        Bundle linkBundle = new Bundle(EntityClass.LINK)
+        Bundle linkBundle = Bundle.of(EntityClass.LINK)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
 
         for (Description desc : unit.getDescriptions()) {

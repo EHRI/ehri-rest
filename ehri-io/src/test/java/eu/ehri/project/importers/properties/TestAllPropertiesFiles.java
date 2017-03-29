@@ -92,7 +92,7 @@ public class TestAllPropertiesFiles {
     @Test
     @Ignore //not used anymore
     public void testEadXmlProperties() {
-        String propfile = "icaatom.properties";
+        String propfile = "ead2002.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENTARY_UNIT_DESCRIPTION));
     }

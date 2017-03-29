@@ -55,10 +55,10 @@ public class Bbwo2HandlerTest extends AbstractImporterTest {
         final String logMessage = "Importing an example BBWO2 DC";
 
         //id="joodse-raad" source="niod-trefwoorden" term="Kinderen"
-        Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
+        Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "niod-trefwoorden")
                 .withDataValue(Ontology.NAME_KEY, "NIOD Keywords");
-        Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
+        Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "joodse-raad");
         Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
         Concept concept_716 = api(validUser).create(conceptBundle, Concept.class);

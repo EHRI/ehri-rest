@@ -51,7 +51,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
                 .importInputStream(ios, logMessage);
 
         printGraph(graph);
@@ -106,7 +106,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = saxImportManager(IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log2 = saxImportManager(EadImporter.class, EadHandler.class)
                 .importInputStream(ios2, logMessage);
 
         // We should have no new nodes, not even SystemEvent

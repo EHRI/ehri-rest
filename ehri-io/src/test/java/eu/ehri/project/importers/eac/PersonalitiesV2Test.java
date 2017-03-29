@@ -132,10 +132,10 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
     @Test
     public void newPersonalitiesWithReferredNodes() throws Exception {
-        Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
+        Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "FAST_keywords")
                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");
-        Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
+        Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382");
         Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
