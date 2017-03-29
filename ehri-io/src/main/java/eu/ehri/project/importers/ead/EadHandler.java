@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.ead;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -53,21 +54,23 @@ import java.util.regex.Pattern;
 public class EadHandler extends SaxXmlHandler {
 
     // Constants for elements we need to watch for.
-    private static final String EADID = "eadid",
-            DESCRULES = "descrules",
-            MAINAGENCYCODE = "mainagencycode",
-            AUTHOR = "author",
-            RULES = "rulesAndConventions",
+    static final String EADID = "eadid",
             ARCHDESC = "archdesc",
             DID = "did";
+
+    // EAD file-level keys which are added to the data of the top-level
+    // archdesc element. Note: tag->property mappings must exist for these
+    // keys if the data is to be extracted.
+    static final List<String> eadFileGlobals = ImmutableList.of(
+            "rulesAndConventions", "processInfo"
+    );
 
     private static final String DEFAULT_PROPERTIES = "ead2002.properties";
 
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes =
-            ImmutableMap.<String, Class<? extends Entity>>builder()
-                    .put("maintenanceEvent", MaintenanceEvent.class).build();
+            ImmutableMap.of("maintenanceEvent", MaintenanceEvent.class);
 
     private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
 
@@ -83,17 +86,18 @@ public class EadHandler extends SaxXmlHandler {
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    private final static String DEFAULT_LANGUAGE = "eng";
+    final static String DEFAULT_LANGUAGE = "eng";
 
     /**
      * Default language to use in units without language
      */
     private String eadLanguage = DEFAULT_LANGUAGE;
+    private String eadId;
 
     /**
      * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
      */
-    private final Map<String, String> eadfileValues;
+    private final Map<String, String> eadfileValues = Maps.newHashMap();
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -125,7 +129,6 @@ public class EadHandler extends SaxXmlHandler {
             XmlImportProperties properties) {
         super(importer, properties);
         children[depth] = Lists.newArrayList();
-        eadfileValues = Maps.newHashMap();
     }
 
     @Override
@@ -141,11 +144,6 @@ public class EadHandler extends SaxXmlHandler {
         if (qName.equals("change")) {
             putPropertyInCurrentGraph(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType.updated.toString());
         }
-        if (attributes.getValue(MAINAGENCYCODE) != null) {
-            eadfileValues.put(MAINAGENCYCODE, attributes.getValue(MAINAGENCYCODE));
-            logger.debug("Found @MAINAGENCYCODE: {}", eadfileValues.get(MAINAGENCYCODE));
-        }
-
     }
 
     /**
@@ -153,7 +151,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @return a List of Strings, i.e. identifiers, representing the path of the current node
      */
-    private List<String> pathIds() {
+    protected List<String> pathIds() {
         if (scopeIds.isEmpty()) {
             return scopeIds;
         } else {
@@ -190,19 +188,10 @@ public class EadHandler extends SaxXmlHandler {
         super.endElement(uri, localName, qName);
 
         // If this is the <eadid> element, store its content
-        switch (qName) {
-            case EADID:
-                eadfileValues.put(EADID, (String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
-                logger.debug("Found <{}>: {}", EADID, eadfileValues.get(EADID));
-                break;
-            case AUTHOR:
-                eadfileValues.put(AUTHOR, (String) currentGraphPath.peek().get(AUTHOR));
-                logger.debug("Found <{}>: {}", AUTHOR, eadfileValues.get(AUTHOR));
-                break;
-            case DESCRULES:
-                eadfileValues.put(RULES, (String) currentGraphPath.peek().get(RULES));
-                logger.debug("Found <{}>: {}", RULES, eadfileValues.get(RULES));
-                break;
+
+        if (qName.equals(EADID)) {
+            eadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
+            logger.debug("Found <{}>: {}", EADID, eadId);
         }
 
         if (localName.equals("language") || qName.equals("language")) {
@@ -242,10 +231,9 @@ public class EadHandler extends SaxXmlHandler {
                     currentGraph.put(Ontology.SOURCEFILE_KEY, getSourceFileId());
 
                     //only on toplevel description:
-                    if (qName.equals("archdesc")) {
+                    if (qName.equals(ARCHDESC)) {
                         //add the <author> of the ead to the processInfo
-                        addAuthor(currentGraph);
-                        addRules(currentGraph);
+                        addGlobalValues(currentGraph, currentGraphPath.peek(), eadFileGlobals);
                     }
 
                     if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
@@ -302,16 +290,15 @@ public class EadHandler extends SaxXmlHandler {
      * @return the <code>&lt;eadid&gt;</code>, extended with the languageTag or null if it was not parsed yet or empty
      */
     protected String getSourceFileId() {
-        if (!eadfileValues.containsKey(EADID)) {
+        if (eadId == null) {
             logger.error("EADID not set yet, or not given in eadfile");
             return null;
         } else {
-            String id = eadfileValues.get(EADID);
             String suffix = "#" + eadLanguage.toUpperCase();
-            if (id.toUpperCase().endsWith(suffix)) {
-                return id;
+            if (eadId.toUpperCase().endsWith(suffix)) {
+                return eadId;
             }
-            return id + suffix;
+            return eadId + suffix;
         }
     }
 
@@ -321,7 +308,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @param currentGraph Data at the current node level
      */
-    private void useDefaultLanguage(Map<String, Object> currentGraph) {
+    protected void useDefaultLanguage(Map<String, Object> currentGraph) {
         useDefaultLanguage(currentGraph, eadLanguage);
     }
 
@@ -424,19 +411,14 @@ public class EadHandler extends SaxXmlHandler {
      * @param elementName The XML element name
      * @return Whether or not we're moved to a new item
      */
-    private static boolean isUnitDelimiter(String elementName) {
+    static boolean isUnitDelimiter(String elementName) {
         return childItemPattern.matcher(elementName).matches() || elementName.equals(ARCHDESC);
     }
 
-    private void addAuthor(Map<String, Object> currentGraph) {
-        if (eadfileValues.containsKey(AUTHOR)) {
-            Helpers.putPropertyInGraph(currentGraph, "processInfo", eadfileValues.get(AUTHOR));
-        }
-    }
-
-    private void addRules(Map<String, Object> currentGraph) {
-        if (eadfileValues.containsKey(RULES)) {
-            Helpers.putPropertyInGraph(currentGraph, RULES, eadfileValues.get(RULES));
+    void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
+        System.out.println("Adding FILE VALUES! " + eadFileGlobals);
+        for (String key : eadFileGlobals) {
+            Helpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));
         }
     }
 }

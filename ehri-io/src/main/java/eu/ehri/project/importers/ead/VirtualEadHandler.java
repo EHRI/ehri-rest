@@ -45,6 +45,8 @@ import java.util.regex.Pattern;
 
 /**
  * Handler of Virtual EAD files.
+ *
+ * TODO: Clean up and merge with regular EadHandler
  */
 public class VirtualEadHandler extends SaxXmlHandler {
     public static final String AUTHOR = "authors",
