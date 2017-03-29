@@ -155,7 +155,6 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
-        System.out.println(new Serializer(graph).entityToJson(fonds));
         Ead2002Exporter exporter = new Ead2002Exporter(api(validUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(fonds, baos, lang);
