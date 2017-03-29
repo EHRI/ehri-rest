@@ -55,7 +55,6 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     private static final Map<IsadG, String> multiValueTextMappings = ImmutableMap.<IsadG, String>builder()
             .put(IsadG.archivistNote, "processinfo")
             .put(IsadG.scopeAndContent, "scopecontent")
-            .put(IsadG.datesOfDescriptions, "processinfo")
             .put(IsadG.systemOfArrangement, "arrangement")
             .put(IsadG.publicationNote, "bibliography")
             .put(IsadG.locationOfCopies, "altformavail")
