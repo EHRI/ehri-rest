@@ -46,6 +46,9 @@ public abstract class SaxXmlImporter extends MapImporter {
     protected static final String LINK_TARGET = "target";
 
     public static final String RESOLVED_LINK_DESC = "Link provided by data provider.";
+    public static final String MAINTENANCE_EVENT = "maintenanceEvent";
+    public static final String ACCESS_POINT = "AccessPoint";
+
 
     /**
      * Construct an EadImporter object.
@@ -170,11 +173,11 @@ public abstract class SaxXmlImporter extends MapImporter {
                     && !itemProperty.getKey().equals(OBJECT_IDENTIFIER)
                     && !itemProperty.getKey().equals(Ontology.IDENTIFIER_KEY)
                     && !itemProperty.getKey().equals(Ontology.OTHER_IDENTIFIERS)
-                    && !itemProperty.getKey().startsWith("maintenanceEvent")
+                    && !itemProperty.getKey().startsWith(MAINTENANCE_EVENT)
+                    && !itemProperty.getKey().endsWith(ACCESS_POINT)
                     && !itemProperty.getKey().startsWith("relation")
                     && !itemProperty.getKey().startsWith("IGNORE")
-                    && !itemProperty.getKey().startsWith("address/")
-                    && !itemProperty.getKey().endsWith("AccessPoint")) {
+                    && !itemProperty.getKey().startsWith("address/")) {
                 description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
                         itemProperty.getKey(), itemProperty.getValue(), entity));
             }

@@ -59,6 +59,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.BiPredicate;
 
+import static eu.ehri.project.importers.base.SaxXmlImporter.MAINTENANCE_EVENT;
+
 /**
  * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
@@ -73,7 +75,6 @@ public class EadImporter extends SaxXmlImporter {
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private final EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
     private final Serializer mergeSerializer;
-    public static final String ACCESS_POINT = "AccessPoint";
 
     /**
      * Construct an EadImporter object.

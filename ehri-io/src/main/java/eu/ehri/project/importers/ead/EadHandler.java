@@ -44,6 +44,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import static eu.ehri.project.importers.base.SaxXmlImporter.ACCESS_POINT;
+import static eu.ehri.project.importers.base.SaxXmlImporter.MAINTENANCE_EVENT;
+
 /**
  * Handler of EAD files. Use to create a representation of the structure of Documentary Units.
  * This generic handler does not do tricks to get data from any CHI-custom use of EAD - you
@@ -70,7 +73,7 @@ public class EadHandler extends SaxXmlHandler {
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes =
-            ImmutableMap.of("maintenanceEvent", MaintenanceEvent.class);
+            ImmutableMap.of(MAINTENANCE_EVENT, MaintenanceEvent.class);
 
     private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
 
@@ -236,9 +239,9 @@ public class EadHandler extends SaxXmlHandler {
                         addGlobalValues(currentGraph, currentGraphPath.peek(), eadFileGlobals);
                     }
 
-                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
+                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(MAINTENANCE_EVENT)) {
                         logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
-                        currentGraph.put("maintenanceEvent", globalMaintenanceEvents);
+                        currentGraph.put(MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
@@ -268,7 +271,7 @@ public class EadHandler extends SaxXmlHandler {
                 }
             } else {
                 // import the MaintenanceEvent
-                if (getImportantPath(currentPath).equals("maintenanceEvent")
+                if (getImportantPath(currentPath).equals(MAINTENANCE_EVENT)
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
                     Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
@@ -321,7 +324,7 @@ public class EadHandler extends SaxXmlHandler {
      */
     private void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            logger.debug("Using default language code: {}", defaultLanguage);
+            logger.debug("Using default languageCode: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
         }
     }
@@ -400,7 +403,7 @@ public class EadHandler extends SaxXmlHandler {
         //controlAccess 
         String path = getImportantPath(currentPath);
         if (path != null) {
-            need = need || path.endsWith("AccessPoint");
+            need = need || path.endsWith(ACCESS_POINT);
         }
         return need || possibleSubnodes.containsKey(getImportantPath(currentPath));
     }
@@ -416,7 +419,6 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
-        System.out.println("Adding FILE VALUES! " + eadFileGlobals);
         for (String key : eadFileGlobals) {
             Helpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));
         }

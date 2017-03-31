@@ -34,6 +34,8 @@ import org.xml.sax.SAXException;
 
 import java.util.Map;
 
+import static eu.ehri.project.importers.base.SaxXmlImporter.MAINTENANCE_EVENT;
+
 /**
  * Handler that reads EAG files. The resulting {@link Map}s should be imported by
  * {@link EagImporter}.
@@ -42,7 +44,7 @@ public class EagHandler extends SaxXmlHandler {
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Entity>>builder().put(
-            "maintenanceEvent", MaintenanceEvent.class).build();
+            MAINTENANCE_EVENT, MaintenanceEvent.class).build();
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
     public EagHandler(AbstractImporter<Map<String, Object>> importer) {
@@ -60,9 +62,9 @@ public class EagHandler extends SaxXmlHandler {
         super.endElement(uri, localName, qName);
 
         if (needToCreateSubNode(qName)) {
-            logger.debug("endElement: " + qName);
+            logger.debug("endElement: {}", qName);
 
-            logger.debug("just before popping: " + depth + "-" + getImportantPath(currentPath) + "-" + qName);
+            logger.debug("just before popping: {}-{}-{}", depth, getImportantPath(currentPath), qName);
             Map<String, Object> currentGraph = currentGraphPath.pop();
             putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
             depth--;
@@ -72,7 +74,7 @@ public class EagHandler extends SaxXmlHandler {
         //an EAG file consists of only 1 element, so if we're back at the root, we're done
         if (currentPath.isEmpty()) {
             try {
-                logger.debug("depth close " + depth + " " + qName);
+                logger.debug("depth close {} {}", depth, qName);
                 //TODO: add any mandatory fields not yet there:
                 if (!currentGraphPath.peek().containsKey(OBJECT_IDENTIFIER)) {
                     logger.warn("no objectIdentifier found");
@@ -82,11 +84,11 @@ public class EagHandler extends SaxXmlHandler {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.NAME_KEY)) {
-                    logger.debug("no " + Ontology.NAME_KEY + " found");
+                    logger.debug("no name found");
                     putPropertyInCurrentGraph(Ontology.NAME_KEY, "title");
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
+                    logger.debug("no languageCode found");
                     putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
                 if (!currentGraphPath.peek().containsKey("rulesAndConventions")) {

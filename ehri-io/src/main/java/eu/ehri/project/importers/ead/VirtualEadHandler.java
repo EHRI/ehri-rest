@@ -43,6 +43,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import static eu.ehri.project.importers.base.SaxXmlImporter.ACCESS_POINT;
+import static eu.ehri.project.importers.base.SaxXmlImporter.MAINTENANCE_EVENT;
+
 /**
  * Handler of Virtual EAD files.
  *
@@ -54,8 +57,9 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
     final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap.<String, Class<?
-            extends Entity>>of("maintenanceEvent", MaintenanceEvent.class);
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap
+            .<String, Class<?
+            extends Entity>>of(MAINTENANCE_EVENT, MaintenanceEvent.class);
 
     private static final Logger logger = LoggerFactory
             .getLogger(VirtualEadHandler.class);
@@ -211,9 +215,9 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     //add the <author> of the ead to every description
                     addAuthor(currentGraph);
 
-                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
+                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(MAINTENANCE_EVENT)) {
                         logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
-                        currentGraph.put("maintenanceEvent", globalMaintenanceEvents);
+                        currentGraph.put(MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
                     AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
@@ -221,7 +225,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     if (current.getType().equals(Entities.VIRTUAL_UNIT)) {
                         logger.debug("virtual unit created: " + current.getIdentifier());
                         topLevel = (VirtualUnit) current; // if it is not overwritten, the current DU is the topLevel
-                        logger.debug("importer used: " + importer.getClass());
+                        logger.debug("importer used: {}", importer.getClass());
                         if (depth > 0) { // if not on root level
                             children[depth - 1].add(current); // add child to parent offspring
                             // set the parent child relationships by hand
@@ -251,14 +255,14 @@ public class VirtualEadHandler extends SaxXmlHandler {
                         }
                     }
                 } catch (ValidationError ex) {
-                    logger.error("caught validation error: " + ex.getMessage());
+                    logger.error("caught validation error: {}", ex.getMessage());
                 } finally {
                     depth--;
                     scopeIds.pop();
                 }
             } else {
                 //import the MaintenanceEvent
-                if (getImportantPath(currentPath).equals("maintenanceEvent")
+                if (getImportantPath(currentPath).equals(MAINTENANCE_EVENT)
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
                     Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
@@ -318,7 +322,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            logger.debug("Using default language code: " + defaultLanguage);
+            logger.debug("Using default language code: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
         }
     }
@@ -388,7 +392,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
         //controlAccess 
         String path = getImportantPath(currentPath);
         if (path != null) {
-            need = need || path.endsWith("AccessPoint");
+            need = need || path.endsWith(ACCESS_POINT);
         }
         return need || possibleSubnodes.containsKey(getImportantPath(currentPath));
     }
