@@ -105,11 +105,6 @@ public class ServerRunner {
         graphLogger.setLevel(ch.qos.logback.classic.Level.ERROR);
 
         // This combination of stuff seems to quiet Jetty's log.
-        Log.__logClass = "none";
-        Properties p = new Properties();
-        p.setProperty("org.eclipse.jetty.LEVEL", "WARN");
-        org.eclipse.jetty.util.log.StdErrLog.setProperties(p);
-
         System.setProperty("org.eclipse.jetty.LEVEL", "DEBUG");
         CommunityServerBuilder serverBuilder = CommunityServerBuilder.server()
                 .onAddress(new HostnamePort("localhost", port));
