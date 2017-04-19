@@ -38,7 +38,6 @@ import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Described;
@@ -52,6 +51,7 @@ import eu.ehri.project.tools.DbUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -68,6 +68,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -241,8 +243,8 @@ public class ToolsResource extends AbstractResource {
         try (final Tx tx = beginTx()) {
             List<String> allIds = Lists.newArrayList(ids);
             data.data().stream()
-                .filter(row -> row.size() == 1)
-                .forEach(row -> allIds.add(row.get(0)));
+                    .filter(row -> row.size() == 1)
+                    .forEach(row -> allIds.add(row.get(0)));
 
             List<Accessible> items = allIds.stream().map(id -> {
                 try {
@@ -544,6 +546,48 @@ public class ToolsResource extends AbstractResource {
             return Table.of(done);
         } catch (ItemNotFound e) {
             throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
+        }
+    }
+
+    /**
+     * Extremely lossy helper method for cleaning a test instance
+     *
+     * @param fixtures YAML fixture data to be loaded into the fresh graph
+     */
+    @POST
+    @Path("__INITIALISE")
+    public void initialize(
+            @QueryParam("yes-i-am-sure") @DefaultValue("false") boolean confirm,
+            InputStream fixtures) throws Exception {
+        try (final Tx tx = beginTx()) {
+            sanityCheck(confirm);
+
+            for (Vertex v : graph.getVertices()) {
+                v.remove();
+            }
+            tx.success();
+        }
+        setConstraints();
+        try (final Tx tx = beginTx()) {
+            FixtureLoaderFactory.getInstance(graph, true)
+                    .loadTestData(fixtures);
+            tx.success();
+        }
+    }
+
+    private void sanityCheck(boolean confirm) {
+        // Bail out if we've got many nodes
+        Iterator<Vertex> counter = graph.getVertices().iterator();
+        int c = 0;
+        while (counter.hasNext()) {
+            counter.next();
+            c++;
+            if (c > 500) {
+                if (!confirm) {
+                    throw new RuntimeException("This database has more than 500 nodes. " +
+                            "Refusing to clear it without confirmation!");
+                } else break;
+            }
         }
     }
 }
