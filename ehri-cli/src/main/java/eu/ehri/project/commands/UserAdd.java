@@ -54,13 +54,6 @@ public class UserAdd extends BaseCommand {
                 .type(String.class)
                 .desc("A group to add the user to")
                 .build());
-        options.addOption(Option.builder()
-                .longOpt("user")
-                .hasArg()
-                .required()
-                .type(String.class)
-                .hasArg().desc("Identifier of user taking action")
-                .build());
         options.addOption(Option.builder("n")
                 .longOpt("name")
                 .hasArg()
@@ -77,7 +70,7 @@ public class UserAdd extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return String.format("%s <user-identifier> [OPTIONS]", NAME);
+        return String.format("%s [OPTIONS] <user-identifier>", NAME);
     }
 
     @Override
