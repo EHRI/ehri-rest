@@ -29,7 +29,7 @@ public class UserAddTest extends AbstractFixtureTest {
 
 	@Test
 	public void testExecWithOptions() throws Exception {
-		String[] args = new String[]{"ben", "--group", "admin", "--user", "mike"};
+		String[] args = new String[]{"ben", "--group", "admin"};
 		
 		UserAdd ua = new UserAdd();
 		CommandLine cmdLine = ua.getCmdLine(args);
