@@ -68,18 +68,15 @@ public class AbstractResourceClientTest extends RunningServerTest {
 
     AbstractResourceClientTest(Class<?> ... additionalProviders) {
         ClientConfig config = new DefaultClientConfig();
-        List<Class<?>> providers = Lists.newArrayList(
+        Lists.<Class<?>>newArrayList(
                 GlobalPermissionSetProvider.class,
                 TableProvider.class,
                 BundleProvider.class,
                 ImportLogProvider.class
-        );
-        for (Class<?> provider : providers) {
-            config.getClasses().add(provider);
-        }
-        for (Class<?> provider : additionalProviders) {
-            config.getClasses().add(provider);
-        }
+        ).forEach(p -> config.getClasses().add(p));
+        Lists.newArrayList(additionalProviders)
+                .forEach(p -> config.getClasses().add(p));
+
         client = Client.create(config);
     }
 
@@ -88,7 +85,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
         tmp.deleteOnExit();
         Files.copy(stream, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
         final List<ZipEntry> entries = Lists.newArrayList();
-        try (FileInputStream fis = new FileInputStream(tmp);
+        try (InputStream fis = Files.newInputStream(tmp.toPath());
              ZipInputStream zis = new ZipInputStream(fis)) {
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {

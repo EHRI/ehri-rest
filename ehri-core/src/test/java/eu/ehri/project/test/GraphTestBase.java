@@ -45,9 +45,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
-import java.io.File;
 import java.io.PrintStream;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +99,7 @@ public abstract class GraphTestBase {
 
     protected static String getFixtureFilePath(final String resourceName) throws Exception {
         URL resource = Resources.getResource(resourceName);
-        return new File(resource.toURI()).getAbsolutePath();
+        return Paths.get(resource.toURI()).toString();
     }
 
     @Before

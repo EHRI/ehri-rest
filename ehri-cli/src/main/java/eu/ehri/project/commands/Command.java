@@ -50,6 +50,15 @@ public interface Command {
     String getDetailedHelp();
 
     /**
+     * Get footer text for the help.
+     *
+     * @return a text string
+     */
+    default String getHelpFooter() {
+        return "";
+    }
+
+    /**
      * Execute this command with the given command line options.
      *
      * @param graph   the graph database

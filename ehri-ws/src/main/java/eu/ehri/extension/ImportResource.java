@@ -49,7 +49,6 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.shared.NoReaderForLangException;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -66,10 +65,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
@@ -454,7 +454,7 @@ public class ImportResource extends AbstractResource {
     private static List<String> getFilePaths(String pathList) {
         List<String> files = Lists.newArrayList();
         for (String path : Splitter.on("\n").omitEmptyStrings().trimResults().split(pathList)) {
-            if (!new File(path).exists()) {
+            if (!Files.isRegularFile(Paths.get(path))) {
                 throw new IllegalArgumentException("File specified in payload not found: " + path);
             }
             files.add(path);
@@ -465,8 +465,8 @@ public class ImportResource extends AbstractResource {
     private static void checkPropertyFile(String properties) {
         // Null properties are allowed
         if (properties != null) {
-            File file = new File(properties);
-            if (!(file.isFile() && file.exists())) {
+            java.nio.file.Path file = Paths.get(properties);
+            if (!Files.isRegularFile(file)) {
                 throw new IllegalArgumentException("Properties file '" + properties + "' " +
                         "either does not exist, or is not a file.");
             }
@@ -502,9 +502,9 @@ public class ImportResource extends AbstractResource {
         if (logMessagePathOrText == null || logMessagePathOrText.trim().isEmpty()) {
             return getLogMessage();
         } else {
-            File fileTest = new File(logMessagePathOrText);
-            if (fileTest.exists()) {
-                return Optional.of(FileUtils.readFileToString(fileTest, Charsets.UTF_8));
+            java.nio.file.Path fileTest = Paths.get(logMessagePathOrText);
+            if (Files.isRegularFile(fileTest)) {
+                return Optional.of(new String(Files.readAllBytes(fileTest), Charsets.UTF_8));
             } else {
                 return Optional.of(logMessagePathOrText);
             }

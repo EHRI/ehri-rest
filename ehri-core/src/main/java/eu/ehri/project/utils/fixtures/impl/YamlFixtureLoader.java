@@ -42,10 +42,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -127,7 +128,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * Load default fixtures.
      */
     private void loadFixtures() {
-        try(InputStream ios = this.getClass().getClassLoader()
+        try (InputStream ios = this.getClass().getClassLoader()
                 .getResourceAsStream(DEFAULT_FIXTURE_FILE)) {
             loadTestData(ios);
         } catch (IOException e) {
@@ -142,12 +143,12 @@ public class YamlFixtureLoader implements FixtureLoader {
      *                           resource, or a local file path.
      */
     public void loadTestData(String resourceNameOrPath) {
-        File file = new File(resourceNameOrPath);
-        try (InputStream stream = file.exists() && file.isFile()
-                    ? new FileInputStream(file)
-                    : this.getClass().getClassLoader()
-                    .getResourceAsStream(resourceNameOrPath)) {
-                loadTestData(stream);
+        Path path = Paths.get(resourceNameOrPath);
+        try (InputStream stream = Files.isRegularFile(path)
+                ? Files.newInputStream(path)
+                : this.getClass().getClassLoader()
+                .getResourceAsStream(resourceNameOrPath)) {
+            loadTestData(stream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -251,10 +252,10 @@ public class YamlFixtureLoader implements FixtureLoader {
             Map<String, Object> nodeData,
             Multimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
         Map<String, Object> data = ImmutableMap.of(
-            Bundle.ID_KEY, id,
-            Bundle.TYPE_KEY, type.getName(),
-            Bundle.DATA_KEY, nodeData,
-            Bundle.REL_KEY, dependentRelations.asMap()
+                Bundle.ID_KEY, id,
+                Bundle.TYPE_KEY, type.getName(),
+                Bundle.DATA_KEY, nodeData,
+                Bundle.REL_KEY, dependentRelations.asMap()
         );
         Bundle b = Bundle.fromData(data);
 

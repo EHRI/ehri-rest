@@ -39,13 +39,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static eu.ehri.extension.ImportResource.*;
@@ -234,7 +235,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         createZipFromResources(temp, SINGLE_EAD, HIERARCHICAL_EAD);
 
         // Get the path of an EAD file
-        InputStream payloadStream = new FileInputStream(temp);
+        InputStream payloadStream = Files.newInputStream(temp.toPath());
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
@@ -258,10 +259,10 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         temp.deleteOnExit();
         File gzip = File.createTempFile("test-gzip", ".gz");
         createZipFromResources(temp, SINGLE_EAD, HIERARCHICAL_EAD);
-        IOHelpers.gzipFile(temp, gzip);
+        IOHelpers.gzipFile(temp.toPath(), gzip.toPath());
 
         // Get the path of an EAD file
-        InputStream payloadStream = new FileInputStream(gzip);
+        InputStream payloadStream = Files.newInputStream(gzip.toPath());
 
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
@@ -395,7 +396,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         List<String> paths = Lists.newArrayList();
         for (String resourceName : resources) {
             URL resource = Resources.getResource(resourceName);
-            paths.add(new File(resource.toURI()).getAbsolutePath());
+            paths.add(Paths.get(resource.toURI()).toAbsolutePath().toString());
         }
         String payloadText = Joiner.on("\n").join(paths) + "\n";
         return new ByteArrayInputStream(

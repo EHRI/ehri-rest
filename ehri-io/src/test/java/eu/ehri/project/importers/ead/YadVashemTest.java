@@ -41,6 +41,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 
@@ -213,10 +215,9 @@ public class YadVashemTest extends AbstractImporterTest {
         temp.deleteOnExit();
         IOHelpers.createZipFromResources(temp, resource);
 
-        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(temp));
-             ArchiveInputStream archiveInputStream = new
-                     ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
-                     .createArchiveInputStream(bis)) {
+        try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(temp.toPath()));
+             ArchiveInputStream archiveInputStream = new ArchiveStreamFactory(
+                     StandardCharsets.UTF_8.displayName()).createArchiveInputStream(bis)) {
             ImportLog log2 = importManager
                     .allowUpdates(true)
                     .importArchive(archiveInputStream, "Test 2");
