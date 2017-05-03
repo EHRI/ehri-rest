@@ -6,11 +6,14 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -27,11 +30,11 @@ public class IOHelpers {
      */
     public static void createZipFromResources(File file, String... resources)
             throws URISyntaxException, IOException {
-        try (FileOutputStream fos = new FileOutputStream(file);
+        try (OutputStream fos = Files.newOutputStream(file.toPath());
              ZipOutputStream zos = new ZipOutputStream(fos)) {
             for (String resource : resources) {
                 URL url = Resources.getResource(resource);
-                String name = new File(url.toURI()).getAbsolutePath();
+                String name = Paths.get(url.toURI()).normalize().toString();
                 zos.putNextEntry(new ZipEntry(name));
                 Resources.copy(url, zos);
                 zos.closeEntry();
@@ -47,7 +50,7 @@ public class IOHelpers {
      */
     public static void createTarFromResources(File file, String... resources)
             throws URISyntaxException, IOException {
-        try (FileOutputStream fos = new FileOutputStream(file);
+        try (OutputStream fos = Files.newOutputStream(file.toPath());
              TarArchiveOutputStream tos = new TarArchiveOutputStream(fos)) {
             for (String resource : resources) {
                 URL url = Resources.getResource(resource);
@@ -58,10 +61,10 @@ public class IOHelpers {
         }
     }
 
-    public static void gzipFile(File in, File out) throws IOException {
-        try (FileInputStream fis = new FileInputStream(in);
-             FileOutputStream fos = new FileOutputStream(out);
-            GZIPOutputStream gzip = new GZIPOutputStream(fos)) {
+    public static void gzipFile(Path in, Path out) throws IOException {
+        try (InputStream fis = Files.newInputStream(in);
+             OutputStream fos = Files.newOutputStream(out);
+             GZIPOutputStream gzip = new GZIPOutputStream(fos)) {
             IOUtils.copy(fis, gzip);
         }
     }

@@ -30,11 +30,11 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -68,6 +68,7 @@ public class GraphSON extends BaseCommand {
         return "Load or dump GraphSON data.";
     }
 
+    @Override
     public String getHelpFooter() {
         return "Default is to dump to stdout";
     }
@@ -97,7 +98,6 @@ public class GraphSON extends BaseCommand {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public int execWithOptions(FramedGraph<?> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -113,7 +113,7 @@ public class GraphSON extends BaseCommand {
         return 0;
     }
 
-    public void saveDump(FramedGraph<?> graph,
+    private void saveDump(FramedGraph<?> graph,
             String filePath, CommandLine cmdLine) throws IOException {
 
         // if the file is '-' that means we do standard out
@@ -122,19 +122,19 @@ public class GraphSON extends BaseCommand {
             GraphSONWriter.outputGraph(graph, System.out, GraphSONMode.EXTENDED);
         } else {
             // try to open or create the file for writing
-            OutputStream out = new FileOutputStream(filePath);
+            OutputStream out = Files.newOutputStream(Paths.get(filePath));
             GraphSONWriter.outputGraph(graph, out, GraphSONMode.EXTENDED);
             out.close();
         }
     }
 
-    public void loadDump(FramedGraph<?> graph,
+    private void loadDump(FramedGraph<?> graph,
             String filePath, CommandLine cmdLine) throws Exception {
         GraphSONReader reader = new GraphSONReader(graph);
 
         InputStream readStream = System.in;
         if (!filePath.equals("-")) {
-            InputStream inputStream = new FileInputStream(filePath);
+            InputStream inputStream = Files.newInputStream(Paths.get(filePath));
             readStream = filePath.toLowerCase().endsWith(".gz")
                     ? new GZIPInputStream(inputStream)
                     : inputStream;

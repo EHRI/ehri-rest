@@ -30,8 +30,9 @@ import org.junit.Test;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,7 +45,7 @@ public class SaxImportManagerTest extends AbstractImporterTest {
         File temp = File.createTempFile("test-zip", ".zip");
         temp.deleteOnExit();
         IOHelpers.createZipFromResources(temp, "single-ead.xml", "hierarchical-ead.xml");
-        ImportLog log = importArchive(manager, temp);
+        ImportLog log = importArchive(manager, temp.toPath());
         assertEquals(6, log.getCreated());
         assertEquals(0, log.getUnchanged());
     }
@@ -55,13 +56,13 @@ public class SaxImportManagerTest extends AbstractImporterTest {
         File temp = File.createTempFile("test-tar", ".tar");
         temp.deleteOnExit();
         IOHelpers.createTarFromResources(temp, "single-ead.xml", "hierarchical-ead.xml");
-        ImportLog log = importArchive(manager, temp);
+        ImportLog log = importArchive(manager, temp.toPath());
         assertEquals(6, log.getCreated());
         assertEquals(0, log.getUnchanged());
     }
 
-    private ImportLog importArchive(ImportManager manager, File file) throws Exception {
-        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+    private ImportLog importArchive(ImportManager manager, Path path) throws Exception {
+        try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(path));
              ArchiveInputStream archiveInputStream =
                      new ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())
                              .createArchiveInputStream(bis)) {

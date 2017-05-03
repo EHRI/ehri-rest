@@ -66,10 +66,11 @@ import org.apache.jena.vocabulary.SKOSXL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -196,7 +197,7 @@ public final class JenaSkosImporter implements SkosImporter {
     @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, ValidationError {
-        try (FileInputStream ios = new FileInputStream(filePath)) {
+        try (InputStream ios = Files.newInputStream(Paths.get(filePath))) {
             return importFile(ios, logMessage);
         }
     }

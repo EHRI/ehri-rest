@@ -35,9 +35,10 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +56,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
-    protected String currentFile;
+    private String currentFile;
     protected Integer currentPosition;
     protected final Class<? extends AbstractImporter> importerClass;
 
@@ -99,7 +100,7 @@ public abstract class AbstractImportManager implements ImportManager {
     @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
-        try (FileInputStream ios = new FileInputStream(filePath)) {
+        try (InputStream ios = Files.newInputStream(Paths.get(filePath))) {
             return importInputStream(ios, logMessage);
         }
     }
@@ -138,7 +139,7 @@ public abstract class AbstractImportManager implements ImportManager {
             for (String path : filePaths) {
                 try {
                     currentFile = path;
-                    try (InputStream stream = new FileInputStream(path)) {
+                    try (InputStream stream = Files.newInputStream(Paths.get(path))) {
                         logger.info("Importing file: {}", path);
                         importInputStream(stream, action, log);
                     }

@@ -48,7 +48,7 @@ import java.util.Optional;
  */
 public abstract class BaseCommand implements Command {
 
-    protected static final Logger logger = org.slf4j.LoggerFactory.getLogger(Command.class);
+    static final Logger logger = org.slf4j.LoggerFactory.getLogger(Command.class);
     protected final Options options = new Options();
     private final CommandLineParser parser = new DefaultParser();
 
@@ -58,10 +58,6 @@ public abstract class BaseCommand implements Command {
     public abstract String getHelp();
 
     public abstract String getUsage();
-
-    private String getHelpFooter() {
-        return "";
-    }
 
     /**
      * Execute this command with the given database and un-parsed
@@ -106,7 +102,7 @@ public abstract class BaseCommand implements Command {
      * @param args A list of arg strings
      * @return The parsed command line
      */
-    public CommandLine getCmdLine(String[] args) throws ParseException {
+    CommandLine getCmdLine(String[] args) throws ParseException {
         setCustomOptions(options);
         return parser.parse(options, args);
     }
@@ -122,7 +118,7 @@ public abstract class BaseCommand implements Command {
      * @param msg a possibly null or empty string
      * @return an optional message string
      */
-    protected Optional<String> getLogMessage(String msg) {
+    Optional<String> getLogMessage(String msg) {
         return (msg == null || msg.trim().isEmpty()) ? Optional.empty() : Optional.of(msg);
     }
 }

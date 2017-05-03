@@ -124,9 +124,9 @@ public class UkrainianUnitImporter extends MapImporter {
     private Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
         Map<String, Object> item = Maps.newHashMap();
-        putIfNotNull(item, "scope", itemData.get(p.getFirstPropertyWithValue("scope")));
-        putIfNotNull(item, "priority", itemData.get(p.getFirstPropertyWithValue("priority")));
-        putIfNotNull(item, "copyrightStatus", itemData.get(p.getFirstPropertyWithValue("copyrightStatus")));
+        putIfNotEmpty(item, "scope", itemData.get(p.getFirstPropertyWithValue("scope")));
+        putIfNotEmpty(item, "priority", itemData.get(p.getFirstPropertyWithValue("priority")));
+        putIfNotEmpty(item, "copyrightStatus", itemData.get(p.getFirstPropertyWithValue("copyrightStatus")));
         if (itemData.containsKey("identifier")) {
             item.put(Ontology.IDENTIFIER_KEY, itemData.get("identifier"));
         } else {
@@ -135,7 +135,7 @@ public class UkrainianUnitImporter extends MapImporter {
         return item;
     }
 
-    private void putIfNotNull(Map<String, Object> item, String key, Object value) {
+    private void putIfNotEmpty(Map<String, Object> item, String key, Object value) {
         if (value != null && !value.toString().isEmpty()) {
             item.put(key, value);
         }

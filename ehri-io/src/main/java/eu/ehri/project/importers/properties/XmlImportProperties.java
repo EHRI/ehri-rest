@@ -20,20 +20,18 @@
 package eu.ehri.project.importers.properties;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * wrapper class for the mapping of xml files to be imported.
@@ -62,21 +60,25 @@ public class XmlImportProperties implements ImportProperties {
      * @return a set of key names that have the given value
      */
     Set<String> getPropertiesWithValue(String value) {
-        Set<String> ps = Sets.newHashSet();
-        for (Entry<Object, Object> property : properties.entrySet()) {
-            if (value.equals(property.getValue())) {
-                ps.add(property.getKey().toString());
-            }
-        }
-        return ps;
+        return properties.entrySet().stream()
+                .filter(e -> value.equals(e.getValue()))
+                .map(e -> e.getKey().toString())
+                .collect(Collectors.toSet());
     }
 
     public String getFirstPropertyWithValue(String value) {
-        for (Entry<Object, Object> property : properties.entrySet()) {
-            if (value.equals(property.getValue().toString()))
-                return property.getKey().toString();
-        }
-        return null;
+        return properties.entrySet().stream()
+                .filter(e -> value.equals(e.getValue()))
+                .map(e -> e.getKey().toString())
+                .findFirst().orElse(null);
+    }
+
+    @Override
+    public Set<String> getAllNonAttributeValues() {
+        return properties.entrySet().stream()
+                .filter(e -> !e.getKey().toString().startsWith("@"))
+                .map(e -> e.getValue().toString())
+                .collect(Collectors.toSet());
     }
 
     public String getProperty(String key, String defaultValue) {
@@ -86,16 +88,6 @@ public class XmlImportProperties implements ImportProperties {
     @Override
     public boolean containsPropertyValue(String value) {
         return properties.containsValue(value);
-    }
-
-    @Override
-    public Set<String> getAllNonAttributeValues() {
-        Set<String> values = new HashSet<>();
-        for (Object key : properties.keySet()) {
-            if (!key.toString().startsWith("@"))
-                values.add(properties.getProperty(key.toString()));
-        }
-        return values;
     }
 
     @Override
@@ -139,7 +131,7 @@ abstract class PropertyLoader {
 
     private static Properties loadPropertiesFromFile(Path path) {
         logger.debug("loading file {}...", path.toUri());
-        try (FileInputStream ios = new FileInputStream(path.toFile())) {
+        try (InputStream ios = Files.newInputStream(path)) {
             Properties result = new Properties();
             result.load(ios); // Can throw IOException
             return result;
@@ -152,13 +144,14 @@ abstract class PropertyLoader {
     private static Properties loadPropertiesFromResourceOrFile(String name, ClassLoader loader) {
         Preconditions.checkNotNull(name, "Property resource name may not be null");
         if (loader == null) {
-            loader = ClassLoader.getSystemClassLoader();
-        }
-        Path path = Paths.get(name);
-        if (Files.exists(path)) {
-            return loadPropertiesFromFile(path);
+            return loadPropertiesFromResourceOrFile(name, ClassLoader.getSystemClassLoader());
         } else {
-            return loadPropertiesFromResource(name, loader);
+            Path path = Paths.get(name);
+            if (Files.isRegularFile(path)) {
+                return loadPropertiesFromFile(path);
+            } else {
+                return loadPropertiesFromResource(name, loader);
+            }
         }
     }
 

@@ -38,10 +38,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -178,10 +178,10 @@ public abstract class ImportCommand extends BaseCommand {
      * @param filePaths An output parameter for file paths contained in
      *                  the given file.
      */
-    protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
+    private void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
         InputStream stream = listFile.contentEquals("-")
                 ? System.in
-                : new FileInputStream(new File(listFile));
+                : Files.newInputStream(Paths.get(listFile));
         try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8))) {
             String file;
             while ((file = br.readLine()) != null) {

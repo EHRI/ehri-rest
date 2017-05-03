@@ -26,8 +26,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Command for loading a fixtures file into the graph.
@@ -55,19 +57,17 @@ public class LoadFixtures extends BaseCommand {
     }
 
     @Override
-    public int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         boolean initialize = cmdLine.hasOption("init");
         FixtureLoader loader = FixtureLoaderFactory.getInstance(graph, initialize);
         if (cmdLine.getArgList().size() == 1) {
-            String path = cmdLine.getArgs()[0];
-            File file = new File(path);
-            if (!file.exists() || !file.isFile()) {
+            Path path = Paths.get(cmdLine.getArgs()[0]);
+            if (!Files.isRegularFile(path)) {
                 throw new RuntimeException(String.format(
                         "Fixture file: '%s does not exist or is not a file", path));
             }
             System.err.println("Loading fixture file: " + path);
-            try (FileInputStream inputStream = new FileInputStream(file)) {
+            try (InputStream inputStream = Files.newInputStream(path)) {
                 loader.loadTestData(inputStream);
             }
         } else {
