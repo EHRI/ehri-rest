@@ -209,18 +209,18 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
         String user2 = "mike";
         String user3 = "linda";
 
-        URI followingUrl = entityUri(Entities.USER_PROFILE, user1, FOLLOWING);
+        URI followingUrl = entityUri(Entities.USER_PROFILE, user1, "following");
         List<Bundle> followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
 
-        URI followUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
+        URI followUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, "following")
                 .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, followUrl1).post(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
         followers = getItemList(followingUrl, user1);
         assertEquals(1, followers.size());
 
-        URI followUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, FOLLOWING)
+        URI followUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, "following")
                 .queryParam(ID_PARAM, user3).build();
         response = jsonCallAs(user1, followUrl2).post(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
@@ -228,12 +228,12 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
         assertEquals(2, followers.size());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isFollowingUrl = entityUri(Entities.USER_PROFILE, user1, IS_FOLLOWING, user2);
+        URI isFollowingUrl = entityUri(Entities.USER_PROFILE, user1, "is-following", user2);
         response = jsonCallAs(user1, isFollowingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        URI hasFollowerUrl = entityUri(Entities.USER_PROFILE, user2, IS_FOLLOWER, user1);
+        URI hasFollowerUrl = entityUri(Entities.USER_PROFILE, user2, "is-follower", user1);
         response = jsonCallAs(user2, hasFollowerUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
@@ -248,11 +248,11 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
     public void testBlockAndUnblock() throws Exception {
         String user1 = getRegularUserProfileId();
         String user2 = getAdminUserProfileId();
-        URI blockedUrl = entityUri(Entities.USER_PROFILE, user1, BLOCKED);
+        URI blockedUrl = entityUri(Entities.USER_PROFILE, user1, "blocked");
         List<Bundle> blocked = getItemList(blockedUrl, user1);
         assertTrue(blocked.isEmpty());
 
-        URI blockUrl = entityUriBuilder(Entities.USER_PROFILE, user1, BLOCKED)
+        URI blockUrl = entityUriBuilder(Entities.USER_PROFILE, user1, "blocked")
                 .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, blockUrl)
                 .post(ClientResponse.class);
@@ -261,7 +261,7 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
         assertFalse(blocked.isEmpty());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isBlockingUrl = entityUri(Entities.USER_PROFILE, user1, IS_BLOCKING, user2);
+        URI isBlockingUrl = entityUri(Entities.USER_PROFILE, user1, "is-blocking", user2);
         response = jsonCallAs(user1, isBlockingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
@@ -277,18 +277,18 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
         String user1 = getAdminUserProfileId();
         String item1 = "c1";
         String item2 = "c2";
-        URI watchersUrl = entityUri(Entities.USER_PROFILE, user1, WATCHING);
+        URI watchersUrl = entityUri(Entities.USER_PROFILE, user1, "watching");
         List<Bundle> watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
 
-        URI watchUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)
+        URI watchUrl1 = entityUriBuilder(Entities.USER_PROFILE, user1, "watching")
                 .queryParam(ID_PARAM, item1).build();
         ClientResponse response = jsonCallAs(user1, watchUrl1).post(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
         watching = getItemList(watchersUrl, user1);
         assertEquals(1, watching.size());
 
-        URI watchUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, WATCHING)
+        URI watchUrl2 = entityUriBuilder(Entities.USER_PROFILE, user1, "watching")
                 .queryParam(ID_PARAM, item2).build();
         response = jsonCallAs(user1, watchUrl2).post(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
@@ -296,7 +296,7 @@ public class UserProfileResourceClientTest extends AbstractResourceClientTest {
         assertEquals(2, watching.size());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isWatchingUrl = entityUri(Entities.USER_PROFILE, user1, IS_WATCHING, item1);
+        URI isWatchingUrl = entityUri(Entities.USER_PROFILE, user1, "is-watching", item1);
         response = jsonCallAs(user1, isWatchingUrl).get(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));

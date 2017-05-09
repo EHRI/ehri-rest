@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.utils.Table;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
@@ -95,6 +95,13 @@ public class ToolsResource extends AbstractResource {
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);
         linker = new Linker(graph);
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("version")
+    public String version() {
+        return getClass().getPackage().getImplementationVersion();
     }
 
     /**

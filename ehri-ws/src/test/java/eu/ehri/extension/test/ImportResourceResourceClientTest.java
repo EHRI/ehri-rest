@@ -28,13 +28,12 @@ import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
-import eu.ehri.extension.utils.Table;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
-import javafx.scene.control.Tab;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -389,11 +388,10 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         ));
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "links").build();
         ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
-                .accept("text/csv")
                 .entity(table)
                 .post(ClientResponse.class);
-        Table out = response.getEntity(Table.class);
-        assertEquals(2, out.rows().size());
+        ImportLog out = response.getEntity(ImportLog.class);
+        assertEquals(2, out.getCreated());
     }
 
     private boolean checkExists(String id, String userId) {

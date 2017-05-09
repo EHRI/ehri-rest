@@ -29,7 +29,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import eu.ehri.extension.errors.WebDeserializationError;
-import eu.ehri.extension.utils.Table;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.exceptions.DeserializationError;
 
 import javax.ws.rs.Consumes;

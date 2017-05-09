@@ -1,4 +1,4 @@
-package eu.ehri.extension.utils;
+package eu.ehri.project.utils;
 
 import com.google.common.collect.Lists;
 

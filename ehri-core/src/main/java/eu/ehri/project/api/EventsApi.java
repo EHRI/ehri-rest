@@ -4,6 +4,7 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface EventsApi {
 
     Iterable<List<SystemEvent>> aggregateForItem(Accessible item);
 
-    Iterable<List<SystemEvent>> aggregateUserActions(UserProfile byUser);
+    Iterable<List<SystemEvent>> aggregateActions(Actioner byUser);
 
     Iterable<SystemEvent> listByUser(UserProfile byUser);
 

@@ -22,10 +22,11 @@ package eu.ehri.extension.test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.utils.Table;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
@@ -43,6 +44,16 @@ import static org.junit.Assert.assertTrue;
  * Test web service miscellaneous functions.
  */
 public class ToolsResourceClientTest extends AbstractResourceClientTest {
+    @Test(expected = UniformInterfaceException.class)
+    public void testVersion() throws Exception {
+        // NB: This relies on the Maven build information which is not available
+        // when running tests, hence we get a uniform interface exception because
+        // the version returned is null/204.
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "version"));
+        ClientResponse response = resource.get(ClientResponse.class);
+        System.out.println(response.getEntity(String.class));
+    }
+
     @Test
     public void testFindReplace() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "find-replace"))
