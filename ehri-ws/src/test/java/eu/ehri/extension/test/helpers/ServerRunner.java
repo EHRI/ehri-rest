@@ -31,12 +31,15 @@ import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.eclipse.jetty.util.log.Log;
 import org.neo4j.helpers.ListenSocketAddress;
+import org.neo4j.kernel.GraphDatabaseDependencies;
+import org.neo4j.kernel.configuration.Config;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.helpers.CommunityServerBuilder;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
