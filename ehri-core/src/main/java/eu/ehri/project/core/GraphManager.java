@@ -130,9 +130,11 @@ public interface GraphManager {
      * Get a CloseableIterable of vertices with the given ids.
      *
      * @param ids An iterable of String IDs
-     * @return An iterable of vertices with the given IDs
+     * @return An iterable of vertices with the given IDs. If a vertex
+     * is not found the value at the place in the input iterable will
+     * be null.
      */
-    CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
+    CloseableIterable<Vertex> getVertices(Iterable<String> ids);
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given

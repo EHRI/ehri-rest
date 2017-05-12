@@ -59,6 +59,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static eu.ehri.extension.base.AbstractResource.RANGE_HEADER_NAME;
+
 /**
  * Base class for testing the web service interface on a 'embedded' neo4j server.
  */
@@ -183,7 +185,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
 
     protected Integer getPaginationTotal(ClientResponse response) {
         MultivaluedMap<String, String> headers = response.getHeaders();
-        String range = headers.getFirst("Content-Range");
+        String range = headers.getFirst(RANGE_HEADER_NAME);
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
             return matcher.find() ? Integer.valueOf(matcher.group(3)) : null;

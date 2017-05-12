@@ -45,8 +45,7 @@ public class VersionResourceClientTest extends AbstractResourceClientTest {
                 .put(ClientResponse.class);
         assertStatus(OK, response);
 
-        List<Bundle> versions = getItemList(ehriUri(GenericResource.ENDPOINT, "r1",
-                        GenericResource.VERSIONS),
+        List<Bundle> versions = getItemList(ehriUri(GenericResource.ENDPOINT, "r1", "versions"),
                 getAdminUserProfileId());
         assertEquals(1, versions.size());
         String data = versions.get(0).getDataValue(Ontology.VERSION_ENTITY_DATA);

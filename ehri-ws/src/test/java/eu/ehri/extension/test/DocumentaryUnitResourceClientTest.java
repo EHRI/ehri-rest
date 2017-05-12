@@ -243,7 +243,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         assertEquals(1, data.size());
-        Collections.sort(data, bundleComparator);
+        data.sort(bundleComparator);
         // Extract the second documentary unit. According to the fixtures this
         // should be named 'c2'.
         assertEquals("c2", data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));

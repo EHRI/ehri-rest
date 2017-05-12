@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
@@ -37,11 +36,11 @@ import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.GenericResource.ACCESS;
 import static eu.ehri.extension.GenericResource.ENDPOINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 
 public class GenericResourceClientTest extends AbstractResourceClientTest {
 
@@ -126,20 +125,33 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void listEntitiesByGidThrows404() throws Exception {
+    public void listEntitiesGivesNullForBadItems() throws Exception {
         URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
                 .segment(ENDPOINT)
-                .queryParam("gid", -1L).build();
+                .queryParam("gid", -1L)  // bad GID
+                .queryParam("id", "c1")  // not accessible
+                .queryParam("id", "ur1") // non-content type
+                .queryParam("id", "c4")  // OK
+                .build();
 
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
-        assertStatus(NOT_FOUND, response);
+        ClientResponse response = jsonCallAs(getRegularUserProfileId(), uri).get(ClientResponse.class);
+        assertStatus(OK, response);
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        System.out.println(rootNode.toString());
+        assertTrue(rootNode.isArray());
+        assertEquals(4, rootNode.size());
+        assertTrue(rootNode.path(0).isNull());
+        assertTrue(rootNode.path(1).isNull());
+        assertTrue(rootNode.path(2).isNull());
+        assertTrue(rootNode.path(3).isObject());
     }
 
     @Test
     public void testGetLinks() throws Exception {
         // Fetch annotations for an item.
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c1", GenericResource.LINKS))
+                ehriUri(ENDPOINT, "c1", "links"))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -148,7 +160,7 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     public void testGetAnnotations() throws Exception {
         // Fetch annotations for an item.
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c1", GenericResource.ANNOTATIONS))
+                ehriUri(ENDPOINT, "c1", "annotations"))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -157,7 +169,7 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
     public void testGetAccessors() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
-                ehriUri(ENDPOINT, "c1", ACCESS)).get(ClientResponse.class);
+                ehriUri(ENDPOINT, "c1", "access")).get(ClientResponse.class);
         assertStatus(OK, response);
     }
 
@@ -181,7 +193,7 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add(AbstractResource.ACCESSOR_PARAM, LIMITED_USER_NAME);
 
-        response = client.resource(ehriUri(ENDPOINT, "c1", ACCESS))
+        response = client.resource(ehriUri(ENDPOINT, "c1", "access"))
                 .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -212,7 +224,7 @@ public class GenericResourceClientTest extends AbstractResourceClientTest {
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add(AbstractResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME);
 
-        WebResource resource = client.resource(ehriUri(ENDPOINT, "c1", ACCESS));
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "c1", "access"));
         response = resource
                 .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)

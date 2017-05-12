@@ -111,7 +111,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         String id = url.substring(url.lastIndexOf("/") + 1);
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(GenericResource.ENDPOINT, id, GenericResource.EVENTS))
+                ehriUri(GenericResource.ENDPOINT, id, "events"))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
     }
