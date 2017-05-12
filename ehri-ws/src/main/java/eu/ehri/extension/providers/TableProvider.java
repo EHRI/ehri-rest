@@ -29,7 +29,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import eu.ehri.extension.errors.WebDeserializationError;
-import eu.ehri.extension.utils.Table;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.exceptions.DeserializationError;
 
 import javax.ws.rs.Consumes;
@@ -84,7 +84,7 @@ public class TableProvider implements MessageBodyWriter<Table>, MessageBodyReade
         ObjectWriter writer = mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)
                 ? mapper.writer()
                 : csvMapper.writer(csvSchema.withoutHeader());
-        writer.writeValue(outputStream, table.data());
+        writer.writeValue(outputStream, table.rows());
     }
 
     @Override

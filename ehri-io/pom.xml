@@ -4,7 +4,7 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.8-SNAPSHOT</version>
+        <version>0.13.9</version>
     </parent>
     <artifactId>ehri-io</artifactId>
 

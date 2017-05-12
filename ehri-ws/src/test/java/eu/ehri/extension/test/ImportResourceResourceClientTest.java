@@ -22,11 +22,13 @@ package eu.ehri.extension.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadHandler;
@@ -376,6 +378,20 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
                 .delete(ClientResponse.class);
         assertStatus(ClientResponse.Status.NO_CONTENT, response);
         assertFalse(checkExists("a2", user));
+    }
+
+    @Test
+    public void testImportLinks() throws Exception {
+        Table table = Table.of(ImmutableList.of(
+                ImmutableList.of("r1", "c1", "associative", "", "Test"),
+                ImmutableList.of("r4", "c4", "associative", "", "Test 2")
+        ));
+        URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "links").build();
+        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
+                .entity(table)
+                .post(ClientResponse.class);
+        ImportLog out = response.getEntity(ImportLog.class);
+        assertEquals(2, out.getCreated());
     }
 
     private boolean checkExists(String id, String userId) {

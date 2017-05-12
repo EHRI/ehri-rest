@@ -1,4 +1,4 @@
-package eu.ehri.extension.utils;
+package eu.ehri.project.utils;
 
 import com.google.common.collect.Lists;
 
@@ -25,7 +25,7 @@ public class Table {
         return headers != null && !headers.isEmpty();
     }
 
-    public List<List<String>> data() {
+    public List<List<String>> rows() {
         return data;
     }
 

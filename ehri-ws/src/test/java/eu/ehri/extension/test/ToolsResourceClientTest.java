@@ -22,10 +22,11 @@ package eu.ehri.extension.test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.utils.Table;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
@@ -43,6 +44,16 @@ import static org.junit.Assert.assertTrue;
  * Test web service miscellaneous functions.
  */
 public class ToolsResourceClientTest extends AbstractResourceClientTest {
+    @Test(expected = UniformInterfaceException.class)
+    public void testVersion() throws Exception {
+        // NB: This relies on the Maven build information which is not available
+        // when running tests, hence we get a uniform interface exception because
+        // the version returned is null/204.
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "version"));
+        ClientResponse response = resource.get(ClientResponse.class);
+        System.out.println(response.getEntity(String.class));
+    }
+
     @Test
     public void testFindReplace() throws Exception {
         WebResource resource = client.resource(ehriUri(ENDPOINT, "find-replace"))
@@ -62,8 +73,8 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
                 .post(ClientResponse.class, data);
         Table out = response.getEntity(Table.class);
         assertStatus(OK, response);
-        assertEquals(1, out.data().size());
-        assertEquals(Lists.newArrayList("r2", "rd2", "KCL Description"), out.data().get(0));
+        assertEquals(1, out.rows().size());
+        assertEquals(Lists.newArrayList("r2", "rd2", "KCL Description"), out.rows().get(0));
     }
 
     @Test
@@ -75,7 +86,7 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = resource.post(ClientResponse.class, data);
         Table out = response.getEntity(Table.class);
         assertStatus(OK, response);
-        assertEquals(2, out.data().size());
+        assertEquals(2, out.rows().size());
         assertTrue(out.contains("c1", "nl-r1-c1"));
         assertTrue(out.contains("c4", "nl-r1-c4"));
     }
@@ -87,7 +98,7 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = resource.post(ClientResponse.class);
         Table out = response.getEntity(Table.class);
         assertStatus(OK, response);
-        assertEquals(4, out.data().size());
+        assertEquals(4, out.rows().size());
         assertTrue(out.contains("c1", "nl-r1-c1"));
         assertTrue(out.contains("c2", "nl-r1-c1-c2"));
         assertTrue(out.contains("c3", "nl-r1-c1-c2-c3"));
@@ -101,7 +112,7 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = resource.post(ClientResponse.class);
         Table out = response.getEntity(Table.class);
         assertStatus(OK, response);
-        assertEquals(4, out.data().size());
+        assertEquals(4, out.rows().size());
         assertTrue(out.contains("c1", "nl-r1-c1"));
         assertTrue(out.contains("c2", "nl-r1-c1-c2"));
         assertTrue(out.contains("c3", "nl-r1-c1-c2-c3"));

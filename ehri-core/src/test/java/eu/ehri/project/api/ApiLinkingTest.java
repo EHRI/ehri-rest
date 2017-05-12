@@ -39,8 +39,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -67,8 +69,9 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         String linkDesc = "Test Link";
         String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = api(validUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
-                linkBundle, Lists.<Accessor>newArrayList());
+        Link link = loggingApi(validUser)
+                .createLink("c1", "a1", Lists.newArrayList("ur1"),
+                linkBundle, Lists.<Accessor>newArrayList(), Optional.empty());
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -84,7 +87,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
     public void testCreateLinkWithoutPermission() throws Exception {
         api(invalidUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
                 getLinkBundle("won't work!", "too bad!"),
-                Lists.<Accessor>newArrayList());
+                Lists.<Accessor>newArrayList(), Optional.empty());
     }
 
     @Test
@@ -95,9 +98,11 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         String linkDesc = "Test Link";
         String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = api(validUser).createAccessPointLink("c1", "a1", "cd1",
+        Link link = loggingApi(validUser)
+                .createAccessPointLink("c1", "a1", "cd1",
                 linkDesc, AccessPointType.subject, linkBundle,
-                Lists.<Accessor>newArrayList(validUser, invalidUser));
+                Lists.<Accessor>newArrayList(validUser, invalidUser), Optional.empty());
+        assertNull(linkDesc, link.getLinkField());
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));

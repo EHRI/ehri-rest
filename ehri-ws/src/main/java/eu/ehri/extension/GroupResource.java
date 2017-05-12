@@ -27,6 +27,7 @@ import eu.ehri.extension.base.GetResource;
 import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.api.Api;
+import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -37,6 +38,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -129,8 +131,7 @@ public class GroupResource
      */
     @POST
     @Path("{id:[^/]+}/{aid:[^/]+}")
-    public void addMember(@PathParam("id") String id,
-            @PathParam("aid") String aid)
+    public void addMember(@PathParam("id") String id, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
@@ -185,6 +186,32 @@ public class GroupResource
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
+        }
+    }
+
+    /**
+     * Fetch an aggregate list of a user's actions.
+     *
+     * @param userId      the user's ID
+     * @param aggregation the manner in which to aggregate the results, accepting
+     *                    "user", "strict" or "off" (no aggregation). Default is
+     *                    <b>strict</b>.
+     * @return a list of event ranges
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:[^/]+}/actions")
+    public Response aggregateUserActions(
+            @PathParam("id") String userId,
+            @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
+            throws ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            Actioner group = manager.getEntity(userId, Actioner.class);
+            EventsApi eventsApi = getEventsApi()
+                    .withAggregation(aggregation);
+            Response response = streamingListOfLists(eventsApi.aggregateActions(group));
+            tx.success();
+            return response;
         }
     }
 }

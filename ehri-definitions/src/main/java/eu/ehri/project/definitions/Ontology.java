@@ -47,6 +47,7 @@ public class Ontology {
     public static final String LINK_HAS_TARGET = "hasLinkTarget";
     public static final String LINK_HAS_LINKER = "hasLinker";
     public static final String LINK_HAS_TYPE = "type";
+    public static final String LINK_HAS_FIELD = "field";
     public static final String LINK_HAS_DESCRIPTION = "description";
     public static final String LINK_HAS_CONTEXT = "inContextOf"; // points to a TL virtual unit
 

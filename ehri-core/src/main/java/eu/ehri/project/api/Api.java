@@ -225,7 +225,7 @@ public interface Api {
      * @return a new link
      */
     Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
-            Collection<Accessor> accessibleTo) throws ItemNotFound, ValidationError,
+            Collection<Accessor> accessibleTo, Optional<String> logMessage) throws ItemNotFound, ValidationError,
             PermissionDenied;
 
     /**
@@ -237,7 +237,7 @@ public interface Api {
      * @return a new link
      */
     Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo)
+            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied;
 
     /**
@@ -251,7 +251,8 @@ public interface Api {
      * @return the created annotation
      */
 
-    Annotation createAnnotation(String id, String did, Bundle bundle, Collection<Accessor> accessibleTo)
+    Annotation createAnnotation(String id, String did, Bundle bundle,
+            Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound;
 
     /**

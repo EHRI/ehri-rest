@@ -25,7 +25,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.project.acl.AclManager;
@@ -76,8 +75,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 /**
  * Provides a means of fetching items and lists of items
@@ -87,17 +85,6 @@ import java.util.stream.Stream;
 public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "entities";
-    public static final String ACCESS = "access";
-    public static final String PROMOTE = "promote";
-    public static final String DEMOTE = "demote";
-    public static final String EVENTS = "events";
-    public static final String ANNOTATIONS = "annotations";
-    public static final String LINKS = "links";
-    public static final String PERMISSION_GRANTS = "permission-grants";
-    public static final String SCOPE_PERMISSION_GRANTS = "scope-permission-grants";
-    public static final String DESCRIPTIONS = "descriptions";
-    public static final String ACCESS_POINTS = "access-points";
-    public static final String VERSIONS = "versions";
 
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
@@ -106,33 +93,29 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     /**
      * Fetch a list of items by their ID.
      *
+     * Note: if <i>both</i> global IDs and graph IDs (GIDs) are given as query
+     * parameters, GIDs will be returned at the head of the response list.
+     *
      * @param ids  a list of string IDs
      * @param gids a list of graph number IDs
-     * @return A serialized list of items
+     * @return A serialized list of items, with nulls for items that are not
+     * found or inaccessible.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(@QueryParam("id") List<String> ids,
-            @QueryParam("gid") List<Long> gids) throws ItemNotFound {
-
+    public Response list(@QueryParam("id") List<String> ids, @QueryParam("gid") List<Long> gids) {
         try (Tx tx = beginTx()) {
-            for (Long id : gids) {
-                if (graph.getVertex(id) == null) {
-                    throw new ItemNotFound(String.valueOf(id));
-                }
-            }
-
-            Stream<Vertex> verticesByGids = gids.stream().map(graph::getVertex);
-
-            // Object a lazily-computed view of the ids->vertices...
-            Iterable<Vertex> verticesByIds = manager.getVertices(ids);
-            Iterable<Vertex> allVertices = Iterables.concat(verticesByIds, verticesByGids.collect(Collectors.toList()));
-
-            PipeFunction<Vertex, Boolean> filter = AclManager
+            PipeFunction<Vertex, Boolean> aclFilter = AclManager
                     .getAclFilterFunction(getRequesterUserProfile());
-            GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(allVertices)
-                    .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-            Response response = streamingVertexList(filtered);
+            PipeFunction<Vertex, Boolean> contentFilter = aclManager
+                    .getContentTypeFilterFunction();
+            Function<Vertex, Vertex> filter = v ->
+                    (contentFilter.compute(v) && aclFilter.compute(v)) ? v : null;
+
+            Iterable<Vertex> byGid = Iterables.transform(gids, graph::getVertex);
+            Iterable<Vertex> byId = manager.getVertices(ids);
+            Iterable<Vertex> all = Iterables.concat(byGid, byId);
+            Response response = streamingVertexList(Iterables.transform(all, filter::apply));
             tx.success();
             return response;
         }
@@ -141,9 +124,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     /**
      * Fetch a list of items by their ID.
      *
+     * Note: if <i>both</i> global IDs and graph IDs (GIDs) are given as query
+     * parameters, GIDs will be returned at the head of the response list.
+     *
      * @param json a JSON-encoded list of IDs, which can consist of
      *             either strings or (if a number) graph (long) ids.
-     * @return A serialized list of items
+     * @return A serialized list of items, with nulls for items that are not
+     * found or inaccessible.
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -189,7 +176,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + ACCESS)
+    @Path("{id:[^/]+}/access")
     public Response visibility(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, SerializationError {
         try (final Tx tx = beginTx()) {
@@ -211,7 +198,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + ACCESS)
+    @Path("{id:[^/]+}/access")
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {
@@ -234,7 +221,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + PROMOTE)
+    @Path("{id:[^/]+}/promote")
     public Response addPromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -255,7 +242,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + PROMOTE)
+    @Path("{id:[^/]+}/promote")
     public Response removePromotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = beginTx()) {
@@ -273,7 +260,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + DEMOTE)
+    @Path("{id:[^/]+}/demote")
     public Response addDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -294,7 +281,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + DEMOTE)
+    @Path("{id:[^/]+}/demote")
     public Response removeDemotion(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = beginTx()) {
@@ -313,7 +300,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + EVENTS)
+    @Path("{id:[^/]+}/events")
     public Response events(
             @PathParam("id") String id,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
@@ -336,7 +323,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + ANNOTATIONS)
+    @Path("{id:[^/]+}/annotations")
     public Response annotations(
             @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -357,7 +344,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + LINKS)
+    @Path("{id:[^/]+}/links")
     public Response links(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Linkable entity = manager.getEntity(id, Linkable.class);
@@ -376,7 +363,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + PERMISSION_GRANTS)
+    @Path("{id:[^/]+}/permission-grants")
     public Response permissionGrants(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -396,7 +383,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + SCOPE_PERMISSION_GRANTS)
+    @Path("{id:[^/]+}/scope-permission-grants")
     public Response permissionGrantsAsScope(@PathParam("id") String id)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -419,7 +406,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + DESCRIPTIONS)
+    @Path("{id:[^/]+}/descriptions")
     public Response createDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
@@ -446,7 +433,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + DESCRIPTIONS)
+    @Path("{id:[^/]+}/descriptions")
     public Response updateDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound, SerializationError {
@@ -473,7 +460,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}")
+    @Path("{id:[^/]+}/descriptions/{did:[^/]+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError,
@@ -488,7 +475,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param did the description ID
      */
     @DELETE
-    @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}")
+    @Path("{id:[^/]+}/descriptions/{did:[^/]+}")
     public void deleteDescription(
             @PathParam("id") String id, @PathParam("did") String did)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
@@ -512,7 +499,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}/" + ACCESS_POINTS)
+    @Path("{id:[^/]+}/descriptions/{did:[^/]+}/access-points")
     public Response createAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, Bundle bundle)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
@@ -538,7 +525,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @return a list of versions
      */
     @GET
-    @Path("{id:[^/]+}/" + VERSIONS)
+    @Path("{id:[^/]+}/versions")
     public Response listVersions(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
             Versioned item = api().detail(id, Versioned.class);
@@ -558,7 +545,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param apid the access point's ID
      */
     @DELETE
-    @Path("{id:[^/]+}/" + DESCRIPTIONS + "/{did:[^/]+}/" + ACCESS_POINTS + "/{apid:[^/]+}")
+    @Path("{id:[^/]+}/descriptions/{did:[^/]+}/access-points/{apid:[^/]+}")
     public void deleteAccessPoint(@PathParam("id") String id,
             @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError,

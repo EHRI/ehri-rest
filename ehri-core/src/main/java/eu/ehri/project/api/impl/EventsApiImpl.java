@@ -300,10 +300,10 @@ public class EventsApiImpl implements EventsApi {
      * @return an event stream
      */
     @Override
-    public Iterable<List<SystemEvent>> aggregateUserActions(UserProfile byUser) {
+    public Iterable<List<SystemEvent>> aggregateActions(Actioner byUser) {
         // Add optional filters for event type, item type, and asUser...
         GremlinPipeline<SystemEvent, SystemEvent> pipe = new GremlinPipeline<>(
-                byUser.as(Actioner.class).getActions());
+                byUser.getActions());
 
         // Add additional generic filters
         GremlinPipeline<SystemEvent, SystemEvent> acl = applyAclFilter(filterEvents(pipe), accessor);

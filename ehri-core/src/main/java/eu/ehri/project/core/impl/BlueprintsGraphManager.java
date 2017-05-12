@@ -20,6 +20,7 @@
 package eu.ehri.project.core.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -140,14 +141,14 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
-    public CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound {
-        // Ugh, we don't want to remove duplicate results here
-        // because that's not expected behaviour - if you give
-        // an array with dups you expect the dups to come out...
-        List<Vertex> verts = Lists.newArrayList();
-        for (String id : ids) {
-            verts.add(getVertex(id));
-        }
+    public CloseableIterable<Vertex> getVertices(Iterable<String> ids) {
+        Iterable<Vertex> verts = Iterables.transform(ids, id -> {
+            try {
+                return getVertex(id);
+            } catch (ItemNotFound e) {
+                return null;
+            }
+        });
         return new WrappingCloseableIterable<>(verts);
     }
 

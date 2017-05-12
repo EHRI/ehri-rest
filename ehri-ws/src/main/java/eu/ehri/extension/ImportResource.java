@@ -23,9 +23,12 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
+import eu.ehri.project.importers.links.LinkImporter;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
@@ -404,6 +407,39 @@ public class ImportResource extends AbstractResource {
                     .batchDelete(ids, user, getLogMessage(logMessage));
             logger.debug("Committing delete transaction...");
             tx.success();
+        }
+    }
+
+
+    /**
+     * Create multiple links via CSV or JSON tabular upload.
+     * <p>
+     * Each data row must consist of 5 columns:
+     * <ol>
+     * <li>the source item
+     * <li>the target item
+     * <li>the link type, e.g. associative, hierarchical
+     * <li>the link field (if applicable) e.g. relatedUnitsOfDescription
+     * <li>the link description
+     * </ol>
+     * <p>
+     * A separate log item will be created for each row.
+     *
+     * @param table the tabular data
+     * @return a single column table of link IDs
+     * @throws DeserializationError the problems are found with the import data
+     */
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Path("links")
+    public ImportLog importLinks(
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            Table table) throws DeserializationError, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
+                    .importLinks(table, getLogMessage().orElse(null));
+            tx.success();
+            return log;
         }
     }
 
