@@ -22,7 +22,6 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.GenericResource;
-import eu.ehri.extension.UserProfileResource;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
@@ -36,8 +35,6 @@ import java.util.List;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.UserProfileResource.FOLLOWING;
-import static eu.ehri.extension.UserProfileResource.WATCHING;
 import static eu.ehri.extension.base.AbstractResource.ID_PARAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -114,7 +111,7 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         String id = url.substring(url.lastIndexOf("/") + 1);
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(GenericResource.ENDPOINT, id, GenericResource.EVENTS))
+                ehriUri(GenericResource.ENDPOINT, id, "events"))
                 .get(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -133,20 +130,20 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         // At present, the personalised event stream for the validUser user should
         // contain all the regular events.
         String user = getRegularUserProfileId();
-        URI personalisedEventUrl = entityUri(Entities.USER_PROFILE, user, UserProfileResource.EVENTS);
+        URI personalisedEventUrl = entityUri(Entities.USER_PROFILE, user, "events");
         List<List<Bundle>> events = getItemListOfLists(personalisedEventUrl, user);
         assertEquals(1, events.size());
 
         // Now only fetch events related to items we're watching - this list
         // should currently be empty...
         URI personalisedEventUrlWatched = entityUriBuilder(
-                Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
+                Entities.USER_PROFILE, user, "events")
                 .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventsApi.ShowType.watched).build();
         events = getItemListOfLists(personalisedEventUrlWatched, user);
         assertEquals(0, events.size());
 
         // Now start watching item r1.
-        URI watchUrl = entityUriBuilder(Entities.USER_PROFILE, user, WATCHING)
+        URI watchUrl = entityUriBuilder(Entities.USER_PROFILE, user, "watching")
                 .queryParam(ID_PARAM, "r1").build();
 
         jsonCallAs(user, watchUrl).post(ClientResponse.class);
@@ -165,13 +162,13 @@ public class SystemEventResourceClientTest extends AbstractResourceClientTest {
         // Only get events for people we follow, excluding those
         // for items we watch...
         URI personalisedEventUrlFollowed = entityUriBuilder(
-                Entities.USER_PROFILE, user, UserProfileResource.EVENTS)
+                Entities.USER_PROFILE, user, "events")
                 .queryParam(AbstractAccessibleResource.SHOW_PARAM, EventsApi.ShowType.followed).build();
         events = getItemListOfLists(personalisedEventUrlFollowed, user);
         assertEquals(0, events.size());
 
         // Now follow the other user...
-        URI followUrl = entityUriBuilder(Entities.USER_PROFILE, user, FOLLOWING)
+        URI followUrl = entityUriBuilder(Entities.USER_PROFILE, user, "following")
                 .queryParam(ID_PARAM, getAdminUserProfileId()).build();
         jsonCallAs(user, followUrl).post(ClientResponse.class);
 

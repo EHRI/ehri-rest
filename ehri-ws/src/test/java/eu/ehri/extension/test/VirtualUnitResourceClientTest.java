@@ -80,7 +80,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
         // Ensure the user now owns that item:
         response = jsonCallAs(currentUserId,
                 entityUri(Entities.USER_PROFILE, currentUserId,
-                        UserProfileResource.VIRTUAL_UNITS))
+                        "virtual-units"))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -167,7 +167,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
         List<Bundle> data = getEntityList(
                 Entities.VIRTUAL_UNIT, getAdminUserProfileId());
         assertTrue(!data.isEmpty());
-        Collections.sort(data, bundleComparator);
+        data.sort(bundleComparator);
         // Extract the first collection. According to the fixtures this
         // should be named 'vc1'.
         assertEquals(FIRST_DOC_ID, data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));
@@ -286,7 +286,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
     public void testPageVirtualUnitsForUser() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.USER_PROFILE, "linda",
-                        UserProfileResource.VIRTUAL_UNITS))
+                        "virtual-units"))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
