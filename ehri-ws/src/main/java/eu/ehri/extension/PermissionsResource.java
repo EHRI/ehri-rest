@@ -239,7 +239,7 @@ public class PermissionsResource extends AbstractResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{userOrGroup:[^/]+}/" + GenericResource.PERMISSION_GRANTS)
+    @Path("{userOrGroup:[^/]+}/permission-grants")
     public Response listPermissionGrants(@PathParam("userOrGroup") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor user = manager.getEntity(id, Accessor.class);

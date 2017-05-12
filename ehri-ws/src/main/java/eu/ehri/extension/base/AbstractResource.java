@@ -94,7 +94,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     public final static String TURTLE_MIMETYPE = "text/turtle";
     public final static String RDF_XML_MIMETYPE = "application/rdf+xml";
     public final static String N3_MIMETYPE = "application/n-triples";
-    public final BiMap<String, String> RDF_MIMETYPE_FORMATS = ImmutableBiMap.of(
+    protected final BiMap<String, String> RDF_MIMETYPE_FORMATS = ImmutableBiMap.of(
             N3_MIMETYPE, "N3",
             TURTLE_MIMETYPE, "TTL",
             RDF_XML_MIMETYPE, "RDF/XML"

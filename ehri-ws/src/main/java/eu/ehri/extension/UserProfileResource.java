@@ -67,17 +67,6 @@ import java.util.Set;
 public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
-    public static final String FOLLOWING = "following";
-    public static final String FOLLOWERS = "followers";
-    public static final String IS_FOLLOWING = "is-following";
-    public static final String IS_FOLLOWER = "is-follower";
-    public static final String WATCHING = "watching";
-    public static final String IS_WATCHING = "is-watching";
-    public static final String BLOCKED = "blocked";
-    public static final String IS_BLOCKING = "is-blocking";
-    public static final String ACTIONS = "actions";
-    public static final String EVENTS = "events";
-    public static final String VIRTUAL_UNITS = "virtual-units";
 
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);
@@ -152,7 +141,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + FOLLOWERS)
+    @Path("{id:[^/]+}/followers")
     public Response listFollowers(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -165,7 +154,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + FOLLOWING)
+    @Path("{id:[^/]+}/following")
     public Response listFollowing(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -178,7 +167,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + IS_FOLLOWING + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/is-following/{otherId:[^/]+}")
     public boolean isFollowing(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
@@ -194,7 +183,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + IS_FOLLOWER + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/is-follower/{otherId:[^/]+}")
     public boolean isFollower(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
@@ -208,7 +197,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{id:[^/]+}/" + FOLLOWING)
+    @Path("{id:[^/]+}/following")
     public void followUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -220,7 +209,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{id:[^/]+}/" + FOLLOWING)
+    @Path("{id:[^/]+}/following")
     public void unfollowUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -233,7 +222,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + BLOCKED)
+    @Path("{id:[^/]+}/blocked")
     public Response listBlocked(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -246,7 +235,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + IS_BLOCKING + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/is-blocking/{otherId:[^/]+}")
     public boolean isBlocking(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
@@ -260,7 +249,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{id:[^/]+}/" + BLOCKED)
+    @Path("{id:[^/]+}/blocked")
     public void blockUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -272,7 +261,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{id:[^/]+}/" + BLOCKED)
+    @Path("{id:[^/]+}/blocked")
     public void unblockUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -285,7 +274,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + WATCHING)
+    @Path("{id:[^/]+}/watching")
     public Response listWatching(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -297,7 +286,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @POST
-    @Path("{id:[^/]+}/" + WATCHING)
+    @Path("{id:[^/]+}/watching")
     public void watchItem(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -309,7 +298,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     }
 
     @DELETE
-    @Path("{id:[^/]+}/" + WATCHING)
+    @Path("{id:[^/]+}/watching")
     public void unwatchItem(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
@@ -322,7 +311,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + IS_WATCHING + "/{otherId:[^/]+}")
+    @Path("{id:[^/]+}/is-watching/{otherId:[^/]+}")
     public boolean isWatching(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
@@ -337,7 +326,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + GenericResource.ANNOTATIONS)
+    @Path("{id:[^/]+}/annotations")
     public Response listAnnotations(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -350,7 +339,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + GenericResource.LINKS)
+    @Path("{id:[^/]+}/links")
     public Response pageLinks(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -363,7 +352,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + VIRTUAL_UNITS)
+    @Path("{id:[^/]+}/virtual-units")
     public Response pageVirtualUnits(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
@@ -385,7 +374,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + ACTIONS)
+    @Path("{id:[^/]+}/actions")
     public Response aggregateUserActions(
             @PathParam("id") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
@@ -412,7 +401,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + EVENTS)
+    @Path("{id:[^/]+}/events")
     public Response aggregateEventsForUser(
             @PathParam("id") String userId,
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)

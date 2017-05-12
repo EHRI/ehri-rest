@@ -31,8 +31,6 @@ import javax.ws.rs.core.Response;
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.GenericResource.ACCESS_POINTS;
-import static eu.ehri.extension.GenericResource.DESCRIPTIONS;
 import static eu.ehri.extension.GenericResource.ENDPOINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,7 +39,7 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
 
     private String descriptionTestStr;
     private String accessPointTestStr;
-    static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
+    private static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
 
     @Before
     public void setUp() throws Exception {
@@ -54,7 +52,7 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
         // Create additional description for c2
         // C2 initially has one description, so it should have two afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", DESCRIPTIONS))
+                ehriUri(ENDPOINT, "c2", "descriptions"))
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
@@ -70,7 +68,7 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
         // Update description for c2
         // C2 initially has one description, and should still have one afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", DESCRIPTIONS, "cd2"))
+                ehriUri(ENDPOINT, "c2", "descriptions", "cd2"))
                 .entity(descriptionTestStr).put(ClientResponse.class);
         assertStatus(OK, response);
 
@@ -86,7 +84,7 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
         // Delete description for c2
         // C2 initially has one description, so there should be none afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", DESCRIPTIONS, "cd2"))
+                ehriUri(ENDPOINT, "c2", "descriptions", "cd2"))
                 .delete(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
     }
@@ -94,7 +92,7 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testCreateDeleteAccessPoints() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", DESCRIPTIONS, "cd2", ACCESS_POINTS))
+                ehriUri(ENDPOINT, "c2", "descriptions", "cd2", "access-points"))
                 .entity(accessPointTestStr).post(ClientResponse.class);
         assertStatus(CREATED, response);
         JsonNode rootNode = jsonMapper.readTree(response.getEntity(String.class));
@@ -104,8 +102,8 @@ public class DescriptionResourceClientTest extends AbstractResourceClientTest {
         String value = idNode.asText();
 
         response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", DESCRIPTIONS, "cd2",
-                        ACCESS_POINTS, value))
+                ehriUri(ENDPOINT, "c2", "descriptions", "cd2",
+                        "access-points", value))
                 .delete(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
     }
