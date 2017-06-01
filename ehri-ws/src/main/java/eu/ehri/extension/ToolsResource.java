@@ -35,6 +35,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.AccessPointType;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
@@ -42,6 +43,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -70,6 +72,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -102,6 +105,28 @@ public class ToolsResource extends AbstractResource {
     @Path("version")
     public String version() {
         return getClass().getPackage().getImplementationVersion();
+    }
+
+    @GET
+    @Path("find-moved/{scope:[^/]+}")
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    public Table findMoved(final @PathParam("scope") String scope) throws Exception {
+        try (final Tx tx = beginTx()) {
+            List<List<String>> rows = Lists.newArrayList();
+            DocumentaryUnit parent = manager.getEntity(scope, DocumentaryUnit.class);
+            for (DocumentaryUnit item : parent.getAllChildren()) {
+                for (DocumentaryUnit other : parent.getAllChildren()) {
+                    if (item.getIdentifier().equals(other.getIdentifier())
+                      && item.getId().compareTo(other.getId()) < 0) {
+                        List<DocumentaryUnit> items = Lists.newArrayList(item, other);
+                        items.sort(Comparator.comparing(a -> a.getLatestEvent().getTimestamp()));
+                        rows.add(items.stream().map(Entity::getId).collect(Collectors.toList()));
+                    }
+                }
+            }
+            tx.success();
+            return Table.of(rows);
+        }
     }
 
     /**
