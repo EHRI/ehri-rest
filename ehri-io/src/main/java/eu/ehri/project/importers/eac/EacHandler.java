@@ -37,6 +37,8 @@ import org.xml.sax.SAXException;
 import java.util.List;
 import java.util.Map;
 
+import static eu.ehri.project.importers.base.SaxXmlImporter.MAINTENANCE_EVENT;
+
 
 /**
  * Handler of EAC-CPF files. Creates a {@link Map} for the {@link EacImporter} to
@@ -45,14 +47,15 @@ import java.util.Map;
  */
 public class EacHandler extends SaxXmlHandler {
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Entity>>builder()
-            .put("maintenanceEvent", MaintenanceEvent.class)
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap
+            .<String, Class<? extends Entity>>builder()
+            .put(MAINTENANCE_EVENT, MaintenanceEvent.class)
             .put("relation", Annotation.class)
             .put("book", Annotation.class)
             .put("bookentry", Annotation.class)
             .put("accessPoint", Annotation.class)
-            .put("name", UnknownProperty.class).build();
+            .put("name", UnknownProperty.class)
+            .build();
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
@@ -96,8 +99,8 @@ public class EacHandler extends SaxXmlHandler {
                     overwritePropertyInCurrentGraph(Ontology.NAME_KEY, name);
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
-                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                    logger.debug("no languageCode found");
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
                 }
 
                 importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
@@ -137,7 +140,7 @@ public class EacHandler extends SaxXmlHandler {
                 putPropertyInCurrentGraph("otherFormsOfName", m.get("namePart").toString());
             }
         } else {
-            logger.warn("no {} found", Ontology.NAME_KEY);
+            logger.warn("no name found");
             nameValue = "no title";
         }
         return nameValue.trim();

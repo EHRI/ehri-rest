@@ -87,16 +87,17 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             .put(AccessPointType.genre, "genreform")
             .build();
 
-    private static final List<ContactInfo> addressKeys = ImmutableList
-            .of(ContactInfo.street,
-                    ContactInfo.postalCode,
-                    ContactInfo.municipality,
-                    ContactInfo.firstdem,
-                    ContactInfo.countryCode,
-                    ContactInfo.telephone,
-                    ContactInfo.fax,
-                    ContactInfo.webpage,
-                    ContactInfo.email);
+    private static final List<ContactInfo> addressKeys = ImmutableList.of(
+            ContactInfo.street,
+            ContactInfo.postalCode,
+            ContactInfo.municipality,
+            ContactInfo.firstdem,
+            ContactInfo.countryCode,
+            ContactInfo.telephone,
+            ContactInfo.fax,
+            ContactInfo.webpage,
+            ContactInfo.email
+    );
 
     private final Api api;
 
@@ -214,7 +215,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     }
 
     private void addDataSection(XMLStreamWriter sw, Repository repository, DocumentaryUnit subUnit,
-            Description desc, String langCode) {
+                                Description desc, String langCode) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
@@ -275,7 +276,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     }
 
     private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit,
-            Optional<Description> priorDescOpt, String langCode) {
+                             Optional<Description> priorDescOpt, String langCode) {
         logger.trace("Adding EAD sublevel: c" + num);
         Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);

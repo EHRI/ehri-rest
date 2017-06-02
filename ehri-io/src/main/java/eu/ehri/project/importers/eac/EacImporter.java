@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Import EAC for a given repository into the database.
  */
@@ -192,7 +193,7 @@ public class EacImporter extends SaxXmlImporter {
                     && !key.equals(OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
-                    && !key.startsWith("maintenanceEvent")
+                    && !key.startsWith(MAINTENANCE_EVENT)
                     && !key.startsWith("IGNORE")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
