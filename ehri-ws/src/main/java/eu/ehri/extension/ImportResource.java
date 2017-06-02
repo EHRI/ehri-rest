@@ -22,14 +22,18 @@ package eu.ehri.extension;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
@@ -45,6 +49,8 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -76,7 +82,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -170,6 +179,117 @@ public class ImportResource extends AbstractResource {
             throw new DeserializationError("Unable to read language: " + format);
         }
     }
+
+    private Iterable<DocumentaryUnit> getAllChildren(PermissionScope scope) {
+        switch (scope.getType()) {
+            case Entities.DOCUMENTARY_UNIT:
+                return scope.as(DocumentaryUnit.class).getAllChildren();
+            case Entities.REPOSITORY:
+                return scope.as(Repository.class).getAllDocumentaryUnits();
+                default:
+                    return Collections.emptyList();
+        }
+    }
+
+    @POST
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
+    @Path("ead2")
+    public ImportLog importEad2(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @QueryParam("fonds") String fondsId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            InputStream data)
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+
+        try (final Tx tx = beginTx()) {
+            checkPropertyFile(propertyFile);
+            Class<? extends SaxXmlHandler> handler
+                    = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
+            Class<? extends ItemImporter> importer
+                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
+
+            // Get the current user from the Authorization header and the scope
+            // from the query params...
+            Actioner user = getCurrentActioner();
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
+
+            PermissionScope fonds = manager.getEntity(fondsId, PermissionScope.class);
+
+            // Get a mapping of __id to identifier within the scope,
+            // pre-ingest...
+            Map<String, String> lookup = Maps.newHashMap();
+            lookup.put(fonds.getId(), fonds.getIdentifier());
+            for (DocumentaryUnit unit : getAllChildren(fonds)) {
+                lookup.put(unit.getId(), unit.getIdentifier());
+            }
+
+            logger.debug("ITEMS IN BEFORE MAP: {}", lookup.size());
+
+            // Keep track of new, moved, updated local identifiers.
+            List<String> newIdentifiers = Lists.newArrayList();
+
+            // Run the import!
+            String message = getLogMessage(logMessage).orElse(null);
+            ImportManager importManager = new SaxImportManager(
+                    graph, scope, user, tolerant, allowUpdates, importer, handler,
+                    Lists.newArrayList((ImportCallback) mutation ->
+                            newIdentifiers.add(mutation.getNode().as(DocumentaryUnit.class).getIdentifier())))
+                    .allowUpdates(allowUpdates)
+                    .setTolerant(tolerant)
+                    .withProperties(propertyFile);
+
+            ImportLog log = importDataStream(importManager, message, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
+
+            Set<String> allBefore = Sets.newHashSet(lookup.values());
+            Set<String> allNew = Sets.newHashSet(newIdentifiers);
+            allNew.removeAll(allBefore);
+            allBefore.removeAll(newIdentifiers);
+            
+            logger.debug("NUMBER TO BE DELETED: {}", allBefore.size());
+            logger.debug("NUMBER NEWLY CREATED: {}", allNew.size());
+
+            // Find moved items...
+            // This gets us a map of old __id to new __id
+            Map<String, String> oldToNew = findMovedItems(fonds, lookup);
+            logger.debug("MOVED ITEMS: {}", oldToNew.size());
+
+            logger.debug("Committing import transaction...");
+            tx.success();
+            return log;
+        } catch (ClassNotFoundException e) {
+            throw new DeserializationError("Class not found: " + e.getMessage());
+        } catch (IllegalArgumentException | InputParseError | ArchiveException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+    }
+
+    private Map<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup) {
+        Map<String, String> moved = Maps.newHashMap();
+        for (DocumentaryUnit item : getAllChildren(scope)) {
+            for (DocumentaryUnit other : getAllChildren(scope)) {
+                if (item.getIdentifier().equals(other.getIdentifier())
+                        && item.getId().compareTo(other.getId()) < 0) {
+                    if (lookup.containsKey(item.getId())) {
+                        moved.put(item.getId(), other.getId());
+                    } else if (lookup.containsKey(other.getId())) {
+                        moved.put(other.getId(), item.getId());
+                    } else {
+                        throw new RuntimeException(
+                          "Unexpected situation: 'moved' item not found in before-set... " + item.getIdentifier());
+                    }
+                }
+            }
+        }
+        return moved;
+    }
+
 
     /**
      * Import a set of EAD files. The POST body can be one of:

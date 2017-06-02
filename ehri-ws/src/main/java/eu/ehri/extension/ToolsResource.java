@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
@@ -108,19 +109,86 @@ public class ToolsResource extends AbstractResource {
     }
 
     @GET
+    @Path("find-leaves/{scope:[^/]+}")
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    public Table findLeaves(final @PathParam("scope") String scope) throws ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            List<List<String>> rows = Lists.newArrayList();
+            DocumentaryUnit parent = manager.getEntity(scope, DocumentaryUnit.class);
+            for (DocumentaryUnit item : parent.getAllChildren()) {
+                if (!item.getChildren().iterator().hasNext()) {
+                    List<String> items = Lists.newArrayList(item.getId());
+                    rows.add(items);
+                }
+            }
+            tx.success();
+            return Table.of(rows);
+        }
+    }
+
+    @POST
+    @Path("new-moved-deleted/{scope:[^/]+}")
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    public Table newMovedDeleted(
+            final @PathParam("scope") String scope, Table data) throws ItemNotFound {
+        try (final Tx tx = beginTx()) {
+
+            Set<String> newIds = Sets.newHashSet();
+            Set<String> delIds = Sets.newHashSet();
+            for (List<String> pair : data.rows()) {
+                String first = pair.get(0);
+                String second = pair.get(1);
+                if (first.trim().isEmpty()) {
+                    newIds.add(second);
+                } else {
+                    delIds.add(first);
+                }
+            }
+
+            Set<String> movedIds = Sets.newHashSet();
+            DocumentaryUnit parent = manager.getEntity(scope, DocumentaryUnit.class);
+            for (DocumentaryUnit item : parent.getAllChildren()) {
+                for (DocumentaryUnit other : parent.getAllChildren()) {
+                    if (item.getIdentifier().equals(other.getIdentifier())
+                            && item.getId().compareTo(other.getId()) < 0) {
+                        movedIds.add(item.getIdentifier());
+                    }
+                }
+            }
+
+            Set<String> tmp = Sets.newHashSet(delIds);
+            delIds.removeAll(newIds);
+            newIds.removeAll(tmp);
+
+            List<List<String>> out = Lists.newArrayList();
+            delIds.forEach(id -> out.add(Lists.newArrayList(id, "", "")));
+            movedIds.forEach(id -> out.add(Lists.newArrayList("", id, "")));
+            newIds.forEach(id -> out.add(Lists.newArrayList("", "", id)));
+            tx.success();
+            return Table.of(out);
+        }
+    }
+
+    @GET
     @Path("find-moved/{scope:[^/]+}")
     @Produces({MediaType.APPLICATION_JSON, "text/csv"})
-    public Table findMoved(final @PathParam("scope") String scope) throws Exception {
+    public Table findMoved(final @PathParam("scope") String scope,
+                           final @QueryParam("leaf") @DefaultValue("false") boolean leaf
+    ) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             List<List<String>> rows = Lists.newArrayList();
             DocumentaryUnit parent = manager.getEntity(scope, DocumentaryUnit.class);
             for (DocumentaryUnit item : parent.getAllChildren()) {
                 for (DocumentaryUnit other : parent.getAllChildren()) {
                     if (item.getIdentifier().equals(other.getIdentifier())
-                      && item.getId().compareTo(other.getId()) < 0) {
+                      && item.getId().compareTo(other.getId()) < 0
+                        && (!leaf || !item.getChildren().iterator().hasNext())) {
                         List<DocumentaryUnit> items = Lists.newArrayList(item, other);
                         items.sort(Comparator.comparing(a -> a.getLatestEvent().getTimestamp()));
-                        rows.add(items.stream().map(Entity::getId).collect(Collectors.toList()));
+                        List<String> ids = items.stream().map(Entity::getId).collect(Collectors.toList());
+                        ids.add(item.getIdentifier());
+                        rows.add(ids);
                     }
                 }
             }
