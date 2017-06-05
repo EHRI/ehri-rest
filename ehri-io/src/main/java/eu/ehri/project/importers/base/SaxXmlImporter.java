@@ -46,6 +46,7 @@ public abstract class SaxXmlImporter extends MapImporter {
     protected static final String LINK_TARGET = "target";
 
     public static final String RESOLVED_LINK_DESC = "Link provided by data provider.";
+    private final ImportHelper helper;
 
     /**
      * Construct an EadImporter object.
@@ -56,6 +57,7 @@ public abstract class SaxXmlImporter extends MapImporter {
      */
     public SaxXmlImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(graph, permissionScope, actioner, log);
+        helper = new ImportHelper();
     }
 
     /**
@@ -175,7 +177,7 @@ public abstract class SaxXmlImporter extends MapImporter {
                     && !itemProperty.getKey().startsWith("IGNORE")
                     && !itemProperty.getKey().startsWith("address/")
                     && !itemProperty.getKey().endsWith("AccessPoint")) {
-                description.put(itemProperty.getKey(), flattenNonMultivaluedProperties(
+                description.put(itemProperty.getKey(), helper.flattenNonMultivaluedProperties(
                         itemProperty.getKey(), itemProperty.getValue(), entity));
             }
         }
@@ -189,7 +191,7 @@ public abstract class SaxXmlImporter extends MapImporter {
      * @param itemData a Map containing raw properties of a unit
      * @return returns a Map with all address/ keys (may be empty)
      */
-    protected Map<String, Object> extractAddress(Map<String, Object> itemData) {
+    protected static Map<String, Object> extractAddress(Map<String, Object> itemData) {
         Map<String, Object> address = Maps.newHashMap();
         for (Entry<String, Object> itemProperty : itemData.entrySet()) {
             if (itemProperty.getKey().startsWith("address/")) {

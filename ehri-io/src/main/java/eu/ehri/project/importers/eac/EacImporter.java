@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.ImportHelper;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.base.SaxXmlImporter;
 import eu.ehri.project.models.AccessPoint;
@@ -62,8 +63,10 @@ import java.util.Map;
 public class EacImporter extends SaxXmlImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
-    public static final String REL_TYPE = "type";
-    public static final String REL_NAME = "name";
+    private static final String REL_TYPE = "type";
+    private static final String REL_NAME = "name";
+
+    private final ImportHelper helper;
 
     /**
      * Construct an EacImporter object.
@@ -74,6 +77,7 @@ public class EacImporter extends SaxXmlImporter {
      */
     public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(graph, permissionScope, actioner, log);
+        helper = new ImportHelper();
     }
 
     @Override
@@ -196,7 +200,7 @@ public class EacImporter extends SaxXmlImporter {
                     && !key.startsWith("IGNORE")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
-                description.put(key, flattenNonMultivaluedProperties(key, itemData.get(key), entity));
+                description.put(key, helper.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
             }
         }
 

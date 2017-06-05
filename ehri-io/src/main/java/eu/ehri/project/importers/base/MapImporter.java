@@ -95,7 +95,7 @@ public abstract class MapImporter extends AbstractImporter<Map<String, Object>> 
      * @param data the data map
      * @return returns a List with the separated datevalues
      */
-    protected Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
+    protected static Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
         Map<String, String> datesAsString = Maps.newHashMap();
         Object value;
         for (Entry<String, Object> property : data.entrySet()) {
