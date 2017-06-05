@@ -31,9 +31,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.ImportHelper;
-import eu.ehri.project.importers.base.SaxXmlHandler;
-import eu.ehri.project.importers.base.SaxXmlImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
@@ -60,13 +59,11 @@ import java.util.Map;
 /**
  * Import EAC for a given repository into the database.
  */
-public class EacImporter extends SaxXmlImporter {
+public class EacImporter extends AbstractImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     private static final String REL_TYPE = "type";
     private static final String REL_NAME = "name";
-
-    private final ImportHelper helper;
 
     /**
      * Construct an EacImporter object.
@@ -77,7 +74,6 @@ public class EacImporter extends SaxXmlImporter {
      */
     public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(graph, permissionScope, actioner, log);
-        helper = new ImportHelper();
     }
 
     @Override
@@ -98,23 +94,23 @@ public class EacImporter extends SaxXmlImporter {
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
+        for (Map<String, Object> dpb : Helpers.extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
         // add the address to the description bundle
-        Map<String, Object> address = extractAddress(itemData);
+        Map<String, Object> address = Helpers.extractAddress(itemData);
         if (!address.isEmpty()) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, Bundle.of(EntityClass.ADDRESS, address));
         }
 
-        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        Map<String, Object> unknowns = Helpers.extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : Helpers.extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -147,7 +143,6 @@ public class EacImporter extends SaxXmlImporter {
 
     }
 
-    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
         String relKey = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
@@ -162,7 +157,7 @@ public class EacImporter extends SaxXmlImporter {
                         } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
                             Map<String, Object> m = (Map) ((List) origRelation.get(eventkey)).get(0);
                             //try to find the original identifier
-                            relationNode.put(LINK_TARGET, m.get("concept"));
+                            relationNode.put(Helpers.LINK_TARGET, m.get("concept"));
                             //try to find the original name
                             relationNode.put(Ontology.NAME_KEY, m.get(REL_NAME));
                             relationNode.put("cvoc", m.get("cvoc"));
@@ -181,7 +176,6 @@ public class EacImporter extends SaxXmlImporter {
         return list;
     }
 
-    @Override
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = Maps.newHashMap();
         description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
@@ -192,7 +186,7 @@ public class EacImporter extends SaxXmlImporter {
                 //resolved in EacHandler
             } else if (key.equals("book")) {
                 extractBooks(itemData.get(key), description);
-            } else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
+            } else if (!key.startsWith(Helpers.UNKNOWN_PREFIX)
                     && !key.equals(OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
@@ -200,7 +194,7 @@ public class EacImporter extends SaxXmlImporter {
                     && !key.startsWith("IGNORE")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
-                description.put(key, helper.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
+                description.put(key, Helpers.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
             }
         }
 
@@ -214,7 +208,7 @@ public class EacImporter extends SaxXmlImporter {
         //so they have id's.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, Helpers.RESOLVED_LINK_DESC);
 
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
@@ -228,7 +222,7 @@ public class EacImporter extends SaxXmlImporter {
                 // they need to be found in the vocabularies that are in the graph
                 if (relationVertex.getPropertyKeys().contains("cvoc")) {
                     String cvocId = relationVertex.getProperty("cvoc");
-                    String conceptId = relationVertex.getProperty(LINK_TARGET);
+                    String conceptId = relationVertex.getProperty(Helpers.LINK_TARGET);
                     logger.debug("{} -> {}", cvocId, conceptId);
                     try {
                         Vocabulary vocabulary = manager.getEntity(cvocId, Vocabulary.class);
@@ -307,5 +301,11 @@ public class EacImporter extends SaxXmlImporter {
         if (!subjectOf.isEmpty()) {
             description.put("subjectOf", subjectOf);
         }
+    }
+
+    public Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
+        Map<String, Object> data = Helpers.extractIdentifiers(itemData);
+        data.put("typeOfEntity", itemData.get("typeOfEntity"));
+        return data;
     }
 }

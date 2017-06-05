@@ -34,7 +34,6 @@ import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Base class for importers that import documentary units, historical agents and virtual collections,
@@ -127,17 +126,4 @@ public abstract class AbstractImporter<T> {
      */
     public abstract Accessible importItem(T itemData,
             List<String> scopeIds) throws ValidationError;
-
-    /**
-     * Extract a list of DatePeriod bundles from an item's data.
-     *
-     * @param data the raw map of date data
-     * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
-     */
-    public abstract Iterable<Map<String, Object>> extractDates(T data);
-
-
-    public abstract Iterable<Map<String, Object>> extractMaintenanceEvent(T itemData);
-
-    public abstract Map<String, Object> getMaintenanceEvent(T event);
 }

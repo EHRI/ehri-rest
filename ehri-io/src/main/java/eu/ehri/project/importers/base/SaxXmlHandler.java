@@ -56,13 +56,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  */
 public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
-    protected static final String OBJECT_IDENTIFIER = AbstractImporter.OBJECT_IDENTIFIER;
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
-
-    /**
-     * Keys in the node that denote unknown properties must start with the value of UNKNOWN.
-     */
-    public static final String UNKNOWN = "UNKNOWN_";
 
     /**
      * Key in the node that denotes the object's identifier.
@@ -318,7 +312,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 return key;
             }
         }
-        return UNKNOWN + all.replace("/", "_");
+        return Helpers.UNKNOWN_PREFIX + all.replace("/", "_");
     }
 
     /**

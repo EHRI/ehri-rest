@@ -26,8 +26,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.MapImporter;
-import eu.ehri.project.importers.base.SaxXmlHandler;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
@@ -52,7 +51,7 @@ import java.util.Map;
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  */
-public class PersonalitiesImporter extends MapImporter {
+public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>> {
 
     private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
 
@@ -130,7 +129,7 @@ public class PersonalitiesImporter extends MapImporter {
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
-                    Helpers.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    Helpers.putPropertyInGraph(item, Helpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
                     Helpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
                 }
@@ -151,7 +150,6 @@ public class PersonalitiesImporter extends MapImporter {
      * @param itemData the item data map
      * @return returns a List with Maps with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
-    @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> itemData) {
 
         List<Map<String, Object>> l = Lists.newArrayList();

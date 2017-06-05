@@ -26,6 +26,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
@@ -86,8 +87,8 @@ public class EacHandler extends SaxXmlHandler {
             try {
                 logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
-                if (!currentGraphPath.peek().containsKey(OBJECT_IDENTIFIER)) {
-                    putPropertyInCurrentGraph(OBJECT_IDENTIFIER, "id");
+                if (!currentGraphPath.peek().containsKey(Helpers.OBJECT_IDENTIFIER)) {
+                    putPropertyInCurrentGraph(Helpers.OBJECT_IDENTIFIER, "id");
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName

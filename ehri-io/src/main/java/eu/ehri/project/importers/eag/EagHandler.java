@@ -26,6 +26,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
@@ -74,9 +75,9 @@ public class EagHandler extends SaxXmlHandler {
             try {
                 logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
-                if (!currentGraphPath.peek().containsKey(OBJECT_IDENTIFIER)) {
+                if (!currentGraphPath.peek().containsKey(Helpers.OBJECT_IDENTIFIER)) {
                     logger.warn("no objectIdentifier found");
-                    putPropertyInCurrentGraph(OBJECT_IDENTIFIER, "id");
+                    putPropertyInCurrentGraph(Helpers.OBJECT_IDENTIFIER, "id");
                 }
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");

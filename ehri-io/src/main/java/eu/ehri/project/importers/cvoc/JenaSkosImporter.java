@@ -35,7 +35,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.SaxXmlImporter;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
@@ -319,7 +319,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 Bundle linkBundle = Bundle.of(EntityClass.LINK)
                         .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
                         .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
-                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, SaxXmlImporter.RESOLVED_LINK_DESC);
+                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, Helpers.RESOLVED_LINK_DESC);
                 Link link = api.create(linkBundle, Link.class);
                 unit.addLink(link);
                 concept.addLink(link);

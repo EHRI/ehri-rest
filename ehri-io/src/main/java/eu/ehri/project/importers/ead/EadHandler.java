@@ -165,7 +165,7 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private String getCurrentTopIdentifier() {
-        Object current = currentGraphPath.peek().get(OBJECT_IDENTIFIER);
+        Object current = currentGraphPath.peek().get(Helpers.OBJECT_IDENTIFIER);
         if (current instanceof List<?>) {
             return (String) ((List) current).get(0);
         } else {
@@ -270,7 +270,7 @@ public class EadHandler extends SaxXmlHandler {
                 // import the MaintenanceEvent
                 if (getImportantPath(currentPath).equals("maintenanceEvent")
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
-                    Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
+                    Map<String, Object> me = Helpers.getMaintenanceEvent(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
                 }
@@ -333,8 +333,8 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected void extractTitle(Map<String, Object> currentGraph) {
         if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
-            logger.error("no name found, using identifier {}", currentGraph.get(OBJECT_IDENTIFIER));
-            currentGraph.put(Ontology.NAME_KEY, currentGraph.get(OBJECT_IDENTIFIER));
+            logger.error("no name found, using identifier {}", currentGraph.get(Helpers.OBJECT_IDENTIFIER));
+            currentGraph.put(Ontology.NAME_KEY, currentGraph.get(Helpers.OBJECT_IDENTIFIER));
         }
     }
 
@@ -357,11 +357,11 @@ public class EadHandler extends SaxXmlHandler {
     protected void extractIdentifier(Map<String, Object> currentGraph) {
         // If there are multiple identifiers at this point, take the
         // first and add the rest as alternate identifiers...
-        if (currentGraph.containsKey(OBJECT_IDENTIFIER)) {
-            Object idents = currentGraph.get(OBJECT_IDENTIFIER);
+        if (currentGraph.containsKey(Helpers.OBJECT_IDENTIFIER)) {
+            Object idents = currentGraph.get(Helpers.OBJECT_IDENTIFIER);
             if (idents instanceof List) {
                 List identList = (List) idents;
-                currentGraph.put(OBJECT_IDENTIFIER, identList.get(0));
+                currentGraph.put(Helpers.OBJECT_IDENTIFIER, identList.get(0));
                 for (Object item : identList.subList(1, identList.size())) {
                     addOtherIdentifier(currentGraph, ((String) item));
                 }

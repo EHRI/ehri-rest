@@ -19,32 +19,107 @@
 
 package eu.ehri.project.importers.util;
 
-import eu.ehri.project.utils.LanguageHelpers;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.importers.properties.XmlImportProperties;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class HelpersTest {
-    @Test
-    public void testIso639DashTwoCode() throws Exception {
-        // two-to-three
-        assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("sq"));
-        // bibliographic to term
-        assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("alb"));
-        // name to code
-        // FIXME fails when executed on a server with a Dutch locale
-        assertEquals("eng", LanguageHelpers.iso639DashTwoCode("English"));
+    private Map<String, Object> mapWithOneParseableDate;
+    private Map<String, Object> mapWithMultipleDates;
+    private Map<String, Object> mapWithMultipleDatesAsList;
+
+    @Before
+    public void init() throws ItemNotFound {
+        mapWithOneParseableDate = Maps.newHashMap();
+        mapWithOneParseableDate.put("unitDates", "1934/1936");
+
+        mapWithMultipleDates = Maps.newHashMap();
+        mapWithMultipleDates.put("unitDates", "1934/1936, summer 1978");
+        mapWithMultipleDates.put("existDate", "1900");
+
+        mapWithMultipleDatesAsList = Maps.newHashMap();
+        List<String> datelist = Lists.newArrayList();
+        datelist.add("1934/1936");
+        datelist.add("1978");
+        mapWithMultipleDatesAsList.put("unitDates", datelist);
     }
 
     @Test
-    public void testIso639DashOneCode() throws Exception {
-        assertEquals("en", LanguageHelpers.iso639DashOneCode("eng"));
-        assertEquals("cs", LanguageHelpers.iso639DashOneCode("ces"));
-        assertEquals("cs", LanguageHelpers.iso639DashOneCode("cze"));
-        assertEquals("sq", LanguageHelpers.iso639DashOneCode("sqi"));
-        assertEquals("en", LanguageHelpers.iso639DashOneCode("English"));
-        assertEquals("en-Latn", LanguageHelpers.iso639DashOneCode("eng-Latn"));
-        assertEquals("en", LanguageHelpers.iso639DashOneCode("eng-"));
-        assertEquals("---", LanguageHelpers.iso639DashOneCode("---"));
+    public void splitDatesFromDateProperty() {
+        Map<String, String> dates = Helpers
+                .returnDatesAsString(mapWithOneParseableDate,
+                        new XmlImportProperties("dates.properties"));
+        assertTrue(dates.containsKey("1934/1936"));
+   }
+
+    @Test
+    public void extractDatesFromDateProperty() throws ItemNotFound {
+        List<Map<String, Object>> extractedDates = Helpers
+                .extractDates(mapWithOneParseableDate);
+        for (Map<String, Object> dateMap : extractedDates) {
+            assertEquals("1934/1936", dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
+        }
+    }
+
+    @Test
+    public void removeDateFromDateProperty() throws ItemNotFound {
+        assertTrue(mapWithOneParseableDate.containsKey("unitDates"));
+        Helpers.replaceDates(mapWithOneParseableDate, Helpers
+                .extractDates(mapWithOneParseableDate));
+        assertFalse(mapWithOneParseableDate.containsKey("unitDates"));
+    }
+
+    @Test
+    public void removeDatesFromDateProperty() throws ItemNotFound {
+        assertTrue(mapWithMultipleDates.containsKey("unitDates"));
+        assertTrue(mapWithMultipleDates.containsKey("existDate"));
+        Helpers.replaceDates(mapWithMultipleDates, Helpers.extractDates(mapWithMultipleDates));
+        assertTrue(mapWithMultipleDates.containsKey("unitDates"));
+        assertEquals("summer 1978", mapWithMultipleDates.get("unitDates"));
+        assertFalse(mapWithMultipleDates.containsKey("existDate"));
+    }
+
+    @Test
+    public void removeDatesFromDatePropertyList() throws ItemNotFound {
+        assertTrue(mapWithMultipleDatesAsList.containsKey("unitDates"));
+        Helpers.replaceDates(mapWithMultipleDatesAsList,
+                Helpers.extractDates(mapWithMultipleDatesAsList));
+        assertFalse(mapWithMultipleDatesAsList.containsKey("unitDates"));
+    }
+
+    @Test
+    public void beginDateYear() {
+        assertEquals("1944-01-01",
+                Helpers.normaliseDate("1944", Ontology.DATE_PERIOD_START_DATE));
+    }
+
+    @Test
+    public void beginDateYearMonth() {
+        assertEquals("1944-01-01",
+                Helpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_START_DATE));
+    }
+
+    @Test
+    public void endDateYear() {
+        assertEquals("1944-12-31",
+                Helpers.normaliseDate("1944", Ontology.DATE_PERIOD_END_DATE));
+    }
+
+    @Test
+    public void endDateYearMonth() {
+        assertEquals("1944-01-31",
+                Helpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_END_DATE));
     }
 }

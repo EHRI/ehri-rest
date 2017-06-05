@@ -30,7 +30,8 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.SaxXmlImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -67,7 +68,7 @@ import java.util.function.BiPredicate;
  * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  */
-public class EadImporter extends SaxXmlImporter {
+public class EadImporter extends AbstractImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
@@ -103,8 +104,8 @@ public class EadImporter extends SaxXmlImporter {
 
         Bundle description = getDescription(itemData);
 
-        // extractDocumentaryUnit does not throw ValidationError on missing ID
-        Bundle unit = Bundle.of(unitEntity, extractDocumentaryUnit(itemData));
+        // extractIdentifiers does not throw ValidationError on missing ID
+        Bundle unit = Bundle.of(unitEntity, Helpers.extractIdentifiers(itemData));
 
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -150,10 +151,10 @@ public class EadImporter extends SaxXmlImporter {
      * @return a description bundle
      */
     protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
-        List<Map<String, Object>> extractedDates = extractDates(itemData);
-        replaceDates(itemData, extractedDates);
+        List<Map<String, Object>> extractedDates = Helpers.extractDates(itemData);
+        Helpers.replaceDates(itemData, extractedDates);
 
-        Map<String, Object> raw = extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+        Map<String, Object> raw = Helpers.extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
 
         Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .addData(raw);
@@ -169,14 +170,14 @@ public class EadImporter extends SaxXmlImporter {
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
-        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : Helpers.extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
                     Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
-        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        Map<String, Object> unknowns = Helpers.extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             StringBuilder unknownProperties = new StringBuilder();
             for (String u : unknowns.keySet()) {
@@ -274,7 +275,7 @@ public class EadImporter extends SaxXmlImporter {
         // so they have IDs.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, Helpers.RESOLVED_LINK_DESC);
 
         for (Description desc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
@@ -318,7 +319,6 @@ public class EadImporter extends SaxXmlImporter {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         String rel = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
@@ -329,7 +329,7 @@ public class EadImporter extends SaxXmlImporter {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     if (origRelation.containsKey("type")) {
                         //try to find the original identifier
-                        relationNode.put(LINK_TARGET, origRelation.get("concept"));
+                        relationNode.put(Helpers.LINK_TARGET, origRelation.get("concept"));
                         //try to find the original name
                         relationNode.put(Ontology.NAME_KEY, origRelation.get("name"));
                         relationNode.put("cvoc", origRelation.get("cvoc"));
@@ -379,26 +379,6 @@ public class EadImporter extends SaxXmlImporter {
             }
         }
         return list;
-    }
-
-    /**
-     * Creates a Map containing properties of a Documentary Unit.
-     * These properties are the unit's identifiers.
-     *
-     * @param itemData Map of all extracted information
-     * @return a Map representing a Documentary Unit node
-     */
-    @Override
-    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> unit = Maps.newHashMap();
-        if (itemData.get(OBJECT_IDENTIFIER) != null) {
-            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
-        }
-        if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
-            logger.debug("otherIdentifiers is not null");
-            unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
-        }
-        return unit;
     }
 
     @Override

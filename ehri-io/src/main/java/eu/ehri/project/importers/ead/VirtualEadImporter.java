@@ -62,8 +62,8 @@ import java.util.Map;
  */
 public class VirtualEadImporter extends EadImporter {
 
-    protected static final String REPOID = "vcRepository";
-    protected static final String UNITID = OBJECT_IDENTIFIER;
+    private static final String REPOID = "vcRepository";
+    private static final String UNITID = OBJECT_IDENTIFIER;
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
     /**
@@ -174,7 +174,7 @@ public class VirtualEadImporter extends EadImporter {
      * @param itemData Map of all extracted information
      * @return a Map representing a Documentary Unit node
      */
-    protected Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
+    private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();
         if (itemData.get(OBJECT_IDENTIFIER) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
@@ -184,11 +184,6 @@ public class VirtualEadImporter extends EadImporter {
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
         }
         return unit;
-    }
-
-    @Override
-    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
-        throw new UnsupportedOperationException("Not supported ever.");
     }
 
     @Override

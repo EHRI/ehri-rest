@@ -27,6 +27,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.VirtualUnit;
@@ -141,7 +142,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     }
 
     private String getCurrentTopIdentifier() {
-        Object current = currentGraphPath.peek().get(OBJECT_IDENTIFIER);
+        Object current = currentGraphPath.peek().get(Helpers.OBJECT_IDENTIFIER);
         if (current instanceof List<?>) {
             return (String) ((List) current).get(0);
         } else {
@@ -260,7 +261,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                 //import the MaintenanceEvent
                 if (getImportantPath(currentPath).equals("maintenanceEvent")
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
-                    Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
+                    Map<String, Object> me = Helpers.getMaintenanceEvent(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
                 }

@@ -25,8 +25,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.MapImporter;
-import eu.ehri.project.importers.base.SaxXmlHandler;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -48,9 +47,9 @@ import java.util.Map;
  * Importer of Ukrainian units, which are encoded in a slightly different way
  * than other documentary units.
  */
-public class UkrainianUnitImporter extends MapImporter {
+public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>> {
 
-    public static final String MULTIVALUE_SEP = ",,";
+    private static final String MULTIVALUE_SEP = ",,";
     private final XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianUnitImporter.class);
 
@@ -169,7 +168,7 @@ public class UkrainianUnitImporter extends MapImporter {
                     (!key.equals("language_of_description"))  //dealt with in importItem
                     ) {
                 if (!p.containsProperty(key)) {
-                    Helpers.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    Helpers.putPropertyInGraph(item, Helpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
                     Object value = itemData.get(key);
                     // TODO: Check if the property is an allowedMultivalue one...
