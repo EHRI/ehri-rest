@@ -26,7 +26,7 @@ import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
                     extractIdentifier(currentMap);
                     extractName(currentMap);
                     
-                    Helpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get(Helpers.OBJECT_IDENTIFIER).toString());
+                    ImportHelpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get(ImportHelpers.OBJECT_IDENTIFIER).toString());
                     importer.importItem(currentMap, new Stack<>());
 //                importer.importTopLevelExtraNodes(topLevel, current);
                     //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
@@ -130,11 +130,11 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
     }
 
     private void extractIdentifier(Map<String, Object> currentMap) {
-        if (currentMap.containsKey(Helpers.OBJECT_IDENTIFIER)){
-        logger.debug(currentMap.get(Helpers.OBJECT_IDENTIFIER)+"");
-            String id = currentMap.get(Helpers.OBJECT_IDENTIFIER).toString();
+        if (currentMap.containsKey(ImportHelpers.OBJECT_IDENTIFIER)){
+        logger.debug(currentMap.get(ImportHelpers.OBJECT_IDENTIFIER)+"");
+            String id = currentMap.get(ImportHelpers.OBJECT_IDENTIFIER).toString();
             if(id.startsWith("http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&imid=")){
-                currentMap.put(Helpers.OBJECT_IDENTIFIER, id.substring(60));
+                currentMap.put(ImportHelpers.OBJECT_IDENTIFIER, id.substring(60));
             }
         }else{
             for(String key: currentMap.keySet())

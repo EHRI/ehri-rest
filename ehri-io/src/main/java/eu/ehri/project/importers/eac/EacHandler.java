@@ -26,7 +26,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
@@ -46,14 +46,15 @@ import java.util.Map;
  */
 public class EacHandler extends SaxXmlHandler {
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Entity>>builder()
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap
+            .<String, Class<? extends Entity>>builder()
             .put("maintenanceEvent", MaintenanceEvent.class)
             .put("relation", Annotation.class)
             .put("book", Annotation.class)
             .put("bookentry", Annotation.class)
             .put("accessPoint", Annotation.class)
-            .put("name", UnknownProperty.class).build();
+            .put("name", UnknownProperty.class)
+            .build();
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
@@ -87,8 +88,8 @@ public class EacHandler extends SaxXmlHandler {
             try {
                 logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
-                if (!currentGraphPath.peek().containsKey(Helpers.OBJECT_IDENTIFIER)) {
-                    putPropertyInCurrentGraph(Helpers.OBJECT_IDENTIFIER, "id");
+                if (!currentGraphPath.peek().containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
+                    putPropertyInCurrentGraph(ImportHelpers.OBJECT_IDENTIFIER, "id");
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName

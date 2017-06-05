@@ -27,7 +27,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -168,23 +168,23 @@ public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>>
                     (!key.equals("language_of_description"))  //dealt with in importItem
                     ) {
                 if (!p.containsProperty(key)) {
-                    Helpers.putPropertyInGraph(item, Helpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, ImportHelpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
                     Object value = itemData.get(key);
                     // TODO: Check if the property is an allowedMultivalue one...
                     if (value.toString().contains(MULTIVALUE_SEP)) {
                         for (String v : value.toString().split(MULTIVALUE_SEP)) {
-                            Helpers.putPropertyInGraph(item, p.getProperty(key), v);
+                            ImportHelpers.putPropertyInGraph(item, p.getProperty(key), v);
                         }
                     } else {
-                        Helpers.putPropertyInGraph(item, p.getProperty(key), value.toString());
+                        ImportHelpers.putPropertyInGraph(item, p.getProperty(key), value.toString());
                     }
                 }
             }
 
         }
         //replace the language from the itemData with the one specified in the param
-        Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
+        ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
         return item;
     }
 }

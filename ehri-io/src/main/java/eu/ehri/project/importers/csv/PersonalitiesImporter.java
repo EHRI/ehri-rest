@@ -28,7 +28,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
@@ -125,23 +125,23 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>>
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
 
-        Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
+        ImportHelpers.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
-                    Helpers.putPropertyInGraph(item, Helpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, ImportHelpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
-                    Helpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
                 }
             }
 
         }
         //create all otherFormsOfName
         if (!item.containsKey("typeOfEntity")) {
-            Helpers.putPropertyInGraph(item, "typeOfEntity", "person");
+            ImportHelpers.putPropertyInGraph(item, "typeOfEntity", "person");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
     }

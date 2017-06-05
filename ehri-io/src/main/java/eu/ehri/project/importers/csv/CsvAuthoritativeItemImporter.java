@@ -23,7 +23,6 @@
  */
 package eu.ehri.project.importers.csv;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -31,7 +30,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -103,17 +102,17 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
         Map<String, Object> item = Maps.newHashMap();
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
-        Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
+        ImportHelpers.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
         for (String key : itemData.keySet()) {
             if (!key.equals("id") && !key.equals("name")) {
-                Helpers.putPropertyInGraph(item, key, itemData.get(key).toString());
+                ImportHelpers.putPropertyInGraph(item, key, itemData.get(key).toString());
             }
         }
         if (!item.containsKey("typeOfEntity")) {
-            Helpers.putPropertyInGraph(item, "typeOfEntity", "subject");
+            ImportHelpers.putPropertyInGraph(item, "typeOfEntity", "subject");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
     }

@@ -31,7 +31,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
@@ -109,7 +109,7 @@ public class CsvImportManager extends AbstractImportManager {
                     Map<String, String> rawData = valueIterator.next();
                     Map<String, Object> dataMap = Maps.newHashMap();
                     for (Map.Entry<String, String> entry : rawData.entrySet()) {
-                        Helpers.putPropertyInGraph(dataMap,
+                        ImportHelpers.putPropertyInGraph(dataMap,
                                 entry.getKey().replaceAll("\\s", ""), entry.getValue());
                     }
                     try {

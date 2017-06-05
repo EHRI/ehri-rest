@@ -23,7 +23,7 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,15 +48,15 @@ public class UshmmHandler extends EadHandler {
     @Override
     protected void extractIdentifier(Map<String, Object> currentGraph) {
         //not all units have ids, and some have multiple, find the "irn"
-        if (currentGraph.containsKey(Helpers.OBJECT_IDENTIFIER)) {
-            if (currentGraph.get(Helpers.OBJECT_IDENTIFIER) instanceof List) {
-                logger.debug("class of identifier: " + currentGraph.get(Helpers.OBJECT_IDENTIFIER).getClass());
-                List<String> identifiers = (List<String>) currentGraph.get(Helpers.OBJECT_IDENTIFIER);
+        if (currentGraph.containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
+            if (currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER) instanceof List) {
+                logger.debug("class of identifier: " + currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER).getClass());
+                List<String> identifiers = (List<String>) currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER);
                 List<String> identifierType = (List<String>) currentGraph.get("objectIdentifierType");
                 for (int i = 0; i < identifiers.size(); i++) {
                     if (identifierType.get(i).equals("irn")) {
                         logger.debug("found official id: " + identifiers.get(i));
-                        currentGraph.put(Helpers.OBJECT_IDENTIFIER, identifiers.get(i));
+                        currentGraph.put(ImportHelpers.OBJECT_IDENTIFIER, identifiers.get(i));
                     } else {
                         logger.debug("found other form of identifier: " + identifiers.get(i));
                         addOtherIdentifier(currentGraph, identifiers.get(i));
@@ -67,7 +67,7 @@ public class UshmmHandler extends EadHandler {
             }
         } else {
             logger.error("no unitid found, setting {}", ++count);
-            currentGraph.put(Helpers.OBJECT_IDENTIFIER, "ushmmID" + count);
+            currentGraph.put(ImportHelpers.OBJECT_IDENTIFIER, "ushmmID" + count);
         }
     }
 }

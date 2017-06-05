@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-import static eu.ehri.project.importers.util.Helpers.OBJECT_IDENTIFIER;
+import static eu.ehri.project.importers.util.ImportHelpers.OBJECT_IDENTIFIER;
 
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:

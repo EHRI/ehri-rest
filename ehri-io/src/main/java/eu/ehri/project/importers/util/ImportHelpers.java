@@ -25,10 +25,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Description;
@@ -56,18 +54,22 @@ import java.util.regex.Pattern;
 /**
  * Import utility class.
  */
-public class Helpers {
+public class ImportHelpers {
 
     public static final String RESOLVED_LINK_DESC = "Link provided by data provider.";
     public static final String LINK_TARGET = "target";
     public static final String OBJECT_IDENTIFIER = "objectIdentifier";
-    /**
-     * Keys in the node that denote unknown properties must start with the value of UNKNOWN.
-     */
-    public static final String UNKNOWN_PREFIX = "UNKNOWN_";
 
-    private static final Logger logger = LoggerFactory.getLogger(Helpers.class);
+    // Keys in the node that denote unknown properties must start with the value of UNKNOWN.
+    public static final String UNKNOWN_PREFIX = "UNKNOWN_";
     private static final String NODE_PROPERTIES = "allowedNodeProperties.csv";
+
+    /**
+     * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
+     */
+    private static final String LANGUAGE_KEY_PREFIX = "language";
+
+    private static final Logger logger = LoggerFactory.getLogger(ImportHelpers.class);
     private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
     private static final NodeProperties nodeProperties = loadNodeProperties();
 
@@ -90,26 +92,6 @@ public class Helpers {
             Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
             Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
-
-
-    /**
-     * only properties that have the multivalued-status can actually be multivalued. all other properties will be
-     * flattened by this method.
-     *
-     * @param key    a property key
-     * @param value  a property value
-     * @param entity the EntityClass with which this frameMap must comply
-     */
-    public static Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
-        if (value instanceof List
-                && !(nodeProperties.hasProperty(entity.getName(), key)
-                && nodeProperties.isMultivaluedProperty(entity.getName(), key))) {
-            logger.trace("Flattening array property value: {}: {}", key, value);
-            return stringJoiner.join((List) value);
-        } else {
-            return value;
-        }
-    }
 
     // NB: Using English locale here to avoid ambiguities caused by system dependent
     // time zones such as: Cannot parse "1940-05-16": Illegal instant due to time zone
@@ -142,6 +124,26 @@ public class Helpers {
             }
         }
         return unknowns;
+    }
+
+
+    /**
+     * only properties that have the multivalued-status can actually be multivalued. all other properties will be
+     * flattened by this method.
+     *
+     * @param key    a property key
+     * @param value  a property value
+     * @param entity the EntityClass with which this frameMap must comply
+     */
+    public static Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
+        if (value instanceof List
+                && !(nodeProperties.hasProperty(entity.getName(), key)
+                && nodeProperties.isMultivaluedProperty(entity.getName(), key))) {
+            logger.trace("Flattening array property value: {}: {}", key, value);
+            return stringJoiner.join((List) value);
+        } else {
+            return value;
+        }
     }
 
     /**
@@ -215,46 +217,6 @@ public class Helpers {
     }
 
     /**
-     * Extract node representations for related nodes based on the 'relation' property in the supplied data Map.
-     *
-     * @param itemData a Map containing raw properties of a unit
-     * @return an Iterable of new Maps representing related nodes and their types
-     */
-    public Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        String relName = "relation";
-        List<Map<String, Object>> listOfRelations = Lists.newArrayList();
-        for (Map.Entry<String, Object> itemProperty : itemData.entrySet()) {
-            if (itemProperty.getKey().equals(relName)) {
-                //type, targetUrl, targetName, notes
-                for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemProperty.getValue()) {
-                    Map<String, Object> relationNode = Maps.newHashMap();
-                    for (Map.Entry<String, Object> relationProperty : origRelation.entrySet()) {
-                        if (relationProperty.getKey().equals(relName + "/type")) {
-                            relationNode.put(Ontology.ACCESS_POINT_TYPE, relationProperty.getValue());
-                        } else if (relationProperty.getKey().equals(relName + "/url")) {
-                            //try to find the original identifier
-                            relationNode.put(LINK_TARGET, relationProperty.getValue());
-                        } else if (relationProperty.getKey().equals(relName + "/" + Ontology.NAME_KEY)) {
-                            //try to find the original identifier
-                            relationNode.put(Ontology.NAME_KEY, relationProperty.getValue());
-                        } else if (relationProperty.getKey().equals(relName + "/notes")) {
-                            relationNode.put(Ontology.LINK_HAS_DESCRIPTION, relationProperty.getValue());
-                        } else {
-                            relationNode.put(relationProperty.getKey(), relationProperty.getValue());
-                        }
-                    }
-                    // Set a default relationship type if no type was found in the relationship
-                    if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                        relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
-                    }
-                    listOfRelations.add(relationNode);
-                }
-            }
-        }
-        return listOfRelations;
-    }
-
-    /**
      * Extract datevalues from datamap
      *
      * @param data the data map
@@ -278,29 +240,6 @@ public class Helpers {
             }
         }
         return datesAsString;
-    }
-
-    public List<Map<String, Object>> csvExtractDates(Map<String, Object> itemData) {
-
-        List<Map<String, Object>> l = Lists.newArrayList();
-        Map<String, Object> items = Maps.newHashMap();
-
-        String end = (String) itemData.get("DateofdeathYYYY-MM-DD");
-        String start = (String) itemData.get("DateofbirthYYYY-MM-DD");
-        if (start != null && start.endsWith("00-00")) {
-            start = start.substring(0, 4);
-        }
-        if (end != null && end.endsWith("00-00")) {
-            end = end.substring(0, 4);
-        }
-        if (end != null || start != null) {
-            if (start != null)
-                items.put(Ontology.DATE_PERIOD_START_DATE, start);
-            if (end != null)
-                items.put(Ontology.DATE_PERIOD_END_DATE, end);
-            l.add(items);
-        }
-        return l;
     }
 
     /**
@@ -398,33 +337,6 @@ public class Helpers {
     }
 
     /**
-     * Attempt to extract some date periods. This does not currently put the dates into ISO form.
-     *
-     * @param date the data map
-     * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
-     */
-    private static Optional<Map<String, Object>> extractDate(String date) {
-        Map<String, Object> data = matchDate(date);
-        return data.isEmpty() ? Optional.empty() : Optional.of(data);
-    }
-
-    private static Map<String, Object> matchDate(String date) {
-        Map<String, Object> data = Maps.newHashMap();
-        for (Pattern re : datePatterns) {
-            Matcher matcher = re.matcher(date);
-            if (matcher.matches()) {
-                logger.debug("matched {}", date);
-                data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
-                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
-                        .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));
-                data.put(Ontology.DATE_HAS_DESCRIPTION, date);
-                break;
-            }
-        }
-        return data;
-    }
-
-    /**
      * Normalise a date in a string.
      *
      * @param date       a String date that needs formatting
@@ -454,21 +366,6 @@ public class Helpers {
             }
         }
         return returnDate;
-    }
-
-    /**
-     * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
-     */
-    private static final String LANGUAGE_KEY_PREFIX = "language";
-
-    private static final Pattern cDataReplace = Pattern.compile("\\]\\]>");
-
-    private static String normaliseValue(String property, String value) {
-        String trimmedValue = StringUtils.normalizeSpace(value);
-        // Language codes are converted to their 3-letter alternates
-        return property.startsWith(LANGUAGE_KEY_PREFIX)
-                ? LanguageHelpers.iso639DashTwoCode(trimmedValue)
-                : trimmedValue;
     }
 
     public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
@@ -508,13 +405,38 @@ public class Helpers {
     }
 
     /**
-     * Remove sub-strings that can not exist within an XML CDATA section.
+     * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
-     * @param data the input string
-     * @return a string with CDATA escapes removed
+     * @param date the data map
+     * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
-    public static String escapeCData(String data) {
-        return cDataReplace.matcher(data).replaceAll("");
+    private static Optional<Map<String, Object>> extractDate(String date) {
+        Map<String, Object> data = matchDate(date);
+        return data.isEmpty() ? Optional.empty() : Optional.of(data);
+    }
+
+    private static Map<String, Object> matchDate(String date) {
+        Map<String, Object> data = Maps.newHashMap();
+        for (Pattern re : datePatterns) {
+            Matcher matcher = re.matcher(date);
+            if (matcher.matches()) {
+                logger.debug("matched {}", date);
+                data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
+                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
+                        .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));
+                data.put(Ontology.DATE_HAS_DESCRIPTION, date);
+                break;
+            }
+        }
+        return data;
+    }
+
+    private static String normaliseValue(String property, String value) {
+        String trimmedValue = StringUtils.normalizeSpace(value);
+        // Language codes are converted to their 3-letter alternates
+        return property.startsWith(LANGUAGE_KEY_PREFIX)
+                ? LanguageHelpers.iso639DashTwoCode(trimmedValue)
+                : trimmedValue;
     }
 
 
@@ -522,7 +444,7 @@ public class Helpers {
     // Helpers
 
     private static NodeProperties loadNodeProperties() {
-        try (InputStream fis = Helpers.class.getClassLoader().getResourceAsStream(NODE_PROPERTIES);
+        try (InputStream fis = ImportHelpers.class.getClassLoader().getResourceAsStream(NODE_PROPERTIES);
              BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charsets.UTF_8))) {
             NodeProperties nodeProperties = new NodeProperties();
             String headers = br.readLine();

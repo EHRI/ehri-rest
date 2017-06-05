@@ -22,18 +22,20 @@ package eu.ehri.project.exporters.xml;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import eu.ehri.project.importers.util.Helpers;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * A helper base class for writing XML as a stream, using
  * lambdas for hierarchical nesting of elements.
  */
 public abstract class StreamingXmlDsl {
+    private static final Pattern cDataReplace = Pattern.compile("\\]\\]>");
+
     protected static Map<String, String> attrs(Object... kv) {
         Preconditions.checkArgument(kv.length % 2 == 0,
                 "Attrs must be pairs of key/value");
@@ -166,7 +168,7 @@ public abstract class StreamingXmlDsl {
 
     protected void cData(XMLStreamWriter sw, String chars) {
         try {
-            sw.writeCData(Helpers.escapeCData(chars));
+            sw.writeCData(cDataReplace.matcher(chars).replaceAll(""));
         } catch (XMLStreamException e) {
             throw new RuntimeException(e);
         }

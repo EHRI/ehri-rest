@@ -31,7 +31,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -105,7 +105,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>> {
         Bundle description = getDescription(itemData);
 
         // extractIdentifiers does not throw ValidationError on missing ID
-        Bundle unit = Bundle.of(unitEntity, Helpers.extractIdentifiers(itemData));
+        Bundle unit = Bundle.of(unitEntity, ImportHelpers.extractIdentifiers(itemData));
 
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -151,10 +151,10 @@ public class EadImporter extends AbstractImporter<Map<String, Object>> {
      * @return a description bundle
      */
     protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
-        List<Map<String, Object>> extractedDates = Helpers.extractDates(itemData);
-        Helpers.replaceDates(itemData, extractedDates);
+        List<Map<String, Object>> extractedDates = ImportHelpers.extractDates(itemData);
+        ImportHelpers.replaceDates(itemData, extractedDates);
 
-        Map<String, Object> raw = Helpers.extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+        Map<String, Object> raw = ImportHelpers.extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
 
         Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .addData(raw);
@@ -170,14 +170,14 @@ public class EadImporter extends AbstractImporter<Map<String, Object>> {
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
-        for (Map<String, Object> dpb : Helpers.extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
                     Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
-        Map<String, Object> unknowns = Helpers.extractUnknownProperties(itemData);
+        Map<String, Object> unknowns = ImportHelpers.extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             StringBuilder unknownProperties = new StringBuilder();
             for (String u : unknowns.keySet()) {
@@ -275,7 +275,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>> {
         // so they have IDs.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, Helpers.RESOLVED_LINK_DESC);
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
 
         for (Description desc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
@@ -329,7 +329,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>> {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     if (origRelation.containsKey("type")) {
                         //try to find the original identifier
-                        relationNode.put(Helpers.LINK_TARGET, origRelation.get("concept"));
+                        relationNode.put(ImportHelpers.LINK_TARGET, origRelation.get("concept"));
                         //try to find the original name
                         relationNode.put(Ontology.NAME_KEY, origRelation.get("name"));
                         relationNode.put("cvoc", origRelation.get("cvoc"));

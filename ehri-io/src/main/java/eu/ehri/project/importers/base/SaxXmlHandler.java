@@ -22,7 +22,7 @@ package eu.ehri.project.importers.base;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -188,7 +188,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 attribute = null;
             }
         } else {
-            Helpers.putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
+            ImportHelpers.putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
         }
     }
 
@@ -264,7 +264,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value    the property value
      */
     protected void putPropertyInCurrentGraph(String property, String value) {
-        Helpers.putPropertyInGraph(currentGraphPath.peek(), property, value);
+        ImportHelpers.putPropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
     /**
@@ -274,7 +274,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value    new value for the property.
      */
     protected void overwritePropertyInCurrentGraph(String property, String value) {
-        Helpers.overwritePropertyInGraph(currentGraphPath.peek(), property, value);
+        ImportHelpers.overwritePropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
     /**
@@ -312,7 +312,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 return key;
             }
         }
-        return Helpers.UNKNOWN_PREFIX + all.replace("/", "_");
+        return ImportHelpers.UNKNOWN_PREFIX + all.replace("/", "_");
     }
 
     /**

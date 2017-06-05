@@ -25,11 +25,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -166,7 +165,7 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private String getCurrentTopIdentifier() {
-        Object current = currentGraphPath.peek().get(Helpers.OBJECT_IDENTIFIER);
+        Object current = currentGraphPath.peek().get(ImportHelpers.OBJECT_IDENTIFIER);
         if (current instanceof List<?>) {
             return (String) ((List) current).get(0);
         } else {
@@ -271,7 +270,7 @@ public class EadHandler extends SaxXmlHandler {
                 // import the MaintenanceEvent
                 if (getImportantPath(currentPath).equals("maintenanceEvent")
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
-                    Map<String, Object> me = Helpers.getMaintenanceEvent(currentGraph);
+                    Map<String, Object> me = ImportHelpers.getMaintenanceEvent(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
                 }
@@ -334,8 +333,8 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected void extractTitle(Map<String, Object> currentGraph) {
         if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
-            logger.error("no name found, using identifier {}", currentGraph.get(Helpers.OBJECT_IDENTIFIER));
-            currentGraph.put(Ontology.NAME_KEY, currentGraph.get(Helpers.OBJECT_IDENTIFIER));
+            logger.error("no name found, using identifier {}", currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
+            currentGraph.put(Ontology.NAME_KEY, currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
         }
     }
 
@@ -358,11 +357,11 @@ public class EadHandler extends SaxXmlHandler {
     protected void extractIdentifier(Map<String, Object> currentGraph) {
         // If there are multiple identifiers at this point, take the
         // first and add the rest as alternate identifiers...
-        if (currentGraph.containsKey(Helpers.OBJECT_IDENTIFIER)) {
-            Object idents = currentGraph.get(Helpers.OBJECT_IDENTIFIER);
+        if (currentGraph.containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
+            Object idents = currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER);
             if (idents instanceof List) {
                 List identList = (List) idents;
-                currentGraph.put(Helpers.OBJECT_IDENTIFIER, identList.get(0));
+                currentGraph.put(ImportHelpers.OBJECT_IDENTIFIER, identList.get(0));
                 for (Object item : identList.subList(1, identList.size())) {
                     addOtherIdentifier(currentGraph, ((String) item));
                 }
@@ -419,7 +418,7 @@ public class EadHandler extends SaxXmlHandler {
     void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
         System.out.println("Adding FILE VALUES! " + eadFileGlobals);
         for (String key : eadFileGlobals) {
-            Helpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));
+            ImportHelpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));
         }
     }
 }

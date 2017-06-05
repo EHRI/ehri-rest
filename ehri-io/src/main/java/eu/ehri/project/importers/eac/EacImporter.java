@@ -32,7 +32,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-import static eu.ehri.project.importers.util.Helpers.OBJECT_IDENTIFIER;
+import static eu.ehri.project.importers.util.ImportHelpers.OBJECT_IDENTIFIER;
 
 /**
  * Import EAC for a given repository into the database.
@@ -96,23 +96,23 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (Map<String, Object> dpb : Helpers.extractDates(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
         // add the address to the description bundle
-        Map<String, Object> address = Helpers.extractAddress(itemData);
+        Map<String, Object> address = ImportHelpers.extractAddress(itemData);
         if (!address.isEmpty()) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, Bundle.of(EntityClass.ADDRESS, address));
         }
 
-        Map<String, Object> unknowns = Helpers.extractUnknownProperties(itemData);
+        Map<String, Object> unknowns = ImportHelpers.extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        for (Map<String, Object> dpb : Helpers.extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractMaintenanceEvent(itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -159,7 +159,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
                         } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
                             Map<String, Object> m = (Map) ((List) origRelation.get(eventkey)).get(0);
                             //try to find the original identifier
-                            relationNode.put(Helpers.LINK_TARGET, m.get("concept"));
+                            relationNode.put(ImportHelpers.LINK_TARGET, m.get("concept"));
                             //try to find the original name
                             relationNode.put(Ontology.NAME_KEY, m.get(REL_NAME));
                             relationNode.put("cvoc", m.get("cvoc"));
@@ -188,7 +188,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
                 //resolved in EacHandler
             } else if (key.equals("book")) {
                 extractBooks(itemData.get(key), description);
-            } else if (!key.startsWith(Helpers.UNKNOWN_PREFIX)
+            } else if (!key.startsWith(ImportHelpers.UNKNOWN_PREFIX)
                     && !key.equals(OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
@@ -196,7 +196,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
                     && !key.startsWith("IGNORE")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
-                description.put(key, Helpers.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
+                description.put(key, ImportHelpers.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
             }
         }
 
@@ -210,7 +210,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
         //so they have id's.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, Helpers.RESOLVED_LINK_DESC);
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
 
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
@@ -224,7 +224,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
                 // they need to be found in the vocabularies that are in the graph
                 if (relationVertex.getPropertyKeys().contains("cvoc")) {
                     String cvocId = relationVertex.getProperty("cvoc");
-                    String conceptId = relationVertex.getProperty(Helpers.LINK_TARGET);
+                    String conceptId = relationVertex.getProperty(ImportHelpers.LINK_TARGET);
                     logger.debug("{} -> {}", cvocId, conceptId);
                     try {
                         Vocabulary vocabulary = manager.getEntity(cvocId, Vocabulary.class);
@@ -306,7 +306,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>> {
     }
 
     public Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> data = Helpers.extractIdentifiers(itemData);
+        Map<String, Object> data = ImportHelpers.extractIdentifiers(itemData);
         data.put("typeOfEntity", itemData.get("typeOfEntity"));
         return data;
     }

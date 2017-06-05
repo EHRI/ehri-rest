@@ -35,7 +35,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-public class HelpersTest {
+public class ImportHelpersTest {
     private Map<String, Object> mapWithOneParseableDate;
     private Map<String, Object> mapWithMultipleDates;
     private Map<String, Object> mapWithMultipleDatesAsList;
@@ -58,7 +58,7 @@ public class HelpersTest {
 
     @Test
     public void splitDatesFromDateProperty() {
-        Map<String, String> dates = Helpers
+        Map<String, String> dates = ImportHelpers
                 .returnDatesAsString(mapWithOneParseableDate,
                         new XmlImportProperties("dates.properties"));
         assertTrue(dates.containsKey("1934/1936"));
@@ -66,7 +66,7 @@ public class HelpersTest {
 
     @Test
     public void extractDatesFromDateProperty() throws ItemNotFound {
-        List<Map<String, Object>> extractedDates = Helpers
+        List<Map<String, Object>> extractedDates = ImportHelpers
                 .extractDates(mapWithOneParseableDate);
         for (Map<String, Object> dateMap : extractedDates) {
             assertEquals("1934/1936", dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
@@ -76,7 +76,7 @@ public class HelpersTest {
     @Test
     public void removeDateFromDateProperty() throws ItemNotFound {
         assertTrue(mapWithOneParseableDate.containsKey("unitDates"));
-        Helpers.replaceDates(mapWithOneParseableDate, Helpers
+        ImportHelpers.replaceDates(mapWithOneParseableDate, ImportHelpers
                 .extractDates(mapWithOneParseableDate));
         assertFalse(mapWithOneParseableDate.containsKey("unitDates"));
     }
@@ -85,7 +85,7 @@ public class HelpersTest {
     public void removeDatesFromDateProperty() throws ItemNotFound {
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
         assertTrue(mapWithMultipleDates.containsKey("existDate"));
-        Helpers.replaceDates(mapWithMultipleDates, Helpers.extractDates(mapWithMultipleDates));
+        ImportHelpers.replaceDates(mapWithMultipleDates, ImportHelpers.extractDates(mapWithMultipleDates));
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
         assertEquals("summer 1978", mapWithMultipleDates.get("unitDates"));
         assertFalse(mapWithMultipleDates.containsKey("existDate"));
@@ -94,32 +94,32 @@ public class HelpersTest {
     @Test
     public void removeDatesFromDatePropertyList() throws ItemNotFound {
         assertTrue(mapWithMultipleDatesAsList.containsKey("unitDates"));
-        Helpers.replaceDates(mapWithMultipleDatesAsList,
-                Helpers.extractDates(mapWithMultipleDatesAsList));
+        ImportHelpers.replaceDates(mapWithMultipleDatesAsList,
+                ImportHelpers.extractDates(mapWithMultipleDatesAsList));
         assertFalse(mapWithMultipleDatesAsList.containsKey("unitDates"));
     }
 
     @Test
     public void beginDateYear() {
         assertEquals("1944-01-01",
-                Helpers.normaliseDate("1944", Ontology.DATE_PERIOD_START_DATE));
+                ImportHelpers.normaliseDate("1944", Ontology.DATE_PERIOD_START_DATE));
     }
 
     @Test
     public void beginDateYearMonth() {
         assertEquals("1944-01-01",
-                Helpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_START_DATE));
+                ImportHelpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_START_DATE));
     }
 
     @Test
     public void endDateYear() {
         assertEquals("1944-12-31",
-                Helpers.normaliseDate("1944", Ontology.DATE_PERIOD_END_DATE));
+                ImportHelpers.normaliseDate("1944", Ontology.DATE_PERIOD_END_DATE));
     }
 
     @Test
     public void endDateYearMonth() {
         assertEquals("1944-01-31",
-                Helpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_END_DATE));
+                ImportHelpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_END_DATE));
     }
 }
