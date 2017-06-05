@@ -56,6 +56,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+import static eu.ehri.project.importers.util.Helpers.OBJECT_IDENTIFIER;
+
 /**
  * Import EAC for a given repository into the database.
  */

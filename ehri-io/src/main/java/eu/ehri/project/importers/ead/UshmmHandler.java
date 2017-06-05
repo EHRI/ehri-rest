@@ -21,7 +21,7 @@
  */
 package eu.ehri.project.importers.ead;
 
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class UshmmHandler extends EadHandler {
 
     private int count;
 
-    public UshmmHandler(AbstractImporter<Map<String, Object>> importer) {
+    public UshmmHandler(ItemImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("ushmm.properties"));
 
     }

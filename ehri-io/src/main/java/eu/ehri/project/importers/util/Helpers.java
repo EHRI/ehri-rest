@@ -60,7 +60,7 @@ public class Helpers {
 
     public static final String RESOLVED_LINK_DESC = "Link provided by data provider.";
     public static final String LINK_TARGET = "target";
-    public static final String OBJECT_IDENTIFIER = AbstractImporter.OBJECT_IDENTIFIER;
+    public static final String OBJECT_IDENTIFIER = "objectIdentifier";
     /**
      * Keys in the node that denote unknown properties must start with the value of UNKNOWN.
      */

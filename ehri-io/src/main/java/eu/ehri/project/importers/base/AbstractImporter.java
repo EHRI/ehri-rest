@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
@@ -35,16 +34,7 @@ import eu.ehri.project.persistence.Mutation;
 
 import java.util.List;
 
-/**
- * Base class for importers that import documentary units, historical agents and virtual collections,
- * with their constituent logical data, description(s), and date periods.
- *
- * @param <T> Type of node representation that can be imported. In this version,
- *            the only implementation is for {@code Map<String, Object>}.
- */
-public abstract class AbstractImporter<T> {
-
-    public static final String OBJECT_IDENTIFIER = "objectIdentifier";
+public abstract class AbstractImporter<T> implements ItemImporter<T> {
 
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
@@ -102,28 +92,9 @@ public abstract class AbstractImporter<T> {
      *
      * @param callback a callback function object
      */
+    @Override
     public void addCallback(ImportCallback callback) {
         callbacks.add(callback);
     }
 
-    /**
-     * Import an item representation into the graph, and return the Node.
-     *
-     * @param itemData the item representation to import
-     * @return the imported node
-     * @throws ValidationError when the item representation does not validate
-     */
-    public abstract Accessible importItem(T itemData) throws ValidationError;
-
-    /**
-     * Import an item representation into the graph at a certain depth, and return the Node.
-     *
-     * @param itemData the item representation to import
-     * @param scopeIds parent identifiers for ID generation,
-     *                 not including permission scope
-     * @return the imported node
-     * @throws ValidationError when the item representation does not validate
-     */
-    public abstract Accessible importItem(T itemData,
-            List<String> scopeIds) throws ValidationError;
 }

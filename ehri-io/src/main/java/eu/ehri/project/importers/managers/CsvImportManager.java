@@ -28,7 +28,7 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.util.Helpers;
@@ -57,7 +57,7 @@ public class CsvImportManager extends AbstractImportManager {
     public CsvImportManager(FramedGraph<?> framedGraph,
             PermissionScope permissionScope, Actioner actioner,
             boolean tolerant,
-            boolean allowUpdates, Class<? extends AbstractImporter> importerClass) {
+            boolean allowUpdates, Class<? extends ItemImporter> importerClass) {
         super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass);
     }
 
@@ -73,7 +73,7 @@ public class CsvImportManager extends AbstractImportManager {
             final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {
-            AbstractImporter importer = importerClass
+            ItemImporter importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportLog.class)
                     .newInstance(framedGraph, permissionScope, actioner, log);
             logger.debug("importer of class " + importer.getClass());

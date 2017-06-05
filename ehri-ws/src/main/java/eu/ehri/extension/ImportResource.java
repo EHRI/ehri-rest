@@ -23,15 +23,14 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
@@ -230,7 +229,7 @@ public class ImportResource extends AbstractResource {
             checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler
                     = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
-            Class<? extends AbstractImporter> importer
+            Class<? extends ItemImporter> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             // Get the current user from the Authorization header and the scope
@@ -322,7 +321,7 @@ public class ImportResource extends AbstractResource {
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
-            Class<? extends AbstractImporter> importer
+            Class<? extends ItemImporter> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             // Get the current user from the Authorization header and the scope
@@ -523,15 +522,15 @@ public class ImportResource extends AbstractResource {
     }
 
     @SuppressWarnings("unchecked")
-    private static Class<? extends AbstractImporter> getImporterCls(String importerName, String defaultImporter)
+    private static Class<? extends ItemImporter> getImporterCls(String importerName, String defaultImporter)
             throws ClassNotFoundException, DeserializationError {
         String name = nameOrDefault(importerName, defaultImporter);
         Class<?> importer = Class.forName(name);
-        if (!AbstractImporter.class.isAssignableFrom(importer)) {
+        if (!ItemImporter.class.isAssignableFrom(importer)) {
             throw new DeserializationError("Class '" + importerName + "' is" +
-                    " not an instance of " + AbstractImporter.class.getSimpleName());
+                    " not an instance of " + ItemImporter.class.getSimpleName());
         }
-        return (Class<? extends AbstractImporter>) importer;
+        return (Class<? extends ItemImporter>) importer;
     }
 
     private Optional<String> getLogMessage(String logMessagePathOrText) throws IOException {

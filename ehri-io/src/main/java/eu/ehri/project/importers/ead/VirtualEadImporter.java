@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+import static eu.ehri.project.importers.util.Helpers.OBJECT_IDENTIFIER;
+
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:
  * <p>
@@ -63,7 +65,6 @@ import java.util.Map;
 public class VirtualEadImporter extends EadImporter {
 
     private static final String REPOID = "vcRepository";
-    private static final String UNITID = OBJECT_IDENTIFIER;
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
     /**
@@ -192,13 +193,13 @@ public class VirtualEadImporter extends EadImporter {
     }
 
     private boolean isVirtualLevel(Map<String, Object> itemData) {
-        return !(itemData.containsKey(REPOID) && itemData.containsKey(UNITID));
+        return !(itemData.containsKey(REPOID) && itemData.containsKey(OBJECT_IDENTIFIER));
     }
 
     private DocumentaryUnit findReferredToDocumentaryUnit(Map<String, Object> itemData) throws ItemNotFound {
-        if (itemData.containsKey(REPOID) && itemData.containsKey(UNITID)) {
+        if (itemData.containsKey(REPOID) && itemData.containsKey(OBJECT_IDENTIFIER)) {
             String repositoryId = itemData.get(REPOID).toString();
-            String unitId = itemData.get(UNITID).toString();
+            String unitId = itemData.get(OBJECT_IDENTIFIER).toString();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
             for (DocumentaryUnit unit : repository.getAllDocumentaryUnits()) {
                 logger.debug("{} / {} / {}", unit.getIdentifier(), unit.getId(), unitId);

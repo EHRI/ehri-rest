@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
@@ -46,7 +46,7 @@ public class EagHandler extends SaxXmlHandler {
             "maintenanceEvent", MaintenanceEvent.class).build();
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
-    public EagHandler(AbstractImporter<Map<String, Object>> importer) {
+    public EagHandler(ItemImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("eag.properties"));
     }
 

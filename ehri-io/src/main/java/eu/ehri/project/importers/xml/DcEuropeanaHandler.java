@@ -22,7 +22,7 @@ package eu.ehri.project.importers.xml;
 import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -46,7 +46,7 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
 private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Entity>>builder()
                 .put("relation", Annotation.class).build();
-    public DcEuropeanaHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties xmlImportProperties) {
+    public DcEuropeanaHandler(ItemImporter<Map<String, Object>> importer, XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
     }
 

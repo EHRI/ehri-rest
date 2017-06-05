@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.Helpers;
@@ -102,7 +102,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param importer
      */
     @SuppressWarnings("unchecked")
-    public VirtualEadHandler(AbstractImporter<Map<String, Object>> importer) {
+    public VirtualEadHandler(ItemImporter<Map<String, Object>> importer) {
         this(importer, new XmlImportProperties("vc.properties"));
         logger.warn("vc.properties used");
     }
@@ -113,7 +113,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param importer
      * @param xmlImportProperties
      */
-    public VirtualEadHandler(AbstractImporter<Map<String, Object>> importer,
+    public VirtualEadHandler(ItemImporter<Map<String, Object>> importer,
             XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
         children[depth] = Lists.newArrayList();

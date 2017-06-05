@@ -40,7 +40,7 @@ import java.io.PrintStream;
 import java.util.NoSuchElementException;
 
 
-public class AbstractImporterTest extends AbstractFixtureTest {
+public abstract class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
 
     /**
@@ -60,12 +60,12 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     /**
      * Convenience method for creating a Sax import manager.
      */
-    protected SaxImportManager saxImportManager(Class<? extends AbstractImporter> importerClass, Class<? extends
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter> importerClass, Class<? extends
             SaxXmlHandler> handlerClass) {
         return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass);
     }
 
-    protected SaxImportManager saxImportManager(Class<? extends AbstractImporter> importerClass, Class<? extends
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter> importerClass, Class<? extends
             SaxXmlHandler> handlerClass, String propertiesResource) {
         return saxImportManager(importerClass, handlerClass).withProperties(propertiesResource);
     }
