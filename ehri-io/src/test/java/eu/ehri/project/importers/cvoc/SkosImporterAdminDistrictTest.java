@@ -19,17 +19,16 @@
 
 package eu.ehri.project.importers.cvoc;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.InputStream;
-import org.junit.Test;
-
-
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import org.junit.Test;
+
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class SkosImporterAdminDistrictTest extends AbstractImporterTest {

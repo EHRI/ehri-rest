@@ -59,8 +59,7 @@ public class ImportHelpersTest {
     @Test
     public void splitDatesFromDateProperty() {
         Map<String, String> dates = ImportHelpers
-                .returnDatesAsString(mapWithOneParseableDate,
-                        new XmlImportProperties("dates.properties"));
+                .returnDatesAsString(mapWithOneParseableDate);
         assertTrue(dates.containsKey("1934/1936"));
    }
 
@@ -102,24 +101,24 @@ public class ImportHelpersTest {
     @Test
     public void beginDateYear() {
         assertEquals("1944-01-01",
-                ImportHelpers.normaliseDate("1944", Ontology.DATE_PERIOD_START_DATE));
+                ImportHelpers.normaliseDate("1944"));
     }
 
     @Test
     public void beginDateYearMonth() {
         assertEquals("1944-01-01",
-                ImportHelpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_START_DATE));
+                ImportHelpers.normaliseDate("1944-01"));
     }
 
     @Test
     public void endDateYear() {
         assertEquals("1944-12-31",
-                ImportHelpers.normaliseDate("1944", Ontology.DATE_PERIOD_END_DATE));
+                ImportHelpers.normaliseDate("1944", true));
     }
 
     @Test
     public void endDateYearMonth() {
         assertEquals("1944-01-31",
-                ImportHelpers.normaliseDate("1944-01", Ontology.DATE_PERIOD_END_DATE));
+                ImportHelpers.normaliseDate("1944-01", true));
     }
 }

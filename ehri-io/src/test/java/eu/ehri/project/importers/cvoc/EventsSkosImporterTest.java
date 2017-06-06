@@ -19,29 +19,26 @@
 
 package eu.ehri.project.importers.cvoc;
 
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-
-import java.io.InputStream;
-
-import eu.ehri.project.models.AccessPointType;
-import org.junit.Test;
-
-
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import org.junit.Test;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class EventsSkosImporterTest extends AbstractImporterTest {

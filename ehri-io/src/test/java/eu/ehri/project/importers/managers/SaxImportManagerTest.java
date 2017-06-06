@@ -19,8 +19,8 @@
 
 package eu.ehri.project.importers.managers;
 
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.test.IOHelpers;

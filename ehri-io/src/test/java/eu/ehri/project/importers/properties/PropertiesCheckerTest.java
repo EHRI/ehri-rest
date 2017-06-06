@@ -20,9 +20,10 @@
 package eu.ehri.project.importers.properties;
 
 import eu.ehri.project.models.EntityClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 
 public class PropertiesCheckerTest {

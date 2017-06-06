@@ -77,9 +77,7 @@ public class EacImporterTest extends AbstractImporterTest {
         assertEquals(count + 8, getNodeCount(graph));
 
         HistoricalAgent abwehr = manager.getEntity("381", HistoricalAgent.class);
-        logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
-        assertNotNull(abwehr);
         assertEquals(0, toList(abwehr.getAnnotations()).size());
     }
 

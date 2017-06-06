@@ -22,8 +22,8 @@ package eu.ehri.project.importers.eag;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
@@ -31,15 +31,13 @@ import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
+import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
-
 import static org.junit.Assert.*;
-
-import org.slf4j.LoggerFactory;
 
 
 public class Eag2896Test extends AbstractImporterTest {

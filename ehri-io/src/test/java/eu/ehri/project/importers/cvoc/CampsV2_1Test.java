@@ -19,13 +19,13 @@
 
 package eu.ehri.project.importers.cvoc;
 
+import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.api.QueryApi;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

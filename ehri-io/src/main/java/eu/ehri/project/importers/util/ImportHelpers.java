@@ -83,14 +83,16 @@ public class ImportHelpers {
             Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
             Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
             Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
-            Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
+            Pattern.compile("^\\[(\\d{4})\\]$"),
+            Pattern.compile("^(\\d{4})$"),
             Pattern.compile("^(\\d{2})th century$"),
             Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
             //bundesarchive: 1906/19
             Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
             Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})"),
             Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
-            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})")
+            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})"),
+            Pattern.compile("^(\\d{4})/(\\d{4}-\\d{1,2}-\\d{1,2})")
     };
 
     // NB: Using English locale here to avoid ambiguities caused by system dependent
@@ -104,10 +106,6 @@ public class ImportHelpers {
     private static final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
     private static final SimpleDateFormat yearDateFormat = new SimpleDateFormat("yyyy");
     private static final XmlImportProperties dates = new XmlImportProperties("dates.properties");
-
-    private static String normaliseDate(String date) {
-        return normaliseDate(date, Ontology.DATE_PERIOD_START_DATE);
-    }
 
     /**
      * Extract properties from the itemData Map that are marked as unknown, and return them in a new Map.
@@ -222,7 +220,7 @@ public class ImportHelpers {
      * @param data the data map
      * @return returns a List with the separated datevalues
      */
-    public static Map<String, String> returnDatesAsString(Map<String, Object> data, XmlImportProperties dates) {
+    static Map<String, String> returnDatesAsString(Map<String, Object> data) {
         Map<String, String> datesAsString = Maps.newHashMap();
         Object value;
         for (Map.Entry<String, Object> property : data.entrySet()) {
@@ -250,7 +248,7 @@ public class ImportHelpers {
      */
     public static List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
-        Map<String, String> dateValues = returnDatesAsString(data, dates);
+        Map<String, String> dateValues = returnDatesAsString(data);
         for (String s : dateValues.keySet()) {
             extractDate(s).ifPresent(extractedDates::add);
         }
@@ -264,7 +262,7 @@ public class ImportHelpers {
      * @param extractedDates the set of extracted dates
      */
     public static void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates) {
-        Map<String, String> dateValues = returnDatesAsString(data, dates);
+        Map<String, String> dateValues = returnDatesAsString(data);
         Map<String, String> dateTypes = Maps.newHashMap();
         for (String dateValue : dateValues.keySet()) {
             dateTypes.put(dateValues.get(dateValue), null);
@@ -336,21 +334,25 @@ public class ImportHelpers {
         return me;
     }
 
+    static String normaliseDate(String date) {
+        return normaliseDate(date, false);
+    }
+
     /**
      * Normalise a date in a string.
      *
      * @param date       a String date that needs formatting
-     * @param beginOrEnd a string signifying whether this date is the begin of
+     * @param endOfPeriod a string signifying whether this date is the begin of
      *                   a period or the end of a period
      * @return a String containing the formatted date.
      */
-    protected static String normaliseDate(String date, String beginOrEnd) {
+    static String normaliseDate(String date, boolean endOfPeriod) {
         String returnDate = isoDateTimeFormat.print(DateTime.parse(date));
         if (returnDate.startsWith("00")) {
             returnDate = "19" + returnDate.substring(2);
             date = "19" + date;
         }
-        if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
+        if (endOfPeriod) {
             if (!date.equals(returnDate)) {
                 ParsePosition p = new ParsePosition(0);
                 yearMonthDateFormat.parse(date, p);
@@ -370,11 +372,10 @@ public class ImportHelpers {
 
     public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
         String normValue = normaliseValue(property, value);
-        if (normValue == null || normValue.isEmpty()) {
-            return;
+        if (normValue != null && !normValue.isEmpty()) {
+            logger.debug("overwrite property: {} {}", property, normValue);
+            c.put(property, normValue);
         }
-        logger.debug("overwrite property: {} {}", property, normValue);
-        c.put(property, normValue);
     }
 
     /**
@@ -423,7 +424,7 @@ public class ImportHelpers {
                 logger.debug("matched {}", date);
                 data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
                 data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
-                        .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));
+                        .groupCount() > 1 ? 2 : 1), true));
                 data.put(Ontology.DATE_HAS_DESCRIPTION, date);
                 break;
             }
