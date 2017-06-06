@@ -58,11 +58,11 @@ public class EacHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
-    public EacHandler(ItemImporter<Map<String, Object>> importer) {
+    public EacHandler(ItemImporter<Map<String, Object>, ?> importer) {
         super(importer, new XmlImportProperties("eac.properties"));
     }
 
-    public EacHandler(ItemImporter<Map<String, Object>> importer, XmlImportProperties properties) {
+    public EacHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties properties) {
         super(importer, properties);
     }
 

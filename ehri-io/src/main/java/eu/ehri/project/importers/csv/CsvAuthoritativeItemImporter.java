@@ -32,6 +32,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
@@ -51,7 +52,7 @@ import java.util.Map;
  * Importer of authoritative items such as historical agents and concepts, loaded
  * from a CSV file.
  */
-public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, Object>> {
+public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, Object>, AuthoritativeItem> {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
@@ -61,7 +62,7 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AuthoritativeItem importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
@@ -82,7 +83,7 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData, List<String> idPath) throws
+    public AuthoritativeItem importItem(Map<String, Object> itemData, List<String> idPath) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }

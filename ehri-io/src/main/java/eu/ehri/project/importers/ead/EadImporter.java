@@ -40,7 +40,6 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -68,7 +67,7 @@ import java.util.function.BiPredicate;
  * <p>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  */
-public class EadImporter extends AbstractImporter<Map<String, Object>> {
+public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractUnit> {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
@@ -382,7 +381,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>> {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AbstractUnit importItem(Map<String, Object> itemData) throws ValidationError {
         return importItem(itemData, new Stack<>());
     }
 }

@@ -32,6 +32,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
@@ -52,7 +53,7 @@ public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AuthoritativeItem importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.CVOC_CONCEPT_DESCRIPTION,

@@ -61,7 +61,7 @@ import static eu.ehri.project.importers.util.ImportHelpers.OBJECT_IDENTIFIER;
 /**
  * Import EAC for a given repository into the database.
  */
-public class EacImporter extends AbstractImporter<Map<String, Object>> {
+public class EacImporter extends AbstractImporter<Map<String, Object>, HistoricalAgent> {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     private static final String REL_TYPE = "type";

@@ -11,10 +11,10 @@ import java.util.List;
  * Interface for importers that import documentary units, historical agents and virtual collections,
  * with their constituent logical data, description(s), and date periods.
  *
- * @param <T> Type of node representation that can be imported,
+ * @param <I> Type of node representation that can be imported,
  *            for example, {@code Map<String, Object>}.
  */
-public interface ItemImporter<T> {
+public interface ItemImporter<I, T extends Accessible> {
     /**
      * Import an item representation into the graph, and return the Node.
      *
@@ -22,7 +22,7 @@ public interface ItemImporter<T> {
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    Accessible importItem(T itemData) throws ValidationError;
+    T importItem(I itemData) throws ValidationError;
 
     /**
      * Import an item representation into the graph at a certain depth, and return the Node.
@@ -33,7 +33,7 @@ public interface ItemImporter<T> {
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    Accessible importItem(T itemData, List<String> scopeIds) throws ValidationError;
+    T importItem(I itemData, List<String> scopeIds) throws ValidationError;
 
     /**
      * Add a callback to run when an item is created.

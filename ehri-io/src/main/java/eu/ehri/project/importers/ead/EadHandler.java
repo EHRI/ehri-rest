@@ -114,7 +114,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @param importer the importer instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>> importer) {
+    public EadHandler(ItemImporter<Map<String, Object>, ?> importer) {
         this(importer, new XmlImportProperties(DEFAULT_PROPERTIES));
         logger.warn("Using default properties file: {}", DEFAULT_PROPERTIES);
     }
@@ -125,7 +125,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param importer   the importer instance
      * @param properties an XML node properties instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>> importer,
+    public EadHandler(ItemImporter<Map<String, Object>, ?> importer,
             XmlImportProperties properties) {
         super(importer, properties);
         children[depth] = Lists.newArrayList();

@@ -46,7 +46,7 @@ public class EagHandler extends SaxXmlHandler {
             "maintenanceEvent", MaintenanceEvent.class).build();
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
-    public EagHandler(ItemImporter<Map<String, Object>> importer) {
+    public EagHandler(ItemImporter<Map<String, Object>, ?> importer) {
         super(importer, new XmlImportProperties("eag.properties"));
     }
 

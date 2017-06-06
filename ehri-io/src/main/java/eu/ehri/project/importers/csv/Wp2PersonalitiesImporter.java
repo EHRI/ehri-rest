@@ -31,7 +31,6 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -49,7 +48,7 @@ import java.util.Map;
  * before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  */
-public abstract class Wp2PersonalitiesImporter extends AbstractImporter<Map<String, Object>> {
+public abstract class Wp2PersonalitiesImporter extends AbstractImporter<Map<String, Object>, HistoricalAgent> {
 
     private final XmlImportProperties p = new XmlImportProperties("wp2personalities.properties");
 
@@ -61,7 +60,7 @@ public abstract class Wp2PersonalitiesImporter extends AbstractImporter<Map<Stri
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -83,7 +82,7 @@ public abstract class Wp2PersonalitiesImporter extends AbstractImporter<Map<Stri
         return frame;
     }
 
-    public Accessible importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 

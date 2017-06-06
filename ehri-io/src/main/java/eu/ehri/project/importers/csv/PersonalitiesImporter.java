@@ -51,7 +51,7 @@ import java.util.Map;
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  */
-public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>> {
+public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>, HistoricalAgent> {
 
     private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
 
@@ -63,7 +63,7 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>>
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
@@ -87,7 +87,7 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>>
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData, List<String> idPath) throws
+    public HistoricalAgent importItem(Map<String, Object> itemData, List<String> idPath) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }

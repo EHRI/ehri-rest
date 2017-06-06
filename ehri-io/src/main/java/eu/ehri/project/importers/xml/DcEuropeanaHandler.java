@@ -46,7 +46,7 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
 private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Entity>>builder()
                 .put("relation", Annotation.class).build();
-    public DcEuropeanaHandler(ItemImporter<Map<String, Object>> importer, XmlImportProperties xmlImportProperties) {
+    public DcEuropeanaHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
     }
 

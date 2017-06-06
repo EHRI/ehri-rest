@@ -143,7 +143,7 @@ public class SaxImportManager extends AbstractImportManager {
     protected void importInputStream(final InputStream stream, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
-            ItemImporter<Map<String, Object>> importer = importerClass
+            ItemImporter<Map<String, Object>, ?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class,
                             Actioner.class, ImportLog.class)
                     .newInstance(framedGraph, permissionScope, actioner, log);

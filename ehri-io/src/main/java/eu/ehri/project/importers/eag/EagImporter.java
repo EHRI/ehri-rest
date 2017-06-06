@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
 /**
  * Importer of EAG-based descriptions.
  */
-public class EagImporter extends AbstractImporter<Map<String, Object>> {
+public class EagImporter extends AbstractImporter<Map<String, Object>, Repository> {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     private final Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");

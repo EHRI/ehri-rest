@@ -31,6 +31,7 @@ import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -47,7 +48,7 @@ import java.util.Map;
  * Importer of Ukrainian units, which are encoded in a slightly different way
  * than other documentary units.
  */
-public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>> {
+public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>, AbstractUnit> {
 
     private static final String MULTIVALUE_SEP = ",,";
     private final XmlImportProperties p;
@@ -60,7 +61,7 @@ public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>>
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AbstractUnit importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
 
@@ -115,7 +116,7 @@ public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>>
 
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData, List<String> scopeIds) throws
+    public AbstractUnit importItem(Map<String, Object> itemData, List<String> scopeIds) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }

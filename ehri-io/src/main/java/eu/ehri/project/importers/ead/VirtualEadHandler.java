@@ -102,7 +102,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param importer
      */
     @SuppressWarnings("unchecked")
-    public VirtualEadHandler(ItemImporter<Map<String, Object>> importer) {
+    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer) {
         this(importer, new XmlImportProperties("vc.properties"));
         logger.warn("vc.properties used");
     }
@@ -113,7 +113,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param importer
      * @param xmlImportProperties
      */
-    public VirtualEadHandler(ItemImporter<Map<String, Object>> importer,
+    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer,
             XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
         children[depth] = Lists.newArrayList();

@@ -34,7 +34,7 @@ import eu.ehri.project.persistence.Mutation;
 
 import java.util.List;
 
-public abstract class AbstractImporter<T> implements ItemImporter<T> {
+public abstract class AbstractImporter<I, T extends Accessible> implements ItemImporter<I, T> {
 
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;

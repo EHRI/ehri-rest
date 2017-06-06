@@ -32,7 +32,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -188,7 +187,7 @@ public class VirtualEadImporter extends EadImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AbstractUnit importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
