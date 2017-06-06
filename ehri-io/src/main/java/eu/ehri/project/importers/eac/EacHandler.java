@@ -21,12 +21,14 @@ package eu.ehri.project.importers.eac;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -47,15 +49,19 @@ import java.util.Map;
  */
 public class EacHandler extends SaxXmlHandler {
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap
+    // Artificial subnodes
+    private static final String NAME_ENTRY = "NameEntry";
+    static final String BOOK = "Book";
+    static final String BOOK_ENTRY = "BookEntry";
+
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap
             .<String, Class<? extends Entity>>builder()
-            .put("maintenanceEvent", MaintenanceEvent.class)
-            .put("relation", Annotation.class)
-            .put("datePeriod", DatePeriod.class)
-            .put("book", Annotation.class)
-            .put("bookentry", Annotation.class)
-            .put("accessPoint", Annotation.class)
-            .put("name", UnknownProperty.class)
+            .put(Entities.MAINTENANCE_EVENT, MaintenanceEvent.class)
+            .put(Entities.ACCESS_POINT, AccessPoint.class)
+            .put(Entities.DATE_PERIOD, DatePeriod.class)
+            .put(BOOK, Annotation.class)
+            .put(BOOK_ENTRY, Annotation.class)
+            .put(NAME_ENTRY, UnknownProperty.class)
             .build();
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
@@ -70,16 +76,16 @@ public class EacHandler extends SaxXmlHandler {
 
     @Override
     protected boolean needToCreateSubNode(String key) {
-        return possibleSubnodes.containsKey(getImportantPath(currentPath));
+        return possibleSubNodes.containsKey(getMappedProperty(currentPath));
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //if a subnode is ended, add it to the super-supergraph
         super.endElement(uri, localName, qName);
-        if (needToCreateSubNode(getImportantPath(currentPath))) {
+        if (needToCreateSubNode(getMappedProperty(currentPath))) {
             Map<String, Object> currentGraph = currentGraphPath.pop();
-            putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
+            putSubGraphInCurrentGraph(getMappedProperty(currentPath), currentGraph);
             depth--;
         }
 
@@ -88,15 +94,15 @@ public class EacHandler extends SaxXmlHandler {
         //an EAC file consists of only 1 element, so if we're back at the root, we're done
         if (currentPath.isEmpty()) {
             try {
-                logger.debug("depth close " + depth + " " + qName);
+                logger.debug("depth close {} {}", depth, qName);
                 //TODO: add any mandatory fields not yet there:
                 if (!currentGraphPath.peek().containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
                     putPropertyInCurrentGraph(ImportHelpers.OBJECT_IDENTIFIER, "id");
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName
-                if (currentGraphPath.peek().containsKey(Ontology.NAME_KEY)) {
-                    String name = chooseName(currentGraphPath.peek().get(Ontology.NAME_KEY));
+                if (currentGraphPath.peek().containsKey(NAME_ENTRY)) {
+                    String name = chooseName(currentGraphPath.peek().get(NAME_ENTRY));
                     overwritePropertyInCurrentGraph(Ontology.NAME_KEY, name);
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
@@ -137,8 +143,11 @@ public class EacHandler extends SaxXmlHandler {
 
             for (int i = 1; i < ((List) names).size(); i++) {
                 Map m = (Map) ((List) names).get(i);
-                logger.debug("other name: {}", m.get("namePart"));
-                putPropertyInCurrentGraph("otherFormsOfName", m.get("namePart").toString());
+                Object namePart = m.get("namePart");
+                if (namePart != null) {
+                    logger.info("other name: {}", namePart);
+                    putPropertyInCurrentGraph("otherFormsOfName", namePart.toString());
+                }
             }
         } else {
             logger.warn("no {} found", Ontology.NAME_KEY);

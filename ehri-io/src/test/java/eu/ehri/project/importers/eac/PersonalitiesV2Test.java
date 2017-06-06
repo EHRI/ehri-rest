@@ -69,7 +69,7 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-        /**
+        /*
          * null: 2
          * relationship: 1
          * historicalAgent: 1

@@ -27,6 +27,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -112,7 +113,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes("maintenanceEvent", itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes(Entities.MAINTENANCE_EVENT, itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -146,10 +147,9 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
     }
 
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        String relKey = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
-            if (key.equals(relKey)) {
+            if (key.equals(Entities.ACCESS_POINT)) {
                 //name identifier
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemData.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
@@ -157,12 +157,11 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
                         if (eventkey.equals(REL_TYPE)) {
                             relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
-                            Map<String, Object> m = (Map) ((List) origRelation.get(eventkey)).get(0);
                             //try to find the original identifier
-                            relationNode.put(ImportHelpers.LINK_TARGET, m.get("concept"));
+                            relationNode.put(ImportHelpers.LINK_TARGET, origRelation.get("concept"));
                             //try to find the original name
-                            relationNode.put(Ontology.NAME_KEY, m.get(REL_NAME));
-                            relationNode.put("cvoc", m.get("cvoc"));
+                            relationNode.put(Ontology.NAME_KEY, origRelation.get(REL_NAME));
+                            relationNode.put("cvoc", origRelation.get("cvoc"));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
@@ -186,15 +185,15 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
                 //resolved in EacHandler
-            } else if (key.equals("book")) {
+            } else if (key.equals(EacHandler.BOOK)) {
                 extractBooks(itemData.get(key), description);
             } else if (!key.startsWith(ImportHelpers.UNKNOWN_PREFIX)
                     && !key.equals(OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
-                    && !key.startsWith("maintenanceEvent")
+                    && !key.startsWith(Entities.MAINTENANCE_EVENT)
+                    && !key.startsWith(Entities.ACCESS_POINT)
                     && !key.startsWith("IGNORE")
-                    && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
                 description.put(key, ImportHelpers.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
             }
@@ -264,14 +263,14 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
                     String publication = "";
                     for (Object entryKey : bookEntry.keySet()) {
                         switch ((String) entryKey) {
-                            case "bookentry":
+                            case EacHandler.BOOK_ENTRY:
                                 if (bookEntry.get(entryKey) instanceof List) {
                                     for (Object entry : (List) bookEntry.get(entryKey)) {
                                         if (entry instanceof Map
                                                 && ((Map) entry).containsKey(REL_TYPE)
-                                                && ((Map) entry).containsKey("bookentry")) {
+                                                && ((Map) entry).containsKey(EacHandler.BOOK_ENTRY)) {
                                             String type = ((Map) entry).get(REL_TYPE).toString();
-                                            String value = ((Map) entry).get("bookentry").toString();
+                                            String value = ((Map) entry).get(EacHandler.BOOK_ENTRY).toString();
                                             String join = type.equals("isbn") || type.equals("creator")
                                                     ? " " + type + ":"
                                                     : "";

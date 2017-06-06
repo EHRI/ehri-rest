@@ -65,7 +65,8 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
-        Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }

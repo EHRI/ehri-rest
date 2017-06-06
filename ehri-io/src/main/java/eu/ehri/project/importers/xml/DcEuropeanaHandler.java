@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.xml;
 
 import com.google.common.collect.ImmutableMap;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.ItemImporter;
@@ -43,9 +44,10 @@ import java.util.Stack;
 public class DcEuropeanaHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DcEuropeanaHandler.class);
-private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Entity>>builder()
-                .put("relation", Annotation.class).build();
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
+            Entities.ACCESS_POINT, Annotation.class
+    );
+
     public DcEuropeanaHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
     }
@@ -57,15 +59,15 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
         super.endElement(uri, localName, qName);
 
         if (needToCreateSubNode(qName)) {
-             Map<String, Object> currentMap = currentGraphPath.pop();
-             if (isUnitDelimiter(qName)) {
+            Map<String, Object> currentMap = currentGraphPath.pop();
+            if (isUnitDelimiter(qName)) {
                 try {
                     //we're back at the top. find the maintenanceevents and add to the topLevel DU
                     currentMap.put("languageCode", "nld");
-                    
+
                     extractIdentifier(currentMap);
                     extractName(currentMap);
-                    
+
                     ImportHelpers.putPropertyInGraph(currentMap, "sourceFileId", currentMap.get(ImportHelpers.OBJECT_IDENTIFIER).toString());
                     importer.importItem(currentMap, new Stack<>());
 //                importer.importTopLevelExtraNodes(topLevel, current);
@@ -73,25 +75,22 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
                 } catch (ValidationError ex) {
                     logger.error(ex.getMessage());
                 }
-             }else {
-                putSubGraphInCurrentGraph(getImportantPath(currentPath), currentMap);
+            } else {
+                putSubGraphInCurrentGraph(getMappedProperty(currentPath), currentMap);
                 depth--;
             }
         }
 
         currentPath.pop();
-        
-        
-
     }
 
     @Override
     protected boolean needToCreateSubNode(String qName) {
         boolean need = isUnitDelimiter(qName);
-        need = need || possibleSubnodes.containsKey(getImportantPath(currentPath));
-        String path = getImportantPath(currentPath);
+        need = need || possibleSubNodes.containsKey(getMappedProperty(currentPath));
+        String path = getMappedProperty(currentPath);
         logger.debug(path);
-        return  need || path.endsWith(EadImporter.ACCESS_POINT);
+        return need || path.endsWith(EadImporter.ACCESS_POINT);
     }
 
 //    private String replaceOpname(String toString) {
@@ -130,16 +129,16 @@ private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
     }
 
     private void extractIdentifier(Map<String, Object> currentMap) {
-        if (currentMap.containsKey(ImportHelpers.OBJECT_IDENTIFIER)){
-        logger.debug(currentMap.get(ImportHelpers.OBJECT_IDENTIFIER)+"");
+        if (currentMap.containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
+            logger.debug(currentMap.get(ImportHelpers.OBJECT_IDENTIFIER) + "");
             String id = currentMap.get(ImportHelpers.OBJECT_IDENTIFIER).toString();
-            if(id.startsWith("http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&imid=")){
+            if (id.startsWith("http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&imid=")) {
                 currentMap.put(ImportHelpers.OBJECT_IDENTIFIER, id.substring(60));
             }
-        }else{
-            for(String key: currentMap.keySet())
+        } else {
+            for (String key : currentMap.keySet())
                 logger.debug(key);
         }
     }
-    
+
 }

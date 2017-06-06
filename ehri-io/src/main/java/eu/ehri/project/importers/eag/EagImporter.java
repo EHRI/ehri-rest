@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.eag;
 
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
@@ -120,7 +121,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes("maintenanceEvent", itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes(Entities.MAINTENANCE_EVENT, itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));

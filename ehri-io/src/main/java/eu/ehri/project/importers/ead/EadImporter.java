@@ -25,6 +25,7 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -169,7 +170,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
-        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes("maintenanceEvent", itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes(Entities.MAINTENANCE_EVENT, itemData)) {
             logger.debug("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
@@ -319,10 +320,9 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
 
     @SuppressWarnings("unchecked")
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        String rel = "relation";
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : data.keySet()) {
-            if (key.equals(rel)) {
+            if (key.equals(Entities.ACCESS_POINT)) {
                 //name identifier
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
@@ -334,7 +334,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                         relationNode.put("cvoc", origRelation.get("cvoc"));
                         relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get("type"));
                     } else {
-                        relationNode.put(Ontology.NAME_KEY, origRelation.get(rel));
+                        relationNode.put(Ontology.NAME_KEY, origRelation.get(Entities.ACCESS_POINT));
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
                         logger.debug("relationNode without type: {}", relationNode.get(Ontology.NAME_KEY));

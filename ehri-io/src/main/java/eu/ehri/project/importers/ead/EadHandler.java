@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.base.ItemImporter;
@@ -30,6 +31,7 @@ import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Entity;
@@ -61,7 +63,7 @@ public class EadHandler extends SaxXmlHandler {
     // EAD file-level keys which are added to the data of the top-level
     // archdesc element. Note: tag->property mappings must exist for these
     // keys if the data is to be extracted.
-    static final List<String> eadFileGlobals = ImmutableList.of(
+    private static final List<String> eadFileGlobals = ImmutableList.of(
             "rulesAndConventions", "processInfo"
     );
 
@@ -69,8 +71,9 @@ public class EadHandler extends SaxXmlHandler {
 
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes =
-            ImmutableMap.of("maintenanceEvent", MaintenanceEvent.class);
+    private final Map<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
+            Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
+    );
 
     private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
 
@@ -236,9 +239,9 @@ public class EadHandler extends SaxXmlHandler {
                         addGlobalValues(currentGraph, currentGraphPath.peek(), eadFileGlobals);
                     }
 
-                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
+                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(Entities.MAINTENANCE_EVENT)) {
                         logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
-                        currentGraph.put("maintenanceEvent", globalMaintenanceEvents);
+                        currentGraph.put(Entities.MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
@@ -268,13 +271,13 @@ public class EadHandler extends SaxXmlHandler {
                 }
             } else {
                 // import the MaintenanceEvent
-                if (getImportantPath(currentPath).equals("maintenanceEvent")
+                if (getMappedProperty(currentPath).equals(Entities.MAINTENANCE_EVENT)
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
                     Map<String, Object> me = ImportHelpers.getSubNode(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
                 }
-                putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
+                putSubGraphInCurrentGraph(getMappedProperty(currentPath), currentGraph);
                 depth--;
             }
         }
@@ -398,11 +401,11 @@ public class EadHandler extends SaxXmlHandler {
         //child or parent unit:
         boolean need = isUnitDelimiter(qName);
         //controlAccess 
-        String path = getImportantPath(currentPath);
+        String path = getMappedProperty(currentPath);
         if (path != null) {
             need = need || path.endsWith("AccessPoint");
         }
-        return need || possibleSubnodes.containsKey(getImportantPath(currentPath));
+        return need || possibleSubNodes.containsKey(getMappedProperty(currentPath));
     }
 
     /**
@@ -411,11 +414,11 @@ public class EadHandler extends SaxXmlHandler {
      * @param elementName The XML element name
      * @return Whether or not we're moved to a new item
      */
-    static boolean isUnitDelimiter(String elementName) {
+    private static boolean isUnitDelimiter(String elementName) {
         return childItemPattern.matcher(elementName).matches() || elementName.equals(ARCHDESC);
     }
 
-    void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
+    private void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
         System.out.println("Adding FILE VALUES! " + eadFileGlobals);
         for (String key : eadFileGlobals) {
             ImportHelpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));

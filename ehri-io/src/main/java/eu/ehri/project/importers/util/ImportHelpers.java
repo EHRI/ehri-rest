@@ -23,6 +23,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
@@ -185,8 +186,8 @@ public class ImportHelpers {
                     && !itemProperty.getKey().equals(OBJECT_IDENTIFIER)
                     && !itemProperty.getKey().equals(Ontology.IDENTIFIER_KEY)
                     && !itemProperty.getKey().equals(Ontology.OTHER_IDENTIFIERS)
-                    && !itemProperty.getKey().startsWith("maintenanceEvent")
-                    && !itemProperty.getKey().startsWith("relation")
+                    && !itemProperty.getKey().startsWith(Entities.MAINTENANCE_EVENT)
+                    && !itemProperty.getKey().startsWith(Entities.ACCESS_POINT)
                     && !itemProperty.getKey().startsWith("IGNORE")
                     && !itemProperty.getKey().startsWith("address/")
                     && !itemProperty.getKey().endsWith("AccessPoint")) {
@@ -250,7 +251,7 @@ public class ImportHelpers {
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
 
         for (String key : data.keySet()) {
-            if (key.equals("datePeriod") && data.get(key) instanceof List) {
+            if (key.equals(Entities.DATE_PERIOD) && data.get(key) instanceof List) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
                     extractedDates.add(getSubNode(event));
                 }

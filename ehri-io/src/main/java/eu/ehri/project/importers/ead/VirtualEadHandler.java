@@ -50,19 +50,20 @@ import java.util.regex.Pattern;
  * TODO: Clean up and merge with regular EadHandler
  */
 public class VirtualEadHandler extends SaxXmlHandler {
-    public static final String AUTHOR = "authors",
+    private static final String AUTHOR = "authors",
             SOURCEFILEID = "sourceFileId";
 
-    final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
+    private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes = ImmutableMap.<String, Class<?
-            extends Entity>>of("maintenanceEvent", MaintenanceEvent.class);
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.<String, Class<? extends Entity>>of(
+            Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
+    );
 
     private static final Logger logger = LoggerFactory
             .getLogger(VirtualEadHandler.class);
 
     protected final List<AbstractUnit>[] children = new ArrayList[12];
-    protected final Stack<String> scopeIds = new Stack<>();
+    private final Stack<String> scopeIds = new Stack<>();
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
@@ -212,9 +213,9 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     //add the <author> of the ead to every description
                     addAuthor(currentGraph);
 
-                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey("maintenanceEvent")) {
+                    if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(Entities.MAINTENANCE_EVENT)) {
                         logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
-                        currentGraph.put("maintenanceEvent", globalMaintenanceEvents);
+                        currentGraph.put(Entities.MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
                     AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
@@ -259,14 +260,14 @@ public class VirtualEadHandler extends SaxXmlHandler {
                 }
             } else {
                 //import the MaintenanceEvent
-                if (getImportantPath(currentPath).equals("maintenanceEvent")
+                if (getMappedProperty(currentPath).equals(Entities.MAINTENANCE_EVENT)
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
                     Map<String, Object> me = ImportHelpers.getSubNode(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
                 }
 
-                putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
+                putSubGraphInCurrentGraph(getMappedProperty(currentPath), currentGraph);
                 depth--;
             }
         }
@@ -387,11 +388,11 @@ public class VirtualEadHandler extends SaxXmlHandler {
         //child or parent unit:
         boolean need = isUnitDelimiter(qName);
         //controlAccess 
-        String path = getImportantPath(currentPath);
+        String path = getMappedProperty(currentPath);
         if (path != null) {
             need = need || path.endsWith("AccessPoint");
         }
-        return need || possibleSubnodes.containsKey(getImportantPath(currentPath));
+        return need || possibleSubNodes.containsKey(getMappedProperty(currentPath));
     }
 
     /**
