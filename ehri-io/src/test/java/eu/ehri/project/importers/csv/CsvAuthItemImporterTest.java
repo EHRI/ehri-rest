@@ -23,9 +23,9 @@
  */
 package eu.ehri.project.importers.csv;
 
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import com.google.common.collect.Lists;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;

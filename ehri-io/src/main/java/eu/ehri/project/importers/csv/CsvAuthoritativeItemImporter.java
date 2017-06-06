@@ -32,8 +32,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;

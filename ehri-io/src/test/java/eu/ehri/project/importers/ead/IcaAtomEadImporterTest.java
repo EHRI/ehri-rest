@@ -21,8 +21,8 @@ package eu.ehri.project.importers.ead;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;

@@ -25,6 +25,8 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -48,8 +50,6 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

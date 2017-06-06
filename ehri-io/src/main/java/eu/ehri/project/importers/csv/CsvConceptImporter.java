@@ -29,18 +29,16 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
-
-import java.util.Map;
-
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
+
+import java.util.Map;
 
 /**
  * Importer of concepts loaded from a CSV file.

@@ -35,11 +35,10 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-
-import java.util.Map;
-
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
+
+import java.util.Map;
 
 /**
  * Importer of historical agents loaded from a CSV file.
