@@ -270,7 +270,7 @@ public class EadHandler extends SaxXmlHandler {
                 // import the MaintenanceEvent
                 if (getImportantPath(currentPath).equals("maintenanceEvent")
                         && (qName.equals("profiledesc") || qName.equals("change"))) {
-                    Map<String, Object> me = ImportHelpers.getMaintenanceEvent(currentGraph);
+                    Map<String, Object> me = ImportHelpers.getSubNode(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
                 }

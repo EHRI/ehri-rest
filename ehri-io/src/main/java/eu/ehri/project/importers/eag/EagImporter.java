@@ -120,7 +120,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        for (Map<String, Object> dpb : ImportHelpers.extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes("maintenanceEvent", itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));

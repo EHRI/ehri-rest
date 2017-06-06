@@ -28,6 +28,7 @@ import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Entity;
@@ -50,6 +51,7 @@ public class EacHandler extends SaxXmlHandler {
             .<String, Class<? extends Entity>>builder()
             .put("maintenanceEvent", MaintenanceEvent.class)
             .put("relation", Annotation.class)
+            .put("datePeriod", DatePeriod.class)
             .put("book", Annotation.class)
             .put("bookentry", Annotation.class)
             .put("accessPoint", Annotation.class)

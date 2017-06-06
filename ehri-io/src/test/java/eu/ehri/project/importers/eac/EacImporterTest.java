@@ -25,6 +25,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.base.Accessible;
@@ -51,7 +52,8 @@ public class EacImporterTest extends AbstractImporterTest {
     @Test
     public void testAbwehrWithOUTAllReferredNodes() throws Exception {
         String eacFile = "abwehr.xml";
-        String logMessage = "Importing EAC " + eacFile + " without creating any annotation, since the targets are not present in the graph";
+        String logMessage = String.format("Importing EAC %s without creating any annotation, " +
+                "since the targets are not present in the graph", eacFile);
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile);
 
@@ -65,7 +67,7 @@ public class EacImporterTest extends AbstractImporterTest {
         GraphDiff diff = GraphTestBase.diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
 
-        /**
+        /*
          * How many new nodes will have been created? We should have
          * null: 2
          * historicalAgent: 1
@@ -73,12 +75,17 @@ public class EacImporterTest extends AbstractImporterTest {
          * maintenanceEvent: 2
          * systemEvent: 1
          * historicalAgentDescription: 1
-         **/
-        assertEquals(count + 8, getNodeCount(graph));
+         * datePeriod: 1
+         */
+        assertEquals(count + 9, getNodeCount(graph));
 
         HistoricalAgent abwehr = manager.getEntity("381", HistoricalAgent.class);
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertEquals(0, toList(abwehr.getAnnotations()).size());
+        Description desc = abwehr.getDescriptions().iterator().next();
+        DatePeriod d = desc.as(HistoricalAgentDescription.class).getDatePeriods().iterator().next();
+        assertEquals("1933", d.getStartDate());
+        assertEquals("1944", d.getEndDate());
     }
 
     @Test

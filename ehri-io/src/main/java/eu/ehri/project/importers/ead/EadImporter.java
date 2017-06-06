@@ -169,7 +169,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
-        for (Map<String, Object> dpb : ImportHelpers.extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes("maintenanceEvent", itemData)) {
             logger.debug("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,

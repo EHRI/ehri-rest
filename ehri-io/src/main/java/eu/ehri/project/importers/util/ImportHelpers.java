@@ -248,6 +248,15 @@ public class ImportHelpers {
      */
     public static List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
+
+        for (String key : data.keySet()) {
+            if (key.equals("datePeriod") && data.get(key) instanceof List) {
+                for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
+                    extractedDates.add(getSubNode(event));
+                }
+            }
+        }
+
         Map<String, String> dateValues = returnDatesAsString(data);
         for (String s : dateValues.keySet()) {
             extractDate(s).ifPresent(extractedDates::add);
@@ -292,31 +301,12 @@ public class ImportHelpers {
     }
 
     /**
-     * Extract an Iterable of representations of maintenance events from the itemData.
-     *
-     * @param itemData a Map containing raw properties of a unit
-     * @return a List of node representations of maintenance events (may be empty)
-     */
-    public static Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData) {
-        List<Map<String, Object>> list = Lists.newArrayList();
-        for (String key : itemData.keySet()) {
-            if (key.equals("maintenanceEvent") && itemData.get(key) instanceof List) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
-                    list.add(getMaintenanceEvent(event));
-                }
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Convert a representation of a maintenance event from the maintenanceEvent data,
-     * using property names from MaintenanceEvent.
+     * Extract the data from a sub-node.
      *
      * @param event a Map of event properties
-     * @return a correct node representation of a single maintenance event
+     * @return a data map
      */
-    public static Map<String, Object> getMaintenanceEvent(Map<String, Object> event) {
+    public static Map<String, Object> getSubNode(Map<String, Object> event) {
         Map<String, Object> me = Maps.newHashMap();
         for (Map.Entry<String, Object> eventEntry : event.entrySet()) {
             // Hack for EAG 1 and 2012 compatibility - maps maintenance event
@@ -438,6 +428,18 @@ public class ImportHelpers {
         return property.startsWith(LANGUAGE_KEY_PREFIX)
                 ? LanguageHelpers.iso639DashTwoCode(trimmedValue)
                 : trimmedValue;
+    }
+
+    public static List<Map<String, Object>> extractSubNodes(String type, Map<String,Object> data) {
+
+        List<Map<String, Object>> out = Lists.newArrayList();
+        Object nodes = data.get(type);
+        if (nodes != null && nodes instanceof  List) {
+            for (Map<String, Object> event : (List<Map<String, Object>>) nodes) {
+                out.add(getSubNode(event));
+            }
+        }
+        return out;
     }
 
 
