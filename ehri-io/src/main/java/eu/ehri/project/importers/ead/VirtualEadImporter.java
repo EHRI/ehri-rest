@@ -32,7 +32,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -43,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+
+import static eu.ehri.project.importers.util.ImportHelpers.OBJECT_IDENTIFIER;
 
 /**
  * Import EAD describing a Virtual Collection. some rules governing virtual collections:
@@ -62,8 +63,7 @@ import java.util.Map;
  */
 public class VirtualEadImporter extends EadImporter {
 
-    protected static final String REPOID = "vcRepository";
-    protected static final String UNITID = OBJECT_IDENTIFIER;
+    private static final String REPOID = "vcRepository";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
     /**
@@ -174,7 +174,7 @@ public class VirtualEadImporter extends EadImporter {
      * @param itemData Map of all extracted information
      * @return a Map representing a Documentary Unit node
      */
-    protected Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
+    private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();
         if (itemData.get(OBJECT_IDENTIFIER) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
@@ -187,23 +187,18 @@ public class VirtualEadImporter extends EadImporter {
     }
 
     @Override
-    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
-        throw new UnsupportedOperationException("Not supported ever.");
-    }
-
-    @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AbstractUnit importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private boolean isVirtualLevel(Map<String, Object> itemData) {
-        return !(itemData.containsKey(REPOID) && itemData.containsKey(UNITID));
+        return !(itemData.containsKey(REPOID) && itemData.containsKey(OBJECT_IDENTIFIER));
     }
 
     private DocumentaryUnit findReferredToDocumentaryUnit(Map<String, Object> itemData) throws ItemNotFound {
-        if (itemData.containsKey(REPOID) && itemData.containsKey(UNITID)) {
+        if (itemData.containsKey(REPOID) && itemData.containsKey(OBJECT_IDENTIFIER)) {
             String repositoryId = itemData.get(REPOID).toString();
-            String unitId = itemData.get(UNITID).toString();
+            String unitId = itemData.get(OBJECT_IDENTIFIER).toString();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
             for (DocumentaryUnit unit : repository.getAllDocumentaryUnits()) {
                 logger.debug("{} / {} / {}", unit.getIdentifier(), unit.getId(), unitId);

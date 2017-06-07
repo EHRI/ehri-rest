@@ -30,13 +30,15 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
-import java.io.InputStream;
-
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class CsvConceptImporterTest extends AbstractImporterTest {

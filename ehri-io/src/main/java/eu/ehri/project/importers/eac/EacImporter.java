@@ -25,14 +25,17 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.SaxXmlHandler;
-import eu.ehri.project.importers.base.SaxXmlImporter;
+import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
@@ -48,8 +51,6 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +60,11 @@ import java.util.Map;
 /**
  * Import EAC for a given repository into the database.
  */
-public class EacImporter extends SaxXmlImporter {
+public class EacImporter extends AbstractImporter<Map<String, Object>, HistoricalAgent> {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
-    public static final String REL_TYPE = "type";
-    public static final String REL_NAME = "name";
+    private static final String REL_TYPE = "type";
+    private static final String REL_NAME = "name";
 
     /**
      * Construct an EacImporter object.
@@ -94,23 +95,23 @@ public class EacImporter extends SaxXmlImporter {
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
         // add the address to the description bundle
-        Map<String, Object> address = extractAddress(itemData);
+        Map<String, Object> address = ImportHelpers.extractAddress(itemData);
         if (!address.isEmpty()) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, Bundle.of(EntityClass.ADDRESS, address));
         }
 
-        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        Map<String, Object> unknowns = ImportHelpers.extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+        for (Map<String, Object> dpb : ImportHelpers.extractSubNodes(Entities.MAINTENANCE_EVENT, itemData)) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -143,25 +144,22 @@ public class EacImporter extends SaxXmlImporter {
 
     }
 
-    @Override
-    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
-        String relKey = "relation";
+    private Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
-            if (key.equals(relKey)) {
+            if (key.equals(Entities.ACCESS_POINT)) {
                 //name identifier
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemData.get(key)) {
                     Map<String, Object> relationNode = Maps.newHashMap();
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL_TYPE)) {
                             relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
-                            Map<String, Object> m = (Map) ((List) origRelation.get(eventkey)).get(0);
+                        } else if (eventkey.equals(REL_NAME)) {
                             //try to find the original identifier
-                            relationNode.put(LINK_TARGET, m.get("concept"));
+                            relationNode.put(ImportHelpers.LINK_TARGET, origRelation.get("concept"));
                             //try to find the original name
-                            relationNode.put(Ontology.NAME_KEY, m.get(REL_NAME));
-                            relationNode.put("cvoc", m.get("cvoc"));
+                            relationNode.put(Ontology.NAME_KEY, origRelation.get(REL_NAME));
+                            relationNode.put("cvoc", origRelation.get("cvoc"));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
@@ -177,7 +175,6 @@ public class EacImporter extends SaxXmlImporter {
         return list;
     }
 
-    @Override
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = Maps.newHashMap();
         description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
@@ -185,32 +182,29 @@ public class EacImporter extends SaxXmlImporter {
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
-                //resolved in EacHandler
-            } else if (key.equals("book")) {
-                extractBooks(itemData.get(key), description);
-            } else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
-                    && !key.equals(OBJECT_IDENTIFIER)
+            } else if (!key.startsWith(ImportHelpers.UNKNOWN_PREFIX)
+                    && !key.equals(ImportHelpers.OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
-                    && !key.startsWith("maintenanceEvent")
+                    && !key.startsWith(Entities.MAINTENANCE_EVENT)
+                    && !key.startsWith(Entities.ACCESS_POINT)
                     && !key.startsWith("IGNORE")
-                    && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
-                description.put(key, flattenNonMultivaluedProperties(key, itemData.get(key), entity));
+                description.put(key, ImportHelpers.flattenNonMultivaluedProperties(key, itemData.get(key), entity));
             }
         }
 
         return description;
     }
 
-    protected void solveUndeterminedRelationships(HistoricalAgent unit, Bundle descBundle) throws ValidationError {
+    private void solveUndeterminedRelationships(HistoricalAgent unit, Bundle descBundle) throws ValidationError {
 
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
         //so they have id's.
         Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
         Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, RESOLVED_LINK_DESC);
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
 
         for (Description unitdesc : unit.getDescriptions()) {
             // Put the set of relationships into a HashSet to remove duplicates.
@@ -224,7 +218,7 @@ public class EacImporter extends SaxXmlImporter {
                 // they need to be found in the vocabularies that are in the graph
                 if (relationVertex.getPropertyKeys().contains("cvoc")) {
                     String cvocId = relationVertex.getProperty("cvoc");
-                    String conceptId = relationVertex.getProperty(LINK_TARGET);
+                    String conceptId = relationVertex.getProperty(ImportHelpers.LINK_TARGET);
                     logger.debug("{} -> {}", cvocId, conceptId);
                     try {
                         Vocabulary vocabulary = manager.getEntity(cvocId, Vocabulary.class);
@@ -252,56 +246,9 @@ public class EacImporter extends SaxXmlImporter {
         }
     }
 
-    private void extractBooks(Object books, Map<String, Object> description) {
-        List<String> createdBy = Lists.newArrayList();
-        List<String> subjectOf = Lists.newArrayList();
-
-        if (books instanceof List) {
-            for (Object book : (List) books) {
-                if (book instanceof Map) {
-                    Map bookEntry = (Map) book;
-                    boolean created = false;
-                    String publication = "";
-                    for (Object entryKey : bookEntry.keySet()) {
-                        switch ((String) entryKey) {
-                            case "bookentry":
-                                if (bookEntry.get(entryKey) instanceof List) {
-                                    for (Object entry : (List) bookEntry.get(entryKey)) {
-                                        if (entry instanceof Map
-                                                && ((Map) entry).containsKey(REL_TYPE)
-                                                && ((Map) entry).containsKey("bookentry")) {
-                                            String type = ((Map) entry).get(REL_TYPE).toString();
-                                            String value = ((Map) entry).get("bookentry").toString();
-                                            String join = type.equals("isbn") || type.equals("creator")
-                                                    ? " " + type + ":"
-                                                    : "";
-                                            publication = publication.concat(join + value);
-                                        }
-                                    }
-                                }
-                                break;
-                            case REL_TYPE:
-                                created = (bookEntry.get(entryKey).equals("creatorOf"));
-                                break;
-                            default:
-                                publication = publication.concat(entryKey + ":" + bookEntry.get(entryKey));
-                                break;
-                        }
-                    }
-                    if (created) {
-                        createdBy.add(publication);
-                    } else {
-                        subjectOf.add(publication);
-                    }
-                }
-            }
-        }
-        if (!createdBy.isEmpty()) {
-            description.put("createdBy", createdBy);
-        }
-
-        if (!subjectOf.isEmpty()) {
-            description.put("subjectOf", subjectOf);
-        }
+    private Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
+        Map<String, Object> data = ImportHelpers.extractIdentifiers(itemData);
+        data.put("typeOfEntity", itemData.get("typeOfEntity"));
+        return data;
     }
 }

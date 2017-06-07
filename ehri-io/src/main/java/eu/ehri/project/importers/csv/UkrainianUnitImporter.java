@@ -25,14 +25,13 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.MapImporter;
-import eu.ehri.project.importers.base.SaxXmlHandler;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -48,9 +47,9 @@ import java.util.Map;
  * Importer of Ukrainian units, which are encoded in a slightly different way
  * than other documentary units.
  */
-public class UkrainianUnitImporter extends MapImporter {
+public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>, AbstractUnit> {
 
-    public static final String MULTIVALUE_SEP = ",,";
+    private static final String MULTIVALUE_SEP = ",,";
     private final XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianUnitImporter.class);
 
@@ -61,7 +60,7 @@ public class UkrainianUnitImporter extends MapImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AbstractUnit importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
 
@@ -116,7 +115,7 @@ public class UkrainianUnitImporter extends MapImporter {
 
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData, List<String> scopeIds) throws
+    public AbstractUnit importItem(Map<String, Object> itemData, List<String> scopeIds) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
@@ -169,23 +168,23 @@ public class UkrainianUnitImporter extends MapImporter {
                     (!key.equals("language_of_description"))  //dealt with in importItem
                     ) {
                 if (!p.containsProperty(key)) {
-                    Helpers.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, ImportHelpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
                     Object value = itemData.get(key);
                     // TODO: Check if the property is an allowedMultivalue one...
                     if (value.toString().contains(MULTIVALUE_SEP)) {
                         for (String v : value.toString().split(MULTIVALUE_SEP)) {
-                            Helpers.putPropertyInGraph(item, p.getProperty(key), v);
+                            ImportHelpers.putPropertyInGraph(item, p.getProperty(key), v);
                         }
                     } else {
-                        Helpers.putPropertyInGraph(item, p.getProperty(key), value.toString());
+                        ImportHelpers.putPropertyInGraph(item, p.getProperty(key), value.toString());
                     }
                 }
             }
 
         }
         //replace the language from the itemData with the one specified in the param
-        Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
+        ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
         return item;
     }
 }

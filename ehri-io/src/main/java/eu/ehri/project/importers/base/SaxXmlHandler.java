@@ -22,7 +22,7 @@ package eu.ehri.project.importers.base;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -56,13 +56,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  */
 public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
-    protected static final String OBJECT_IDENTIFIER = AbstractImporter.OBJECT_IDENTIFIER;
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
-
-    /**
-     * Keys in the node that denote unknown properties must start with the value of UNKNOWN.
-     */
-    public static final String UNKNOWN = "UNKNOWN_";
 
     /**
      * Key in the node that denotes the object's identifier.
@@ -74,14 +68,14 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
 
     protected String currentEntity;
 
-    protected final AbstractImporter<Map<String, Object>> importer;
+    protected final ItemImporter<Map<String, Object>, ?> importer;
     protected final XmlImportProperties properties;
 
     protected int depth;
     private String attribute;
     private String languagePrefix;
 
-    public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
+    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties properties) {
         super();
         this.importer = importer;
         this.properties = properties;
@@ -169,10 +163,10 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                     && !properties.getAttributeProperty(attributeName).equals(LANGUAGE_OF_DESCRIPTION)) {
 
                 if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "")) {
-                    String path = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "");
+                    String path = getMappedProperty(currentPath, "@" + properties.getAttributeProperty(attributeName), "");
                     putPropertyInCurrentGraph(path, attributes.getValue(attr));
                 } else if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
-                    attribute = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
+                    attribute = getMappedProperty(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
                 } else {
                     logger.debug("attribute {} not found in properties", attributeName);
                 }
@@ -188,13 +182,13 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (languagePrefix == null) {
             if (attribute == null) {
-                putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop().toString());
+                putPropertyInCurrentGraph(getMappedProperty(currentPath), currentText.pop().toString());
             } else {
                 putPropertyInCurrentGraph(attribute, currentText.pop().toString());
                 attribute = null;
             }
         } else {
-            Helpers.putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
+            ImportHelpers.putPropertyInGraph(languageMap.get(languagePrefix), getMappedProperty(currentPath), currentText.pop().toString());
         }
     }
 
@@ -270,7 +264,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value    the property value
      */
     protected void putPropertyInCurrentGraph(String property, String value) {
-        Helpers.putPropertyInGraph(currentGraphPath.peek(), property, value);
+        ImportHelpers.putPropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
     /**
@@ -280,7 +274,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param value    new value for the property.
      */
     protected void overwritePropertyInCurrentGraph(String property, String value) {
-        Helpers.overwritePropertyInGraph(currentGraphPath.peek(), property, value);
+        ImportHelpers.overwritePropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
     /**
@@ -293,8 +287,8 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * if this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
-    protected String getImportantPath(Stack<String> path) {
-        return getImportantPath(path, "", "");
+    protected String getMappedProperty(Stack<String> path) {
+        return getMappedProperty(path, "", "");
     }
 
     /**
@@ -309,7 +303,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * If this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
-    private String getImportantPath(Stack<String> path, String attribute, String value) {
+    private String getMappedProperty(Stack<String> path, String attribute, String value) {
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
@@ -318,7 +312,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 return key;
             }
         }
-        return UNKNOWN + all.replace("/", "_");
+        return ImportHelpers.UNKNOWN_PREFIX + all.replace("/", "_");
     }
 
     /**

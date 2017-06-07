@@ -1,8 +1,8 @@
 package eu.ehri.project.exporters.cvoc;
 
+import eu.ehri.project.definitions.Entities;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;

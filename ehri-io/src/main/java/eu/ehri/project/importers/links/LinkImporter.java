@@ -1,6 +1,5 @@
 package eu.ehri.project.importers.links;
 
-import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;

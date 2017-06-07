@@ -24,9 +24,9 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.MapImporter;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
@@ -41,9 +41,9 @@ import java.util.Map;
  * to manipulate the graph.
  */
 public abstract class ImportCsvCommand extends BaseCommand {
-    final Class<? extends MapImporter> importer;
+    final Class<? extends ItemImporter> importer;
 
-    public ImportCsvCommand(Class<? extends MapImporter> importer) {
+    public ImportCsvCommand(Class<? extends ItemImporter> importer) {
         this.importer = importer;
     }
 

@@ -24,7 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -58,7 +58,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     private String currentFile;
     protected Integer currentPosition;
-    protected final Class<? extends AbstractImporter> importerClass;
+    protected final Class<? extends ItemImporter> importerClass;
 
     /**
      * Constructor.
@@ -77,7 +77,7 @@ public abstract class AbstractImportManager implements ImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends AbstractImporter> importerClass) {
+            Class<? extends ItemImporter> importerClass) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;

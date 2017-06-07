@@ -19,13 +19,14 @@
 
 package eu.ehri.project.importers.csv;
 
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.List;
 
-import eu.ehri.project.importers.csv.TerezinDataConverter;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 public class TerezinDataConverterTest {

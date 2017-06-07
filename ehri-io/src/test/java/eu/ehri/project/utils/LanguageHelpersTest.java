@@ -23,10 +23,34 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class LanguageHelpersTest {
+
+    @Test
+    public void testIso639DashTwoCode() throws Exception {
+        // two-to-three
+        assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("sq"));
+        // bibliographic to term
+        assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("alb"));
+        // name to code
+        // FIXME fails when executed on a server with a Dutch locale
+        assertEquals("eng", LanguageHelpers.iso639DashTwoCode("English"));
+    }
+
+    @Test
+    public void testIso639DashOneCode() throws Exception {
+        assertEquals("en", LanguageHelpers.iso639DashOneCode("eng"));
+        assertEquals("cs", LanguageHelpers.iso639DashOneCode("ces"));
+        assertEquals("cs", LanguageHelpers.iso639DashOneCode("cze"));
+        assertEquals("sq", LanguageHelpers.iso639DashOneCode("sqi"));
+        assertEquals("en", LanguageHelpers.iso639DashOneCode("English"));
+        assertEquals("en-Latn", LanguageHelpers.iso639DashOneCode("eng-Latn"));
+        assertEquals("en", LanguageHelpers.iso639DashOneCode("eng-"));
+        assertEquals("---", LanguageHelpers.iso639DashOneCode("---"));
+    }
 
     @Test
     public void testCountryCodeToContinent() throws Exception {

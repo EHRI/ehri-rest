@@ -1,7 +1,6 @@
 package eu.ehri.project.importers.links;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -10,7 +9,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class LinkImporterTest extends AbstractFixtureTest {
 

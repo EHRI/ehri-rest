@@ -28,6 +28,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -50,10 +51,10 @@ import java.util.Optional;
  * Superclass of all import command-line tools.
  */
 public abstract class ImportCommand extends BaseCommand {
-    protected final Class<? extends SaxXmlHandler> handler;
-    protected final Class<? extends AbstractImporter> importer;
+    private final Class<? extends SaxXmlHandler> handler;
+    private final Class<? extends ItemImporter> importer;
 
-    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
+    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter> importer) {
         this.handler = handler;
         this.importer = importer;
     }

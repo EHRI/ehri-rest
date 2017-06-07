@@ -23,17 +23,15 @@
  */
 package eu.ehri.project.importers.csv;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.MapImporter;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -52,7 +50,7 @@ import java.util.Map;
  * Importer of authoritative items such as historical agents and concepts, loaded
  * from a CSV file.
  */
-public class CsvAuthoritativeItemImporter extends MapImporter {
+public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, Object>, AuthoritativeItem> {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
@@ -62,7 +60,7 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public AuthoritativeItem importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
         Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
@@ -83,7 +81,7 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData, List<String> idPath) throws
+    public AuthoritativeItem importItem(Map<String, Object> itemData, List<String> idPath) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
@@ -103,42 +101,18 @@ public class CsvAuthoritativeItemImporter extends MapImporter {
         Map<String, Object> item = Maps.newHashMap();
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
-        Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
+        ImportHelpers.putPropertyInGraph(item, Ontology.NAME_KEY, itemData.get("name").toString());
         for (String key : itemData.keySet()) {
             if (!key.equals("id") && !key.equals("name")) {
-                Helpers.putPropertyInGraph(item, key, itemData.get(key).toString());
+                ImportHelpers.putPropertyInGraph(item, key, itemData.get(key).toString());
             }
         }
         if (!item.containsKey("typeOfEntity")) {
-            Helpers.putPropertyInGraph(item, "typeOfEntity", "subject");
+            ImportHelpers.putPropertyInGraph(item, "typeOfEntity", "subject");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
-    }
-
-    @Override
-    public List<Map<String, Object>> extractDates(Map<String, Object> itemData) {
-
-        List<Map<String, Object>> l = Lists.newArrayList();
-        Map<String, Object> items = Maps.newHashMap();
-
-        String end = (String) itemData.get("DateofdeathYYYY-MM-DD");
-        String start = (String) itemData.get("DateofbirthYYYY-MM-DD");
-        if (start != null && start.endsWith("00-00")) {
-            start = start.substring(0, 4);
-        }
-        if (end != null && end.endsWith("00-00")) {
-            end = end.substring(0, 4);
-        }
-        if (end != null || start != null) {
-            if (start != null)
-                items.put(Ontology.DATE_PERIOD_START_DATE, start);
-            if (end != null)
-                items.put(Ontology.DATE_PERIOD_END_DATE, end);
-            l.add(items);
-        }
-        return l;
     }
 }

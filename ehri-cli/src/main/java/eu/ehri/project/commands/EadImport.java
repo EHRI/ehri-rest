@@ -20,6 +20,7 @@
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
@@ -41,7 +42,7 @@ public class EadImport extends ImportCommand {
      * @param handler  The Handler class to be used for import
      * @param importer The Importer class to be used. If null, IcaAtomEadImporter is used.
      */
-    public EadImport(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
+    public EadImport(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter> importer) {
         super(handler, importer);
     }
 

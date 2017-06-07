@@ -26,13 +26,11 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.MapImporter;
-import eu.ehri.project.importers.base.SaxXmlHandler;
+import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.importers.util.Helpers;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -52,7 +50,7 @@ import java.util.Map;
  * Before importing the file: delete the columns with the reordering of the first and last name
  * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
  */
-public class PersonalitiesImporter extends MapImporter {
+public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>, HistoricalAgent> {
 
     private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
 
@@ -64,10 +62,11 @@ public class PersonalitiesImporter extends MapImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleManager persister = getPersister();
-        Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+        Bundle descBundle = Bundle.of(EntityClass.HISTORICAL_AGENT_DESCRIPTION,
+                extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
@@ -88,7 +87,7 @@ public class PersonalitiesImporter extends MapImporter {
     }
 
     @Override
-    public Accessible importItem(Map<String, Object> itemData, List<String> idPath) throws
+    public HistoricalAgent importItem(Map<String, Object> itemData, List<String> idPath) throws
             ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
@@ -126,23 +125,23 @@ public class PersonalitiesImporter extends MapImporter {
         item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
 
 
-        Helpers.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
+        ImportHelpers.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
-                    Helpers.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, ImportHelpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
-                    Helpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
                 }
             }
 
         }
         //create all otherFormsOfName
         if (!item.containsKey("typeOfEntity")) {
-            Helpers.putPropertyInGraph(item, "typeOfEntity", "person");
+            ImportHelpers.putPropertyInGraph(item, "typeOfEntity", "person");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            Helpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
     }
@@ -151,7 +150,6 @@ public class PersonalitiesImporter extends MapImporter {
      * @param itemData the item data map
      * @return returns a List with Maps with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
-    @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> itemData) {
 
         List<Map<String, Object>> l = Lists.newArrayList();

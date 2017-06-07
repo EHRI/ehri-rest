@@ -17,16 +17,13 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers.base;
+package eu.ehri.project.importers.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,17 +35,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-public class MapImporterTest extends AbstractImporterTest {
-
+public class ImportHelpersTest {
     private Map<String, Object> mapWithOneParseableDate;
     private Map<String, Object> mapWithMultipleDates;
     private Map<String, Object> mapWithMultipleDatesAsList;
-    private MapImporter importer;
 
     @Before
     public void init() throws ItemNotFound {
-        PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
-        importer = new EadImporter(graph, agent, validUser, new ImportLog());
         mapWithOneParseableDate = Maps.newHashMap();
         mapWithOneParseableDate.put("unitDates", "1934/1936");
 
@@ -65,15 +58,14 @@ public class MapImporterTest extends AbstractImporterTest {
 
     @Test
     public void splitDatesFromDateProperty() {
-        Map<String, String> dates = importer
-                .returnDatesAsString(mapWithOneParseableDate,
-                        new XmlImportProperties("dates.properties"));
+        Map<String, String> dates = ImportHelpers
+                .returnDatesAsString(mapWithOneParseableDate);
         assertTrue(dates.containsKey("1934/1936"));
-    }
+   }
 
     @Test
     public void extractDatesFromDateProperty() throws ItemNotFound {
-        List<Map<String, Object>> extractedDates = importer
+        List<Map<String, Object>> extractedDates = ImportHelpers
                 .extractDates(mapWithOneParseableDate);
         for (Map<String, Object> dateMap : extractedDates) {
             assertEquals("1934/1936", dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
@@ -83,7 +75,7 @@ public class MapImporterTest extends AbstractImporterTest {
     @Test
     public void removeDateFromDateProperty() throws ItemNotFound {
         assertTrue(mapWithOneParseableDate.containsKey("unitDates"));
-        importer.replaceDates(mapWithOneParseableDate, importer
+        ImportHelpers.replaceDates(mapWithOneParseableDate, ImportHelpers
                 .extractDates(mapWithOneParseableDate));
         assertFalse(mapWithOneParseableDate.containsKey("unitDates"));
     }
@@ -92,7 +84,7 @@ public class MapImporterTest extends AbstractImporterTest {
     public void removeDatesFromDateProperty() throws ItemNotFound {
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
         assertTrue(mapWithMultipleDates.containsKey("existDate"));
-        importer.replaceDates(mapWithMultipleDates, importer.extractDates(mapWithMultipleDates));
+        ImportHelpers.replaceDates(mapWithMultipleDates, ImportHelpers.extractDates(mapWithMultipleDates));
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
         assertEquals("summer 1978", mapWithMultipleDates.get("unitDates"));
         assertFalse(mapWithMultipleDates.containsKey("existDate"));
@@ -101,32 +93,32 @@ public class MapImporterTest extends AbstractImporterTest {
     @Test
     public void removeDatesFromDatePropertyList() throws ItemNotFound {
         assertTrue(mapWithMultipleDatesAsList.containsKey("unitDates"));
-        importer.replaceDates(mapWithMultipleDatesAsList,
-                importer.extractDates(mapWithMultipleDatesAsList));
+        ImportHelpers.replaceDates(mapWithMultipleDatesAsList,
+                ImportHelpers.extractDates(mapWithMultipleDatesAsList));
         assertFalse(mapWithMultipleDatesAsList.containsKey("unitDates"));
     }
 
     @Test
     public void beginDateYear() {
         assertEquals("1944-01-01",
-                importer.normaliseDate("1944", Ontology.DATE_PERIOD_START_DATE));
+                ImportHelpers.normaliseDate("1944"));
     }
 
     @Test
     public void beginDateYearMonth() {
         assertEquals("1944-01-01",
-                importer.normaliseDate("1944-01", Ontology.DATE_PERIOD_START_DATE));
+                ImportHelpers.normaliseDate("1944-01"));
     }
 
     @Test
     public void endDateYear() {
         assertEquals("1944-12-31",
-                importer.normaliseDate("1944", Ontology.DATE_PERIOD_END_DATE));
+                ImportHelpers.normaliseDate("1944", true));
     }
 
     @Test
     public void endDateYearMonth() {
         assertEquals("1944-01-31",
-                importer.normaliseDate("1944-01", Ontology.DATE_PERIOD_END_DATE));
+                ImportHelpers.normaliseDate("1944-01", true));
     }
 }

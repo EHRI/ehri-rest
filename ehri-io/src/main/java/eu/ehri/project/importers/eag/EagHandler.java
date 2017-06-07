@@ -21,11 +21,13 @@ package eu.ehri.project.importers.eag;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
@@ -40,18 +42,18 @@ import java.util.Map;
  */
 public class EagHandler extends SaxXmlHandler {
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubnodes
-            = ImmutableMap.<String, Class<? extends Entity>>builder().put(
-            "maintenanceEvent", MaintenanceEvent.class).build();
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
+            Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
+    );
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
-    public EagHandler(AbstractImporter<Map<String, Object>> importer) {
+    public EagHandler(ItemImporter<Map<String, Object>, ?> importer) {
         super(importer, new XmlImportProperties("eag.properties"));
     }
 
     @Override
     protected boolean needToCreateSubNode(String qName) {
-        return possibleSubnodes.containsKey(getImportantPath(currentPath));
+        return possibleSubNodes.containsKey(getMappedProperty(currentPath));
     }
 
     @Override
@@ -60,11 +62,11 @@ public class EagHandler extends SaxXmlHandler {
         super.endElement(uri, localName, qName);
 
         if (needToCreateSubNode(qName)) {
-            logger.debug("endElement: " + qName);
+            logger.debug("endElement: {}", qName);
 
-            logger.debug("just before popping: " + depth + "-" + getImportantPath(currentPath) + "-" + qName);
+            logger.debug("just before popping: {} - {} - {}", depth, getMappedProperty(currentPath), qName);
             Map<String, Object> currentGraph = currentGraphPath.pop();
-            putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
+            putSubGraphInCurrentGraph(getMappedProperty(currentPath), currentGraph);
             depth--;
         }
 
@@ -72,21 +74,21 @@ public class EagHandler extends SaxXmlHandler {
         //an EAG file consists of only 1 element, so if we're back at the root, we're done
         if (currentPath.isEmpty()) {
             try {
-                logger.debug("depth close " + depth + " " + qName);
+                logger.debug("depth close {} {}", depth, qName);
                 //TODO: add any mandatory fields not yet there:
-                if (!currentGraphPath.peek().containsKey(OBJECT_IDENTIFIER)) {
+                if (!currentGraphPath.peek().containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
                     logger.warn("no objectIdentifier found");
-                    putPropertyInCurrentGraph(OBJECT_IDENTIFIER, "id");
+                    putPropertyInCurrentGraph(ImportHelpers.OBJECT_IDENTIFIER, "id");
                 }
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.NAME_KEY)) {
-                    logger.debug("no " + Ontology.NAME_KEY + " found");
+                    logger.debug("no {} found", Ontology.NAME_KEY);
                     putPropertyInCurrentGraph(Ontology.NAME_KEY, "title");
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
+                    logger.debug("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
                     putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
                 if (!currentGraphPath.peek().containsKey("rulesAndConventions")) {

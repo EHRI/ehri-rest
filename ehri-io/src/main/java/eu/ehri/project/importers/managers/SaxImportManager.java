@@ -24,7 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
@@ -70,7 +70,7 @@ public class SaxImportManager extends AbstractImportManager {
             Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             Optional<XmlImportProperties> properties,
             List<ImportCallback> callbacks) {
         super(graph, scope, actioner, tolerant, allowUpdates, importerClass);
@@ -92,7 +92,7 @@ public class SaxImportManager extends AbstractImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             List<ImportCallback> callbacks) {
         this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, Optional
                         .<XmlImportProperties>empty(),
@@ -110,7 +110,7 @@ public class SaxImportManager extends AbstractImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             XmlImportProperties properties) {
         this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass,
                 Optional.ofNullable(properties),
@@ -126,7 +126,7 @@ public class SaxImportManager extends AbstractImportManager {
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
-            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this(graph, scope, actioner, false, false, importerClass, handlerClass, Lists
                 .<ImportCallback>newArrayList());
     }
@@ -142,7 +142,7 @@ public class SaxImportManager extends AbstractImportManager {
     protected void importInputStream(final InputStream stream, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
-            AbstractImporter<Map<String, Object>> importer = importerClass
+            ItemImporter<Map<String, Object>, ?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class,
                             Actioner.class, ImportLog.class)
                     .newInstance(framedGraph, permissionScope, actioner, log);
@@ -175,9 +175,9 @@ public class SaxImportManager extends AbstractImportManager {
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
             SaxXmlHandler handler = properties.isPresent()
-                    ? handlerClass.getConstructor(AbstractImporter.class, XmlImportProperties.class)
+                    ? handlerClass.getConstructor(ItemImporter.class, XmlImportProperties.class)
                     .newInstance(importer, properties.get())
-                    : handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
+                    : handlerClass.getConstructor(ItemImporter.class).newInstance(importer);
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);

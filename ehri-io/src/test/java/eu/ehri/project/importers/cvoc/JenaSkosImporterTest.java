@@ -27,11 +27,11 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.util.Comparator;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 public class JenaSkosImporterTest extends AbstractSkosTest {

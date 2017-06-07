@@ -1,0 +1,13 @@
+
+OLD
+.git
+
+# Ignores a Neo4j instance/database in the dev dir
+neo4j-*
+
+# Ignores Java target stuff
+ehri-*/target
+
+# data
+data
+testdata

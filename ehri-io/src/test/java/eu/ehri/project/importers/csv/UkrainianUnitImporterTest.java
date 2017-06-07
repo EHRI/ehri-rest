@@ -20,20 +20,21 @@
 package eu.ehri.project.importers.csv;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
-
-import java.io.InputStream;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class UkrainianUnitImporterTest extends AbstractImporterTest {
