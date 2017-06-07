@@ -29,7 +29,6 @@ import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
@@ -51,16 +50,12 @@ public class EacHandler extends SaxXmlHandler {
 
     // Artificial subnodes
     private static final String NAME_ENTRY = "NameEntry";
-    static final String BOOK = "Book";
-    static final String BOOK_ENTRY = "BookEntry";
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap
             .<String, Class<? extends Entity>>builder()
             .put(Entities.MAINTENANCE_EVENT, MaintenanceEvent.class)
             .put(Entities.ACCESS_POINT, AccessPoint.class)
             .put(Entities.DATE_PERIOD, DatePeriod.class)
-            .put(BOOK, Annotation.class)
-            .put(BOOK_ENTRY, Annotation.class)
             .put(NAME_ENTRY, UnknownProperty.class)
             .build();
 

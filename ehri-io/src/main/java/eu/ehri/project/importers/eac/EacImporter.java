@@ -57,8 +57,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-import static eu.ehri.project.importers.util.ImportHelpers.OBJECT_IDENTIFIER;
-
 /**
  * Import EAC for a given repository into the database.
  */
@@ -146,7 +144,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
     }
 
-    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
+    private Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
         List<Map<String, Object>> list = Lists.newArrayList();
         for (String key : itemData.keySet()) {
             if (key.equals(Entities.ACCESS_POINT)) {
@@ -156,7 +154,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL_TYPE)) {
                             relationNode.put(Ontology.ACCESS_POINT_TYPE, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL_NAME) && origRelation.get(REL_TYPE).equals("subject")) {
+                        } else if (eventkey.equals(REL_NAME)) {
                             //try to find the original identifier
                             relationNode.put(ImportHelpers.LINK_TARGET, origRelation.get("concept"));
                             //try to find the original name
@@ -184,11 +182,8 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
-                //resolved in EacHandler
-            } else if (key.equals(EacHandler.BOOK)) {
-                extractBooks(itemData.get(key), description);
             } else if (!key.startsWith(ImportHelpers.UNKNOWN_PREFIX)
-                    && !key.equals(OBJECT_IDENTIFIER)
+                    && !key.equals(ImportHelpers.OBJECT_IDENTIFIER)
                     && !key.equals(Ontology.OTHER_IDENTIFIERS)
                     && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith(Entities.MAINTENANCE_EVENT)
@@ -202,7 +197,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         return description;
     }
 
-    protected void solveUndeterminedRelationships(HistoricalAgent unit, Bundle descBundle) throws ValidationError {
+    private void solveUndeterminedRelationships(HistoricalAgent unit, Bundle descBundle) throws ValidationError {
 
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
@@ -251,60 +246,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         }
     }
 
-    private void extractBooks(Object books, Map<String, Object> description) {
-        List<String> createdBy = Lists.newArrayList();
-        List<String> subjectOf = Lists.newArrayList();
-
-        if (books instanceof List) {
-            for (Object book : (List) books) {
-                if (book instanceof Map) {
-                    Map bookEntry = (Map) book;
-                    boolean created = false;
-                    String publication = "";
-                    for (Object entryKey : bookEntry.keySet()) {
-                        switch ((String) entryKey) {
-                            case EacHandler.BOOK_ENTRY:
-                                if (bookEntry.get(entryKey) instanceof List) {
-                                    for (Object entry : (List) bookEntry.get(entryKey)) {
-                                        if (entry instanceof Map
-                                                && ((Map) entry).containsKey(REL_TYPE)
-                                                && ((Map) entry).containsKey(EacHandler.BOOK_ENTRY)) {
-                                            String type = ((Map) entry).get(REL_TYPE).toString();
-                                            String value = ((Map) entry).get(EacHandler.BOOK_ENTRY).toString();
-                                            String join = type.equals("isbn") || type.equals("creator")
-                                                    ? " " + type + ":"
-                                                    : "";
-                                            publication = publication.concat(join + value);
-                                        }
-                                    }
-                                }
-                                break;
-                            case REL_TYPE:
-                                created = (bookEntry.get(entryKey).equals("creatorOf"));
-                                break;
-                            default:
-                                publication = publication.concat(entryKey + ":" + bookEntry.get(entryKey));
-                                break;
-                        }
-                    }
-                    if (created) {
-                        createdBy.add(publication);
-                    } else {
-                        subjectOf.add(publication);
-                    }
-                }
-            }
-        }
-        if (!createdBy.isEmpty()) {
-            description.put("createdBy", createdBy);
-        }
-
-        if (!subjectOf.isEmpty()) {
-            description.put("subjectOf", subjectOf);
-        }
-    }
-
-    public Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
+    private Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> data = ImportHelpers.extractIdentifiers(itemData);
         data.put("typeOfEntity", itemData.get("typeOfEntity"));
         return data;
