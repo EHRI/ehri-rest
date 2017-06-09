@@ -30,6 +30,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.definitions.Skos;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -97,6 +98,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final boolean tolerant;
     private final String format;
     private final String baseURI;
+    private final String suffix;
     private final String defaultLang;
     private static final String DEFAULT_LANG = "eng";
 
@@ -111,12 +113,13 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param defaultLang The language to use for elements without specified language
      */
     public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
-            Vocabulary vocabulary, boolean tolerant, String baseURI, String format, String defaultLang) {
+            Vocabulary vocabulary, boolean tolerant, String baseURI, String suffix, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
         this.tolerant = tolerant;
         this.baseURI = baseURI;
+        this.suffix = suffix;
         this.format = format;
         this.defaultLang = defaultLang;
         this.dao = new BundleManager(framedGraph, vocabulary.idPath());
@@ -155,35 +158,42 @@ public final class JenaSkosImporter implements SkosImporter {
      */
     public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
-        this(framedGraph, actioner, vocabulary, false, null, null, DEFAULT_LANG);
+        this(framedGraph, actioner, vocabulary, false, null, null, null, DEFAULT_LANG);
     }
 
     @Override
     public JenaSkosImporter setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: {}", tolerant);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setBaseURI(String prefix) {
         logger.debug("Setting importer base URI: {}", prefix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, prefix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, prefix, suffix, format, defaultLang);
+    }
+
+    @Override
+    public JenaSkosImporter setURISuffix(String suffix) {
+        logger.debug("Setting importer URI: suffix {}", suffix);
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setFormat(String format) {
         logger.debug("Setting importer format: {}", format);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setDefaultLang(String lang) {
         logger.debug("Setting importer default language: {}", lang);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, format,
+                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format,
                 LanguageHelpers.iso639DashTwoCode(lang));
     }
 
@@ -294,7 +304,8 @@ public final class JenaSkosImporter implements SkosImporter {
     private Mutation<Concept> importConcept(Resource item) throws ValidationError {
         logger.debug("Importing: {}", item);
         Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
-                .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())));
+                .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())))
+                .addDataValue(Ontology.URI_KEY, item.getURI());
 
         Map<AuthoritativeItem, String> linkedConcepts = Maps.newHashMap();
 
@@ -315,10 +326,10 @@ public final class JenaSkosImporter implements SkosImporter {
 
         for (AuthoritativeItem concept : linkedConcepts.keySet()) {
             try {
-                String reltype = linkedConcepts.get(concept);
+                String relType = linkedConcepts.get(concept);
                 Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                        .withDataValue(Ontology.LINK_HAS_TYPE, "associate")
-                        .withDataValue(reltype.substring(0, reltype.indexOf(":")), reltype.substring(reltype.indexOf(":") + 1))
+                        .withDataValue(Ontology.LINK_HAS_TYPE, "associative")
+                        .withDataValue(relType.substring(0, relType.indexOf(":")), relType.substring(relType.indexOf(":") + 1))
                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
                 Link link = api.create(linkBundle, Link.class);
                 unit.addLink(link);
@@ -452,6 +463,7 @@ public final class JenaSkosImporter implements SkosImporter {
             descCode.ifPresent(code -> builder.addDataValue(Ontology.IDENTIFIER_KEY, code));
 
             for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
+
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                     if (target.isLiteral()) {
                         if (prop.getKey().equals("latitude/longitude")) {
@@ -461,10 +473,10 @@ public final class JenaSkosImporter implements SkosImporter {
                                 builder.addDataValue("longitude", latLon[1]);
                             }
                         } else {
-                            builder.addDataValue(prop.getKey(), target.asLiteral().getString());
+                            builder.addDataMultiValue(prop.getKey(), target.asLiteral().getString());
                         }
                     } else {
-                        builder.addDataValue(prop.getKey(), target.toString());
+                        builder.addDataMultiValue(prop.getKey(), target.toString());
                     }
                 }
             }
@@ -495,6 +507,21 @@ public final class JenaSkosImporter implements SkosImporter {
             descriptions.add(bundle);
         }
 
+        // Hack: if there's only one description it means we've only
+        // got one prefLabel with a language tag. In this case get
+        // a list of altLabels in all languages :(
+        if (descriptions.size() == 1) {
+            List<String> all = getReifiedObjectValue(item, SkosRDFVocabulary.ALT_LABEL.getURI())
+                    .stream()
+                    .map(StringValue::getValue)
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+            if (!all.isEmpty()) {
+                descriptions.set(0, descriptions.get(0).withDataValue(Skos.altLabel.toString(), all));
+            }
+        }
+
         return descriptions;
     }
 
@@ -516,7 +543,10 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private String getId(URI uri) {
-        if (baseURI != null && uri.toString().startsWith(baseURI)) {
+        if (baseURI != null && suffix != null && uri.toString().startsWith(baseURI)) {
+            String sub = uri.toString().substring(baseURI.length());
+            return sub.substring(0, sub.lastIndexOf(suffix));
+        } else if (baseURI != null && uri.toString().startsWith(baseURI)) {
             return uri.toString().substring(baseURI.length());
         } else if (uri.getFragment() != null) {
             return uri.getFragment();

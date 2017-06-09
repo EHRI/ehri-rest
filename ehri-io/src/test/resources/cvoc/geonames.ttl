@@ -1,0 +1,41 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix gn: <http://www.geonames.org/ontology#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix sesame: <http://www.openrdf.org/schema/sesame#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions#> .
+
+<http://sws.geonames.org/125605/> a skos:Concept ;
+        skos:inScheme <http://sws.geonames.org/place/> ;
+        dct:source <http://sws.geonames.org/> ;
+        skos:prefLabel "Ostān-e Lorestān" ;
+        skos:altLabel "استان لرستان"@fa ;
+        dct:type gn:A.ADM1 ;
+        wgs:lat "33.5" ;
+        wgs:long "48.5" ;
+        rdfs:seeAlso <http://en.wikipedia.org/wiki/Loristan_Province> , <http://sws.geonames.org/125605/about.rdf> , <http://dbpedia.org/resource/Loristan_Province> ;
+        skos:altLabel "Lorestan"@pt , "Lorestan"@de , "Ostān-e Lorestān"@fa , "Lorestān" , "Farmāndārī-ye Koll-e Lorestān" , "Lorestán"@es , "Governorship of Lorestan" , "Lorestan"@nl , "فَرماندارئ كُلِّ لُرِستان"@fa , "محافظة لرستان"@ar , "Luristan"@no , "Lorestān"@fa , "ロレスターン州"@ja , "Lorestan"@fr , "Устони Луристoн"@tg , "لرستان"@fa , "Lorestan"@tr , "Larestan" , "Luristan"@da , "Loristan"@ku .
+
+<http://sws.geonames.org/2793747/> a skos:Concept ;
+        skos:inScheme <http://sws.geonames.org/place/> ;
+        dct:source <http://sws.geonames.org/> ;
+        skos:prefLabel "La Bouverie" ;
+        dct:type gn:P.PPL ;
+        wgs:lat "50.40524" ;
+        wgs:long "3.8744" ;
+        skos:broader <http://sws.geonames.org/2796741/> ;
+        rdfs:seeAlso <http://sws.geonames.org/2793747/about.rdf> .
+
+<http://sws.geonames.org/2793798/> a skos:Concept ;
+        skos:inScheme <http://sws.geonames.org/place/> ;
+        dct:source <http://sws.geonames.org/> ;
+        skos:prefLabel "Laarne" ;
+        skos:altLabel "Laarne" ;
+        dct:type gn:A.ADM4 ;
+        wgs:lat "51.04434" ;
+        wgs:long "3.88169" ;
+        skos:broader <http://sws.geonames.org/2789733/> .

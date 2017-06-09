@@ -154,7 +154,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         for (Link desc : termJR.getLinks()) {
             assertTrue(desc.getPropertyKeys().contains("type"));
-            assertEquals("associate", desc.getProperty("type"));
+            assertEquals("associative", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("skos"));
             assertEquals("exactMatch", desc.getProperty("skos"));
         }

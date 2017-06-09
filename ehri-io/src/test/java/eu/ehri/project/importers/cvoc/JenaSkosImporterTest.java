@@ -21,10 +21,15 @@ package eu.ehri.project.importers.cvoc;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
+import com.tinkerpop.blueprints.CloseableIterable;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.definitions.Skos;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.persistence.Serializer;
 import org.junit.Test;
 
 import java.util.Comparator;
@@ -32,6 +37,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class JenaSkosImporterTest extends AbstractSkosTest {
@@ -132,5 +138,26 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         ImportLog importLog2 = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 1");
         assertEquals(1, importLog2.getUnchanged());
+    }
+
+    @Test
+    public void testImportGeonames() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                .setBaseURI("http://sws.geonames.org/")
+                .setURISuffix("/")
+                .setFormat("TTL");
+        ImportLog importLog = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE8), "geonames");
+        assertEquals(3, importLog.getCreated());
+        Iterable<Concept> concepts = graph.getVertices(Ontology.IDENTIFIER_KEY, "125605", Concept.class);
+        assertTrue(concepts.iterator().hasNext());
+        Concept larestan = concepts.iterator().next();
+        // Check all the altLabels are present...
+        List<String> altLabels = larestan.getDescriptions().iterator().next()
+                .<List<String>>getProperty(Skos.altLabel.toString());
+        assertEquals(15, altLabels.size());
+        List<String> seeAlso = larestan.getDescriptions().iterator().next()
+                .<List<String>>getProperty("seeAlso");
+        assertEquals(3, seeAlso.size());
     }
 }

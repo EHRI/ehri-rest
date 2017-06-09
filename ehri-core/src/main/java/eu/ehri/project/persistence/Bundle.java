@@ -136,6 +136,21 @@ public final class Bundle implements NestableData<Bundle> {
             return this;
         }
 
+        public Builder addDataMultiValue(String key, Object value) {
+            if (!data.containsKey(key)) {
+                data.put(key, value);
+            } else {
+                Object current = data.get(key);
+                if (current instanceof List) {
+                    ((List)current).add(value);
+                    data.put(key, current);
+                } else {
+                    data.put(key, Lists.newArrayList(current, value));
+                }
+            }
+            return this;
+        }
+
         public Builder addMetaData(Map<String, Object> d) {
             meta.putAll(d);
             return this;
