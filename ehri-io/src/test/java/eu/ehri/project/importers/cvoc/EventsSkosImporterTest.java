@@ -119,7 +119,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         for(Link desc : teheranChildren.getLinks()){
             found=true;
             assertTrue(desc.getPropertyKeys().contains("type"));
-            assertEquals("associate", desc.getProperty("type"));
+            assertEquals("associative", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("sem"));
             assertEquals("person", desc.getProperty("sem"));
             for(Linkable e : desc.getLinkTargets()){
@@ -171,7 +171,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         for(Link desc : termJR.getLinks()){
             found=true;
             assertTrue(desc.getPropertyKeys().contains("type"));
-            assertEquals("associate", desc.getProperty("type"));
+            assertEquals("associative", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("skos"));
             assertTrue(desc.getProperty("skos").equals("broadMatch") || desc.getProperty("skos").equals("relatedMatch"));
         }

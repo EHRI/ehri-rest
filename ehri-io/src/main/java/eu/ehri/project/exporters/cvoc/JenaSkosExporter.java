@@ -21,6 +21,7 @@ package eu.ehri.project.exporters.cvoc;
 
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Description;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Export SKOS RDF.
@@ -74,6 +76,12 @@ public class JenaSkosExporter implements SkosExporter {
         model.getWriter(format).write(model, outputStream, null);
     }
 
+    private String getUri(Concept concept, String baseUri) {
+        String fallback = baseUri + concept.getIdentifier();
+        String orig = concept.getProperty(Ontology.URI_KEY);
+        return Optional.ofNullable(orig).orElse(fallback);
+    }
+
     public Model export(String base) throws IOException {
 
         String baseUri = base == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : base;
@@ -103,7 +111,7 @@ public class JenaSkosExporter implements SkosExporter {
 
         for (Concept concept : concepts) {
             Vertex cv = concept.asVertex();
-            Resource resource = model.createResource(baseUri + concept.getIdentifier());
+            Resource resource = model.createResource(getUri(concept, baseUri));
             model.add(resource, RDF.type, skosConcept);
             model.add(resource, inSchemeProp, vocabResource);
 
@@ -138,15 +146,15 @@ public class JenaSkosExporter implements SkosExporter {
             }
 
             for (Concept other : concept.getBroaderConcepts()) {
-                Resource otherResource = model.createResource(baseUri + other.getIdentifier());
+                Resource otherResource = model.createResource(getUri(other, baseUri));
                 model.add(resource, model.createProperty(SkosRDFVocabulary.BROADER.getURI().toString()), otherResource);
             }
             for (Concept other : concept.getNarrowerConcepts()) {
-                Resource otherResource = model.createResource(baseUri + other.getIdentifier());
+                Resource otherResource = model.createResource(getUri(other, baseUri));
                 model.add(resource, model.createProperty(SkosRDFVocabulary.NARROWER.getURI().toString()), otherResource);
             }
             for (Concept other : concept.getRelatedConcepts()) {
-                Resource otherResource = model.createResource(baseUri + other.getIdentifier());
+                Resource otherResource = model.createResource(getUri(other, baseUri));
                 model.add(resource, model.createProperty(SkosRDFVocabulary.RELATED.getURI().toString()), otherResource);
             }
         }

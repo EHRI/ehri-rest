@@ -48,6 +48,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
                 FILE5, "RDF/XML"
         );
         for (Map.Entry<String, String> entry : files.entrySet()) {
+
             SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
             importer.setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
                     .importFile(ClassLoader.getSystemResourceAsStream(entry.getKey()), "test");
@@ -57,8 +58,9 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
             SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
                     .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue());
             OutputStream outputStream = new ByteArrayOutputStream();
-            exporter.export(outputStream, null);
+            exporter.export(outputStream, "http://www.my.com/#");
             String skos = outputStream.toString();
+            //System.out.println("EXPORT: " + skos);
             ImportLog log = importer.setFormat(entry.getValue())
                     .importFile(new ByteArrayInputStream(skos.getBytes()), "test");
             log.printReport();
@@ -79,7 +81,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
     public void testExport() throws Exception {
         String[] formats = {"TTL", "RDF/XML", "N3"};
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        String baseUri = "http://example.com#";
+        String baseUri = "http://ehri01.dans.knaw.nl/";
         importer.importFile(ClassLoader.getSystemResourceAsStream(FILE4), "test");
 
         for (String format : formats) {

@@ -57,6 +57,7 @@ public class Ontology {
     public static final String OTHER_IDENTIFIERS = "otherIdentifiers";
     public static final String SOURCEFILE_KEY = "sourceFileId";
     public static final String NAME_KEY = "name";
+    public static final String URI_KEY = "uri";
     public static final String PREFLABEL = NAME_KEY; //"prefLabel";
 
     public static final String DOC_IS_CHILD_OF = "childOf";

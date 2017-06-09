@@ -22,6 +22,7 @@ package eu.ehri.project.importers.cvoc;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Skos;
+import org.apache.jena.vocabulary.RDFS;
 
 import java.net.URI;
 import java.util.List;
@@ -93,6 +94,7 @@ public enum SkosRDFVocabulary {
             .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
             .put("person", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
             .put("place", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
+            .put("seeAlso", URI.create(RDFS.seeAlso.getURI()))
             .build();
 
     // Properties that end up as undeterminedRelation nodes.

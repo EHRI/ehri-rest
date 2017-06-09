@@ -62,9 +62,17 @@ public interface SkosImporter {
      * Set the URI prefix for items created by the importer.
      *
      * @param prefix a URI prefix
-     * @return A new SKOS importer with the given format
+     * @return A new SKOS importer with the given prefix
      */
     SkosImporter setBaseURI(String prefix);
+
+    /**
+     * Set the URI suffix for items created by the importer.
+     *
+     * @param suffix a URI suffix
+     * @return A new SKOS importer with the given suffix
+     */
+    SkosImporter setURISuffix(String suffix);
 
     /**
      * Set the RDF format. Supported values are: N3, TTL, TURTLE,

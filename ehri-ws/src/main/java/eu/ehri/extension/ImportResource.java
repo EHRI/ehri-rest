@@ -92,6 +92,7 @@ public class ImportResource extends AbstractResource {
     public static final String SCOPE_PARAM = "scope";
     public static final String TOLERANT_PARAM = "tolerant";
     public static final String BASE_URI_PARAM = "baseURI";
+    public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String VERSION_PARAM = "version";
     public static final String HANDLER_PARAM = "handler";
@@ -124,6 +125,10 @@ public class ImportResource extends AbstractResource {
      * @param tolerant   whether or not to die on the first validation error
      * @param logMessage log message for import. If this refers to an accessible local file
      *                   its contents will be used.
+     * @param baseURI    a URI prefix common to ingested items that will be removed
+     *                   from each item's URI to obtain the local identifier.
+     * @param uriSuffix  a URI suffix common to ingested items that will be removed
+     *                   from each item's URI to obtain the local identifier.
      * @param format     the RDF format of the POSTed data
      * @param stream     a stream of SKOS data in a valid format.
      * @return a JSON object showing how many records were created,
@@ -135,6 +140,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(BASE_URI_PARAM) String baseURI,
+            @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
             InputStream stream)
@@ -150,6 +156,7 @@ public class ImportResource extends AbstractResource {
                     .setFormat(format)
                     .setTolerant(tolerant)
                     .setBaseURI(baseURI)
+                    .setURISuffix(uriSuffix)
                     .importFile(stream, getLogMessage(logMessage).orElse(null));
             logger.debug("Committing SKOS import transaction...");
             tx.success();
