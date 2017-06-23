@@ -66,12 +66,10 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
     private static final Logger log = LoggerFactory.getLogger(StreamingExecutionStrategy.class);
 
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
-
         generator.writeStartObject();
         for (String fieldName : parameters.fields().keySet()) {
             generator.writeFieldName(fieldName);
-            List<Field> fieldList = parameters.fields().get(fieldName);
-            resolveField(generator, executionContext, parameters, fieldList);
+            resolveField(generator, executionContext, parameters, parameters.fields().get(fieldName));
         }
         generator.writeEndObject();
     }
@@ -215,8 +213,9 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
     private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields, Iterable<Object> result) throws IOException {
         TypeInfo typeInfo = parameters.typeInfo();
         GraphQLList fieldType = typeInfo.castType(GraphQLList.class);
-        for (Object item : result) {
 
+        generator.writeStartArray();
+        for (Object item : result) {
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
                     .typeInfo(typeInfo.asType(fieldType.getWrappedType()))
                     .fields(parameters.fields())
@@ -224,6 +223,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
             completeValue(generator, executionContext, newParameters, fields);
         }
+        generator.writeEndArray();
     }
 
 

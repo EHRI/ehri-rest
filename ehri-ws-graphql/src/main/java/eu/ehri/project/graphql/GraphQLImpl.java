@@ -519,7 +519,7 @@ public class GraphQLImpl {
         return newFieldDefinition()
                 .name(name)
                 .description(description)
-                .type(connectionType(type, name, description))
+                .type(type)
                 .dataFetcher(dataFetcher)
                 .argument(newArgument()
                         .name(FIRST_PARAM)
@@ -656,7 +656,7 @@ public class GraphQLImpl {
                         .name(PAGE_INFO)
                         .description("Pagination information")
                         .type(newObject()
-                                .name(PAGE_INFO)
+                                .name(PAGE_INFO + wrappedType.getName())
                                 .field(newFieldDefinition()
                                         .name(HAS_PREVIOUS_PAGE)
                                         .description("If a previous page of data is available")
@@ -804,7 +804,7 @@ public class GraphQLImpl {
 
 
     private final GraphQLObjectType entityType = newObject()
-            .name("Entity")
+            .name("EntityImpl")
             .description("An EHRI entity")
             .fields(entityFields)
             .withInterface(entityInterface)
@@ -900,6 +900,10 @@ public class GraphQLImpl {
             .defaultValue(false)
             .build();
 
+    private final GraphQLOutputType documentaryUnitsConnection = connectionType(
+            new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+            "documentaryUnits", "The list of documentary units");
+
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description("A repository / archival institution")
@@ -907,7 +911,7 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
             .field(itemCountFieldDefinition(r -> r.as(Repository.class).getChildCount()))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
-                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    documentaryUnitsConnection,
                     hierarchicalOneToManyRelationshipConnectionFetcher(
                             r -> r.as(Repository.class).getTopLevelDocumentaryUnits(),
                             r -> r.as(Repository.class).getAllDocumentaryUnits()),
@@ -933,7 +937,7 @@ public class GraphQLImpl {
                     manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository())))
             .field(itemCountFieldDefinition(d -> d.as(DocumentaryUnit.class).getChildCount()))
             .field(connectionFieldDefinition("children", "The unit's child items",
-                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    documentaryUnitsConnection,
                     hierarchicalOneToManyRelationshipConnectionFetcher(
                             d -> d.as(DocumentaryUnit.class).getChildren(),
                             d -> d.as(DocumentaryUnit.class).getAllChildren()),
@@ -961,6 +965,10 @@ public class GraphQLImpl {
             .withInterface(describedInterface)
             .build();
 
+    private final GraphQLOutputType historicalAgentsConnection = connectionType(
+            new GraphQLTypeReference(Entities.HISTORICAL_AGENT),
+            "historicalAgents", "A list of historicalAgents");
+
     private final GraphQLObjectType authoritativeSetType = newObject()
             .name(Entities.AUTHORITATIVE_SET)
             .description("An authority set")
@@ -969,13 +977,17 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.NAME_KEY, "The set's name"))
             .field(nullAttr("description", "The item's description"))
             .field(itemCountFieldDefinition(a -> a.as(AuthoritativeSet.class).getChildCount()))
-            .field(connectionFieldDefinition("authorities", "Item's contained in this vocabulary", historicalAgentType,
+            .field(connectionFieldDefinition("authorities", "Item's contained in this vocabulary",
+                    historicalAgentsConnection,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())))
             .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .build();
 
+    private final GraphQLOutputType repositoriesConnection = connectionType(
+            new GraphQLTypeReference(Entities.REPOSITORY),
+            "repositories", "A list of repositories");
 
     private final GraphQLObjectType countryType = newObject()
             .name(Entities.COUNTRY)
@@ -993,7 +1005,8 @@ public class GraphQLImpl {
             .fields(countryDescriptionNullFields)
             .fields(countryDescriptionListFields)
             .field(itemCountFieldDefinition(c -> c.as(Country.class).getChildCount()))
-            .field(connectionFieldDefinition("repositories", "Repositories located in the country", repositoryType,
+            .field(connectionFieldDefinition("repositories", "Repositories located in the country",
+                    repositoriesConnection,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Country.class).getRepositories())))
             .fields(linksAndAnnotationsFields())
@@ -1030,6 +1043,10 @@ public class GraphQLImpl {
             .withInterface(describedInterface)
             .build();
 
+    private final GraphQLOutputType conceptsConnection = connectionType(
+            new GraphQLTypeReference(Entities.CVOC_CONCEPT),
+            "concepts", "A list of concepts");
+
     private final GraphQLObjectType vocabularyType = newObject()
             .name(Entities.CVOC_VOCABULARY)
             .description("A vocabulary")
@@ -1038,7 +1055,8 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.NAME_KEY, "The vocabulary's name"))
             .field(nullAttr("description", "The item's description"))
             .field(itemCountFieldDefinition(r -> r.as(Vocabulary.class).getChildCount()))
-            .field(connectionFieldDefinition("concepts", "Concepts contained in this vocabulary", conceptType,
+            .field(connectionFieldDefinition("concepts", "Concepts contained in this vocabulary",
+                    conceptsConnection,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Vocabulary.class).getConcepts())))
             .fields(linksAndAnnotationsFields())
@@ -1050,7 +1068,8 @@ public class GraphQLImpl {
             .description("An annotation")
             .fields(entityFields)
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, "The text of the annotation"))
-            .field(listFieldDefinition("targets", "The annotation's target(s)", entityType,
+            .field(listFieldDefinition("targets", "The annotation's target(s)",
+                    entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
             .field(listFieldDefinition("annotations", "This item's annotations",
                     new GraphQLTypeReference(Entities.ANNOTATION),
@@ -1063,7 +1082,8 @@ public class GraphQLImpl {
             .description("A link")
             .fields(entityFields)
             .field(nonNullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
-            .field(listFieldDefinition("targets", "The annotation's targets", entityType,
+            .field(listFieldDefinition("targets", "The annotation's targets",
+                    entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))
             .field(listFieldDefinition("body", "The links's body(s)", accessPointType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkBodies())))
@@ -1072,6 +1092,26 @@ public class GraphQLImpl {
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
             .withInterface(entityInterface)
             .build();
+
+    private final GraphQLOutputType countriesConnection = connectionType(
+            new GraphQLTypeReference(Entities.COUNTRY),
+            "countries", "A list of countries");
+
+    private final GraphQLOutputType authoritativeSetsConnection = connectionType(
+            new GraphQLTypeReference(Entities.AUTHORITATIVE_SET),
+            "authoritativeSets", "A list of authoritative sets");
+
+    private final GraphQLOutputType vocabulariesConnection = connectionType(
+            new GraphQLTypeReference(Entities.CVOC_VOCABULARY),
+            "vocabularies", "A list of vocabularies");
+
+    private final GraphQLOutputType annotationsConnection = connectionType(
+            new GraphQLTypeReference(Entities.ANNOTATION),
+            "annotations", "A list of annotations");
+
+    private final GraphQLOutputType linksConnection = connectionType(
+            new GraphQLTypeReference(Entities.LINK),
+            "links", "A list of links");
 
     private GraphQLObjectType queryType() {
         return newObject()
@@ -1098,34 +1138,34 @@ public class GraphQLImpl {
                         linkType, entityIdDataFetcher(Entities.LINK), idArgument))
 
                 .field(connectionFieldDefinition("documentaryUnits", "A page of documentary units",
-                        documentaryUnitType,
+                        documentaryUnitsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT)))
                 .field(connectionFieldDefinition("topLevelDocumentaryUnits", "A page of top level documentary units",
-                        documentaryUnitType,
+                        documentaryUnitsConnection,
                         topLevelDocDataFetcher()))
                 .field(connectionFieldDefinition("repositories", "A page of repositories",
-                        repositoryType,
+                        repositoriesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.REPOSITORY)))
                 .field(connectionFieldDefinition("historicalAgents", "A page of historical agents",
-                        historicalAgentType,
+                        historicalAgentsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.HISTORICAL_AGENT)))
                 .field(connectionFieldDefinition("countries", "A page of countries",
-                        countryType,
+                        countriesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.COUNTRY)))
                 .field(connectionFieldDefinition("authoritativeSets", "A page of authoritative sets",
-                        authoritativeSetType,
+                        authoritativeSetsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.AUTHORITATIVE_SET)))
                 .field(connectionFieldDefinition("concepts", "A page of concepts",
-                        conceptType,
+                        conceptsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.CVOC_CONCEPT)))
                 .field(connectionFieldDefinition("vocabularies", "A page of vocabularies",
-                        vocabularyType,
+                        vocabulariesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.CVOC_VOCABULARY)))
                 .field(connectionFieldDefinition("annotations", "A page of annotation",
-                        annotationType,
+                        annotationsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.ANNOTATION)))
                 .field(connectionFieldDefinition("links", "A page of links",
-                        linkType,
+                        linksConnection,
                         entityTypeConnectionDataFetcher(EntityClass.LINK)))
 
                 .build();
