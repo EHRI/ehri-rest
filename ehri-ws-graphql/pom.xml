@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
-            <version>2.2.0</version>
+            <version>2017-06-23T04-42-02</version>
         </dependency>
 
         <!-- Test dependencies -->
