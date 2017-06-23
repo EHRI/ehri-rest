@@ -216,11 +216,13 @@ public class GraphQLImpl {
     // Data fetchers...
 
     private DataFetcher topLevelDocDataFetcher() {
-        Iterable<Country> countries = api().query()
-                .setStream(true).setLimit(-1).page(EntityClass.COUNTRY, Country.class);
-        Iterable<Iterable<Entity>> docs = Iterables.transform(countries, c ->
-                Iterables.transform(c.getTopLevelDocumentaryUnits(), d -> d.as(Entity.class)));
-        return connectionDataFetcher(() -> Iterables.concat(docs));
+        return connectionDataFetcher(() -> {
+            Iterable<Country> countries = api().query()
+                    .setStream(true).setLimit(-1).page(EntityClass.COUNTRY, Country.class);
+            Iterable<Iterable<Entity>> docs = Iterables.transform(countries, c ->
+                    Iterables.transform(c.getTopLevelDocumentaryUnits(), d -> d.as(Entity.class)));
+            return Iterables.concat(docs);
+        });
     }
 
     private DataFetcher entityTypeConnectionDataFetcher(EntityClass type) {
@@ -241,7 +243,7 @@ public class GraphQLImpl {
         return env -> {
             boolean allOrTop = (Boolean) Optional.ofNullable(env.getArgument(ALL_PARAM)).orElse(false);
             Function<Entity, Iterable<? extends Entity>> func = allOrTop ? all : top;
-            return connectionDataFetcher(() -> func.apply(((Entity) env.getSource()))).get(env);
+            return connectionDataFetcher(() -> func.apply((env.getSource()))).get(env);
         };
     }
 
@@ -278,7 +280,11 @@ public class GraphQLImpl {
     }
 
     private Map<String, Object> strictConnectionDataFetcher(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
-        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        // Note: strict connections are considerably slower than lazy ones
+        // since to assemble the PageInfo we need to count the total number
+        // of items, which involves fetching the iterator twice.
+        long total = Iterables.size(iter.get());
+        QueryApi query = api().query().setStream(true).setLimit(limit).setOffset(offset);
         QueryApi.Page<Entity> page = query.page(iter.get(), Entity.class);
         List<Entity> items = Lists.newArrayList(page);
 
@@ -292,7 +298,7 @@ public class GraphQLImpl {
             ));
         }
 
-        boolean hasNext = page.getOffset() + items.size() < page.getTotal();
+        boolean hasNext = page.getOffset() + items.size() < total;
         boolean hasPrev = page.getOffset() > 0;
         String nextCursor = toBase64(String.valueOf(offset + limit));
         String prevCursor = toBase64(String.valueOf(offset - limit));
@@ -331,18 +337,17 @@ public class GraphQLImpl {
     ;
 
     private static final DataFetcher idDataFetcher =
-            environment -> ((Entity) environment.getSource()).getProperty(EntityType.ID_KEY);
+            env -> ((Entity) env.getSource()).getProperty(EntityType.ID_KEY);
 
     private static final DataFetcher typeDataFetcher =
-            environment -> ((Entity) environment.getSource()).getProperty(EntityType.TYPE_KEY);
+            env -> ((Entity) env.getSource()).getProperty(EntityType.TYPE_KEY);
 
     private static final DataFetcher attributeDataFetcher =
-            environment -> ((Entity) environment.getSource())
-                    .getProperty(environment.getFields().get(0).getName());
+            env -> ((Entity) env.getSource()).getProperty(env.getFields().get(0).getName());
 
     private static DataFetcher listDataFetcher(DataFetcher fetcher) {
-        return environment -> {
-            Object obj = fetcher.get(environment);
+        return env -> {
+            Object obj = fetcher.get(env);
             if (obj == null) {
                 return Collections.emptyList();
             } else if (obj instanceof List) {
@@ -353,15 +358,15 @@ public class GraphQLImpl {
         };
     }
 
-    private static final DataFetcher descriptionDataFetcher = environment -> {
-        String lang = environment.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
-        String code = environment.getArgument(Ontology.IDENTIFIER_KEY);
+    private static final DataFetcher descriptionDataFetcher = env -> {
+        String lang = env.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
+        String code = env.getArgument(Ontology.IDENTIFIER_KEY);
 
-        Entity source = environment.getSource();
+        Entity source = env.getSource();
         Iterable<Description> descriptions = source.as(Described.class).getDescriptions();
 
         if (lang == null && code == null) {
-            int at = environment.getArgument(SLICE_PARAM);
+            int at = env.getArgument(SLICE_PARAM);
             List<Description> descList = Lists.newArrayList(descriptions);
             return at >= 1 && descList.size() >= at ? descList.get(at - 1) : null;
         } else {
@@ -383,19 +388,19 @@ public class GraphQLImpl {
     };
 
     private static DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
-        return environment -> transformer.apply(fetcher.get(environment));
+        return env -> transformer.apply(fetcher.get(env));
     }
 
     private DataFetcher oneToManyRelationshipFetcher(Function<Entity, Iterable<? extends Entity>> f) {
-        return environment -> {
-            Iterable<? extends Entity> elements = f.apply(((Entity) environment.getSource()));
+        return env -> {
+            Iterable<? extends Entity> elements = f.apply((env.getSource()));
             return api().query().setStream(true).setLimit(-1).page(elements, Entity.class);
         };
     }
 
     private DataFetcher manyToOneRelationshipFetcher(Function<Entity, Entity> f) {
-        return environment -> {
-            Entity elem = f.apply((Entity) environment.getSource());
+        return env -> {
+            Entity elem = f.apply(env.getSource());
             if (elem != null &&
                     AclManager.getAclFilterFunction(api().accessor())
                             .compute(elem.asVertex())) {
