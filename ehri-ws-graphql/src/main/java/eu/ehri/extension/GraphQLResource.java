@@ -101,7 +101,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-        ExecutionResult executionResult = new GraphQL(schema).execute(
+
+        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build().execute(
                 q.getQuery(), (Object) null, q.getVariablesAsMap());
 
         if (!executionResult.getErrors().isEmpty()) {
@@ -124,7 +125,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                         new GraphQLImpl(api(), true).getSchema());
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
-                ql2.execute(generator, document, q.getOperationName(),
+                ql2.execute(generator, q.getQuery(), document, q.getOperationName(),
                         null, q.getVariablesAsMap());
                 generator.writeEndObject();
                 tx.success();

@@ -60,7 +60,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
-import graphql.relay.Base64;
+import graphql.TypeResolutionEnvironment;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
@@ -75,6 +75,9 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.TypeResolver;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +144,19 @@ public class GraphQLImpl {
                 .build();
     }
 
+    private static String toBase64(String string) {
+        try {
+            return DatatypeConverter.printBase64Binary(string.getBytes("utf-8"));
+        } catch (UnsupportedEncodingException var2) {
+            throw new RuntimeException(var2);
+        }
+    }
+
+    private static String fromBase64(String string) {
+        return new String(DatatypeConverter.parseBase64Binary(string), Charset.forName("UTF-8"));
+    }
+
+
     private static Map<String, Object> mapOf(Object... items) {
         Preconditions.checkArgument(items.length % 2 == 0, "Items must be pairs of key/value");
         Map<String, Object> map = Maps.newHashMap();
@@ -153,7 +169,7 @@ public class GraphQLImpl {
     private static int decodeCursor(String cursor, int defaultVal) {
         try {
             return cursor != null
-                    ? Math.max(-1, Integer.parseInt(Base64.fromBase64(cursor)))
+                    ? Math.max(-1, Integer.parseInt(fromBase64(cursor)))
                     : defaultVal;
         } catch (NumberFormatException e) {
             return defaultVal;
@@ -271,15 +287,15 @@ public class GraphQLImpl {
         List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
         for (int i = 0; i < items.size(); i++) {
             edges.add(mapOf(
-                    CURSOR, Base64.toBase64(String.valueOf(offset + i)),
+                    CURSOR, toBase64(String.valueOf(offset + i)),
                     NODE, items.get(i)
             ));
         }
 
         boolean hasNext = page.getOffset() + items.size() < page.getTotal();
         boolean hasPrev = page.getOffset() > 0;
-        String nextCursor = Base64.toBase64(String.valueOf(offset + limit));
-        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        String nextCursor = toBase64(String.valueOf(offset + limit));
+        String prevCursor = toBase64(String.valueOf(offset - limit));
         return connectionData(items, edges, hasNext ? nextCursor : null, hasPrev ? prevCursor : null);
     }
 
@@ -293,11 +309,11 @@ public class GraphQLImpl {
         final AtomicInteger index = new AtomicInteger();
         Iterable<Map<String, Object>> edges = Iterables.transform(
                 query.page(iter.get(), Entity.class), item -> mapOf(
-                        CURSOR, Base64.toBase64(String.valueOf(offset + index.getAndIncrement())),
+                        CURSOR, toBase64(String.valueOf(offset + index.getAndIncrement())),
                         NODE, item
                 ));
 
-        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        String prevCursor = toBase64(String.valueOf(offset - limit));
         return connectionData(items, edges, null, hasPrev ? prevCursor : null);
     }
 
@@ -341,7 +357,7 @@ public class GraphQLImpl {
         String lang = environment.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
         String code = environment.getArgument(Ontology.IDENTIFIER_KEY);
 
-        Entity source = (Entity) environment.getSource();
+        Entity source = environment.getSource();
         Iterable<Description> descriptions = source.as(Described.class).getDescriptions();
 
         if (lang == null && code == null) {
@@ -691,8 +707,8 @@ public class GraphQLImpl {
 
     private TypeResolver entityTypeResolver = new TypeResolver() {
         @Override
-        public GraphQLObjectType getType(Object item) {
-            Entity entity = (Entity) item;
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Entity entity = (Entity) env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT:
                     return documentaryUnitType;
@@ -724,8 +740,8 @@ public class GraphQLImpl {
 
     private TypeResolver descriptionTypeResolver = new TypeResolver() {
         @Override
-        public GraphQLObjectType getType(Object item) {
-            Entity entity = (Entity) item;
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Entity entity = (Entity) env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT_DESCRIPTION:
                     return documentaryUnitDescriptionType;
