@@ -187,7 +187,6 @@ public class PermissionsResource extends AbstractResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("{userOrGroup:[^/]+}/scope/{id:[^/]+}")
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userOrGroup") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
