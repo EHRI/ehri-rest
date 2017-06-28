@@ -21,6 +21,7 @@ package eu.ehri.project.importers.eac;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -39,6 +40,7 @@ import org.xml.sax.SAXException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -101,8 +103,8 @@ public class EacHandler extends SaxXmlHandler {
                     overwritePropertyInCurrentGraph(Ontology.NAME_KEY, name);
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
-                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                    logger.debug("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
                 }
 
                 importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
@@ -136,14 +138,16 @@ public class EacHandler extends SaxXmlHandler {
                 }
             }
 
+            Set<String> otherNames = Sets.newHashSet();
             for (int i = 1; i < ((List) names).size(); i++) {
                 Map m = (Map) ((List) names).get(i);
                 Object namePart = m.get("namePart");
-                if (namePart != null) {
-                    logger.info("other name: {}", namePart);
-                    putPropertyInCurrentGraph("otherFormsOfName", namePart.toString());
+                if (namePart != null && !namePart.toString().trim().equalsIgnoreCase(nameValue)) {
+                    otherNames.add(namePart.toString().trim());
+                    logger.debug("other name: {}", namePart);
                 }
             }
+            otherNames.forEach(n -> putPropertyInCurrentGraph("otherFormsOfName", n));
         } else {
             logger.warn("no {} found", Ontology.NAME_KEY);
             nameValue = "no title";
