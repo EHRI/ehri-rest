@@ -108,13 +108,8 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
             assertTrue(desc.getPropertyKeys().contains("scopeNote"));
         }
         Concept teheranChildren = manager.getEntity("cvoc1-2", Concept.class);
-        for(Description desc : teheranChildren.getDescriptions()){
-//            for(String k : desc.getPropertyKeys())
-//                System.out.println(k+"-"+desc.getProperty(k));
-            assertTrue(desc.getPropertyKeys().contains(AccessPointType.person.name()));
-        }
-        
-        AuthoritativeItem ad1 = manager.getEntity("ad1", AuthoritativeItem.class);
+        assertTrue(teheranChildren.getPropertyKeys().contains(AccessPointType.person.name()));
+
         boolean found=false;
         for(Link desc : teheranChildren.getLinks()){
             found=true;

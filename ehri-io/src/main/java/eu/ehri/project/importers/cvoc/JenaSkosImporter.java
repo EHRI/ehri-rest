@@ -307,6 +307,24 @@ public final class JenaSkosImporter implements SkosImporter {
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())))
                 .addDataValue(Ontology.URI_KEY, item.getURI());
 
+        for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
+            for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
+                if (target.isLiteral()) {
+                    if (prop.getKey().equals("latitude/longitude")) {
+                        String[] latLon = target.asLiteral().getString().split(",");
+                        if (latLon.length > 1) {
+                            builder.addDataValue("latitude", latLon[0]);
+                            builder.addDataValue("longitude", latLon[1]);
+                        }
+                    } else {
+                        builder.addDataMultiValue(prop.getKey(), target.asLiteral().getString());
+                    }
+                } else {
+                    builder.addDataMultiValue(prop.getKey(), target.toString());
+                }
+            }
+        }
+
         Map<AuthoritativeItem, String> linkedConcepts = Maps.newHashMap();
 
         List<Bundle> unknown = getAdditionalRelations(item, linkedConcepts);
@@ -461,25 +479,6 @@ public final class JenaSkosImporter implements SkosImporter {
             builder.addDataValue(Ontology.NAME_KEY, property.getValue())
                     .addDataValue(Ontology.LANGUAGE, langCode3Letter);
             descCode.ifPresent(code -> builder.addDataValue(Ontology.IDENTIFIER_KEY, code));
-
-            for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
-
-                for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
-                    if (target.isLiteral()) {
-                        if (prop.getKey().equals("latitude/longitude")) {
-                            String[] latLon = target.asLiteral().getString().split(",");
-                            if (latLon.length > 1) {
-                                builder.addDataValue("latitude", latLon[0]);
-                                builder.addDataValue("longitude", latLon[1]);
-                            }
-                        } else {
-                            builder.addDataMultiValue(prop.getKey(), target.asLiteral().getString());
-                        }
-                    } else {
-                        builder.addDataMultiValue(prop.getKey(), target.toString());
-                    }
-                }
-            }
 
             for (Map.Entry<String, List<URI>> prop : SkosRDFVocabulary.LANGUAGE_PROPS.entrySet()) {
                 List<String> values = Lists.newArrayList();
