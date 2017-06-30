@@ -74,11 +74,8 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         Concept ghetto0 = manager.getEntity("cvoc1-0", Concept.class);
         //  <geo:lat>52.43333333333333</geo:lat>
         //	<geo:long>20.716666666666665</geo:long>
-        Iterable<Description> ghetto0desc = ghetto0.getDescriptions();
-        for (Description d : ghetto0desc) {
-            assertEquals("52.43333333333333", d.getProperty("latitude"));
-            assertEquals("20.716666666666665", d.getProperty("longitude"));
-        }
+        assertEquals("52.43333333333333", ghetto0.getProperty("latitude"));
+        assertEquals("20.716666666666665", ghetto0.getProperty("longitude"));
 
         // and print the tree
 //        printConceptTree(System.out, list.get(0));
@@ -110,10 +107,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         
         Concept ghetto0v2 = manager.getEntity("cvoc1-0", Concept.class);
         assertEquals(ghetto0, ghetto0v2);
-        
-        for(Description d : ghetto0v2.getDescriptions()){
-            assertEquals("48.6666666667", d.getProperty("latitude"));
-            assertEquals("26.5666666667", d.getProperty("longitude"));
-        }
+        assertEquals("48.6666666667", ghetto0v2.getProperty("latitude"));
+        assertEquals("26.5666666667", ghetto0v2.getProperty("longitude"));
     }
 }

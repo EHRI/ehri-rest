@@ -152,12 +152,11 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         Iterable<Concept> concepts = graph.getVertices(Ontology.IDENTIFIER_KEY, "125605", Concept.class);
         assertTrue(concepts.iterator().hasNext());
         Concept larestan = concepts.iterator().next();
+        List<String> seeAlso = larestan.<List<String>>getProperty("seeAlso");
+        assertEquals(3, seeAlso.size());
         // Check all the altLabels are present...
         List<String> altLabels = larestan.getDescriptions().iterator().next()
                 .<List<String>>getProperty(Skos.altLabel.toString());
         assertEquals(15, altLabels.size());
-        List<String> seeAlso = larestan.getDescriptions().iterator().next()
-                .<List<String>>getProperty("seeAlso");
-        assertEquals(3, seeAlso.size());
     }
 }
