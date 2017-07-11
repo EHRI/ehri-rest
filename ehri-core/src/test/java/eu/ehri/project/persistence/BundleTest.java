@@ -293,6 +293,18 @@ public class BundleTest {
     }
 
     @Test
+    public void testDependentsOnly() throws Exception {
+        assertEquals(bundle, bundle.dependentsOnly());
+        Bundle withNonDeps = bundle.withRelation("someRel",
+                Bundle.Builder.withClass(EntityClass.REPOSITORY)
+                        .addDataValue("key", "value")
+                        .build());
+        assertFalse(withNonDeps.dependentsOnly().hasRelations("key"));
+        assertNotEquals(withNonDeps, bundle);
+        assertEquals(withNonDeps.dependentsOnly(), bundle);
+    }
+
+    @Test
     public void testWithMetaData() throws Exception {
         Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .withDataValue(Ontology.NAME_KEY, "Foobar")
