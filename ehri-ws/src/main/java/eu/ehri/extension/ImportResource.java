@@ -63,6 +63,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -72,6 +73,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
@@ -317,6 +319,7 @@ public class ImportResource extends AbstractResource {
     @POST
     @Consumes({MediaType.TEXT_PLAIN, CSV_MEDIA_TYPE,
             MediaType.APPLICATION_OCTET_STREAM})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("csv")
     public ImportLog importCsv(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -368,6 +371,7 @@ public class ImportResource extends AbstractResource {
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("batch")
     public ImportLog batchUpdate(
             @QueryParam(SCOPE_PARAM) String scopeId,
@@ -380,7 +384,7 @@ public class ImportResource extends AbstractResource {
             PermissionScope scope = scopeId != null
                     ? manager.getEntity(scopeId, PermissionScope.class)
                     : null;
-            ImportLog log = new BatchOperations(graph, scope, version, tolerant)
+            ImportLog log = new BatchOperations(graph, scope, version, tolerant, Collections.emptyList())
                     .batchUpdate(inputStream, user, getLogMessage(logMessage));
             logger.debug("Committing batch update transaction...");
             tx.success();
@@ -409,7 +413,7 @@ public class ImportResource extends AbstractResource {
             PermissionScope scope = scopeId != null
                     ? manager.getEntity(scopeId, PermissionScope.class)
                     : null;
-            new BatchOperations(graph, scope, version, false)
+            new BatchOperations(graph, scope, version, false, Collections.emptyList())
                     .batchDelete(ids, user, getLogMessage(logMessage));
             logger.debug("Committing delete transaction...");
             tx.success();

@@ -1,6 +1,7 @@
 package eu.ehri.project.importers.json;
 
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -11,6 +12,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -25,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +45,7 @@ public class BatchOperations {
     private final PermissionScope scope;
     private final boolean version;
     private final boolean tolerant;
+    private final List<ImportCallback> callbacks;
 
     /**
      * Constructor.
@@ -52,11 +56,13 @@ public class BatchOperations {
      * @param tolerant whether to allow individual validation errors
      *                 without failing the entire batch
      */
-    public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant) {
+    public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant,
+            List<ImportCallback> callbacks) {
         this.graph = graph;
         this.scope = Optional.ofNullable(scopeOpt).orElse(SystemScope.getInstance());
         this.version = version;
         this.tolerant = tolerant;
+        this.callbacks = callbacks;
 
         this.manager = GraphManagerFactory.getInstance(graph);
         this.actionManager = new ActionManager(graph, scope);
@@ -71,7 +77,7 @@ public class BatchOperations {
      * @param graph the graph object
      */
     public BatchOperations(FramedGraph<?> graph) {
-        this(graph, SystemScope.getInstance(), true, false);
+        this(graph, SystemScope.getInstance(), true, false, Collections.emptyList());
     }
 
     /**
@@ -82,7 +88,7 @@ public class BatchOperations {
      * @return a new batch operation manager
      */
     public BatchOperations setTolerant(boolean tolerant) {
-        return new BatchOperations(graph, scope, version, tolerant);
+        return new BatchOperations(graph, scope, version, tolerant, callbacks);
     }
 
     /**
@@ -92,7 +98,7 @@ public class BatchOperations {
      * @return a new batch operation manager
      */
     public BatchOperations setVersioning(boolean versioning) {
-        return new BatchOperations(graph, scope, versioning, tolerant);
+        return new BatchOperations(graph, scope, versioning, tolerant, callbacks);
     }
 
     /**
@@ -102,7 +108,20 @@ public class BatchOperations {
      * @return a new batch operation manager
      */
     public BatchOperations setScope(PermissionScope scope) {
-        return new BatchOperations(graph, scope, version, tolerant);
+        return new BatchOperations(graph, scope, version, tolerant, callbacks);
+    }
+
+    /**
+     * Add import callbacks to the importer. Note: order of execution
+     * is undefined.
+     *
+     * @param callbacks one or more ImportCallback instances
+     * @return a new batch operation manager
+     */
+    public BatchOperations withCallbacks(ImportCallback ...callbacks) {
+        List<ImportCallback> newCallbacks = Lists.newArrayList(callbacks);
+        newCallbacks.addAll(this.callbacks);
+        return new BatchOperations(graph,  scope, version, tolerant, newCallbacks);
     }
 
     /**
@@ -123,20 +142,25 @@ public class BatchOperations {
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle bundle : bundleIter) {
                 try {
-                    Mutation<Accessible> update = dao.createOrUpdate(bundle, Accessible.class);
-                    switch (update.getState()) {
+                    Mutation<Accessible> mutation = dao.createOrUpdate(bundle, Accessible.class);
+                    switch (mutation.getState()) {
                         case UPDATED:
                             log.addUpdated();
-                            ctx.addSubjects(update.getNode());
+                            ctx.addSubjects(mutation.getNode());
                             if (version) {
-                                ctx.createVersion(update.getNode(), update.getPrior().get());
+                                mutation.getPrior().ifPresent(b ->
+                                        ctx.createVersion(mutation.getNode(), b));
                             }
                             break;
                         case CREATED:
                             log.addCreated();
-                            ctx.addSubjects(update.getNode());
+                            ctx.addSubjects(mutation.getNode());
+                            break;
                         default:
                             log.addUnchanged();
+                    }
+                    for (ImportCallback callback : callbacks) {
+                        callback.itemImported(mutation);
                     }
                 } catch (ValidationError e) {
                     if (!tolerant) {

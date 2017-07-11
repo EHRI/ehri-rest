@@ -741,6 +741,25 @@ public final class Bundle implements NestableData<Bundle> {
     }
 
     /**
+     * Return a bundle consisting of only dependent relations.
+     *
+     * @return a new bundle with non-dependent relations removed
+     */
+    public Bundle dependentsOnly() {
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(type.getJavaClass());
+        Multimap<String, Bundle> tmp = ArrayListMultimap.create();
+        for (String relation : relations.keySet()) {
+            if (dependents.containsKey(relation)) {
+                for (Bundle bundle : relations.get(relation)) {
+                    tmp.put(relation, bundle.dependentsOnly());
+                }
+            }
+        }
+        return new Bundle(id, type, data, tmp, meta, temp);
+    }
+
+    /**
      * Generate missing IDs for the subtree.
      *
      * @param scopes A set of parent scopes.

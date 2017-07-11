@@ -200,13 +200,14 @@ public final class BundleManager {
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
         Vertex node = manager.getVertex(bundle.getId());
         try {
-            Bundle nodeBundle = serializer.vertexToBundle(node);
-            if (!nodeBundle.equals(bundle)) {
-                logger.trace("Bundles differ\nnew:\n{}\nold:\n{}", bundle.toJson(), nodeBundle.toJson());
+            Bundle currentBundle = serializer.vertexToBundle(node);
+            Bundle newBundle = bundle.dependentsOnly();
+            if (!currentBundle.equals(newBundle)) {
+                logger.trace("Bundles differ\nnew:\n{}\nold:\n{}", newBundle.toJson(), currentBundle.toJson());
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData());
                 updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
-                return new Mutation<>(node, MutationState.UPDATED, nodeBundle);
+                return new Mutation<>(node, MutationState.UPDATED, currentBundle);
             } else {
                 logger.debug("Not updating equivalent bundle {}", bundle.getId());
                 return new Mutation<>(node, MutationState.UNCHANGED);

@@ -19,6 +19,7 @@
 
 package eu.ehri.extension;
 
+import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.base.DeleteResource;
@@ -35,8 +36,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -57,6 +63,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -152,6 +159,38 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                     api().withScope(repository), DocumentaryUnit.class);
             tx.success();
             return response;
+        }
+    }
+
+    /**
+     * Add items to a repository via serialised data.
+     *
+     * @param id       the repository ID
+     * @param data     a list of serialised items
+     * @return an import log
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:[^/]+}/list")
+    public ImportLog addChildren(
+            @PathParam("id") String id,
+            InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
+        try (final Tx tx = beginTx()) {
+            Actioner user = getCurrentActioner();
+            Repository repository = api().detail(id, cls);
+            ImportCallback cb = mutation -> {
+                Accessible accessible = mutation.getNode();
+                if (!Entities.DOCUMENTARY_UNIT.equals(accessible.getType())) {
+                    throw new RuntimeException("Bundle is not a documentary unit: " + accessible.getId());
+                }
+                repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
+            };
+            ImportLog log = new BatchOperations(graph, repository, true,
+                    false, Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            logger.debug("Committing batch ingest transaction...");
+            tx.success();
+            return log;
         }
     }
 
