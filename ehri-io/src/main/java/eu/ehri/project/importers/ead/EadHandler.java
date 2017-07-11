@@ -419,7 +419,6 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
-        System.out.println("Adding FILE VALUES! " + eadFileGlobals);
         for (String key : eadFileGlobals) {
             ImportHelpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));
         }

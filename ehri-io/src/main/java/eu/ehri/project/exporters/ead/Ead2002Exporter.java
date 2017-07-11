@@ -9,6 +9,7 @@ import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
@@ -36,7 +37,9 @@ import javax.xml.stream.XMLStreamWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,8 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
+
+    private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
 
     private static final String DEFAULT_NAMESPACE = "urn:isbn:1-931666-22-9";
     private static final Map<String, String> NAMESPACES = namespaces(
@@ -196,16 +201,16 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         List<List<SystemEvent>> eventList = Lists.newArrayList(api.events().aggregateForItem(unit));
         if (!eventList.isEmpty()) {
             tag(sw, "revisiondesc", () -> {
-                for (int i = eventList.size() - 1; i >= 0; i--) {
-                    List<SystemEvent> agg = eventList.get(i);
+                for (List<SystemEvent> agg : eventList) {
                     SystemEvent event = agg.get(0);
+                    String eventDesc = getEventDescription(event.getEventType());
                     tag(sw, "change", () -> {
                         tag(sw, "date", new DateTime(event.getTimestamp()).toString());
                         if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
-                            tag(sw, "item", event.getEventType().name());
+                            tag(sw, "item", eventDesc);
                         } else {
                             tag(sw, "item", String.format("%s [%s]",
-                                    event.getLogMessage(), event.getEventType()));
+                                    event.getLogMessage(), eventDesc));
                         }
                     });
                 }
@@ -390,5 +395,13 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 .setLimit(-1)
                 .setStream(true)
                 .page(unit.getChildren(), DocumentaryUnit.class);
+    }
+
+    private String getEventDescription(EventTypes eventType) {
+        try {
+            return i18n.getString(eventType.name());
+        } catch (MissingResourceException e) {
+            return eventType.name();
+        }
     }
 }

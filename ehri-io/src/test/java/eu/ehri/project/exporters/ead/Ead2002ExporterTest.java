@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ResourceBundle;
 
 import static eu.ehri.project.test.XmlTestHelpers.assertXPath;
 import static eu.ehri.project.test.XmlTestHelpers.parseDocument;
@@ -39,6 +40,8 @@ import static eu.ehri.project.test.XmlTestHelpers.validatesSchema;
 
 
 public class Ead2002ExporterTest extends XmlExporterTest {
+
+    private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
 
     @Test
     public void testExport1() throws Exception {
@@ -68,7 +71,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "Resource (call) |||.Ident (num) |||", "eng");
         //System.out.println(xml);
         Document doc = parseDocument(xml);
-        assertXPath(doc, "Testing import/export [ingest]",
+        assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
                 "//ead/eadheader/revisiondesc/change/item/text()");
         assertXPath(doc, "eng",
                 "//ead/eadheader/profiledesc/langusage/language/@langcode");
