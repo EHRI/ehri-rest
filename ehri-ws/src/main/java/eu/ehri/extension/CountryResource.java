@@ -92,7 +92,7 @@ public class CountryResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Country country = api().detail(id, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(country.getRepositories(), Repository.class));
             tx.success();
             return response;

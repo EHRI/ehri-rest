@@ -101,10 +101,12 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Repository repository = api().detail(id, cls);
-            Iterable<DocumentaryUnit> units = all
-                    ? repository.getAllDocumentaryUnits()
-                    : repository.getTopLevelDocumentaryUnits();
-            Response response = streamingPage(getQuery().page(units, DocumentaryUnit.class));
+            Response response = streamingPage(() -> {
+                Iterable<DocumentaryUnit> units = all
+                        ? repository.getAllDocumentaryUnits()
+                        : repository.getTopLevelDocumentaryUnits();
+                return getQuery().page(units, DocumentaryUnit.class);
+            });
             tx.success();
             return response;
         }

@@ -112,7 +112,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
         try (final Tx tx = beginTx()) {
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi.aggregate());
+            Response response = streamingListOfLists(eventsApi::aggregate);
             tx.success();
             return response;
         }
@@ -132,7 +132,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
         try (final Tx tx = beginTx()) {
             SystemEvent event = api().detail(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                             .page(event.getSubjects(), Accessible.class),
                     getSerializer().withDepth(1).withCache());
             tx.success();

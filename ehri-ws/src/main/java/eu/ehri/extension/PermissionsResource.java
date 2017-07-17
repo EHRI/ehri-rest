@@ -242,7 +242,7 @@ public class PermissionsResource extends AbstractResource {
     public Response listPermissionGrants(@PathParam("userOrGroup") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor user = manager.getEntity(id, Accessor.class);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getPermissionGrants(), PermissionGrant.class));
             tx.success();
             return response;

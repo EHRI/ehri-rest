@@ -97,10 +97,12 @@ public final class VirtualUnitResource extends
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             VirtualUnit parent = manager.getEntity(id, VirtualUnit.class);
-            Iterable<VirtualUnit> units = all
-                    ? parent.getAllChildren()
-                    : parent.getChildren();
-            Response response = streamingPage(getQuery().page(units, cls));
+            Response response = streamingPage(() -> {
+                Iterable<VirtualUnit> units = all
+                        ? parent.getAllChildren()
+                        : parent.getChildren();
+                return getQuery().page(units, cls);
+            });
             tx.success();
             return response;
         }
@@ -108,12 +110,12 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/" + INCLUDED)
+    @Path("{id:[^/]+}/includes")
     public Response listIncludedVirtualUnits(
             @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             VirtualUnit parent = manager.getEntity(id, VirtualUnit.class);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(parent.getIncludedUnits(), DocumentaryUnit.class));
             tx.success();
             return response;
@@ -121,7 +123,7 @@ public final class VirtualUnitResource extends
     }
 
     @POST
-    @Path("{id:[^/]+}/" + INCLUDED)
+    @Path("{id:[^/]+}/includes")
     public Response addIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
@@ -136,7 +138,7 @@ public final class VirtualUnitResource extends
     }
 
     @DELETE
-    @Path("{id:[^/]+}/" + INCLUDED)
+    @Path("{id:[^/]+}/includes")
     public Response removeIncludedVirtualUnits(
             @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
             throws ItemNotFound, PermissionDenied {
@@ -151,7 +153,7 @@ public final class VirtualUnitResource extends
     }
 
     @POST
-    @Path("{from:[^/]+}/" + INCLUDED + "/{to:[^/]+}")
+    @Path("{from:[^/]+}/includes/{to:[^/]+}")
     public void moveIncludedVirtualUnits(
             @PathParam("from") String fromId, @PathParam("to") String toId,
             @QueryParam(ID_PARAM) List<String> includedIds)

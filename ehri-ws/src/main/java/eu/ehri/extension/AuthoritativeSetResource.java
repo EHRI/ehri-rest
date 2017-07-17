@@ -101,8 +101,8 @@ public class AuthoritativeSetResource extends
 
         try (final Tx tx = beginTx()) {
             AuthoritativeSet set = api().detail(id, cls);
-            Response response = streamingPage(getQuery().page(set.getAuthoritativeItems(),
-                    AuthoritativeItem.class));
+            Response response = streamingPage(() ->
+                    getQuery().page(set.getAuthoritativeItems(), AuthoritativeItem.class));
             tx.success();
             return response;
         }
