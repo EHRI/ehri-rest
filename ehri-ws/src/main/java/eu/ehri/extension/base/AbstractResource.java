@@ -70,6 +70,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 
 /**
@@ -377,7 +378,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param page A page of data
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingPage(QueryApi.Page<T> page) {
+    protected <T extends Entity> Response streamingPage(Supplier<QueryApi.Page<T>> page) {
         return streamingPage(page, getSerializer());
     }
 
@@ -390,8 +391,9 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingPage(
-            final QueryApi.Page<T> page, final Serializer serializer) {
-        return streamingList(page.getIterable(), serializer, streamingResponseBuilder(page));
+            final Supplier<QueryApi.Page<T>> page, final Serializer serializer) {
+        return streamingList(() -> page.get().getIterable(), serializer,
+                streamingResponseBuilder(page.get()));
     }
 
     /**
@@ -400,7 +402,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param vertices an iterable of vertices
      * @return a streaming response
      */
-    protected Response streamingVertexList(Iterable<Vertex> vertices) {
+    protected Response streamingVertexList(Supplier<Iterable<Vertex>> vertices) {
         return streamingVertexList(vertices, getSerializer());
     }
 
@@ -411,7 +413,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param serializer a serializer instance
      * @return a streaming response
      */
-    protected Response streamingVertexList(Iterable<Vertex> vertices, Serializer serializer) {
+    protected Response streamingVertexList(Supplier<Iterable<Vertex>> vertices, Serializer serializer) {
         return streamingVertexList(vertices, serializer, Response.ok());
     }
 
@@ -421,7 +423,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param list A list of framed items
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingList(Iterable<T> list) {
+    protected <T extends Entity> Response streamingList(Supplier<Iterable<T>> list) {
         return streamingList(list, getSerializer());
     }
 
@@ -431,7 +433,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param lists an iterable of item groups
      * @return a streaming response
      */
-    protected <T extends Entity> Response streamingListOfLists(Iterable<? extends Collection<T>> lists) {
+    protected <T extends Entity> Response streamingListOfLists(Supplier<Iterable<? extends Collection<T>>> lists) {
         return streamingGroup(lists, getSerializer(), Response.ok());
     }
 
@@ -442,7 +444,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * @param list A list of framed items
      * @return A streaming response
      */
-    protected <T extends Entity> Response streamingList(Iterable<T> list, Serializer serializer) {
+    protected <T extends Entity> Response streamingList(Supplier<Iterable<T>> list, Serializer serializer) {
         return streamingList(list, serializer, Response.ok());
     }
 
@@ -516,7 +518,7 @@ public abstract class AbstractResource implements TxCheckedResource {
         }
     }
 
-    private Response.ResponseBuilder streamingResponseBuilder(QueryApi.Page<?> page) {
+    private <T> Response.ResponseBuilder streamingResponseBuilder(QueryApi.Page<T> page) {
         Response.ResponseBuilder builder = Response.ok();
         for (Map.Entry<String, Object> entry : getHeaders(page).entrySet()) {
             builder = builder.header(entry.getKey(), entry.getValue());
@@ -532,13 +534,13 @@ public abstract class AbstractResource implements TxCheckedResource {
     }
 
     private Response streamingVertexList(
-            Iterable<Vertex> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+            Supplier<Iterable<Vertex>> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();
             try (Tx tx = beginTx();
                  JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
                 g.writeStartArray();
-                for (Vertex item : page) {
+                for (Vertex item : page.get()) {
                     g.writeRaw('\n');
                     jsonMapper.writeValue(g, item == null ? null : cacheSerializer.vertexToData(item));
                 }
@@ -551,13 +553,13 @@ public abstract class AbstractResource implements TxCheckedResource {
     }
 
     private <T extends Entity> Response streamingList(
-            Iterable<T> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+            Supplier<Iterable<T>> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();
             try (Tx tx = beginTx();
                  JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
                 g.writeStartArray();
-                for (T item : page) {
+                for (T item : page.get()) {
                     g.writeRaw('\n');
                     jsonMapper.writeValue(g, item == null ? null : cacheSerializer.entityToData(item));
                 }
@@ -570,13 +572,13 @@ public abstract class AbstractResource implements TxCheckedResource {
     }
 
     private <T extends Entity> Response streamingGroup(
-            Iterable<? extends Collection<T>> groups, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+            Supplier<Iterable<? extends Collection<T>>> groups, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();
             try (Tx tx = beginTx();
                  JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
                 g.writeStartArray();
-                for (Collection<T> collect : groups) {
+                for (Collection<T> collect : groups.get()) {
                     g.writeStartArray();
                     for (T item : collect) {
                         jsonMapper.writeValue(g, item == null ? null : cacheSerializer.entityToData(item));

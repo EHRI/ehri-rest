@@ -100,7 +100,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Vocabulary vocabulary = api().detail(id, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(vocabulary.getConcepts(), Concept.class));
             tx.success();
             return response;

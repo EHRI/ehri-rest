@@ -92,10 +92,12 @@ public class DocumentaryUnitResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             DocumentaryUnit parent = manager.getEntity(id, DocumentaryUnit.class);
-            Iterable<DocumentaryUnit> units = all
-                    ? parent.getAllChildren()
-                    : parent.getChildren();
-            Response response = streamingPage(getQuery().page(units, cls));
+            Response response = streamingPage(() -> {
+                Iterable<DocumentaryUnit> units = all
+                        ? parent.getAllChildren()
+                        : parent.getChildren();
+                return getQuery().page(units, cls);
+            });
             tx.success();
             return response;
         }

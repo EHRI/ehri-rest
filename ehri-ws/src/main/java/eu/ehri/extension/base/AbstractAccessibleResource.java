@@ -118,7 +118,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      */
     public Response listItems() {
         try (final Tx tx = beginTx()) {
-            Response response = streamingPage(getQuery().page(cls));
+            Response response = streamingPage(() -> getQuery().page(cls));
             tx.success();
             return response;
         }

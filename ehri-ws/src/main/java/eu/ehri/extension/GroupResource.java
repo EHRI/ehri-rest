@@ -168,11 +168,12 @@ public class GroupResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
-            Iterable<Accessible> members = all
-                    ? group.getAllUserProfileMembers()
-                    : group.getMembersAsEntities();
-            Response response = streamingPage(getQuery()
-                    .page(members, Accessible.class));
+            Response response = streamingPage(() -> {
+                Iterable<Accessible> members = all
+                        ? group.getAllUserProfileMembers()
+                        : group.getMembersAsEntities();
+                return getQuery().page(members, Accessible.class);
+            });
             tx.success();
             return response;
         }
@@ -209,7 +210,7 @@ public class GroupResource
             Actioner group = manager.getEntity(userId, Actioner.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi.aggregateActions(group));
+            Response response = streamingListOfLists(() -> eventsApi.aggregateActions(group));
             tx.success();
             return response;
         }

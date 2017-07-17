@@ -115,7 +115,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Iterable<Vertex> byGid = Iterables.transform(gids, graph::getVertex);
             Iterable<Vertex> byId = manager.getVertices(ids);
             Iterable<Vertex> all = Iterables.concat(byGid, byId);
-            Response response = streamingVertexList(Iterables.transform(all, filter::apply));
+            Response response = streamingVertexList(() -> Iterables.transform(all, filter::apply));
             tx.success();
             return response;
         }
@@ -182,7 +182,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             Accessible item = manager.getEntity(id, Accessible.class);
             Iterable<Accessor> accessors = item.getAccessors();
-            Response response = streamingList(accessors);
+            Response response = streamingList(() -> accessors);
             tx.success();
             return response;
         }
@@ -309,7 +309,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             Accessible item = api().detail(id, Accessible.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi.aggregateForItem(item));
+            Response response = streamingListOfLists(() -> eventsApi.aggregateForItem(item));
             tx.success();
             return response;
         }
@@ -328,7 +328,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Annotatable entity = manager.getEntity(id, Annotatable.class);
-            Response response = streamingPage(getQuery().page(
+            Response response = streamingPage(() -> getQuery().page(
                     entity.getAnnotations(),
                     Annotation.class));
             tx.success();
@@ -348,7 +348,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response links(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Linkable entity = manager.getEntity(id, Linkable.class);
-            Response response = streamingPage(getQuery().page(
+            Response response = streamingPage(() -> getQuery().page(
                     entity.getLinks(),
                     Link.class));
             tx.success();
@@ -368,7 +368,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             PermissionGrantTarget target = manager.getEntity(id, PermissionGrantTarget.class);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(target.getPermissionGrants(),
                             PermissionGrant.class));
             tx.success();
@@ -388,7 +388,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(scope.getPermissionGrants(),
                             PermissionGrant.class));
             tx.success();
@@ -529,7 +529,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response listVersions(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
             Versioned item = api().detail(id, Versioned.class);
-            Response response = streamingPage(getQuery().setStream(true)
+            Response response = streamingPage(() -> getQuery().setStream(true)
                     .page(item.getAllPriorVersions(), Version.class));
             tx.success();
             return response;

@@ -145,7 +145,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listFollowers(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getFollowers(), UserProfile.class));
             tx.success();
             return response;
@@ -158,7 +158,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listFollowing(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getFollowing(), UserProfile.class));
             tx.success();
             return response;
@@ -226,7 +226,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listBlocked(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getBlocked(), UserProfile.class));
             tx.success();
             return response;
@@ -278,7 +278,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listWatching(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getWatching(), Watchable.class));
             tx.success();
             return response;
@@ -330,7 +330,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response listAnnotations(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getAnnotations(), Annotation.class));
             tx.success();
             return response;
@@ -343,7 +343,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response pageLinks(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getLinks(), Link.class));
             tx.success();
             return response;
@@ -356,7 +356,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response pageVirtualUnits(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().detail(userId, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(user.getVirtualUnits(), VirtualUnit.class));
             tx.success();
             return response;
@@ -383,7 +383,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             UserProfile user = manager.getEntity(userId, UserProfile.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi.aggregateActions(user));
+            Response response = streamingListOfLists(() -> eventsApi.aggregateActions(user));
             tx.success();
             return response;
         }
@@ -410,7 +410,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             UserProfile asUser = manager.getEntity(userId, UserProfile.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi.aggregateAsUser(asUser));
+            Response response = streamingListOfLists(() -> eventsApi.aggregateAsUser(asUser));
             tx.success();
             return response;
         }

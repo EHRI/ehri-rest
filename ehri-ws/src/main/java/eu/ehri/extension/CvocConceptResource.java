@@ -115,7 +115,7 @@ public class CvocConceptResource
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            Response response = streamingPage(getQuery()
+            Response response = streamingPage(() -> getQuery()
                     .page(concept.getNarrowerConcepts(), Concept.class));
             tx.success();
             return response;
@@ -195,7 +195,7 @@ public class CvocConceptResource
             throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            Response response = streamingList(concept.getBroaderConcepts());
+            Response response = streamingList(concept::getBroaderConcepts);
             tx.success();
             return response;
         }
@@ -213,7 +213,7 @@ public class CvocConceptResource
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            Response response = streamingList(concept.getRelatedConcepts());
+            Response response = streamingList(concept::getRelatedConcepts);
             tx.success();
             return response;
         }
@@ -233,7 +233,7 @@ public class CvocConceptResource
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
-            Response response = streamingList(concept.getRelatedByConcepts());
+            Response response = streamingList(concept::getRelatedByConcepts);
             tx.success();
             return response;
         }
