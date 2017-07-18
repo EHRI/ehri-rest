@@ -212,7 +212,8 @@ public class ImportResource extends AbstractResource {
             EadFondsSync syncManager = new EadFondsSync(
                     graph, scope, user, importManager, excludes);
 
-            SyncLog log = syncManager.sync(data, message);
+            SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE));
 
             tx.success();
             return log;

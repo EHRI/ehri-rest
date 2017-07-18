@@ -1,7 +1,10 @@
 package eu.ehri.project.importers.ead;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Entities;
@@ -19,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +48,11 @@ public class EadFondsSync {
         this.excludes = excludes;
     }
 
-    public SyncLog sync(InputStream ios, String logMessage) throws ArchiveException, InputParseError, ValidationError, IOException {
+    public interface IngestOperation {
+        ImportLog run(ImportManager manager) throws ArchiveException, InputParseError, ValidationError, IOException;
+    }
+
+    public SyncLog sync(IngestOperation op) throws ArchiveException, InputParseError, ValidationError, IOException {
 
         // Get a mapping of __id to identifier within the scope,
         // pre-ingest...
@@ -66,7 +72,7 @@ public class EadFondsSync {
         // Run the import!
         ImportManager manager = importManager
                 .withCallback(m -> newIdentifiers.add(m.getNode().as(DocumentaryUnit.class).getIdentifier()));
-        ImportLog log = manager.importInputStream(ios, logMessage);
+        ImportLog log = op.run(manager);
 
         Set<String> allBefore = Sets.newHashSet(lookup.values());
         Set<String> allNew = Sets.newHashSet(newIdentifiers);
@@ -88,21 +94,35 @@ public class EadFondsSync {
 
     private Map<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup) {
         Map<String, String> moved = Maps.newHashMap();
-        for (DocumentaryUnit item : getAllChildren(scope)) {
-            for (DocumentaryUnit other : getAllChildren(scope)) {
-                if (item.getIdentifier().equals(other.getIdentifier())
-                        && item.getId().compareTo(other.getId()) < 0) {
-                    if (lookup.containsKey(item.getId())) {
-                        moved.put(item.getId(), other.getId());
-                    } else if (lookup.containsKey(other.getId())) {
-                        moved.put(other.getId(), item.getId());
-                    } else {
-                        throw new RuntimeException(
-                                "Unexpected situation: 'moved' item not found in before-set... " + item.getIdentifier());
-                    }
+
+        logger.debug("Starting moved item scan...");
+        long start = System.nanoTime();
+        // NB: This method of finding moved items uses a lot of memory for big
+        // repositories, but is dramatically faster than the alternative.
+        Multimap<String, String> scan = LinkedHashMultimap.create();
+        getAllChildren(scope).forEach(item -> scan.put(item.getIdentifier(), item.getId()));
+
+        scan.asMap().entrySet().forEach(e -> {
+            List<String> ids = Lists.newArrayList(e.getValue());
+            if (ids.size() > 1) {
+                Preconditions.checkState(ids.size() == 2,
+                        "Unexpected situation in EAD sync. Item " + e.getKey() +
+                                " cannot be unique since after sync ingest there are it exists in more than two places: " + ids);
+                String first = ids.get(0);
+                String second = ids.get(1);
+                if (lookup.containsKey(first)) {
+                    moved.put(first, second);
+                } else if (lookup.containsKey(second)) {
+                    moved.put(second, first);
+                } else {
+                    throw new RuntimeException(
+                            "Unexpected situation: 'moved' item not found in before-set... " + e.getKey());
                 }
             }
-        }
+        });
+        long end = System.nanoTime();
+        logger.debug("Completed moved item scan in {} milli secs", (end - start) / 1_000_000);
+
         return moved;
     }
 

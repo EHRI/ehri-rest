@@ -30,7 +30,7 @@ public class EadFondsSyncTest extends AbstractImporterTest {
                 Sets.newHashSet("c1", "c2", "c3", "c4", "nl-r1-m19"));
 
         InputStream ios2 = ClassLoader.getSystemResourceAsStream("hierarchical-ead-sync-test.xml");
-        SyncLog log = sync.sync(ios2, "Test sync 2");
+        SyncLog log = sync.sync(m -> m.importInputStream(ios2, "Test sync 2"));
 
         System.out.println(log);
         assertEquals(Sets.newHashSet("C00002-1"), log.deleted());
