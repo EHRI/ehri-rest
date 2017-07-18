@@ -32,7 +32,6 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
@@ -48,7 +47,6 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -81,6 +79,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -181,13 +180,13 @@ public class ImportResource extends AbstractResource {
     @Path("ead/sync")
     public SyncLog importEad2(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @QueryParam("fonds") String fondsId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam("ex") Set<String> excludes,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
@@ -203,13 +202,15 @@ public class ImportResource extends AbstractResource {
             Actioner user = getCurrentActioner();
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
-            PermissionScope fonds = manager.getEntity(fondsId, PermissionScope.class);
-
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
+            SaxImportManager importManager = new SaxImportManager(
+                    graph, scope, user, importer, handler)
+                    .allowUpdates(allowUpdates)
+                    .setTolerant(tolerant)
+                    .withProperties(propertyFile);
             EadFondsSync syncManager = new EadFondsSync(
-                    graph, scope, fonds, user, tolerant, allowUpdates, importer, handler,
-                    Optional.empty());
+                    graph, scope, user, importManager, excludes);
 
             SyncLog log = syncManager.sync(data, message);
 

@@ -10,7 +10,6 @@ import eu.ehri.project.models.Repository;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,10 +25,9 @@ public class EadFondsSyncTest extends AbstractImporterTest {
         importManager.importInputStream(ios, "Test sync");
         manager.getEntities(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)
                 .forEach(v -> System.out.println(v.getId()));
-        DocumentaryUnit fonds = manager.getEntity("nl-r1-ctop_level_fonds", DocumentaryUnit.class);
 
-        EadFondsSync sync = new EadFondsSync(graph, scope, fonds, validUser,
-                false, true, EadImporter.class, EadHandler.class, Optional.empty());
+        EadFondsSync sync = new EadFondsSync(graph, scope, validUser, importManager,
+                Sets.newHashSet("c1", "c2", "c3", "c4", "nl-r1-m19"));
 
         InputStream ios2 = ClassLoader.getSystemResourceAsStream("hierarchical-ead-sync-test.xml");
         SyncLog log = sync.sync(ios2, "Test sync 2");

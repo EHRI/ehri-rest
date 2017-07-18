@@ -7,15 +7,11 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.base.ItemImporter;
-import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -27,7 +23,6 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class EadFondsSync {
@@ -36,31 +31,19 @@ public class EadFondsSync {
 
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
-    private final PermissionScope fonds;
     private final Actioner actioner;
-    private final boolean tolerant;
-    private final boolean allowUpdates;
-    private final Class<? extends ItemImporter> importerClass;
-    private final Class<? extends SaxXmlHandler> handlerClass;
-    private final Optional<XmlImportProperties> properties;
-
-    public interface ImportFunc {
-        public ImportLog run() throws IOException, ArchiveException, InputParseError, ValidationError;
-    }
+    private final SaxImportManager importManager;
+    private final Set<String> excludes;
 
     public EadFondsSync(
             FramedGraph<?> graph,
-            PermissionScope scope, PermissionScope fonds, Actioner actioner, boolean tolerant, boolean allowUpdates, Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass, Optional<XmlImportProperties> properties) {
+            PermissionScope scope, Actioner actioner, SaxImportManager importManager,
+            Set<String> excludes) {
         this.graph = graph;
         this.scope = scope;
         this.actioner = actioner;
-        this.fonds = fonds;
-        this.tolerant = tolerant;
-        this.allowUpdates = allowUpdates;
-
-        this.importerClass = importerClass;
-        this.handlerClass = handlerClass;
-        this.properties = properties;
+        this.importManager = importManager;
+        this.excludes = excludes;
     }
 
     public SyncLog sync(InputStream ios, String logMessage) throws ArchiveException, InputParseError, ValidationError, IOException {
@@ -68,10 +51,12 @@ public class EadFondsSync {
         // Get a mapping of __id to identifier within the scope,
         // pre-ingest...
         Map<String, String> lookup = Maps.newHashMap();
-        lookup.put(fonds.getId(), fonds.getIdentifier());
-        for (DocumentaryUnit unit : getAllChildren(fonds)) {
+        for (DocumentaryUnit unit : getAllChildren(scope)) {
             lookup.put(unit.getId(), unit.getIdentifier());
         }
+
+        // Remove anything specifically excludes...
+        excludes.forEach(lookup::remove);
 
         logger.debug("ITEMS IN BEFORE MAP: {}", lookup.size());
 
@@ -79,9 +64,8 @@ public class EadFondsSync {
         List<String> newIdentifiers = Lists.newArrayList();
 
         // Run the import!
-        ImportManager manager = new SaxImportManager(
-                graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, properties,
-                Lists.newArrayList(m -> newIdentifiers.add(m.getNode().as(DocumentaryUnit.class).getIdentifier())));
+        ImportManager manager = importManager
+                .withCallback(m -> newIdentifiers.add(m.getNode().as(DocumentaryUnit.class).getIdentifier()));
         ImportLog log = manager.importInputStream(ios, logMessage);
 
         Set<String> allBefore = Sets.newHashSet(lookup.values());
@@ -94,7 +78,7 @@ public class EadFondsSync {
 
         // Find moved items...
         // This gets us a map of old __id to new __id
-        Map<String, String> oldToNew = findMovedItems(fonds, lookup);
+        Map<String, String> oldToNew = findMovedItems(scope, lookup);
         logger.debug("MOVED ITEMS: {}", oldToNew.size());
 
         logger.debug("Committing import transaction...");

@@ -226,4 +226,11 @@ public class SaxImportManager extends AbstractImportManager {
         return new SaxImportManager(framedGraph, scope, actioner, tolerant,
                 allowUpdates, importerClass, handlerClass, properties, extraCallbacks);
     }
+
+    public SaxImportManager withCallback(ImportCallback callback) {
+        List<ImportCallback> newCbs = Lists.newArrayList(extraCallbacks);
+        newCbs.add(callback);
+        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
+                allowUpdates, importerClass, handlerClass, properties, newCbs);
+    }
 }
