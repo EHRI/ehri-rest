@@ -70,7 +70,8 @@ public class SaxImportManager extends AbstractImportManager {
             Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter> importerClass,
+            Class<? extends SaxXmlHandler> handlerClass,
             Optional<XmlImportProperties> properties,
             List<ImportCallback> callbacks) {
         super(graph, scope, actioner, tolerant, allowUpdates, importerClass);
