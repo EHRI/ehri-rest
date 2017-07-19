@@ -269,10 +269,13 @@ public class ImportResource extends AbstractResource {
      * Synchronise a repository or fonds via EAD data, removing
      * items which are not present in the incoming data. Parameters
      * are the same as /ead with the addition of `ex={id}`, which
-     * allows specifying items to ignore
+     * allows specifying items to ignore, and fondsId, which allows
+     * synchronising just within a specific item.
      *
-     * @param ex the ID of an item to be excluded from the sync operation
-     *
+     * @param fonds the ID of a specific fonds within the repository
+     *              scope to synchronise. If missing the scope will be
+     *              used
+     * @param ex    the ID of an item to be excluded from the sync operation
      * @return a {@link SyncLog} instance.
      */
     @POST
@@ -281,6 +284,7 @@ public class ImportResource extends AbstractResource {
     @Path("ead-sync")
     public SyncLog syncEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
+            @QueryParam("fonds") String fonds,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -300,6 +304,9 @@ public class ImportResource extends AbstractResource {
 
             Actioner user = getCurrentActioner();
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
+            PermissionScope syncScope = fonds == null
+                    ? scope
+                    : manager.getEntity(fonds, PermissionScope.class);
 
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
@@ -308,7 +315,9 @@ public class ImportResource extends AbstractResource {
                     .allowUpdates(allowUpdates)
                     .setTolerant(tolerant)
                     .withProperties(propertyFile);
-            EadSync syncManager = new EadSync(api(), scope, user, importManager);
+            // Note that while the import manager uses the scope, here
+            // we use the fonds as the scope, which might be different.
+            EadSync syncManager = new EadSync(api(), syncScope, user, importManager);
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
 

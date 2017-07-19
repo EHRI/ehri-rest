@@ -28,6 +28,7 @@ import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
+import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
@@ -296,6 +297,48 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+    }
+
+    @Test
+    public void testSyncEad() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(HIERARCHICAL_EAD);
+
+        String logText = "Setup";
+        URI uri = getImportUrl("ead-sync", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_PLAIN_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        SyncLog log = response.getEntity(SyncLog.class);
+        // this will have deleted all existing items in the repo...
+        assertEquals(5, log.deleted().size());
+        assertEquals(5, log.log().getCreated());
+        assertEquals(0, log.log().getUpdated());
+        assertEquals(0, log.log().getUnchanged());
+        assertEquals(logText, log.log().getLogMessage().orElse(null));
+
+        // Now sync the updates file
+        URI uri2 = getImportUrl("ead-sync", "r1", "Test sync", false)
+                .queryParam(ALLOW_UPDATES_PARAM, true)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .build();
+        InputStream payloadStream2 = getPayloadStream("hierarchical-ead-sync-test.xml");
+        ClientResponse response2 = callAs(getAdminUserProfileId(), uri2)
+                .type(MediaType.TEXT_PLAIN_TYPE)
+                .entity(payloadStream2)
+                .post(ClientResponse.class);
+
+        SyncLog log2 = response2.getEntity(SyncLog.class);
+        System.out.println(log2);
+        assertEquals(2, log2.log().getCreated());
+        assertEquals(0, log2.log().getUpdated());
+        assertEquals(3, log2.log().getUnchanged());
+        assertEquals(logText, log.log().getLogMessage().orElse(null));
+
     }
 
     @Test
