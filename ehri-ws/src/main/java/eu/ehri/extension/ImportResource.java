@@ -174,56 +174,6 @@ public class ImportResource extends AbstractResource {
         }
     }
 
-    @POST
-    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
-            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
-    @Path("ead/sync")
-    public SyncLog importEad2(
-            @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @QueryParam(LOG_PARAM) String logMessage,
-            @QueryParam(PROPERTIES_PARAM) String propertyFile,
-            @QueryParam(HANDLER_PARAM) String handlerClass,
-            @QueryParam(IMPORTER_PARAM) String importerClass,
-            @QueryParam("ex") Set<String> excludes,
-            InputStream data)
-            throws ItemNotFound, ValidationError, IOException, DeserializationError {
-
-        try (final Tx tx = beginTx()) {
-            checkPropertyFile(propertyFile);
-            Class<? extends SaxXmlHandler> handler
-                    = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
-            Class<? extends ItemImporter> importer
-                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
-
-            // Get the current user from the Authorization header and the scope
-            // from the query params...
-            Actioner user = getCurrentActioner();
-            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
-
-            // Run the import!
-            String message = getLogMessage(logMessage).orElse(null);
-            SaxImportManager importManager = new SaxImportManager(
-                    graph, scope, user, importer, handler)
-                    .allowUpdates(allowUpdates)
-                    .setTolerant(tolerant)
-                    .withProperties(propertyFile);
-            EadSync syncManager = new EadSync(
-                    api(), scope, user, importManager);
-
-            SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
-                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), excludes, message);
-
-            tx.success();
-            return log;
-        } catch (ClassNotFoundException e) {
-            throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | InputParseError | ArchiveException | EadSync.EadSyncError e) {
-            throw new DeserializationError(e.getMessage());
-        }
-    }
-
     /**
      * Import a set of EAD files. The POST body can be one of:
      * <ul>
@@ -312,6 +262,62 @@ public class ImportResource extends AbstractResource {
             logger.debug("Committing import transaction...");
             tx.success();
             return log;
+        }
+    }
+
+    /**
+     * Synchronise a repository or fonds via EAD data, removing
+     * items which are not present in the incoming data. Parameters
+     * are the same as /ead with the addition of `ex={id}`, which
+     * allows specifying items to ignore
+     *
+     * @param ex the ID of an item to be excluded from the sync operation
+     *
+     * @return a {@link SyncLog} instance.
+     */
+    @POST
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
+    @Path("ead-sync")
+    public SyncLog syncEad(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam("ex") Set<String> ex,
+            InputStream data)
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+
+        try (final Tx tx = beginTx()) {
+            checkPropertyFile(propertyFile);
+            Class<? extends SaxXmlHandler> handler
+                    = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
+            Class<? extends ItemImporter> importer
+                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
+
+            Actioner user = getCurrentActioner();
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
+
+            // Run the sync...
+            String message = getLogMessage(logMessage).orElse(null);
+            SaxImportManager importManager = new SaxImportManager(
+                    graph, scope, user, importer, handler)
+                    .allowUpdates(allowUpdates)
+                    .setTolerant(tolerant)
+                    .withProperties(propertyFile);
+            EadSync syncManager = new EadSync(api(), scope, user, importManager);
+            SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
+
+            tx.success();
+            return log;
+        } catch (ClassNotFoundException e) {
+            throw new DeserializationError("Class not found: " + e.getMessage());
+        } catch (IllegalArgumentException | InputParseError | ArchiveException | EadSync.EadSyncError e) {
+            throw new DeserializationError(e.getMessage());
         }
     }
 

@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class EadSyncTest extends AbstractImporterTest {
@@ -40,6 +41,7 @@ public class EadSyncTest extends AbstractImporterTest {
         String logMessage = "Test sync 2";
         SyncLog log = runSync(repo, excludes, logMessage, "hierarchical-ead-sync-test.xml");
         checkSync(repo, logMessage, log);
+        assertTrue(manager.exists("c1"));
     }
 
     @Test

@@ -185,12 +185,12 @@ public class EadSync {
         // with many thousands of items.
         // Here we use a multimap and look for items where one local ID maps to
         // two graph IDs.
-        Multimap<String, String> scan = LinkedHashMultimap.create();
+        Multimap<String, String> localToGraph = LinkedHashMultimap.create();
         for (DocumentaryUnit unit : itemsInScope(scope)) {
-            scan.put(unit.getIdentifier(), unit.getId());
+            localToGraph.put(unit.getIdentifier(), unit.getId());
         }
 
-        scan.asMap().forEach((localId, graphIds) -> {
+        localToGraph.asMap().forEach((localId, graphIds) -> {
             List<String> ids = Lists.newArrayList(graphIds);
             if (ids.size() > 1) {
                 Preconditions.checkState(ids.size() == 2,
