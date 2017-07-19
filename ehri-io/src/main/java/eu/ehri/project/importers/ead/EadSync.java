@@ -25,6 +25,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import org.apache.commons.compress.archivers.ArchiveException;
+import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +35,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class EadFondsSync {
+public class EadSync {
 
-    private static final Logger logger = LoggerFactory.getLogger(EadFondsSync.class);
+    private static final Logger logger = LoggerFactory.getLogger(EadSync.class);
 
     private final Api api;
     private final PermissionScope scope;
     private final Actioner actioner;
     private final SaxImportManager importManager;
 
-    public EadFondsSync(
+    public EadSync(
             Api api,
             PermissionScope scope,
             Actioner actioner,
@@ -54,16 +55,16 @@ public class EadFondsSync {
         this.importManager = importManager;
     }
 
-    public interface IngestOperation {
+    public interface EadIngestOperation {
         ImportLog run(ImportManager manager) throws ArchiveException, InputParseError, ValidationError, IOException;
     }
 
-    public class EadFondsSyncError extends Exception {
-        EadFondsSyncError(String message, Throwable underlying) {
+    public class EadSyncError extends Exception {
+        EadSyncError(String message, Throwable underlying) {
             super(message, underlying);
         }
 
-        EadFondsSyncError(String message) {
+        EadSyncError(String message) {
             super(message);
         }
     }
@@ -79,21 +80,21 @@ public class EadFondsSync {
      * @param op         the ingest operation
      * @param logMessage a log message that will be attached to the delete event
      * @return a sync log
-     * @throws EadFondsSyncError if local identifiers are not unique
+     * @throws EadSyncError if local identifiers are not unique
      */
-    public SyncLog sync(IngestOperation op, Set<String> excludes, String logMessage)
-            throws ArchiveException, InputParseError, ValidationError, IOException, EadFondsSyncError {
+    public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
+            throws ArchiveException, InputParseError, ValidationError, IOException, EadSyncError {
 
         // Get a mapping of __id to identifier within the scope,
         // pre-ingest...
         // Pre-sync ALL of the local IDs must be unique
         BiMap<String, String> lookup = HashBiMap.create();
         try {
-            for (DocumentaryUnit unit: getAllChildren(scope)) {
+            for (DocumentaryUnit unit: itemsInScope(scope)) {
                 lookup.put(unit.getId(), unit.getIdentifier());
             }
         } catch (IllegalArgumentException e) {
-            throw new EadFondsSyncError("Local identifiers are not unique", e);
+            throw new EadSyncError("Local identifiers are not unique", e);
         }
 
         // Remove anything specifically excluded. This would typically
@@ -159,7 +160,7 @@ public class EadFondsSync {
     }
 
     private Map<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup)
-            throws EadFondsSyncError {
+            throws EadSyncError {
         Map<String, String> moved = Maps.newHashMap();
 
         logger.debug("Starting moved item scan...");
@@ -167,7 +168,7 @@ public class EadFondsSync {
         // NB: This method of finding moved items uses a lot of memory for big
         // repositories, but is dramatically faster than the alternative.
         Multimap<String, String> scan = LinkedHashMultimap.create();
-        getAllChildren(scope).forEach(item -> scan.put(item.getIdentifier(), item.getId()));
+        itemsInScope(scope).forEach(item -> scan.put(item.getIdentifier(), item.getId()));
 
         scan.asMap().forEach((localId, graphIds) -> {
             List<String> ids = Lists.newArrayList(graphIds);
@@ -193,14 +194,16 @@ public class EadFondsSync {
         return moved;
     }
 
-    private Iterable<DocumentaryUnit> getAllChildren(PermissionScope scope) throws EadFondsSyncError {
+    private Iterable<DocumentaryUnit> itemsInScope(PermissionScope scope) throws EadSyncError {
         switch (scope.getType()) {
             case Entities.DOCUMENTARY_UNIT:
-                return scope.as(DocumentaryUnit.class).getAllChildren();
+                // If the scope is a doc unit, the full set of items includes itself
+                return Iterables.append(scope.as(DocumentaryUnit.class),
+                        scope.as(DocumentaryUnit.class).getAllChildren());
             case Entities.REPOSITORY:
                 return scope.as(Repository.class).getAllDocumentaryUnits();
             default:
-                throw new EadFondsSyncError("Scope must be a repository or a documentary unit");
+                throw new EadSyncError("Scope must be a repository or a documentary unit");
         }
     }
 }
