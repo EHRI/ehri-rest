@@ -5,7 +5,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import eu.ehri.project.api.Api;
@@ -98,9 +97,9 @@ public class EadSync {
     public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
             throws ArchiveException, InputParseError, ValidationError, IOException, EadSyncError {
 
-        // Get a mapping of __id to identifier within the scope,
-        // pre-ingest...
-        // Pre-sync ALL of the local IDs must be unique
+        // Get a mapping of graph ID to local ID within the scope,
+        // Pre-sync, ALL of the local IDs must be unique (and
+        // the BiMap will error if they aren't.)
         BiMap<String, String> oldGraphToLocal = HashBiMap.create();
         try {
             for (DocumentaryUnit unit: itemsInScope(scope)) {
@@ -181,7 +180,7 @@ public class EadSync {
         long start = System.nanoTime();
         // NB: This method of finding moved items uses a lot of memory for big
         // repositories, but is dramatically faster than the alternative, which
-        // for every item to loop over every _other_ item and check if it has the
+        // is for every item to loop over every _other_ item and check if it has the
         // same local ID and a different graph one. This becomes impractically slow
         // with many thousands of items.
         // Here we use a multimap and look for items where one local ID maps to
