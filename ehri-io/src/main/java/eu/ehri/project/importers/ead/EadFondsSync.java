@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,17 +62,24 @@ public class EadFondsSync {
         EadFondsSyncError(String message, Throwable underlying) {
             super(message, underlying);
         }
+
+        EadFondsSyncError(String message) {
+            super(message);
+        }
     }
 
     /**
      * Synchronise an archival scope from EAD files. The actual ingest
      * operation is delegated to the given {@link SaxImportManager} instance.
      * <p>
-     * For sync to work correctly
+     * For sync to work correctly the local (scoped) item identifiers
+     * <strong>must</strong> be unique in the scope in which sync is
+     * taking place.
      *
      * @param op         the ingest operation
      * @param logMessage a log message that will be attached to the delete event
      * @return a sync log
+     * @throws EadFondsSyncError if local identifiers are not unique
      */
     public SyncLog sync(IngestOperation op, Set<String> excludes, String logMessage)
             throws ArchiveException, InputParseError, ValidationError, IOException, EadFondsSyncError {
@@ -83,21 +89,24 @@ public class EadFondsSync {
         // Pre-sync ALL of the local IDs must be unique
         BiMap<String, String> lookup = HashBiMap.create();
         try {
-            getAllChildren(scope)
-                    .forEach(unit -> lookup.put(unit.getId(), unit.getIdentifier()));
+            for (DocumentaryUnit unit: getAllChildren(scope)) {
+                lookup.put(unit.getId(), unit.getIdentifier());
+            }
         } catch (IllegalArgumentException e) {
             throw new EadFondsSyncError("Local identifiers are not unique", e);
         }
 
-        // Remove anything specifically excludes...
+        // Remove anything specifically excluded. This would typically
+        // be items in the scope that are not being synced in this operation.
         excludes.forEach(lookup::remove);
 
-        logger.debug("ITEMS IN BEFORE MAP: {}", lookup.size());
+        logger.debug("Items in scope prior to sync: {}", lookup.size());
 
         // Keep track of new, moved, updated local identifiers.
         BiMap<String, String> newIdentifiers = HashBiMap.create();
 
-        // Run the import!
+        // Add a callback to the import manager so we can collect the
+        // IDs of new items and run the ingest operation.
         ImportManager manager = importManager
                 .withCallback(m -> {
                     DocumentaryUnit doc = m.getNode().as(DocumentaryUnit.class);
@@ -105,33 +114,33 @@ public class EadFondsSync {
                 });
         ImportLog log = op.run(manager);
 
-        Set<String> toDeleteLocalIds = Sets.newHashSet(lookup.values());
-        toDeleteLocalIds.removeAll(newIdentifiers.keySet());
-        Set<String> allNewLocalIds = Sets.newHashSet(newIdentifiers.keySet());
-        allNewLocalIds.removeAll(lookup.values());
-        allNewLocalIds.removeAll(toDeleteLocalIds);
+        // Local IDs to be deleted are those in the original set and not in the key set
+        Set<String> toDeleteLocalIds = Sets.difference(lookup.values(), newIdentifiers.keySet());
 
-        Set<String> allNewGraphIds = Sets.newHashSet();
-        allNewLocalIds.forEach(id -> allNewGraphIds.add(newIdentifiers.get(id)));
+        // All-new items are those in the new set but not the old set, minus those to be deleted.
+        Set<String> newLocalIds = Sets.difference(newIdentifiers.keySet(), lookup.values());
 
-        logger.debug("NUMBER TO BE DELETED: {}", toDeleteLocalIds.size());
-        logger.debug("NUMBER NEWLY CREATED: {}", allNewLocalIds.size());
+        // All-new graph IDs...
+        Set<String> allNewGraphIds = Sets.newHashSet(
+                Maps.filterKeys(newIdentifiers, newLocalIds::contains).values());
+
+        // Get a set of graph IDs for items to be deleted...
+        Set<String> toDeleteGraphIds = Maps.filterValues(lookup, toDeleteLocalIds::contains).keySet();
 
         // Find moved items...
-        // This gets us a map of old __id to new __id
+        // This gets us a map of old graph ID to new graph ID
         Map<String, String> oldToNew = findMovedItems(scope, lookup);
-        logger.debug("MOVED ITEMS: {}", oldToNew.size());
 
-        // Delete the old items
-        Set<String> toDeleteGraphIds = Sets.newHashSet();
-        toDeleteLocalIds.forEach(locId -> toDeleteGraphIds.add(lookup.inverse().get(locId)));
+        logger.debug("Deleted items: {}, Created items: {}, Moved items: {}",
+                toDeleteGraphIds.size(), allNewGraphIds.size(), oldToNew.size());
 
         if (!toDeleteLocalIds.isEmpty()) {
             try {
-                ActionManager actionManager = api.actionManager().setScope(scope);
                 Api api = this.api.enableLogging(false);
+                ActionManager actionManager = api.actionManager().setScope(scope);
                 ActionManager.EventContext ctx = actionManager
                         .newEventContext(actioner, EventTypes.deletion, Optional.ofNullable(logMessage));
+                logger.debug("Deleting {} items", toDeleteGraphIds.size());
                 for (String id : toDeleteGraphIds) {
                     DocumentaryUnit item = api.detail(id, DocumentaryUnit.class);
                     ctx.addSubjects(item);
@@ -146,12 +155,11 @@ public class EadFondsSync {
             }
         }
 
-        logger.debug("Committing import transaction...");
-
         return new SyncLog(log, toDeleteGraphIds, oldToNew, allNewGraphIds);
     }
 
-    private Map<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup) {
+    private Map<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup)
+            throws EadFondsSyncError {
         Map<String, String> moved = Maps.newHashMap();
 
         logger.debug("Starting moved item scan...");
@@ -185,14 +193,14 @@ public class EadFondsSync {
         return moved;
     }
 
-    private Iterable<DocumentaryUnit> getAllChildren(PermissionScope scope) {
+    private Iterable<DocumentaryUnit> getAllChildren(PermissionScope scope) throws EadFondsSyncError {
         switch (scope.getType()) {
             case Entities.DOCUMENTARY_UNIT:
                 return scope.as(DocumentaryUnit.class).getAllChildren();
             case Entities.REPOSITORY:
                 return scope.as(Repository.class).getAllDocumentaryUnits();
             default:
-                return Collections.emptyList();
+                throw new EadFondsSyncError("Scope must be a repository or a documentary unit");
         }
     }
 }
