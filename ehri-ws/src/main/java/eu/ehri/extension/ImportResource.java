@@ -24,7 +24,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.importers.base.ItemImporter;
-import eu.ehri.project.importers.ead.EadFondsSync;
+import eu.ehri.project.importers.ead.EadSync;
 import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.utils.Table;
@@ -209,7 +209,7 @@ public class ImportResource extends AbstractResource {
                     .allowUpdates(allowUpdates)
                     .setTolerant(tolerant)
                     .withProperties(propertyFile);
-            EadFondsSync syncManager = new EadFondsSync(
+            EadSync syncManager = new EadSync(
                     api(), scope, user, importManager);
 
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
@@ -219,7 +219,7 @@ public class ImportResource extends AbstractResource {
             return log;
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | InputParseError | ArchiveException | EadFondsSync.EadFondsSyncError e) {
+        } catch (IllegalArgumentException | InputParseError | ArchiveException | EadSync.EadSyncError e) {
             throw new DeserializationError(e.getMessage());
         }
     }

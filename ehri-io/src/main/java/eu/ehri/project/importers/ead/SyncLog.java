@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.importers.ImportLog;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,9 +18,8 @@ public class SyncLog {
     @JsonCreator
     public SyncLog(
             @JsonProperty("log") ImportLog log,
-            @JsonProperty("deleted") Set<String> deleted,
-            @JsonProperty("moved") Map<String, String> moved,
-            @JsonProperty("created") Set<String> created) {
+            @JsonProperty("created") Set<String> created, @JsonProperty("deleted") Set<String> deleted,
+            @JsonProperty("moved") Map<String, String> moved) {
         this.log = log;
         this.deleted = deleted;
         this.moved = moved;

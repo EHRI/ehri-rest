@@ -35,6 +35,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+
+/**
+ * Synchronise items in a repository or fonds from EAD data.
+ */
 public class EadSync {
 
     private static final Logger logger = LoggerFactory.getLogger(EadSync.class);
@@ -55,10 +59,19 @@ public class EadSync {
         this.importManager = importManager;
     }
 
+    /**
+     * An operation that performs the actual ingest, given the {@link ImportManager}
+     * and returning an {@link ImportLog}. This is a function because the actual
+     * ingest may depend on situational details of the data of no interest to us
+     * here.
+     */
     public interface EadIngestOperation {
-        ImportLog run(ImportManager manager) throws ArchiveException, InputParseError, ValidationError, IOException;
+        ImportLog runIngest(ImportManager manager) throws ArchiveException, InputParseError, ValidationError, IOException;
     }
 
+    /**
+     * Signal that something has gone wrong with the sync operation.
+     */
     public class EadSyncError extends Exception {
         EadSyncError(String message, Throwable underlying) {
             super(message, underlying);
@@ -79,7 +92,7 @@ public class EadSync {
      *
      * @param op         the ingest operation
      * @param logMessage a log message that will be attached to the delete event
-     * @return a sync log
+     * @return a {@link SyncLog} instance
      * @throws EadSyncError if local identifiers are not unique
      */
     public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
@@ -88,10 +101,10 @@ public class EadSync {
         // Get a mapping of __id to identifier within the scope,
         // pre-ingest...
         // Pre-sync ALL of the local IDs must be unique
-        BiMap<String, String> lookup = HashBiMap.create();
+        BiMap<String, String> oldGraphToLocal = HashBiMap.create();
         try {
             for (DocumentaryUnit unit: itemsInScope(scope)) {
-                lookup.put(unit.getId(), unit.getIdentifier());
+                oldGraphToLocal.put(unit.getId(), unit.getIdentifier());
             }
         } catch (IllegalArgumentException e) {
             throw new EadSyncError("Local identifiers are not unique", e);
@@ -99,49 +112,51 @@ public class EadSync {
 
         // Remove anything specifically excluded. This would typically
         // be items in the scope that are not being synced in this operation.
-        excludes.forEach(lookup::remove);
+        excludes.forEach(oldGraphToLocal::remove);
 
-        logger.debug("Items in scope prior to sync: {}", lookup.size());
+        logger.debug("Items in scope prior to sync: {}", oldGraphToLocal.size());
 
-        // Keep track of new, moved, updated local identifiers.
-        BiMap<String, String> newIdentifiers = HashBiMap.create();
+        // Keep a mapping of new graph to local IDs in the ingest operation
+        BiMap<String, String> newGraphToLocal = HashBiMap.create();
 
         // Add a callback to the import manager so we can collect the
         // IDs of new items and run the ingest operation.
-        ImportManager manager = importManager
-                .withCallback(m -> {
+        ImportManager manager = importManager.withCallback(m -> {
                     DocumentaryUnit doc = m.getNode().as(DocumentaryUnit.class);
-                    newIdentifiers.put(doc.getIdentifier(), doc.getId());
+                    newGraphToLocal.put(doc.getId(), doc.getIdentifier());
                 });
-        ImportLog log = op.run(manager);
+        // Actually run the ingest...
+        ImportLog log = op.runIngest(manager);
 
-        // Local IDs to be deleted are those in the original set and not in the key set
-        Set<String> toDeleteLocalIds = Sets.difference(lookup.values(), newIdentifiers.keySet());
+        // Find moved items... this gets us a map of old graph ID to new graph ID
+        BiMap<String, String> movedGraphIds = findMovedItems(scope, oldGraphToLocal);
 
-        // All-new items are those in the new set but not the old set, minus those to be deleted.
-        Set<String> newLocalIds = Sets.difference(newIdentifiers.keySet(), lookup.values());
+        // All-new items are those in the new set but not the old set.
+        Set<String> allNewGraphIds = Sets.difference(newGraphToLocal.keySet(), oldGraphToLocal.keySet());
 
-        // All-new graph IDs...
-        Set<String> allNewGraphIds = Sets.newHashSet(
-                Maps.filterKeys(newIdentifiers, newLocalIds::contains).values());
+        // Items to be deleted are in the old set but not in the new set.
+        Set<String> allDeletedGraphIds = Sets.difference(oldGraphToLocal.keySet(), newGraphToLocal.keySet());
 
-        // Get a set of graph IDs for items to be deleted...
-        Set<String> toDeleteGraphIds = Maps.filterValues(lookup, toDeleteLocalIds::contains).keySet();
+        // These are just the created or deleted items, minus those that have moved.
+        Set<String> createdIds = Sets.difference(allNewGraphIds, movedGraphIds.values());
+        Set<String> deletedIds = Sets.difference(allDeletedGraphIds, movedGraphIds.keySet());
 
-        // Find moved items...
-        // This gets us a map of old graph ID to new graph ID
-        Map<String, String> oldToNew = findMovedItems(scope, lookup);
+        logger.debug("Created items: {}, Deleted items: {}, Moved items: {}",
+                createdIds.size(), deletedIds.size(), movedGraphIds.size());
 
-        logger.debug("Deleted items: {}, Created items: {}, Moved items: {}",
-                toDeleteGraphIds.size(), allNewGraphIds.size(), oldToNew.size());
+        // Delete items that have been deleted or moved...
+        deleteDeadOrMoved(allDeletedGraphIds, logMessage);
 
-        if (!toDeleteLocalIds.isEmpty()) {
+        return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
+    }
+
+    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) throws ValidationError {
+        if (!toDeleteGraphIds.isEmpty()) {
             try {
                 Api api = this.api.enableLogging(false);
                 ActionManager actionManager = api.actionManager().setScope(scope);
                 ActionManager.EventContext ctx = actionManager
                         .newEventContext(actioner, EventTypes.deletion, Optional.ofNullable(logMessage));
-                logger.debug("Deleting {} items", toDeleteGraphIds.size());
                 for (String id : toDeleteGraphIds) {
                     DocumentaryUnit item = api.detail(id, DocumentaryUnit.class);
                     ctx.addSubjects(item);
@@ -151,24 +166,30 @@ public class EadSync {
                 for (String id : toDeleteGraphIds) {
                     api.delete(id);
                 }
+                logger.debug("Finished deleting {} items...", toDeleteGraphIds.size());
             } catch (ItemNotFound | SerializationError | PermissionDenied e) {
                 throw new RuntimeException("Unexpected error when deleting item", e);
             }
         }
-
-        return new SyncLog(log, toDeleteGraphIds, oldToNew, allNewGraphIds);
     }
 
-    private Map<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup)
+    private BiMap<String, String> findMovedItems(PermissionScope scope, Map<String, String> lookup)
             throws EadSyncError {
-        Map<String, String> moved = Maps.newHashMap();
+        BiMap<String, String> moved = HashBiMap.create();
 
         logger.debug("Starting moved item scan...");
         long start = System.nanoTime();
         // NB: This method of finding moved items uses a lot of memory for big
-        // repositories, but is dramatically faster than the alternative.
+        // repositories, but is dramatically faster than the alternative, which
+        // for every item to loop over every _other_ item and check if it has the
+        // same local ID and a different graph one. This becomes impractically slow
+        // with many thousands of items.
+        // Here we use a multimap and look for items where one local ID maps to
+        // two graph IDs.
         Multimap<String, String> scan = LinkedHashMultimap.create();
-        itemsInScope(scope).forEach(item -> scan.put(item.getIdentifier(), item.getId()));
+        for (DocumentaryUnit unit : itemsInScope(scope)) {
+            scan.put(unit.getIdentifier(), unit.getId());
+        }
 
         scan.asMap().forEach((localId, graphIds) -> {
             List<String> ids = Lists.newArrayList(graphIds);
