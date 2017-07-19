@@ -210,16 +210,16 @@ public class ImportResource extends AbstractResource {
                     .setTolerant(tolerant)
                     .withProperties(propertyFile);
             EadFondsSync syncManager = new EadFondsSync(
-                    graph, scope, user, importManager, excludes);
+                    api(), scope, user, importManager);
 
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
-                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE));
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), excludes, message);
 
             tx.success();
             return log;
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | InputParseError | ArchiveException e) {
+        } catch (IllegalArgumentException | InputParseError | ArchiveException | EadFondsSync.EadFondsSyncError e) {
             throw new DeserializationError(e.getMessage());
         }
     }

@@ -7,11 +7,14 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class EadFondsSyncTest extends AbstractImporterTest {
 
@@ -26,17 +29,29 @@ public class EadFondsSyncTest extends AbstractImporterTest {
         manager.getEntities(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)
                 .forEach(v -> System.out.println(v.getId()));
 
-        EadFondsSync sync = new EadFondsSync(graph, scope, validUser, importManager,
-                Sets.newHashSet("c1", "c2", "c3", "c4", "nl-r1-m19"));
+        Set<String> excludes = Sets.newHashSet("c1", "c2", "c3", "c4", "nl-r1-m19");
+        EadFondsSync sync = new EadFondsSync(api(validUser), scope, validUser, importManager);
 
         InputStream ios2 = ClassLoader.getSystemResourceAsStream("hierarchical-ead-sync-test.xml");
-        SyncLog log = sync.sync(m -> m.importInputStream(ios2, "Test sync 2"));
+        String logMessage = "Test sync 2";
+        SyncLog log = sync.sync(m -> m.importInputStream(ios2, logMessage), excludes, logMessage);
 
         System.out.println(log);
-        assertEquals(Sets.newHashSet("C00002-1"), log.deleted());
-        assertEquals(Sets.newHashSet("C00002-2-parent"), log.created());
-        assertEquals(ImmutableMap.of("nl-r1-ctop_level_fonds-c00001-c00002-2", "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2"), log.moved());
+        assertEquals(Sets.newHashSet("nl-r1-ctop_level_fonds-c00001-c00002-1"), log.deleted());
+        assertEquals(Sets.newHashSet("nl-r1-ctop_level_fonds-c00001-c00002-2_parent"), log.created());
+        assertEquals(ImmutableMap.of(
+                "nl-r1-ctop_level_fonds-c00001-c00002-2",
+                "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2"
+                ), log.moved());
         assertEquals(3, log.log().getUnchanged());
         assertEquals(2, log.log().getCreated());
+
+        // Check we actually deleted stuff and that the deletion event is in the
+        // right place
+        assertFalse(manager.exists("nl-r1-ctop_level_fonds-c00001-c00002-1"));
+        SystemEvent ev = api(validUser).actionManager().getLatestGlobalEvent();
+        assertEquals(logMessage, ev.getLogMessage());
+        assertEquals(1, ev.subjectCount());
+        assertEquals(scope, ev.getEventScope());
     }
 }
