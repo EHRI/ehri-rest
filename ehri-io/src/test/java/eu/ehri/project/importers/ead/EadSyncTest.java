@@ -2,16 +2,23 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistence.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -53,6 +60,35 @@ public class EadSyncTest extends AbstractImporterTest {
         checkSync(scope, logMessage, log);
     }
 
+    @Test
+    public void testUnitSyncWithUserGeneratedContent() throws Exception {
+        DocumentaryUnit scope = manager.getEntity("nl-r1-ctop_level_fonds", DocumentaryUnit.class);
+        Set<String> excludes = Sets.newHashSet();
+        Annotation testAnnotation = api(validUser).createAnnotation(
+                "nl-r1-ctop_level_fonds-c00001-c00002-2",
+                "nl-r1-ctop_level_fonds-c00001-c00002-2.eng-test_desc_id_eng",
+                Bundle.of(EntityClass.ANNOTATION, ImmutableMap.of("body", "Test annotation!")),
+                Collections.emptyList(),
+                Optional.empty());
+
+        String logMessage = "Test sync 2";
+        SyncLog log = runSync(scope, excludes, logMessage, "hierarchical-ead-sync-test.xml");
+        checkSync(scope, logMessage, log);
+
+        // Check the new item has the annotation
+        DocumentaryUnit unit = manager.getEntity(
+                "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2", DocumentaryUnit.class);
+        DocumentaryUnitDescription desc = manager.getEntity(
+                "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2.eng-test_desc_id_eng", DocumentaryUnitDescription.class);
+        assertEquals(unit, testAnnotation.getTargets().iterator().next());
+        assertEquals(desc, testAnnotation.getTargetParts().iterator().next());
+        // Transfer event prior to delete event...
+        SystemEvent transferEvent = api(validUser).actionManager()
+                .getLatestGlobalEvent().getPriorEvent();
+        assertEquals(EventTypes.modification, transferEvent.getEventType());
+        assertEquals(logMessage, transferEvent.getLogMessage());
+    }
+
     @Test(expected = EadSync.EadSyncError.class)
     public void testUnitSyncWithDuplicateIds() throws Exception {
         // Import the data again but with an additional item that duplicates
@@ -66,7 +102,7 @@ public class EadSyncTest extends AbstractImporterTest {
     }
 
     private SyncLog runSync(PermissionScope scope, Set<String> excludes, String logMessage, String ead) throws Exception {
-        EadSync sync = new EadSync(api(validUser), scope, validUser, importManager);
+        EadSync sync = new EadSync(graph, api(validUser), scope, validUser, importManager);
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead);
         return sync.sync(m -> m.importInputStream(ios2, logMessage), excludes, logMessage);
     }

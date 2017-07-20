@@ -7,9 +7,13 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -18,11 +22,16 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
@@ -31,8 +40,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 
 /**
@@ -42,20 +53,27 @@ public class EadSync {
 
     private static final Logger logger = LoggerFactory.getLogger(EadSync.class);
 
+    private final FramedGraph<?> graph;
     private final Api api;
     private final PermissionScope scope;
     private final Actioner actioner;
     private final SaxImportManager importManager;
+    private final GraphManager manager;
+    private final Serializer depSerializer;
 
     public EadSync(
+            FramedGraph<?> graph,
             Api api,
             PermissionScope scope,
             Actioner actioner,
             SaxImportManager importManager) {
+        this.graph = graph;
         this.api = api;
         this.scope = scope;
         this.actioner = actioner;
         this.importManager = importManager;
+        this.manager = GraphManagerFactory.getInstance(graph);
+        this.depSerializer = api.serializer().withDependentOnly(true);
     }
 
     /**
@@ -102,7 +120,7 @@ public class EadSync {
         // the BiMap will error if they aren't.)
         BiMap<String, String> oldGraphToLocal = HashBiMap.create();
         try {
-            for (DocumentaryUnit unit: itemsInScope(scope)) {
+            for (DocumentaryUnit unit : itemsInScope(scope)) {
                 oldGraphToLocal.put(unit.getId(), unit.getIdentifier());
             }
         } catch (IllegalArgumentException e) {
@@ -121,9 +139,9 @@ public class EadSync {
         // Add a callback to the import manager so we can collect the
         // IDs of new items and run the ingest operation.
         ImportManager manager = importManager.withCallback(m -> {
-                    DocumentaryUnit doc = m.getNode().as(DocumentaryUnit.class);
-                    newGraphToLocal.put(doc.getId(), doc.getIdentifier());
-                });
+            DocumentaryUnit doc = m.getNode().as(DocumentaryUnit.class);
+            newGraphToLocal.put(doc.getId(), doc.getIdentifier());
+        });
         // Actually run the ingest...
         ImportLog log = op.runIngest(manager);
 
@@ -143,10 +161,88 @@ public class EadSync {
         logger.debug("Created items: {}, Deleted items: {}, Moved items: {}",
                 createdIds.size(), deletedIds.size(), movedGraphIds.size());
 
+        // Transfer user-generated annotations and links between moved items...
+        transferUserGeneratedContent(movedGraphIds, logMessage);
+
         // Delete items that have been deleted or moved...
         deleteDeadOrMoved(allDeletedGraphIds, logMessage);
 
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
+    }
+
+    private void transferUserGeneratedContent(BiMap<String, String> movedGraphIds, String logMessage) {
+        if (!movedGraphIds.isEmpty()) {
+            try {
+                int modified = 0;
+                Api api = this.api.enableLogging(false);
+                ActionManager actionManager = api.actionManager().setScope(scope);
+                ActionManager.EventContext ctx = actionManager
+                        .newEventContext(actioner, EventTypes.modification, Optional.ofNullable(logMessage));
+
+                for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
+                    DocumentaryUnit from = api.detail(entry.getKey(), DocumentaryUnit.class);
+                    DocumentaryUnit to = api.detail(entry.getValue(), DocumentaryUnit.class);
+                    boolean changed = transferUserGeneratedContent(from, to);
+                    if (changed) {
+                        ctx.addSubjects(to);
+                        modified++;
+                    }
+                }
+
+                if (modified > 0) {
+                    ctx.commit();
+                }
+
+                logger.debug("Transferred user-generated content from {} items...", modified);
+            } catch (SerializationError | ItemNotFound e) {
+                throw new RuntimeException("Unexpected error when transferring user generated content", e);
+            }
+        }
+    }
+
+    private boolean transferUserGeneratedContent(DocumentaryUnit from, DocumentaryUnit to)
+            throws SerializationError, ItemNotFound {
+        int moved = 0;
+        List<Link> links = Lists.newArrayList(from.getLinks());
+        for (Link link : links) {
+            if (link.getLinkBodies().iterator().hasNext()) {
+                // Skip links with a body...
+                continue;
+            }
+            logger.debug("Moving link from {} to {}...", from.getId(), to.getId());
+            to.addLink(link);
+            moved++;
+        }
+        List<Annotation> annotations = Lists.newArrayList(from.getAnnotations());
+        for (Annotation annotation : annotations) {
+            logger.debug("Moving annotation from {} to {}...", from.getId(), to.getId());
+            to.addAnnotation(annotation);
+            for (Annotatable part : annotation.getTargetParts()) {
+                findPart(part, to).ifPresent(altPart -> {
+                    logger.debug("Found equivalent target part: {}", altPart.getId());
+                    altPart.addAnnotationPart(annotation);
+                });
+            }
+            moved++;
+        }
+        return moved > 0;
+    }
+
+    private Optional<Annotatable> findPart(Annotatable orig, DocumentaryUnit newParent)
+            throws SerializationError, ItemNotFound {
+        Bundle newParentBundle = depSerializer.entityToBundle(newParent);
+        Bundle dep = depSerializer.entityToBundle(orig);
+
+        BiFunction<Bundle, Bundle, Boolean> isEquivalentDescription =
+                (Bundle a, Bundle b) -> Objects.equals(a.getType(), b.getType())
+                        && Objects.equals(a.getDataValue(Ontology.LANGUAGE), b.getDataValue(Ontology.LANGUAGE))
+                        && Objects.equals(a.getDataValue(Ontology.IDENTIFIER_KEY), b.getDataValue(Ontology.IDENTIFIER_KEY));
+
+        Optional<Bundle> bundle = newParentBundle.find(b ->
+                b.equals(dep) || isEquivalentDescription.apply(dep, b));
+        return bundle.isPresent()
+                ? Optional.of(manager.getEntity(bundle.get().getId(), Annotatable.class))
+                : Optional.empty();
     }
 
     private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) throws ValidationError {

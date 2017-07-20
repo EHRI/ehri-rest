@@ -317,7 +317,7 @@ public class ImportResource extends AbstractResource {
                     .withProperties(propertyFile);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
-            EadSync syncManager = new EadSync(api(), syncScope, user, importManager);
+            EadSync syncManager = new EadSync(graph, api(), syncScope, user, importManager);
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
 
