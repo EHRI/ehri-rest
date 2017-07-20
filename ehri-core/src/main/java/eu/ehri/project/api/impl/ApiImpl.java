@@ -141,6 +141,11 @@ public class ApiImpl implements Api {
     }
 
     @Override
+    public Serializer serializer() {
+        return new Serializer(graph);
+    }
+
+    @Override
     public Api withAccessor(Accessor accessor) {
         return new ApiImpl(graph, accessor, scope, logging);
     }

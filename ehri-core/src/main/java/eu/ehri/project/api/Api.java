@@ -42,6 +42,7 @@ import eu.ehri.project.models.base.Promotable;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.persistence.VersionManager;
 
 import java.util.Collection;
@@ -78,6 +79,8 @@ public interface Api {
     EventsApi events();
 
     QueryApi query();
+
+    Serializer serializer();
 
     /**
      * Fetch an item, as a user. This only provides access control.
