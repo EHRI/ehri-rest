@@ -68,6 +68,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -258,10 +259,6 @@ public class ImportResource extends AbstractResource {
             logger.debug("Committing import transaction...");
             tx.success();
             return log;
-        } catch (ClassNotFoundException e) {
-            throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | InputParseError | ArchiveException e) {
-            throw new DeserializationError(e.getMessage());
         }
     }
 
@@ -329,7 +326,6 @@ public class ImportResource extends AbstractResource {
             @QueryParam(IMPORTER_PARAM) String importerClass,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-
         try (final Tx tx = beginTx()) {
             Class<? extends ItemImporter> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
@@ -348,12 +344,6 @@ public class ImportResource extends AbstractResource {
             logger.debug("Committing import transaction...");
             tx.success();
             return log;
-        } catch (InputParseError ex) {
-            throw new DeserializationError("ParseError: " + ex.getMessage());
-        } catch (ClassNotFoundException e) {
-            throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | ArchiveException e) {
-            throw new DeserializationError(e.getMessage());
         }
     }
 
@@ -457,16 +447,24 @@ public class ImportResource extends AbstractResource {
 
     private ImportLog importDataStream(
             ImportManager importManager, String message, InputStream data, MediaType... accepts)
-            throws IOException, ValidationError, InputParseError, ArchiveException {
+            throws DeserializationError, ValidationError {
         MediaType mediaType = requestHeaders.getMediaType();
-        if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
-            // Extract our list of paths...
-            List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
-            return importManager.importFiles(paths, message);
-        } else if (Lists.newArrayList(accepts).contains(mediaType)) {
-            return importManager.importInputStream(data, message);
-        } else {
-            return importPotentiallyGZippedArchive(importManager, message, data);
+        try {
+            if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
+                // Extract our list of paths...
+                List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
+                return importManager.importFiles(paths, message);
+            } else if (Lists.newArrayList(accepts).contains(mediaType)) {
+                return importManager.importInputStream(data, message);
+            } else {
+                return importPotentiallyGZippedArchive(importManager, message, data);
+            }
+        } catch (EOFException e) {
+            throw new DeserializationError("EOF reading input data");
+        } catch (InputParseError | IOException e) {
+            throw new DeserializationError("ParseError: " + e.getMessage());
+        } catch (IllegalArgumentException | ArchiveException e) {
+            throw new DeserializationError(e.getMessage());
         }
     }
 
@@ -497,23 +495,23 @@ public class ImportResource extends AbstractResource {
         }
     }
 
-    private static List<String> getFilePaths(String pathList) {
+    private static List<String> getFilePaths(String pathList) throws DeserializationError {
         List<String> files = Lists.newArrayList();
         for (String path : Splitter.on("\n").omitEmptyStrings().trimResults().split(pathList)) {
             if (!Files.isRegularFile(Paths.get(path))) {
-                throw new IllegalArgumentException("File specified in payload not found: " + path);
+                throw new DeserializationError("File specified in payload not found: " + path);
             }
             files.add(path);
         }
         return files;
     }
 
-    private static void checkPropertyFile(String properties) {
+    private static void checkPropertyFile(String properties) throws DeserializationError {
         // Null properties are allowed
         if (properties != null) {
             java.nio.file.Path file = Paths.get(properties);
             if (!Files.isRegularFile(file)) {
-                throw new IllegalArgumentException("Properties file '" + properties + "' " +
+                throw new DeserializationError("Properties file '" + properties + "' " +
                         "either does not exist, or is not a file.");
             }
         }
@@ -522,26 +520,34 @@ public class ImportResource extends AbstractResource {
     @SuppressWarnings("unchecked")
     private static Class<? extends SaxXmlHandler> getHandlerCls(String handlerName, String
             defaultHandler)
-            throws ClassNotFoundException, DeserializationError {
+            throws DeserializationError {
         String name = nameOrDefault(handlerName, defaultHandler);
-        Class<?> handler = Class.forName(name);
-        if (!SaxXmlHandler.class.isAssignableFrom(handler)) {
-            throw new DeserializationError("Class '" + handlerName + "' is" +
-                    " not an instance of " + SaxXmlHandler.class.getSimpleName());
+        try {
+            Class<?> handler = Class.forName(name);
+            if (!SaxXmlHandler.class.isAssignableFrom(handler)) {
+                throw new DeserializationError("Class '" + handlerName + "' is" +
+                        " not an instance of " + SaxXmlHandler.class.getSimpleName());
+            }
+            return (Class<? extends SaxXmlHandler>) handler;
+        } catch (ClassNotFoundException e) {
+            throw new DeserializationError("Class not found: " + e.getMessage());
         }
-        return (Class<? extends SaxXmlHandler>) handler;
     }
 
     @SuppressWarnings("unchecked")
     private static Class<? extends ItemImporter> getImporterCls(String importerName, String defaultImporter)
-            throws ClassNotFoundException, DeserializationError {
+            throws DeserializationError {
         String name = nameOrDefault(importerName, defaultImporter);
-        Class<?> importer = Class.forName(name);
-        if (!ItemImporter.class.isAssignableFrom(importer)) {
-            throw new DeserializationError("Class '" + importerName + "' is" +
-                    " not an instance of " + ItemImporter.class.getSimpleName());
+        try {
+            Class<?> importer = Class.forName(name);
+            if (!ItemImporter.class.isAssignableFrom(importer)) {
+                throw new DeserializationError("Class '" + importerName + "' is" +
+                        " not an instance of " + ItemImporter.class.getSimpleName());
+            }
+            return (Class<? extends ItemImporter>) importer;
+        } catch (ClassNotFoundException e) {
+            throw new DeserializationError("Class not found: " + e.getMessage());
         }
-        return (Class<? extends ItemImporter>) importer;
     }
 
     private Optional<String> getLogMessage(String logMessagePathOrText) throws IOException {

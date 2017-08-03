@@ -210,6 +210,22 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
     }
 
     @Test
+    public void testImportEadWithEmptyPayload() throws Exception {
+        // Get the path of an EAD file
+        URI uri = getImportUrl("ead", "r1", "Test", false)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_OCTET_STREAM)
+                .post(ClientResponse.class);
+
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+        String output = response.getEntity(String.class);
+        JsonNode rootNode = jsonMapper.readTree(output);
+        assertTrue("Has correct error messages", rootNode.path("details").toString()
+                .contains("EOF reading input data"));
+    }
+
+    @Test
     public void testImportEadWithFileLogMessage() throws Exception {
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
