@@ -323,9 +323,7 @@ public class ImportResource extends AbstractResource {
 
             tx.success();
             return log;
-        } catch (ClassNotFoundException e) {
-            throw new DeserializationError("Class not found: " + e.getMessage());
-        } catch (IllegalArgumentException | InputParseError | ArchiveException | EadSync.EadSyncError e) {
+        } catch (EadSync.EadSyncError e) {
             throw new DeserializationError(e.getMessage());
         }
     }

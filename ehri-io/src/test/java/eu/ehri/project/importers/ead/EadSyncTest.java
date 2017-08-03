@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.importers.base.AbstractImporterTest;
+import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -104,7 +105,13 @@ public class EadSyncTest extends AbstractImporterTest {
     private SyncLog runSync(PermissionScope scope, Set<String> excludes, String logMessage, String ead) throws Exception {
         EadSync sync = new EadSync(graph, api(validUser), scope, validUser, importManager);
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead);
-        return sync.sync(m -> m.importInputStream(ios2, logMessage), excludes, logMessage);
+        return sync.sync(m -> {
+            try {
+                return m.importInputStream(ios2, logMessage);
+            } catch (InputParseError e) {
+                throw new RuntimeException(e);
+            }
+        }, excludes, logMessage);
     }
 
     private void checkSync(PermissionScope scope, String logMessage, SyncLog log) {
