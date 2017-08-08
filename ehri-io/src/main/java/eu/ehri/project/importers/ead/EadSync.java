@@ -159,14 +159,14 @@ public class EadSync {
         Set<String> createdIds = Sets.difference(allNewGraphIds, movedGraphIds.values());
         Set<String> deletedIds = Sets.difference(allDeletedGraphIds, movedGraphIds.keySet());
 
-        logger.debug("Created items: {}, Deleted items: {}, Moved items: {}",
-                createdIds.size(), deletedIds.size(), movedGraphIds.size());
-
         // Transfer user-generated annotations and links between moved items...
         transferUserGeneratedContent(movedGraphIds, logMessage);
 
         // Delete items that have been deleted or moved...
         deleteDeadOrMoved(allDeletedGraphIds, logMessage);
+
+        logger.debug("Created items: {}, Deleted items: {}, Moved items: {}",
+                createdIds.size(), deletedIds.size(), movedGraphIds.size());
 
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
     }
