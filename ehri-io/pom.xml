@@ -89,6 +89,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Config -->
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+
         <!-- Jackson CSV -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
