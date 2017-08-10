@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.ContactInfo;
@@ -47,6 +49,7 @@ import java.util.stream.Collectors;
 public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Ead2002Exporter.class);
+    private static final Config config = ConfigFactory.load();
     private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
 
     private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
@@ -198,23 +201,25 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
     }
 
     private void addRevisionDesc(XMLStreamWriter sw, DocumentaryUnit unit) {
-        List<List<SystemEvent>> eventList = Lists.newArrayList(api.events().aggregateForItem(unit));
-        if (!eventList.isEmpty()) {
-            tag(sw, "revisiondesc", () -> {
-                for (List<SystemEvent> agg : eventList) {
-                    SystemEvent event = agg.get(0);
-                    String eventDesc = getEventDescription(event.getEventType());
-                    tag(sw, "change", () -> {
-                        tag(sw, "date", new DateTime(event.getTimestamp()).toString());
-                        if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
-                            tag(sw, "item", eventDesc);
-                        } else {
-                            tag(sw, "item", String.format("%s [%s]",
-                                    event.getLogMessage(), eventDesc));
-                        }
-                    });
-                }
-            });
+        if (config.getBoolean("io.export.ead.includeRevisions")) {
+            List<List<SystemEvent>> eventList = Lists.newArrayList(api.events().aggregateForItem(unit));
+            if (!eventList.isEmpty()) {
+                tag(sw, "revisiondesc", () -> {
+                    for (List<SystemEvent> agg : eventList) {
+                        SystemEvent event = agg.get(0);
+                        String eventDesc = getEventDescription(event.getEventType());
+                        tag(sw, "change", () -> {
+                            tag(sw, "date", new DateTime(event.getTimestamp()).toString());
+                            if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
+                                tag(sw, "item", eventDesc);
+                            } else {
+                                tag(sw, "item", String.format("%s [%s]",
+                                        event.getLogMessage(), eventDesc));
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
