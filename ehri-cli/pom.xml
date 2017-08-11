@@ -32,13 +32,6 @@
 
     <dependencies>
 
-        <!-- Vizualization -->
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-graphviz</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
-
         <!-- Command line parsing -->
         <dependency>
             <groupId>commons-cli</groupId>
@@ -108,6 +101,14 @@
             <version>${neo4j.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Test logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
