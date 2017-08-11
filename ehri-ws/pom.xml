@@ -154,19 +154,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <!-- logging -->
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-slf4j</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
-        <!-- logging -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- testing -->
         <dependency>
