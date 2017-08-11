@@ -85,6 +85,13 @@
                         <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                             <resource>reference.conf</resource>
                         </transformer>
+
+                        <!-- Resources to not package... -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                            <resources>
+                                <resource>jena-log4j.properties</resource>
+                            </resources>
+                        </transformer>
                     </transformers>
                 </configuration>
             </plugin>
