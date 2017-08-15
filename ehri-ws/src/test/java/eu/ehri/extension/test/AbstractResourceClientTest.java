@@ -185,23 +185,23 @@ public class AbstractResourceClientTest extends RunningServerTest {
         return getItemList(uri, userId, params);
     }
 
-    protected Integer getPaginationTotal(ClientResponse response) {
+    protected int getPaginationTotal(ClientResponse response) {
         MultivaluedMap<String, String> headers = response.getHeaders();
         String range = headers.getFirst(RANGE_HEADER_NAME);
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
-            return matcher.find() ? Integer.valueOf(matcher.group(3)) : null;
+            return matcher.find() ? Integer.valueOf(matcher.group(3)) : -1;
         }
-        return null;
+        return -1;
     }
 
-    protected Long getEntityCount(String entityType, String userId) {
+    protected long getEntityCount(String entityType, String userId) {
         WebResource resource = client.resource(entityUri(entityType));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME, userId)
                 .head();
-        return Long.valueOf(getPaginationTotal(response));
+        return (long) getPaginationTotal(response);
     }
 
     protected UriBuilder ehriUriBuilder(String... segments) {

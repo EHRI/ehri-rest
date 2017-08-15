@@ -85,7 +85,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(OK, response);
         // Check the response contains a new version
-        assertEquals(Integer.valueOf(1), getPaginationTotal(response));
+        assertEquals(1, getPaginationTotal(response));
     }
 
     @Test
@@ -290,7 +290,7 @@ public class VirtualUnitResourceClientTest extends AbstractResourceClientTest {
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
-        assertEquals(Integer.valueOf(1), getPaginationTotal(response));
+        assertEquals(1, getPaginationTotal(response));
     }
 
     private URI getCreationUri() {

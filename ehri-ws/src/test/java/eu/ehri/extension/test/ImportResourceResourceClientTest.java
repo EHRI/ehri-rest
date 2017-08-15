@@ -112,6 +112,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -132,6 +133,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -159,6 +161,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         URI uri3 = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
                 .queryParam(ALLOW_UPDATES_PARAM, "true")
+                .queryParam(COMMIT, true)
                 .build();
         ImportLog log2 = callAs(getAdminUserProfileId(), uri3)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -175,6 +178,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(HANDLER_PARAM, "IDontExist") // oops
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_PLAIN_TYPE)
@@ -183,7 +187,6 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         assertStatus(ClientResponse.Status.BAD_REQUEST, response);
         String output = response.getEntity(String.class);
-        System.out.println(output);
         JsonNode rootNode = jsonMapper.readTree(output);
         assertTrue("Has correct error messages", rootNode.path("details").toString()
                 .contains("Class not found"));
@@ -196,6 +199,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
 
         URI uri = getImportUrl("ead", "r1", "Test", false)
                 .queryParam(HANDLER_PARAM, "java.lang.String") // oops
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_PLAIN_TYPE)
@@ -214,6 +218,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
     public void testImportEadWithEmptyPayload() throws Exception {
         // Get the path of an EAD file
         URI uri = getImportUrl("ead", "r1", "Test", false)
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.APPLICATION_OCTET_STREAM)
@@ -230,10 +235,11 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
     public void testImportEadWithFileLogMessage() throws Exception {
         // Get the path of an EAD file
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
-
+        long count = getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_PLAIN_TYPE)
@@ -245,6 +251,33 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertEquals(count + 1L,
+                getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
+    }
+
+    @Test
+    public void testImportEadDryRun() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(SINGLE_EAD);
+        long count = getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, false) // Not committing!
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_PLAIN_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orElse(null));
+        // count should be the same as before since we didn't commit
+        assertEquals(count,
+                getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
     }
 
     @Test
@@ -259,6 +292,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
@@ -286,6 +320,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", getTestLogFilePath(logText), false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
@@ -307,6 +342,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Setup";
         URI uri = getImportUrl("ead-sync", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_PLAIN_TYPE)
@@ -325,6 +361,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         URI uri2 = getImportUrl("ead-sync", "r1", "Test sync", false)
                 .queryParam(ALLOW_UPDATES_PARAM, true)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
                 .build();
         InputStream payloadStream2 = getPayloadStream("hierarchical-ead-sync-test.xml");
         ClientResponse response2 = callAs(getAdminUserProfileId(), uri2)
@@ -347,6 +384,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
                 .getClassLoader().getResourceAsStream("eag.xml");
         String logText = "Testing import";
         URI uri = getImportUrl("eag", "nl", logText, false)
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -366,6 +404,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
                 .getClassLoader().getResourceAsStream("eac.xml");
         String logText = "Testing import";
         URI uri = getImportUrl("eac", "auths", logText, false)
+                .queryParam(COMMIT, true)
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .type(MediaType.TEXT_XML_TYPE)
@@ -386,6 +425,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         System.out.println(payloadStream);
         String logText = "Testing patch update";
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
+                .queryParam(COMMIT, true)
                 .queryParam(LOG_PARAM, logText).build();
         ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
                 .type(MediaType.APPLICATION_JSON_TYPE)
@@ -409,6 +449,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Testing patch to unset values";
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
                 .queryParam(LOG_PARAM, logText)
+                .queryParam(COMMIT, true)
                 .queryParam(SCOPE_PARAM, "nl").build();
         ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
                 .type(MediaType.APPLICATION_JSON_TYPE)
@@ -431,6 +472,7 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         String logText = "Testing patch delete";
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "batch")
                 .queryParam(LOG_PARAM, logText)
+                .queryParam(COMMIT, true)
                 .queryParam(ID_PARAM, "a2")
                 .build();
         ClientResponse response = callAs(user, jsonUri)
