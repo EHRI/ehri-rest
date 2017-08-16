@@ -57,6 +57,6 @@ public class SyncLog {
 
     @Override
     public String toString() {
-        return getData().toString();
+        return String.format("%s, Moved: %d", log.toString(), moved.size());
     }
 }

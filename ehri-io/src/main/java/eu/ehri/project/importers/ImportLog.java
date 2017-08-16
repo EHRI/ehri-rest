@@ -168,14 +168,6 @@ public class ImportLog {
         return Optional.of(logMessage);
     }
 
-    public void printReport() {
-        printReport(System.out);
-    }
-
-    public void printReport(PrintStream out) {
-        out.println(toString());
-    }
-
     @Override
     public String toString() {
         return String.format(

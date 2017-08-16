@@ -63,7 +63,6 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
             //System.out.println("EXPORT: " + skos);
             ImportLog log = importer.setFormat(entry.getValue())
                     .importFile(new ByteArrayInputStream(skos.getBytes()), "test");
-            log.printReport();
             List<VertexProxy> after = getGraphState(graph);
             assertTrue(log.getUnchanged() > 0);
             assertEquals(0, log.getChanged());

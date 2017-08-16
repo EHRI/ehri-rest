@@ -59,7 +59,7 @@ public class ImportLogProvider implements MessageBodyWriter<ImportLog>,
         if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
             mapper.writeValue(outputStream, importLog);
         } else {
-            importLog.printReport(new PrintStream(outputStream));
+            new PrintStream(outputStream).println(importLog);
         }
     }
 

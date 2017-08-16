@@ -50,10 +50,9 @@ public class CampsImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
 
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, logMessage);
-        log.printReport();
+        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+            .setTolerant(true)
+            .importFile(ios, logMessage);
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have

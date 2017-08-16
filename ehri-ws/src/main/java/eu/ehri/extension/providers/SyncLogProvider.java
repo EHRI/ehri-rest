@@ -32,6 +32,7 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -58,7 +59,7 @@ public class SyncLogProvider implements MessageBodyWriter<SyncLog>,
         if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
             mapper.writeValue(outputStream, syncLog);
         } else {
-            outputStream.write(syncLog.getData().toString().getBytes());
+            new PrintStream(outputStream).println(syncLog);
         }
     }
 

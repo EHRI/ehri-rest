@@ -155,7 +155,7 @@ public abstract class ImportCommand extends BaseCommand {
                     optionalProperties,
                     Lists.<ImportCallback>newArrayList())
                     .importFiles(filePaths, logMessage);
-            log.printReport();
+            System.out.println(log);
 
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
