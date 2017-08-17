@@ -35,6 +35,7 @@ import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.providers.BundleProvider;
 import eu.ehri.extension.providers.GlobalPermissionSetProvider;
 import eu.ehri.extension.providers.ImportLogProvider;
+import eu.ehri.extension.providers.SyncLogProvider;
 import eu.ehri.extension.providers.TableProvider;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
@@ -74,7 +75,8 @@ public class AbstractResourceClientTest extends RunningServerTest {
                 GlobalPermissionSetProvider.class,
                 TableProvider.class,
                 BundleProvider.class,
-                ImportLogProvider.class
+                ImportLogProvider.class,
+                SyncLogProvider.class
         ).forEach(p -> config.getClasses().add(p));
         Lists.newArrayList(additionalProviders)
                 .forEach(p -> config.getClasses().add(p));
@@ -183,23 +185,23 @@ public class AbstractResourceClientTest extends RunningServerTest {
         return getItemList(uri, userId, params);
     }
 
-    protected Integer getPaginationTotal(ClientResponse response) {
+    protected int getPaginationTotal(ClientResponse response) {
         MultivaluedMap<String, String> headers = response.getHeaders();
         String range = headers.getFirst(RANGE_HEADER_NAME);
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
-            return matcher.find() ? Integer.valueOf(matcher.group(3)) : null;
+            return matcher.find() ? Integer.valueOf(matcher.group(3)) : -1;
         }
-        return null;
+        return -1;
     }
 
-    protected Long getEntityCount(String entityType, String userId) {
+    protected long getEntityCount(String entityType, String userId) {
         WebResource resource = client.resource(entityUri(entityType));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME, userId)
                 .head();
-        return Long.valueOf(getPaginationTotal(response));
+        return (long) getPaginationTotal(response);
     }
 
     protected UriBuilder ehriUriBuilder(String... segments) {

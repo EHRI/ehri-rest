@@ -41,7 +41,7 @@ import java.util.Map;
  * to manipulate the graph.
  */
 public abstract class ImportCsvCommand extends BaseCommand {
-    final Class<? extends ItemImporter> importer;
+    private final Class<? extends ItemImporter> importer;
 
     public ImportCsvCommand(Class<? extends ItemImporter> importer) {
         this.importer = importer;
@@ -96,9 +96,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
             throw new RuntimeException(getUsage());
 
         List<String> filePaths = Lists.newLinkedList();
-        for (int i = 0; i < cmdLine.getArgList().size(); i++) {
-            filePaths.add(cmdLine.getArgList().get(i));
-        }
+        filePaths.addAll(cmdLine.getArgList());
 
         try {
             // Find the agent
@@ -114,7 +112,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
             ImportLog log = new CsvImportManager(graph, scope, user, tolerant, allowUpdates, importer)
                     .importFiles(filePaths, logMessage);
 
-            log.printReport();
+            System.out.println(log);
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {

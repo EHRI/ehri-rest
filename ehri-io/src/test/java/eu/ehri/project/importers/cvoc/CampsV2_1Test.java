@@ -21,14 +21,11 @@ package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
@@ -38,9 +35,9 @@ import static org.junit.Assert.assertNotNull;
 
 
 public class CampsV2_1Test extends AbstractImporterTest {
-    private static final Logger logger = LoggerFactory.getLogger(CampsV2_1Test.class);
-    protected final String SKOS_FILE = "cvoc/camps.rdf";
-    protected final String SKOS_FILE_VERSION2 = "cvoc/camps-v2-1.rdf.xml";
+
+    private final String SKOS_FILE = "cvoc/camps.rdf";
+    private final String SKOS_FILE_VERSION2 = "cvoc/camps-v2-1.rdf.xml";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -53,16 +50,15 @@ public class CampsV2_1Test extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
 
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, logMessage);
-        log.printReport();
+        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+                .setTolerant(true)
+                .importFile(ios, logMessage);
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 8 more Concepts
        	 * 8 more ConceptDescription
-	 * 9 more import Event links (8 for every Unit, 1 for the User)
+	     * 9 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
         int afterNodeCount = count + 26;
@@ -92,16 +88,16 @@ public class CampsV2_1Test extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-//        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, "Importing the camps as a SKOS file");
+
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+                .setTolerant(true);
+        importer.importFile(ios, "Importing the camps as a SKOS file");
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 8 more Concepts
        	 * 8 more ConceptDescription
-	 * 9 more import Event links (8 for every Unit, 1 for the User)
+    	 * 9 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
         int afterNodeCount = count + 26;
@@ -130,16 +126,13 @@ public class CampsV2_1Test extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        log = importer.importFile(ios, "Importing the modified camps as a SKOS file");
+        importer.importFile(ios, "Importing the modified camps as a SKOS file");
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
 
-
-//         printGraph(graph);
-        /*  How many new nodes will have been created? We should have*/
-        /**
+        /*  How many new nodes will have been created? We should have:
          * CREATED:
          * null: 3
          * cvocConceptDescription: 2
@@ -147,12 +140,9 @@ public class CampsV2_1Test extends AbstractImporterTest {
          *
          * REMOVED:
          * vocConceptDescription: 2
-         *
          */
         afterNodeCount = count + 26 + 4;
         assertEquals(afterNodeCount, getNodeCount(graph));
         assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
-
     }
-
 }

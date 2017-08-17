@@ -183,6 +183,11 @@ public final class Serializer {
                 includeProps, cache);
     }
 
+    public Serializer withDependentOnly(boolean dependentOnly) {
+        return new Serializer(graph, dependentOnly, maxTraversals, liteMode,
+                includeProps, cache);
+    }
+
     /**
      * Get the list of included properties for this serializer.
      *

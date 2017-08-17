@@ -113,7 +113,7 @@ public class SkosVocabularyImport extends BaseCommand {
             ImportLog log = importer
                     .setTolerant(cmdLine.hasOption("tolerant"))
                     .importFile(filePath, logMessage);
-            log.printReport();
+            System.out.println(log);
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Entry<String, String> entry : log.getErrors().entrySet()) {

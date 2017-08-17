@@ -70,7 +70,8 @@ public class SaxImportManager extends AbstractImportManager {
             Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter> importerClass,
+            Class<? extends SaxXmlHandler> handlerClass,
             Optional<XmlImportProperties> properties,
             List<ImportCallback> callbacks) {
         super(graph, scope, actioner, tolerant, allowUpdates, importerClass);
@@ -224,5 +225,12 @@ public class SaxImportManager extends AbstractImportManager {
     public SaxImportManager withScope(PermissionScope scope) {
         return new SaxImportManager(framedGraph, scope, actioner, tolerant,
                 allowUpdates, importerClass, handlerClass, properties, extraCallbacks);
+    }
+
+    public SaxImportManager withCallback(ImportCallback callback) {
+        List<ImportCallback> newCbs = Lists.newArrayList(extraCallbacks);
+        newCbs.add(callback);
+        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
+                allowUpdates, importerClass, handlerClass, properties, newCbs);
     }
 }

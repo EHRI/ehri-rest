@@ -21,14 +21,12 @@ package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.junit.Test;
@@ -43,8 +41,8 @@ import static org.junit.Assert.assertTrue;
 
 public class EventsSkosImporterTest extends AbstractImporterTest {
 
-    protected final String EVENT_SKOS = "cvoc/ehri-events.rdf";
-    protected final String EHRI_SKOS_TERM = "cvoc/joods_raad.xml";
+    private final String EVENT_SKOS = "cvoc/ehri-events.rdf";
+    private final String EHRI_SKOS_TERM = "cvoc/joods_raad.xml";
     final String logMessage = "Importing a single skos: " + EVENT_SKOS;
 
     @Test
@@ -53,14 +51,14 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
-              // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importer.importFile(ios, logMessage);
-//        log.printReport();
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
+        importer.importFile(ios, logMessage);
+
         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
        /*
         * relationship: 5
         * null: 2
@@ -69,29 +67,28 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         * cvocConcept: 1 
         */
         printGraph(graph);
-        
+
     }
-  
+
     @Test
     public void testImportItemsT() throws Exception {
 
         int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
-//        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-        importer.setTolerant(true);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+                .setTolerant(true);
         //auths
-              // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importer.importFile(ios, logMessage);
-//        log.printReport();
-        // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
+        importer.importFile(ios, logMessage);
 
-        /** How many new nodes will have been created? We should have
+        // After...
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
+
+        /* How many new nodes will have been created? We should have
          * relationship: 4
          * null: 3
          * link: 1
@@ -102,54 +99,54 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         assertEquals(count + 13, getNodeCount(graph));
         printGraph(graph);
 
-        
+
         Concept bloodForGoods = manager.getEntity("cvoc1-1", Concept.class);
-        for(Description desc : bloodForGoods.getDescriptions()){
+        for (Description desc : bloodForGoods.getDescriptions()) {
             assertTrue(desc.getPropertyKeys().contains("scopeNote"));
         }
         Concept teheranChildren = manager.getEntity("cvoc1-2", Concept.class);
         assertTrue(teheranChildren.getPropertyKeys().contains(AccessPointType.person.name()));
 
-        boolean found=false;
-        for(Link desc : teheranChildren.getLinks()){
-            found=true;
+        boolean found = false;
+        for (Link desc : teheranChildren.getLinks()) {
+            found = true;
             assertTrue(desc.getPropertyKeys().contains("type"));
             assertEquals("associative", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("sem"));
             assertEquals("person", desc.getProperty("sem"));
-            for(Linkable e : desc.getLinkTargets()){
+            for (Linkable e : desc.getLinkTargets()) {
                 assertTrue(e.getId().equals("cvoc1-2") || e.getId().equals("a1"));
             }
         }
         assertTrue(found);
-        
+
     }
-    
-    @Test 
-    public void withOutsideScheme() throws ItemNotFound, IOException, InputParseError, ValidationError{
+
+    @Test
+    public void withOutsideScheme() throws ItemNotFound, IOException, InputParseError, ValidationError {
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
-        SkosImporter importer1 = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1);
-        importer1.setTolerant(true);
-        ImportLog log1 = importer1.importFile(ios1, logMessage);
+        SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1)
+                .setTolerant(true)
+                .importFile(ios1, logMessage);
 
-           int count = getNodeCount(graph);
+        int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
-        
-              // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
-        ImportLog log = importer.importFile(ios, logMessage);
-//        log.printReport();
+
+        // Before...
+        List<VertexProxy> graphState1 = getGraphState(graph);
+        importer.importFile(ios, logMessage);
+
         // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+        List<VertexProxy> graphState2 = getGraphState(graph);
+        GraphDiff diff = diffGraph(graphState1, graphState2);
+        diff.printDebug(System.out);
 
 
-        /** How many new nodes will have been created? We should have
+        /* How many new nodes will have been created? We should have
          * link: 3
          * relationship: 2
          * null: 3
@@ -158,13 +155,12 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
          * cvocConcept: 2
          */
         assertEquals(count + 13, getNodeCount(graph));
-//        printGraph(graph);   
-        
+
         Concept termJR = manager.getEntity("cvoc1-tema_866", Concept.class);
-        
-        boolean found=false;
-        for(Link desc : termJR.getLinks()){
-            found=true;
+
+        boolean found = false;
+        for (Link desc : termJR.getLinks()) {
+            found = true;
             assertTrue(desc.getPropertyKeys().contains("type"));
             assertEquals("associative", desc.getProperty("type"));
             assertTrue(desc.getPropertyKeys().contains("skos"));

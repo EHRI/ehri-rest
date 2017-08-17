@@ -2,6 +2,13 @@
 <!-- <!DOCTYPE ead PUBLIC "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN" "http://lcweb2.loc.gov/xmlcommon/dtds/ead2002/ead.dtd"> -->
 
 <ead>
+	<!--
+		Note: this file is for testing synchronisation of archival hierarchies. It
+		 is similar to hierarchical-ead.xml but with the following changes.
+		  - C00002-1 removed
+		  - C00002-2-parent added
+		  - C00002-2 moved under newly added item
+	-->
 	<eadheader langencoding="iso639-2b" countryencoding="iso3166-1"
 		dateencoding="iso8601" repositoryencoding="iso15511" scriptencoding="iso15924"
 		relatedencoding="DC">
@@ -83,27 +90,27 @@
 					</scopecontent>
 					<c03>
 						<did>
-							<unittitle encodinganalog="3.1.2">Test EAD Item Nested 2 - 1</unittitle>
+							<unittitle encodinganalog="3.1.2">Test EAD Item Nested 2 - 2 Parent</unittitle>
 							<unitid repositorycode="GB00001" countrycode="GB"
-								encodinganalog="3.1.1">C00002-1</unitid>
+								encodinganalog="3.1.1">C00002-2-parent</unitid>
 						</did>
 						<scopecontent encodinganalog="3.3.1">
 							<p>
-								Second nested item.
+								Inserted parent item
 							</p>
 						</scopecontent>
-					</c03>
-					<c03>
-						<did>
-							<unittitle encodinganalog="3.1.2">Test EAD Item Nested 2 - 2</unittitle>
-							<unitid repositorycode="GB00001" countrycode="GB"
-								encodinganalog="3.1.1">C00002-2</unitid>
-						</did>
-						<scopecontent encodinganalog="3.3.1">
-							<p>
-								Second nested item.
-							</p>
-						</scopecontent>
+						<c04>
+							<did>
+								<unittitle encodinganalog="3.1.2">Test EAD Item Nested 2 - 2</unittitle>
+								<unitid repositorycode="GB00001" countrycode="GB"
+										encodinganalog="3.1.1">C00002-2</unitid>
+							</did>
+							<scopecontent encodinganalog="3.3.1">
+								<p>
+									Second nested item.
+								</p>
+							</scopecontent>
+						</c04>
 					</c03>					
 				</c02>
 			</c01>

@@ -19,7 +19,7 @@
 
 package eu.ehri.extension.providers;
 
-import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ead.SyncLog;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -39,40 +39,40 @@ import java.lang.reflect.Type;
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-public class ImportLogProvider implements MessageBodyWriter<ImportLog>,
-        MessageBodyReader<ImportLog>, JsonMessageBodyHandler {
+public class SyncLogProvider implements MessageBodyWriter<SyncLog>,
+        MessageBodyReader<SyncLog>, JsonMessageBodyHandler {
     @Override
     public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return aClass == ImportLog.class;
+        return aClass == SyncLog.class;
     }
 
     @Override
-    public long getSize(ImportLog importLog, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+    public long getSize(SyncLog syncLog, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
         return -1L;
     }
 
     @Override
-    public void writeTo(ImportLog importLog, Class<?> aClass, Type type,
+    public void writeTo(SyncLog syncLog, Class<?> aClass, Type type,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream)
             throws IOException, WebApplicationException {
         if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
-            mapper.writeValue(outputStream, importLog);
+            mapper.writeValue(outputStream, syncLog);
         } else {
-            new PrintStream(outputStream).println(importLog);
+            new PrintStream(outputStream).println(syncLog);
         }
     }
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return aClass == ImportLog.class;
+        return aClass == SyncLog.class;
     }
 
     @Override
-    public ImportLog readFrom(Class<ImportLog> aClass, Type type,
+    public SyncLog readFrom(Class<SyncLog> aClass, Type type,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> multivaluedMap, InputStream inputStream)
             throws IOException, WebApplicationException {
-        return mapper.readValue(inputStream, ImportLog.class);
+        return mapper.readValue(inputStream, SyncLog.class);
     }
 }

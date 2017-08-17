@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import static org.junit.Assert.*;
@@ -412,5 +413,12 @@ public class BundleTest {
         assertTrue(bundle.forAny(d -> d.getDataValue(Ontology.LANGUAGE) != null));
         assertTrue(bundle.forAny(d -> "foobar".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))));
         assertFalse(bundle.forAny(d -> "test".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))));
+    }
+
+    @Test
+    public void testFindData() throws Exception {
+        assertTrue(bundle.find(d -> d.getDataValue(Ontology.LANGUAGE) != null).isPresent());
+        assertTrue(bundle.find(d -> "foobar".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))).isPresent());
+        assertFalse(bundle.find(d -> "test".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))).isPresent());
     }
 }

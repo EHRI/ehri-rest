@@ -607,15 +607,20 @@ public final class Bundle implements NestableData<Bundle> {
      * @return If the predicate tested true
      */
     public boolean forAny(Predicate<Bundle> f) {
+        return find(f).isPresent();
+    }
+
+    public Optional<Bundle> find(Predicate<Bundle> f) {
         if (f.test(this)) {
-            return true;
+            return Optional.of(this);
         }
         for (Map.Entry<String, Bundle> rel : relations.entries()) {
-            if (rel.getValue().forAny(f)) {
-                return true;
+            Optional<Bundle> findRel = rel.getValue().find(f);
+            if (findRel.isPresent()) {
+                return findRel;
             }
         }
-        return false;
+        return Optional.empty();
     }
 
     /**

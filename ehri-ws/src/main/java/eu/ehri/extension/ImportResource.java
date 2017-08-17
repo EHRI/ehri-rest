@@ -24,6 +24,8 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.importers.base.ItemImporter;
+import eu.ehri.project.importers.ead.EadSync;
+import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.core.Tx;
@@ -77,6 +79,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -102,6 +105,7 @@ public class ImportResource extends AbstractResource {
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
+    public static final String COMMIT = "commit";
 
     public static final String CSV_MEDIA_TYPE = "text/csv";
 
@@ -133,6 +137,8 @@ public class ImportResource extends AbstractResource {
      * @param uriSuffix  a URI suffix common to ingested items that will be removed
      *                   from each item's URI to obtain the local identifier.
      * @param format     the RDF format of the POSTed data
+     * @param commit     commit the operation to the database. The default
+     *                   mode is to operate as a dry-run
      * @param stream     a stream of SKOS data in a valid format.
      * @return a JSON object showing how many records were created,
      * updated, or unchanged.
@@ -146,6 +152,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             InputStream stream)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
@@ -161,8 +168,10 @@ public class ImportResource extends AbstractResource {
                     .setBaseURI(baseURI)
                     .setURISuffix(uriSuffix)
                     .importFile(stream, getLogMessage(logMessage).orElse(null));
-            logger.debug("Committing SKOS import transaction...");
-            tx.success();
+            if (commit) {
+                logger.debug("Committing SKOS import transaction...");
+                tx.success();
+            }
             return log;
         } catch (InputParseError e) {
             throw new DeserializationError("Unable to parse input: " + e.getMessage());
@@ -213,6 +222,8 @@ public class ImportResource extends AbstractResource {
      *                      (defaults to EadImporter)
      * @param propertyFile  a local file path pointing to an import properties
      *                      configuration file.
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
      *                      multiple EAD files in an archive, a list of local file
      *                      paths. The Content-Type header is used to distinguish
@@ -232,6 +243,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
@@ -256,9 +268,80 @@ public class ImportResource extends AbstractResource {
                     .withProperties(propertyFile);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
-            logger.debug("Committing import transaction...");
-            tx.success();
+
+            if (commit) {
+                logger.debug("Committing EAD import transaction...");
+                tx.success();
+            }
+
             return log;
+        }
+    }
+
+    /**
+     * Synchronise a repository or fonds via EAD data, removing
+     * items which are not present in the incoming data. Parameters
+     * are the same as /ead with the addition of `ex={id}`, which
+     * allows specifying items to ignore, and fondsId, which allows
+     * synchronising just within a specific item.
+     *
+     * @param fonds the ID of a specific fonds within the repository
+     *              scope to synchronise. If missing the scope will be
+     *              used
+     * @param ex    the ID of an item to be excluded from the sync operation
+     * @return a {@link SyncLog} instance.
+     */
+    @POST
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+            MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
+    @Path("ead-sync")
+    public SyncLog syncEad(
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @QueryParam("fonds") String fonds,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam("ex") Set<String> ex,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            InputStream data)
+            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+
+        try (final Tx tx = beginTx()) {
+            checkPropertyFile(propertyFile);
+            Class<? extends SaxXmlHandler> handler
+                    = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
+            Class<? extends ItemImporter> importer
+                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
+
+            Actioner user = getCurrentActioner();
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
+            PermissionScope syncScope = fonds == null
+                    ? scope
+                    : manager.getEntity(fonds, PermissionScope.class);
+
+            // Run the sync...
+            String message = getLogMessage(logMessage).orElse(null);
+            SaxImportManager importManager = new SaxImportManager(
+                    graph, scope, user, importer, handler)
+                    .allowUpdates(allowUpdates)
+                    .setTolerant(tolerant)
+                    .withProperties(propertyFile);
+            // Note that while the import manager uses the scope, here
+            // we use the fonds as the scope, which might be different.
+            EadSync syncManager = new EadSync(graph, api(), syncScope, user, importManager);
+            SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
+
+            if (commit) {
+                logger.debug("Committing EAD sync transaction...");
+                tx.success();
+            }
+            return log;
+        } catch (EadSync.EadSyncError e) {
+            throw new DeserializationError(e.getMessage());
         }
     }
 
@@ -277,11 +360,13 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
                 nameOrDefault(handlerClass, EagHandler.class.getName()),
-                nameOrDefault(importerClass, EagImporter.class.getName()), data);
+                nameOrDefault(importerClass, EagImporter.class.getName()),
+                commit, data);
     }
 
     /**
@@ -299,11 +384,13 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
                 nameOrDefault(handlerClass, EacHandler.class.getName()),
-                nameOrDefault(importerClass, EacImporter.class.getName()), data);
+                nameOrDefault(importerClass, EacImporter.class.getName()),
+                commit, data);
     }
 
     /**
@@ -324,6 +411,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
@@ -341,8 +429,10 @@ public class ImportResource extends AbstractResource {
                     graph, scope, user, tolerant, allowUpdates, importer);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
-            logger.debug("Committing import transaction...");
-            tx.success();
+            if (commit) {
+                logger.debug("Committing CSV import transaction...");
+                tx.success();
+            }
             return log;
         }
     }
@@ -367,7 +457,9 @@ public class ImportResource extends AbstractResource {
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
-            @QueryParam(LOG_PARAM) String logMessage, InputStream inputStream)
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            InputStream inputStream)
             throws IOException, ItemNotFound, ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
@@ -376,8 +468,10 @@ public class ImportResource extends AbstractResource {
                     : null;
             ImportLog log = new BatchOperations(graph, scope, version, tolerant, Collections.emptyList())
                     .batchUpdate(inputStream, user, getLogMessage(logMessage));
-            logger.debug("Committing batch update transaction...");
-            tx.success();
+            if (commit) {
+                logger.debug("Committing batch update transaction...");
+                tx.success();
+            }
             return log;
         }
     }
@@ -396,6 +490,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             @QueryParam(ID_PARAM) List<String> ids)
             throws IOException, ItemNotFound, DeserializationError {
         try (final Tx tx = beginTx()) {
@@ -405,8 +500,10 @@ public class ImportResource extends AbstractResource {
                     : null;
             new BatchOperations(graph, scope, version, false, Collections.emptyList())
                     .batchDelete(ids, user, getLogMessage(logMessage));
-            logger.debug("Committing delete transaction...");
-            tx.success();
+            if (commit) {
+                logger.debug("Committing batch delete transaction...");
+                tx.success();
+            }
         }
     }
 
@@ -431,14 +528,19 @@ public class ImportResource extends AbstractResource {
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("links")
     public ImportLog importLinks(
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
             Table table) throws DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
                     .importLinks(table, getLogMessage().orElse(null));
-            tx.success();
+            if (commit) {
+                logger.debug("Committing link import transaction...");
+                tx.success();
+            }
             return log;
         }
     }

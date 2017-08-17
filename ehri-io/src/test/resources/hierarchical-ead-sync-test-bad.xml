@@ -104,7 +104,19 @@
 								Second nested item.
 							</p>
 						</scopecontent>
-					</c03>					
+					</c03>
+					<c03>
+						<did>
+							<unittitle encodinganalog="3.1.2">Test EAD Item Nested 2 - 2 DUPLICATE LOCAL ID</unittitle>
+							<unitid repositorycode="GB00001" countrycode="GB"
+									encodinganalog="3.1.1">C00001</unitid>
+						</did>
+						<scopecontent encodinganalog="3.3.1">
+							<p>
+								Non-unique local ID.
+							</p>
+						</scopecontent>
+					</c03>
 				</c02>
 			</c01>
 		</dsc>
