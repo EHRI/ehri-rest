@@ -76,17 +76,17 @@ Now we can POST the data to the ingest endpoint:
         -H "X-User:mike" \
         -H "Content-type: text/xml" \
         --data-binary @KHSK_GER.xml \
-        "http://localhost:7474/ehri/import/ead?scope=de-002409&log=$LOG&properties=$PROPERTIES"
+        "http://localhost:7474/ehri/import/ead?scope=de-002409&log=$LOG&properties=$PROPERTIES&commit=true"
 
 These parameters are:
 
- - the `X-User` header tells the web service which user is responsible for the ingest
- - the `Content-type` header tells it to expect XML data
+ - the `X-User` header tells the web service which user is responsible for the ingest.
+ - the `Content-type` header tells it to expect XML data.
  - the `scope=de-002409` query parameter tells it we're importing this EAD into
-   the ITS repository
- - the `log=$LOG` parameter tells it to find the log text in a local file
- - the `properties=$PROPERTIES` parameter tells it to file the import properties
-   in a local file
+   the ITS repository.
+ - the `log=$LOG` parameter tells it to find the log text in a local file.
+ - the `properties=$PROPERTIES` parameter tells it to file the import properties in a local file.
+ - the `commit=true|false` parameter tells the web service to actually commit the  transaction. By default it will not, which provides a way of doing "dry run" ingests.
 
 **Note**: when importing a single EAD containing ~50,000 items in a single transaction the
 staging server might run out of memory. If it does the only option is to increase the
