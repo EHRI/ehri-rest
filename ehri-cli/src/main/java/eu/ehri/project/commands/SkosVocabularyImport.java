@@ -99,16 +99,12 @@ public class SkosVocabularyImport extends BaseCommand {
         String filePath = cmdLine.getArgList().get(0);
 
         try {
-
+            // Find the vocabulary and user
             Vocabulary vocabulary = manager.getEntity(
                     cmdLine.getOptionValue("scope"), Vocabulary.class);
-            // Find the user
-            UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
-                    UserProfile.class);
+            UserProfile user = manager.getEntity(
+                    cmdLine.getOptionValue("user"), UserProfile.class);
 
-            // FIXME: Casting the graph shouldn't be necessary here, but it is
-            // because the import managers do transactional stuff that they
-            // probably should not do.
             SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, vocabulary);
             ImportLog log = importer
                     .setTolerant(cmdLine.hasOption("tolerant"))
