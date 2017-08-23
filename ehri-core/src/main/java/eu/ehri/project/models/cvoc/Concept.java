@@ -22,7 +22,6 @@ package eu.ehri.project.models.cvoc;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
@@ -31,6 +30,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.InverseOf;
 import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
@@ -59,7 +59,8 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     void setVocabulary(Vocabulary vocabulary);
 
-    @Property(CHILD_COUNT)
+    @Meta(CHILD_COUNT)
+    @JavaHandler
     int getChildCount();
 
     // relations to other concepts
