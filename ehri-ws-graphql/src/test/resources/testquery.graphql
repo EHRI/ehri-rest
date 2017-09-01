@@ -149,4 +149,8 @@
             }
         }
     }
+
+    wrongType: HistoricalAgent(id: "c1") {
+        id
+    }
 }
