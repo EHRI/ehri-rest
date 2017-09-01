@@ -21,33 +21,23 @@ package eu.ehri.project.importers.eac;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
-import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
@@ -66,6 +56,8 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
     private static final String REL_TYPE = "type";
     private static final String REL_NAME = "name";
 
+    private final LinkResolver linkResolver;
+
     /**
      * Construct an EacImporter object.
      *
@@ -75,6 +67,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
      */
     public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(graph, permissionScope, actioner, log);
+        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
     }
 
     @Override
@@ -130,7 +123,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
-        solveUndeterminedRelationships(frame, descBundle);
+        linkResolver.solveUndeterminedRelationships(frame);
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())
@@ -195,55 +188,6 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
         }
 
         return description;
-    }
-
-    private void solveUndeterminedRelationships(HistoricalAgent unit, Bundle descBundle) throws ValidationError {
-
-        //Try to resolve the undetermined relationships
-        //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
-        //so they have id's.
-        Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
-        Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
-
-        for (Description unitdesc : unit.getDescriptions()) {
-            // Put the set of relationships into a HashSet to remove duplicates.
-            for (AccessPoint rel : Sets.newHashSet(unitdesc.getAccessPoints())) {
-                Vertex relationVertex = rel.asVertex();
-                for (String key : relationVertex.getPropertyKeys()) {
-                    logger.debug("solving undetermindRels: {} {} ({})",
-                            key, relationVertex.getProperty(key), descBundle.getId());
-                }
-                // the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
-                // they need to be found in the vocabularies that are in the graph
-                if (relationVertex.getPropertyKeys().contains("cvoc")) {
-                    String cvocId = relationVertex.getProperty("cvoc");
-                    String conceptId = relationVertex.getProperty(ImportHelpers.LINK_TARGET);
-                    logger.debug("{} -> {}", cvocId, conceptId);
-                    try {
-                        Vocabulary vocabulary = manager.getEntity(cvocId, Vocabulary.class);
-                        for (Concept concept : vocabulary.getConcepts()) {
-                            logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
-                            if (concept.getIdentifier().equals(conceptId)) {
-                                try {
-                                    String linkType = relationVertex.getProperty(REL_TYPE);
-                                    Bundle data = linkBundle.withDataValue(Ontology.LINK_HAS_TYPE, linkType);
-                                    Link link = api.create(data, Link.class);
-                                    unit.addLink(link);
-                                    concept.addLink(link);
-                                    link.addLinkBody(rel);
-                                } catch (PermissionDenied | DeserializationError ex) {
-                                    logger.error("Unexpected error on EAC relationship creation: {}", ex);
-                                    throw new RuntimeException(ex);
-                                }
-                            }
-                        }
-                    } catch (ItemNotFound ex) {
-                        logger.error("Vocabulary with id {} not found: {}", cvocId, ex);
-                    }
-                }
-            }
-        }
     }
 
     private Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {

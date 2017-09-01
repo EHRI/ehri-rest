@@ -1,0 +1,36 @@
+
+# Test data for import link resolution. The 2 access points
+# provide the bodies for links between this unit and a1+a2
+- id: c5
+  type: DocumentaryUnit
+  data:
+    identifier: c5
+  relationships:
+    describes:
+      - id: cd5
+        type: DocumentaryUnitDescription
+        data:
+          identifier: c5-desc
+          name: Documentary Unit 5
+          languageCode: eng
+          scopeAndContent: Some description text for c5
+        relationships:
+          relatesTo:
+            - id: ur3
+              type: AccessPoint
+              data:
+                name: Unresolved 1
+                type: person
+                cvoc: auths
+                target: a1
+            - id: ur4
+              type: AccessPoint
+              data:
+                name: Unresolved 2
+                type: person
+                cvoc: auths
+                target: a2
+
+    heldBy: r1
+    hasPermissionScope: r1
+
