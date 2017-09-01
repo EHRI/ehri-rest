@@ -75,6 +75,7 @@ import graphql.schema.TypeResolver;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -296,12 +297,15 @@ public class GraphQLImpl {
         return connectionData(items, edges, null, hasPrev ? prevCursor : null);
     }
 
-    private final DataFetcher entityIdDataFetcher = env -> {
-        try {
-            return api().detail(env.getArgument(Bundle.ID_KEY), Accessible.class);
-        } catch (ItemNotFound e) {
-            return null;
-        }
+    private DataFetcher entityIdDataFetcher(String type) {
+        return env -> {
+            try {
+                Accessible detail = api().detail(env.getArgument(Bundle.ID_KEY), Accessible.class);
+                return Objects.equals(detail.getType(), type) ? detail : null;
+            } catch (ItemNotFound e) {
+                return null;
+            }
+        };
     };
 
     private static final DataFetcher idDataFetcher =
@@ -1030,23 +1034,23 @@ public class GraphQLImpl {
 
                 // Single item types...
                 .field(itemFieldDefinition(Entities.DOCUMENTARY_UNIT, "Fetch a single documentary unit",
-                        documentaryUnitType, entityIdDataFetcher, idArgument))
+                        documentaryUnitType, entityIdDataFetcher(Entities.DOCUMENTARY_UNIT), idArgument))
                 .field(itemFieldDefinition(Entities.REPOSITORY, "Fetch a single repository",
-                        repositoryType, entityIdDataFetcher, idArgument))
+                        repositoryType, entityIdDataFetcher(Entities.REPOSITORY), idArgument))
                 .field(itemFieldDefinition(Entities.COUNTRY, "Fetch a single country",
-                        countryType, entityIdDataFetcher, idArgument))
+                        countryType, entityIdDataFetcher(Entities.COUNTRY), idArgument))
                 .field(itemFieldDefinition(Entities.HISTORICAL_AGENT, "Fetch a single historical agent",
-                        historicalAgentType, entityIdDataFetcher, idArgument))
+                        historicalAgentType, entityIdDataFetcher(Entities.HISTORICAL_AGENT), idArgument))
                 .field(itemFieldDefinition(Entities.AUTHORITATIVE_SET, "Fetch a single authority set",
-                        authoritativeSetType, entityIdDataFetcher, idArgument))
+                        authoritativeSetType, entityIdDataFetcher(Entities.AUTHORITATIVE_SET), idArgument))
                 .field(itemFieldDefinition(Entities.CVOC_CONCEPT, "Fetch a single concept",
-                        conceptType, entityIdDataFetcher, idArgument))
+                        conceptType, entityIdDataFetcher(Entities.CVOC_CONCEPT), idArgument))
                 .field(itemFieldDefinition(Entities.CVOC_VOCABULARY, "Fetch a single vocabulary",
-                        vocabularyType, entityIdDataFetcher, idArgument))
+                        vocabularyType, entityIdDataFetcher(Entities.CVOC_VOCABULARY), idArgument))
                 .field(itemFieldDefinition(Entities.ANNOTATION, "Fetch a single annotation",
-                        annotationType, entityIdDataFetcher, idArgument))
+                        annotationType, entityIdDataFetcher(Entities.ANNOTATION), idArgument))
                 .field(itemFieldDefinition(Entities.LINK, "Fetch a single link",
-                        linkType, entityIdDataFetcher, idArgument))
+                        linkType, entityIdDataFetcher(Entities.LINK), idArgument))
 
                 .field(connectionFieldDefinition("documentaryUnits", "A page of documentary units",
                         documentaryUnitType,
