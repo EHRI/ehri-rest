@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
  */
 public class ImportHelpers {
 
-    public static final String RESOLVED_LINK_DESC = "Link provided by data provider.";
     public static final String LINK_TARGET = "target";
     public static final String OBJECT_IDENTIFIER = "objectIdentifier";
 

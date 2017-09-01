@@ -21,33 +21,24 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporter;
+import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
-import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
@@ -74,6 +65,8 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private final EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
     private final Serializer mergeSerializer;
+    private final LinkResolver linkResolver;
+
     public static final String ACCESS_POINT = "AccessPoint";
 
     /**
@@ -86,6 +79,8 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
         super(graph, permissionScope, actioner, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
+        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
+
     }
 
     /**
@@ -134,11 +129,10 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
         }
+
         handleCallbacks(mutation);
-        logger.debug("============== {} state: {}", frame.getId(), mutation.getState());
-        if (mutation.created()) {
-            solveUndeterminedRelationships(frame);
-        }
+        linkResolver.solveUndeterminedRelationships(frame);
+
         return frame;
     }
 
@@ -250,71 +244,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             }
         } else { // else we create a new bundle.
             return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-        }
-    }
-
-    /**
-     * Subclasses can override this method to cater to their special needs for UndeterminedRelationships
-     * by default, it expects something like this in the original EAD:
-     * <p>
-     * <pre>
-     * {@code
-     * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
-     * Leonhard (* 11.5.1886)</persname>
-     * }
-     * </pre>
-     * <p>
-     * it works in unison with the extractRelations() method.
-     *
-     * @param unit the current unit
-     */
-    protected void solveUndeterminedRelationships(DocumentaryUnit unit) throws ValidationError {
-        // Try to resolve the undetermined relationships
-        // we can only create the annotations after the DocumentaryUnit
-        // and its Description have been added to the graph,
-        // so they have IDs.
-        Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
-        Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
-
-        for (Description desc : unit.getDescriptions()) {
-            // Put the set of relationships into a HashSet to remove duplicates.
-            for (AccessPoint rel : Sets.newHashSet(desc.getAccessPoints())) {
-                // the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
-                // they need to be found in the vocabularies that are in the graph
-                if (rel.getPropertyKeys().contains("cvoc")) {
-                    String vocab = rel.getProperty("cvoc");
-                    String conceptId = rel.getProperty("concept");
-                    if (conceptId == null) {
-                        conceptId = rel.getProperty("target");
-                    }
-                    logger.debug("cvoc: {}, concept: {}", vocab, conceptId);
-                    try {
-                        Vocabulary vocabulary = manager.getEntity(vocab, Vocabulary.class);
-                        for (Concept concept : vocabulary.getConcepts()) {
-                            logger.debug("********************* {} {}", concept.getId(), concept.getIdentifier());
-                            if (concept.getIdentifier().equalsIgnoreCase(conceptId)) {
-                                try {
-                                    // TODO: Fix link type here...
-                                    Bundle data = linkBundle
-                                            .withDataValue(Ontology.LINK_HAS_TYPE, "associative");
-                                    Link link = api.create(data, Link.class);
-                                    unit.addLink(link);
-                                    concept.addLink(link);
-                                    link.addLinkBody(rel);
-                                    logger.debug("link created between {} and {}", conceptId, concept.getId());
-                                } catch (PermissionDenied | DeserializationError ex) {
-                                    logger.error(ex.getMessage());
-                                }
-                            }
-                        }
-                    } catch (ItemNotFound ex) {
-                        logger.error("Vocabulary with id {} not found: {}", vocab, ex.getMessage());
-                    }
-                } else {
-                    logger.debug("no cvoc found");
-                }
-            }
         }
     }
 

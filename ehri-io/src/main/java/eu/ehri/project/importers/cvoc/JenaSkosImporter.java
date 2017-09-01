@@ -24,6 +24,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.core.GraphManager;
@@ -34,13 +36,15 @@ import eu.ehri.project.definitions.Skos;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Described;
+import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
@@ -49,6 +53,7 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
@@ -89,18 +94,24 @@ import java.util.stream.Stream;
 public final class JenaSkosImporter implements SkosImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(JenaSkosImporter.class);
+    private static final Config config = ConfigFactory.load();
     private static final Splitter codeSplitter = Splitter.on('-')
             .omitEmptyStrings().trimResults().limit(2);
     private final FramedGraph<?> framedGraph;
     private final Actioner actioner;
     private final Vocabulary vocabulary;
     private final BundleManager dao;
+    private final Api api;
+    private final Serializer mergeSerializer;
     private final boolean tolerant;
     private final String format;
     private final String baseURI;
     private final String suffix;
     private final String defaultLang;
     private static final String DEFAULT_LANG = "eng";
+    private static final Bundle linkTemplate = Bundle.of(EntityClass.LINK)
+            .withDataValue(Ontology.LINK_HAS_DESCRIPTION, config.getString("io.import.defaultLinkText"))
+            .withDataValue(Ontology.LINK_HAS_TYPE, config.getString("io.import.defaultLinkType"));
 
     /**
      * Constructor
@@ -117,6 +128,8 @@ public final class JenaSkosImporter implements SkosImporter {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
+        this.api = ApiFactory.noLogging(framedGraph, actioner.as(Accessor.class));
+        this.mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
         this.tolerant = tolerant;
         this.baseURI = baseURI;
         this.suffix = suffix;
@@ -335,27 +348,39 @@ public final class JenaSkosImporter implements SkosImporter {
         }
 
         Mutation<Concept> mut = dao.createOrUpdate(builder.build(), Concept.class);
-        solveUndeterminedRelationships(mut.getNode(), linkedConcepts);
+        createLinks(mut.getNode(), linkedConcepts);
         return mut;
     }
 
-    private void solveUndeterminedRelationships(Concept unit, Map<AuthoritativeItem, String> linkedConcepts) {
-        Api api = ApiFactory.noLogging(framedGraph, actioner.as(UserProfile.class));
-
+    private void createLinks(Concept unit, Map<AuthoritativeItem, String> linkedConcepts) {
         for (AuthoritativeItem concept : linkedConcepts.keySet()) {
             try {
                 String relType = linkedConcepts.get(concept);
-                Bundle linkBundle = Bundle.of(EntityClass.LINK)
-                        .withDataValue(Ontology.LINK_HAS_TYPE, "associative")
-                        .withDataValue(relType.substring(0, relType.indexOf(":")), relType.substring(relType.indexOf(":") + 1))
-                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, ImportHelpers.RESOLVED_LINK_DESC);
-                Link link = api.create(linkBundle, Link.class);
-                unit.addLink(link);
-                concept.addLink(link);
-            } catch (ValidationError | PermissionDenied | DeserializationError ex) {
-                logger.error(ex.getMessage());
+                String typeKey = relType.substring(0, relType.indexOf(":"));
+                String typeValue = relType.substring(relType.indexOf(":") + 1);
+                Bundle data = linkTemplate.withDataValue(typeKey, typeValue);
+                Optional<Link> existing = findLink(unit, concept, data);
+                if (!existing.isPresent()) {
+                    Link link = api.create(data, Link.class);
+                    unit.addLink(link);
+                    concept.addLink(link);
+                }
+            } catch (ValidationError | PermissionDenied | DeserializationError | SerializationError ex) {
+                logger.error("Unexpected error creating relationship link", ex);
             }
         }
+    }
+
+    private Optional<Link> findLink(Described unit, Linkable target, Bundle data) throws SerializationError {
+        for (Link link : unit.getLinks()) {
+            for (Linkable connected : link.getLinkTargets()) {
+                if (target.equals(connected)
+                        && mergeSerializer.entityToBundle(link).equals(data)) {
+                    return Optional.of(link);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private List<Bundle> getAdditionalRelations(Resource item, Map<AuthoritativeItem, String> linkedItems) {
