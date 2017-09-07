@@ -146,9 +146,8 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      */
     protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
         List<Map<String, Object>> extractedDates = ImportHelpers.extractDates(itemData);
-        ImportHelpers.replaceDates(itemData, extractedDates);
 
-        Map<String, Object> raw = ImportHelpers.extractUnitDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
+        Map<String, Object> raw = ImportHelpers.extractDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
 
         Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                 .addData(raw);

@@ -101,7 +101,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
 
         BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
 
-        Map<String, Object> descmap = ImportHelpers.extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
+        Map<String, Object> descmap = ImportHelpers.extractDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
         descmap.put(Ontology.IDENTIFIER_KEY, descmap.get(Ontology.IDENTIFIER_KEY) + "#desc");
         Bundle descBundle = Bundle.of(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
