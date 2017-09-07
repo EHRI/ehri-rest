@@ -27,15 +27,11 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,14 +39,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Import utility class.
@@ -73,40 +63,6 @@ public class ImportHelpers {
     private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
     private static final NodeProperties nodeProperties = loadNodeProperties();
 
-    // Various date patterns
-    private static final Pattern[] datePatterns = {
-            // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
-            // Yad Vashem in Wp2: 12-15-1941, 9-30-1944
-            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
-            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})$"),
-            Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
-            Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
-            Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
-            Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
-            Pattern.compile("^\\[(\\d{4})\\]$"),
-            Pattern.compile("^(\\d{4})$"),
-            Pattern.compile("^(\\d{2})th century$"),
-            Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
-            //bundesarchive: 1906/19
-            Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
-            Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})"),
-            Pattern.compile("^(\\d{4}-\\d{1,2})/(\\d{4}-\\d{1,2})"),
-            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})/(\\d{4}-\\d{1,2}-\\d{1,2})"),
-            Pattern.compile("^(\\d{4})/(\\d{4}-\\d{1,2}-\\d{1,2})")
-    };
-
-    // NB: Using English locale here to avoid ambiguities caused by system dependent
-    // time zones such as: Cannot parse "1940-05-16": Illegal instant due to time zone
-    // offset transition (Europe/Amsterdam)
-    // https://en.wikipedia.org/wiki/UTC%2B00:20
-    private static final DateTimeFormatter isoDateTimeFormat = ISODateTimeFormat.date()
-            .withLocale(Locale.ENGLISH);
-
-    // NB: Not static yet since these objects aren't thread safe :(
-    private static final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
-    private static final SimpleDateFormat yearDateFormat = new SimpleDateFormat("yyyy");
-    private static final XmlImportProperties dates = new XmlImportProperties("dates.properties");
-
     /**
      * Extract properties from the itemData Map that are marked as unknown, and return them in a new Map.
      *
@@ -123,7 +79,6 @@ public class ImportHelpers {
         }
         return unknowns;
     }
-
 
     /**
      * only properties that have the multivalued-status can actually be multivalued. all other properties will be
@@ -165,15 +120,15 @@ public class ImportHelpers {
     }
 
     /**
-     * Extract a Map containing the properties of a documentary unit's description.
-     * Excludes unknown properties, object identifier(s), maintenance events, relations,
-     * addresses and *Access relations.
+     * Extract a Map containing the properties of a generic description.
+     * Excludes unknown properties, object identifier(s), maintenance events,
+     * relations, addresses and access point relations.
      *
-     * @param itemData a Map containing raw properties of a unit
-     * @param entity   an EntityClass to get the multi-valuedness of properties for
-     * @return a Map representation of a DocumentDescription
+     * @param itemData a Map containing raw properties of the description
+     * @param entity   an EntityClass
+     * @return a Map representation of a generic Description
      */
-    public static Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
+    public static Map<String, Object> extractDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = Maps.newHashMap();
 
         description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
@@ -215,89 +170,14 @@ public class ImportHelpers {
     }
 
     /**
-     * Extract datevalues from datamap
-     *
-     * @param data the data map
-     * @return returns a List with the separated datevalues
-     */
-    static Map<String, String> returnDatesAsString(Map<String, Object> data) {
-        Map<String, String> datesAsString = Maps.newHashMap();
-        Object value;
-        for (Map.Entry<String, Object> property : data.entrySet()) {
-            if (dates.containsProperty(property.getKey()) && (value = property.getValue()) != null) {
-                if (property.getValue() instanceof String) {
-                    String dateValue = (String) value;
-                    for (String d : dateValue.split(",")) {
-                        datesAsString.put(d, property.getKey());
-                    }
-                } else if (property.getValue() instanceof List) {
-                    for (String s : (List<String>) value) {
-                        datesAsString.put(s, property.getKey());
-                    }
-                }
-            }
-        }
-        return datesAsString;
-    }
-
-    /**
      * Extract a list of entity bundles for DatePeriods from the data,
      * attempting to parse the unitdate attribute.
      *
-     * @param data the data map
+     * @param data the data map. This is an out parameter from which
+     *             keys associated with extracted dates will be removed
      */
     public static List<Map<String, Object>> extractDates(Map<String, Object> data) {
-        List<Map<String, Object>> extractedDates = Lists.newArrayList();
-
-        for (String key : data.keySet()) {
-            if (key.equals(Entities.DATE_PERIOD) && data.get(key) instanceof List) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
-                    extractedDates.add(getSubNode(event));
-                }
-            }
-        }
-
-        Map<String, String> dateValues = returnDatesAsString(data);
-        for (String s : dateValues.keySet()) {
-            extractDate(s).ifPresent(extractedDates::add);
-        }
-        return extractedDates;
-    }
-
-    /**
-     * The dates that have been extracted to the extractedDates will be removed from the data map
-     *
-     * @param data           the data map
-     * @param extractedDates the set of extracted dates
-     */
-    public static void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates) {
-        Map<String, String> dateValues = returnDatesAsString(data);
-        Map<String, String> dateTypes = Maps.newHashMap();
-        for (String dateValue : dateValues.keySet()) {
-            dateTypes.put(dateValues.get(dateValue), null);
-        }
-        for (Map<String, Object> dateMap : extractedDates) {
-            dateValues.remove(dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
-        }
-        //replace dates in data map
-        for (String datevalue : dateValues.keySet()) {
-            String dateType = dateValues.get(datevalue);
-            logger.debug("{} -- {}", datevalue, dateType);
-            if (dateTypes.containsKey(dateType) && dateTypes.get(dateType) != null) {
-                dateTypes.put(dateType, dateTypes.get(dateType) + ", " + datevalue.trim());
-            } else {
-                dateTypes.put(dateType, datevalue.trim());
-            }
-        }
-        for (String dateType : dateTypes.keySet()) {
-            logger.debug("datetype {} -- {}", dateType, dateTypes.get(dateType));
-            if (dateTypes.get(dateType) == null) {
-                data.remove(dateType);
-            } else {
-                data.put(dateType, dateTypes.get(dateType));
-            }
-            logger.debug("" + data.get(dateType));
-        }
+        return DateParser.extractDates(data);
     }
 
     /**
@@ -322,42 +202,6 @@ public class ImportHelpers {
             me.put(Ontology.MAINTENANCE_EVENT_TYPE, MaintenanceEventType.updated.name());
         }
         return me;
-    }
-
-    static String normaliseDate(String date) {
-        return normaliseDate(date, false);
-    }
-
-    /**
-     * Normalise a date in a string.
-     *
-     * @param date       a String date that needs formatting
-     * @param endOfPeriod a string signifying whether this date is the begin of
-     *                   a period or the end of a period
-     * @return a String containing the formatted date.
-     */
-    static String normaliseDate(String date, boolean endOfPeriod) {
-        String returnDate = isoDateTimeFormat.print(DateTime.parse(date));
-        if (returnDate.startsWith("00")) {
-            returnDate = "19" + returnDate.substring(2);
-            date = "19" + date;
-        }
-        if (endOfPeriod) {
-            if (!date.equals(returnDate)) {
-                ParsePosition p = new ParsePosition(0);
-                yearMonthDateFormat.parse(date, p);
-                if (p.getIndex() > 0) {
-                    returnDate = isoDateTimeFormat.print(DateTime.parse(date).plusMonths(1).minusDays(1));
-                } else {
-                    p = new ParsePosition(0);
-                    yearDateFormat.parse(date, p);
-                    if (p.getIndex() > 0) {
-                        returnDate = isoDateTimeFormat.print(DateTime.parse(date).plusYears(1).minusDays(1));
-                    }
-                }
-            }
-        }
-        return returnDate;
     }
 
     public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
@@ -395,33 +239,6 @@ public class ImportHelpers {
         }
     }
 
-    /**
-     * Attempt to extract some date periods. This does not currently put the dates into ISO form.
-     *
-     * @param date the data map
-     * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
-     */
-    private static Optional<Map<String, Object>> extractDate(String date) {
-        Map<String, Object> data = matchDate(date);
-        return data.isEmpty() ? Optional.empty() : Optional.of(data);
-    }
-
-    private static Map<String, Object> matchDate(String date) {
-        Map<String, Object> data = Maps.newHashMap();
-        for (Pattern re : datePatterns) {
-            Matcher matcher = re.matcher(date);
-            if (matcher.matches()) {
-                logger.debug("matched {}", date);
-                data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
-                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
-                        .groupCount() > 1 ? 2 : 1), true));
-                data.put(Ontology.DATE_HAS_DESCRIPTION, date);
-                break;
-            }
-        }
-        return data;
-    }
-
     private static String normaliseValue(String property, String value) {
         String trimmedValue = StringUtils.normalizeSpace(value);
         // Language codes are converted to their 3-letter alternates
@@ -430,19 +247,16 @@ public class ImportHelpers {
                 : trimmedValue;
     }
 
-    public static List<Map<String, Object>> extractSubNodes(String type, Map<String,Object> data) {
-
+    public static List<Map<String, Object>> extractSubNodes(String type, Map<String, Object> data) {
         List<Map<String, Object>> out = Lists.newArrayList();
         Object nodes = data.get(type);
-        if (nodes != null && nodes instanceof  List) {
+        if (nodes != null && nodes instanceof List) {
             for (Map<String, Object> event : (List<Map<String, Object>>) nodes) {
                 out.add(getSubNode(event));
             }
         }
         return out;
     }
-
-
 
     // Helpers
 
