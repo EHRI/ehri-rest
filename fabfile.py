@@ -123,8 +123,10 @@ def online_backup(remote_dir, tar = True):
     if files.exists(remote_dir):
         abort("Remote directory '%s' already exists!" % remote_dir)
     tar_name = remote_dir + ".tgz"
-    with settings(dst=remote_dir):
-        run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
+    dirname = os.path.dirname(remote_dir)
+    basename = os.path.basename(remote_dir)
+    with settings(dirname=dirname, basename=basename):
+        run("%(neo4j_install)s/bin/neo4j-admin backup --from localhost:6362 --name=%(basename)s --backup-dir %(dirname)s" % env)
         if tar:
             run("tar --create --gzip --file %s -C %s ." % (tar_name, remote_dir))
             run("rm -rf " + remote_dir)
