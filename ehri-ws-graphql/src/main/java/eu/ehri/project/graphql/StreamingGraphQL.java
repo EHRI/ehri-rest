@@ -24,7 +24,7 @@ import eu.ehri.extension.errors.ExecutionError;
 import graphql.ExecutionInput;
 import graphql.InvalidSyntaxError;
 import graphql.execution.ExecutionId;
-import graphql.execution.SimpleExecutionStrategy;
+import graphql.execution.AsyncExecutionStrategy;
 import graphql.execution.instrumentation.NoOpInstrumentation;
 import graphql.language.Document;
 import graphql.language.SourceLocation;
@@ -59,8 +59,8 @@ public class StreamingGraphQL {
             arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
         log.debug("Executing request. operation name: {}. Request: {} ", operationName, document);
-        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new SimpleExecutionStrategy(),
-                new SimpleExecutionStrategy(), NoOpInstrumentation.INSTANCE);
+        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new AsyncExecutionStrategy(),
+                new AsyncExecutionStrategy(), NoOpInstrumentation.INSTANCE);
         ExecutionInput input = ExecutionInput.newExecutionInput()
                 .context(context)
                 .variables(arguments)
@@ -86,7 +86,7 @@ public class StreamingGraphQL {
             RecognitionException recognitionException = (RecognitionException) e.getCause();
             SourceLocation sourceLocation = new SourceLocation(recognitionException.getOffendingToken().getLine(),
                     recognitionException.getOffendingToken().getCharPositionInLine());
-            InvalidSyntaxError invalidSyntaxError = new InvalidSyntaxError(sourceLocation);
+            InvalidSyntaxError invalidSyntaxError = new InvalidSyntaxError(sourceLocation, "Invalid syntax");
             throw new ExecutionError(Collections.singletonList(invalidSyntaxError));
         }
 

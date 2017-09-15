@@ -21,13 +21,14 @@ package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import graphql.ExecutionResult;
+import graphql.ExecutionResultImpl;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionStrategy;
 import graphql.execution.ExecutionStrategyParameters;
+import graphql.execution.ExecutionTypeInfo;
 import graphql.execution.FieldCollectorParameters;
 import graphql.execution.NonNullableFieldWasNullException;
-import graphql.execution.SimpleExecutionStrategy;
-import graphql.execution.TypeInfo;
+import graphql.execution.AsyncExecutionStrategy;
 import graphql.execution.TypeResolutionParameters;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.InstrumentationContext;
@@ -51,11 +52,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static graphql.execution.FieldCollectorParameters.newParameters;
-import static graphql.execution.TypeInfo.newTypeInfo;
+import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
 import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
 
 /**
@@ -93,27 +96,28 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
                 .selectionSet(fieldCollector)
                 .build();
 
+        ExecutionTypeInfo fieldTypeInfo = newTypeInfo()
+                .type(fieldType)
+                .parentInfo(parameters.typeInfo())
+                .build();
+
         Instrumentation instrumentation = executionContext.getInstrumentation();
 
-        InstrumentationContext<ExecutionResult> fieldCtx = instrumentation.beginField(new InstrumentationFieldParameters(executionContext, fieldDef, environment));
+        InstrumentationContext<ExecutionResult> fieldCtx = instrumentation.beginField(new InstrumentationFieldParameters(executionContext, fieldDef, fieldTypeInfo));
 
         InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment));
         Object resolvedValue = null;
         try {
             resolvedValue = fieldDef.getDataFetcher().get(environment);
 
-            fetchCtx.onEnd(resolvedValue);
+            fetchCtx.onEnd(resolvedValue, null);
         } catch (Exception e) {
             log.warn("Exception while fetching data", e);
-            handleDataFetchingException(executionContext, fieldDef, argumentValues, parameters.path(), e);
-            fetchCtx.onEnd(e);
+            // FIXME: ???
+            //handleDataFetchingException(executionContext, fieldDef, argumentValues, parameters.path(), e);
+
+            fetchCtx.onEnd(null, e);
         }
-
-        TypeInfo fieldTypeInfo = newTypeInfo()
-                .type(fieldType)
-                .parentInfo(parameters.typeInfo())
-                .build();
-
 
         ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
                 .typeInfo(fieldTypeInfo)
@@ -123,20 +127,20 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
         completeValue(generator, executionContext, newParameters, fields);
 
-        fieldCtx.onEnd((ExecutionResult) null);
+        fieldCtx.onEnd(new ExecutionResultImpl(resolvedValue, Collections.emptyList()), null);
     }
 
     private void completeValue(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
 
-        TypeInfo typeInfo = parameters.typeInfo();
+        ExecutionTypeInfo typeInfo = parameters.typeInfo();
         Object result = parameters.source();
-        GraphQLType fieldType = parameters.typeInfo().type();
+        GraphQLType fieldType = parameters.typeInfo().getType();
 
         if (result == null) {
-            if (typeInfo.typeIsNonNull()) {
+            if (typeInfo.isNonNullType()) {
                 // see http://facebook.github.io/graphql/#sec-Errors-and-Non-Nullability
                 NonNullableFieldWasNullException nonNullException = new NonNullableFieldWasNullException(typeInfo, parameters.path());
-                executionContext.addError(nonNullException);
+                //executionContext.addError(nonNullException, parameters.path());
                 throw nonNullException;
             }
             generator.writeNull();
@@ -180,7 +184,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
             Map<String, List<Field>> subFields = fieldCollector.collectFields(collectorParameters, fields);
 
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .typeInfo(typeInfo.asType(resolvedType))
+                    .typeInfo(typeInfo.treatAs(resolvedType))
                     .fields(subFields)
                     .source(result).build();
 
@@ -211,13 +215,13 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
     }
 
     private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields, Iterable<Object> result) throws IOException {
-        TypeInfo typeInfo = parameters.typeInfo();
+        ExecutionTypeInfo typeInfo = parameters.typeInfo();
         GraphQLList fieldType = typeInfo.castType(GraphQLList.class);
 
         generator.writeStartArray();
         for (Object item : result) {
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .typeInfo(typeInfo.asType(fieldType.getWrappedType()))
+                    .typeInfo(typeInfo.treatAs(fieldType.getWrappedType()))
                     .fields(parameters.fields())
                     .source(item).build();
 
@@ -228,7 +232,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
 
     @Override
-    public ExecutionResult execute(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
-        return new SimpleExecutionStrategy().execute(executionContext, parameters);
+    public CompletableFuture<ExecutionResult> execute(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
+        return new AsyncExecutionStrategy().execute(executionContext, parameters);
     }
 }
