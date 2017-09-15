@@ -29,10 +29,10 @@ import graphql.execution.ExecutionId;
 import graphql.execution.ExecutionPath;
 import graphql.execution.ExecutionStrategy;
 import graphql.execution.ExecutionStrategyParameters;
+import graphql.execution.ExecutionTypeInfo;
 import graphql.execution.FieldCollector;
 import graphql.execution.FieldCollectorParameters;
 import graphql.execution.NonNullableFieldValidator;
-import graphql.execution.TypeInfo;
 import graphql.execution.ValuesResolver;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.language.Document;
@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 import static graphql.execution.FieldCollectorParameters.newParameters;
-import static graphql.execution.TypeInfo.newTypeInfo;
+import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
 
 
 public class StreamingExecution extends Execution {
@@ -93,7 +93,7 @@ public class StreamingExecution extends Execution {
 
         Map<String, List<Field>> fields = fieldCollector.collectFields(collectorParameters, operationDefinition.getSelectionSet());
 
-        TypeInfo typeInfo = newTypeInfo().type(operationRootType).build();
+        ExecutionTypeInfo typeInfo = newTypeInfo().type(operationRootType).build();
         NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, typeInfo);
 
         ExecutionStrategyParameters parameters = ExecutionStrategyParameters.newParameters()
