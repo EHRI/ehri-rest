@@ -17,16 +17,16 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.exceptions;
+package eu.ehri.project.importers;
+
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.persistence.Mutation;
 
 /**
- * Represents the violation of an integrity constraint
- * during data persistence, typically due to
- * properties that must be unique across the entire
- * graph (e.g. identifiers.)
+ * Implementing classes do things after an item import threw
+ * a validation error.
  */
-public class IntegrityError extends Exception {
-    public IntegrityError(String idValue) {
-        super("Integrity error for id value: " + idValue);
-    }
+public interface ErrorCallback {
+    void itemError(Exception ex) throws Exception;
 }

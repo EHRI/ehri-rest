@@ -26,9 +26,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.ModeViolation;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Mutation;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.input.BoundedInputStream;
@@ -94,6 +98,28 @@ public abstract class AbstractImportManager implements ImportManager {
      */
     public boolean isTolerant() {
         return tolerant;
+    }
+
+    protected void defaultImportCallback(ImportLog log, ActionManager.EventContext context, Mutation<? extends Accessible> mutation) {
+        switch (mutation.getState()) {
+            case CREATED:
+                logger.info("Item created: {}", mutation.getNode().getId());
+                context.addSubjects(mutation.getNode());
+                log.addCreated();
+                break;
+            case UPDATED:
+                if (!allowUpdates) {
+                    throw new ModeViolation(String.format(
+                            "Item '%s' was updated but import manager does not allow updates",
+                            mutation.getNode().getId()));
+                }
+                logger.info("Item updated: {}", mutation.getNode().getId());
+                context.addSubjects(mutation.getNode());
+                log.addUpdated();
+                break;
+            default:
+                log.addUnchanged();
+        }
     }
 
 

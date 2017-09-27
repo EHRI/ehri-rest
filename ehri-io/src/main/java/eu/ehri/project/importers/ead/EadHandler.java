@@ -31,7 +31,6 @@ import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Entity;
@@ -95,11 +94,6 @@ public class EadHandler extends SaxXmlHandler {
      */
     private String eadLanguage = Locale.ENGLISH.getISO3Language();
     private String eadId;
-
-    /**
-     * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
-     */
-    private final Map<String, String> eadfileValues = Maps.newHashMap();
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -263,7 +257,11 @@ public class EadHandler extends SaxXmlHandler {
                         }
                     }
                 } catch (ValidationError ex) {
-                    logger.error("caught validation error", ex);
+                    try {
+                        importer.handleErrors(new RuntimeException(ex));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 } finally {
                     depth--;
                     scopeIds.pop();

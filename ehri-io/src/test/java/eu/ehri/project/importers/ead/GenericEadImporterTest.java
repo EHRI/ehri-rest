@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.ead;
 
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import org.junit.Test;
@@ -54,14 +55,22 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         assertEquals(origCount + 11, getNodeCount(graph));
     }
 
-    @Test
+    @Test(expected = ValidationError.class)
     public void testImportInvalidItem() throws Exception {
+        InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .importInputStream(ios, "Test invalid item import");
+    }
+
+    @Test
+    public void testImportInvalidItemTolerant() throws Exception {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
         ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                .setTolerant(true)
                 .importInputStream(ios, "Test invalid item import");
-        System.out.println(log);
+        assertEquals(1, log.getErrored());
         assertEquals(origCount, getNodeCount(graph));
     }
 }

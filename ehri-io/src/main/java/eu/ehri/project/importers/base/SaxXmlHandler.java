@@ -75,6 +75,10 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     private String attribute;
     private String languagePrefix;
 
+    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer) {
+        this(importer, null);
+    }
+
     public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties properties) {
         super();
         this.importer = importer;
