@@ -70,6 +70,7 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
                 .setTolerant(true)
                 .importInputStream(ios, "Test invalid item import");
+        System.out.println(log.getErrors());
         assertEquals(1, log.getErrored());
         assertEquals(origCount, getNodeCount(graph));
     }

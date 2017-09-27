@@ -68,7 +68,7 @@ public class CsvImportManager extends AbstractImportManager {
      * @param log     an import log instance
      */
     @Override
-    protected void importInputStream(InputStream stream, final ActionManager.EventContext context,
+    protected void importInputStream(InputStream stream, String tag, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {

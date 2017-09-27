@@ -35,7 +35,6 @@ import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
-import jdk.nashorn.internal.scripts.JO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -261,8 +260,9 @@ public class EadHandler extends SaxXmlHandler {
                         // In order to indicate what has errored here if there's no
                         // ID we need to create one with the line number reference.
                         String path = pathIds().isEmpty() ? null : Joiner.on("/").join(pathIds());
-                        String ref = String.format("[Item closing on line: %d]", locator.getLineNumber());
-                        String id = Joiner.on(" ").skipNulls().join(path, ref);
+                        String ref = String.format("[Item completed prior to line: %d]",
+                                locator.getLineNumber());
+                        String id = Joiner.on(" ").skipNulls().join(path, locator.getSystemId(), ref);
                         importer.handleError(new ValidationError(bundle.withId(id), ex.getErrorSet()));
                     } else {
                         importer.handleError(ex);

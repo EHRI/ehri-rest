@@ -41,6 +41,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
+import eu.ehri.project.persistence.Messages;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
@@ -105,13 +106,13 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
-                    "Missing identifier " + Ontology.IDENTIFIER_KEY);
+                    Messages.getString("BundleValidator.missingField"));
         }
-        logger.debug("Imported item: {}", itemData.get("name"));
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(mergeWithPreviousAndSave(unit,
                         description, idPath), DocumentaryUnit.class);
+        logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship

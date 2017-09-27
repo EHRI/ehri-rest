@@ -103,12 +103,12 @@ public abstract class AbstractImportManager implements ImportManager {
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
         try (InputStream ios = Files.newInputStream(Paths.get(filePath))) {
-            return importInputStream(ios, logMessage);
+            return importInputStream(ios, filePath, logMessage);
         }
     }
 
     @Override
-    public ImportLog importInputStream(InputStream stream, String logMessage)
+    public ImportLog importInputStream(InputStream stream, String tag, String logMessage)
             throws IOException, InputParseError, ValidationError {
         // Create a new action for this import
         Optional<String> msg = getLogMessage(logMessage);
@@ -119,7 +119,7 @@ public abstract class AbstractImportManager implements ImportManager {
         ImportLog log = new ImportLog(msg.orElse(null));
 
         // Do the import...
-        importInputStream(stream, action, log);
+        importInputStream(stream, tag, action, log);
         // If nothing was imported, remove the action...
         if (log.hasDoneWork()) {
             action.commit();
@@ -143,7 +143,7 @@ public abstract class AbstractImportManager implements ImportManager {
                     currentFile = path;
                     try (InputStream stream = Files.newInputStream(Paths.get(path))) {
                         logger.info("Importing file: {}", path);
-                        importInputStream(stream, action, log);
+                        importInputStream(stream, currentFile, action, log);
                     }
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
@@ -184,7 +184,7 @@ public abstract class AbstractImportManager implements ImportManager {
                             = new BoundedInputStream(stream, entry.getSize());
                     boundedInputStream.setPropagateClose(false);
                     logger.info("Importing file: {}", currentFile);
-                    importInputStream(boundedInputStream, action, log);
+                    importInputStream(boundedInputStream, currentFile, action, log);
                 }
             } catch (InputParseError | ValidationError e) {
                 log.addError(formatErrorLocation(), e.getMessage());
@@ -207,11 +207,12 @@ public abstract class AbstractImportManager implements ImportManager {
      * Import an InputStream with an event context.
      *
      * @param stream  the InputStream to import
+     * @param tag        an optional tag identifying the source of the stream
      * @param context the event that this import is part of
      * @param log     an import log to write to
      */
     protected abstract void importInputStream(InputStream stream,
-            ActionManager.EventContext context, ImportLog log)
+            String tag, ActionManager.EventContext context, ImportLog log)
             throws IOException, ValidationError, InputParseError;
 
     /**
@@ -257,7 +258,7 @@ public abstract class AbstractImportManager implements ImportManager {
         // tolerant is off.
         if (ex instanceof ValidationError) {
             ValidationError e = (ValidationError) ex;
-            log.addError(e.getBundle().getId(), e.getMessage());
+            log.addError(e.getBundle().getId(), e.getErrorSet().toString());
             if (!isTolerant()) {
                 throw new RuntimeException(e);
             }

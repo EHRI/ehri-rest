@@ -33,6 +33,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -137,7 +138,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param log     a logger object
      */
     @Override
-    protected void importInputStream(final InputStream stream, final ActionManager.EventContext context,
+    protected void importInputStream(final InputStream stream, final String tag, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
             ItemImporter<Map<String, Object>, ?> importer = importerClass
@@ -168,7 +169,9 @@ public class SaxImportManager extends AbstractImportManager {
             logger.debug("isValidating: " + spf.isValidating());
             SAXParser saxParser = spf.newSAXParser();
             saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
-            saxParser.parse(stream, handler);
+            InputSource src = new InputSource(stream);
+            src.setSystemId(tag);
+            saxParser.parse(src, handler);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                 NoSuchMethodException | SecurityException |
                 ParserConfigurationException e) {

@@ -241,7 +241,7 @@ public final class ErrorSet implements NestableData<ErrorSet> {
 
     @Override
     public String toString() {
-        return "[" + Joiner.on(", ").join(flatErrors()) + "]";
+        return Joiner.on(", ").join(flatErrors());
     }
 
     private List<String> flatErrors() {
