@@ -304,15 +304,15 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * replacing the /
      */
     private String getMappedProperty(Stack<String> path, String attribute, String value) {
-        String all = "";
+        StringBuilder all = new StringBuilder();
         for (int i = path.size(); i > 0; i--) {
-            all = path.get(i - 1) + "/" + all;
+            all.insert(0, path.get(i - 1) + "/");
             String key = properties.getProperty(all + attribute + escapeValueForKey(value));
             if (key != null) {
                 return key;
             }
         }
-        return ImportHelpers.UNKNOWN_PREFIX + all.replace("/", "_");
+        return ImportHelpers.UNKNOWN_PREFIX + all.toString().replace("/", "_");
     }
 
     /**

@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
@@ -89,12 +90,10 @@ public class EadHandler extends SaxXmlHandler {
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    final static String DEFAULT_LANGUAGE = "eng";
-
     /**
      * Default language to use in units without language
      */
-    private String eadLanguage = DEFAULT_LANGUAGE;
+    private String eadLanguage = Locale.ENGLISH.getISO3Language();
     private String eadId;
 
     /**

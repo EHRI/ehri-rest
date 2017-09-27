@@ -1,55 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" audience="external">
-<eadheader>
-<eadid countrycode="BE">BE / ADVN / AC 2</eadid>
-<filedesc>
-<titlestmt>
-<titleproper></titleproper>
-<author>
-                Gertjan Desmet
-            </author>
-</titlestmt>
-</filedesc>
-<profiledesc>
-<creation>EHRI created this EAD based on the text file of the book "P. FALEK ALHADEFF &amp; G. DESMET, P.-A. TALLIER (dir.), Mekorot Hayeda. Bronnen voor de geschiedenis van de Joden in België (19de-20ste eeuw) - Sources pour l’histoire des Juifs en Belgique (19-20ème siècles), Brussel, Algemeen Rijksarchief – Archives Générales du Royaume, 2014." 
-<date>2015-02-12 11:29:20</date>
-</creation>
-<langusage>
-<language langcode="dut" scriptcode="Latn">Dutch</language>
-</langusage>
-</profiledesc>
-</eadheader>
-<frontmatter></frontmatter>
-<archdesc level="fonds">
-<did>
-<unitid label="ehri_main_identifier">BE / ADVN / AC 2</unitid>
-<unitid label="institution_identifier">AC 2</unitid>
-<unittitle>Archief Arthur De Bruyne.</unittitle>
-<unitdate>1936-1992</unitdate>
-<physdesc>
-<extent>15 s.m. en 4 dozen.</extent>
-</physdesc>
-<origination>
-            De Bruyne, Arthur
-        </origination>
-<repository label="ehri_repository_vc" altrender="ADVN">be-002093</repository>
-</did>
-<scopecontent>
-<p>
-                In dit bestand noteren we vooreerst onder F1/G de artikels “Dr. Marten Rudelsheim” (1981), “De Jodenvervolging onder Hitler” (1981) en “Pius XII en de vervolgde Joden” (1982), verschenen in het rechtse Vlaams-nationalistische blad ’t Pallieterke. Het bestand bevat nog andere dossiers (doorgaans bestaande uit documentatie, aantekeningen, kladversies en originelen) inzake voor deze gids relevante artikels van De Bruyne, zie “De ‘anderen’ en de Joden: Britse en Zwitserse schuld” (1979) en “Hitler en de Joden” (1979)(onder nrs. D8713(6/1) – D8713(6/2)), “De Jodenvervolging onder Hitler” (1981)(nrs. D8713(6/3) – D8713(6/5)), “Het vreselijk geheim. 1. De konferentie aan de Wannsee” (1984-1985)(nrs. D8713(6/6) – D8713(6/7)), “[Nuremberg] 1946” (1976)(nrs. D8714(2/1) – D8714(2/3)), “Dr. Marten Rudelsheim” (1981)(nrs. D8746(2/1) – D8746(2/4)) en “In Naam van de Vrijheid” (1970, 1979-1981)(nrs. D8757(4/1) – D8757(4/4)). Daarnaast noteren we nog documentatiedossiers over David Ben Gurion (nr. D8701(1/3)), “Joden” (1970-1971)(nr. D8704(3/1)) en rabbijn Kahane (1971)(nr. D8701(3/2)).
+    <eadheader>
+        <eadid countrycode="BE">BE / ADVN / AC 2</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Archief Arthur De Bruyne.</titleproper>
+                <author>
+                    Gertjan Desmet
+                </author>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>EHRI created this EAD based on the text file of the book "P. FALEK ALHADEFF &amp; G. DESMET, P.-A.
+                TALLIER (dir.), Mekorot Hayeda. Bronnen voor de geschiedenis van de Joden in België (19de-20ste eeuw) -
+                Sources pour l’histoire des Juifs en Belgique (19-20ème siècles), Brussel, Algemeen Rijksarchief –
+                Archives Générales du Royaume, 2014."
+                <date>2015-02-12 11:29:20</date>
+            </creation>
+            <langusage>
+                <language langcode="dut" scriptcode="Latn">Dutch</language>
+            </langusage>
+        </profiledesc>
+    </eadheader>
+    <archdesc level="fonds">
+        <did>
+            <unitid label="ehri_main_identifier">BE / ADVN / AC 2</unitid>
+            <unitid label="institution_identifier">AC 2</unitid>
+            <unittitle>Archief Arthur De Bruyne.</unittitle>
+            <unitdate>1936-1992</unitdate>
+            <physdesc>
+                <extent>15 s.m. en 4 dozen.</extent>
+            </physdesc>
+            <origination>
+                De Bruyne, Arthur
+            </origination>
+            <repository label="ehri_repository_vc" altrender="ADVN">be-002093</repository>
+        </did>
+        <scopecontent>
+            <p>
+                In dit bestand noteren we vooreerst onder F1/G de artikels “Dr. Marten Rudelsheim” (1981), “De
+                Jodenvervolging onder Hitler” (1981) en “Pius XII en de vervolgde Joden” (1982), verschenen in het
+                rechtse Vlaams-nationalistische blad ’t Pallieterke. Het bestand bevat nog andere dossiers (doorgaans
+                bestaande uit documentatie, aantekeningen, kladversies en originelen) inzake voor deze gids relevante
+                artikels van De Bruyne, zie “De ‘anderen’ en de Joden: Britse en Zwitserse schuld” (1979) en “Hitler en
+                de Joden” (1979)(onder nrs. D8713(6/1) – D8713(6/2)), “De Jodenvervolging onder Hitler” (1981)(nrs.
+                D8713(6/3) – D8713(6/5)), “Het vreselijk geheim. 1. De konferentie aan de Wannsee” (1984-1985)(nrs.
+                D8713(6/6) – D8713(6/7)), “[Nuremberg] 1946” (1976)(nrs. D8714(2/1) – D8714(2/3)), “Dr. Marten
+                Rudelsheim” (1981)(nrs. D8746(2/1) – D8746(2/4)) en “In Naam van de Vrijheid” (1970, 1979-1981)(nrs.
+                D8757(4/1) – D8757(4/4)). Daarnaast noteren we nog documentatiedossiers over David Ben Gurion (nr.
+                D8701(1/3)), “Joden” (1970-1971)(nr. D8704(3/1)) en rabbijn Kahane (1971)(nr. D8701(3/2)).
             </p>
-</scopecontent>
-<controlaccess>
-<subject>extreemrechts</subject>
-<subject>flamingantisme</subject>
-<subject  authfilenumber="?tema=788" source="ehri-skos">historiografie</subject>
-</controlaccess>
-<otherfindaid><p>
+        </scopecontent>
+        <controlaccess>
+            <subject>extreemrechts</subject>
+            <subject>flamingantisme</subject>
+            <subject authfilenumber="?tema=788" source="ehri-skos">historiografie</subject>
+        </controlaccess>
+        <otherfindaid>
+            <p>
                 W. VANNESTE, Werkinventaris Archief Arthur De Bruyne AC 2, Antwerpen, ADVN, 1996.
-            </p></otherfindaid>
-<processinfo>
-<p>EHRI has made a selection of relevant fonds based on subject and content, excluding non-holocaust relevant material.</p>
-</processinfo>
-<dsc></dsc>
-</archdesc>
+            </p>
+        </otherfindaid>
+        <processinfo>
+            <p>EHRI has made a selection of relevant fonds based on subject and content, excluding non-holocaust
+                relevant material.
+            </p>
+        </processinfo>
+    </archdesc>
 </ead>

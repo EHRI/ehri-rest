@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,7 +105,8 @@ public class EacHandler extends SaxXmlHandler {
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                     logger.debug("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
-                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION,
+                            Locale.ENGLISH.getISO3Language());
                 }
 
                 importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
