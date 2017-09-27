@@ -40,9 +40,9 @@ public interface ItemImporter<I, T extends Accessible> {
      * Used to indicate a validation error in the
      * handler for a given element.
      *
-     * @param ex a validation exception
+     * @param ex      a validation exception
      */
-    void handleErrors(Exception ex) throws Exception;
+    void handleError(Exception ex);
 
     /**
      * Add a callback to run when an item is created.

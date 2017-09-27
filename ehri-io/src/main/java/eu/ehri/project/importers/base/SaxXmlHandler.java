@@ -26,6 +26,8 @@ import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
@@ -54,9 +56,11 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node,
  * with an edge to the unit-description.
  */
-public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
+public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler, ContentHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
+
+    protected Locator locator;
 
     /**
      * Key in the node that denotes the object's identifier.
@@ -107,6 +111,11 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
 
     @Override
     public void startDTD(String name, String publicId, String systemId) {
+    }
+
+    @Override
+    public void setDocumentLocator(Locator locator) {
+        this.locator = locator;
     }
 
     @Override

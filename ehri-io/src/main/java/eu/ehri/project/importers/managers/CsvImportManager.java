@@ -78,9 +78,7 @@ public class CsvImportManager extends AbstractImportManager {
             logger.debug("importer of class " + importer.getClass());
 
             importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
-            importer.addErrorCallback(e -> {
-                //throw e;
-            });
+            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
             CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(VALUE_DELIMITER).withHeader();
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);

@@ -150,20 +150,7 @@ public class SaxImportManager extends AbstractImportManager {
             }
 
             importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
-            importer.addErrorCallback(ex -> {
-                // Otherwise, check if we had a validation error that was
-                // thrown for an individual item and only re-throw if
-                // tolerant is off.
-                if (ex.getCause() instanceof ValidationError) {
-                    ValidationError e = (ValidationError)ex.getCause();
-                    log.addError(e.getBundle().getId(), e.getMessage());
-                    if (!isTolerant()) {
-                        throw e;
-                    }
-                } else {
-                    throw ex;
-                }
-            });
+            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
             SaxXmlHandler handler = properties != null
@@ -190,7 +177,7 @@ public class SaxImportManager extends AbstractImportManager {
         } catch (SAXException e) {
             // Something was wrong with the XML...
             throw new InputParseError(e);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             if (e.getCause() instanceof ValidationError) {
                 throw (ValidationError)e.getCause();
             } else {

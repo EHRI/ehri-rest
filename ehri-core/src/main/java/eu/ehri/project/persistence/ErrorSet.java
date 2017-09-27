@@ -19,6 +19,7 @@
 
 package eu.ehri.project.persistence;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedHashMultiset;
@@ -240,7 +241,20 @@ public final class ErrorSet implements NestableData<ErrorSet> {
 
     @Override
     public String toString() {
-        return toJson();
+        return "[" + Joiner.on(", ").join(flatErrors()) + "]";
+    }
+
+    private List<String> flatErrors() {
+        List<String> flatErrors = Lists.newArrayList();
+        for (Map.Entry<String, String> e : errors.entries()) {
+            flatErrors.add(String.format("%s: %s", e.getKey(), e.getValue()));
+        }
+        for (Map.Entry<String, ErrorSet> e : relations.entries()) {
+            for (String flatError : e.getValue().flatErrors()) {
+                flatErrors.add(String.format("%s.%s", e.getKey(), flatError));
+            }
+        }
+        return flatErrors;
     }
 
     /**

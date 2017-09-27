@@ -49,8 +49,7 @@ public class ValidationError extends Exception {
     }
 
     private static String formatErrors(String clsName, ErrorSet errorSet) {
-        return String.format(
-                "A validation error occurred building %s: %s%n", clsName, errorSet.toJson());
+        return String.format("%s: %s%n", clsName, errorSet.toString());
     }
     
     public String getMessage() {

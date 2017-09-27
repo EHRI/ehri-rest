@@ -19,14 +19,10 @@
 
 package eu.ehri.project.importers;
 
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.persistence.Mutation;
-
 /**
  * Implementing classes do things after an item import threw
  * a validation error.
  */
 public interface ErrorCallback {
-    void itemError(Exception ex) throws Exception;
+    void itemError(Exception ex);
 }

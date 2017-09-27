@@ -19,10 +19,10 @@
 
 package eu.ehri.project.importers.ead;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -34,6 +34,8 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.persistence.Bundle;
+import jdk.nashorn.internal.scripts.JO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -239,9 +241,6 @@ public class EadHandler extends SaxXmlHandler {
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
 
-                    /*
-      used to attach the MaintenanceEvents to
-     */
                     logger.debug("importer used: {}", importer.getClass());
                     if (depth > 0) { // if not on root level
                         children[depth - 1].add(current); // add child to parent offspring
@@ -257,10 +256,16 @@ public class EadHandler extends SaxXmlHandler {
                         }
                     }
                 } catch (ValidationError ex) {
-                    try {
-                        importer.handleErrors(new RuntimeException(ex));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    Bundle bundle = ex.getBundle();
+                    if (bundle.getId() == null) {
+                        // In order to indicate what has errored here if there's no
+                        // ID we need to create one with the line number reference.
+                        String path = pathIds().isEmpty() ? null : Joiner.on("/").join(pathIds());
+                        String ref = String.format("[Item closing on line: %d]", locator.getLineNumber());
+                        String id = Joiner.on(" ").skipNulls().join(path, ref);
+                        importer.handleError(new ValidationError(bundle.withId(id), ex.getErrorSet()));
+                    } else {
+                        importer.handleError(ex);
                     }
                 } finally {
                     depth--;

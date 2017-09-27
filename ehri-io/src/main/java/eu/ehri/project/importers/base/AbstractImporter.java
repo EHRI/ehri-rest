@@ -101,7 +101,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     }
 
     @Override
-    public void handleErrors(Exception ex) throws Exception {
+    public void handleError(Exception ex) {
         for (ErrorCallback errorCallback: errorCallbacks) {
             errorCallback.itemError(ex);
         }

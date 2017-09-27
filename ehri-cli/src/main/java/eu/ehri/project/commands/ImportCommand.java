@@ -117,13 +117,11 @@ public abstract class ImportCommand extends BaseCommand {
             throw new RuntimeException(getUsage());
         }
 
-        String logMessage = "Imported from command-line";
-        if (cmdLine.hasOption("log")) {
-            logMessage = cmdLine.getOptionValue("log");
-        }
+        String logMessage = cmdLine.hasOption("log")
+                ? cmdLine.getOptionValue("log")
+                : "Imported from command-line";
 
         try {
-
             // Find the agent
             PermissionScope scope = SystemScope.getInstance();
             if (cmdLine.hasOption("scope")) {
@@ -141,9 +139,6 @@ public abstract class ImportCommand extends BaseCommand {
                 optionalProperties = properties;
             }
 
-            // FIXME: Casting the graph shouldn't be necessary here, but it is
-            // because the import managers do transactional stuff that they
-            // probably should not do.
             ImportLog log = new SaxImportManager(graph, scope, user,
                     cmdLine.hasOption("tolerant"),
                     cmdLine.hasOption("allow-updates"),
