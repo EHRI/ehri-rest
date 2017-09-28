@@ -93,4 +93,13 @@ public class ErrorSetTest {
         ErrorSet es5 = es.withRelation("rel2", es4);
         assertFalse(es5.isEmpty());
     }
+
+    @Test
+    public void testToString() throws Exception {
+        ErrorSet es1 = ErrorSet.fromError("foo", "bad")
+                .withRelations("rel",
+                                Lists.newArrayList(ErrorSet.fromError(
+                                        "bar", "baz")));
+        assertEquals("foo: bad, rel.bar: baz", es1.toString());
+    }
 }
