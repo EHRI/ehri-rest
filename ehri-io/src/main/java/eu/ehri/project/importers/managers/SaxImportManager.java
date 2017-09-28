@@ -27,13 +27,13 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,7 +44,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -55,7 +54,7 @@ public class SaxImportManager extends AbstractImportManager {
     private static final Logger logger = LoggerFactory.getLogger(SaxImportManager.class);
 
     private final Class<? extends SaxXmlHandler> handlerClass;
-    private final Optional<XmlImportProperties> properties;
+    private final XmlImportProperties properties;
     private final List<ImportCallback> extraCallbacks;
 
     /**
@@ -72,7 +71,7 @@ public class SaxImportManager extends AbstractImportManager {
             boolean allowUpdates,
             Class<? extends ItemImporter> importerClass,
             Class<? extends SaxXmlHandler> handlerClass,
-            Optional<XmlImportProperties> properties,
+            XmlImportProperties properties,
             List<ImportCallback> callbacks) {
         super(graph, scope, actioner, tolerant, allowUpdates, importerClass);
         this.handlerClass = handlerClass;
@@ -95,8 +94,7 @@ public class SaxImportManager extends AbstractImportManager {
             boolean allowUpdates,
             Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             List<ImportCallback> callbacks) {
-        this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, Optional
-                        .<XmlImportProperties>empty(),
+        this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, null,
                 callbacks);
     }
 
@@ -114,7 +112,7 @@ public class SaxImportManager extends AbstractImportManager {
             Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             XmlImportProperties properties) {
         this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass,
-                Optional.ofNullable(properties),
+                properties,
                 Lists.<ImportCallback>newArrayList());
     }
 
@@ -140,7 +138,7 @@ public class SaxImportManager extends AbstractImportManager {
      * @param log     a logger object
      */
     @Override
-    protected void importInputStream(final InputStream stream, final ActionManager.EventContext context,
+    protected void importInputStream(final InputStream stream, final String tag, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
             ItemImporter<Map<String, Object>, ?> importer = importerClass
@@ -152,32 +150,13 @@ public class SaxImportManager extends AbstractImportManager {
                 importer.addCallback(callback);
             }
 
-            // Add housekeeping callbacks for the log object...
-            importer.addCallback(mutation -> {
-                switch (mutation.getState()) {
-                    case CREATED:
-                        logger.info("Item created: {}", mutation.getNode().getId());
-                        context.addSubjects(mutation.getNode());
-                        log.addCreated();
-                        break;
-                    case UPDATED:
-                        if (!allowUpdates) {
-                            throw new ModeViolation(String.format(
-                                    "Item '%s' was updated but import manager does not allow updates",
-                                    mutation.getNode().getId()));
-                        }
-                        logger.info("Item updated: {}", mutation.getNode().getId());
-                        context.addSubjects(mutation.getNode());
-                        log.addUpdated();
-                        break;
-                    default:
-                        log.addUnchanged();
-                }
-            });
+            importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
+            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
+
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            SaxXmlHandler handler = properties.isPresent()
+            SaxXmlHandler handler = properties != null
                     ? handlerClass.getConstructor(ItemImporter.class, XmlImportProperties.class)
-                    .newInstance(importer, properties.get())
+                    .newInstance(importer, properties)
                     : handlerClass.getConstructor(ItemImporter.class).newInstance(importer);
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -190,26 +169,30 @@ public class SaxImportManager extends AbstractImportManager {
             logger.debug("isValidating: " + spf.isValidating());
             SAXParser saxParser = spf.newSAXParser();
             saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
-            saxParser.parse(stream, handler);
+            InputSource src = new InputSource(stream);
+            src.setSystemId(tag);
+            saxParser.parse(src, handler);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                 NoSuchMethodException | SecurityException |
                 ParserConfigurationException e) {
             // In normal operation these should not be thrown
             throw new RuntimeException(e);
         } catch (SAXException e) {
+            // Something was wrong with the XML...
             throw new InputParseError(e);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof ValidationError) {
+                throw (ValidationError)e.getCause();
+            } else {
+                throw e;
+            }
         }
     }
 
     public SaxImportManager withProperties(String properties) {
-        if (properties == null) {
-            return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates,
-                    importerClass, handlerClass, Optional.<XmlImportProperties>empty(), extraCallbacks);
-        } else {
-            XmlImportProperties xmlImportProperties = new XmlImportProperties(properties);
-            return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass,
-                    handlerClass, Optional.of(xmlImportProperties), extraCallbacks);
-        }
+        XmlImportProperties xmlImportProperties = properties == null ? null : new XmlImportProperties(properties);
+        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass,
+                handlerClass, xmlImportProperties, extraCallbacks);
     }
 
     public SaxImportManager setTolerant(boolean tolerant) {

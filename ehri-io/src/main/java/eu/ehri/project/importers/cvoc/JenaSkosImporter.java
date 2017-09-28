@@ -79,6 +79,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -108,7 +109,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final String baseURI;
     private final String suffix;
     private final String defaultLang;
-    private static final String DEFAULT_LANG = "eng";
+    private static final String DEFAULT_LANG = Locale.ENGLISH.getISO3Language();
     private static final Bundle linkTemplate = Bundle.of(EntityClass.LINK)
             .withDataValue(Ontology.LINK_HAS_DESCRIPTION, config.getString("io.import.defaultLinkText"))
             .withDataValue(Ontology.LINK_HAS_TYPE, config.getString("io.import.defaultLinkType"));

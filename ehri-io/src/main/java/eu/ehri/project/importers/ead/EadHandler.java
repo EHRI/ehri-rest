@@ -19,10 +19,10 @@
 
 package eu.ehri.project.importers.ead;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -31,10 +31,10 @@ import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.persistence.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
@@ -89,18 +90,11 @@ public class EadHandler extends SaxXmlHandler {
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    final static String DEFAULT_LANGUAGE = "eng";
-
     /**
      * Default language to use in units without language
      */
-    private String eadLanguage = DEFAULT_LANGUAGE;
+    private String eadLanguage = Locale.ENGLISH.getISO3Language();
     private String eadId;
-
-    /**
-     * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
-     */
-    private final Map<String, String> eadfileValues = Maps.newHashMap();
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -246,9 +240,6 @@ public class EadHandler extends SaxXmlHandler {
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
 
-                    /*
-      used to attach the MaintenanceEvents to
-     */
                     logger.debug("importer used: {}", importer.getClass());
                     if (depth > 0) { // if not on root level
                         children[depth - 1].add(current); // add child to parent offspring
@@ -264,7 +255,18 @@ public class EadHandler extends SaxXmlHandler {
                         }
                     }
                 } catch (ValidationError ex) {
-                    logger.error("caught validation error", ex);
+                    Bundle bundle = ex.getBundle();
+                    if (bundle.getId() == null) {
+                        // In order to indicate what has errored here if there's no
+                        // ID we need to create one with the line number reference.
+                        String path = pathIds().isEmpty() ? null : Joiner.on("/").join(pathIds());
+                        String ref = String.format("[Item completed prior to line: %d]",
+                                locator.getLineNumber());
+                        String id = Joiner.on(" ").skipNulls().join(path, locator.getSystemId(), ref);
+                        importer.handleError(new ValidationError(bundle.withId(id), ex.getErrorSet()));
+                    } else {
+                        importer.handleError(ex);
+                    }
                 } finally {
                     depth--;
                     scopeIds.pop();

@@ -24,6 +24,8 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ErrorCallback;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Accessible;
@@ -42,6 +44,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     protected final GraphManager manager;
     protected final ImportLog log;
     private final List<ImportCallback> callbacks = Lists.newArrayList();
+    private final List<ErrorCallback> errorCallbacks = Lists.newArrayList();
 
     /**
      * Call all registered ImportCallbacks for the given mutation.
@@ -87,14 +90,20 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
         manager = GraphManagerFactory.getInstance(graph);
     }
 
-    /**
-     * Add a callback to run when an item is created.
-     *
-     * @param callback a callback function object
-     */
     @Override
     public void addCallback(ImportCallback callback) {
         callbacks.add(callback);
     }
 
+    @Override
+    public void addErrorCallback(ErrorCallback errorCallback) {
+        errorCallbacks.add(errorCallback);
+    }
+
+    @Override
+    public void handleError(Exception ex) {
+        for (ErrorCallback errorCallback: errorCallbacks) {
+            errorCallback.itemError(ex);
+        }
+    }
 }

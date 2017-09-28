@@ -40,6 +40,7 @@ import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
@@ -70,7 +71,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
     // Constants for elements we need to watch for.
     private final static String ARCHDESC = "archdesc";
     private final static String DID = "did";
-    private final static String DEFAULT_LANGUAGE = "eng";
     /**
      * used to attach the MaintenanceEvents to
      */
@@ -79,7 +79,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     /**
      * Default language to use in units without language
      */
-    protected String eadLanguage = DEFAULT_LANGUAGE;
+    protected String eadLanguage = Locale.ENGLISH.getISO3Language();
 
     /**
      * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file

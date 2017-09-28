@@ -146,7 +146,6 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
         // Check the JSON gives use the correct error
         String errString = response.getEntity(String.class);
-
         assertStatus(BAD_REQUEST, response);
 
         JsonNode rootNode = jsonMapper.readTree(errString);

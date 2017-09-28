@@ -25,7 +25,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.ItemImporter;
@@ -45,7 +44,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Superclass of all import command-line tools.
@@ -114,20 +112,16 @@ public abstract class ImportCommand extends BaseCommand {
         if (cmdLine.hasOption("files-from")) {
             getPathsFromFile(cmdLine.getOptionValue("files-from"), filePaths);
         } else if (!cmdLine.getArgList().isEmpty()) {
-            for (int i = 0; i < cmdLine.getArgList().size(); i++) {
-                filePaths.add(cmdLine.getArgList().get(i));
-            }
+            filePaths.addAll(cmdLine.getArgList());
         } else {
             throw new RuntimeException(getUsage());
         }
 
-        String logMessage = "Imported from command-line";
-        if (cmdLine.hasOption("log")) {
-            logMessage = cmdLine.getOptionValue("log");
-        }
+        String logMessage = cmdLine.hasOption("log")
+                ? cmdLine.getOptionValue("log")
+                : "Imported from command-line";
 
         try {
-
             // Find the agent
             PermissionScope scope = SystemScope.getInstance();
             if (cmdLine.hasOption("scope")) {
@@ -138,16 +132,13 @@ public abstract class ImportCommand extends BaseCommand {
             UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            Optional<XmlImportProperties> optionalProperties = Optional.empty();
+            XmlImportProperties optionalProperties = null;
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
                 logMessage += " Using properties file : " + cmdLine.getOptionValue("properties");
-                optionalProperties = Optional.of(properties);
+                optionalProperties = properties;
             }
 
-            // FIXME: Casting the graph shouldn't be necessary here, but it is
-            // because the import managers do transactional stuff that they
-            // probably should not do.
             ImportLog log = new SaxImportManager(graph, scope, user,
                     cmdLine.hasOption("tolerant"),
                     cmdLine.hasOption("allow-updates"),

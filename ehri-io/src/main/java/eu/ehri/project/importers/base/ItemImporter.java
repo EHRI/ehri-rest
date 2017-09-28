@@ -1,6 +1,7 @@
 package eu.ehri.project.importers.base;
 
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ErrorCallback;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.models.base.Accessible;
 
@@ -36,9 +37,24 @@ public interface ItemImporter<I, T extends Accessible> {
     T importItem(I itemData, List<String> scopeIds) throws ValidationError;
 
     /**
+     * Used to indicate a validation error in the
+     * handler for a given element.
+     *
+     * @param ex      a validation exception
+     */
+    void handleError(Exception ex);
+
+    /**
      * Add a callback to run when an item is created.
      *
      * @param callback a callback function object
      */
     void addCallback(ImportCallback callback);
+
+    /**
+     * Add a callback to run when an item errors.
+     *
+     * @param callback a callback function object
+     */
+    void addErrorCallback(ErrorCallback callback);
 }

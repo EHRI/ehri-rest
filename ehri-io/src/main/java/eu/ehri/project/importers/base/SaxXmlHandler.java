@@ -26,6 +26,8 @@ import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
@@ -54,9 +56,11 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node,
  * with an edge to the unit-description.
  */
-public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
+public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler, ContentHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
+
+    protected Locator locator;
 
     /**
      * Key in the node that denotes the object's identifier.
@@ -74,6 +78,10 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected int depth;
     private String attribute;
     private String languagePrefix;
+
+    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer) {
+        this(importer, null);
+    }
 
     public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties properties) {
         super();
@@ -103,6 +111,11 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
 
     @Override
     public void startDTD(String name, String publicId, String systemId) {
+    }
+
+    @Override
+    public void setDocumentLocator(Locator locator) {
+        this.locator = locator;
     }
 
     @Override
@@ -304,15 +317,15 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * replacing the /
      */
     private String getMappedProperty(Stack<String> path, String attribute, String value) {
-        String all = "";
+        StringBuilder all = new StringBuilder();
         for (int i = path.size(); i > 0; i--) {
-            all = path.get(i - 1) + "/" + all;
+            all.insert(0, path.get(i - 1) + "/");
             String key = properties.getProperty(all + attribute + escapeValueForKey(value));
             if (key != null) {
                 return key;
             }
         }
-        return ImportHelpers.UNKNOWN_PREFIX + all.replace("/", "_");
+        return ImportHelpers.UNKNOWN_PREFIX + all.toString().replace("/", "_");
     }
 
     /**

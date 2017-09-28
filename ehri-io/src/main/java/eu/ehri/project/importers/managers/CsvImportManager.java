@@ -30,7 +30,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -69,7 +68,7 @@ public class CsvImportManager extends AbstractImportManager {
      * @param log     an import log instance
      */
     @Override
-    protected void importInputStream(InputStream stream, final ActionManager.EventContext context,
+    protected void importInputStream(InputStream stream, String tag, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {
@@ -78,27 +77,8 @@ public class CsvImportManager extends AbstractImportManager {
                     .newInstance(framedGraph, permissionScope, actioner, log);
             logger.debug("importer of class " + importer.getClass());
 
-            importer.addCallback(mutation -> {
-                switch (mutation.getState()) {
-                    case CREATED:
-                        logger.info("Item created: {}", mutation.getNode().getId());
-                        context.addSubjects(mutation.getNode());
-                        log.addCreated();
-                        break;
-                    case UPDATED:
-                        if (!allowUpdates) {
-                            throw new ModeViolation(String.format(
-                                    "Item '%s' was updated but import manager does not allow updates",
-                                    mutation.getNode().getId()));
-                        }
-                        logger.info("Item updated: {}", mutation.getNode().getId());
-                        context.addSubjects(mutation.getNode());
-                        log.addUpdated();
-                        break;
-                    default:
-                        log.addUnchanged();
-                }
-            });
+            importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
+            importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
             CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(VALUE_DELIMITER).withHeader();
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);

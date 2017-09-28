@@ -26,9 +26,12 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.exceptions.ModeViolation;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Mutation;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.input.BoundedInputStream;
@@ -96,17 +99,16 @@ public abstract class AbstractImportManager implements ImportManager {
         return tolerant;
     }
 
-
     @Override
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {
         try (InputStream ios = Files.newInputStream(Paths.get(filePath))) {
-            return importInputStream(ios, logMessage);
+            return importInputStream(ios, filePath, logMessage);
         }
     }
 
     @Override
-    public ImportLog importInputStream(InputStream stream, String logMessage)
+    public ImportLog importInputStream(InputStream stream, String tag, String logMessage)
             throws IOException, InputParseError, ValidationError {
         // Create a new action for this import
         Optional<String> msg = getLogMessage(logMessage);
@@ -117,7 +119,7 @@ public abstract class AbstractImportManager implements ImportManager {
         ImportLog log = new ImportLog(msg.orElse(null));
 
         // Do the import...
-        importInputStream(stream, action, log);
+        importInputStream(stream, tag, action, log);
         // If nothing was imported, remove the action...
         if (log.hasDoneWork()) {
             action.commit();
@@ -141,7 +143,7 @@ public abstract class AbstractImportManager implements ImportManager {
                     currentFile = path;
                     try (InputStream stream = Files.newInputStream(Paths.get(path))) {
                         logger.info("Importing file: {}", path);
-                        importInputStream(stream, action, log);
+                        importInputStream(stream, currentFile, action, log);
                     }
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
@@ -182,7 +184,7 @@ public abstract class AbstractImportManager implements ImportManager {
                             = new BoundedInputStream(stream, entry.getSize());
                     boundedInputStream.setPropagateClose(false);
                     logger.info("Importing file: {}", currentFile);
-                    importInputStream(boundedInputStream, action, log);
+                    importInputStream(boundedInputStream, currentFile, action, log);
                 }
             } catch (InputParseError | ValidationError e) {
                 log.addError(formatErrorLocation(), e.getMessage());
@@ -205,12 +207,65 @@ public abstract class AbstractImportManager implements ImportManager {
      * Import an InputStream with an event context.
      *
      * @param stream  the InputStream to import
+     * @param tag        an optional tag identifying the source of the stream
      * @param context the event that this import is part of
      * @param log     an import log to write to
      */
     protected abstract void importInputStream(InputStream stream,
-            ActionManager.EventContext context, ImportLog log)
+            String tag, ActionManager.EventContext context, ImportLog log)
             throws IOException, ValidationError, InputParseError;
+
+    /**
+     * A default handler for import callbacks which adds the item to the
+     * log and event context.
+     *
+     * @param log      an import log
+     * @param context  an event context
+     * @param mutation the item mutation
+     */
+    void defaultImportCallback(ImportLog log, ActionManager.EventContext context, Mutation<? extends Accessible> mutation) {
+        switch (mutation.getState()) {
+            case CREATED:
+                logger.info("Item created: {}", mutation.getNode().getId());
+                context.addSubjects(mutation.getNode());
+                log.addCreated();
+                break;
+            case UPDATED:
+                if (!allowUpdates) {
+                    throw new ModeViolation(String.format(
+                            "Item '%s' was updated but import manager does not allow updates",
+                            mutation.getNode().getId()));
+                }
+                logger.info("Item updated: {}", mutation.getNode().getId());
+                context.addSubjects(mutation.getNode());
+                log.addUpdated();
+                break;
+            default:
+                log.addUnchanged();
+        }
+    }
+
+    /**
+     * A default handler for error callbacks which adds the error to
+     * the log and throws it if the importer is not in tolerant mode.
+     *
+     * @param log an import log
+     * @param ex  the propagated exception
+     */
+    void defaultErrorCallback(ImportLog log, Exception ex) {
+        // Otherwise, check if we had a validation error that was
+        // thrown for an individual item and only re-throw if
+        // tolerant is off.
+        if (ex instanceof ValidationError) {
+            ValidationError e = (ValidationError) ex;
+            log.addError(e.getBundle().getId(), e.getErrorSet().toString());
+            if (!isTolerant()) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new RuntimeException(ex);
+        }
+    }
 
     // Helpers
 

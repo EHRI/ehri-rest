@@ -19,16 +19,18 @@
 
 package eu.ehri.project.importers.ead;
 
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 
 public class GenericEadImporterTest extends AbstractImporterTest {
-
-    protected final String SINGLE_EAD = "generic-ead.xml";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -36,20 +38,40 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int origCount = getNodeCount(graph);
-        System.out.println(origCount);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
+        InputStream ios = ClassLoader.getSystemResourceAsStream("generic-ead.xml");
         saxImportManager(EadImporter.class, EadHandler.class, "ara.properties")
                 .importInputStream(ios, logMessage);
+        /*
+         * Nodes created:
+         *  - 1 unit
+         *  - 1 description
+         *  - 1 system event
+         *  - 2 event link
+         *  - 3 subject access points
+         *  - 1 creator access point
+         *  - 1 maintenance event
+         *  - 1 date period
+         */
+        assertEquals(origCount + 11, getNodeCount(graph));
+    }
 
-        // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
-        printGraph(graph);
+    @Test(expected = ValidationError.class)
+    public void testImportInvalidItem() throws Exception {
+        InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
+        saxImportManager(EadImporter.class, EadHandler.class)
+                .importInputStream(ios, "Test invalid item import");
+    }
 
-        // After...
-        List<VertexProxy> graphState2 = getGraphState(graph);
-        GraphDiff diff = diffGraph(graphState1, graphState2);
-        diff.printDebug(System.out);
+    @Test
+    public void testImportInvalidItemTolerant() throws Exception {
+        int origCount = getNodeCount(graph);
 
-        printGraph(graph);
+        InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                .setTolerant(true)
+                .importInputStream(ios, "Test invalid item import");
+        System.out.println(log.getErrors());
+        assertEquals(1, log.getErrored());
+        assertEquals(origCount, getNodeCount(graph));
     }
 }

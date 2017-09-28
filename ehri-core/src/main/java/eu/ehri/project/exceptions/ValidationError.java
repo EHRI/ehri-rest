@@ -40,7 +40,7 @@ public class ValidationError extends Exception {
         this.errorSet = errorSet;
     }
 
-    public ValidationError(Bundle bundle, String key, String error) {        
+    public ValidationError(Bundle bundle, String key, String error) {
         this(bundle, ErrorSet.fromError(key, error));
     }
 
@@ -48,13 +48,12 @@ public class ValidationError extends Exception {
         this(bundle, new ErrorSet(errors));
     }
 
-    private static String formatErrors(String clsName, ErrorSet errorSet) {
-        return String.format(
-                "A validation error occurred building %s: %s%n", clsName, errorSet.toJson());
+    private static String formatErrors(String clsName, String id, ErrorSet errorSet) {
+        return String.format("%s %s: %s%n", clsName, id, errorSet.toString());
     }
-    
+
     public String getMessage() {
-    	return formatErrors(bundle.getType().getName(), errorSet);
+        return formatErrors(bundle.getType().getName(), bundle.getId(), errorSet);
     }
 
     public ErrorSet getErrorSet() {

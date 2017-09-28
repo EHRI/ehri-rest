@@ -28,13 +28,13 @@ import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.GenericResource;
 import eu.ehri.extension.ImportResource;
-import eu.ehri.project.importers.ead.SyncLog;
-import eu.ehri.project.utils.Table;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadHandler;
+import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
+import eu.ehri.project.utils.Table;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -58,7 +58,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 
-public class ImportResourceResourceClientTest extends AbstractResourceClientTest {
+public class ImportResourceClientTest extends AbstractResourceClientTest {
     // NB: This file is *copied* into the extension test resources because
     // I can't figure out how to refer to resources in another module...
     private static final String SINGLE_EAD = "ead.xml";
@@ -123,6 +123,39 @@ public class ImportResourceResourceClientTest extends AbstractResourceClientTest
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+    }
+
+    @Test
+    public void testImportSingleEadWithValidationError() throws Exception {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("invalid-ead.xml");
+        URI uri = getImportUrl("ead", "r1", "Error test", false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_XML_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        System.out.println(response.getEntity(String.class));
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+    }
+
+    @Test
+    public void testImportSingleEadWithValidationErrorInTolerantMode() throws Exception {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("invalid-ead.xml");
+        URI uri = getImportUrl("ead", "r1", "Error test", true)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT, true)
+                .build();
+
+        ImportLog log = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_XML_TYPE)
+                .entity(payloadStream)
+                .post(ImportLog.class);
+        assertEquals(1, log.getErrored());
     }
 
     @Test
