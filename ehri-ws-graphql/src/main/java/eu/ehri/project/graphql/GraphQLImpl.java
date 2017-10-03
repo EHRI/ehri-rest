@@ -306,7 +306,9 @@ public class GraphQLImpl {
                 return null;
             }
         };
-    };
+    }
+
+    ;
 
     private static final DataFetcher idDataFetcher =
             environment -> ((Entity) environment.getSource()).getProperty(EntityType.ID_KEY);
@@ -521,6 +523,10 @@ public class GraphQLImpl {
                 .build();
     }
 
+    private static List<GraphQLFieldDefinition> entityFields() {
+        return Lists.newArrayList(idField, typeField);
+    }
+
     private static List<GraphQLFieldDefinition> descriptionFields() {
         return Lists.newArrayList(
                 nonNullAttr(Ontology.LANGUAGE_OF_DESCRIPTION, "The description's language code"),
@@ -545,6 +551,17 @@ public class GraphQLImpl {
                 .description("The number of child items this item contains")
                 .dataFetcher(env -> Math.toIntExact(f.apply((Entity) env.getSource())))
                 .build();
+    }
+
+    private List<GraphQLFieldDefinition> linksAndAnnotationsFields() {
+        return Lists.newArrayList(
+                listFieldDefinition("links", "This item's links",
+                        new GraphQLTypeReference(Entities.LINK),
+                        oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())),
+                listFieldDefinition("annotations", "This item's annotations",
+                        new GraphQLTypeReference(Entities.ANNOTATION),
+                        oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations()))
+        );
     }
 
     private GraphQLFieldDefinition accessPointFieldDefinition() {
@@ -727,8 +744,7 @@ public class GraphQLImpl {
     private final GraphQLInterfaceType entityInterface = newInterface()
             .name("Entity")
             .description("An entity")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .typeResolver(entityTypeResolver)
             .build();
 
@@ -742,8 +758,11 @@ public class GraphQLImpl {
     private final GraphQLInterfaceType describedInterface = newInterface()
             .name("Described")
             .description("An item with multi-lingual descriptions")
+            .fields(entityFields())
             .field(singleDescriptionFieldDefinition(descriptionInterface))
             .field(descriptionsFieldDefinition(descriptionInterface))
+            .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
+            .fields(linksAndAnnotationsFields())
             .typeResolver(describedTypeResolver)
             .build();
 
@@ -751,8 +770,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType entityType = newObject()
             .name("Entity")
             .description("An EHRI entity")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .withInterface(entityInterface)
             .build();
 
@@ -849,8 +867,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description("A repository / archival institution")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
             .field(itemCountFieldDefinition(r -> r.as(Repository.class).getChildCount()))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
@@ -864,12 +881,7 @@ public class GraphQLImpl {
             .field(itemFieldDefinition("country", "The repository's country",
                     new GraphQLTypeReference(Entities.COUNTRY),
                     manyToOneRelationshipFetcher(r -> r.as(Repository.class).getCountry())))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();
@@ -877,8 +889,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType documentaryUnitType = newObject()
             .name(Entities.DOCUMENTARY_UNIT)
             .description("An archival unit")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
             .field(descriptionsFieldDefinition(documentaryUnitDescriptionType))
             .field(singleDescriptionFieldDefinition(documentaryUnitDescriptionType))
@@ -897,12 +908,7 @@ public class GraphQLImpl {
             .field(listFieldDefinition("ancestors", "The unit's parent items, as a list",
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     oneToManyRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getAncestors())))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();
@@ -910,17 +916,11 @@ public class GraphQLImpl {
     private final GraphQLObjectType historicalAgentType = newObject()
             .name(Entities.HISTORICAL_AGENT)
             .description("An historical agent")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The historical agent's EHRI identifier"))
             .field(singleDescriptionFieldDefinition(historicalAgentDescriptionType))
             .field(descriptionsFieldDefinition(historicalAgentDescriptionType))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();
@@ -928,8 +928,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType authoritativeSetType = newObject()
             .name(Entities.AUTHORITATIVE_SET)
             .description("An authority set")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The set's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The set's name"))
             .field(nullAttr("description", "The item's description"))
@@ -937,12 +936,7 @@ public class GraphQLImpl {
             .field(connectionFieldDefinition("authorities", "Item's contained in this vocabulary", historicalAgentType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .build();
 
@@ -950,8 +944,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType countryType = newObject()
             .name(Entities.COUNTRY)
             .description("A country")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The country's ISO639-2 code"))
             .field(newFieldDefinition()
                     .name(Ontology.NAME_KEY)
@@ -967,20 +960,14 @@ public class GraphQLImpl {
             .field(connectionFieldDefinition("repositories", "Repositories located in the country", repositoryType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Country.class).getRepositories())))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .build();
 
     private final GraphQLObjectType conceptType = newObject()
             .name(Entities.CVOC_CONCEPT)
             .description("A concept")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The concept's local identifier"))
             .field(descriptionsFieldDefinition(conceptDescriptionType))
             .field(singleDescriptionFieldDefinition(conceptDescriptionType))
@@ -999,12 +986,7 @@ public class GraphQLImpl {
             .field(itemFieldDefinition("vocabulary", "The vocabulary",
                     new GraphQLTypeReference(Entities.CVOC_VOCABULARY),
                     manyToOneRelationshipFetcher(c -> c.as(Concept.class).getVocabulary())))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();
@@ -1012,8 +994,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType vocabularyType = newObject()
             .name(Entities.CVOC_VOCABULARY)
             .description("A vocabulary")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The vocabulary's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The vocabulary's name"))
             .field(nullAttr("description", "The item's description"))
@@ -1021,20 +1002,14 @@ public class GraphQLImpl {
             .field(connectionFieldDefinition("concepts", "Concepts contained in this vocabulary", conceptType,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Vocabulary.class).getConcepts())))
-            .field(listFieldDefinition("links", "This item's links",
-                    new GraphQLTypeReference(Entities.LINK),
-                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
+            .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .build();
 
     private final GraphQLObjectType annotationType = newObject()
             .name(Entities.ANNOTATION)
             .description("An annotation")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, "The text of the annotation"))
             .field(listFieldDefinition("targets", "The annotation's target(s)", entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
@@ -1047,8 +1022,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType linkType = newObject()
             .name(Entities.LINK)
             .description("A link")
-            .field(idField)
-            .field(typeField)
+            .fields(entityFields())
             .field(nonNullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
             .field(listFieldDefinition("targets", "The annotation's targets", entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))
