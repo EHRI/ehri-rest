@@ -452,7 +452,7 @@ public class GraphQLImpl {
             .dataFetcher(typeDataFetcher)
             .build();
 
-    private static GraphQLFieldDefinition singleDescriptionFieldDefinition(GraphQLObjectType descriptionType) {
+    private static GraphQLFieldDefinition singleDescriptionFieldDefinition(GraphQLOutputType descriptionType) {
         return newFieldDefinition()
                 .type(descriptionType)
                 .name("description")
@@ -529,7 +529,7 @@ public class GraphQLImpl {
         );
     }
 
-    private GraphQLFieldDefinition descriptionsFieldDefinition(GraphQLObjectType descriptionType) {
+    private GraphQLFieldDefinition descriptionsFieldDefinition(GraphQLOutputType descriptionType) {
         return newFieldDefinition()
                 .type(new GraphQLList(descriptionType))
                 .name("descriptions")
@@ -695,7 +695,7 @@ public class GraphQLImpl {
                 case Entities.REPOSITORY_DESCRIPTION:
                     return repositoryDescriptionType;
                 case Entities.HISTORICAL_AGENT_DESCRIPTION:
-                    return historicalAgentType;
+                    return historicalAgentDescriptionType;
                 case Entities.CVOC_CONCEPT_DESCRIPTION:
                     return conceptDescriptionType;
                 default:
@@ -703,6 +703,26 @@ public class GraphQLImpl {
             }
         }
     };
+
+    private TypeResolver describedTypeResolver = new TypeResolver() {
+        @Override
+        public GraphQLObjectType getType(Object item) {
+            Entity entity = (Entity) item;
+            switch (entity.getType()) {
+                case Entities.DOCUMENTARY_UNIT:
+                    return documentaryUnitType;
+                case Entities.REPOSITORY:
+                    return repositoryType;
+                case Entities.HISTORICAL_AGENT:
+                    return historicalAgentType;
+                case Entities.CVOC_CONCEPT:
+                    return conceptType;
+                default:
+                    return null;
+            }
+        }
+    };
+
 
     private final GraphQLInterfaceType entityInterface = newInterface()
             .name("Entity")
@@ -717,6 +737,14 @@ public class GraphQLImpl {
             .description("A language-specific item description")
             .fields(descriptionFields())
             .typeResolver(descriptionTypeResolver)
+            .build();
+
+    private final GraphQLInterfaceType describedInterface = newInterface()
+            .name("Described")
+            .description("An item with multi-lingual descriptions")
+            .field(singleDescriptionFieldDefinition(descriptionInterface))
+            .field(descriptionsFieldDefinition(descriptionInterface))
+            .typeResolver(describedTypeResolver)
             .build();
 
 
@@ -843,6 +871,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.ANNOTATION),
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
             .withInterface(entityInterface)
+            .withInterface(describedInterface)
             .build();
 
     private final GraphQLObjectType documentaryUnitType = newObject()
@@ -875,6 +904,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.ANNOTATION),
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
             .withInterface(entityInterface)
+            .withInterface(describedInterface)
             .build();
 
     private final GraphQLObjectType historicalAgentType = newObject()
@@ -892,6 +922,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.ANNOTATION),
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
             .withInterface(entityInterface)
+            .withInterface(describedInterface)
             .build();
 
     private final GraphQLObjectType authoritativeSetType = newObject()
@@ -975,6 +1006,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.ANNOTATION),
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
             .withInterface(entityInterface)
+            .withInterface(describedInterface)
             .build();
 
     private final GraphQLObjectType vocabularyType = newObject()
