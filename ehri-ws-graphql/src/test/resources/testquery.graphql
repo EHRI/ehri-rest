@@ -1,4 +1,10 @@
-{
+fragment desc on Described {
+  description {
+    name
+  }
+}
+
+query test {
     c1: DocumentaryUnit(id: "c1") {
         id
         type
@@ -69,13 +75,9 @@
     c3: DocumentaryUnit(id: "c3") {
         ancestors {
             id
-            description {
-                name
-            }
+            ...desc
             repository {
-                description {
-                    name
-                }
+                ...desc
             }
         }
     }
@@ -90,9 +92,7 @@
 
     CvocConcept(id: "cvoc1") {
         identifier
-        description {
-            name
-        }
+        ...desc
     }
 
     AuthoritativeSet(id: "auths") {
@@ -100,9 +100,7 @@
         authorities {
             items {
                 identifier
-                description {
-                    name
-                }
+                ...desc
             }
         }
     }
@@ -122,9 +120,7 @@
     }
 
     firstAgentDesc: HistoricalAgent(id: "a1") {
-        description {
-            name
-        }
+        ...desc
     }
 
     secondDocDesc: DocumentaryUnit(id: "c1") {
