@@ -44,6 +44,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.definitions.Skos;
 import eu.ehri.project.definitions.SkosMultilingual;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Country;
@@ -103,6 +104,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static graphql.Scalars.GraphQLBigDecimal;
 import static graphql.Scalars.GraphQLBoolean;
@@ -503,6 +505,27 @@ public class GraphQLImpl {
         }
     };
 
+    private static DataFetcher relatedItemsDataFetcher(String type) {
+        return environment -> {
+            Entity source = (Entity) environment.getSource();
+            Iterable<Link> links = source.as(Linkable.class).getLinks();
+            return StreamSupport.stream(links.spliterator(), false).map( link -> {
+
+                String context = StreamSupport.stream(link.getLinkBodies().spliterator(), false)
+                        .filter(ap -> ap.getType().equals(Entities.ACCESS_POINT))
+                        .findFirst()
+                        .map(ap -> ap.as(AccessPoint.class).getRelationshipType().name())
+                        .orElse(link.getDescription());
+
+                Linkable target = Iterables.tryFind(link.getLinkTargets(),
+                        t -> t != null && !t.equals(source) &&
+                                Objects.equals(type, t.getType())).orNull();
+                return target == null ? null : mapOf("context", context, "item", target);
+            }).filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        };
+    }
+
     private static DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
         return env -> transformer.apply(fetcher.get(env));
     }
@@ -719,6 +742,14 @@ public class GraphQLImpl {
         );
     }
 
+    private GraphQLFieldDefinition relatedItemsItemFieldDefinition(GraphQLOutputType type) {
+        return newFieldDefinition()
+                .type(type)
+                .name("item")
+                .description("The related item")
+                .build();
+    }
+
     private GraphQLFieldDefinition accessPointFieldDefinition() {
         return listFieldDefinition("accessPoints", "Access points associated with this description",
                 accessPointType, oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
@@ -737,6 +768,15 @@ public class GraphQLImpl {
                 .description(description)
                 .dataFetcher(dataFetcher)
                 .argument(Lists.newArrayList(arguments))
+                .build();
+    }
+
+    private GraphQLFieldDefinition relatedTypeFieldDefinition(String name, String description, String type) {
+        return newFieldDefinition()
+                .name(name)
+                .description(description)
+                .type(new GraphQLList(relatedType(new GraphQLTypeReference(type))))
+                .dataFetcher(relatedItemsDataFetcher(type))
                 .build();
     }
 
@@ -969,6 +1009,20 @@ public class GraphQLImpl {
             .fields(listStringAttrs(ContactInfo.values()))
             .build();
 
+    private GraphQLObjectType relatedType(GraphQLOutputType wrapped) {
+       return newObject()
+                .name("Related" + wrapped.getName())
+               .description("A related " + wrapped.getName() + " item")
+               .field(newFieldDefinition()
+                    .name("context")
+                    .description("The context of this relationship, either " +
+                            "as a type of access point or free text")
+                   .type(GraphQLString)
+                    .build())
+               .field(relatedItemsItemFieldDefinition(wrapped))
+               .build();
+    }
+
     private final GraphQLObjectType documentaryUnitDescriptionType = newObject()
             .name(Entities.DOCUMENTARY_UNIT_DESCRIPTION)
             .description("An archival description")
@@ -1070,6 +1124,12 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     oneToManyRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getAncestors())))
             .fields(linksAndAnnotationsFields())
+            .field(relatedTypeFieldDefinition("relatedHistoricalAgents","Related historical agent items",
+                    Entities.HISTORICAL_AGENT))
+            .field(relatedTypeFieldDefinition("relatedConcepts","Related concept items",
+                    Entities.CVOC_CONCEPT))
+            .field(relatedTypeFieldDefinition("relatedDocumentaryUnits","Related documentary unit items",
+                    Entities.DOCUMENTARY_UNIT))
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();

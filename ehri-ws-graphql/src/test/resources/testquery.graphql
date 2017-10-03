@@ -80,6 +80,12 @@ query test {
                 ...desc
             }
         }
+        relatedHistoricalAgents {
+            context
+            item {
+                id
+            }
+        }
     }
 
     c4: DocumentaryUnit(id: "c4") {
