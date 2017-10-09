@@ -184,12 +184,10 @@ public class ImportResource extends AbstractResource {
      * Import a set of EAD files. The POST body can be one of:
      * <ul>
      * <li>a single EAD file</li>
-     * <li>multiple EAD files in an archive</li>
+     * <li>multiple EAD files in an archive such as tar, tar.gz, or zip</li>
      * <li>a plain test file containing local file paths</li>
      * </ul>
      * The Content-Type header is used to distinguish the contents.
-     * <br>
-     * <b>Note:</b> The archive does not currently support compression.
      * <p>
      * The way you would run with would typically be:
      * <p>
