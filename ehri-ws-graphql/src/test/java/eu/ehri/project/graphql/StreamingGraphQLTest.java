@@ -41,12 +41,15 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
-            GraphQLSchema schema = new GraphQLImpl(api(validUser)).getSchema();
+            GraphQLSchema schema = new GraphQLImpl(api(validUser), true).getSchema();
             StreamingGraphQL ql = new StreamingGraphQL(schema);
             ql.execute(generator, testQuery, null, null, Collections.emptyMap());
         }
         JsonNode json = mapper.readTree(out.toByteArray());
+        //System.out.println(json);
         assertEquals("c1", json.path("firstTwo").path("items")
+                .path(0).path("id").textValue());
+        assertEquals("c4", json.path("topLevelDocumentaryUnits").path("items")
                 .path(0).path("id").textValue());
     }
 }
