@@ -111,6 +111,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
+        // FIXME: Ugly: have to reinitialise the schema in this transaction
+        // otherwise iterables will be invalid.
         final StreamingGraphQL ql = new StreamingGraphQL(schema);
         final Document document = ql.parseAndValidate(q.getQuery());
         return outputStream -> {
@@ -118,9 +120,11 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                  final JsonGenerator generator = jsonFactory
                          .createGenerator(outputStream)
                          .useDefaultPrettyPrinter()) {
+                final StreamingGraphQL ql2 = new StreamingGraphQL(
+                        new GraphQLImpl(api(), true).getSchema());
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
-                ql.execute(generator, document, q.getOperationName(),
+                ql2.execute(generator, document, q.getOperationName(),
                         null, q.getVariablesAsMap());
                 generator.writeEndObject();
                 tx.success();
