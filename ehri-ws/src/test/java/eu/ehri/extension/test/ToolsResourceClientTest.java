@@ -144,4 +144,23 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
         assertStatus(OK, response);
         assertEquals("a1,a2,2\n", out);
     }
+
+    @Test
+    public void testRename() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "rename"));
+        ClientResponse response = resource
+                .accept("text/csv")
+                .post(ClientResponse.class,
+                        Table.of(ImmutableList.of(
+                                // Data ordered child-first to
+                                // text lexical re-ordering and
+                                // correct hierarchical ID generation
+                                ImmutableList.of("c3", "test2"),
+                                ImmutableList.of("c2", "test1"))));
+        Table out = response.getEntity(Table.class);
+        assertStatus(OK, response);
+        assertEquals(ImmutableList.of(
+                ImmutableList.of("c2", "nl-r1-c1-test1"),
+                ImmutableList.of("c3", "nl-r1-c1-test1-test2")), out.rows());
+    }
 }

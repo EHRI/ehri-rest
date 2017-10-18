@@ -20,6 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
@@ -523,11 +524,15 @@ public class ToolsResource extends AbstractResource {
     /**
      * Takes a CSV file containing two columns: the global id, and a new local
      * identifier to rename an item to. A new global ID will be regenerated.
+     * <p>
+     * Input rows will be re-sorted lexically to ensure correct generation
+     * of dependent parent/child hierarchical IDs and output order will
+     * reflect this.
      *
-     * @param mapping a comma-separated CSV file, including headers, with
-     *                the headers being 'id' and 'local'.
+     * @param mapping a comma-separated CSV file, exluding headers.
      * @return CSV data containing two columns: the old global ID, and
-     * a newly generated global ID, derived from the new local identifier.
+     * a newly generated global ID, derived from the new local identifier,
+     * with ordering corresponding to lexically-ordered input data.
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
@@ -536,9 +541,14 @@ public class ToolsResource extends AbstractResource {
     public Table rename(Table mapping)
             throws IdRegenerator.IdCollisionError, DeserializationError {
         try (final Tx tx = beginTx()) {
-            List<List<String>> done = Lists.newArrayList();
             IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(true);
-            for (List<String> row : mapping.rows()) {
+            // Sorting the toString of each item *should* put hierarchical lists
+            // in parent-child order, which is necessary to have ID-regeneration work
+            // correctly.
+            List<List<String>> sorted = Ordering.usingToString().sortedCopy(mapping.rows());
+
+            List<List<String>> done = Lists.newArrayList();
+            for (List<String> row : sorted) {
                 if (row.size() != 2) {
                     throw new DeserializationError(
                             "Invalid table data: must contain 2 columns only");
