@@ -1,0 +1,9 @@
+query dates {
+    DatePeriod(from: 1929, to: 1940) {
+        docs {
+            items {
+                id
+            }
+        }
+    }
+}

@@ -51,7 +51,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     public ExecutionResult describe() throws Exception {
         try (final Tx tx = beginTx()) {
-            GraphQLSchema schema = new GraphQLImpl(api()).getSchema();
+            GraphQLSchema schema = new GraphQLImpl(manager, api()).getSchema();
             tx.success();
             return new GraphQL(schema).execute(IntrospectionQuery.INTROSPECTION_QUERY);
         }
@@ -70,7 +70,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     public Response query(GraphQLQuery q) throws Exception {
         try (final Tx tx = beginTx()) {
             boolean stream = isStreaming();
-            GraphQLSchema schema = new GraphQLImpl(api(), stream).getSchema();
+            GraphQLSchema schema = new GraphQLImpl(manager, api(), stream).getSchema();
             Object data = stream ? lazyExecution(schema, q) : strictExecution(schema, q);
             tx.success();
             return Response.ok(data).build();
@@ -122,7 +122,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                          .createGenerator(outputStream)
                          .useDefaultPrettyPrinter()) {
                 final StreamingGraphQL ql2 = new StreamingGraphQL(
-                        new GraphQLImpl(api(), true).getSchema());
+                        new GraphQLImpl(manager, api(), true).getSchema());
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
                 ql2.execute(generator, q.getQuery(), document, q.getOperationName(),

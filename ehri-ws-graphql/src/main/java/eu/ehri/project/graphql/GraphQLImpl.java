@@ -24,9 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.core.Finder;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.CountryInfo;
 import eu.ehri.project.definitions.DefinitionList;
@@ -42,6 +45,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Country;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -62,6 +66,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
@@ -87,6 +92,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static graphql.Scalars.GraphQLBigDecimal;
 import static graphql.Scalars.GraphQLBoolean;
@@ -122,16 +129,18 @@ public class GraphQLImpl {
     private static final int DEFAULT_LIST_LIMIT = 40;
     private static final int MAX_LIST_LIMIT = 100;
 
+    private final GraphManager manager;
     private final Api _api;
     private final boolean stream;
 
-    public GraphQLImpl(Api api, boolean stream) {
+    public GraphQLImpl(GraphManager manager, Api api, boolean stream) {
+        this.manager = manager;
         this._api = api;
         this.stream = stream;
     }
 
-    public GraphQLImpl(Api api) {
-        this(api, false);
+    public GraphQLImpl(GraphManager manager, Api api) {
+        this(manager, api, false);
     }
 
     private Api api() {
@@ -355,6 +364,32 @@ public class GraphQLImpl {
             } else {
                 return Lists.newArrayList(obj);
             }
+        };
+    }
+
+    private final DataFetcher argDataFetcher = DataFetchingEnvironment::getArguments;
+
+    private DataFetcher getItemsWithDates(String type) {
+        return environment -> {
+            Map<String, Object> args = (Map<String, Object>) environment.getSource();
+            final String from = (String) args.get("from");
+            final String to = (String) args.get("to");
+
+            return connectionDataFetcher(() -> {
+                Iterable<Vertex> vertices = manager.getVertices(
+                        Finder.newFinder(EntityClass.DATE_PERIOD)
+                                .withPredicate(Ontology.DATE_PERIOD_START_DATE, Finder.Op.GTE, from)
+                                .withPredicate(Ontology.DATE_PERIOD_END_DATE, Finder.Op.LTE, to)
+                                .build());
+                Iterable<DatePeriod> datePeriods = manager.getGraph()
+                        .frameVertices(vertices, DatePeriod.class);
+                Stream<Entity> docs = StreamSupport
+                        .stream(datePeriods.spliterator(), false)
+                        .map(d -> d.getEntity().as(Description.class).getEntity())
+                        .filter(e -> Objects.nonNull(e) && type.equals(e.getType()))
+                        .map(e -> e.as(Entity.class));
+                return docs::iterator;
+            }).get(environment);
         };
     }
 
@@ -764,8 +799,8 @@ public class GraphQLImpl {
 
     private TypeResolver describedTypeResolver = new TypeResolver() {
         @Override
-        public GraphQLObjectType getType(Object item) {
-            Entity entity = (Entity) item;
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Entity entity = (Entity) env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT:
                     return documentaryUnitType;
@@ -1118,9 +1153,35 @@ public class GraphQLImpl {
             new GraphQLTypeReference(Entities.LINK),
             "links", "A list of links");
 
+    private GraphQLObjectType datePeriodQueryType(String name, String description, GraphQLOutputType type) {
+        return newObject()
+                .name(Entities.DATE_PERIOD)
+                .description("Items created within the given date range")
+                .field(connectionFieldDefinition(name, description,
+                        type, getItemsWithDates(type.getName())))
+                .build();
+    }
+
     private GraphQLObjectType queryType() {
         return newObject()
                 .name("Root")
+
+                .field(newFieldDefinition()
+                        .name(Entities.DATE_PERIOD + "Query")
+                        .description("Query items within a date period")
+                        .type(newObject()
+                            .name(Entities.DATE_PERIOD + "Query")
+                            .description("Items created within the given date range")
+                            .field(connectionFieldDefinition("docs", "Docs",
+                                    documentaryUnitType, getItemsWithDates(Entities.DOCUMENTARY_UNIT)))
+                            .field(connectionFieldDefinition("agents", "Agents",
+                                    historicalAgentType, getItemsWithDates(Entities.HISTORICAL_AGENT)))
+                            .build()
+                        )
+                        .dataFetcher(argDataFetcher)
+                        .argument(new GraphQLArgument("from", "From", GraphQLString, ""))
+                        .argument(new GraphQLArgument("to", "To", GraphQLString, ""))
+                        .build())
 
                 // Single item types...
                 .field(itemFieldDefinition(Entities.DOCUMENTARY_UNIT, "Fetch a single documentary unit",
