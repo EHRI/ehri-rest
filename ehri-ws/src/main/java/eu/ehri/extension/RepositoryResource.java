@@ -186,6 +186,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 if (!Entities.DOCUMENTARY_UNIT.equals(accessible.getType())) {
                     throw new RuntimeException("Bundle is not a documentary unit: " + accessible.getId());
                 }
+                accessible.setPermissionScope(repository);
                 repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
             };
             ImportLog log = new BatchOperations(graph, repository, true,
