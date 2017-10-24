@@ -11,11 +11,21 @@ import static org.junit.Assert.assertTrue;
 public class GraphQLImplTest extends AbstractFixtureTest {
     @Test
     public void testGetSchema() throws Exception {
-        GraphQLImpl graphQL = new GraphQLImpl(anonApi());
+        GraphQLImpl graphQL = new GraphQLImpl(manager, anonApi());
         GraphQLSchema schema = graphQL.getSchema();
         String testQuery = readResourceFileAsString("testquery.graphql");
         ExecutionResult result = new GraphQL(schema)
                 .execute(testQuery);
         assertTrue(result.getErrors().isEmpty());
+    }
+
+    @Test
+    public void testDateQuery() throws Exception {
+        GraphQLImpl graphQL = new GraphQLImpl(manager, anonApi());
+        GraphQLSchema schema = graphQL.getSchema();
+        String testQuery = readResourceFileAsString("testquery-dates.graphql");
+        ExecutionResult result = new GraphQL(schema)
+                .execute(testQuery);
+        System.out.println(result.getData());
     }
 }

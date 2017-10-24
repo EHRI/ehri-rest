@@ -11,6 +11,7 @@ import com.tinkerpop.blueprints.util.DefaultGraphQuery;
 import com.tinkerpop.blueprints.util.ExceptionFactory;
 import com.tinkerpop.blueprints.util.PropertyFilteredIterable;
 import com.tinkerpop.blueprints.util.StringFactory;
+import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationConverter;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -21,6 +22,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
@@ -202,6 +204,16 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         return new Neo4j2VertexIterable(wrap, this);
     }
 
+    public CloseableIterable<Vertex> getVerticesByQuery(final String query, final Map<String, Object> params) {
+        ResourceIterable<Node> wrap = () -> {
+            autoStartTransaction(false);
+            return rawGraph
+                    .execute(query, params)
+                    .columnAs("v");
+        };
+        return new Neo4j2VertexIterable(wrap, this);
+    }
+
     @Override
     public Iterable<Vertex> getVertices(String key, Object value) {
         this.autoStartTransaction(false);
@@ -358,7 +370,11 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         return new DefaultGraphQuery(this);
     }
 
-    public Iterator<Map<String, Object>> query(String query, Map<String, Object> params) {
-        return rawGraph.execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+    public CloseableIterable<Map<String, Object>> query(String query, Map<String, Object> params) {
+        ResourceIterable<Map<String, Object>> wrap = () -> {
+            autoStartTransaction(false);
+            return rawGraph.execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+        };
+        return new WrappingCloseableIterable<>(wrap);
     }
 }

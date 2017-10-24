@@ -19,12 +19,17 @@
 
 package eu.ehri.project.core.impl;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.Finder;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
+import eu.ehri.project.core.impl.neo4j.Neo4j2VertexIterable;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
@@ -32,12 +37,18 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterable;
+import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -47,7 +58,7 @@ import java.util.NoSuchElementException;
  */
 public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> {
 
-    private final static Logger logger = org.slf4j.LoggerFactory.getLogger(Neo4jGraphManager.class);
+    private final static Logger logger = LoggerFactory.getLogger(Neo4jGraphManager.class);
 
     public Neo4jGraphManager(FramedGraph<T> graph) {
         super(graph);
@@ -82,6 +93,13 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
             EntityClass type) {
         return graph.getBaseGraph().getVerticesByLabelKeyValue(type.getName(),
                 key, value);
+    }
+
+    @Override
+    public CloseableIterable<Vertex> getVertices(Finder finder) {
+        logger.trace("Cypher query: {} -> {}", toQuery(finder), parameters(finder));
+        return graph.getBaseGraph()
+                .getVerticesByQuery(toQuery(finder), parameters(finder));
     }
 
     @Override
@@ -142,12 +160,12 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
                 .on(EntityType.TYPE_KEY)
                 .create();
 
-        // Create an index on each mandatory property and
+        // Create an index on each property and
         // a unique constraint on unique properties.
         for (EntityClass cls : EntityClass.values()) {
-            Collection<String> mandPropertyKeys = ClassUtils.getMandatoryPropertyKeys(cls.getJavaClass());
-            for (String prop : mandPropertyKeys) {
-                logger.trace("Creating index on mandatory property: {} -> {}",
+            Collection<String> propertyKeys = ClassUtils.getPropertyKeys(cls.getJavaClass());
+            for (String prop : propertyKeys) {
+                logger.trace("Creating index on property: {} -> {}",
                         cls.getName(), prop);
                 schema.indexFor(Label.label(cls.getName()))
                         .on(prop)
@@ -162,6 +180,51 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
                         .assertPropertyIsUnique(unique)
                         .create();
             }
+        }
+    }
+
+    private Map<String, Object> parameters(Finder finder) {
+        Map<String, Object> p = Maps.newHashMap();
+        for (int i = 0; i < finder.getPredicates().size(); i++) {
+            p.put("v" + (i + 1), finder.getPredicates().get(i).value);
+        }
+        return p;
+    }
+
+    private String toQuery(Finder finder) {
+        Map<String, String> keys = parameterKeys(finder);
+        String s = "MATCH (v:" + finder.getType().getName() + ")\n";
+        List<String> filters = Lists.newArrayList();
+        for (int i = 0; i < finder.getPredicates().size(); i++) {
+            Finder.Predicate p = finder.getPredicates().get(i);
+            String k = p.property + p.op + i;
+            filters.add("v." + p.property + " " + opToCypher(p.op) + " {" + keys.get(k) + "}");
+        }
+        String q = filters.isEmpty() ? "" : "WHERE " + Joiner.on("\n  AND ").join(filters) + "\n";
+        return s + q + "RETURN v";
+    }
+
+    private Map<String, String> parameterKeys(Finder finder) {
+        Map<String, String> p = Maps.newHashMap();
+        for (int i = 0; i < finder.getPredicates().size(); i++) {
+            Finder.Predicate predicate = finder.getPredicates().get(i);
+            p.put(predicate.property + predicate.op + i, "v" + (i+1));
+        }
+        return p;
+    }
+
+    private String opToCypher(Finder.Op op) {
+        switch (op) {
+            case STARTS_WITH: return "STARTS WITH";
+            case ENDS_WITH: return "ENDS WITH";
+            case EQ: return "=";
+            case GT: return ">";
+            case LT: return "<";
+            case GTE: return ">=";
+            case LTE: return "<=";
+            case NE: return "<>";
+            case CONTAINS: return "CONTAINS";
+            default: return "=";
         }
     }
 }
