@@ -19,19 +19,18 @@
 
 package eu.ehri.project.definitions;
 
-public enum Skos implements DefinitionList {
+public enum Geo implements DefinitionList {
 
-    uri,
-    seeAlso(true);
+    latitude,
+    longitude;
 
     private final Boolean multiValued;
 
-
-    Skos() {
+    Geo() {
         this(false);
     }
 
-    Skos(Boolean multiValued) {
+    Geo(Boolean multiValued) {
         this.multiValued = multiValued;
     }
 
