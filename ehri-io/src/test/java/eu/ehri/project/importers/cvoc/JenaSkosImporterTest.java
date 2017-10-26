@@ -21,15 +21,12 @@ package eu.ehri.project.importers.cvoc;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
-import com.tinkerpop.blueprints.CloseableIterable;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.definitions.Skos;
+import eu.ehri.project.definitions.SkosMultilingual;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.persistence.Serializer;
 import org.junit.Test;
 
 import java.util.Comparator;
@@ -156,7 +153,7 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         assertEquals(3, seeAlso.size());
         // Check all the altLabels are present...
         List<String> altLabels = larestan.getDescriptions().iterator().next()
-                .<List<String>>getProperty(Skos.altLabel.toString());
+                .<List<String>>getProperty(SkosMultilingual.altLabel.toString());
         assertEquals(15, altLabels.size());
     }
 }

@@ -21,7 +21,7 @@ package eu.ehri.project.importers.cvoc;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import eu.ehri.project.definitions.Skos;
+import eu.ehri.project.definitions.SkosMultilingual;
 import org.apache.jena.vocabulary.RDFS;
 
 import java.net.URI;
@@ -109,13 +109,13 @@ public enum SkosRDFVocabulary {
             .build();
 
     public static final Map<String, List<URI>> LANGUAGE_PROPS = ImmutableMap.<String, List<URI>>builder()
-            .put(Skos.altLabel.name(), Lists.newArrayList(ALT_LABEL.getURI()))
-            .put(Skos.hiddenLabel.name(), Lists.newArrayList(HIDDEN_LABEL.getURI()))
-            .put(Skos.definition.name(), Lists.newArrayList(DEFINITION.getURI()))
-            .put(Skos.scopeNote.name(), Lists.newArrayList(SCOPE_NOTE.getURI(),
+            .put(SkosMultilingual.altLabel.name(), Lists.newArrayList(ALT_LABEL.getURI()))
+            .put(SkosMultilingual.hiddenLabel.name(), Lists.newArrayList(HIDDEN_LABEL.getURI()))
+            .put(SkosMultilingual.definition.name(), Lists.newArrayList(DEFINITION.getURI()))
+            .put(SkosMultilingual.scopeNote.name(), Lists.newArrayList(SCOPE_NOTE.getURI(),
                     URI.create("http://www.w3.org/2000/01/rdf-schema#comment")))
-            .put(Skos.note.name(), Lists.newArrayList(NOTE.getURI()))
-            .put(Skos.editorialNote.name(), Lists.newArrayList(EDITORIAL_NOTE.getURI()))
+            .put(SkosMultilingual.note.name(), Lists.newArrayList(NOTE.getURI()))
+            .put(SkosMultilingual.editorialNote.name(), Lists.newArrayList(EDITORIAL_NOTE.getURI()))
             .build();
 
     private final URI uri;

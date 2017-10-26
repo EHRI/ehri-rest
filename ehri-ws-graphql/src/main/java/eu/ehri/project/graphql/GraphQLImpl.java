@@ -35,6 +35,7 @@ import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Isdiah;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.definitions.Skos;
+import eu.ehri.project.definitions.SkosMultilingual;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
@@ -82,6 +83,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static graphql.Scalars.GraphQLBigDecimal;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
@@ -661,10 +663,12 @@ public class GraphQLImpl {
     private static final List<GraphQLFieldDefinition> repositoryDescriptionListFields = listStringAttrs(Isdiah.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionNullFields = nullStringAttrs(Isaar.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionListFields = listStringAttrs(Isaar.values());
-    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(Skos.values());
-    private static final List<GraphQLFieldDefinition> conceptDescriptionListFields = listStringAttrs(Skos.values());
     private static final List<GraphQLFieldDefinition> countryDescriptionNullFields = nullStringAttrs(CountryInfo.values());
     private static final List<GraphQLFieldDefinition> countryDescriptionListFields = listStringAttrs(CountryInfo.values());
+    private static final List<GraphQLFieldDefinition> conceptNullFields = nullStringAttrs(Skos.values());
+    private static final List<GraphQLFieldDefinition> conceptListFields = listStringAttrs(Skos.values());
+    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(SkosMultilingual.values());
+    private static final List<GraphQLFieldDefinition> conceptDescriptionListFields = listStringAttrs(SkosMultilingual.values());
 
 
     // Interfaces and type resolvers...
@@ -969,6 +973,8 @@ public class GraphQLImpl {
             .description("A concept")
             .fields(entityFields())
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The concept's local identifier"))
+            .fields(conceptNullFields)
+            .fields(conceptListFields)
             .field(descriptionsFieldDefinition(conceptDescriptionType))
             .field(singleDescriptionFieldDefinition(conceptDescriptionType))
             .field(listFieldDefinition("related", "Related concepts, as a list",
