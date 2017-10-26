@@ -535,11 +535,13 @@ public class GraphQLImpl {
                     .name(Geo.latitude.name())
                     .description(Geo.latitude.getDescription())
                     .type(GraphQLBigDecimal)
+                    .dataFetcher(attributeDataFetcher)
                     .build(),
             newFieldDefinition()
                     .name(Geo.longitude.name())
                     .description(Geo.longitude.getDescription())
                     .type(GraphQLBigDecimal)
+                    .dataFetcher(attributeDataFetcher)
                     .build()
     );
 
