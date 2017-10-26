@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 public class GraphQLQuery {
@@ -80,9 +81,10 @@ public class GraphQLQuery {
 
     private static Map<String, Object> deserializeVariables(String s) {
         try {
-            return mapper.readValue(s == null ? "" : s, ref);
+            Map<String, Object> value = mapper.readValue(s == null ? "" : s, ref);
+            return value != null ? value : Collections.emptyMap();
         } catch (IOException e) {
-            return Maps.newHashMap();
+            return Collections.emptyMap();
         }
     }
 }

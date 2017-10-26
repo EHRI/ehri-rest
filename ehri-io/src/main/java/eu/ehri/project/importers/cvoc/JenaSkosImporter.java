@@ -32,7 +32,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.definitions.Skos;
+import eu.ehri.project.definitions.SkosMultilingual;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -543,7 +543,7 @@ public final class JenaSkosImporter implements SkosImporter {
                     .sorted()
                     .collect(Collectors.toList());
             if (!all.isEmpty()) {
-                descriptions.set(0, descriptions.get(0).withDataValue(Skos.altLabel.toString(), all));
+                descriptions.set(0, descriptions.get(0).withDataValue(SkosMultilingual.altLabel.toString(), all));
             }
         }
 

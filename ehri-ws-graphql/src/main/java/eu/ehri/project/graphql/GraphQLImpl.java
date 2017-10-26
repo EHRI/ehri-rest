@@ -20,6 +20,7 @@
 package eu.ehri.project.graphql;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,11 +31,13 @@ import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.CountryInfo;
 import eu.ehri.project.definitions.DefinitionList;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Geo;
 import eu.ehri.project.definitions.Isaar;
 import eu.ehri.project.definitions.IsadG;
 import eu.ehri.project.definitions.Isdiah;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.definitions.Skos;
+import eu.ehri.project.definitions.SkosMultilingual;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
@@ -82,6 +85,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static graphql.Scalars.GraphQLBigDecimal;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
@@ -440,14 +444,14 @@ public class GraphQLImpl {
                 ).collect(Collectors.toList());
     }
 
-    private static GraphQLFieldDefinition idField = newFieldDefinition()
+    private static final GraphQLFieldDefinition idField = newFieldDefinition()
             .type(GraphQLNonNullString)
             .name(Bundle.ID_KEY)
             .description("The item's EHRI id")
             .dataFetcher(idDataFetcher)
             .build();
 
-    private static GraphQLFieldDefinition typeField = newFieldDefinition()
+    private static final GraphQLFieldDefinition typeField = newFieldDefinition()
             .type(new GraphQLNonNull(GraphQLString))
             .name(Bundle.TYPE_KEY)
             .description("The item's EHRI type")
@@ -523,9 +527,23 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private static List<GraphQLFieldDefinition> entityFields() {
-        return Lists.newArrayList(idField, typeField);
-    }
+    private static final List<GraphQLFieldDefinition> entityFields =
+            ImmutableList.of(idField, typeField);
+
+    private static final List<GraphQLFieldDefinition> geoFields = ImmutableList.of(
+            newFieldDefinition()
+                    .name(Geo.latitude.name())
+                    .description(Geo.latitude.getDescription())
+                    .type(GraphQLBigDecimal)
+                    .dataFetcher(attributeDataFetcher)
+                    .build(),
+            newFieldDefinition()
+                    .name(Geo.longitude.name())
+                    .description(Geo.longitude.getDescription())
+                    .type(GraphQLBigDecimal)
+                    .dataFetcher(attributeDataFetcher)
+                    .build()
+    );
 
     private static List<GraphQLFieldDefinition> descriptionFields() {
         return Lists.newArrayList(
@@ -661,10 +679,12 @@ public class GraphQLImpl {
     private static final List<GraphQLFieldDefinition> repositoryDescriptionListFields = listStringAttrs(Isdiah.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionNullFields = nullStringAttrs(Isaar.values());
     private static final List<GraphQLFieldDefinition> historicalAgentDescriptionListFields = listStringAttrs(Isaar.values());
-    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(Skos.values());
-    private static final List<GraphQLFieldDefinition> conceptDescriptionListFields = listStringAttrs(Skos.values());
     private static final List<GraphQLFieldDefinition> countryDescriptionNullFields = nullStringAttrs(CountryInfo.values());
     private static final List<GraphQLFieldDefinition> countryDescriptionListFields = listStringAttrs(CountryInfo.values());
+    private static final List<GraphQLFieldDefinition> conceptNullFields = nullStringAttrs(Skos.values());
+    private static final List<GraphQLFieldDefinition> conceptListFields = listStringAttrs(Skos.values());
+    private static final List<GraphQLFieldDefinition> conceptDescriptionNullFields = nullStringAttrs(SkosMultilingual.values());
+    private static final List<GraphQLFieldDefinition> conceptDescriptionListFields = listStringAttrs(SkosMultilingual.values());
 
 
     // Interfaces and type resolvers...
@@ -744,7 +764,7 @@ public class GraphQLImpl {
     private final GraphQLInterfaceType entityInterface = newInterface()
             .name("Entity")
             .description("An entity")
-            .fields(entityFields())
+            .fields(entityFields)
             .typeResolver(entityTypeResolver)
             .build();
 
@@ -758,7 +778,7 @@ public class GraphQLImpl {
     private final GraphQLInterfaceType describedInterface = newInterface()
             .name("Described")
             .description("An item with multi-lingual descriptions")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(singleDescriptionFieldDefinition(descriptionInterface))
             .field(descriptionsFieldDefinition(descriptionInterface))
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
@@ -770,7 +790,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType entityType = newObject()
             .name("Entity")
             .description("An EHRI entity")
-            .fields(entityFields())
+            .fields(entityFields)
             .withInterface(entityInterface)
             .build();
 
@@ -867,7 +887,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description("A repository / archival institution")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
             .field(itemCountFieldDefinition(r -> r.as(Repository.class).getChildCount()))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
@@ -889,7 +909,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType documentaryUnitType = newObject()
             .name(Entities.DOCUMENTARY_UNIT)
             .description("An archival unit")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
             .field(descriptionsFieldDefinition(documentaryUnitDescriptionType))
             .field(singleDescriptionFieldDefinition(documentaryUnitDescriptionType))
@@ -916,7 +936,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType historicalAgentType = newObject()
             .name(Entities.HISTORICAL_AGENT)
             .description("An historical agent")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The historical agent's EHRI identifier"))
             .field(singleDescriptionFieldDefinition(historicalAgentDescriptionType))
             .field(descriptionsFieldDefinition(historicalAgentDescriptionType))
@@ -928,7 +948,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType authoritativeSetType = newObject()
             .name(Entities.AUTHORITATIVE_SET)
             .description("An authority set")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The set's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The set's name"))
             .field(nullAttr("description", "The item's description"))
@@ -944,7 +964,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType countryType = newObject()
             .name(Entities.COUNTRY)
             .description("A country")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The country's ISO639-2 code"))
             .field(newFieldDefinition()
                     .name(Ontology.NAME_KEY)
@@ -967,8 +987,11 @@ public class GraphQLImpl {
     private final GraphQLObjectType conceptType = newObject()
             .name(Entities.CVOC_CONCEPT)
             .description("A concept")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The concept's local identifier"))
+            .fields(conceptNullFields)
+            .fields(conceptListFields)
+            .fields(geoFields)
             .field(descriptionsFieldDefinition(conceptDescriptionType))
             .field(singleDescriptionFieldDefinition(conceptDescriptionType))
             .field(listFieldDefinition("related", "Related concepts, as a list",
@@ -994,7 +1017,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType vocabularyType = newObject()
             .name(Entities.CVOC_VOCABULARY)
             .description("A vocabulary")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The vocabulary's local identifier"))
             .field(nonNullAttr(Ontology.NAME_KEY, "The vocabulary's name"))
             .field(nullAttr("description", "The item's description"))
@@ -1009,7 +1032,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType annotationType = newObject()
             .name(Entities.ANNOTATION)
             .description("An annotation")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, "The text of the annotation"))
             .field(listFieldDefinition("targets", "The annotation's target(s)", entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
@@ -1022,7 +1045,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType linkType = newObject()
             .name(Entities.LINK)
             .description("A link")
-            .fields(entityFields())
+            .fields(entityFields)
             .field(nonNullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
             .field(listFieldDefinition("targets", "The annotation's targets", entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))
