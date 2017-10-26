@@ -532,12 +532,12 @@ public class GraphQLImpl {
 
     private static final List<GraphQLFieldDefinition> geoFields = ImmutableList.of(
             newFieldDefinition()
-                    .name(Geo.latitude.getName())
+                    .name(Geo.latitude.name())
                     .description(Geo.latitude.getDescription())
                     .type(GraphQLBigDecimal)
                     .build(),
             newFieldDefinition()
-                    .name(Geo.longitude.getName())
+                    .name(Geo.longitude.name())
                     .description(Geo.longitude.getDescription())
                     .type(GraphQLBigDecimal)
                     .build()

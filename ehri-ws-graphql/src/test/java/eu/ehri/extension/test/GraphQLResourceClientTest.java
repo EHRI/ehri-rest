@@ -220,6 +220,17 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
+    public void testGraphQLNullQueryVariable() throws Exception {
+        String testQuery = readResourceFileAsString("testquery.graphql");
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .entity(new GraphQLQuery(testQuery, "null", null))
+                .post(ClientResponse.class);
+        assertStatus(OK, response);
+    }
+
+    @Test
     public void testGraphQLStreaming() throws Exception {
         String testQuery = readResourceFileAsString("testquery.graphql");
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
