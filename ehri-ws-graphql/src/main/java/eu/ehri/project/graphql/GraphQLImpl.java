@@ -21,15 +21,17 @@ package eu.ehri.project.graphql;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
-import eu.ehri.project.core.Finder;
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.CountryInfo;
 import eu.ehri.project.definitions.DefinitionList;
@@ -45,7 +47,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Country;
-import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -53,6 +54,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
@@ -64,7 +66,10 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
+import graphql.GraphQLException;
 import graphql.TypeResolutionEnvironment;
+import graphql.language.StringValue;
+import graphql.schema.Coercing;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
@@ -79,6 +84,8 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.TypeResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
@@ -91,9 +98,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static graphql.Scalars.GraphQLBigDecimal;
 import static graphql.Scalars.GraphQLBoolean;
@@ -109,6 +115,8 @@ import static graphql.schema.GraphQLObjectType.newObject;
  * Implementation of a GraphQL schema over the API
  */
 public class GraphQLImpl {
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphQLImpl.class);
 
     private static final String SLICE_PARAM = "at";
     private static final String FIRST_PARAM = "first";
@@ -213,6 +221,42 @@ public class GraphQLImpl {
     private static GraphQLScalarType wrappedString(String name, String description) {
         return new GraphQLScalarType(name, description, GraphQLString.getCoercing());
     }
+
+    private static final GraphQLScalarType DatePrefixType = new GraphQLScalarType(
+            "DatePrefix", "A date prefix in YYYY-MM-DD format", new Coercing() {
+        private final Pattern pattern = Pattern.compile("\\d\\d\\d\\d(-\\d\\d(-\\d\\d)?)?");
+
+        private String convertImpl(Object input) {
+            System.out.println("Converting: " + input);
+            return input instanceof String && pattern.matcher((String) input).matches()
+                    ? (String) input
+                    : null;
+        }
+
+        @Override
+        public Object serialize(Object input) {
+            String result = convertImpl(input);
+            if (result == null) {
+                throw new GraphQLException("DatePrefix input '" + input + "' is invalid");
+            }
+            return result;
+        }
+
+        @Override
+        public Object parseValue(Object input) {
+            String result = convertImpl(input);
+            if (result == null) {
+                throw new GraphQLException("DatePrefix input '" + input + "' is invalid");
+            }
+            return result;
+        }
+
+        @Override
+        public Object parseLiteral(Object input) {
+            if (!(input instanceof StringValue)) return null;
+            return ((StringValue) input).getValue();
+        }
+    });
 
     private static final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
     private static final GraphQLScalarType CursorType = wrappedString("Cursor", "A connection cursor");
@@ -369,27 +413,60 @@ public class GraphQLImpl {
 
     private final DataFetcher argDataFetcher = DataFetchingEnvironment::getArguments;
 
+    // Horrific proof-of-concept implementation of querying
+    // via dates, using Cypher, with access control.
     private DataFetcher getItemsWithDates(String type) {
-        return environment -> {
-            Map<String, Object> args = (Map<String, Object>) environment.getSource();
-            final String from = (String) args.get("from");
-            final String to = (String) args.get("to");
+        return env -> {
+            Map<String, Object> args = (Map<String, Object>) env.getSource();
+            String from = (String) args.get("from");
+            String to = (String) args.get("to");
+            int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
+            int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
 
-            return connectionDataFetcher(() -> {
-                Iterable<Vertex> vertices = manager.getVertices(
-                        Finder.newFinder(EntityClass.DATE_PERIOD)
-                                .withPredicate(Ontology.DATE_PERIOD_START_DATE, Finder.Op.GTE, from)
-                                .withPredicate(Ontology.DATE_PERIOD_END_DATE, Finder.Op.LTE, to)
-                                .build());
-                Iterable<DatePeriod> datePeriods = manager.getGraph()
-                        .frameVertices(vertices, DatePeriod.class);
-                Stream<Entity> docs = StreamSupport
-                        .stream(datePeriods.spliterator(), false)
-                        .map(d -> d.getEntity().as(Description.class).getEntity())
-                        .filter(e -> Objects.nonNull(e) && type.equals(e.getType()))
-                        .map(e -> e.as(Entity.class));
-                return docs::iterator;
-            }).get(environment);
+            Accessor accessor = api().accessor();
+            Neo4j2Graph ng = (Neo4j2Graph) manager.getGraph().getBaseGraph();
+
+            String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v:" + type + "),\n"
+                    + "       (a: UserProfile {__id:{accessor}})-[:belongsTo*]->(g)\n"
+                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
+                    + "    AND (NOT (v)-[:access]->()\n" +
+                    "        OR (v)-[:access]->(a)\n" +
+                    "        OR (v)-[:access]->(g))\n";
+
+            String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v:" + type + ")\n"
+                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
+                    + "    AND NOT (v)-[:access]->()\n";
+
+            Map<String, Object> params = ImmutableMap.of(
+                    "from", from != null ? from : "0",
+                    "to", to != null ? to : "a",
+                    "offset", offset,
+                    "limit", limit < 0 ? Integer.MAX_VALUE : limit,
+                    "accessor", accessor.getId()
+            );
+
+            String q = (accessor.isAnonymous() ? anonQ : authQ)
+                    + "RETURN v SKIP {offset} LIMIT {limit}\n";
+            logger.debug("Cypher: {}\nWhere: {}", q, params);
+
+            // FIXME: This iter isn't closed, but in practice closing the transaction
+            // should release its resources...
+            CloseableIterable<Vertex> verticesByQuery = ng.getVerticesByQuery(q, params);
+            Iterable<Entity> items = manager.getGraph().frameVertices(verticesByQuery, Entity.class);
+            boolean hasPrev = offset > 0;
+            // Create a list of edges, with the cursor taking into
+            // account each item's offset
+            final AtomicInteger index = new AtomicInteger();
+            Iterable<Map<String, Object>> edges = Iterables.transform(
+                    items, item -> mapOf(
+                            CURSOR, toBase64(String.valueOf(offset + index.getAndIncrement())),
+                            NODE, item
+                    ));
+
+            String prevCursor = toBase64(String.valueOf(offset - limit));
+            String nextCursor = toBase64(String.valueOf(offset + limit));
+
+            return connectionData(items, edges, nextCursor, hasPrev ? prevCursor : null);
         };
     }
 
@@ -1170,17 +1247,17 @@ public class GraphQLImpl {
                         .name(Entities.DATE_PERIOD + "Query")
                         .description("Query items within a date period")
                         .type(newObject()
-                            .name(Entities.DATE_PERIOD + "Query")
-                            .description("Items created within the given date range")
-                            .field(connectionFieldDefinition("docs", "Docs",
-                                    documentaryUnitType, getItemsWithDates(Entities.DOCUMENTARY_UNIT)))
-                            .field(connectionFieldDefinition("agents", "Agents",
-                                    historicalAgentType, getItemsWithDates(Entities.HISTORICAL_AGENT)))
-                            .build()
+                                .name(Entities.DATE_PERIOD + "Query")
+                                .description("Items created within the given date range")
+                                .field(connectionFieldDefinition("docs", "Docs",
+                                        documentaryUnitType, getItemsWithDates(Entities.DOCUMENTARY_UNIT)))
+                                .field(connectionFieldDefinition("agents", "Agents",
+                                        historicalAgentType, getItemsWithDates(Entities.HISTORICAL_AGENT)))
+                                .build()
                         )
                         .dataFetcher(argDataFetcher)
-                        .argument(new GraphQLArgument("from", "From", GraphQLString, ""))
-                        .argument(new GraphQLArgument("to", "To", GraphQLString, ""))
+                        .argument(newArgument().name("from").description("From").type(DatePrefixType).build())
+                        .argument(newArgument().name("to").description("To").type(DatePrefixType).build())
                         .build())
 
                 // Single item types...
