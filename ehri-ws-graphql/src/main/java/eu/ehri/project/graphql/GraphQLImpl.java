@@ -223,38 +223,24 @@ public class GraphQLImpl {
     }
 
     private static final GraphQLScalarType DatePrefixType = new GraphQLScalarType(
-            "DatePrefix", "A date prefix in YYYY-MM-DD format", new Coercing() {
+            "DatePrefix", "A date prefix in YYYY-MM-DD format", new Coercing<String, String>() {
         private final Pattern pattern = Pattern.compile("\\d\\d\\d\\d(-\\d\\d(-\\d\\d)?)?");
 
-        private String convertImpl(Object input) {
-            System.out.println("Converting: " + input);
-            return input instanceof String && pattern.matcher((String) input).matches()
-                    ? (String) input
-                    : null;
+        @Override
+        public String serialize(Object input) {
+            return input instanceof String ? (String)input : null;
         }
 
         @Override
-        public Object serialize(Object input) {
-            String result = convertImpl(input);
-            if (result == null) {
-                throw new GraphQLException("DatePrefix input '" + input + "' is invalid");
-            }
-            return result;
+        public String parseValue(Object input) {
+            return serialize(input);
         }
 
         @Override
-        public Object parseValue(Object input) {
-            String result = convertImpl(input);
-            if (result == null) {
-                throw new GraphQLException("DatePrefix input '" + input + "' is invalid");
-            }
-            return result;
-        }
-
-        @Override
-        public Object parseLiteral(Object input) {
+        public String parseLiteral(Object input) {
             if (!(input instanceof StringValue)) return null;
-            return ((StringValue) input).getValue();
+            String value = ((StringValue) input).getValue();
+            return pattern.matcher(value).matches() ? value : null;
         }
     });
 

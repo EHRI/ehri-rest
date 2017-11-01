@@ -123,6 +123,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                          .useDefaultPrettyPrinter()) {
                 final StreamingGraphQL ql2 = new StreamingGraphQL(
                         new GraphQLImpl(manager, api(), true).getSchema());
+                String tag = getCurrentActioner().getId() + "-" + System.currentTimeMillis();
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
                 ql2.execute(generator, q.getQuery(), document, q.getOperationName(),

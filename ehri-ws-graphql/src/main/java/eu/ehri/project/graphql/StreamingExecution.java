@@ -45,8 +45,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static graphql.execution.FieldCollectorParameters.newParameters;
 import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
+import static graphql.execution.FieldCollectorParameters.newParameters;
 
 
 public class StreamingExecution extends Execution {
