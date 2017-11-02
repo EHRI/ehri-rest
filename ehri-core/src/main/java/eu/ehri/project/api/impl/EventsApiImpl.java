@@ -70,8 +70,8 @@ public class EventsApiImpl implements EventsApi {
     private final Set<String> ids;
     private final Set<EntityClass> entityTypes;
     private final Set<EventTypes> eventTypes;
-    private final Optional<String> from;
-    private final Optional<String> to;
+    private final String from;
+    private final String to;
     private final Set<ShowType> showType;
     private final Aggregation aggregation;
 
@@ -97,8 +97,8 @@ public class EventsApiImpl implements EventsApi {
         private Set<String> ids = Sets.newHashSet();
         private Set<EntityClass> entityTypes = Sets.newHashSet();
         private Set<EventTypes> eventTypes = Sets.newHashSet();
-        private Optional<String> from = Optional.empty();
-        private Optional<String> to = Optional.empty();
+        private String from = null;
+        private String to = null;
         private Set<ShowType> showType = Sets.newHashSet();
         private Aggregation aggregation = Aggregation.strict;
 
@@ -149,12 +149,12 @@ public class EventsApiImpl implements EventsApi {
         }
 
         public Builder from(String from) {
-            this.from = Optional.ofNullable(from);
+            this.from = from;
             return this;
         }
 
         public Builder to(String to) {
-            this.to = Optional.ofNullable(to);
+            this.to = to;
             return this;
         }
 
@@ -195,8 +195,8 @@ public class EventsApiImpl implements EventsApi {
             Collection<String> ids,
             Collection<EntityClass> entityTypes,
             Collection<EventTypes> eventTypes,
-            Optional<String> from,
-            Optional<String> to,
+            String from,
+            String to,
             Collection<ShowType> showType,
             Aggregation aggregation) {
         this.graph = graph;
@@ -224,8 +224,8 @@ public class EventsApiImpl implements EventsApi {
                 Lists.<String>newArrayList(),
                 Lists.<EntityClass>newArrayList(),
                 Lists.<EventTypes>newArrayList(),
-                Optional.empty(),
-                Optional.empty(),
+                null,
+                null,
                 Lists.<ShowType>newArrayList(),
                 Aggregation.strict);
     }
@@ -427,17 +427,17 @@ public class EventsApiImpl implements EventsApi {
         }
 
         // Add from/to filters (depends on timestamp strings comparing the right way!
-        if (from.isPresent()) {
+        if (from != null) {
             pipe = pipe.filter(event -> {
                 String timestamp = event.getTimestamp();
-                return from.get().compareTo(timestamp) >= 0;
+                return from.compareTo(timestamp) >= 0;
             });
         }
 
-        if (to.isPresent()) {
+        if (to != null) {
             pipe = pipe.filter(event -> {
                 String timestamp = event.getTimestamp();
-                return to.get().compareTo(timestamp) <= 0;
+                return to.compareTo(timestamp) <= 0;
             });
         }
 

@@ -55,7 +55,7 @@ public final class QueryApiImpl implements QueryApi {
     private final int offset;
     private final int limit;
     private final SortedMap<String, Sort> sort;
-    private final Optional<Pair<String, Sort>> defaultSort;
+    private final Pair<String, Sort> defaultSort;
     private final SortedMap<String, Pair<FilterPredicate, Object>> filters;
     private final boolean stream;
 
@@ -72,7 +72,7 @@ public final class QueryApiImpl implements QueryApi {
             int offset,
             int limit,
             SortedMap<String, Sort> sort,
-            Optional<Pair<String, Sort>> defSort,
+            Pair<String, Sort> defSort,
             SortedMap<String, Pair<FilterPredicate, Object>> filters,
             boolean stream) {
         this.graph = graph;
@@ -91,8 +91,7 @@ public final class QueryApiImpl implements QueryApi {
      */
     public QueryApiImpl(FramedGraph<?> graph, Accessor accessor) {
         this(graph, accessor, 0, DEFAULT_LIMIT,
-                ImmutableSortedMap.of(), Optional
-                        .empty(), ImmutableSortedMap.of(), false);
+                ImmutableSortedMap.of(), null, ImmutableSortedMap.of(), false);
     }
 
     /**
@@ -104,7 +103,7 @@ public final class QueryApiImpl implements QueryApi {
         private int offset;
         private int limit = DEFAULT_LIMIT;
         private SortedMap<String, Sort> sort = ImmutableSortedMap.of();
-        private Optional<Pair<String, Sort>> defSort = Optional.empty();
+        private Pair<String, Sort> defSort = null;
         private SortedMap<String, Pair<FilterPredicate, Object>> filters = ImmutableSortedMap.of();
         private boolean stream;
 
@@ -346,19 +345,11 @@ public final class QueryApiImpl implements QueryApi {
         }
     }
 
-    private <EE> GremlinPipeline<EE, Vertex> setOrder(
-            GremlinPipeline<EE, Vertex> pipe) {
-        if (sort.isEmpty()) {
-            if (defaultSort.isPresent()) {
-                return pipe
-                        .order(getOrderFunction(new ImmutableSortedMap.Builder<String, Sort>(
-                                Ordering.natural().nullsLast()).put(
-                                defaultSort.get().getA(),
-                                defaultSort.get().getB()).build()));
-            }
-            return pipe;
-        }
-        return pipe.order(getOrderFunction(sort));
+    private <EE> GremlinPipeline<EE, Vertex> setOrder(GremlinPipeline<EE, Vertex> pipe) {
+        ImmutableSortedMap<String, Sort> fallback = defaultSort != null
+                ? ImmutableSortedMap.of(defaultSort.getA(), defaultSort.getB())
+                : ImmutableSortedMap.of();
+        return pipe.order(getOrderFunction(sort.isEmpty() ? fallback : sort));
     }
 
     private <EE> GremlinPipeline<EE, Vertex> setFilters(GremlinPipeline<EE, Vertex> pipe) {
