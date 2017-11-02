@@ -260,31 +260,6 @@ public class GraphManagerTest {
             manager.setProperty(vertex, "", "foo");
         }
 
-        @Test
-        public void testFindVerticesByFinder() throws Exception {
-            Map<String, String> data = Maps
-                    .newHashMap(ImmutableMap.of(TEST_KEY, TEST_VALUE));
-            Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
-
-            try(CloseableIterable<Vertex> it = manager.getVertices(Finder.newFinder(TEST_TYPE)
-                    .withPredicate(TEST_KEY, Finder.Op.STARTS_WITH, "t")
-                    .withPredicate(TEST_KEY, Finder.Op.ENDS_WITH, "e")
-                    .withPredicate(TEST_KEY, Finder.Op.CONTAINS, "tV")
-                    .withPredicate(TEST_KEY, Finder.Op.EQ, TEST_VALUE)
-                    .withPredicate(TEST_KEY, Finder.Op.GT, "s")
-                    .withPredicate(TEST_KEY, Finder.Op.LT, "u")
-                    .build())) {
-                assertEquals(TEST_VALUE, it.iterator().next().getProperty(TEST_KEY));
-            }
-            try(CloseableIterable<Vertex> it = manager.getVertices(Finder.newFinder(TEST_TYPE)
-                    .withPredicate(TEST_KEY, Finder.Op.STARTS_WITH, "t")
-                    .withPredicate(TEST_KEY, Finder.Op.ENDS_WITH, "e")
-                    .withPredicate(TEST_KEY, Finder.Op.CONTAINS, "OOPS")
-                    .build())) {
-                assertFalse(it.iterator().hasNext());
-            }
-        }
-
         @Test(expected = IllegalArgumentException.class)
         public void testSetPropertyWithBadPropArg() throws Exception {
             Map<String, String> data = Maps
