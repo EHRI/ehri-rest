@@ -1,5 +1,6 @@
 package eu.ehri.project.core.impl.neo4j;
 
+import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Features;
@@ -204,12 +205,24 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         return new Neo4j2VertexIterable(wrap, this);
     }
 
-    public CloseableIterable<Vertex> getVerticesByQuery(final String query, final Map<String, Object> params) {
+    /**
+     * Get an iterable of vertices via a Cypher query.
+     *
+     * @param query  the cypher query
+     * @param params a map of parameters
+     * @param column the name of the column from which to extract the vertices. The column
+     *               must be a node or a class cast exception will be thrown when the
+     *               iterable is accessed
+     * @return an iterable of vertices
+     */
+    public CloseableIterable<Vertex> getVerticesByQuery(final String query, final Map<String, Object> params, String column) {
+        Preconditions.checkNotNull(query, "Query cannot be null");
+        Preconditions.checkNotNull(column, "Column cannot be null");
         ResourceIterable<Node> wrap = () -> {
             autoStartTransaction(false);
             return rawGraph
-                    .execute(query, params)
-                    .columnAs("v");
+                    .execute(query, params != null ? params : Collections.emptyMap())
+                    .columnAs(column);
         };
         return new Neo4j2VertexIterable(wrap, this);
     }
