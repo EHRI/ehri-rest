@@ -254,9 +254,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .header(AbstractResource.STREAM_HEADER_NAME, "true")
                 .entity(testQuery)
                 .post(ClientResponse.class);
-
-        assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
         JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertFalse(data.path("data").path("topLevelDocumentaryUnits").path("items").path(0).isMissingNode());
     }
