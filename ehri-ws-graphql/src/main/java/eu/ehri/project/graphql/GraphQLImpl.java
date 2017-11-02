@@ -70,6 +70,8 @@ import graphql.GraphQLException;
 import graphql.TypeResolutionEnvironment;
 import graphql.language.StringValue;
 import graphql.schema.Coercing;
+import graphql.schema.CoercingParseValueException;
+import graphql.schema.CoercingSerializeException;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
@@ -226,14 +228,29 @@ public class GraphQLImpl {
             "DatePrefix", "A date prefix in YYYY-MM-DD format", new Coercing<String, String>() {
         private final Pattern pattern = Pattern.compile("\\d\\d\\d\\d(-\\d\\d(-\\d\\d)?)?");
 
+        private String convertImpl(Object input) {
+            if (input instanceof String && pattern.matcher((String)input).matches()) {
+                return (String) input;
+            }
+            return null;
+        }
+
         @Override
         public String serialize(Object input) {
-            return input instanceof String ? (String)input : null;
+            String result = convertImpl(input);
+            if (result == null) {
+                throw new CoercingSerializeException("Invalid value '" + input + "' for DatePrefix");
+            }
+            return result;
         }
 
         @Override
         public String parseValue(Object input) {
-            return serialize(input);
+            String result = convertImpl(input);
+            if (result == null) {
+                throw new CoercingParseValueException("Invalid value '" + input + "' for DatePrefix");
+            }
+            return result;
         }
 
         @Override
@@ -414,25 +431,25 @@ public class GraphQLImpl {
 
             String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v:" + type + "),\n"
                     + "       (a: UserProfile {__id:{accessor}})-[:belongsTo*]->(g)\n"
-                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
+                    + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
                     + "    AND (NOT (v)-[:access]->()\n" +
                     "        OR (v)-[:access]->(a)\n" +
                     "        OR (v)-[:access]->(g))\n";
 
             String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v:" + type + ")\n"
-                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
+                    + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
                     + "    AND NOT (v)-[:access]->()\n";
 
             Map<String, Object> params = ImmutableMap.of(
-                    "from", from != null ? from : "0",
-                    "to", to != null ? to : "a",
+                    "from", from != null ? from : "",
+                    "to", to != null ? to : "",
                     "offset", offset,
                     "limit", limit < 0 ? Integer.MAX_VALUE : limit,
                     "accessor", accessor.getId()
             );
 
             String q = (accessor.isAnonymous() ? anonQ : authQ)
-                    + "RETURN v SKIP {offset} LIMIT {limit}\n";
+                    + "RETURN DISTINCT(v) SKIP {offset} LIMIT {limit}\n";
             logger.debug("Cypher: {}\nWhere: {}", q, params);
 
             // FIXME: This iter isn't closed, but in practice closing the transaction
@@ -1235,15 +1252,21 @@ public class GraphQLImpl {
                         .type(newObject()
                                 .name(Entities.DATE_PERIOD + "Query")
                                 .description("Items created within the given date range")
-                                .field(connectionFieldDefinition("docs", "Docs",
-                                        documentaryUnitType, getItemsWithDates(Entities.DOCUMENTARY_UNIT)))
-                                .field(connectionFieldDefinition("agents", "Agents",
-                                        historicalAgentType, getItemsWithDates(Entities.HISTORICAL_AGENT)))
+                                .field(connectionFieldDefinition("documentaryUnits",
+                                        "Documentary units with a given date of creation or existence",
+                                        documentaryUnitsConnection, getItemsWithDates(Entities.DOCUMENTARY_UNIT)))
+                                .field(connectionFieldDefinition("historicalAgents",
+                                        "Historical agents with a given date of creation or existence",
+                                        historicalAgentsConnection, getItemsWithDates(Entities.HISTORICAL_AGENT)))
+                                .field(connectionFieldDefinition("repositories",
+                                        "Repositories with a given date of creation or existence",
+                                        repositoriesConnection, getItemsWithDates(Entities.REPOSITORY)))
                                 .build()
                         )
                         .dataFetcher(argDataFetcher)
-                        .argument(newArgument().name("from").description("From").type(DatePrefixType).build())
-                        .argument(newArgument().name("to").description("To").type(DatePrefixType).build())
+                        .argument(newArgument().name("from").description("From date, inclusive").type(DatePrefixType).build())
+                        .argument(newArgument().name("to").description("To date, inclusive").type(DatePrefixType).build())
+                        .deprecate("This field is experimental and likely to change or be removed in future.")
                         .build())
 
                 // Single item types...
