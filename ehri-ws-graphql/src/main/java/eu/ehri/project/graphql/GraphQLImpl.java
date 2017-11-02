@@ -454,7 +454,7 @@ public class GraphQLImpl {
 
             // FIXME: This iter isn't closed, but in practice closing the transaction
             // should release its resources...
-            CloseableIterable<Vertex> verticesByQuery = ng.getVerticesByQuery(q, params);
+            CloseableIterable<Vertex> verticesByQuery = ng.getVerticesByQuery(q, params, "v");
             Iterable<Entity> items = manager.getGraph().frameVertices(verticesByQuery, Entity.class);
             boolean hasPrev = offset > 0;
             // Create a list of edges, with the cursor taking into
