@@ -86,10 +86,6 @@
             <artifactId>joda-time</artifactId>
             <version>2.9.4</version>
         </dependency>
-
-        <!-- logging - we include logback as a logging impl, but this means
-             that any other implementations included with e.g. Neo4j must
-             be removed from the classpath. -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

@@ -36,6 +36,7 @@ import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
@@ -47,7 +48,7 @@ import java.util.NoSuchElementException;
  */
 public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGraphManager<T> {
 
-    private final static Logger logger = org.slf4j.LoggerFactory.getLogger(Neo4jGraphManager.class);
+    private final static Logger logger = LoggerFactory.getLogger(Neo4jGraphManager.class);
 
     public Neo4jGraphManager(FramedGraph<T> graph) {
         super(graph);
@@ -142,12 +143,12 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
                 .on(EntityType.TYPE_KEY)
                 .create();
 
-        // Create an index on each mandatory property and
+        // Create an index on each property and
         // a unique constraint on unique properties.
         for (EntityClass cls : EntityClass.values()) {
-            Collection<String> mandPropertyKeys = ClassUtils.getMandatoryPropertyKeys(cls.getJavaClass());
-            for (String prop : mandPropertyKeys) {
-                logger.trace("Creating index on mandatory property: {} -> {}",
+            Collection<String> propertyKeys = ClassUtils.getPropertyKeys(cls.getJavaClass());
+            for (String prop : propertyKeys) {
+                logger.trace("Creating index on property: {} -> {}",
                         cls.getName(), prop);
                 schema.indexFor(Label.label(cls.getName()))
                         .on(prop)
