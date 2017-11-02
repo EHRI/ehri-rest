@@ -21,7 +21,6 @@ package eu.ehri.project.core.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -30,21 +29,16 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.Finder;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Entity;
-import org.bouncycastle.util.io.Streams;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -159,23 +153,6 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
-    public CloseableIterable<Vertex> getVertices(Finder finder) {
-        return new CloseableIterable<Vertex>() {
-            CloseableIterable<Vertex> verts = getVertices(finder.getType());
-            @Override
-            public void close() {
-                verts.close();
-            }
-
-            @Override
-            public Iterator<Vertex> iterator() {
-                return Iterators.filter(verts.iterator(),
-                        f -> finder.getPredicates().stream().allMatch(p -> filter(f, p)));
-            }
-        };
-    }
-
-    @Override
     public CloseableIterable<Vertex> getVertices(String key, Object value, EntityClass type) {
         // NB: This is rather annoying.
         List<Vertex> elems = Lists.newArrayList();
@@ -286,33 +263,5 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
         vdata.put(EntityType.ID_KEY, id);
         vdata.put(EntityType.TYPE_KEY, type.getName());
         return vdata;
-    }
-
-    private boolean filter(Vertex v, Finder.Predicate p) {
-        Object value = v.getProperty(p.property);
-        if (value == null) {
-            return false;
-        }
-        switch (p.op) {
-            case STARTS_WITH:
-                return value.toString().startsWith(p.value.toString());
-            case ENDS_WITH:
-                return value.toString().endsWith(p.value.toString());
-            case EQ:
-                return value.equals(p.value);
-            case NE:
-                return !value.equals(p.value);
-            case GTE:
-                return value.toString().compareTo(p.value.toString()) > -1;
-            case GT:
-                return value.toString().compareTo(p.value.toString()) > 0;
-            case LTE:
-                return value.toString().compareTo(p.value.toString()) < 1;
-            case LT:
-                return value.toString().compareTo(p.value.toString()) < 0;
-            case CONTAINS:
-                return value.toString().contains(p.value.toString());
-            default: return false;
-        }
     }
 }

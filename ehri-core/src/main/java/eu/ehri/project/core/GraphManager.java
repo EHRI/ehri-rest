@@ -137,14 +137,6 @@ public interface GraphManager {
     CloseableIterable<Vertex> getVertices(Iterable<String> ids);
 
     /**
-     * Get a CloseableIterable of vertices.
-     *
-     * @param a {@Finder} instance specifying what to find.
-     * @return An iterable of vertices.
-     */
-    CloseableIterable<Vertex> getVertices(Finder finder);
-
-    /**
      * Get a CloseableIterable of vertices with the given type, and the given
      * key/value property.
      *
