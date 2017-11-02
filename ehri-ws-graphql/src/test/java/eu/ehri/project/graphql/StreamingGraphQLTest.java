@@ -43,7 +43,7 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
                 .useDefaultPrettyPrinter()) {
             GraphQLSchema schema = new GraphQLImpl(manager, api(validUser), true).getSchema();
             StreamingGraphQL ql = new StreamingGraphQL(schema);
-            ql.execute(generator, "test", testQuery, null, null, Collections.emptyMap());
+            ql.execute(generator, testQuery, null, null, Collections.emptyMap());
         }
         JsonNode json = mapper.readTree(out.toByteArray());
         //System.out.println(json);

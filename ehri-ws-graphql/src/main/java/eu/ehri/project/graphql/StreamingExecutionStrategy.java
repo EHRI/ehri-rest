@@ -22,13 +22,13 @@ package eu.ehri.project.graphql;
 import com.fasterxml.jackson.core.JsonGenerator;
 import graphql.ExecutionResult;
 import graphql.ExecutionResultImpl;
+import graphql.execution.AsyncExecutionStrategy;
+import graphql.execution.DataFetcherExceptionHandlerParameters;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionStrategy;
 import graphql.execution.ExecutionStrategyParameters;
 import graphql.execution.ExecutionTypeInfo;
 import graphql.execution.FieldCollectorParameters;
-import graphql.execution.NonNullableFieldWasNullException;
-import graphql.execution.AsyncExecutionStrategy;
 import graphql.execution.TypeResolutionParameters;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.InstrumentationContext;
@@ -55,14 +55,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static graphql.execution.FieldCollectorParameters.newParameters;
 import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
+import static graphql.execution.FieldCollectorParameters.newParameters;
 import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
 
 /**
  * Streaming version of an execution strategy.
+ *
+ * TODO: this class duplicates with slight modifications a lot of logic
+ * from the {@link ExecutionStrategy} class - find a way to clean it up
+ * and rationalise things for easier maintenance and upgrading.
  */
 public class StreamingExecutionStrategy extends ExecutionStrategy {
 
@@ -77,11 +82,32 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         generator.writeEndObject();
     }
 
-    private void resolveField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
-        GraphQLObjectType parentType = parameters.typeInfo().castType(GraphQLObjectType.class);
-        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, fields.get(0));
+    private void handleFetchingException(ExecutionContext executionContext,
+            ExecutionStrategyParameters parameters,
+            Field field,
+            GraphQLFieldDefinition fieldDef,
+            Map<String, Object> argumentValues,
+            DataFetchingEnvironment environment,
+            Throwable e) {
+        DataFetcherExceptionHandlerParameters handlerParameters = DataFetcherExceptionHandlerParameters.newExceptionParameters()
+                .executionContext(executionContext)
+                .dataFetchingEnvironment(environment)
+                .argumentValues(argumentValues)
+                .field(field)
+                .fieldDefinition(fieldDef)
+                .path(parameters.path())
+                .exception(e)
+                .build();
 
-        Map<String, Object> argumentValues = valuesResolver.getArgumentValues(fieldDef.getArguments(), fields.get(0).getArguments(), executionContext.getVariables());
+        dataFetcherExceptionHandler.accept(handlerParameters);
+    }
+
+    private void resolveField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
+        Field field = fields.get(0);
+        GraphQLObjectType parentType = parameters.typeInfo().castType(GraphQLObjectType.class);
+        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field);
+
+        Map<String, Object> argumentValues = valuesResolver.getArgumentValues(fieldDef.getArguments(), field.getArguments(), executionContext.getVariables());
 
         GraphQLOutputType fieldType = fieldDef.getType();
         DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(executionContext, fieldType, fields);
@@ -109,13 +135,9 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         Object resolvedValue = null;
         try {
             resolvedValue = fieldDef.getDataFetcher().get(environment);
-
             fetchCtx.onEnd(resolvedValue, null);
         } catch (Exception e) {
-            log.warn("Exception while fetching data", e);
-            // FIXME: ???
-            //handleDataFetchingException(executionContext, fieldDef, argumentValues, parameters.path(), e);
-
+            handleFetchingException(executionContext, parameters, field, fieldDef, argumentValues, environment, e);
             fetchCtx.onEnd(null, e);
         }
 
@@ -137,12 +159,6 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         GraphQLType fieldType = parameters.typeInfo().getType();
 
         if (result == null) {
-            if (typeInfo.isNonNullType()) {
-                // see http://facebook.github.io/graphql/#sec-Errors-and-Non-Nullability
-                NonNullableFieldWasNullException nonNullException = new NonNullableFieldWasNullException(typeInfo, parameters.path());
-                //executionContext.addError(nonNullException, parameters.path());
-                throw nonNullException;
-            }
             generator.writeNull();
         } else if (fieldType instanceof GraphQLList) {
             completeValueForList(generator, executionContext, parameters, fields, result);
@@ -151,7 +167,6 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         } else if (fieldType instanceof GraphQLEnumType) {
             completeValueForEnum(generator, (GraphQLEnumType) fieldType, result);
         } else {
-
             GraphQLObjectType resolvedType;
             if (fieldType instanceof GraphQLInterfaceType) {
                 TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()

@@ -58,7 +58,7 @@ public class StreamingGraphQL {
     public void execute(JsonGenerator generator, String requestString, Document document, String operationName, Object context, Map<String, Object>
             arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        log.debug("Executing request. operation name: {}. Request: {} ", operationName, document);
+        log.trace("Executing request. operation name: {}. Request: {} ", operationName, document);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new AsyncExecutionStrategy(),
                 new AsyncExecutionStrategy(), NoOpInstrumentation.INSTANCE);
         ExecutionInput input = ExecutionInput.newExecutionInput()
@@ -70,9 +70,9 @@ public class StreamingGraphQL {
         execution.execute(generator, graphQLSchema, document, ExecutionId.from("test"), input);
     }
 
-    public void execute(JsonGenerator generator, String tag, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
+    public void execute(JsonGenerator generator, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        log.debug("Executing request. operation name: {}. Request: {} ", operationName, requestString);
+        log.trace("Executing request. operation name: {}. Request: {} ", operationName, requestString);
         Document document = parseAndValidate(requestString);
         execute(generator, requestString, document, operationName, context, arguments);
     }
