@@ -21,7 +21,11 @@ package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import eu.ehri.extension.errors.ExecutionError;
+import graphql.ExecutionInput;
 import graphql.InvalidSyntaxError;
+import graphql.execution.ExecutionId;
+import graphql.execution.AsyncExecutionStrategy;
+import graphql.execution.instrumentation.NoOpInstrumentation;
 import graphql.language.Document;
 import graphql.language.SourceLocation;
 import graphql.parser.Parser;
@@ -51,20 +55,26 @@ public class StreamingGraphQL {
     }
 
 
-    public void execute(JsonGenerator generator, Document document, String operationName, Object context, Map<String, Object>
+    public void execute(JsonGenerator generator, String requestString, Document document, String operationName, Object context, Map<String, Object>
             arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        log.debug("Executing request. operation name: {}. Request: {} ", operationName, document);
-        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy());
-        execution.execute(generator, graphQLSchema, context, document, operationName, arguments);
+        log.trace("Executing request. operation name: {}. Request: {} ", operationName, document);
+        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new AsyncExecutionStrategy(),
+                new AsyncExecutionStrategy(), NoOpInstrumentation.INSTANCE);
+        ExecutionInput input = ExecutionInput.newExecutionInput()
+                .context(context)
+                .variables(arguments)
+                .query(requestString)
+                .operationName(operationName)
+                .build();
+        execution.execute(generator, graphQLSchema, document, ExecutionId.from("test"), input);
     }
 
     public void execute(JsonGenerator generator, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
-        log.debug("Executing request. operation name: {}. Request: {} ", operationName, requestString);
+        log.trace("Executing request. operation name: {}. Request: {} ", operationName, requestString);
         Document document = parseAndValidate(requestString);
-        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy());
-        execution.execute(generator, graphQLSchema, context, document, operationName, arguments);
+        execute(generator, requestString, document, operationName, context, arguments);
     }
 
     public Document parseAndValidate(String requestString) {
@@ -76,7 +86,7 @@ public class StreamingGraphQL {
             RecognitionException recognitionException = (RecognitionException) e.getCause();
             SourceLocation sourceLocation = new SourceLocation(recognitionException.getOffendingToken().getLine(),
                     recognitionException.getOffendingToken().getCharPositionInLine());
-            InvalidSyntaxError invalidSyntaxError = new InvalidSyntaxError(sourceLocation);
+            InvalidSyntaxError invalidSyntaxError = new InvalidSyntaxError(sourceLocation, "Invalid syntax");
             throw new ExecutionError(Collections.singletonList(invalidSyntaxError));
         }
 

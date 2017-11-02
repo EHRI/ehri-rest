@@ -1,0 +1,30 @@
+query dates {
+    from_to_1: DatePeriodQuery(from: "1939", to: "1945") {
+        documentaryUnits(first: 1) {
+            items {
+                id
+            }
+        }
+    }
+    from_to_2: DatePeriodQuery(from: "1939", to: "1945") {
+        documentaryUnits(from: "MQ==") {
+            items {
+                id
+            }
+        }
+    }
+    from: DatePeriodQuery(from: "1939") {
+        documentaryUnits {
+            items {
+                id
+            }
+        }
+    }
+    to: DatePeriodQuery(to: "1945") {
+        documentaryUnits {
+            items {
+                id
+            }
+        }
+    }
+}
