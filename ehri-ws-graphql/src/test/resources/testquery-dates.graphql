@@ -1,0 +1,47 @@
+query dates {
+    from_to_1: DatePeriodQuery(from: "1939", to: "1945") {
+        temporalItems(first: 1) {
+            items {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+    }
+    from_to_2: DatePeriodQuery(from: "1939", to: "1945") {
+        temporalItems(from: "MQ==") {
+            items {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+    }
+    from: DatePeriodQuery(from: "1939") {
+        temporalItems {
+            items {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+    }
+    to: DatePeriodQuery(to: "1945") {
+        temporalItems {
+            items {
+                ... on DocumentaryUnit {
+                    id
+                }
+            }
+        }
+    }
+    all: DatePeriodQuery(from: "1900") {
+        temporalItems {
+            items {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+        }
+    }
+}

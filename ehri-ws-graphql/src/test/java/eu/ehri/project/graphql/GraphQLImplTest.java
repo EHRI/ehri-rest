@@ -6,16 +6,29 @@ import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertTrue;
 
 public class GraphQLImplTest extends AbstractFixtureTest {
     @Test
     public void testGetSchema() throws Exception {
-        GraphQLImpl graphQL = new GraphQLImpl(anonApi());
+        GraphQLImpl graphQL = new GraphQLImpl(manager, anonApi());
         GraphQLSchema schema = graphQL.getSchema();
         String testQuery = readResourceFileAsString("testquery.graphql");
-        ExecutionResult result = new GraphQL(schema)
-                .execute(testQuery);
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(testQuery);
         assertTrue(result.getErrors().isEmpty());
+    }
+
+    @Test
+    public void testDateQuery() throws Exception {
+        GraphQLImpl graphQL = new GraphQLImpl(manager, api(validUser));
+        GraphQLSchema schema = graphQL.getSchema();
+        String testQuery = readResourceFileAsString("testquery-dates.graphql");
+        ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(testQuery);
+        System.out.println(result.getErrors());
+        assertTrue(result.getErrors().isEmpty());
+        Map<String, Object> data = result.getData();
+        System.out.println(data);
     }
 }

@@ -21,12 +21,17 @@ package eu.ehri.project.graphql;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.CountryInfo;
 import eu.ehri.project.definitions.DefinitionList;
@@ -49,6 +54,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
@@ -60,8 +66,14 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
-import graphql.relay.Base64;
+import graphql.GraphQLException;
+import graphql.TypeResolutionEnvironment;
+import graphql.language.StringValue;
+import graphql.schema.Coercing;
+import graphql.schema.CoercingParseValueException;
+import graphql.schema.CoercingSerializeException;
 import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
@@ -73,8 +85,14 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
+import graphql.schema.GraphQLUnionType;
 import graphql.schema.TypeResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +101,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static graphql.Scalars.GraphQLBigDecimal;
@@ -99,6 +118,8 @@ import static graphql.schema.GraphQLObjectType.newObject;
  * Implementation of a GraphQL schema over the API
  */
 public class GraphQLImpl {
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphQLImpl.class);
 
     private static final String SLICE_PARAM = "at";
     private static final String FIRST_PARAM = "first";
@@ -119,16 +140,18 @@ public class GraphQLImpl {
     private static final int DEFAULT_LIST_LIMIT = 40;
     private static final int MAX_LIST_LIMIT = 100;
 
+    private final GraphManager manager;
     private final Api _api;
     private final boolean stream;
 
-    public GraphQLImpl(Api api, boolean stream) {
+    public GraphQLImpl(GraphManager manager, Api api, boolean stream) {
+        this.manager = manager;
         this._api = api;
         this.stream = stream;
     }
 
-    public GraphQLImpl(Api api) {
-        this(api, false);
+    public GraphQLImpl(GraphManager manager, Api api) {
+        this(manager, api, false);
     }
 
     private Api api() {
@@ -140,6 +163,19 @@ public class GraphQLImpl {
                 .query(queryType())
                 .build();
     }
+
+    private static String toBase64(String string) {
+        try {
+            return DatatypeConverter.printBase64Binary(string.getBytes("utf-8"));
+        } catch (UnsupportedEncodingException var2) {
+            throw new RuntimeException(var2);
+        }
+    }
+
+    private static String fromBase64(String string) {
+        return new String(DatatypeConverter.parseBase64Binary(string), Charset.forName("UTF-8"));
+    }
+
 
     private static Map<String, Object> mapOf(Object... items) {
         Preconditions.checkArgument(items.length % 2 == 0, "Items must be pairs of key/value");
@@ -153,7 +189,7 @@ public class GraphQLImpl {
     private static int decodeCursor(String cursor, int defaultVal) {
         try {
             return cursor != null
-                    ? Math.max(-1, Integer.parseInt(Base64.fromBase64(cursor)))
+                    ? Math.max(-1, Integer.parseInt(fromBase64(cursor)))
                     : defaultVal;
         } catch (NumberFormatException e) {
             return defaultVal;
@@ -189,6 +225,43 @@ public class GraphQLImpl {
         return new GraphQLScalarType(name, description, GraphQLString.getCoercing());
     }
 
+    private static final GraphQLScalarType DatePrefixType = new GraphQLScalarType(
+            "DatePrefix", "A date prefix in YYYY-MM-DD format", new Coercing<String, String>() {
+        private final Pattern pattern = Pattern.compile("\\d\\d\\d\\d(-\\d\\d(-\\d\\d)?)?");
+
+        private String convertImpl(Object input) {
+            if (input instanceof String && pattern.matcher((String)input).matches()) {
+                return (String) input;
+            }
+            return null;
+        }
+
+        @Override
+        public String serialize(Object input) {
+            String result = convertImpl(input);
+            if (result == null) {
+                throw new CoercingSerializeException("Invalid value '" + input + "' for DatePrefix");
+            }
+            return result;
+        }
+
+        @Override
+        public String parseValue(Object input) {
+            String result = convertImpl(input);
+            if (result == null) {
+                throw new CoercingParseValueException("Invalid value '" + input + "' for DatePrefix");
+            }
+            return result;
+        }
+
+        @Override
+        public String parseLiteral(Object input) {
+            if (!(input instanceof StringValue)) return null;
+            String value = ((StringValue) input).getValue();
+            return pattern.matcher(value).matches() ? value : null;
+        }
+    });
+
     private static final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
     private static final GraphQLScalarType CursorType = wrappedString("Cursor", "A connection cursor");
 
@@ -200,11 +273,13 @@ public class GraphQLImpl {
     // Data fetchers...
 
     private DataFetcher topLevelDocDataFetcher() {
-        Iterable<Country> countries = api().query()
-                .setStream(true).setLimit(-1).page(EntityClass.COUNTRY, Country.class);
-        Iterable<Iterable<Entity>> docs = Iterables.transform(countries, c ->
-                Iterables.transform(c.getTopLevelDocumentaryUnits(), d -> d.as(Entity.class)));
-        return connectionDataFetcher(() -> Iterables.concat(docs));
+        return connectionDataFetcher(() -> {
+            Iterable<Country> countries = api().query()
+                    .setStream(true).setLimit(-1).page(EntityClass.COUNTRY, Country.class);
+            Iterable<Iterable<Entity>> docs = Iterables.transform(countries, c ->
+                    Iterables.transform(c.getTopLevelDocumentaryUnits(), d -> d.as(Entity.class)));
+            return Iterables.concat(docs);
+        });
     }
 
     private DataFetcher entityTypeConnectionDataFetcher(EntityClass type) {
@@ -225,7 +300,7 @@ public class GraphQLImpl {
         return env -> {
             boolean allOrTop = (Boolean) Optional.ofNullable(env.getArgument(ALL_PARAM)).orElse(false);
             Function<Entity, Iterable<? extends Entity>> func = allOrTop ? all : top;
-            return connectionDataFetcher(() -> func.apply(((Entity) env.getSource()))).get(env);
+            return connectionDataFetcher(() -> func.apply((env.getSource()))).get(env);
         };
     }
 
@@ -262,7 +337,11 @@ public class GraphQLImpl {
     }
 
     private Map<String, Object> strictConnectionDataFetcher(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
-        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        // Note: strict connections are considerably slower than lazy ones
+        // since to assemble the PageInfo we need to count the total number
+        // of items, which involves fetching the iterator twice.
+        long total = Iterables.size(iter.get());
+        QueryApi query = api().query().setStream(true).setLimit(limit).setOffset(offset);
         QueryApi.Page<Entity> page = query.page(iter.get(), Entity.class);
         List<Entity> items = Lists.newArrayList(page);
 
@@ -271,15 +350,15 @@ public class GraphQLImpl {
         List<Map<String, Object>> edges = Lists.newArrayListWithExpectedSize(items.size());
         for (int i = 0; i < items.size(); i++) {
             edges.add(mapOf(
-                    CURSOR, Base64.toBase64(String.valueOf(offset + i)),
+                    CURSOR, toBase64(String.valueOf(offset + i)),
                     NODE, items.get(i)
             ));
         }
 
-        boolean hasNext = page.getOffset() + items.size() < page.getTotal();
+        boolean hasNext = page.getOffset() + items.size() < total;
         boolean hasPrev = page.getOffset() > 0;
-        String nextCursor = Base64.toBase64(String.valueOf(offset + limit));
-        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        String nextCursor = toBase64(String.valueOf(offset + limit));
+        String prevCursor = toBase64(String.valueOf(offset - limit));
         return connectionData(items, edges, hasNext ? nextCursor : null, hasPrev ? prevCursor : null);
     }
 
@@ -293,11 +372,11 @@ public class GraphQLImpl {
         final AtomicInteger index = new AtomicInteger();
         Iterable<Map<String, Object>> edges = Iterables.transform(
                 query.page(iter.get(), Entity.class), item -> mapOf(
-                        CURSOR, Base64.toBase64(String.valueOf(offset + index.getAndIncrement())),
+                        CURSOR, toBase64(String.valueOf(offset + index.getAndIncrement())),
                         NODE, item
                 ));
 
-        String prevCursor = Base64.toBase64(String.valueOf(offset - limit));
+        String prevCursor = toBase64(String.valueOf(offset - limit));
         return connectionData(items, edges, null, hasPrev ? prevCursor : null);
     }
 
@@ -315,18 +394,17 @@ public class GraphQLImpl {
     ;
 
     private static final DataFetcher idDataFetcher =
-            environment -> ((Entity) environment.getSource()).getProperty(EntityType.ID_KEY);
+            env -> ((Entity) env.getSource()).getProperty(EntityType.ID_KEY);
 
     private static final DataFetcher typeDataFetcher =
-            environment -> ((Entity) environment.getSource()).getProperty(EntityType.TYPE_KEY);
+            env -> ((Entity) env.getSource()).getProperty(EntityType.TYPE_KEY);
 
     private static final DataFetcher attributeDataFetcher =
-            environment -> ((Entity) environment.getSource())
-                    .getProperty(environment.getFields().get(0).getName());
+            env -> ((Entity) env.getSource()).getProperty(env.getFields().get(0).getName());
 
     private static DataFetcher listDataFetcher(DataFetcher fetcher) {
-        return environment -> {
-            Object obj = fetcher.get(environment);
+        return env -> {
+            Object obj = fetcher.get(env);
             if (obj == null) {
                 return Collections.emptyList();
             } else if (obj instanceof List) {
@@ -337,15 +415,74 @@ public class GraphQLImpl {
         };
     }
 
-    private static final DataFetcher descriptionDataFetcher = environment -> {
-        String lang = environment.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
-        String code = environment.getArgument(Ontology.IDENTIFIER_KEY);
+    private final DataFetcher argDataFetcher = DataFetchingEnvironment::getArguments;
 
-        Entity source = (Entity) environment.getSource();
+    // Horrific proof-of-concept implementation of querying
+    // via dates, using Cypher, with access control.
+    private DataFetcher getItemsWithDates() {
+        return env -> {
+            Map<String, Object> args = env.getSource();
+            String from = (String) args.get("from");
+            String to = (String) args.get("to");
+            int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
+            int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
+
+            Accessor accessor = api().accessor();
+            Neo4j2Graph ng = (Neo4j2Graph) manager.getGraph().getBaseGraph();
+
+            String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v),\n"
+                    + "       (a: UserProfile {__id:{accessor}})-[:belongsTo*]->(g)\n"
+                    + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
+                    + "    AND (NOT (v)-[:access]->()\n" +
+                    "        OR (v)-[:access]->(a)\n" +
+                    "        OR (v)-[:access]->(g))\n";
+
+            String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v)\n"
+                    + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
+                    + "    AND NOT (v)-[:access]->()\n";
+
+            Map<String, Object> params = ImmutableMap.of(
+                    "from", from != null ? from : "",
+                    "to", to != null ? to : "",
+                    "offset", offset,
+                    "limit", limit < 0 ? Integer.MAX_VALUE : limit,
+                    "accessor", accessor.getId()
+            );
+
+            String q = (accessor.isAnonymous() ? anonQ : authQ)
+                    + "RETURN DISTINCT(v) SKIP {offset} LIMIT {limit}\n";
+            logger.debug("Cypher: {}\nWhere: {}", q, params);
+
+            // FIXME: This iter isn't closed, but in practice closing the transaction
+            // should release its resources...
+            CloseableIterable<Vertex> verticesByQuery = ng.getVerticesByQuery(q, params, "v");
+            Iterable<Entity> items = manager.getGraph().frameVertices(verticesByQuery, Entity.class);
+            boolean hasPrev = offset > 0;
+            // Create a list of edges, with the cursor taking into
+            // account each item's offset
+            final AtomicInteger index = new AtomicInteger();
+            Iterable<Map<String, Object>> edges = Iterables.transform(
+                    items, item -> mapOf(
+                            CURSOR, toBase64(String.valueOf(offset + index.getAndIncrement())),
+                            NODE, item
+                    ));
+
+            String prevCursor = toBase64(String.valueOf(offset - limit));
+            String nextCursor = toBase64(String.valueOf(offset + limit));
+
+            return connectionData(items, edges, nextCursor, hasPrev ? prevCursor : null);
+        };
+    }
+
+    private static final DataFetcher descriptionDataFetcher = env -> {
+        String lang = env.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
+        String code = env.getArgument(Ontology.IDENTIFIER_KEY);
+
+        Entity source = env.getSource();
         Iterable<Description> descriptions = source.as(Described.class).getDescriptions();
 
         if (lang == null && code == null) {
-            int at = environment.getArgument(SLICE_PARAM);
+            int at = env.getArgument(SLICE_PARAM);
             List<Description> descList = Lists.newArrayList(descriptions);
             return at >= 1 && descList.size() >= at ? descList.get(at - 1) : null;
         } else {
@@ -367,19 +504,19 @@ public class GraphQLImpl {
     };
 
     private static DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
-        return environment -> transformer.apply(fetcher.get(environment));
+        return env -> transformer.apply(fetcher.get(env));
     }
 
     private DataFetcher oneToManyRelationshipFetcher(Function<Entity, Iterable<? extends Entity>> f) {
-        return environment -> {
-            Iterable<? extends Entity> elements = f.apply(((Entity) environment.getSource()));
+        return env -> {
+            Iterable<? extends Entity> elements = f.apply((env.getSource()));
             return api().query().setStream(true).setLimit(-1).page(elements, Entity.class);
         };
     }
 
     private DataFetcher manyToOneRelationshipFetcher(Function<Entity, Entity> f) {
-        return environment -> {
-            Entity elem = f.apply((Entity) environment.getSource());
+        return env -> {
+            Entity elem = f.apply(env.getSource());
             if (elem != null &&
                     AclManager.getAclFilterFunction(api().accessor())
                             .compute(elem.asVertex())) {
@@ -503,7 +640,7 @@ public class GraphQLImpl {
         return newFieldDefinition()
                 .name(name)
                 .description(description)
-                .type(connectionType(type, name, description))
+                .type(type)
                 .dataFetcher(dataFetcher)
                 .argument(newArgument()
                         .name(FIRST_PARAM)
@@ -640,7 +777,7 @@ public class GraphQLImpl {
                         .name(PAGE_INFO)
                         .description("Pagination information")
                         .type(newObject()
-                                .name(PAGE_INFO)
+                                .name(PAGE_INFO + wrappedType.getName())
                                 .field(newFieldDefinition()
                                         .name(HAS_PREVIOUS_PAGE)
                                         .description("If a previous page of data is available")
@@ -691,8 +828,8 @@ public class GraphQLImpl {
 
     private TypeResolver entityTypeResolver = new TypeResolver() {
         @Override
-        public GraphQLObjectType getType(Object item) {
-            Entity entity = (Entity) item;
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Entity entity = (Entity) env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT:
                     return documentaryUnitType;
@@ -724,8 +861,8 @@ public class GraphQLImpl {
 
     private TypeResolver descriptionTypeResolver = new TypeResolver() {
         @Override
-        public GraphQLObjectType getType(Object item) {
-            Entity entity = (Entity) item;
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Entity entity = (Entity) env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT_DESCRIPTION:
                     return documentaryUnitDescriptionType;
@@ -743,8 +880,8 @@ public class GraphQLImpl {
 
     private TypeResolver describedTypeResolver = new TypeResolver() {
         @Override
-        public GraphQLObjectType getType(Object item) {
-            Entity entity = (Entity) item;
+        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+            Entity entity = (Entity) env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT:
                     return documentaryUnitType;
@@ -788,7 +925,7 @@ public class GraphQLImpl {
 
 
     private final GraphQLObjectType entityType = newObject()
-            .name("Entity")
+            .name("EntityImpl")
             .description("An EHRI entity")
             .fields(entityFields)
             .withInterface(entityInterface)
@@ -884,6 +1021,10 @@ public class GraphQLImpl {
             .defaultValue(false)
             .build();
 
+    private final GraphQLOutputType documentaryUnitsConnection = connectionType(
+            new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+            "documentaryUnits", "The list of documentary units");
+
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description("A repository / archival institution")
@@ -891,7 +1032,7 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The repository's EHRI identifier"))
             .field(itemCountFieldDefinition(r -> r.as(Repository.class).getChildCount()))
             .field(connectionFieldDefinition("documentaryUnits", "The repository's top level documentary units",
-                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    documentaryUnitsConnection,
                     hierarchicalOneToManyRelationshipConnectionFetcher(
                             r -> r.as(Repository.class).getTopLevelDocumentaryUnits(),
                             r -> r.as(Repository.class).getAllDocumentaryUnits()),
@@ -917,7 +1058,7 @@ public class GraphQLImpl {
                     manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository())))
             .field(itemCountFieldDefinition(d -> d.as(DocumentaryUnit.class).getChildCount()))
             .field(connectionFieldDefinition("children", "The unit's child items",
-                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    documentaryUnitsConnection,
                     hierarchicalOneToManyRelationshipConnectionFetcher(
                             d -> d.as(DocumentaryUnit.class).getChildren(),
                             d -> d.as(DocumentaryUnit.class).getAllChildren()),
@@ -945,6 +1086,10 @@ public class GraphQLImpl {
             .withInterface(describedInterface)
             .build();
 
+    private final GraphQLOutputType historicalAgentsConnection = connectionType(
+            new GraphQLTypeReference(Entities.HISTORICAL_AGENT),
+            "historicalAgents", "A list of historicalAgents");
+
     private final GraphQLObjectType authoritativeSetType = newObject()
             .name(Entities.AUTHORITATIVE_SET)
             .description("An authority set")
@@ -953,13 +1098,17 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.NAME_KEY, "The set's name"))
             .field(nullAttr("description", "The item's description"))
             .field(itemCountFieldDefinition(a -> a.as(AuthoritativeSet.class).getChildCount()))
-            .field(connectionFieldDefinition("authorities", "Item's contained in this vocabulary", historicalAgentType,
+            .field(connectionFieldDefinition("authorities", "Item's contained in this vocabulary",
+                    historicalAgentsConnection,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())))
             .fields(linksAndAnnotationsFields())
             .withInterface(entityInterface)
             .build();
 
+    private final GraphQLOutputType repositoriesConnection = connectionType(
+            new GraphQLTypeReference(Entities.REPOSITORY),
+            "repositories", "A list of repositories");
 
     private final GraphQLObjectType countryType = newObject()
             .name(Entities.COUNTRY)
@@ -977,7 +1126,8 @@ public class GraphQLImpl {
             .fields(countryDescriptionNullFields)
             .fields(countryDescriptionListFields)
             .field(itemCountFieldDefinition(c -> c.as(Country.class).getChildCount()))
-            .field(connectionFieldDefinition("repositories", "Repositories located in the country", repositoryType,
+            .field(connectionFieldDefinition("repositories", "Repositories located in the country",
+                    repositoriesConnection,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Country.class).getRepositories())))
             .fields(linksAndAnnotationsFields())
@@ -1014,6 +1164,10 @@ public class GraphQLImpl {
             .withInterface(describedInterface)
             .build();
 
+    private final GraphQLOutputType conceptsConnection = connectionType(
+            new GraphQLTypeReference(Entities.CVOC_CONCEPT),
+            "concepts", "A list of concepts");
+
     private final GraphQLObjectType vocabularyType = newObject()
             .name(Entities.CVOC_VOCABULARY)
             .description("A vocabulary")
@@ -1022,7 +1176,8 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.NAME_KEY, "The vocabulary's name"))
             .field(nullAttr("description", "The item's description"))
             .field(itemCountFieldDefinition(r -> r.as(Vocabulary.class).getChildCount()))
-            .field(connectionFieldDefinition("concepts", "Concepts contained in this vocabulary", conceptType,
+            .field(connectionFieldDefinition("concepts", "Concepts contained in this vocabulary",
+                    conceptsConnection,
                     oneToManyRelationshipConnectionFetcher(
                             c -> c.as(Vocabulary.class).getConcepts())))
             .fields(linksAndAnnotationsFields())
@@ -1034,7 +1189,8 @@ public class GraphQLImpl {
             .description("An annotation")
             .fields(entityFields)
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, "The text of the annotation"))
-            .field(listFieldDefinition("targets", "The annotation's target(s)", entityType,
+            .field(listFieldDefinition("targets", "The annotation's target(s)",
+                    entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
             .field(listFieldDefinition("annotations", "This item's annotations",
                     new GraphQLTypeReference(Entities.ANNOTATION),
@@ -1047,7 +1203,8 @@ public class GraphQLImpl {
             .description("A link")
             .fields(entityFields)
             .field(nonNullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
-            .field(listFieldDefinition("targets", "The annotation's targets", entityType,
+            .field(listFieldDefinition("targets", "The annotation's targets",
+                    entityType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))
             .field(listFieldDefinition("body", "The links's body(s)", accessPointType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkBodies())))
@@ -1057,9 +1214,70 @@ public class GraphQLImpl {
             .withInterface(entityInterface)
             .build();
 
+    private final GraphQLOutputType countriesConnection = connectionType(
+            new GraphQLTypeReference(Entities.COUNTRY),
+            "countries", "A list of countries");
+
+    private final GraphQLOutputType authoritativeSetsConnection = connectionType(
+            new GraphQLTypeReference(Entities.AUTHORITATIVE_SET),
+            "authoritativeSets", "A list of authoritative sets");
+
+    private final GraphQLOutputType vocabulariesConnection = connectionType(
+            new GraphQLTypeReference(Entities.CVOC_VOCABULARY),
+            "vocabularies", "A list of vocabularies");
+
+    private final GraphQLOutputType annotationsConnection = connectionType(
+            new GraphQLTypeReference(Entities.ANNOTATION),
+            "annotations", "A list of annotations");
+
+    private final GraphQLOutputType linksConnection = connectionType(
+            new GraphQLTypeReference(Entities.LINK),
+            "links", "A list of links");
+
+    private final GraphQLUnionType temporalType = GraphQLUnionType.newUnionType()
+            .possibleTypes(documentaryUnitType, historicalAgentType, repositoryType)
+            .typeResolver(env -> {
+                Entity entity = (Entity) env.getObject();
+                switch (entity.getType()) {
+                    case Entities.DOCUMENTARY_UNIT:
+                        return documentaryUnitType;
+                    case Entities.REPOSITORY:
+                        return repositoryType;
+                    case Entities.HISTORICAL_AGENT:
+                        return historicalAgentType;
+                    default:
+                        return null;
+                }
+            })
+            .name("Temporal")
+            .description("A type with descriptions that have temporal data")
+            .build();
+
+    private final GraphQLOutputType temporalConnection = connectionType(
+            temporalType,
+            "temporalItems", "A list of items with temporal data");
+
+
     private GraphQLObjectType queryType() {
         return newObject()
                 .name("Root")
+
+                .field(newFieldDefinition()
+                        .name(Entities.DATE_PERIOD + "Query")
+                        .description("Query items within a date period")
+                        .type(newObject()
+                                .name(Entities.DATE_PERIOD + "Query")
+                                .description("Items created within the given date range")
+                                .field(connectionFieldDefinition("temporalItems",
+                                        "Items with a given date of creation or existence",
+                                        temporalConnection, getItemsWithDates()))
+                                .build()
+                        )
+                        .dataFetcher(argDataFetcher)
+                        .argument(newArgument().name("from").description("From date, inclusive").type(DatePrefixType).build())
+                        .argument(newArgument().name("to").description("To date, inclusive").type(DatePrefixType).build())
+                        .deprecate("This field is experimental and likely to change or be removed in future.")
+                        .build())
 
                 // Single item types...
                 .field(itemFieldDefinition(Entities.DOCUMENTARY_UNIT, "Fetch a single documentary unit",
@@ -1082,34 +1300,34 @@ public class GraphQLImpl {
                         linkType, entityIdDataFetcher(Entities.LINK), idArgument))
 
                 .field(connectionFieldDefinition("documentaryUnits", "A page of documentary units",
-                        documentaryUnitType,
+                        documentaryUnitsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT)))
                 .field(connectionFieldDefinition("topLevelDocumentaryUnits", "A page of top level documentary units",
-                        documentaryUnitType,
+                        documentaryUnitsConnection,
                         topLevelDocDataFetcher()))
                 .field(connectionFieldDefinition("repositories", "A page of repositories",
-                        repositoryType,
+                        repositoriesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.REPOSITORY)))
                 .field(connectionFieldDefinition("historicalAgents", "A page of historical agents",
-                        historicalAgentType,
+                        historicalAgentsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.HISTORICAL_AGENT)))
                 .field(connectionFieldDefinition("countries", "A page of countries",
-                        countryType,
+                        countriesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.COUNTRY)))
                 .field(connectionFieldDefinition("authoritativeSets", "A page of authoritative sets",
-                        authoritativeSetType,
+                        authoritativeSetsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.AUTHORITATIVE_SET)))
                 .field(connectionFieldDefinition("concepts", "A page of concepts",
-                        conceptType,
+                        conceptsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.CVOC_CONCEPT)))
                 .field(connectionFieldDefinition("vocabularies", "A page of vocabularies",
-                        vocabularyType,
+                        vocabulariesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.CVOC_VOCABULARY)))
                 .field(connectionFieldDefinition("annotations", "A page of annotation",
-                        annotationType,
+                        annotationsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.ANNOTATION)))
                 .field(connectionFieldDefinition("links", "A page of links",
-                        linkType,
+                        linksConnection,
                         entityTypeConnectionDataFetcher(EntityClass.LINK)))
 
                 .build();
