@@ -24,6 +24,7 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Indexed;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
@@ -67,6 +68,7 @@ public interface Link extends Promotable, Temporal, Annotatable {
     @Property(Ontology.LINK_HAS_TYPE)
     String getLinkType();
 
+    @Indexed
     @Property(Ontology.LINK_HAS_FIELD)
     String getLinkField();
 

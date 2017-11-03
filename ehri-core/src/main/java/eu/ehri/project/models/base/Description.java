@@ -28,12 +28,12 @@ import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Indexed;
 import eu.ehri.project.models.annotations.Mandatory;
 
 /**
  * An entity that describes another entity.
  *
-
  */
 public interface Description extends Named, Accessible {
 
@@ -53,9 +53,11 @@ public interface Description extends Named, Accessible {
     @Property(Ontology.LANGUAGE_OF_DESCRIPTION)
     String getLanguageOfDescription();
 
+    @Indexed
     @Property(Ontology.IDENTIFIER_KEY)
     String getDescriptionCode();
 
+    @Indexed
     @Property(Ontology.CREATION_PROCESS)
     CreationProcess getCreationProcess();
 

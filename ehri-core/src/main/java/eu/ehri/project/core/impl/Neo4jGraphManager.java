@@ -20,6 +20,7 @@
 package eu.ehri.project.core.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes,
@@ -143,13 +145,14 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
                 .on(EntityType.TYPE_KEY)
                 .create();
 
-        // Create an index on each property and
+        // Create an index on each mandatory or indexed property and
         // a unique constraint on unique properties.
         for (EntityClass cls : EntityClass.values()) {
-            Collection<String> propertyKeys = ClassUtils.getPropertyKeys(cls.getJavaClass());
+            Set<String> propertyKeys = Sets.newHashSet();
+            propertyKeys.addAll(ClassUtils.getIndexedPropertyKeys(cls.getJavaClass()));
+            propertyKeys.addAll(ClassUtils.getMandatoryPropertyKeys(cls.getJavaClass()));
             for (String prop : propertyKeys) {
-                logger.trace("Creating index on property: {} -> {}",
-                        cls.getName(), prop);
+                logger.trace("Creating index on property: {} -> {}", cls.getName(), prop);
                 schema.indexFor(Label.label(cls.getName()))
                         .on(prop)
                         .create();
