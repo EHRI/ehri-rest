@@ -85,6 +85,7 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
+import graphql.schema.GraphQLUnionType;
 import graphql.schema.TypeResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -418,9 +419,9 @@ public class GraphQLImpl {
 
     // Horrific proof-of-concept implementation of querying
     // via dates, using Cypher, with access control.
-    private DataFetcher getItemsWithDates(String type) {
+    private DataFetcher getItemsWithDates() {
         return env -> {
-            Map<String, Object> args = (Map<String, Object>) env.getSource();
+            Map<String, Object> args = env.getSource();
             String from = (String) args.get("from");
             String to = (String) args.get("to");
             int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
@@ -429,14 +430,14 @@ public class GraphQLImpl {
             Accessor accessor = api().accessor();
             Neo4j2Graph ng = (Neo4j2Graph) manager.getGraph().getBaseGraph();
 
-            String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v:" + type + "),\n"
+            String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v),\n"
                     + "       (a: UserProfile {__id:{accessor}})-[:belongsTo*]->(g)\n"
                     + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
                     + "    AND (NOT (v)-[:access]->()\n" +
                     "        OR (v)-[:access]->(a)\n" +
                     "        OR (v)-[:access]->(g))\n";
 
-            String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v:" + type + ")\n"
+            String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v)\n"
                     + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
                     + "    AND NOT (v)-[:access]->()\n";
 
@@ -1233,14 +1234,29 @@ public class GraphQLImpl {
             new GraphQLTypeReference(Entities.LINK),
             "links", "A list of links");
 
-    private GraphQLObjectType datePeriodQueryType(String name, String description, GraphQLOutputType type) {
-        return newObject()
-                .name(Entities.DATE_PERIOD)
-                .description("Items created within the given date range")
-                .field(connectionFieldDefinition(name, description,
-                        type, getItemsWithDates(type.getName())))
-                .build();
-    }
+    private final GraphQLUnionType temporalType = GraphQLUnionType.newUnionType()
+            .possibleTypes(documentaryUnitType, historicalAgentType, repositoryType)
+            .typeResolver(env -> {
+                Entity entity = (Entity) env.getObject();
+                switch (entity.getType()) {
+                    case Entities.DOCUMENTARY_UNIT:
+                        return documentaryUnitType;
+                    case Entities.REPOSITORY:
+                        return repositoryType;
+                    case Entities.HISTORICAL_AGENT:
+                        return historicalAgentType;
+                    default:
+                        return null;
+                }
+            })
+            .name("Temporal")
+            .description("A type with descriptions that have temporal data")
+            .build();
+
+    private final GraphQLOutputType temporalConnection = connectionType(
+            temporalType,
+            "temporalItems", "A list of items with temporal data");
+
 
     private GraphQLObjectType queryType() {
         return newObject()
@@ -1252,15 +1268,9 @@ public class GraphQLImpl {
                         .type(newObject()
                                 .name(Entities.DATE_PERIOD + "Query")
                                 .description("Items created within the given date range")
-                                .field(connectionFieldDefinition("documentaryUnits",
-                                        "Documentary units with a given date of creation or existence",
-                                        documentaryUnitsConnection, getItemsWithDates(Entities.DOCUMENTARY_UNIT)))
-                                .field(connectionFieldDefinition("historicalAgents",
-                                        "Historical agents with a given date of creation or existence",
-                                        historicalAgentsConnection, getItemsWithDates(Entities.HISTORICAL_AGENT)))
-                                .field(connectionFieldDefinition("repositories",
-                                        "Repositories with a given date of creation or existence",
-                                        repositoriesConnection, getItemsWithDates(Entities.REPOSITORY)))
+                                .field(connectionFieldDefinition("temporalItems",
+                                        "Items with a given date of creation or existence",
+                                        temporalConnection, getItemsWithDates()))
                                 .build()
                         )
                         .dataFetcher(argDataFetcher)

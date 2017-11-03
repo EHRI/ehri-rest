@@ -420,6 +420,14 @@
               this is some
               test text
           languageCode: eng
+        relationships:
+          hasDate:
+            - id: a1-dp1
+              type: DatePeriod
+              data:
+                type: existence
+                startDate: !!str 1900-01-01
+                endDate: !!str 1980-01-01
     inAuthoritativeSet: auths
     hasPermissionScope: auths
 
