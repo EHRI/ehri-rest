@@ -30,12 +30,14 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Indexed;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.annotations.Unique;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
@@ -56,6 +58,7 @@ public class ClassUtils {
     private static final Map<Class<?>,Map<String,Set<String>>> enumPropertyValuesCache = Maps.newHashMap();
     private static final Map<Class<?>,Collection<String>> propertyKeysCache = Maps.newHashMap();
     private static final Map<Class<?>,Collection<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
+    private static final Map<Class<?>,Collection<String>> indexedPropertyKeysCache = Maps.newHashMap();
     private static final Map<Class<?>,Collection<String>> uniquePropertyKeysCache = Maps.newHashMap();
     private static final Map<Class<?>,Map<String, Direction>> dependentRelationsCache = Maps.newHashMap();
     private static final Map<Class<?>,EntityClass> entityClassCache = Maps.newHashMap();
@@ -123,7 +126,7 @@ public class ClassUtils {
      */
     public static Collection<String> getPropertyKeys(Class<?> cls) {
         if (!propertyKeysCache.containsKey(cls)) {
-            propertyKeysCache.put(cls, getPropertyKeysInternal(cls));
+            propertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Property.class, true));
         }
         return propertyKeysCache.get(cls);
     }
@@ -136,9 +139,22 @@ public class ClassUtils {
      */
     public static Collection<String> getMandatoryPropertyKeys(Class<?> cls) {
         if (!mandatoryPropertyKeysCache.containsKey(cls)) {
-            mandatoryPropertyKeysCache.put(cls, getMandatoryPropertyKeysInternal(cls));
+            mandatoryPropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Mandatory.class, false));
         }
         return mandatoryPropertyKeysCache.get(cls);
+    }
+
+    /**
+     * Get a collection of names for methods marked as indexed properties.
+     *
+     * @param cls the entity's Java class
+     * @return a collection of property names
+     */
+    public static Collection<String> getIndexedPropertyKeys(Class<?> cls) {
+        if (!indexedPropertyKeysCache.containsKey(cls)) {
+            indexedPropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Indexed.class, false));
+        }
+        return indexedPropertyKeysCache.get(cls);
     }
 
     /**
@@ -150,7 +166,7 @@ public class ClassUtils {
 
     public static Collection<String> getUniquePropertyKeys(Class<?> cls) {
         if (!uniquePropertyKeysCache.containsKey(cls)) {
-            uniquePropertyKeysCache.put(cls, getUniquePropertyKeysInternal(cls));
+            uniquePropertyKeysCache.put(cls, getAnnotatedPropertyKeys(cls, Unique.class, true));
         }
         return uniquePropertyKeysCache.get(cls);
     }
@@ -247,56 +263,22 @@ public class ClassUtils {
         return out;
     }
 
-    private static Collection<String> getPropertyKeysInternal(Class<?> cls) {
+    private static <T extends Annotation> Collection<String> getAnnotatedPropertyKeys(
+            Class<?> cls, Class<T> annotationClass, boolean includeMeta) {
         List<String> out = Lists.newArrayList();
         for (Method method : cls.getMethods()) {
-            Property ann = method.getAnnotation(Property.class);
-            if (ann != null)
-                out.add(ann.value());
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            out.addAll(getPropertyKeysInternal(s));
-        }
-
-        return ImmutableSet.copyOf(out);
-    }
-
-    private static Collection<String> getMandatoryPropertyKeysInternal(Class<?> cls) {
-        List<String> out = Lists.newArrayList();
-        for (Method method : cls.getMethods()) {
-            Mandatory mandatory = method.getAnnotation(Mandatory.class);
-            if (mandatory != null) {
-                Property ann = method.getAnnotation(Property.class);
-                // Ignore structural properties, beginning with '__'
-                if (ann != null && !ann.value().startsWith("__")) {
-                    out.add(ann.value());
+            T unique = method.getAnnotation(annotationClass);
+            if (unique != null) {
+                Property prop = method.getAnnotation(Property.class);
+                if (prop != null && (includeMeta || !prop.value().startsWith("__"))) {
+                    out.add(prop.value());
                 }
             }
 
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            out.addAll(getMandatoryPropertyKeysInternal(s));
-        }
-
-        return ImmutableSet.copyOf(out);
-    }
-
-    private static Collection<String> getUniquePropertyKeysInternal(Class<?> cls) {
-        List<String> out = Lists.newArrayList();
-        for (Method method : cls.getMethods()) {
-            Unique unique = method.getAnnotation(Unique.class);
-            if (unique != null) {
-                Property ann = method.getAnnotation(Property.class);
-                if (ann != null)
-                    out.add(ann.value());
-            }
-
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            out.addAll(getUniquePropertyKeysInternal(s));
+            out.addAll(getAnnotatedPropertyKeys(s, annotationClass, includeMeta));
         }
 
         return ImmutableSet.copyOf(out);

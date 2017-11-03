@@ -17,28 +17,17 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.models;
+package eu.ehri.project.models.annotations;
 
-import com.tinkerpop.frames.Property;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Indexed;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Temporal;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Frame class representing a pre-ingest event that took place
- * upon some documentary unit item.
+ * Indicates that a property must be indexed.
  */
-@EntityType(EntityClass.MAINTENANCE_EVENT)
-public interface MaintenanceEvent extends Temporal, Accessible {
-
-    @Mandatory
-    @Property(Ontology.MAINTENANCE_EVENT_TYPE)
-    MaintenanceEventType getEventType();
-
-    @Indexed
-    @Property(Ontology.MAINTENANCE_EVENT_AGENT_TYPE)
-    MaintenanceEventAgentType getAgentType();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Indexed {
 }

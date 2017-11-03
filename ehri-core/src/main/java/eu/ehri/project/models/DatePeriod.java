@@ -24,6 +24,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Indexed;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Temporal;
@@ -43,6 +44,7 @@ public interface DatePeriod extends Annotatable {
      *
      * @return a UTC date string
      */
+    @Indexed
     @Property(Ontology.DATE_PERIOD_START_DATE)
     String getStartDate();
 
@@ -51,6 +53,7 @@ public interface DatePeriod extends Annotatable {
      *
      * @return a UTC string
      */
+    @Indexed
     @Property(Ontology.DATE_PERIOD_END_DATE)
     String getEndDate();
 
@@ -59,6 +62,7 @@ public interface DatePeriod extends Annotatable {
      *
      * @return a type string
      */
+    @Indexed
     @Property(Ontology.DATE_PERIOD_TYPE)
     DatePeriodType getDateType();
 

@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.AccessPoint;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -85,6 +86,16 @@ public class ClassUtilsTest {
     public void testGetUniquePropertyKeys() throws Exception {
         Set<String> keys = Sets.newHashSet();
         assertEquals(keys, ClassUtils.getUniquePropertyKeys(DocumentaryUnit.class));
+    }
+
+    @Test
+    public void testGetIndexedPropertyKeys() throws Exception {
+        Set<String> keys = Sets.newHashSet(
+                Ontology.DATE_PERIOD_START_DATE,
+                Ontology.DATE_PERIOD_END_DATE,
+                Ontology.DATE_PERIOD_TYPE
+        );
+        assertEquals(keys, ClassUtils.getIndexedPropertyKeys(DatePeriod.class));
     }
 
     @Test
