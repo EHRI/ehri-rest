@@ -80,10 +80,12 @@ query test {
                 ...desc
             }
         }
-        relatedHistoricalAgents {
+        related {
             context
             item {
-                id
+                ... on HistoricalAgent {
+                    id
+                }
             }
         }
     }
@@ -146,8 +148,9 @@ query test {
         items {
             body
             targets {
-                id
-                type
+                ... on HistoricalAgent {
+                    id
+                }
             }
         }
     }

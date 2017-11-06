@@ -10,6 +10,7 @@ import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.graphql.StreamingGraphQL;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Bundle;
+import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLException;
@@ -53,7 +54,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             GraphQLSchema schema = new GraphQLImpl(manager, api()).getSchema();
             tx.success();
-            return new GraphQL(schema).execute(IntrospectionQuery.INTROSPECTION_QUERY);
+            return GraphQL.newGraphQL(schema).build()
+                    .execute(IntrospectionQuery.INTROSPECTION_QUERY);
         }
     }
 
@@ -102,9 +104,11 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
 
-        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build().execute(
-                q.getQuery(), (Object) null, q.getVariables());
-
+        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build()
+                .execute(ExecutionInput.newExecutionInput()
+                        .query(q.getQuery())
+                        .operationName(q.getOperationName())
+                        .variables(q.getVariables()).build());
         if (!executionResult.getErrors().isEmpty()) {
             throw new ExecutionError(executionResult.getErrors());
         }
@@ -123,7 +127,6 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                          .useDefaultPrettyPrinter()) {
                 final StreamingGraphQL ql2 = new StreamingGraphQL(
                         new GraphQLImpl(manager, api(), true).getSchema());
-                String tag = getCurrentActioner().getId() + "-" + System.currentTimeMillis();
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
                 ql2.execute(generator, q.getQuery(), document, q.getOperationName(),

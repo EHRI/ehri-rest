@@ -190,7 +190,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * representation
      */
     public Response getItem(String id) throws ItemNotFound {
-        logger.info("Fetched item: {}", id);
+        logger.debug("Fetched item: {}", id);
         try (final Tx tx = beginTx()) {
             E entity = api().detail(id, cls);
             if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {

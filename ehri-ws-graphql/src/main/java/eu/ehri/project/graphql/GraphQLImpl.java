@@ -67,7 +67,6 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
-import graphql.GraphQLException;
 import graphql.TypeResolutionEnvironment;
 import graphql.language.StringValue;
 import graphql.schema.Coercing;
@@ -232,7 +231,7 @@ public class GraphQLImpl {
         private final Pattern pattern = Pattern.compile("\\d\\d\\d\\d(-\\d\\d(-\\d\\d)?)?");
 
         private String convertImpl(Object input) {
-            if (input instanceof String && pattern.matcher((String)input).matches()) {
+            if (input instanceof String && pattern.matcher((String) input).matches()) {
                 return (String) input;
             }
             return null;
@@ -265,6 +264,7 @@ public class GraphQLImpl {
     });
 
     private static final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
+
     private static final GraphQLScalarType CursorType = wrappedString("Cursor", "A connection cursor");
 
     private static final GraphQLArgument idArgument = newArgument()
@@ -307,7 +307,7 @@ public class GraphQLImpl {
     }
 
     private DataFetcher oneToManyRelationshipConnectionFetcher(Function<Entity, Iterable<? extends Entity>> f) {
-        return env -> connectionDataFetcher(() -> f.apply(((Entity) env.getSource()))).get(env);
+        return env -> connectionDataFetcher(() -> f.apply((env.getSource()))).get(env);
     }
 
     private DataFetcher connectionDataFetcher(Supplier<Iterable<? extends Entity>> iter) {
@@ -505,26 +505,23 @@ public class GraphQLImpl {
         }
     };
 
-    private static DataFetcher relatedItemsDataFetcher(String type) {
-        return environment -> {
-            Entity source = (Entity) environment.getSource();
-            Iterable<Link> links = source.as(Linkable.class).getLinks();
-            return StreamSupport.stream(links.spliterator(), false).map( link -> {
+    private static final DataFetcher relatedItemsDataFetcher = env -> {
+        Entity source = env.getSource();
+        Iterable<Link> links = source.as(Linkable.class).getLinks();
+        return StreamSupport.stream(links.spliterator(), false).map(link -> {
 
-                String context = StreamSupport.stream(link.getLinkBodies().spliterator(), false)
-                        .filter(ap -> ap.getType().equals(Entities.ACCESS_POINT))
-                        .findFirst()
-                        .map(ap -> ap.as(AccessPoint.class).getRelationshipType().name())
-                        .orElse(link.getDescription());
+            String context = StreamSupport.stream(link.getLinkBodies().spliterator(), false)
+                    .filter(ap -> ap.getType().equals(Entities.ACCESS_POINT))
+                    .findFirst()
+                    .map(ap -> ap.as(AccessPoint.class).getRelationshipType().name())
+                    .orElse(link.getDescription());
 
-                Linkable target = Iterables.tryFind(link.getLinkTargets(),
-                        t -> t != null && !t.equals(source) &&
-                                Objects.equals(type, t.getType())).orNull();
-                return target == null ? null : mapOf("context", context, "item", target);
-            }).filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        };
-    }
+            Linkable target = Iterables.tryFind(link.getLinkTargets(),
+                    t -> t != null && !t.equals(source)).orNull();
+            return target == null ? null : mapOf("context", context, "item", target);
+        }).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    };
 
     private static DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
         return env -> transformer.apply(fetcher.get(env));
@@ -742,14 +739,6 @@ public class GraphQLImpl {
         );
     }
 
-    private GraphQLFieldDefinition relatedItemsItemFieldDefinition(GraphQLOutputType type) {
-        return newFieldDefinition()
-                .type(type)
-                .name("item")
-                .description("The related item")
-                .build();
-    }
-
     private GraphQLFieldDefinition accessPointFieldDefinition() {
         return listFieldDefinition("accessPoints", "Access points associated with this description",
                 accessPointType, oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
@@ -771,12 +760,12 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private GraphQLFieldDefinition relatedTypeFieldDefinition(String name, String description, String type) {
+    private GraphQLFieldDefinition relatedTypeFieldDefinition() {
         return newFieldDefinition()
-                .name(name)
-                .description(description)
-                .type(new GraphQLList(relatedType(new GraphQLTypeReference(type))))
-                .dataFetcher(relatedItemsDataFetcher(type))
+                .name("related")
+                .description("Related items")
+                .type(new GraphQLList(relatedType))
+                .dataFetcher(relatedItemsDataFetcher)
                 .build();
     }
 
@@ -894,7 +883,7 @@ public class GraphQLImpl {
                 case Entities.DATE_PERIOD:
                     return datePeriodType;
                 default:
-                    return entityType;
+                    return null;
             }
         }
     };
@@ -918,57 +907,66 @@ public class GraphQLImpl {
         }
     };
 
-    private TypeResolver describedTypeResolver = new TypeResolver() {
-        @Override
-        public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-            Entity entity = (Entity) env.getObject();
-            switch (entity.getType()) {
-                case Entities.DOCUMENTARY_UNIT:
-                    return documentaryUnitType;
-                case Entities.REPOSITORY:
-                    return repositoryType;
-                case Entities.HISTORICAL_AGENT:
-                    return historicalAgentType;
-                case Entities.CVOC_CONCEPT:
-                    return conceptType;
-                default:
-                    return null;
-            }
-        }
-    };
-
-
     private final GraphQLInterfaceType entityInterface = newInterface()
-            .name("Entity")
+            .name(Entity.class.getSimpleName())
             .description("An entity")
             .fields(entityFields)
             .typeResolver(entityTypeResolver)
             .build();
 
     private final GraphQLInterfaceType descriptionInterface = newInterface()
-            .name("Description")
+            .name(Description.class.getSimpleName())
             .description("A language-specific item description")
             .fields(descriptionFields())
             .typeResolver(descriptionTypeResolver)
             .build();
 
     private final GraphQLInterfaceType describedInterface = newInterface()
-            .name("Described")
+            .name(Described.class.getSimpleName())
             .description("An item with multi-lingual descriptions")
             .fields(entityFields)
             .field(singleDescriptionFieldDefinition(descriptionInterface))
             .field(descriptionsFieldDefinition(descriptionInterface))
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
             .fields(linksAndAnnotationsFields())
-            .typeResolver(describedTypeResolver)
+            .typeResolver(entityTypeResolver)
             .build();
 
+    private final GraphQLUnionType temporalType = GraphQLUnionType.newUnionType()
+            .possibleTypes(
+                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    new GraphQLTypeReference(Entities.REPOSITORY),
+                    new GraphQLTypeReference(Entities.HISTORICAL_AGENT))
+            .typeResolver(entityTypeResolver)
+            .name(Temporal.class.getSimpleName())
+            .description("A type with descriptions that have temporal data")
+            .build();
 
-    private final GraphQLObjectType entityType = newObject()
-            .name("EntityImpl")
-            .description("An EHRI entity")
-            .fields(entityFields)
-            .withInterface(entityInterface)
+    private final GraphQLUnionType annotatableType = GraphQLUnionType.newUnionType()
+            .possibleTypes(
+                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    new GraphQLTypeReference(Entities.REPOSITORY),
+                    new GraphQLTypeReference(Entities.HISTORICAL_AGENT),
+                    new GraphQLTypeReference(Entities.CVOC_CONCEPT),
+                    new GraphQLTypeReference(Entities.COUNTRY),
+                    new GraphQLTypeReference(Entities.ANNOTATION)
+            )
+            .typeResolver(entityTypeResolver)
+            .name(Annotatable.class.getSimpleName())
+            .description("A type that can be annotated")
+            .build();
+
+    private final GraphQLUnionType linkableType = GraphQLUnionType.newUnionType()
+            .possibleTypes(
+                    new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
+                    new GraphQLTypeReference(Entities.REPOSITORY),
+                    new GraphQLTypeReference(Entities.HISTORICAL_AGENT),
+                    new GraphQLTypeReference(Entities.CVOC_CONCEPT),
+                    new GraphQLTypeReference(Entities.COUNTRY)
+            )
+            .typeResolver(entityTypeResolver)
+            .name(Linkable.class.getSimpleName())
+            .description("A type that can be linked to other items")
             .build();
 
     private final GraphQLEnumType accessPointTypeEnum = newEnum()
@@ -1009,19 +1007,26 @@ public class GraphQLImpl {
             .fields(listStringAttrs(ContactInfo.values()))
             .build();
 
-    private GraphQLObjectType relatedType(GraphQLOutputType wrapped) {
-       return newObject()
-                .name("Related" + wrapped.getName())
-               .description("A related " + wrapped.getName() + " item")
-               .field(newFieldDefinition()
+    private GraphQLFieldDefinition relatedItemsItemFieldDefinition() {
+        return newFieldDefinition()
+                .type(linkableType)
+                .name("item")
+                .description("The related item")
+                .build();
+    }
+
+    private final GraphQLObjectType relatedType = newObject()
+            .name("Relationship")
+            .description("A related item")
+            .field(newFieldDefinition()
                     .name("context")
                     .description("The context of this relationship, either " +
                             "as a type of access point or free text")
-                   .type(GraphQLString)
+                    .type(GraphQLString)
                     .build())
-               .field(relatedItemsItemFieldDefinition(wrapped))
-               .build();
-    }
+            .field(relatedItemsItemFieldDefinition())
+            .build();
+
 
     private final GraphQLObjectType documentaryUnitDescriptionType = newObject()
             .name(Entities.DOCUMENTARY_UNIT_DESCRIPTION)
@@ -1124,12 +1129,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     oneToManyRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getAncestors())))
             .fields(linksAndAnnotationsFields())
-            .field(relatedTypeFieldDefinition("relatedHistoricalAgents","Related historical agent items",
-                    Entities.HISTORICAL_AGENT))
-            .field(relatedTypeFieldDefinition("relatedConcepts","Related concept items",
-                    Entities.CVOC_CONCEPT))
-            .field(relatedTypeFieldDefinition("relatedDocumentaryUnits","Related documentary unit items",
-                    Entities.DOCUMENTARY_UNIT))
+            .field(relatedTypeFieldDefinition())
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();
@@ -1142,6 +1142,7 @@ public class GraphQLImpl {
             .field(singleDescriptionFieldDefinition(historicalAgentDescriptionType))
             .field(descriptionsFieldDefinition(historicalAgentDescriptionType))
             .fields(linksAndAnnotationsFields())
+            .field(relatedTypeFieldDefinition())
             .withInterface(entityInterface)
             .withInterface(describedInterface)
             .build();
@@ -1250,7 +1251,7 @@ public class GraphQLImpl {
             .fields(entityFields)
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, "The text of the annotation"))
             .field(listFieldDefinition("targets", "The annotation's target(s)",
-                    entityType,
+                    annotatableType,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
             .field(listFieldDefinition("annotations", "This item's annotations",
                     new GraphQLTypeReference(Entities.ANNOTATION),
@@ -1262,13 +1263,13 @@ public class GraphQLImpl {
             .name(Entities.LINK)
             .description("A link")
             .fields(entityFields)
-            .field(nonNullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
-            .field(listFieldDefinition("targets", "The annotation's targets",
-                    entityType,
+            .field(nullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
+            .field(nullAttr(Ontology.LINK_HAS_FIELD, "The field to which this link relates"))
+            .field(listFieldDefinition("targets", "The link's targets", linkableType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))
             .field(listFieldDefinition("body", "The links's body(s)", accessPointType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkBodies())))
-            .field(listFieldDefinition("annotations", "This item's annotations",
+            .field(listFieldDefinition("annotations", "This link's annotations",
                     new GraphQLTypeReference(Entities.ANNOTATION),
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
             .withInterface(entityInterface)
@@ -1294,24 +1295,6 @@ public class GraphQLImpl {
             new GraphQLTypeReference(Entities.LINK),
             "links", "A list of links");
 
-    private final GraphQLUnionType temporalType = GraphQLUnionType.newUnionType()
-            .possibleTypes(documentaryUnitType, historicalAgentType, repositoryType)
-            .typeResolver(env -> {
-                Entity entity = (Entity) env.getObject();
-                switch (entity.getType()) {
-                    case Entities.DOCUMENTARY_UNIT:
-                        return documentaryUnitType;
-                    case Entities.REPOSITORY:
-                        return repositoryType;
-                    case Entities.HISTORICAL_AGENT:
-                        return historicalAgentType;
-                    default:
-                        return null;
-                }
-            })
-            .name("Temporal")
-            .description("A type with descriptions that have temporal data")
-            .build();
 
     private final GraphQLOutputType temporalConnection = connectionType(
             temporalType,
