@@ -21,7 +21,6 @@ package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import graphql.ExecutionInput;
-import graphql.GraphQLException;
 import graphql.execution.Execution;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionContextBuilder;
@@ -33,10 +32,10 @@ import graphql.execution.ExecutionTypeInfo;
 import graphql.execution.FieldCollector;
 import graphql.execution.FieldCollectorParameters;
 import graphql.execution.NonNullableFieldValidator;
-import graphql.execution.ValuesResolver;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.language.Document;
 import graphql.language.Field;
+import graphql.language.NodeUtil;
 import graphql.language.OperationDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
@@ -45,8 +44,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static graphql.Assert.assertShouldNeverHappen;
 import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
 import static graphql.execution.FieldCollectorParameters.newParameters;
+import static graphql.language.OperationDefinition.Operation.MUTATION;
+import static graphql.language.OperationDefinition.Operation.QUERY;
+import static graphql.language.OperationDefinition.Operation.SUBSCRIPTION;
 
 
 public class StreamingExecution extends Execution {
@@ -65,24 +68,24 @@ public class StreamingExecution extends Execution {
         this.instrumentation = instrumentation;
     }
 
-    private GraphQLObjectType getOperationRootType(GraphQLSchema graphQLSchema, OperationDefinition operationDefinition) {
-        if (operationDefinition.getOperation() == OperationDefinition.Operation.MUTATION) {
+    private GraphQLObjectType getOperationRootType(GraphQLSchema graphQLSchema, OperationDefinition.Operation operation) {
+        if (operation == MUTATION) {
             return graphQLSchema.getMutationType();
-
-        } else if (operationDefinition.getOperation() == OperationDefinition.Operation.QUERY) {
+        } else if (operation == QUERY) {
             return graphQLSchema.getQueryType();
-
+        } else if (operation == SUBSCRIPTION) {
+            return graphQLSchema.getSubscriptionType();
         } else {
-            throw new GraphQLException();
+            return assertShouldNeverHappen("Unhandled case.  An extra operation enum has been added without code support");
         }
     }
-
     private void executeOperation(
             JsonGenerator generator,
             ExecutionContext executionContext,
             Object root,
             OperationDefinition operationDefinition) throws IOException {
-        GraphQLObjectType operationRootType = getOperationRootType(executionContext.getGraphQLSchema(), operationDefinition);
+        GraphQLObjectType operationRootType = getOperationRootType(executionContext.getGraphQLSchema(),
+                operationDefinition.getOperation());
 
         FieldCollectorParameters collectorParameters = newParameters()
                 .schema(executionContext.getGraphQLSchema())
@@ -108,18 +111,19 @@ public class StreamingExecution extends Execution {
     }
 
     public void execute(JsonGenerator generator, GraphQLSchema graphQLSchema, Document document, ExecutionId executionId, ExecutionInput executionInput) throws IOException {
+        NodeUtil.GetOperationResult operationResult = NodeUtil.getOperation(document, executionInput.getOperationName());
         ExecutionContext executionContext = new ExecutionContextBuilder()
-                .valuesResolver(new ValuesResolver())
                 .instrumentation(instrumentation)
                 .executionId(executionId)
                 .graphQLSchema(graphQLSchema)
                 .queryStrategy(queryStrategy)
                 .mutationStrategy(mutationStrategy)
                 .subscriptionStrategy(subscriptionStrategy)
+                .operationDefinition(operationResult.operationDefinition)
                 .context(executionInput.getContext())
+                .fragmentsByName(operationResult.fragmentsByName)
                 .root(executionInput.getRoot())
                 .document(document)
-                .operationName(executionInput.getOperationName())
                 .variables(executionInput.getVariables())
                 .build();
 

@@ -99,11 +99,9 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     public Response query(String q) throws Exception {
         return query(new GraphQLQuery(q));
-
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-
         ExecutionResult executionResult = GraphQL.newGraphQL(schema).build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(q.getQuery())
@@ -119,7 +117,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         // FIXME: Ugly: have to reinitialise the schema in this transaction
         // otherwise iterables will be invalid.
         final StreamingGraphQL ql = new StreamingGraphQL(schema);
-        final Document document = ql.parseAndValidate(q.getQuery());
+        final Document document = ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariablesAsMap());
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory

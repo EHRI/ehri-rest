@@ -20,14 +20,20 @@
 package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.Lists;
 import eu.ehri.extension.errors.ExecutionError;
 import graphql.ExecutionInput;
+import graphql.GraphQLError;
 import graphql.InvalidSyntaxError;
-import graphql.execution.ExecutionId;
 import graphql.execution.AsyncExecutionStrategy;
+import graphql.execution.ExecutionId;
+import graphql.execution.ValuesResolver;
 import graphql.execution.instrumentation.NoOpInstrumentation;
 import graphql.language.Document;
+import graphql.language.NodeUtil;
+import graphql.language.OperationDefinition;
 import graphql.language.SourceLocation;
+import graphql.language.VariableDefinition;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationError;
@@ -73,15 +79,15 @@ public class StreamingGraphQL {
     public void execute(JsonGenerator generator, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
         assertNotNull(arguments, "arguments can't be null");
         log.trace("Executing request. operation name: {}. Request: {} ", operationName, requestString);
-        Document document = parseAndValidate(requestString);
+        Document document = parseAndValidate(requestString, operationName, arguments);
         execute(generator, requestString, document, operationName, context, arguments);
     }
 
-    public Document parseAndValidate(String requestString) {
+    public Document parseAndValidate(String query, String operationName, Map<String, Object> variables) {
         Parser parser = new Parser();
         Document document;
         try {
-            document = parser.parseDocument(requestString);
+            document = parser.parseDocument(query);
         } catch (Exception e) {
             RecognitionException recognitionException = (RecognitionException) e.getCause();
             SourceLocation sourceLocation = new SourceLocation(recognitionException.getOffendingToken().getLine(),
@@ -95,6 +101,22 @@ public class StreamingGraphQL {
         if (validationErrors.size() > 0) {
             throw new ExecutionError(validationErrors);
         }
+
+        NodeUtil.GetOperationResult operationResult = NodeUtil.getOperation(document, operationName);
+        OperationDefinition operationDefinition = operationResult.operationDefinition;
+
+        ValuesResolver valuesResolver = new ValuesResolver();
+        List<VariableDefinition> variableDefinitions = operationDefinition.getVariableDefinitions();
+
+        try {
+            valuesResolver.coerceArgumentValues(graphQLSchema, variableDefinitions, variables);
+        } catch (RuntimeException rte) {
+            if (rte instanceof GraphQLError) {
+                throw new ExecutionError(Lists.newArrayList((GraphQLError)rte));
+            }
+            throw rte;
+        }
+
         return document;
     }
 }
