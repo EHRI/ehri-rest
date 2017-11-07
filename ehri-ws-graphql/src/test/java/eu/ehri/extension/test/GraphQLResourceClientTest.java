@@ -20,8 +20,8 @@
 package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
+import com.google.common.collect.Maps;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -34,11 +34,12 @@ import eu.ehri.project.persistence.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
+import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
+import static com.sun.jersey.api.client.ClientResponse.Status.INTERNAL_SERVER_ERROR;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -197,11 +198,11 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
     public void testGraphQLQueryVariables() throws Exception {
         String testQuery = readResourceFileAsString("testquery-variables.graphql");
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
-        ObjectNode vars = jsonMapper.createObjectNode();
+        Map<String, Object> vars = Maps.newHashMap();
         vars.put("n", 4);
 
         ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
-                .entity(new GraphQLQuery(testQuery, jsonMapper.writeValueAsString(vars), null))
+                .entity(new GraphQLQuery(testQuery, vars, null))
                 .post(ClientResponse.class);
 
         JsonNode data = response.getEntity(JsonNode.class);
@@ -212,11 +213,26 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         vars.put("from", data.path("data").path("test").path("pageInfo").path("nextPage").textValue());
         ClientResponse nextResponse = callAs(getAdminUserProfileId(), queryUri)
-                .entity(new GraphQLQuery(testQuery, jsonMapper.writeValueAsString(vars), null))
+                .entity(new GraphQLQuery(testQuery, vars, null))
                 .post(ClientResponse.class);
         JsonNode nextData = nextResponse.getEntity(JsonNode.class);
         assertEquals(1, nextData.path("data").path("test").path("items").size());
         assertStatus(OK, nextResponse);
+    }
+
+    @Test
+    public void testGraphQLBadQueryVariable() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-variables.graphql");
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        Map<String, Object> vars = Maps.newHashMap();
+        vars.put("n", 1234567891011L);
+
+        ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
+                .entity(new GraphQLQuery(testQuery, vars, null))
+                .post(ClientResponse.class);
+        System.out.println(response.getEntity(String.class));
+        // FIXME: Shouldn't this return
+        assertStatus(INTERNAL_SERVER_ERROR, response);
     }
 
     @Test
@@ -225,7 +241,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
 
         ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
-                .entity(new GraphQLQuery(testQuery, "null", null))
+                .entity(new GraphQLQuery(testQuery, null, null))
                 .post(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -254,6 +270,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .entity(testQuery)
                 .post(ClientResponse.class);
 
+        assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
         assertEquals("ValidationError",
                 data.path("errors").path(0).path("type").textValue());
