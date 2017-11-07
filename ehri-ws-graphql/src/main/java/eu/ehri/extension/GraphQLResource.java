@@ -117,7 +117,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         // FIXME: Ugly: have to reinitialise the schema in this transaction
         // otherwise iterables will be invalid.
         final StreamingGraphQL ql = new StreamingGraphQL(schema);
-        final Document document = ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariablesAsMap());
+        final Document document = ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory
