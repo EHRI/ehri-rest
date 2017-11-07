@@ -20,30 +20,21 @@
 package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
 public class GraphQLQuery {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     private final String query;
-    private final String variables;
+    private final Map<String, Object> variables;
     private final String operationName;
-
-    private static final TypeReference<Map<String, Object>> ref = new TypeReference<Map<String, Object>>() {
-    };
 
     @JsonCreator
     public GraphQLQuery(@JsonProperty("query") String query,
-            @JsonProperty("variables") String variables,
+            @JsonProperty("variables") Map<String, Object> variables,
             @JsonProperty("operationName") String operationName) {
         this.query = query;
         this.variables = variables;
@@ -51,20 +42,15 @@ public class GraphQLQuery {
     }
 
     public GraphQLQuery(String query) {
-        this(query, "\"{}\"", null);
+        this(query, Collections.emptyMap(), null);
     }
 
     public String getQuery() {
         return query;
     }
 
-    @JsonIgnore
-    public Map<String, Object> getVariablesAsMap() {
-        return deserializeVariables(variables);
-    }
-
-    public String getVariables() {
-        return variables;
+    public Map<String, Object> getVariables() {
+        return variables != null ? variables : Collections.emptyMap();
     }
 
     public String getOperationName() {
@@ -77,14 +63,5 @@ public class GraphQLQuery {
         m.put("query", query);
         m.put("variables", variables);
         return m.toString();
-    }
-
-    private static Map<String, Object> deserializeVariables(String s) {
-        try {
-            Map<String, Object> value = mapper.readValue(s == null ? "" : s, ref);
-            return value != null ? value : Collections.emptyMap();
-        } catch (IOException e) {
-            return Collections.emptyMap();
-        }
     }
 }
