@@ -547,6 +547,12 @@
     type: associative
     body: Test link
   relationships:
+    hasDate:
+      id: link1-dp1
+      type: DatePeriod
+      date:
+        startDate: !!str 1920-01-01
+        endDate: !!str 1950-01-01
     hasLinkTarget:
      - c1
      - c4

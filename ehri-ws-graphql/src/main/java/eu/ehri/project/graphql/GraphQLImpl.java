@@ -1265,6 +1265,7 @@ public class GraphQLImpl {
             .name(Entities.LINK)
             .description("A link")
             .fields(entityFields)
+            .field(datePeriodFieldDefinition())
             .field(nullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
             .field(nullAttr(Ontology.LINK_HAS_FIELD, "The field to which this link relates"))
             .field(listFieldDefinition("targets", "The link's targets", linkableType,
