@@ -148,7 +148,7 @@ query test {
         items {
             body
             targets {
-                ... on HistoricalAgent {
+                ... on Entity {
                     id
                 }
             }

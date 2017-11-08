@@ -38,7 +38,7 @@ query dates {
     all: DatePeriodQuery(from: "1900") {
         temporalItems {
             items {
-                ... on HistoricalAgent {
+                ... on Entity {
                     id
                 }
             }

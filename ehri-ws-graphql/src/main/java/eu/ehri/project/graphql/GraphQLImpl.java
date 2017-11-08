@@ -936,7 +936,8 @@ public class GraphQLImpl {
             .possibleTypes(
                     new GraphQLTypeReference(Entities.DOCUMENTARY_UNIT),
                     new GraphQLTypeReference(Entities.REPOSITORY),
-                    new GraphQLTypeReference(Entities.HISTORICAL_AGENT))
+                    new GraphQLTypeReference(Entities.HISTORICAL_AGENT),
+                    new GraphQLTypeReference(Entity.class.getSimpleName()))
             .typeResolver(entityTypeResolver)
             .name(Temporal.class.getSimpleName())
             .description("A type with descriptions that have temporal data")
@@ -962,7 +963,8 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.REPOSITORY),
                     new GraphQLTypeReference(Entities.HISTORICAL_AGENT),
                     new GraphQLTypeReference(Entities.CVOC_CONCEPT),
-                    new GraphQLTypeReference(Entities.COUNTRY)
+                    new GraphQLTypeReference(Entities.COUNTRY),
+                    new GraphQLTypeReference(Entity.class.getSimpleName())
             )
             .typeResolver(entityTypeResolver)
             .name(Linkable.class.getSimpleName())
