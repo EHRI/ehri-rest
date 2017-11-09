@@ -38,7 +38,7 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         assertEquals("c1", node.path("from_to_1").path("items").path(0).path("id").asText());
         assertEquals(2, node.path("from_to_2").path("items").size());
         assertEquals(3, node.path("from").path("items").size());
-        assertEquals(4, node.path("to").path("items").size());
+        assertEquals(3, node.path("to").path("items").size());
         assertEquals(4, node.path("all").path("items").size());
     }
 }

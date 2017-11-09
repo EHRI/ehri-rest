@@ -434,18 +434,18 @@ public class GraphQLImpl {
 
             String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v),\n"
                     + "       (a: UserProfile {__id:{accessor}})-[:belongsTo*]->(g)\n"
-                    + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
+                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
                     + "    AND (NOT (v)-[:access]->()\n" +
                     "        OR (v)-[:access]->(a)\n" +
                     "        OR (v)-[:access]->(g))\n";
 
             String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v)\n"
-                    + "  WHERE dp.startDate >= {from} AND {to} <= dp.endDate\n"
+                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
                     + "    AND NOT (v)-[:access]->()\n";
 
             Map<String, Object> params = ImmutableMap.of(
                     "from", from != null ? from : "",
-                    "to", to != null ? to : "",
+                    "to", (to != null ? to : "") + "a", // appended 'a' for lexical sorting
                     "offset", offset,
                     "limit", limit < 0 ? Integer.MAX_VALUE : limit,
                     "accessor", accessor.getId()
