@@ -391,9 +391,7 @@ public class GraphQLImpl {
                 return null;
             }
         };
-    }
-
-    ;
+    };
 
     private static final DataFetcher idDataFetcher =
             env -> ((Entity) env.getSource()).getProperty(EntityType.ID_KEY);
@@ -509,18 +507,10 @@ public class GraphQLImpl {
         Entity source = env.getSource();
         Iterable<Link> links = source.as(Linkable.class).getLinks();
         return StreamSupport.stream(links.spliterator(), false).map(link -> {
-
-            String context = StreamSupport.stream(link.getLinkBodies().spliterator(), false)
-                    .filter(ap -> ap.getType().equals(Entities.ACCESS_POINT))
-                    .findFirst()
-                    .map(ap -> ap.as(AccessPoint.class).getRelationshipType().name())
-                    .orElse(link.getDescription());
-
             Linkable target = Iterables.tryFind(link.getLinkTargets(),
                     t -> t != null && !t.equals(source)).orNull();
-            return target == null ? null : mapOf("context", context, "item", target);
-        }).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            return target == null ? null : mapOf("context", link, "item", target);
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     };
 
     private static DataFetcher transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
@@ -1022,9 +1012,8 @@ public class GraphQLImpl {
             .description("A related item")
             .field(newFieldDefinition()
                     .name("context")
-                    .description("The context of this relationship, either " +
-                            "as a type of access point or free text")
-                    .type(GraphQLString)
+                    .description("The link object providing context for this relationship")
+                    .type(new GraphQLTypeReference(Entities.LINK))
                     .build())
             .field(relatedItemsItemFieldDefinition())
             .build();

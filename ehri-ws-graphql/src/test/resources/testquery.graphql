@@ -81,11 +81,13 @@ query test {
             }
         }
         related {
-            context
             item {
                 ... on HistoricalAgent {
                     id
                 }
+            }
+            context {
+                id
             }
         }
     }
