@@ -150,9 +150,7 @@ query test {
         items {
             body
             targets {
-                ... on Entity {
-                    id
-                }
+                id
             }
         }
     }
