@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
@@ -153,14 +154,18 @@ public class GraphQLImpl {
         this(manager, api, false);
     }
 
-    private Api api() {
-        return _api;
-    }
-
     public GraphQLSchema getSchema() {
         return GraphQLSchema.newSchema()
                 .query(queryType())
+                // NB: this needed because the date type is only
+                // references via a type reference to avoid forward-
+                // declaration problems...
+                .additionalTypes(Sets.newHashSet(datePeriodType))
                 .build();
+    }
+
+    private Api api() {
+        return _api;
     }
 
     private static String toBase64(String string) {
@@ -706,26 +711,29 @@ public class GraphQLImpl {
                 .dataFetcher(env -> Math.toIntExact(f.apply(env.<Entity>getSource())));
     }
 
+    private GraphQLFieldDefinition.Builder linkFieldDefinition =
+            listFieldDefinition("links", "This item's links",
+                    new GraphQLTypeReference(Entities.LINK),
+                    oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks()));
+
+    private GraphQLFieldDefinition.Builder annotationsFieldDefinition =
+            listFieldDefinition("annotations", "This item's annotations",
+                    new GraphQLTypeReference(Entities.ANNOTATION),
+                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations()));
+
     private List<GraphQLFieldDefinition> linksAndAnnotationsFields() {
-        return Lists.newArrayList(
-                listFieldDefinition("links", "This item's links",
-                        new GraphQLTypeReference(Entities.LINK),
-                        oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks())).build(),
-                listFieldDefinition("annotations", "This item's annotations",
-                        new GraphQLTypeReference(Entities.ANNOTATION),
-                        oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())).build()
-        );
+        return Lists.newArrayList(linkFieldDefinition.build(), annotationsFieldDefinition.build());
     }
 
-    private GraphQLFieldDefinition.Builder accessPointFieldDefinition() {
-        return listFieldDefinition("accessPoints", "Access points associated with this description",
-                accessPointType, oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
-    }
+    private GraphQLFieldDefinition.Builder accessPointFieldDefinition =
+        listFieldDefinition("accessPoints", "Access points associated with this description",
+                new GraphQLTypeReference(Entities.ACCESS_POINT),
+                oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
 
-    private GraphQLFieldDefinition.Builder datePeriodFieldDefinition() {
-        return listFieldDefinition("dates", "Date periods associated with this description",
-                datePeriodType, oneToManyRelationshipFetcher(d -> d.as(Temporal.class).getDatePeriods()));
-    }
+    private GraphQLFieldDefinition.Builder datePeriodFieldDefinition =
+        listFieldDefinition("dates", "Date periods associated with this description",
+                new GraphQLTypeReference(Entities.DATE_PERIOD),
+                oneToManyRelationshipFetcher(d -> d.as(Temporal.class).getDatePeriods()));
 
     private GraphQLFieldDefinition.Builder itemFieldDefinition(String name, String description,
             GraphQLOutputType type, DataFetcher dataFetcher, GraphQLArgument... arguments) {
@@ -746,6 +754,14 @@ public class GraphQLImpl {
                 .build();
     }
 
+    private GraphQLFieldDefinition relatedItemsItemFieldDefinition() {
+        return newFieldDefinition()
+                .type(linkableInterface)
+                .name("item")
+                .description("The related item")
+                .build();
+    }
+
     // Type definitions...
 
     private static GraphQLOutputType edgeType(GraphQLOutputType wrapped, String description) {
@@ -759,7 +775,7 @@ public class GraphQLImpl {
                 )
                 .field(newFieldDefinition()
                         .name(CURSOR)
-                        .type(GraphQLString)
+                        .type(CursorType)
                         .build()
                 )
                 .build();
@@ -791,7 +807,7 @@ public class GraphQLImpl {
                                 .field(newFieldDefinition()
                                         .name(PREVIOUS_PAGE)
                                         .description("A cursor pointing to the previous page of items")
-                                        .type(GraphQLString)
+                                        .type(CursorType)
                                         .build()
                                 )
                                 .field(newFieldDefinition()
@@ -803,7 +819,7 @@ public class GraphQLImpl {
                                 .field(newFieldDefinition()
                                         .name(NEXT_PAGE)
                                         .description("A cursor pointing to the next page of items")
-                                        .type(GraphQLString)
+                                        .type(CursorType)
                                         .build()
                                 )
                                 .build())
@@ -903,6 +919,14 @@ public class GraphQLImpl {
             .typeResolver(descriptionTypeResolver)
             .build();
 
+    private final GraphQLInterfaceType temporalDescriptionInterface = newInterface()
+            .name(Temporal.class.getSimpleName() + Description.class.getSimpleName())
+            .description("A language-specific item description with dates")
+            .fields(descriptionFields())
+            .field((f) -> datePeriodFieldDefinition)
+            .typeResolver(descriptionTypeResolver)
+            .build();
+
     private final GraphQLInterfaceType describedInterface = newInterface()
             .name(Described.class.getSimpleName())
             .description("An item with multi-lingual descriptions")
@@ -915,14 +939,18 @@ public class GraphQLImpl {
             .build();
 
     private final GraphQLInterfaceType temporalInterface = newInterface()
-            .fields(entityFields)
             .typeResolver(entityTypeResolver)
             .name(Temporal.class.getSimpleName())
+            .fields(entityFields)
+            .field(nonNullAttr(Ontology.IDENTIFIER_KEY, "The item's local identifier"))
+            .field(singleDescriptionFieldDefinition(temporalDescriptionInterface))
+            .field(descriptionsFieldDefinition(temporalDescriptionInterface))
             .description("A type with descriptions that have temporal data")
             .build();
 
     private final GraphQLInterfaceType annotatableInterface = newInterface()
             .fields(entityFields)
+            .field(annotationsFieldDefinition)
             .typeResolver(entityTypeResolver)
             .name(Annotatable.class.getSimpleName())
             .description("A type that can be annotated")
@@ -930,6 +958,7 @@ public class GraphQLImpl {
 
     private final GraphQLInterfaceType linkableInterface = newInterface()
             .fields(entityFields)
+            .field(linkFieldDefinition)
             .typeResolver(entityTypeResolver)
             .name(Linkable.class.getSimpleName())
             .description("A type that can be linked to other items")
@@ -962,8 +991,8 @@ public class GraphQLImpl {
     private final GraphQLObjectType datePeriodType = newObject()
             .name(Entities.DATE_PERIOD)
             .description("A date period")
-            .field(nullAttr(Ontology.DATE_PERIOD_START_DATE, "The start date"))
-            .field(nullAttr(Ontology.DATE_PERIOD_END_DATE, "The end date"))
+            .field(nullAttr(Ontology.DATE_PERIOD_START_DATE, "The start of this period"))
+            .field(nullAttr(Ontology.DATE_PERIOD_END_DATE, "The end of this period"))
             .build();
 
     private final GraphQLObjectType addressType = newObject()
@@ -972,14 +1001,6 @@ public class GraphQLImpl {
             .fields(nullStringAttrs(ContactInfo.values()))
             .fields(listStringAttrs(ContactInfo.values()))
             .build();
-
-    private GraphQLFieldDefinition relatedItemsItemFieldDefinition() {
-        return newFieldDefinition()
-                .type(linkableInterface)
-                .name("item")
-                .description("The related item")
-                .build();
-    }
 
     private final GraphQLObjectType relatedType = newObject()
             .name("Relationship")
@@ -997,45 +1018,45 @@ public class GraphQLImpl {
             .name(Entities.DOCUMENTARY_UNIT_DESCRIPTION)
             .description("An archival description")
             .fields(descriptionFields())
-            .field(accessPointFieldDefinition())
-            .field(datePeriodFieldDefinition())
+            .field(accessPointFieldDefinition)
+            .field(datePeriodFieldDefinition)
             .fields(documentaryUnitDescriptionNullFields)
             .fields(documentaryUnitDescriptionListFields)
-            .withInterface(descriptionInterface)
+            .withInterfaces(descriptionInterface, temporalDescriptionInterface)
             .build();
 
     private final GraphQLObjectType repositoryDescriptionType = newObject()
             .name(Entities.REPOSITORY_DESCRIPTION)
             .description("A repository description")
             .fields(descriptionFields())
-            .field(accessPointFieldDefinition())
+            .field(accessPointFieldDefinition)
             .field(listFieldDefinition("addresses", "Addresses",
                     addressType, oneToManyRelationshipFetcher(d ->
                             d.as(RepositoryDescription.class).getAddresses())))
             .fields(repositoryDescriptionNullFields)
             .fields(repositoryDescriptionListFields)
-            .withInterface(descriptionInterface)
+            .withInterfaces(descriptionInterface)
             .build();
 
     private final GraphQLObjectType historicalAgentDescriptionType = newObject()
             .name(Entities.HISTORICAL_AGENT_DESCRIPTION)
             .description("An historical agent description")
             .fields(descriptionFields())
-            .field(accessPointFieldDefinition())
-            .field(datePeriodFieldDefinition())
+            .field(accessPointFieldDefinition)
+            .field(datePeriodFieldDefinition)
             .fields(historicalAgentDescriptionNullFields)
             .fields(historicalAgentDescriptionListFields)
-            .withInterface(descriptionInterface)
+            .withInterfaces(descriptionInterface, temporalDescriptionInterface)
             .build();
 
     private final GraphQLObjectType conceptDescriptionType = newObject()
             .name(Entities.CVOC_CONCEPT_DESCRIPTION)
             .description("A concept description")
             .fields(descriptionFields())
-            .field(accessPointFieldDefinition())
+            .field(accessPointFieldDefinition)
             .fields(conceptDescriptionNullFields)
             .fields(conceptDescriptionListFields)
-            .withInterface(descriptionInterface)
+            .withInterfaces(descriptionInterface)
             .build();
 
     private static final GraphQLArgument allArgument = newArgument()
@@ -1224,17 +1245,15 @@ public class GraphQLImpl {
             .name(Entities.LINK)
             .description("A link")
             .fields(entityFields)
-            .field(datePeriodFieldDefinition())
             .field(nullAttr(Ontology.LINK_HAS_DESCRIPTION, "The link description"))
             .field(nullAttr(Ontology.LINK_HAS_FIELD, "The field to which this link relates"))
             .field(listFieldDefinition("targets", "The link's targets", linkableInterface,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets())))
             .field(listFieldDefinition("body", "The links's body(s)", accessPointType,
                     oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkBodies())))
-            .field(listFieldDefinition("annotations", "This link's annotations",
-                    new GraphQLTypeReference(Entities.ANNOTATION),
-                    oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations())))
-            .withInterfaces(entityInterface)
+            .field(annotationsFieldDefinition)
+            .field(datePeriodFieldDefinition)
+            .withInterfaces(entityInterface, annotatableInterface)
             .build();
 
     private final GraphQLOutputType countriesConnection = connectionType(
