@@ -41,7 +41,7 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
-            GraphQLSchema schema = new GraphQLImpl(api(validUser), true).getSchema();
+            GraphQLSchema schema = new GraphQLImpl(manager, api(validUser), true).getSchema();
             StreamingGraphQL ql = new StreamingGraphQL(schema);
             ql.execute(generator, testQuery, null, null, Collections.emptyMap());
         }

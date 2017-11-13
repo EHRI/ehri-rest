@@ -1,0 +1,27 @@
+query dates {
+    from_to_1: temporal(startDate: "1939", endDate: "1945", first: 1) {
+        items {
+            id
+        }
+    }
+    from_to_2: temporal(startDate: "1939", endDate: "1945", from: "MQ==") {
+        items {
+            id
+        }
+    }
+    from: temporal(startDate: "1939") {
+        items {
+            id
+        }
+    }
+    to: temporal(endDate: "1945") {
+        items {
+            id
+        }
+    }
+    all: temporal(startDate: "1900") {
+        items {
+            id
+        }
+    }
+}

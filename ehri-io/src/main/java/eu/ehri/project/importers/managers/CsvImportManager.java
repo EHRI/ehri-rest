@@ -83,8 +83,8 @@ public class CsvImportManager extends AbstractImportManager {
             CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(VALUE_DELIMITER).withHeader();
             ObjectReader reader = new CsvMapper().readerFor(Map.class).with(schema);
 
-            try (MappingIterator<Map<String, String>> valueIterator = reader
-                    .readValues(new InputStreamReader(stream, Charsets.UTF_8))) {
+            try (InputStreamReader s = new InputStreamReader(stream, Charsets.UTF_8);
+                 MappingIterator<Map<String, String>> valueIterator = reader.readValues(s)) {
                 while (valueIterator.hasNext()) {
                     Map<String, String> rawData = valueIterator.next();
                     Map<String, Object> dataMap = Maps.newHashMap();

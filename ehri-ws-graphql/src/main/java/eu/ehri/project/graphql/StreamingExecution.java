@@ -20,64 +20,113 @@
 package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import graphql.GraphQLException;
+import graphql.ExecutionInput;
 import graphql.execution.Execution;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionContextBuilder;
+import graphql.execution.ExecutionId;
+import graphql.execution.ExecutionPath;
 import graphql.execution.ExecutionStrategy;
+import graphql.execution.ExecutionStrategyParameters;
+import graphql.execution.ExecutionTypeInfo;
 import graphql.execution.FieldCollector;
-import graphql.execution.ValuesResolver;
+import graphql.execution.FieldCollectorParameters;
+import graphql.execution.NonNullableFieldValidator;
+import graphql.execution.instrumentation.Instrumentation;
 import graphql.language.Document;
 import graphql.language.Field;
+import graphql.language.NodeUtil;
 import graphql.language.OperationDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static graphql.Assert.assertShouldNeverHappen;
+import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
+import static graphql.execution.FieldCollectorParameters.newParameters;
+import static graphql.language.OperationDefinition.Operation.MUTATION;
+import static graphql.language.OperationDefinition.Operation.QUERY;
+import static graphql.language.OperationDefinition.Operation.SUBSCRIPTION;
 
 
 public class StreamingExecution extends Execution {
 
     private FieldCollector fieldCollector = new FieldCollector();
-    private ExecutionStrategy strategy;
+    private final ExecutionStrategy queryStrategy;
+    private final ExecutionStrategy mutationStrategy;
+    private final ExecutionStrategy subscriptionStrategy;
+    private final Instrumentation instrumentation;
 
-    public StreamingExecution(ExecutionStrategy strategy) {
-        super(strategy);
-        this.strategy = strategy;
+    public StreamingExecution(ExecutionStrategy queryStrategy, ExecutionStrategy mutationStrategy, ExecutionStrategy subscriptionStrategy, Instrumentation instrumentation) {
+        super(queryStrategy, mutationStrategy, subscriptionStrategy, instrumentation);
+        this.queryStrategy = queryStrategy;
+        this.mutationStrategy = mutationStrategy;
+        this.subscriptionStrategy = subscriptionStrategy;
+        this.instrumentation = instrumentation;
     }
 
-    private GraphQLObjectType getOperationRootType(GraphQLSchema graphQLSchema, OperationDefinition operationDefinition) {
-        if (operationDefinition.getOperation() == OperationDefinition.Operation.MUTATION) {
+    private GraphQLObjectType getOperationRootType(GraphQLSchema graphQLSchema, OperationDefinition.Operation operation) {
+        if (operation == MUTATION) {
             return graphQLSchema.getMutationType();
-
-        } else if (operationDefinition.getOperation() == OperationDefinition.Operation.QUERY) {
+        } else if (operation == QUERY) {
             return graphQLSchema.getQueryType();
-
+        } else if (operation == SUBSCRIPTION) {
+            return graphQLSchema.getSubscriptionType();
         } else {
-            throw new GraphQLException();
+            return assertShouldNeverHappen("Unhandled case.  An extra operation enum has been added without code support");
         }
     }
-
     private void executeOperation(
             JsonGenerator generator,
             ExecutionContext executionContext,
             Object root,
             OperationDefinition operationDefinition) throws IOException {
-        GraphQLObjectType operationRootType = getOperationRootType(executionContext.getGraphQLSchema(), operationDefinition);
+        GraphQLObjectType operationRootType = getOperationRootType(executionContext.getGraphQLSchema(),
+                operationDefinition.getOperation());
 
-        Map<String, List<Field>> fields = new LinkedHashMap<String, List<Field>>();
-        fieldCollector.collectFields(executionContext, operationRootType, operationDefinition.getSelectionSet(), new ArrayList<String>(), fields);
+        FieldCollectorParameters collectorParameters = newParameters()
+                .schema(executionContext.getGraphQLSchema())
+                .objectType(operationRootType)
+                .fragments(executionContext.getFragmentsByName())
+                .variables(executionContext.getVariables())
+                .build();
 
-        new StreamingExecutionStrategy().execute(generator, executionContext, operationRootType, root, fields);
+        Map<String, List<Field>> fields = fieldCollector.collectFields(collectorParameters, operationDefinition.getSelectionSet());
+
+        ExecutionTypeInfo typeInfo = newTypeInfo().type(operationRootType).build();
+        NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, typeInfo);
+
+        ExecutionStrategyParameters parameters = ExecutionStrategyParameters.newParameters()
+                .typeInfo(typeInfo)
+                .source(root)
+                .fields(fields)
+                .nonNullFieldValidator(nonNullableFieldValidator)
+                .path(ExecutionPath.rootPath())
+                .build();
+
+        new StreamingExecutionStrategy().execute(generator, executionContext, parameters);
     }
 
-    public void execute(JsonGenerator generator, GraphQLSchema graphQLSchema, Object root, Document document, String operationName, Map<String, Object> arguments) throws IOException {
-        ExecutionContextBuilder executionContextBuilder = new ExecutionContextBuilder(new ValuesResolver());
-        ExecutionContext executionContext = executionContextBuilder.build(graphQLSchema, strategy, root, document, operationName, arguments);
-        executeOperation(generator, executionContext, root, executionContext.getOperationDefinition());
+    public void execute(JsonGenerator generator, GraphQLSchema graphQLSchema, Document document, ExecutionId executionId, ExecutionInput executionInput) throws IOException {
+        NodeUtil.GetOperationResult operationResult = NodeUtil.getOperation(document, executionInput.getOperationName());
+        ExecutionContext executionContext = new ExecutionContextBuilder()
+                .instrumentation(instrumentation)
+                .executionId(executionId)
+                .graphQLSchema(graphQLSchema)
+                .queryStrategy(queryStrategy)
+                .mutationStrategy(mutationStrategy)
+                .subscriptionStrategy(subscriptionStrategy)
+                .operationDefinition(operationResult.operationDefinition)
+                .context(executionInput.getContext())
+                .fragmentsByName(operationResult.fragmentsByName)
+                .root(executionInput.getRoot())
+                .document(document)
+                .variables(executionInput.getVariables())
+                .build();
+
+        executeOperation(generator, executionContext, executionInput.getRoot(), executionContext.getOperationDefinition());
     }
 }

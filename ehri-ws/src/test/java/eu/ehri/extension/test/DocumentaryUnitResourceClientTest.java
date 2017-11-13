@@ -35,7 +35,6 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
@@ -208,7 +207,28 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
         assertTrue(!data.isEmpty());
-        Collections.sort(data, bundleComparator);
+        data.sort(bundleComparator);
+        // Extract the first documentary unit. According to the fixtures this
+        // should be named 'c1'.
+        assertEquals(FIRST_DOC_ID, data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));
+    }
+
+    @Test
+    public void testListDocumentaryUnitWithStreaming() throws Exception {
+        MultivaluedMap<String, String> params = new StringKeyIgnoreCaseMultivaluedMap<>();
+        //params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
+        params.add(AbstractResource.LIMIT_PARAM, String.valueOf(-1L));
+
+        WebResource resource = client.resource(entityUri(Entities.DOCUMENTARY_UNIT)).queryParams(params);
+        String s = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .header(AbstractResource.STREAM_HEADER_NAME, "true")
+                .get(String.class);
+
+        List<Bundle> data = decodeList(s);
+        assertTrue(!data.isEmpty());
+        data.sort(bundleComparator);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
         assertEquals(FIRST_DOC_ID, data.get(0).getDataValue(Ontology.IDENTIFIER_KEY));
@@ -221,7 +241,6 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
                 .get(ClientResponse.class);
         String s = response.getEntity(String.class);
         assertStatus(NOT_FOUND, response);
-        System.out.println("Return: " + s);
     }
 
     @Test

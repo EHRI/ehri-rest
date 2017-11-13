@@ -33,7 +33,6 @@ import org.eclipse.jetty.util.log.Log;
 import org.neo4j.helpers.ListenSocketAddress;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.helpers.CommunityServerBuilder;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -46,7 +45,6 @@ import java.util.logging.Logger;
  */
 public class ServerRunner {
 
-    public final static org.slf4j.Logger logger = LoggerFactory.getLogger(ServerRunner.class);
     private static ServerRunner INSTANCE;
 
     // Graph factory.

@@ -183,13 +183,13 @@ public class BatchOperationsTest extends AbstractImporterTest {
         int deleted = new BatchOperations(graph).batchDelete(Lists.newArrayList("a1"),
                 validUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(1, deleted);
-        // By default, total nodes should have increased by 2, since we
-        // deleted 2 nodes (item and description) and created 4:
+        // By default, total nodes should have increased by 1, since we
+        // deleted 3 nodes (item, description, date period) and created 4:
         //  - 1 version node
         //  - 1 event link
         //  - 1 action link
         //  - 1 event
-        assertEquals(nodesBefore + 2, getNodeCount(graph));
+        assertEquals(nodesBefore + 1, getNodeCount(graph));
     }
 
     @Test
@@ -200,11 +200,11 @@ public class BatchOperationsTest extends AbstractImporterTest {
                 .batchDelete(Lists.newArrayList("a1"),
                         validUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(1, deleted);
-        // By default, total nodes should have increased by 1, since we
-        // deleted 2 nodes (item and description) and created 3:
+        // By default, total nodes should have increased by 0, since we
+        // deleted 3 nodes (item, description, date period) and created 4:
         //  - 1 event link
         //  - 1 action link
         //  - 1 event
-        assertEquals(nodesBefore + 1, getNodeCount(graph));
+        assertEquals(nodesBefore, getNodeCount(graph));
     }
 }

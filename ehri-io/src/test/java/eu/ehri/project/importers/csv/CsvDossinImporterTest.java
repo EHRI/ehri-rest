@@ -19,38 +19,38 @@
 
 package eu.ehri.project.importers.csv;
 
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 
 public class CsvDossinImporterTest extends AbstractImporterTest {
 
-    protected final String SINGLE_EAD = "dossin.csv";
     protected final String TEST_REPO = "r1";
 
     @Test
     public void testImportItemsT() throws Exception {
 
-        PermissionScope ps = manager.getEntity(TEST_REPO, PermissionScope.class);
+        Repository ps = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing some Dossin records";
 
         int count = getNodeCount(graph);
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        new CsvImportManager(graph, ps, validUser, false, false, EadImporter.class).importInputStream(ios, logMessage);
+        InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv");
+        ImportLog importLog = new CsvImportManager(graph, ps, validUser, false, false, EadImporter.class)
+                .importInputStream(ios, logMessage);
+        System.out.println(importLog);
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -63,20 +63,8 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
          * systemEvent: 1
          * datePeriod: 4
          */
-//        printGraph(graph);
         assertEquals(count + 22, getNodeCount(graph));
-
-        DocumentaryUnit unit = graph.frame(
-                getVertexByIdentifier(graph, "kd3"),
-                DocumentaryUnit.class);
-
-        assertNotNull(unit);
-        Repository r = unit.getRepository();
-        System.out.println(r.getId());
-        Repository repo = graph.frame(
-                getVertexByIdentifier(graph, TEST_REPO),
-                Repository.class);
-        assertEquals(repo, r);
-
+        DocumentaryUnit unit = manager.getEntity("nl-r1-kd3", DocumentaryUnit.class);
+        assertEquals(ps, unit.getRepository());
     }
 }
