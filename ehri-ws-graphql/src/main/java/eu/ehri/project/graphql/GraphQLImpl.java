@@ -78,10 +78,8 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.TypeResolver;
+import org.apache.commons.codec.binary.Base64;
 
-import javax.xml.bind.DatatypeConverter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -93,10 +91,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static graphql.Scalars.GraphQLBigDecimal;
-import static graphql.Scalars.GraphQLBoolean;
-import static graphql.Scalars.GraphQLInt;
-import static graphql.Scalars.GraphQLString;
+import static graphql.Scalars.*;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLEnumType.newEnum;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
@@ -179,16 +174,12 @@ public class GraphQLImpl {
                 .withEventTypes(supportedEvents.toArray(new EventTypes[supportedEvents.size()]));
     }
 
-    private static String toBase64(String string) {
-        try {
-            return DatatypeConverter.printBase64Binary(string.getBytes("utf-8"));
-        } catch (UnsupportedEncodingException var2) {
-            throw new RuntimeException(var2);
-        }
+    private static String toBase64(String s) {
+        return Base64.encodeBase64String(s.getBytes());
     }
 
-    private static String fromBase64(String string) {
-        return new String(DatatypeConverter.parseBase64Binary(string), Charset.forName("UTF-8"));
+    private static String fromBase64(String s) {
+        return new String(Base64.decodeBase64(s));
     }
 
 
@@ -236,17 +227,13 @@ public class GraphQLImpl {
     private static final GraphQLList GraphQLStringList = new GraphQLList(GraphQLString);
     private static final GraphQLNonNull GraphQLNonNullString = new GraphQLNonNull(GraphQLString);
 
-    private static GraphQLScalarType wrappedString(String name, String description) {
-        return new GraphQLScalarType(name, description, GraphQLString.getCoercing());
-    }
-
-    private static final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
-
-    private static final GraphQLScalarType CursorType = wrappedString("Cursor", "A connection cursor");
+    private static final GraphQLScalarType CursorType =
+            new GraphQLScalarType("Cursor", "A connection cursor", GraphQLString.getCoercing());
 
     private static final GraphQLArgument idArgument = newArgument()
             .name(Bundle.ID_KEY)
-            .type(new GraphQLNonNull(IdType))
+            .description("An item string identifier")
+            .type(new GraphQLNonNull(GraphQLID))
             .build();
 
     // Data fetchers...
