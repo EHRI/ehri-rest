@@ -20,6 +20,7 @@
 package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Charsets;
@@ -131,14 +132,18 @@ public class AbstractResourceClientTest extends RunningServerTest {
         return getItemList(uri, userId, new MultivaluedMapImpl());
     }
 
+    protected List<Bundle> decodeList(String data) throws Exception {
+        TypeReference<LinkedList<Bundle>> typeRef = new TypeReference<LinkedList<Bundle>>() {
+        };
+        return jsonMapper.readValue(data, typeRef);
+    }
+
     /**
      * Get a list of items at some url, as the given user.
      */
     protected List<Bundle> getItemList(URI uri, String userId,
             MultivaluedMap<String, String> params) throws Exception {
-        TypeReference<LinkedList<Bundle>> typeRef = new TypeReference<LinkedList<Bundle>>() {
-        };
-        return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
+        return decodeList(getJson(uri, userId, params));
     }
 
     protected List<List<Bundle>> getItemListOfLists(URI uri, String userId) throws Exception {
@@ -272,7 +277,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
     }
 
 
-    protected final Comparator<Bundle> bundleComparator = (a, b) -> a.getId().compareTo(b.getId());
+    protected final Comparator<Bundle> bundleComparator = Comparator.comparing(Bundle::getId);
 
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
         WebResource resource = client.resource(uri).queryParams(params);

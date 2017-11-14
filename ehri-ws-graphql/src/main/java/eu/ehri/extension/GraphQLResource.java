@@ -3,16 +3,15 @@ package eu.ehri.extension;
 import com.fasterxml.jackson.core.JsonGenerator;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.errors.ExecutionError;
-import eu.ehri.extension.errors.ExecutionException;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.graphql.StreamingGraphQL;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Bundle;
+import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.GraphQLException;
 import graphql.introspection.IntrospectionQuery;
 import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
@@ -53,7 +52,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             GraphQLSchema schema = new GraphQLImpl(api()).getSchema();
             tx.success();
-            return new GraphQL(schema).execute(IntrospectionQuery.INTROSPECTION_QUERY);
+            return GraphQL.newGraphQL(schema).build()
+                    .execute(IntrospectionQuery.INTROSPECTION_QUERY);
         }
     }
 
@@ -74,15 +74,6 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
             Object data = stream ? lazyExecution(schema, q) : strictExecution(schema, q);
             tx.success();
             return Response.ok(data).build();
-        } catch (GraphQLException e) {
-            // Hack: handle non validation of null variables and
-            // irregular integers by returning a proper error...
-            if (e.getMessage().contains("Null value")
-                    || e.getMessage().contains("Int literal")) {
-                throw new ExecutionException(e);
-            } else {
-                throw e;
-            }
         }
     }
 
@@ -97,13 +88,14 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     public Response query(String q) throws Exception {
         return query(new GraphQLQuery(q));
-
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-        ExecutionResult executionResult = new GraphQL(schema).execute(
-                q.getQuery(), (Object) null, q.getVariables());
-
+        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build()
+                .execute(ExecutionInput.newExecutionInput()
+                        .query(q.getQuery())
+                        .operationName(q.getOperationName())
+                        .variables(q.getVariables()).build());
         if (!executionResult.getErrors().isEmpty()) {
             throw new ExecutionError(executionResult.getErrors());
         }
@@ -114,7 +106,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         // FIXME: Ugly: have to reinitialise the schema in this transaction
         // otherwise iterables will be invalid.
         final StreamingGraphQL ql = new StreamingGraphQL(schema);
-        final Document document = ql.parseAndValidate(q.getQuery());
+        final Document document = ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory
@@ -124,7 +116,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                         new GraphQLImpl(api(), true).getSchema());
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
-                ql2.execute(generator, document, q.getOperationName(),
+                ql2.execute(generator, q.getQuery(), document, q.getOperationName(),
                         null, q.getVariables());
                 generator.writeEndObject();
                 tx.success();

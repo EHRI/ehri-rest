@@ -26,10 +26,12 @@ import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -38,9 +40,6 @@ import static org.junit.Assert.assertTrue;
 
 public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";
-
-    // Depends on single-ead.xml
-    protected final String IMPORTED_ITEM_ID = "HR r000382HR HR-HDA 1551";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -72,8 +71,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         assertEquals(0, log.getUpdated());
         assertEquals(3, log.getCreated());
 
-        Iterable<Vertex> docs = graph.getVertices("identifier",
-                IMPORTED_ITEM_ID);
+        Iterable<Vertex> docs = graph.getVertices("identifier", "HR r000382HR HR-HDA 1551");
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
 
@@ -85,7 +83,9 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
 
         assertEquals(2, unit.getChildCount());
-        List<DocumentaryUnit> children = Ordering.usingToString().sortedCopy(unit.getChildren());
+        List<DocumentaryUnit> children = Ordering
+                .from(Comparator.comparing(Entity::getId))
+                .sortedCopy(unit.getChildren());
         DocumentaryUnit child1 = children.get(0);
         DocumentaryUnit child2 = children.get(1);
 
@@ -95,8 +95,8 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         assertEquals(unit, child2.getPermissionScope());
 
         // Check child IDs
-        assertEquals(targetUnitId + "-hr_hda_223", child1.getId());
-        assertEquals(targetUnitId + "-hr_hda_145", child2.getId());
+        assertEquals(targetUnitId + "-hr_hda_145", child1.getId());
+        assertEquals(targetUnitId + "-hr_hda_223", child2.getId());
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action

@@ -81,10 +81,10 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         // Without the X-Stream header we should get strict execution.
         assertNull(response.getHeaders().getFirst("Transfer-Encoding"));
-        assertStatus(OK, response);
 
         JsonNode data = response.getEntity(JsonNode.class);
         //System.out.println(data);
+        assertStatus(OK, response);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
         assertEquals(1, data.path("data").path("c1")
@@ -101,6 +101,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .path("children").path("items").path(0)
                 .path("children").path("items").path(0)
                 .path("id").textValue());
+        assertEquals("a1", data.path("data").path("c3").path("related")
+                .path(0).path("item").path("id").textValue());
         assertEquals("Amsterdam", data.path("data").path("c1").path("repository")
                 .path("english").path("addresses").path(0)
                 .path("municipality").textValue());
@@ -174,8 +176,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("ValidationError",
-                data.path("errors").path(0).path("type").textValue());
+        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id",
+                data.path("errors").path(0).path("message").textValue());
     }
 
     @Test
@@ -231,8 +233,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .entity(new GraphQLQuery(testQuery, vars, null))
                 .post(ClientResponse.class);
         System.out.println(response.getEntity(String.class));
-        // FIXME: Shouldn't this return
-        assertStatus(INTERNAL_SERVER_ERROR, response);
+        assertStatus(BAD_REQUEST, response);
     }
 
     @Test
@@ -254,9 +255,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .header(AbstractResource.STREAM_HEADER_NAME, "true")
                 .entity(testQuery)
                 .post(ClientResponse.class);
-
-        assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
         JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertFalse(data.path("data").path("topLevelDocumentaryUnits").path("items").path(0).isMissingNode());
     }
@@ -272,7 +272,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("ValidationError",
-                data.path("errors").path(0).path("type").textValue());
+        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id",
+                data.path("errors").path(0).path("message").textValue());
     }
 }

@@ -71,6 +71,11 @@ query test {
         ancestors {
             id
         }
+        systemEvents {
+            eventType
+            timestamp
+            logMessage
+        }
     }
 
     c3: DocumentaryUnit(id: "c3") {
@@ -78,6 +83,16 @@ query test {
             ...desc
             repository {
                 ...desc
+            }
+        }
+        related {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+            context {
+                id
             }
         }
     }
@@ -141,7 +156,6 @@ query test {
             body
             targets {
                 id
-                type
             }
         }
     }

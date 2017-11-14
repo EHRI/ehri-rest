@@ -23,8 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import graphql.GraphQLError;
+import graphql.GraphqlErrorHelper;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -42,15 +42,10 @@ public class ExecutionError extends WebApplicationException {
     private static String errorToJson(List<? extends GraphQLError> errors) {
         try {
             return mapper.writeValueAsString(
-                    ImmutableMap.of("errors", errors.stream().map(e -> ImmutableMap.of(
-                            "message", e.getMessage(),
-                            "location", e.getLocations() == null ? Lists.newArrayList() : e.getLocations()
-                                        .stream().map(s -> ImmutableMap.of(
-                                    "line", s.getLine(),
-                                    "column", s.getColumn()
-                            )).collect(Collectors.toList()),
-                            "type", e.getErrorType().name()
-                            )).collect(Collectors.toList())
+                    ImmutableMap.of("errors", errors
+                            .stream()
+                            .map(GraphqlErrorHelper::toSpecification)
+                            .collect(Collectors.toList())
                     )
             );
         } catch (JsonProcessingException err) {
