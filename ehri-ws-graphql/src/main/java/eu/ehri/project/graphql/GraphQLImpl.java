@@ -21,19 +21,14 @@ package eu.ehri.project.graphql;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.QueryApi;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.definitions.ContactInfo;
 import eu.ehri.project.definitions.CountryInfo;
 import eu.ehri.project.definitions.DefinitionList;
@@ -57,7 +52,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
@@ -162,18 +156,16 @@ public class GraphQLImpl {
       EventTypes.annotation
     );
 
-    private final GraphManager manager;
     private final Api _api;
     private final boolean stream;
 
-    public GraphQLImpl(GraphManager manager, Api api, boolean stream) {
-        this.manager = manager;
+    public GraphQLImpl(Api api, boolean stream) {
         this._api = api;
         this.stream = stream;
     }
 
-    public GraphQLImpl(GraphManager manager, Api api) {
-        this(manager, api, false);
+    public GraphQLImpl(Api api) {
+        this(api, false);
     }
 
     public GraphQLSchema getSchema() {
@@ -450,62 +442,6 @@ public class GraphQLImpl {
             } else {
                 return Lists.newArrayList(obj);
             }
-        };
-    }
-
-    // Horrific proof-of-concept implementation of querying
-    // via dates, using Cypher, with access control.
-    private DataFetcher<Map<String, Object>> temporalDataFetcher() {
-        return env -> {
-            String from = env.getArgument(Ontology.DATE_PERIOD_START_DATE);
-            String to = env.getArgument(Ontology.DATE_PERIOD_END_DATE);
-            int limit = getLimit(env.getArgument(FIRST_PARAM), stream);
-            int offset = getOffset(env.getArgument(AFTER_PARAM), env.getArgument(FROM_PARAM));
-
-            Accessor accessor = api().accessor();
-            Neo4j2Graph ng = (Neo4j2Graph) manager.getGraph().getBaseGraph();
-
-            String authQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v),\n"
-                    + "       (a: UserProfile {__id:{accessor}})-[:belongsTo*]->(g)\n"
-                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
-                    + "    AND (NOT (v)-[:access]->()\n" +
-                    "        OR (v)-[:access]->(a)\n" +
-                    "        OR (v)-[:access]->(g))\n";
-
-            String anonQ = "MATCH (dp:DatePeriod)-[:hasDate]-(dc)-[:describes]-(v)\n"
-                    + "  WHERE dp.startDate >= {from} AND dp.endDate <= {to}\n"
-                    + "    AND NOT (v)-[:access]->()\n";
-
-            Map<String, Object> params = ImmutableMap.of(
-                    "from", from != null ? from : "",
-                    "to", (to != null ? to : "") + "a", // appended 'a' for lexical sorting
-                    "offset", offset,
-                    "limit", limit < 0 ? Integer.MAX_VALUE : limit,
-                    "accessor", accessor.getId()
-            );
-
-            String q = (accessor.isAnonymous() ? anonQ : authQ)
-                    + "RETURN DISTINCT(v) SKIP {offset} LIMIT {limit}\n";
-            logger.debug("Cypher: {}\nWhere: {}", q, params);
-
-            // FIXME: This iter isn't closed, but in practice closing the transaction
-            // should release its resources...
-            CloseableIterable<Vertex> verticesByQuery = ng.getVerticesByQuery(q, params, "v");
-            Iterable<Entity> items = manager.getGraph().frameVertices(verticesByQuery, Entity.class);
-            boolean hasPrev = offset > 0;
-            // Create a list of edges, with the cursor taking into
-            // account each item's offset
-            final AtomicInteger index = new AtomicInteger();
-            Iterable<Map<String, Object>> edges = Iterables.transform(
-                    items, item -> mapOf(
-                            CURSOR, toBase64(String.valueOf(offset + index.getAndIncrement())),
-                            NODE, item
-                    ));
-
-            String prevCursor = toBase64(String.valueOf(offset - limit));
-            String nextCursor = toBase64(String.valueOf(offset + limit));
-
-            return connectionData(items, edges, nextCursor, hasPrev ? prevCursor : null);
         };
     }
 
@@ -1364,22 +1300,9 @@ public class GraphQLImpl {
             new GraphQLTypeReference(Entities.LINK),
             "links", "A list of links");
 
-
-    private final GraphQLOutputType temporalConnection = connectionType(
-            temporalInterface,
-            "temporalItems", "A list of items with temporal data");
-
-
     private GraphQLObjectType queryType() {
         return newObject()
                 .name("Root")
-
-                .field(
-                        connectionFieldDefinition("temporal", "Query items within a date period",
-                                temporalConnection, temporalDataFetcher(),
-                                newArgument().name(Ontology.DATE_PERIOD_START_DATE).description("From date, inclusive").type(DatePrefixType).build(),
-                                newArgument().name(Ontology.DATE_PERIOD_END_DATE).description("To date, inclusive").type(DatePrefixType).build())
-                            .deprecate("This field is experimental and likely to be changed in the future."))
 
                 // Single item types...
                 .field(itemFieldDefinition(Entities.DOCUMENTARY_UNIT, "Fetch a single documentary unit",
@@ -1401,6 +1324,7 @@ public class GraphQLImpl {
                 .field(itemFieldDefinition(Entities.LINK, "Fetch a single link",
                         linkType, entityIdDataFetcher(Entities.LINK), idArgument))
 
+                // Top level item connections
                 .field(connectionFieldDefinition("documentaryUnits", "A page of documentary units",
                         documentaryUnitsConnection,
                         entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT)))
