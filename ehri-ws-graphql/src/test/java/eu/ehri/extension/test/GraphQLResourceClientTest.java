@@ -233,8 +233,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .entity(new GraphQLQuery(testQuery, vars, null))
                 .post(ClientResponse.class);
         System.out.println(response.getEntity(String.class));
-        // FIXME: Shouldn't this return
-        assertStatus(INTERNAL_SERVER_ERROR, response);
+        assertStatus(BAD_REQUEST, response);
     }
 
     @Test

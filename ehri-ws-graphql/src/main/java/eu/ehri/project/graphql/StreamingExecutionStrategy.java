@@ -47,15 +47,12 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLUnionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
@@ -70,8 +67,6 @@ import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvir
  * and rationalise things for easier maintenance and upgrading.
  */
 public class StreamingExecutionStrategy extends ExecutionStrategy {
-
-    private static final Logger log = LoggerFactory.getLogger(StreamingExecutionStrategy.class);
 
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
         generator.writeStartObject();

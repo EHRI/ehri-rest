@@ -3,7 +3,6 @@ package eu.ehri.extension;
 import com.fasterxml.jackson.core.JsonGenerator;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.errors.ExecutionError;
-import eu.ehri.extension.errors.ExecutionException;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
@@ -13,7 +12,6 @@ import eu.ehri.project.persistence.Bundle;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.GraphQLException;
 import graphql.introspection.IntrospectionQuery;
 import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
@@ -76,15 +74,6 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
             Object data = stream ? lazyExecution(schema, q) : strictExecution(schema, q);
             tx.success();
             return Response.ok(data).build();
-        } catch (GraphQLException e) {
-            // Hack: handle non validation of null variables and
-            // irregular integers by returning a proper error...
-            if (e.getMessage().contains("Null value")
-                    || e.getMessage().contains("Int literal")) {
-                throw new ExecutionException(e);
-            } else {
-                throw e;
-            }
         }
     }
 

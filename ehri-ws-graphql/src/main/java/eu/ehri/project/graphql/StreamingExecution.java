@@ -54,7 +54,7 @@ import static graphql.language.OperationDefinition.Operation.SUBSCRIPTION;
 
 public class StreamingExecution extends Execution {
 
-    private FieldCollector fieldCollector = new FieldCollector();
+    private final FieldCollector fieldCollector = new FieldCollector();
     private final ExecutionStrategy queryStrategy;
     private final ExecutionStrategy mutationStrategy;
     private final ExecutionStrategy subscriptionStrategy;

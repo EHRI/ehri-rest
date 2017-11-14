@@ -65,10 +65,6 @@ import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
 import graphql.TypeResolutionEnvironment;
-import graphql.language.StringValue;
-import graphql.schema.Coercing;
-import graphql.schema.CoercingParseValueException;
-import graphql.schema.CoercingSerializeException;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
@@ -82,8 +78,6 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.TypeResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
@@ -96,7 +90,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -114,8 +107,6 @@ import static graphql.schema.GraphQLObjectType.newObject;
  * Implementation of a GraphQL schema over the API
  */
 public class GraphQLImpl {
-
-    private static final Logger logger = LoggerFactory.getLogger(GraphQLImpl.class);
 
     private static final String SLICE_PARAM = "at";
     private static final String FIRST_PARAM = "first";
@@ -248,43 +239,6 @@ public class GraphQLImpl {
     private static GraphQLScalarType wrappedString(String name, String description) {
         return new GraphQLScalarType(name, description, GraphQLString.getCoercing());
     }
-
-    private static final GraphQLScalarType DatePrefixType = new GraphQLScalarType(
-            "DatePrefix", "A date prefix in YYYY-MM-DD format", new Coercing<String, String>() {
-        private final Pattern pattern = Pattern.compile("\\d\\d\\d\\d(-\\d\\d(-\\d\\d)?)?");
-
-        private String convertImpl(Object input) {
-            if (input instanceof String && pattern.matcher((String) input).matches()) {
-                return (String) input;
-            }
-            return null;
-        }
-
-        @Override
-        public String serialize(Object input) {
-            String result = convertImpl(input);
-            if (result == null) {
-                throw new CoercingSerializeException("Invalid value '" + input + "' for DatePrefix");
-            }
-            return result;
-        }
-
-        @Override
-        public String parseValue(Object input) {
-            String result = convertImpl(input);
-            if (result == null) {
-                throw new CoercingParseValueException("Invalid value '" + input + "' for DatePrefix");
-            }
-            return result;
-        }
-
-        @Override
-        public String parseLiteral(Object input) {
-            if (!(input instanceof StringValue)) return null;
-            String value = ((StringValue) input).getValue();
-            return pattern.matcher(value).matches() ? value : null;
-        }
-    });
 
     private static final GraphQLScalarType IdType = wrappedString("Id", "An entity global string identifier");
 
@@ -615,37 +569,7 @@ public class GraphQLImpl {
                 .name("systemEvents")
                 .description("Events describing this item's digital curation")
                 .type(new GraphQLList(new GraphQLTypeReference(Entities.SYSTEM_EVENT)))
-                .dataFetcher(itemEventsDataFetcher())
-                .argument(newArgument()
-                    .name(FIRST_PARAM)
-                    .type(GraphQLInt)
-                    .description("The number of items after the cursor")
-                    .build()
-                )
-                .argument(
-                        newArgument()
-                                .name(AFTER_PARAM)
-                                .description("Fetch items after this cursor")
-                                .type(CursorType)
-                                .build()
-                )
-                .argument(newArgument()
-                        .name(FROM_PARAM)
-                        .description("Fetch items from this cursor")
-                        .type(CursorType)
-                        .build()
-                )
-                .argument(
-                        newArgument()
-                                .name(Ontology.DATE_PERIOD_START_DATE)
-                                .description("From date, inclusive").type(DatePrefixType)
-                                .build())
-                .argument(
-                        newArgument()
-                                .name(Ontology.DATE_PERIOD_END_DATE)
-                                .description("To date, inclusive").type(DatePrefixType)
-                                .build()
-                );
+                .dataFetcher(itemEventsDataFetcher());
     }
 
     private static GraphQLFieldDefinition.Builder connectionFieldDefinition(String name, String description,
@@ -718,12 +642,12 @@ public class GraphQLImpl {
                 .dataFetcher(env -> Math.toIntExact(f.apply(env.<Entity>getSource())));
     }
 
-    private GraphQLFieldDefinition.Builder linkFieldDefinition =
+    private final GraphQLFieldDefinition.Builder linkFieldDefinition =
             listFieldDefinition("links", "This item's links",
                     new GraphQLTypeReference(Entities.LINK),
                     oneToManyRelationshipFetcher(r -> r.as(Linkable.class).getLinks()));
 
-    private GraphQLFieldDefinition.Builder annotationsFieldDefinition =
+    private final GraphQLFieldDefinition.Builder annotationsFieldDefinition =
             listFieldDefinition("annotations", "This item's annotations",
                     new GraphQLTypeReference(Entities.ANNOTATION),
                     oneToManyRelationshipFetcher(r -> r.as(Annotatable.class).getAnnotations()));
@@ -732,12 +656,12 @@ public class GraphQLImpl {
         return Lists.newArrayList(linkFieldDefinition.build(), annotationsFieldDefinition.build());
     }
 
-    private GraphQLFieldDefinition.Builder accessPointFieldDefinition =
+    private final GraphQLFieldDefinition.Builder accessPointFieldDefinition =
         listFieldDefinition("accessPoints", "Access points associated with this description",
                 new GraphQLTypeReference(Entities.ACCESS_POINT),
                 oneToManyRelationshipFetcher(d -> d.as(Description.class).getAccessPoints()));
 
-    private GraphQLFieldDefinition.Builder datePeriodFieldDefinition =
+    private final GraphQLFieldDefinition.Builder datePeriodFieldDefinition =
         listFieldDefinition("dates", "Date periods associated with this description",
                 new GraphQLTypeReference(Entities.DATE_PERIOD),
                 oneToManyRelationshipFetcher(d -> d.as(Temporal.class).getDatePeriods()));
@@ -860,10 +784,10 @@ public class GraphQLImpl {
 
     // Interfaces and type resolvers...
 
-    private TypeResolver entityTypeResolver = new TypeResolver() {
+    private final TypeResolver entityTypeResolver = new TypeResolver() {
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-            Entity entity = (Entity) env.getObject();
+            Entity entity = env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT:
                     return documentaryUnitType;
@@ -893,10 +817,10 @@ public class GraphQLImpl {
         }
     };
 
-    private TypeResolver descriptionTypeResolver = new TypeResolver() {
+    private final TypeResolver descriptionTypeResolver = new TypeResolver() {
         @Override
         public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-            Entity entity = (Entity) env.getObject();
+            Entity entity = env.getObject();
             switch (entity.getType()) {
                 case Entities.DOCUMENTARY_UNIT_DESCRIPTION:
                     return documentaryUnitDescriptionType;
