@@ -86,6 +86,10 @@
                             <resource>reference.conf</resource>
                         </transformer>
 
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                            <resource>messages.properties</resource>
+                        </transformer>
+
                         <!-- Resources to not package... -->
                         <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
                             <resources>
