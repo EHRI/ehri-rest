@@ -12,6 +12,19 @@
     <name>Web Service GraphQL Extension</name>
     <description>GraphQL endpoint for web service.</description>
 
+    <build>
+        <!-- Copy messages_*.properties files from the source tree. These are
+        typically used for externalized i18n strings. -->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>ehri-project</groupId>
