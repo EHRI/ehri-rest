@@ -63,7 +63,7 @@ public class IdRegenerator {
 
     public static class IdCollisionError extends Exception {
         IdCollisionError(String from, String to) {
-            super(String.format("Renaming %s to %s collide with existing item",
+            super(String.format("Renaming %s to %s would collide with existing item",
                     from, to));
         }
     }
