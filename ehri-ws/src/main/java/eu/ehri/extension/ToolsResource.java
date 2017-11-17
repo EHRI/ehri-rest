@@ -24,10 +24,10 @@ import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.project.utils.Table;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -36,6 +36,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.AccessPointType;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
@@ -52,6 +53,7 @@ import eu.ehri.project.tools.DbUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
+import eu.ehri.project.utils.Table;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -515,6 +517,62 @@ public class ToolsResource extends AbstractResource {
             }
 
             tx.success();
+            return Table.of(done);
+        } catch (ItemNotFound e) {
+            throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
+        }
+    }
+
+    /**
+     * Takes a CSV file containing two columns: an item global id, and a new parent
+     * ID. The item will be re-parented and a new global ID regenerated.
+     *
+     * @param commit  actually commit changes
+     * @param mapping a comma-separated CSV file, exluding headers.
+     * @return CSV data containing two columns: the old global ID, and
+     * a newly generated global ID, derived from the new hierarchy.
+     */
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Path("reparent")
+    public Table reparent(@QueryParam("commit") @DefaultValue("false") boolean commit, Table mapping)
+            throws DeserializationError {
+        try (final Tx tx = beginTx()) {
+            IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(commit);
+            List<List<String>> done = Lists.newArrayList();
+            for (List<String> row : mapping.rows()) {
+                if (row.size() != 2) {
+                    throw new DeserializationError(
+                            "Invalid table data: must contain 2 columns only");
+                }
+                String id = row.get(0);
+                String newParentId = row.get(1);
+                DocumentaryUnit item = manager
+                        .getEntity(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class);
+                PermissionScope parent = manager.getEntity(newParentId, PermissionScope.class);
+                item.setPermissionScope(parent);
+                if (Entities.DOCUMENTARY_UNIT.equals(parent.getType())) {
+                    parent.as(DocumentaryUnit.class).addChild(item);
+                } else if (Entities.REPOSITORY.equals(parent.getType())) {
+                    item.setRepository(parent.as(Repository.class));
+                } else {
+                    throw new DeserializationError(String.format(
+                            "Unsupported parent type for ID '%s': %s",
+                            newParentId, parent.getType()));
+                }
+                try {
+                    idRegenerator.reGenerateId(item).ifPresent(done::add);
+                } catch (IdRegenerator.IdCollisionError e) {
+                    throw new DeserializationError(String.format(
+                            "%s. Ensure they do not share the same local identifier: '%s'",
+                            e.getMessage(), item.getIdentifier()));
+                }
+            }
+
+            if (commit) {
+                tx.success();
+            }
             return Table.of(done);
         } catch (ItemNotFound e) {
             throw new DeserializationError("Unable to locate item with ID: " + e.getValue());

@@ -163,4 +163,21 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
                 ImmutableList.of("c2", "nl-r1-c1-test1"),
                 ImmutableList.of("c3", "nl-r1-c1-test1-test2")), out.rows());
     }
+
+
+    @Test
+    public void testReparent() throws Exception {
+        WebResource resource = client.resource(ehriUri(ENDPOINT, "reparent"));
+        ClientResponse response = resource
+                .accept("text/csv")
+                .post(ClientResponse.class,
+                        Table.of(ImmutableList.of(
+                                ImmutableList.of("c4", "c1"),
+                                ImmutableList.of("c3", "c1"))));
+        Table out = response.getEntity(Table.class);
+        assertStatus(OK, response);
+        assertEquals(ImmutableList.of(
+                ImmutableList.of("c4", "nl-r1-c1-c4"),
+                ImmutableList.of("c3", "nl-r1-c1-c3")), out.rows());
+    }
 }
