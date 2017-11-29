@@ -31,20 +31,22 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.api.Api;
+import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ApiFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -108,8 +110,11 @@ public abstract class GraphTestBase {
         manager = GraphManagerFactory.getInstance(graph);
     }
 
-    protected FramedGraph<? extends TransactionalGraph> getFramedGraph() {
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+    protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
+        File tempFile = File.createTempFile("neo4j-tmp", ".db");
+        tempFile.deleteOnExit();
+        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory()
+                .newImpermanentDatabaseBuilder(tempFile)
                 .newGraphDatabase();
         try (Transaction tx = rawGraph.beginTx()) {
             Neo4jGraphManager.createIndicesAndConstraints(rawGraph);
