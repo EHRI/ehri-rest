@@ -85,15 +85,15 @@ public class GraphManagerTest {
                 if (annotation != null && ignore == null) {
                     Class<? extends Throwable> expected = annotation.expected();
                     System.err.println(" --- " + cls.getSimpleName() + " invoking test: " + method.getName());
+                    setUp();
                     try {
-                        setUp();
                         method.invoke(this);
-                        tearDown();
                     } catch (InvocationTargetException e) {
-                        if (expected == null
-                                || !e.getTargetException().getClass().equals(expected)) {
+                        if (!e.getTargetException().getClass().equals(expected)) {
                             throw e.getCause();
                         }
+                    } finally {
+                        tearDown();
                     }
                 }
             }

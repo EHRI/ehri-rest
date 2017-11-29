@@ -8,6 +8,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
 import eu.ehri.project.models.EntityClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -23,15 +24,20 @@ import static org.junit.Assert.*;
 public class Neo4jGraphManagerTest {
 
     private GraphManager manager;
+    private FramedGraph<Neo4j2Graph> graph;
 
     @Before
     public void setUp() throws Exception {
-        FramedGraph<Neo4j2Graph> graph = new FramedGraphFactory().create(new Neo4j2Graph(
+        graph = new FramedGraphFactory().create(new Neo4j2Graph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));
         manager = new Neo4jGraphManager<>(graph);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        graph.shutdown();
+    }
 
     @Test
     public void testCreateVertex() throws Exception {
