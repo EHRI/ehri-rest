@@ -83,6 +83,7 @@ query test {
             id
             body
             field
+            by
         }
         ancestors {
             ...desc
