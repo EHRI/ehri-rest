@@ -57,6 +57,7 @@ import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.base.Linkable;
+import eu.ehri.project.models.base.Named;
 import eu.ehri.project.models.base.Temporal;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
@@ -432,6 +433,11 @@ public class GraphQLImpl {
             return null;
         }
     };
+
+    private static final DataFetcher<String> annotationNameDataFetcher =
+            env -> Optional.ofNullable(env.<Entity>getSource().as(Annotation.class)
+                    .getAnnotator())
+                    .map(Named::getName).orElse(null);
 
     private static final DataFetcher<List<Map<String, Object>>> relatedItemsDataFetcher = env -> {
         Entity source = env.getSource();
@@ -1167,6 +1173,13 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, __("annotation.field.body.description")))
             .field(nullAttr(Ontology.ANNOTATION_FIELD, __("annotation.field.field.description")))
             .field(nullAttr(Ontology.ANNOTATION_TYPE, __("annotation.field.annotationType.description")))
+            .field(newFieldDefinition()
+                    .type(GraphQLString)
+                    .name("by")
+                    .description(__("annotation.field.by.description"))
+                    .dataFetcher(annotationNameDataFetcher)
+                    .build()
+            )
             .field(listFieldDefinition("targets", __("annotation.field.targets.description"),
                     annotatableInterface,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))

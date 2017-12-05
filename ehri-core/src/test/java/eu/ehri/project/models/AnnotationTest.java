@@ -28,8 +28,11 @@ import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class AnnotationTest extends ModelTestBase {
@@ -43,18 +46,20 @@ public class AnnotationTest extends ModelTestBase {
     @Test
     public void testUserHasAnnotation() throws ItemNotFound {
         UserProfile mike = manager.getEntity("mike", UserProfile.class);
-        assertTrue(mike.getAnnotations().iterator().hasNext());
-        assertEquals(mike.getAnnotations().iterator().next().getBody(),
-                TEST_ANNOTATION_BODY);
+        List<Annotation> annotations = Lists.newArrayList(mike.getAnnotations());
+        List<String> bodies = annotations.stream().map(Annotation::<String>getBody)
+                .collect(Collectors.toList());
+        assertTrue(bodies.contains(TEST_ANNOTATION_BODY));
     }
 
     @Test
     public void testUserHasAnnotationWithTarget() throws ItemNotFound {
         UserProfile mike = manager.getEntity("mike", UserProfile.class);
         DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getEntity("c3", DocumentaryUnit.class);
         Annotation annotation = mike.getAnnotations().iterator().next();
-        assertTrue(Iterables.contains(mike.getAnnotations(), annotation));
-        assertTrue(Iterables.contains(c1.getAnnotations(), annotation));
+        assertTrue(Iterables.contains(c1.getAnnotations(), annotation)
+            || Iterables.contains(c3.getAnnotations(), annotation));
     }
 
     @Test

@@ -118,6 +118,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .path("annotations").path(0).path("id").textValue());
         assertEquals("scopeAndContent", data.path("data").path("c3")
                 .path("annotations").path(0).path("field").textValue());
+        assertEquals("Mike", data.path("data").path("c3")
+                .path("annotations").path(0).path("by").textValue());
         assertFalse(data.path("data").path("topLevelDocumentaryUnits")
                 .path("items").path(0).path("id").isMissingNode());
         assertFalse(data.path("data").path("wrongType").isMissingNode());

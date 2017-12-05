@@ -76,7 +76,9 @@
     belongsTo:
       - admin
       - kcl
-    hasAnnotation: ann1
+    hasAnnotation:
+      - ann1
+      - ann8
 
 # Reto is a member of the KCL group
 # separately
@@ -455,7 +457,6 @@
     body: Test Annotation
     isPromotable: !!bool true
   relationships:
-    hasAnnotator: mike
     hasAnnotationTarget: c1
     hasAnnotationTargetPart: cd1
     
