@@ -34,7 +34,7 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "wegwijzer.xml";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 

@@ -66,7 +66,7 @@ public class MemShoahTest extends AbstractImporterTest {
         diff.printDebug(System.out);
 
         // How many new nodes will have been created? We should have
-        /**
+        /*
          * relationship: 1
          * events: 2
          * DocumentaryUnit: 1

@@ -53,7 +53,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
     protected final String FONDS = "COLLECTION.JMP.SHOAH/T";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing JMP EAD";
 

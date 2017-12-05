@@ -87,7 +87,7 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
-        /**
+        /*
          * null: 4
          * relationship: 4
          * DocumentaryUnit: 2
@@ -106,7 +106,7 @@ public class YadVashemTest extends AbstractImporterTest {
     }
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 

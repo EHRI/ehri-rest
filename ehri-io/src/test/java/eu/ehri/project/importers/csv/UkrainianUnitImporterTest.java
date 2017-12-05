@@ -43,7 +43,7 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "ukraine_small.csv";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         Bundle ukrainianBundle = Bundle.of(EntityClass.COUNTRY)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "ua");
         Bundle repoBundle = Bundle.of(EntityClass.REPOSITORY).withDataValue(Ontology.IDENTIFIER_KEY, "ua-3311");

@@ -41,7 +41,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "Personalities_small.csv";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         AuthoritativeSet authoritativeSet = manager.getEntity("auths", AuthoritativeSet.class);
         int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
         assertEquals(2, voccount);

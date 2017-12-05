@@ -39,7 +39,7 @@ public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
     protected final String TEST_REPO = "r1";
   
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         UserProfile user = validUser; //graph.frame(graph.getVertex(validUserId), UserProfile.class);
         Repository agent = manager.getEntity(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_USER), Repository.class);
 

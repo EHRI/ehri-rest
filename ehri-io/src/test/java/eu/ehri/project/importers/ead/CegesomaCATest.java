@@ -74,9 +74,6 @@ public class CegesomaCATest extends AbstractImporterTest {
         // Test ID generation is correct
         assertEquals("nl-r1-ca_fe_1437", archdesc.getId());
 
-        /**
-         * Test titles
-         */
         // There should be one DocumentDescription for the <archdesc>
         for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertTrue(dd.getName().startsWith("Dessin caricatural d'un juif ayant "));

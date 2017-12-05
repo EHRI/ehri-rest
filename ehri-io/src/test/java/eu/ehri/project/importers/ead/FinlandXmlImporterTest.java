@@ -43,7 +43,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
 
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 
@@ -55,7 +55,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
 
         // After...
         int countAfter = getNodeCount(graph);
-        /**
+        /*
          * null: 8
          * DocumentaryUnit: 7
          * documentDescription: 7
@@ -92,7 +92,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
 
-        /**
+        /*
          * null: 8
          * property: 1
          * documentDescription: 7

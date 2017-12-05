@@ -32,7 +32,7 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
     protected final String JOHNCAGEXML = "johnCage.xml";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 

@@ -44,7 +44,7 @@ public class Jmp130Test extends AbstractImporterTest {
     protected final String FONDS = "COLLECTION.JMP.ARCHIVE/130";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing JMP EAD";
 
@@ -62,7 +62,7 @@ public class Jmp130Test extends AbstractImporterTest {
         GraphDiff diff = diffGraph(graphState1, graphState2);
         diff.printDebug(System.out);
 
-        /**
+        /*
          * null: 2
          * relationship: 5
          * DocumentaryUnit: 1

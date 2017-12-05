@@ -61,7 +61,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     protected final String FONDS = "wp2-bt";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)

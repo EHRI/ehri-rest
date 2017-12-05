@@ -42,7 +42,7 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a multileveled EAD by IcaAtomMultiLeveled";
 

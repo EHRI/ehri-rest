@@ -48,7 +48,7 @@ public class UshmmTest extends AbstractImporterTest {
     protected final String TEST_REPO = "r1";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by UshmmTest";
 

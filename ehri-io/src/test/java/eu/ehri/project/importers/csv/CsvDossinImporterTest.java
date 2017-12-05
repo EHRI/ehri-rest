@@ -38,7 +38,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
     protected final String TEST_REPO = "r1";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         Repository ps = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing some Dossin records";

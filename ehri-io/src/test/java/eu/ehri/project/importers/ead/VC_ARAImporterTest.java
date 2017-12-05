@@ -34,7 +34,7 @@ public class VC_ARAImporterTest extends AbstractImporterTest {
     protected final String TEST_REPO = "r1";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 

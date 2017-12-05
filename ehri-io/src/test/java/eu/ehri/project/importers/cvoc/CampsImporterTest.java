@@ -40,7 +40,7 @@ public class CampsImporterTest extends AbstractImporterTest {
     protected final String SKOS_FILE_VERSION2 = "cvoc/campsv02.rdf";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
