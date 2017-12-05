@@ -79,6 +79,11 @@ query test {
     }
 
     c3: DocumentaryUnit(id: "c3") {
+        annotations {
+            id
+            body
+            field
+        }
         ancestors {
             ...desc
             repository {

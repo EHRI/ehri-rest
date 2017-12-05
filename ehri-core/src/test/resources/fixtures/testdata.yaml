@@ -540,6 +540,15 @@
       - mike
       - moderators
 
+- id: ann8
+  type: Annotation
+  data:
+    identifier: ann8
+    body: Note on scope content
+    field: scopeAndContent
+  relationships:
+    hasAnnotationTarget: c3
+
 --- # Links
 - id: link1
   type: Link
