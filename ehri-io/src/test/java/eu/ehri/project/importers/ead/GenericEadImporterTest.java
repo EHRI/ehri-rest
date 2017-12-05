@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 public class GenericEadImporterTest extends AbstractImporterTest {
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 

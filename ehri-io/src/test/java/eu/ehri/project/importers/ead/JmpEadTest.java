@@ -44,7 +44,7 @@ public class JmpEadTest extends AbstractImporterTest {
     protected final String FONDS = "COLLECTION.JMP.ARCHIVE/NAD3";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
 

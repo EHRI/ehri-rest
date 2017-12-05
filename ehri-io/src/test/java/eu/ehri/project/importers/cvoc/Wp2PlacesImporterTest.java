@@ -38,7 +38,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
     protected final String SKOS_FILE = "cvoc/wp2_skos_places.xml";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         final String logMessage = "Importing the WP2 places file";
 
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);

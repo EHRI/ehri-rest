@@ -51,7 +51,7 @@ public class Eag2896Test extends AbstractImporterTest {
     private final String AGENT_DESC_ID = "NL-002896#desc";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         Country country = manager.getEntity(TEST_COUNTRY, Country.class);
         final String logMessage = "Importing a single EAG";
 

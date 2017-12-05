@@ -39,7 +39,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
     protected final String SKOS_V2_FILE = "cvoc/ghettos-v20140831.rdf.xml";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);

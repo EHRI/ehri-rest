@@ -66,7 +66,7 @@ public class CegesomaAATest extends AbstractImporterTest {
                 .importInputStream(ios, logMessage);
 
         // How many new nodes will have been created? We should have
-        /**
+        /*
          * event links: 6
          * relationship: 34
          * DocumentaryUnit: 5
@@ -96,9 +96,6 @@ public class CegesomaAATest extends AbstractImporterTest {
         assertEquals(c1.getId() + "-aa_1134_32", c2_1.getId());
         assertEquals(c1.getId() + "-aa_1134_34", c2_2.getId());
 
-        /**
-         * Test titles
-         */
         // There should be one DocumentDescription for the <archdesc>
         for (DocumentaryUnitDescription dd : archdesc.getDocumentDescriptions()) {
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
@@ -131,7 +128,7 @@ public class CegesomaAATest extends AbstractImporterTest {
             assertEquals("item", dd.getProperty("levelOfDescription"));
         }
 
-        /**
+        /*
          * Test hierarchy
          */
         assertEquals(1, archdesc.getChildCount());

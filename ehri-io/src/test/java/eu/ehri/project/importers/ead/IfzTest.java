@@ -73,7 +73,7 @@ public class IfzTest extends AbstractImporterTest {
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
-        /**
+        /*
          * null: 6
          * relationship: 11
          * DocumentaryUnit: 5
@@ -103,7 +103,7 @@ public class IfzTest extends AbstractImporterTest {
         assertEquals(c1.getId() + "-g_2", c2.getId());
         assertEquals(c2.getId() + "-mb_35_10", c3_2.getId());
 
-        /**
+        /*
          * Test titles
          */
         // There should be one DocumentDescription for the <archdesc>
@@ -123,7 +123,7 @@ public class IfzTest extends AbstractImporterTest {
             assertEquals("series", dd.getProperty("levelOfDescription"));
         }
 
-        /**
+        /*
          * Test hierarchy
          */
         assertEquals(1, archdesc.getChildCount());

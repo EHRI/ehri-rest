@@ -45,7 +45,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
     protected final String IMPORTED_ITEM_ID = "C00001";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         Repository agent = manager.getEntity(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by IcaAtomEadSingleEad";
 

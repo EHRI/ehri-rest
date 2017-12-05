@@ -42,7 +42,7 @@ public class DansEadImporterTest extends AbstractImporterTest {
 
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         final String logMessage = "Importing a single EAD";
 

@@ -89,8 +89,6 @@ public class IpnTest extends AbstractImporterTest {
                 VirtualUnit.class);
 
         assertEquals(2, archdesc.getChildCount());
-
-
     }
 
     @Test
@@ -108,7 +106,7 @@ public class IpnTest extends AbstractImporterTest {
         // After...
 
         // How many new nodes will have been created? We should have
-        /**
+        /*
          * null: 4
          * relationship: 4
          * documentaryUnit: 3
@@ -199,7 +197,7 @@ public class IpnTest extends AbstractImporterTest {
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
-        /**
+        /*
          * null: 4
          * relationship: 5
          * documentaryUnit: 3

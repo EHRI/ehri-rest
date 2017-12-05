@@ -71,7 +71,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     }
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);

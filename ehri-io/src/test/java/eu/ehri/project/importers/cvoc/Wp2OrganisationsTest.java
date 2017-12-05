@@ -34,7 +34,7 @@ public class Wp2OrganisationsTest extends AbstractImporterTest {
     protected final String SKOS_FILE = "cvoc/wp2_skos_organisations.rdf";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
         final String logMessage = "Importing a SKOS file";
 
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);

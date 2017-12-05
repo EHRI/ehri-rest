@@ -61,7 +61,7 @@ public class CegesomaABTest extends AbstractImporterTest {
                 .importInputStream(ios, logMessage);
 
         // How many new nodes will have been created? We should have
-        /**
+        /*
          * event links: 2
          * relationship: 3
          * DocumentaryUnit: 1

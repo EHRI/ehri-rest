@@ -57,7 +57,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
     protected final String FONDS = "O.64.2";
 
     @Test
-    public void testImportItemsT() throws Exception {
+    public void testImportItems() throws Exception {
 
         Bundle vocabularyBundle = Bundle.of(EntityClass.CVOC_VOCABULARY)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
