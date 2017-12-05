@@ -75,7 +75,7 @@ public class AclGraphTest extends AbstractFixtureTest {
     public void testGetEdgesAttachedToInvisibleNodes() throws Exception {
         List<Edge> edges1 = Lists.newArrayList(validUserGraph.getEdges());
         List<Edge> edges2 = Lists.newArrayList(invalidUserGraph.getEdges());
-        assertEquals(edges2.size() + 38, edges1.size());
+        assertEquals(edges2.size() + 39, edges1.size());
     }
 
     @Test

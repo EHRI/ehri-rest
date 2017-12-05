@@ -1164,7 +1164,9 @@ public class GraphQLImpl {
             .name(Entities.ANNOTATION)
             .description(__("annotation.description"))
             .fields(entityFields)
-            .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, __("annotation.body.description")))
+            .field(nonNullAttr(Ontology.ANNOTATION_NOTES_BODY, __("annotation.field.body.description")))
+            .field(nullAttr(Ontology.ANNOTATION_FIELD, __("annotation.field.field.description")))
+            .field(nullAttr(Ontology.ANNOTATION_TYPE, __("annotation.field.annotationType.description")))
             .field(listFieldDefinition("targets", __("annotation.field.targets.description"),
                     annotatableInterface,
                     oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets())))
