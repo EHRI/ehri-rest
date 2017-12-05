@@ -120,7 +120,7 @@
         <!-- Overridden by child poms we don't want to create a site for -->
         <maven-site-plugin.skip>false</maven-site-plugin.skip>
 
-        <neo4j.version>3.2.3</neo4j.version>
+        <neo4j.version>3.3.5</neo4j.version>
         <blueprints.version>2.6.0</blueprints.version>
     </properties>
 
