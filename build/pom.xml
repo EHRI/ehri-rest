@@ -74,6 +74,7 @@
                             <include>org.apache.commons:commons-lang3</include>
                             <include>org.apache.commons:commons-compress</include>
                             <include>com.typesafe:config</include>
+                            <include>com.flipkart.zjsonpatch:zjsonpatch</include>
 
                             <!-- GraphQL deps -->
                             <include>org.antlr:antlr4-runtime</include>

@@ -164,6 +164,11 @@
             <version>1.12</version>
         </dependency>
         <dependency>
+            <groupId>com.flipkart.zjsonpatch</groupId>
+            <artifactId>zjsonpatch</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
             <version>${project.parent.version} </version>
