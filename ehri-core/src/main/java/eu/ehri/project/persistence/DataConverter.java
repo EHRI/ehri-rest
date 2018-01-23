@@ -23,9 +23,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -138,6 +140,24 @@ class DataConverter {
             return writer.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             throw new SerializationError("Error writing bundle to JSON", e);
+        }
+    }
+
+    /**
+     * Return a JSON-Patch representation of the difference between
+     * two bundles. Metadata is included.
+     *
+     * @param source the source bundle
+     * @param target the target bundle
+     * @return a JSON-Patch, as a string
+     */
+    public static String diffBundles(Bundle source, Bundle target) {
+        try {
+            JsonNode diff = JsonDiff.asJson(
+                    mapper.valueToTree(source), mapper.valueToTree(target));
+            return writer.writeValueAsString(diff);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

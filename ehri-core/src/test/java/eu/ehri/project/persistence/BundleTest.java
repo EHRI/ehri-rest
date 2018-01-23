@@ -19,6 +19,8 @@
 
 package eu.ehri.project.persistence;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -38,7 +40,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import static org.junit.Assert.*;
@@ -238,7 +239,7 @@ public class BundleTest {
                     && ("en".equals(lang));
         };
         Bundle filtered = bundle.filterRelations(filter);
-        assertFalse((Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
+        assertFalse(bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
         assertTrue(filtered.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
     }
 
@@ -420,5 +421,15 @@ public class BundleTest {
         assertTrue(bundle.find(d -> d.getDataValue(Ontology.LANGUAGE) != null).isPresent());
         assertTrue(bundle.find(d -> "foobar".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))).isPresent());
         assertFalse(bundle.find(d -> "test".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))).isPresent());
+    }
+
+    @Test
+    public void testDiff() throws Exception {
+        String diff = bundle.diff(bundle.withDataValue("foo", "bar"));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readValue(diff, JsonNode.class);
+        assertEquals("add", node.path(0).path("op").textValue());
+        assertEquals("/data/foo", node.path(0).path("path").textValue());
+        assertEquals("bar", node.path(0).path("value").textValue());
     }
 }

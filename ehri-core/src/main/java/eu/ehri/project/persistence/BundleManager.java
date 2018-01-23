@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+
 /**
  * Class responsible for creating, updating and deleting Bundles.
  */
@@ -203,13 +204,16 @@ public final class BundleManager {
             Bundle currentBundle = serializer.vertexToBundle(node);
             Bundle newBundle = bundle.dependentsOnly();
             if (!currentBundle.equals(newBundle)) {
-                logger.trace("Bundles differ\nnew:\n{}\nold:\n{}", newBundle.toJson(), currentBundle.toJson());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Bundles differ: {}", bundle.getId());
+                    logger.trace(currentBundle.diff(newBundle));
+                }
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData());
                 updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(node, MutationState.UPDATED, currentBundle);
             } else {
-                logger.debug("Not updating equivalent bundle {}", bundle.getId());
+                logger.debug("Not updating equivalent bundle: {}", bundle.getId());
                 return new Mutation<>(node, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {

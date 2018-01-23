@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -801,6 +802,19 @@ public final class Bundle implements NestableData<Bundle> {
         result = 31 * result + unmanagedData(data).hashCode();
         result = 31 * result + unorderedRelations(relations).hashCode();
         return result;
+    }
+
+    /**
+     * Return a JSON-Patch representation of the difference between
+     * this bundle and another. Metadata is ignored.
+     *
+     * @param target the target bundle
+     * @return a JSON-Patch, as a string
+     */
+    public String diff(Bundle target) {
+        return DataConverter.diffBundles(
+                withMetaData(Collections.emptyMap()),
+                target.withMetaData(Collections.emptyMap()));
     }
 
     // Helpers...
