@@ -135,6 +135,21 @@ parameter:
 Without this parameter the importer will throw a mode violation error when it ends up updating
 an existing collection.
 
+### Overwriting existing descriptions
+
+If you want to overwrite existing item description with data from a new EAD the EAD must have the same
+`sourceFileId` value as exists on the current description. The `sourceFileId` is a property computed
+from two aspects of the EAD file: the `eadheader/eadid` value and the
+`eadheader/profiledesc/langusage/language/@langcode` value combined thus: `[EADID]#[UPPER-CASE-LANGCODE]`.
+
+For example, if the `eadid` is `100` and the language code is `eng`, the `sourceFileId` will be `100#ENG`.
+
+Only documentary unit descriptions created via the EAD ingest process will have a `sourceFileId`; those created
+using the portal interface will not. For descriptions that have the property it is visible (but not editable) on
+the portal admin pages.
+
+**Note:** the consequence of the above is that the `eadid` value should **not** contain the language code, since this is redundant and will result in a `sourceFileId` like `eng#ENG`.
+
 ## Ingesting multiple files in an archive
 
 It is possible to ingest multiple EAD files in a single transaction by providing the importer

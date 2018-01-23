@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE ead PUBLIC "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN" "http://lcweb2.loc.gov/xmlcommon/dtds/ead2002/ead.dtd">
+
+<ead>
+    <eadheader relatedencoding="DC">
+        <eadid countrycode="GB" mainagencycode="GB-00001" encodinganalog="Identifier">2</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper encodinganalog="Title">EAD-Artikel testen</titleproper>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <langusage>
+                <language langcode="deu" encodinganalog="Language">Deutsche</language>
+            </langusage>
+            <descrules encodinganalog="3.7.2">ISAD(G)</descrules>
+        </profiledesc>
+    </eadheader>
+    <archdesc level="collection" relatedencoding="ISAD(G)v2">
+        <did>
+            <unittitle encodinganalog="3.1.2">EAD-Artikel testen</unittitle>
+            <unitid repositorycode="GB00001" countrycode="GB" encodinganalog="3.1.1">C00001</unitid>
+        </did>
+        <scopecontent encodinganalog="3.3.1">
+            <p>
+                Dies ist ein Testumfang und Inhalt (aktualisiert).
+            </p>
+        </scopecontent>
+    </archdesc>
+</ead>
