@@ -30,6 +30,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.ItemHolder;
@@ -59,7 +60,7 @@ public interface Group extends Accessor, Accessible,
     Iterable<Group> getGroups();
 
     /**
-     * TODO FIXME use this in case we need AccesibleEnity's instead of Accessors, 
+     * TODO FIXME use this in case we need Accessible items's instead of Accessors,
      */
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
     Iterable<Accessible> getMembersAsEntities();
@@ -78,15 +79,15 @@ public interface Group extends Accessor, Accessible,
      * @return a count of group members
      */
     @Meta(CHILD_COUNT)
-    @JavaHandler
-    int getChildCount();
+    @UniqueAdjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
+    int countChildren();
 
     /**
      * Adds a Accessor as a member to this Group, so it has the permissions of the Group.
      *
      * @param accessor a user or group frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
     void addMember(Accessor accessor);
 
     /**
@@ -94,7 +95,7 @@ public interface Group extends Accessor, Accessible,
      *
      * @param accessor a user or group frame
      */
-    @JavaHandler
+    @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
     void removeMember(Accessor accessor);
 
     /**
@@ -110,21 +111,6 @@ public interface Group extends Accessor, Accessible,
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Group {
-
-        public int getChildCount() {
-            return Math.toIntExact(gremlin().inE(Ontology.ACCESSOR_BELONGS_TO_GROUP).count());
-        }
-
-        public void addMember(Accessor accessor) {
-            JavaHandlerUtils.addUniqueRelationship(accessor.asVertex(), it(),
-                    Ontology.ACCESSOR_BELONGS_TO_GROUP);
-        }
-
-        public void removeMember(Accessor accessor) {
-            JavaHandlerUtils.removeAllRelationships(accessor.asVertex(),
-                    it(), Ontology.ACCESSOR_BELONGS_TO_GROUP);
-        }
-
         public Iterable<Accessible> getAllUserProfileMembers() {
             GremlinPipeline<Vertex,Vertex> pipe = gremlin().as("n").in(Ontology.ACCESSOR_BELONGS_TO_GROUP)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops,

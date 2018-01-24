@@ -27,6 +27,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -54,7 +55,7 @@ public interface Accessible extends PermissionGrantTarget {
      *
      * @param accessor an accessor that can access the current item
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.IS_ACCESSIBLE_TO)
     void addAccessor(Accessor accessor);
 
     /**
@@ -78,7 +79,7 @@ public interface Accessible extends PermissionGrantTarget {
      *
      * @param scope a permission scope frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.HAS_PERMISSION_SCOPE, single = true)
     void setPermissionScope(PermissionScope scope);
 
     /**
@@ -119,16 +120,6 @@ public interface Accessible extends PermissionGrantTarget {
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Accessible {
-
-        public void addAccessor(Accessor accessor) {
-            addUniqueRelationship(it(), accessor.asVertex(),
-                    Ontology.IS_ACCESSIBLE_TO);
-        }
-
-        public void setPermissionScope(PermissionScope scope) {
-            addSingleRelationship(it(), scope.asVertex(),
-                    Ontology.HAS_PERMISSION_SCOPE);
-        }
 
         public SystemEvent getLatestEvent() {
             GremlinPipeline<Vertex, Vertex> out = gremlin()

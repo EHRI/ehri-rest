@@ -31,9 +31,9 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.InverseOf;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * This models the thesaurus terms or keywords in a way that is better managing multi-linguality. 
@@ -56,12 +56,12 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     Vocabulary getVocabulary();
 
-    @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
+    @UniqueAdjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, single = true)
     void setVocabulary(Vocabulary vocabulary);
 
     @Meta(CHILD_COUNT)
-    @JavaHandler
-    int getChildCount();
+    @UniqueAdjacency(label = Ontology.CONCEPT_HAS_NARROWER)
+    int countChildren();
 
     // relations to other concepts
     
@@ -75,23 +75,23 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     @InverseOf(Ontology.CONCEPT_HAS_BROADER)
     Iterable<Concept> getNarrowerConcepts();
 
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.CONCEPT_HAS_NARROWER)
     void addNarrowerConcept(Concept concept);
 
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.IN)
     void addBroaderConcept(Concept concept);
 
-    @JavaHandler
+    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER)
     void removeNarrowerConcept(Concept concept);
 
-    @JavaHandler
+    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.IN)
     void removeBroaderConcept(Concept concept);
 
     // Related concepts, should be like a symmetric associative link...
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
     Iterable<Concept> getRelatedConcepts();
 
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.CONCEPT_HAS_RELATED)
     void addRelatedConcept(Concept concept);
 
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
@@ -100,49 +100,4 @@ public interface Concept extends Described, AuthoritativeItem, ItemHolder {
     // Hmm, does not 'feel' symmetric
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED, direction=Direction.IN)
     Iterable<Concept> getRelatedByConcepts();
-
-    /**
-     * Implementation of complex methods.
-     */
-    abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
-
-        @Override
-        public int getChildCount() {
-            return Math.toIntExact(gremlin().outE(Ontology.CONCEPT_HAS_NARROWER).count());
-        }
-
-        @Override
-        public void addRelatedConcept(Concept related) {
-            JavaHandlerUtils.addUniqueRelationship(it(),
-                    related.asVertex(), Ontology.CONCEPT_HAS_RELATED);
-        }
-
-        @Override
-        public void addNarrowerConcept(Concept concept) {
-            if (!concept.asVertex().equals(it())) {
-                JavaHandlerUtils.addUniqueRelationship(it(),
-                        concept.asVertex(), Ontology.CONCEPT_HAS_NARROWER);
-            }
-        }
-
-        @Override
-        public void addBroaderConcept(Concept concept) {
-            if (!concept.asVertex().equals(it())) {
-                JavaHandlerUtils.addUniqueRelationship(concept.asVertex(),
-                        it(), Ontology.CONCEPT_HAS_NARROWER);
-            }
-        }
-
-        @Override
-        public void removeNarrowerConcept(Concept concept) {
-            JavaHandlerUtils.removeAllRelationships(it(), concept.asVertex(),
-                    Ontology.CONCEPT_HAS_NARROWER);
-        }
-
-        @Override
-        public void removeBroaderConcept(Concept concept) {
-            JavaHandlerUtils.removeAllRelationships(concept.asVertex(), it(),
-                    Ontology.CONCEPT_HAS_NARROWER);
-        }
-    }
 }

@@ -123,7 +123,7 @@ public class ItsTest extends AbstractImporterTest {
 
         assertEquals("nl-r1-de_its_ous_1_1_7", unit.getId());
 
-        assertEquals(1, unit.getChildCount());
+        assertEquals(1, unit.countChildren());
 
         for (Description d : unit.getDocumentDescriptions()) {
             Iterable<DatePeriod> datePeriods = d.as(DocumentaryUnitDescription.class).getDatePeriods();

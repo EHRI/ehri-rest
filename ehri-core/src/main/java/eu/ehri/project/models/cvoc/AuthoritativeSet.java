@@ -27,6 +27,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.Named;
@@ -42,6 +43,9 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 public interface AuthoritativeSet extends Accessible,
         PermissionScope, ItemHolder, Named {
 
+    @UniqueAdjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
+    int countChildren();
+
     /**
      * Fetch all items within this set.
      *
@@ -55,23 +59,6 @@ public interface AuthoritativeSet extends Accessible,
      *
      * @param item an authoritative item frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN, single = true)
     void addItem(AuthoritativeItem item);
-
-    /**
-     * Implementation of complex methods.
-     */
-    abstract class Impl implements JavaHandlerContext<Vertex>, AuthoritativeSet {
-
-        @Override
-        public int getChildCount() {
-            return Math.toIntExact(gremlin().inE(Ontology.ITEM_IN_AUTHORITATIVE_SET).count());
-        }
-
-        @Override
-        public void addItem(AuthoritativeItem item) {
-            JavaHandlerUtils.addSingleRelationship(item.asVertex(), it(),
-                    Ontology.ITEM_IN_AUTHORITATIVE_SET);
-        }
-    }
 }

@@ -30,6 +30,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
@@ -53,7 +54,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      */
     @Meta(CHILD_COUNT)
     @JavaHandler
-    int getChildCount();
+    int countChildren();
 
     /**
      * Fetch all top-level documentary unit items within this
@@ -79,7 +80,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      *
      * @param unit a documentary unit item
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, single = true, direction = Direction.IN)
     void addTopLevelDocumentaryUnit(DocumentaryUnit unit);
 
     /**
@@ -97,7 +98,7 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      *
      * @param country a country frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, single = true)
     void setCountry(Country country);
 
     /**
@@ -105,17 +106,8 @@ public interface Repository extends Described, ItemHolder, Watchable, Versioned,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Repository {
 
-        public int getChildCount() {
+        public int countChildren() {
             return Math.toIntExact(gremlin().inE(Ontology.DOC_HELD_BY_REPOSITORY).count());
-        }
-
-        public void addTopLevelDocumentaryUnit(DocumentaryUnit unit) {
-            JavaHandlerUtils.addSingleRelationship(unit.asVertex(), it(),
-                    Ontology.DOC_HELD_BY_REPOSITORY);
-        }
-
-        public void setCountry(Country country) {
-            country.addRepository(frame(it(), Repository.class));
         }
 
         public Iterable<DocumentaryUnit> getAllDocumentaryUnits() {

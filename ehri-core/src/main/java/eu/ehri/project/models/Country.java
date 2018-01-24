@@ -29,6 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.PermissionScope;
@@ -57,8 +58,8 @@ public interface Country extends PermissionScope, ItemHolder, Versioned, Annotat
      * @return the repository count
      */
     @Meta(CHILD_COUNT)
-    @JavaHandler
-    int getChildCount();
+    @UniqueAdjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN)
+    int countChildren();
 
     /**
      * Fetch all repositories in this country.
@@ -76,25 +77,13 @@ public interface Country extends PermissionScope, ItemHolder, Versioned, Annotat
      *
      * @param repository a repository frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN, single = true)
     void addRepository(Repository repository);
 
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Country {
-
-        @Override
-        public int getChildCount() {
-            return Math.toIntExact(gremlin().inE(Ontology.REPOSITORY_HAS_COUNTRY).count());
-        }
-
-        @Override
-        public void addRepository(Repository repository) {
-            JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
-                    Ontology.REPOSITORY_HAS_COUNTRY);
-        }
-
         @Override
         public Iterable<DocumentaryUnit> getTopLevelDocumentaryUnits() {
             return frameVertices(gremlin().in(Ontology.REPOSITORY_HAS_COUNTRY)

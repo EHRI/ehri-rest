@@ -30,8 +30,7 @@ import eu.ehri.project.models.annotations.EntityType;
  * Note that any concept in this Vocabulary that has no parent might be considered a topConcept. 
  */
 @EntityType(EntityClass.CVOC_VOCABULARY)
-public interface Vocabulary extends
-        AuthoritativeSet {
+public interface Vocabulary extends AuthoritativeSet {
 
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     Iterable<Concept> getConcepts();

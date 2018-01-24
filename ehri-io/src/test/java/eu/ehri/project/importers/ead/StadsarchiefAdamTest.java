@@ -141,7 +141,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
             assertEquals("Documentaire foto's door Bart de Kok", desc.getName());
         }
         //test hierarchy
-        assertEquals(1, archdesc.getChildCount());
+        assertEquals(1, archdesc.countChildren());
         for (DocumentaryUnit d : archdesc.getChildren()) {
             assertEquals(C01, d.getIdentifier());
         }

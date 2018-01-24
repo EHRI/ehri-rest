@@ -25,5 +25,5 @@ package eu.ehri.project.models.base;
 public interface ItemHolder {
     String CHILD_COUNT = "childCount";
 
-    int getChildCount();
+    int countChildren();
 }

@@ -35,7 +35,7 @@ public class RepositoryTest extends AbstractFixtureTest {
         assertEquals(3, Iterables.size(r1.getTopLevelDocumentaryUnits()));
 
         // Check the cached size
-        assertEquals(3, r1.getChildCount());
+        assertEquals(3, r1.countChildren());
     }
 
     @Test

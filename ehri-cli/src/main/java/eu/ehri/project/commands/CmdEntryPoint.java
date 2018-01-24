@@ -27,6 +27,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.TxGraph;
 import eu.ehri.project.core.impl.TxNeo4jGraph;
+import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import org.apache.commons.cli.AlreadySelectedException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -155,7 +156,7 @@ public class CmdEntryPoint extends BaseCommand {
             if (COMMANDS.containsKey(args[1])) {
                 Command cmd = COMMANDS.get(args[1]).getConstructor().newInstance();
                 FramedGraph<? extends TxGraph> graph
-                        = new FramedGraphFactory(new JavaHandlerModule()).create(
+                        = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule()).create(
                         new TxNeo4jGraph(args[0]));
                 try (Tx tx = graph.getBaseGraph().beginTx()) {
                     int res = cmd.exec(graph, Arrays.copyOfRange(args, 2, args.length));

@@ -21,9 +21,7 @@ package eu.ehri.project.models.utils;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.slf4j.Logger;
@@ -60,17 +58,6 @@ public final class JavaHandlerUtils {
      */
     public static final PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noopLoopFunc
             = vertexLoopBundle -> true;
-
-    /**
-     * Given a pipeline
-     *
-     * @param element  The element
-     * @param propName The cache property name
-     * @param pipe     A pipeline to count
-     */
-    public static <S, E> void cacheCount(Element element, GremlinPipeline<S, E> pipe, String propName) {
-        element.setProperty(propName, pipe.count());
-    }
 
     /**
      * Add a relationship in such a way that it is the only one of its type

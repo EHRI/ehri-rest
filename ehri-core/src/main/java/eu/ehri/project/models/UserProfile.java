@@ -29,6 +29,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
@@ -36,6 +37,7 @@ import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.base.Watchable;
 
 import static eu.ehri.project.definitions.Ontology.ACCESSOR_BELONGS_TO_GROUP;
+import static eu.ehri.project.definitions.Ontology.USER_BLOCKS_USER;
 import static eu.ehri.project.definitions.Ontology.USER_FOLLOWS_USER;
 import static eu.ehri.project.definitions.Ontology.USER_WATCHING_ITEM;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
@@ -51,16 +53,16 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
     String WATCHING_COUNT = "watching";
 
     @Meta(FOLLOWER_COUNT)
-    @JavaHandler
-    int getFollowerCount();
+    @UniqueAdjacency(label = USER_FOLLOWS_USER, direction = Direction.IN)
+    int countFollowers();
 
     @Meta(FOLLOWING_COUNT)
-    @JavaHandler
-    int getFollowingCount();
+    @UniqueAdjacency(label = USER_FOLLOWS_USER)
+    int countFollowing();
 
     @Meta(WATCHING_COUNT)
-    @JavaHandler
-    int getWatchingCount();
+    @UniqueAdjacency(label = USER_WATCHING_ITEM)
+    int countWatchedItems();
 
     /**
      * Get the groups to which this user belongs.
@@ -84,7 +86,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @return an iterable of user frames
      */
-    @Adjacency(label = USER_FOLLOWS_USER, direction = Direction.OUT)
+    @Adjacency(label = USER_FOLLOWS_USER)
     Iterable<UserProfile> getFollowing();
 
     /**
@@ -92,7 +94,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @param user a user frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_FOLLOWS_USER)
     void addFollowing(UserProfile user);
 
     /**
@@ -100,7 +102,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @param user a user frame
      */
-    @JavaHandler
+    @Adjacency(label = USER_FOLLOWS_USER)
     void removeFollowing(UserProfile user);
 
     /**
@@ -109,7 +111,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      * @param otherUser a user frame
      * @return whether this user is following the other
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_FOLLOWS_USER)
     boolean isFollowing(UserProfile otherUser);
 
     /**
@@ -118,7 +120,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      * @param otherUser a user frame
      * @return whether the other user is following this user
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_FOLLOWS_USER, direction = Direction.IN)
     boolean isFollower(UserProfile otherUser);
 
     /**
@@ -158,7 +160,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @param item a generic item frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_WATCHING_ITEM)
     void addWatching(Watchable item);
 
     /**
@@ -166,7 +168,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @param item a generic item frame
      */
-    @JavaHandler
+    @Adjacency(label = USER_WATCHING_ITEM)
     void removeWatching(Watchable item);
 
     /**
@@ -174,7 +176,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @param user a user frame
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_BLOCKS_USER)
     void addBlocked(UserProfile user);
 
     /**
@@ -182,7 +184,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      *
      * @param user a user frame
      */
-    @JavaHandler
+    @Adjacency(label = USER_BLOCKS_USER)
     void removeBlocked(UserProfile user);
 
     /**
@@ -199,7 +201,7 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      * @param user a user frame
      * @return whther the other user is on this user's block list
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_BLOCKS_USER)
     boolean isBlocking(UserProfile user);
 
     /**
@@ -216,62 +218,11 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
      * @param item a generic item frame
      * @return whether the item is in this user's watch list
      */
-    @JavaHandler
+    @UniqueAdjacency(label = USER_WATCHING_ITEM)
     boolean isWatching(Watchable item);
 
 
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
-
-        @Override
-        public int getFollowerCount() {
-            return Math.toIntExact(gremlin().inE(USER_FOLLOWS_USER).count());
-        }
-
-        @Override
-        public int getFollowingCount() {
-            return Math.toIntExact(gremlin().outE(USER_FOLLOWS_USER).count());
-        }
-
-        @Override
-        public int getWatchingCount() {
-            return Math.toIntExact(gremlin().outE(USER_WATCHING_ITEM).count());
-        }
-
-        @Override
-        public void addFollowing(UserProfile user) {
-            addUniqueRelationship(it(), user.asVertex(), USER_FOLLOWS_USER);
-        }
-
-        @Override
-        public void removeFollowing(UserProfile user) {
-            removeAllRelationships(it(), user.asVertex(), USER_FOLLOWS_USER);
-        }
-
-        @Override
-        public boolean isFollowing(UserProfile otherUser) {
-            return hasRelationship(it(), otherUser.asVertex(), USER_FOLLOWS_USER);
-        }
-
-        @Override
-        public boolean isFollower(UserProfile otherUser) {
-            return hasRelationship(otherUser.asVertex(), it(), USER_FOLLOWS_USER);
-        }
-
-        @Override
-        public void addWatching(Watchable item) {
-            addUniqueRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
-        }
-
-        @Override
-        public void removeWatching(Watchable item) {
-            removeAllRelationships(it(), item.asVertex(), USER_WATCHING_ITEM);
-        }
-
-        @Override
-        public boolean isWatching(Watchable item) {
-            return hasRelationship(it(), item.asVertex(), USER_WATCHING_ITEM);
-        }
-
         @Override
         public Iterable<UserProfile> coGroupMembers() {
             return frameVertices(gremlin().as("n")
@@ -286,24 +237,6 @@ public interface UserProfile extends Accessor, Actioner, Versioned, Annotatable 
                         String type = vertex.getProperty(EntityType.TYPE_KEY);
                         return Entities.USER_PROFILE.equals(type);
                     }));
-        }
-
-        @Override
-        public void addBlocked(UserProfile user) {
-            addUniqueRelationship(it(), user.asVertex(),
-                    Ontology.USER_BLOCKS_USER);
-        }
-
-        @Override
-        public void removeBlocked(UserProfile user) {
-            removeAllRelationships(it(), user.asVertex(),
-                    Ontology.USER_BLOCKS_USER);
-        }
-
-        @Override
-        public boolean isBlocking(UserProfile user) {
-            return hasRelationship(it(), user.asVertex(),
-                    Ontology.USER_BLOCKS_USER);
         }
     }
 }

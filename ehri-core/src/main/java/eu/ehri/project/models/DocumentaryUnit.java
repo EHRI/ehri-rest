@@ -30,6 +30,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Meta;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      *
      * @param repository a repository instance
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, single = true)
     void setRepository(Repository repository);
 
     /**
@@ -84,7 +85,7 @@ public interface DocumentaryUnit extends AbstractUnit {
      *
      * @param child a documentary unit instance
      */
-    @JavaHandler
+    @UniqueAdjacency(label = Ontology.DOC_IS_CHILD_OF, direction = Direction.IN, single = true)
     void addChild(DocumentaryUnit child);
 
     /**
@@ -119,15 +120,15 @@ public interface DocumentaryUnit extends AbstractUnit {
      * @return the number of immediate child items
      */
     @Meta(CHILD_COUNT)
-    @JavaHandler
-    int getChildCount();
+    @UniqueAdjacency(label = Ontology.DOC_IS_CHILD_OF, direction = Direction.IN)
+    int countChildren();
 
     /**
      * Get child documentary units
      *
      * @return an Iterable of DocumentaryUnits that are children
      */
-    @JavaHandler
+    @Adjacency(label = Ontology.DOC_IS_CHILD_OF, direction = Direction.IN)
     Iterable<DocumentaryUnit> getChildren();
 
     /**
@@ -152,32 +153,12 @@ public interface DocumentaryUnit extends AbstractUnit {
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
 
-        public int getChildCount() {
-            return Math.toIntExact(gremlin().inE(Ontology.DOC_IS_CHILD_OF).count());
-        }
-
-        public Iterable<DocumentaryUnit> getChildren() {
-            return frameVertices(gremlin().in(Ontology.DOC_IS_CHILD_OF));
-        }
-
-        public void addChild(DocumentaryUnit child) {
-            JavaHandlerUtils
-                    .addSingleRelationship(child.asVertex(), it(), Ontology.DOC_IS_CHILD_OF);
-        }
-
         public Iterable<DocumentaryUnit> getAllChildren() {
             Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").in(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
             return frameVertices(gremlin().in(Ontology.DOC_IS_CHILD_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
-        }
-
-
-        public void setRepository(Repository repository) {
-            // NB: Convenience methods that proxies addTopLevelDocumentaryUnit (which
-            // in turn maintains the child item cache.)
-            repository.addTopLevelDocumentaryUnit(frame(it(), DocumentaryUnit.class));
         }
 
         public Repository getRepository() {

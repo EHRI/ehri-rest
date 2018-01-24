@@ -79,9 +79,9 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertEquals(2, Iterables.size(reto.getFollowing()));
 
         // Get count caching
-        assertEquals(2, reto.getFollowingCount());
-        assertEquals(1, mike.getFollowerCount());
-        assertEquals(1, linda.getFollowerCount());
+        assertEquals(2, reto.countFollowing());
+        assertEquals(1, mike.countFollowers());
+        assertEquals(1, linda.countFollowers());
 
         assertFalse(Iterables.isEmpty(reto.getFollowing()));
         assertTrue(Iterables.contains(reto.getFollowing(), mike));
@@ -90,8 +90,8 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(Iterables.isEmpty(mike.getFollowers()));
         assertFalse(Iterables.isEmpty(reto.getFollowing()));
 
-        assertEquals(1, reto.getFollowingCount());
-        assertEquals(0, mike.getFollowerCount());
+        assertEquals(1, reto.countFollowing());
+        assertEquals(0, mike.countFollowers());
     }
 
     @Test
@@ -119,22 +119,25 @@ public class UserProfileTest extends AbstractFixtureTest {
         DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
         DocumentaryUnit c2 = manager.getEntity("c2", DocumentaryUnit.class);
         assertFalse(mike.isWatching(c1));
+        mike.addWatching(c2);
+        assertFalse(mike.isWatching(c1));
         mike.addWatching(c1);
         assertTrue(mike.isWatching(c1));
-        assertEquals(1, mike.getWatchingCount());
+        mike.removeWatching(c2);
+        assertEquals(1, mike.countWatchedItems());
         assertTrue(Iterables.contains(c1.getWatchers(), mike));
-        assertEquals(1, c1.getWatchedCount());
+        assertEquals(1, c1.countWatchers());
         assertTrue(Iterables.contains(mike.getWatching(), c1));
 
         mike.addWatching(c2);
-        assertEquals(2, mike.getWatchingCount());
+        assertEquals(2, mike.countWatchedItems());
         mike.removeWatching(c2);
-        assertEquals(1, mike.getWatchingCount());
+        assertEquals(1, mike.countWatchedItems());
 
         mike.removeWatching(c1);
         assertFalse(mike.isWatching(c1));
-        assertEquals(0, mike.getWatchingCount());
-        assertEquals(0, c1.getWatchedCount());
+        assertEquals(0, mike.countWatchedItems());
+        assertEquals(0, c1.countWatchers());
     }
 
     @Test

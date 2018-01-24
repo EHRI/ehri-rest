@@ -49,6 +49,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.persistence.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     protected static final JsonFactory jsonFactory = jsonMapper.getFactory();
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
-    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
     public static final String CSV_MEDIA_TYPE = "text/csv";
 

@@ -27,7 +27,9 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 
+import static eu.ehri.project.definitions.Ontology.PROMOTED_BY;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 
 /**
@@ -36,8 +38,8 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 public interface Promotable extends Accessible {
     String PROMOTION_SCORE = "_promotionScore";
 
-    @Fetch(value = Ontology.PROMOTED_BY, numLevels = 1)
-    @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
+    @Fetch(value = PROMOTED_BY, numLevels = 1)
+    @Adjacency(label = PROMOTED_BY, direction = Direction.OUT)
     Iterable<UserProfile> getPromoters();
 
     @Fetch(value = Ontology.DEMOTED_BY, numLevels = 1)
@@ -59,7 +61,7 @@ public interface Promotable extends Accessible {
     @JavaHandler
     boolean isPromoted();
 
-    @JavaHandler
+    @UniqueAdjacency(label = PROMOTED_BY)
     boolean isPromotedBy(UserProfile user);
 
     @JavaHandler
@@ -74,28 +76,28 @@ public interface Promotable extends Accessible {
     abstract class Impl implements JavaHandlerContext<Vertex>, Promotable {
 
         private void updatePromotionScoreCache() {
-            int score = Math.toIntExact(gremlin().out(Ontology.PROMOTED_BY).count()
+            int score = Math.toIntExact(gremlin().out(PROMOTED_BY).count()
                     - gremlin().out(Ontology.DEMOTED_BY).count());
             it().setProperty(PROMOTION_SCORE, score);
         }
 
         @Override
         public void addPromotion(UserProfile user) {
-            addUniqueRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
+            addUniqueRelationship(it(), user.asVertex(), PROMOTED_BY);
             removeAllRelationships(it(), user.asVertex(), Ontology.DEMOTED_BY);
             updatePromotionScoreCache();
         }
 
         @Override
         public void removePromotion(UserProfile user) {
-            removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
+            removeAllRelationships(it(), user.asVertex(), PROMOTED_BY);
             updatePromotionScoreCache();
         }
 
         @Override
         public void addDemotion(UserProfile user) {
             addUniqueRelationship(it(), user.asVertex(), Ontology.DEMOTED_BY);
-            removeAllRelationships(it(), user.asVertex(), Ontology.PROMOTED_BY);
+            removeAllRelationships(it(), user.asVertex(), PROMOTED_BY);
             updatePromotionScoreCache();
         }
 
@@ -107,21 +109,16 @@ public interface Promotable extends Accessible {
 
         @Override
         public boolean isPromoted() {
-            return gremlin().out(Ontology.PROMOTED_BY).count() > gremlin().out(Ontology.DEMOTED_BY).count();
+            return gremlin().out(PROMOTED_BY).count() > gremlin().out(Ontology.DEMOTED_BY).count();
         }
 
         @Override
         public int getPromotionScore() {
             Integer score = it().getProperty(PROMOTION_SCORE);
             return score == null
-                    ? Math.toIntExact(gremlin().out(Ontology.PROMOTED_BY).count()
+                    ? Math.toIntExact(gremlin().out(PROMOTED_BY).count()
                             - gremlin().out(Ontology.DEMOTED_BY).count())
                     : score;
-        }
-
-        @Override
-        public boolean isPromotedBy(UserProfile user) {
-            return hasRelationship(it(), user.asVertex(), Ontology.PROMOTED_BY);
         }
 
         @Override

@@ -54,7 +54,7 @@ public interface VirtualUnit extends AbstractUnit {
 
     @Meta(CHILD_COUNT)
     @JavaHandler
-    int getChildCount();
+    int countChildren();
 
     @Fetch(Ontology.VC_IS_PART_OF)
     @Adjacency(label = Ontology.VC_IS_PART_OF)
@@ -228,7 +228,7 @@ public interface VirtualUnit extends AbstractUnit {
         }
 
         @Override
-        public int getChildCount() {
+        public int countChildren() {
             long incCount = gremlin().outE(Ontology.VC_INCLUDES_UNIT).count();
             long vcCount = gremlin().inE(Ontology.VC_IS_PART_OF).count();
             return Math.toIntExact(incCount + vcCount);

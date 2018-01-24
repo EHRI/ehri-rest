@@ -28,7 +28,9 @@ import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphConfiguration;
 import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.AbstractModule;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
@@ -39,6 +41,8 @@ import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.utils.CustomAnnotationsModule;
+import eu.ehri.project.models.utils.UniqueAdjacencyAnnotationHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -58,7 +62,7 @@ import java.util.Set;
 
 public abstract class GraphTestBase {
 
-    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
     protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
