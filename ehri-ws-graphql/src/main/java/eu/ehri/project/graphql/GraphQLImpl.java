@@ -1019,7 +1019,7 @@ public class GraphQLImpl {
             .description(__("repository.description"))
             .fields(entityFields)
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("repository.field.identifier.description")))
-            .field(itemCountFieldDefinition(r -> r.as(Repository.class).getChildCount()))
+            .field(itemCountFieldDefinition(r -> r.as(Repository.class).countChildren()))
             .field(connectionFieldDefinition("documentaryUnits", __("repository.field.documentaryUnits.description"),
                     new GraphQLTypeReference("documentaryUnits"),
                     hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -1045,7 +1045,7 @@ public class GraphQLImpl {
             .field(singleDescriptionFieldDefinition(documentaryUnitDescriptionType))
             .field(itemFieldDefinition("repository", __("documentaryUnit.field.repository.description"), repositoryType,
                     manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository())))
-            .field(itemCountFieldDefinition(d -> d.as(DocumentaryUnit.class).getChildCount()))
+            .field(itemCountFieldDefinition(d -> d.as(DocumentaryUnit.class).countChildren()))
             .field(connectionFieldDefinition("children", __("documentaryUnit.field.children.description"),
                     new GraphQLTypeReference("documentaryUnits"),
                     hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -1084,7 +1084,7 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("authoritativeSet.field.identifier.description")))
             .field(nonNullAttr(Ontology.NAME_KEY, __("authoritativeSet.field.name.description")))
             .field(nullAttr("description", __("authoritativeSet.field.description.description")))
-            .field(itemCountFieldDefinition(a -> a.as(AuthoritativeSet.class).getChildCount()))
+            .field(itemCountFieldDefinition(a -> a.as(AuthoritativeSet.class).countChildren()))
             .field(connectionFieldDefinition("authorities", __("authoritativeSet.field.authorities.description"),
                     new GraphQLTypeReference("historicalAgents"),
                     oneToManyRelationshipConnectionFetcher(
@@ -1109,7 +1109,7 @@ public class GraphQLImpl {
             )
             .fields(countryDescriptionNullFields)
             .fields(countryDescriptionListFields)
-            .field(itemCountFieldDefinition(c -> c.as(Country.class).getChildCount()))
+            .field(itemCountFieldDefinition(c -> c.as(Country.class).countChildren()))
             .field(connectionFieldDefinition("repositories", __("country.field.repositories.description"),
                     new GraphQLTypeReference("repositories"),
                     oneToManyRelationshipConnectionFetcher(
@@ -1133,7 +1133,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.CVOC_CONCEPT),
                     oneToManyRelationshipFetcher(
                             c -> c.as(Concept.class).getRelatedConcepts())))
-            .field(itemCountFieldDefinition(c -> c.as(Concept.class).getChildCount()))
+            .field(itemCountFieldDefinition(c -> c.as(Concept.class).countChildren()))
             .field(listFieldDefinition("broader", __("cvocConcept.field.broader.description"),
                     new GraphQLTypeReference(Entities.CVOC_CONCEPT),
                     oneToManyRelationshipFetcher(c -> c.as(Concept.class).getBroaderConcepts())))
@@ -1156,7 +1156,7 @@ public class GraphQLImpl {
             .field(nonNullAttr(Ontology.IDENTIFIER_KEY, __("cvocVocabulary.field.identifier.description")))
             .field(nonNullAttr(Ontology.NAME_KEY, __("cvocVocabulary.field.name.description")))
             .field(nullAttr("description", __("cvocVocabulary.field.description.description")))
-            .field(itemCountFieldDefinition(r -> r.as(Vocabulary.class).getChildCount()))
+            .field(itemCountFieldDefinition(r -> r.as(Vocabulary.class).countChildren()))
             .field(connectionFieldDefinition("concepts", __("cvocVocabulary.field.concepts.description"),
                     new GraphQLTypeReference("concepts"),
                     oneToManyRelationshipConnectionFetcher(

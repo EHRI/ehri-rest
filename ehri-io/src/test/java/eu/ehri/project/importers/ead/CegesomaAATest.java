@@ -131,7 +131,7 @@ public class CegesomaAATest extends AbstractImporterTest {
         /*
          * Test hierarchy
          */
-        assertEquals(1, archdesc.getChildCount());
+        assertEquals(1, archdesc.countChildren());
         for (DocumentaryUnit du : archdesc.getChildren()) {
             assertEquals(C01, du.getIdentifier());
         }

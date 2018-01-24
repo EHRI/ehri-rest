@@ -34,7 +34,7 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {
         VirtualUnit vc1 = manager.getEntity("vc1", VirtualUnit.class);
-        assertEquals(1, vc1.getChildCount());
+        assertEquals(1, vc1.countChildren());
     }
 
     @Test
@@ -48,9 +48,9 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     public void testAddChild() throws Exception {
         VirtualUnit vu2 = manager.getEntity("vu2", VirtualUnit.class);
         VirtualUnit vu3 = manager.getEntity("vu3", VirtualUnit.class);
-        int childCount = vu2.getChildCount();
+        int childCount = vu2.countChildren();
         assertTrue(vu2.addChild(vu3));
-        assertEquals(childCount + 1, vu2.getChildCount());
+        assertEquals(childCount + 1, vu2.countChildren());
         // Doing the same thing twice should return false
         assertFalse(vu2.addChild(vu3));
     }
@@ -80,16 +80,16 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
         assertTrue(vu1.getAllChildren().iterator().hasNext());
         assertTrue(vu1.getIncludedUnits().iterator().hasNext());
-        int childCount = vu1.getChildCount();
+        int childCount = vu1.countChildren();
         assertEquals(2, childCount);
         vu1.addIncludedUnit(c4);
-        assertEquals(childCount + 1, vu1.getChildCount());
+        assertEquals(childCount + 1, vu1.countChildren());
         vu1.removeIncludedUnit(c4);
-        assertEquals(childCount, vu1.getChildCount());
+        assertEquals(childCount, vu1.countChildren());
         vu1.addChild(vu3);
-        assertEquals(childCount + 1, vu1.getChildCount());
+        assertEquals(childCount + 1, vu1.countChildren());
         vu1.removeChild(vu3);
-        assertEquals(childCount, vu1.getChildCount());
+        assertEquals(childCount, vu1.countChildren());
 
     }
 

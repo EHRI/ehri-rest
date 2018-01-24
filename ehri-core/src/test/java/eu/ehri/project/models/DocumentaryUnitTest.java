@@ -86,17 +86,17 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
         DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
         DocumentaryUnit child = manager.getEntity("c2", DocumentaryUnit.class);
         assertEquals(unit, child.getParent());
-        assertEquals(1, unit.getChildCount());
+        assertEquals(1, unit.countChildren());
         unit.addChild(child);
-        assertEquals(1, unit.getChildCount());
+        assertEquals(1, unit.countChildren());
     }
 
     @Test
     public void testCannotAddSelfAsChild() throws Exception {
         DocumentaryUnit unit = manager.getEntity("c1", DocumentaryUnit.class);
-        assertEquals(1, unit.getChildCount());
+        assertEquals(1, unit.countChildren());
         unit.addChild(unit);
-        assertEquals(1, unit.getChildCount());
+        assertEquals(1, unit.countChildren());
     }
 
     @Test
