@@ -23,16 +23,12 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.project.importers.base.ItemImporter;
-import eu.ehri.project.importers.ead.EadSync;
-import eu.ehri.project.importers.ead.SyncLog;
-import eu.ehri.project.importers.links.LinkImporter;
-import eu.ehri.project.utils.Table;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporterFactory;
@@ -40,16 +36,19 @@ import eu.ehri.project.importers.eac.EacHandler;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
+import eu.ehri.project.importers.ead.EadSync;
+import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.json.BatchOperations;
+import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.utils.Table;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -60,10 +59,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -76,7 +73,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -94,20 +90,13 @@ public class ImportResource extends AbstractResource {
     private static final String DEFAULT_EAD_HANDLER = EadHandler.class.getName();
     private static final String DEFAULT_EAD_IMPORTER = EadImporter.class.getName();
 
-    public static final String LOG_PARAM = "log";
-    public static final String SCOPE_PARAM = "scope";
-    public static final String TOLERANT_PARAM = "tolerant";
     public static final String BASE_URI_PARAM = "baseURI";
     public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
-    public static final String VERSION_PARAM = "version";
     public static final String HANDLER_PARAM = "handler";
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
-    public static final String COMMIT = "commit";
-
-    public static final String CSV_MEDIA_TYPE = "text/csv";
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
@@ -152,7 +141,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(FORMAT_PARAM) String format,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream stream)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
@@ -241,7 +230,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
@@ -303,7 +292,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam("ex") Set<String> ex,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
 
@@ -358,7 +347,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
@@ -382,7 +371,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
@@ -409,7 +398,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(IMPORTER_PARAM) String importerClass,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
@@ -436,77 +425,6 @@ public class ImportResource extends AbstractResource {
     }
 
     /**
-     * Update a batch of items via JSON containing (partial)
-     * data bundles.
-     *
-     * @param scopeId     the ID of there item's permission scope
-     * @param tolerant    whether to allow individual validation failures
-     * @param version     whether to create a version prior to delete
-     * @param logMessage  an optional log message
-     * @param inputStream a JSON document containing partial bundles containing
-     *                    the needed data transformations
-     * @return an import log describing the changes committed
-     */
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("batch")
-    public ImportLog batchUpdate(
-            @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
-            @QueryParam(LOG_PARAM) String logMessage,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
-            InputStream inputStream)
-            throws IOException, ItemNotFound, ValidationError, DeserializationError {
-        try (final Tx tx = beginTx()) {
-            Actioner user = getCurrentActioner();
-            PermissionScope scope = scopeId != null
-                    ? manager.getEntity(scopeId, PermissionScope.class)
-                    : null;
-            ImportLog log = new BatchOperations(graph, scope, version, tolerant, Collections.emptyList())
-                    .batchUpdate(inputStream, user, getLogMessage(logMessage));
-            if (commit) {
-                logger.debug("Committing batch update transaction...");
-                tx.success();
-            }
-            return log;
-        }
-    }
-
-    /**
-     * Delete a batch of objects via JSON containing their IDs.
-     *
-     * @param scopeId    the ID of there item's permission scope
-     * @param version    whether to create a version prior to delete
-     * @param logMessage an optional log message.
-     * @param ids        a list of IDs to delete
-     */
-    @DELETE
-    @Path("batch")
-    public void batchDelete(
-            @QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
-            @QueryParam(LOG_PARAM) String logMessage,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
-            @QueryParam(ID_PARAM) List<String> ids)
-            throws IOException, ItemNotFound, DeserializationError {
-        try (final Tx tx = beginTx()) {
-            Actioner user = getCurrentActioner();
-            PermissionScope scope = scopeId != null
-                    ? manager.getEntity(scopeId, PermissionScope.class)
-                    : null;
-            new BatchOperations(graph, scope, version, false, Collections.emptyList())
-                    .batchDelete(ids, user, getLogMessage(logMessage));
-            if (commit) {
-                logger.debug("Committing batch delete transaction...");
-                tx.success();
-            }
-        }
-    }
-
-
-    /**
      * Create multiple links via CSV or JSON tabular upload.
      * <p>
      * Each data row must consist of 5 columns:
@@ -525,12 +443,12 @@ public class ImportResource extends AbstractResource {
      * @throws DeserializationError the problems are found with the import data
      */
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("links")
     public ImportLog importLinks(
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @QueryParam(COMMIT) @DefaultValue("false") boolean commit,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             Table table) throws DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)

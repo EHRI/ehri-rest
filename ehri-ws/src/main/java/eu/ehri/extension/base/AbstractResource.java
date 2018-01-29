@@ -89,6 +89,8 @@ public abstract class AbstractResource implements TxCheckedResource {
     protected static final Logger logger = LoggerFactory.getLogger(AbstractResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
+    public static final String CSV_MEDIA_TYPE = "text/csv";
+
     /**
      * RDF Mimetypes and formatting mappings
      */
@@ -112,6 +114,11 @@ public abstract class AbstractResource implements TxCheckedResource {
     public static final String GROUP_PARAM = "group";
     public static final String ALL_PARAM = "all";
     public static final String ID_PARAM = "id";
+    public static final String LOG_PARAM = "log";
+    public static final String VERSION_PARAM = "version";
+    public static final String SCOPE_PARAM = "scope";
+    public static final String TOLERANT_PARAM = "tolerant";
+    public static final String COMMIT_PARAM = "commit";
 
     /**
      * Serialization config parameters.

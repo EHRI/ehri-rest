@@ -28,6 +28,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -53,8 +54,8 @@ import java.util.List;
  * TODO: Handle CSV headers
  */
 @Provider
-@Produces({MediaType.APPLICATION_JSON, "text/csv"})
-@Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+@Produces({MediaType.APPLICATION_JSON, AbstractResource.CSV_MEDIA_TYPE})
+@Consumes({MediaType.APPLICATION_JSON, AbstractResource.CSV_MEDIA_TYPE})
 public class TableProvider implements MessageBodyWriter<Table>, MessageBodyReader<Table>, JsonMessageBodyHandler {
 
     private static CsvMapper csvMapper = new CsvMapper()

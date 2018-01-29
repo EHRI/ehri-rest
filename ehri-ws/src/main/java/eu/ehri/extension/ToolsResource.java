@@ -90,7 +90,6 @@ public class ToolsResource extends AbstractResource {
 
     public static final String ENDPOINT = "tools";
 
-    private static final String TOLERANT_PARAM = "tolerant";
     private static final String SINGLE_PARAM = "single";
     private static final String LANG_PARAM = "lang";
     private static final String ACCESS_POINT_TYPE_PARAM = "apt";
@@ -127,7 +126,7 @@ public class ToolsResource extends AbstractResource {
     @POST
     @Path("find-replace")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     public Table findReplace(
             final @FormParam("from") String from,
             final @FormParam("to") String to,
@@ -135,7 +134,7 @@ public class ToolsResource extends AbstractResource {
             final @QueryParam("subtype") String subType,
             final @QueryParam("property") String property,
             final @QueryParam("max") @DefaultValue("100") int maxItems,
-            final @QueryParam("commit") @DefaultValue("false") boolean commit) throws ValidationError {
+            final @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) throws ValidationError {
 
         try {
             ContentTypes.withName(type);
@@ -241,14 +240,14 @@ public class ToolsResource extends AbstractResource {
      * body if nothing was changed
      */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
-    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("regenerate-ids")
     public Table regenerateIds(
             @QueryParam("id") List<String> ids,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
-            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
-            @QueryParam("commit") @DefaultValue("false") boolean commit,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             Table data)
             throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
@@ -296,13 +295,13 @@ public class ToolsResource extends AbstractResource {
      * body if nothing was changed
      */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("regenerate-ids-for-type/{type:[^/]+}")
     public Table regenerateIdsForType(
             @PathParam("type") String type,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
-            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
-            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
             throws IOException, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
             EntityClass entityClass = EntityClass.withName(type);
@@ -340,13 +339,13 @@ public class ToolsResource extends AbstractResource {
      * body if nothing was changed
      */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("regenerate-ids-for-scope/{scope:[^/]+}")
     public Table regenerateIdsForScope(
             @PathParam("scope") String scopeId,
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
-            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
-            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
@@ -368,7 +367,7 @@ public class ToolsResource extends AbstractResource {
     @Path("regenerate-description-ids")
     public String regenerateDescriptionIds(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
-            @QueryParam("commit") @DefaultValue("false") boolean commit)
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
             throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
         EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
                 .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
@@ -492,8 +491,8 @@ public class ToolsResource extends AbstractResource {
      * were relinked for each
      */
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("relink-targets")
     public Table relink(Table mapping) throws DeserializationError {
         try (final Tx tx = beginTx()) {
@@ -533,8 +532,8 @@ public class ToolsResource extends AbstractResource {
      * a newly generated global ID, derived from the new hierarchy.
      */
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("reparent")
     public Table reparent(@QueryParam("commit") @DefaultValue("false") boolean commit, Table mapping)
             throws DeserializationError {
@@ -593,8 +592,8 @@ public class ToolsResource extends AbstractResource {
      * with ordering corresponding to lexically-ordered input data.
      */
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, "text/csv"})
-    @Produces({MediaType.APPLICATION_JSON, "text/csv"})
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("rename")
     public Table rename(Table mapping)
             throws IdRegenerator.IdCollisionError, DeserializationError {
