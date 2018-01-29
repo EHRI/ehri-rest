@@ -245,8 +245,8 @@ public class BatchOperations {
      */
     public int batchDelete(List<String> ids, Actioner actioner, Optional<String> logMessage)
             throws ItemNotFound {
+        int done = 0;
         if (!ids.isEmpty()) {
-            int done = 0;
             try {
                 ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                         EventTypes.deletion, logMessage);
@@ -262,12 +262,10 @@ public class BatchOperations {
                     dao.delete(serializer.entityToBundle(manager.getEntity(id, Entity.class)));
                     done++;
                 }
-                return done;
             } catch (SerializationError serializationError) {
                 throw new RuntimeException(serializationError);
             }
-        } else {
-            return 0;
         }
+        return done;
     }
 }
