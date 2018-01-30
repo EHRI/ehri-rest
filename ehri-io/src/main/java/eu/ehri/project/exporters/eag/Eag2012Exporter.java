@@ -197,13 +197,13 @@ public final class Eag2012Exporter extends AbstractStreamingXmlExporter<Reposito
             tag(sw, "autform", desc.getName(), attrs("xml:lang", desc.getLanguageOfDescription()));
 
             Optional.ofNullable(desc.getProperty(Isdiah.parallelFormsOfName)).ifPresent(parNames -> {
-                List values = parNames instanceof List ? (List) parNames : ImmutableList.of(parNames);
+                List<?> values = parNames instanceof List ? (List<?>) parNames : ImmutableList.of(parNames);
                 for (Object value : values) {
                     tag(sw, "parform", value.toString());
                 }
             });
             Optional.ofNullable(desc.getProperty(Isdiah.otherFormsOfName)).ifPresent(parNames -> {
-                List values = parNames instanceof List ? (List) parNames : ImmutableList.of(parNames);
+                List<?> values = parNames instanceof List ? (List<?>) parNames : ImmutableList.of(parNames);
                 for (Object value : values) {
                     tag(sw, "parform", value.toString());
                 }

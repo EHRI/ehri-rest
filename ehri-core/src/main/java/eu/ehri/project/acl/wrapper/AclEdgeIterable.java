@@ -20,8 +20,8 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
 
     @Override
     public void close() {
-        if (this.iterable instanceof CloseableIterable) {
-            ((CloseableIterable) iterable).close();
+        if (this.iterable instanceof CloseableIterable<?>) {
+            ((CloseableIterable<?>) iterable).close();
         }
     }
 

@@ -392,13 +392,13 @@ public class GraphQLImpl {
         return source.getProperty(name);
     };
 
-    private static DataFetcher<List> listDataFetcher(DataFetcher<Object> fetcher) {
+    private static DataFetcher<List<?>> listDataFetcher(DataFetcher<?> fetcher) {
         return env -> {
             Object obj = fetcher.get(env);
             if (obj == null) {
                 return Collections.emptyList();
             } else if (obj instanceof List) {
-                return (List)obj;
+                return (List<?>)obj;
             } else {
                 return Lists.newArrayList(obj);
             }
@@ -449,7 +449,7 @@ public class GraphQLImpl {
         }).filter(Objects::nonNull).collect(Collectors.toList());
     };
 
-    private static DataFetcher<Object> transformingDataFetcher(DataFetcher fetcher, Function<Object, Object> transformer) {
+    private static <S, T> DataFetcher<T> transformingDataFetcher(DataFetcher<S> fetcher, Function<S, T> transformer) {
         return env -> transformer.apply(fetcher.get(env));
     }
 
@@ -565,7 +565,7 @@ public class GraphQLImpl {
     }
 
     private static GraphQLFieldDefinition.Builder listFieldDefinition(String name, String description,
-            GraphQLOutputType type, DataFetcher dataFetcher) {
+            GraphQLOutputType type, DataFetcher<Iterable<Entity>> dataFetcher) {
         return newFieldDefinition()
                 .name(name)
                 .type(new GraphQLList(type))
@@ -582,7 +582,7 @@ public class GraphQLImpl {
     }
 
     private static GraphQLFieldDefinition.Builder connectionFieldDefinition(String name, String description,
-            GraphQLOutputType type, DataFetcher dataFetcher, GraphQLArgument... arguments) {
+            GraphQLOutputType type, DataFetcher<Map<String, Object>> dataFetcher, GraphQLArgument... arguments) {
         return newFieldDefinition()
                 .name(name)
                 .description(description)
@@ -675,8 +675,8 @@ public class GraphQLImpl {
                 new GraphQLTypeReference(Entities.DATE_PERIOD),
                 oneToManyRelationshipFetcher(d -> d.as(Temporal.class).getDatePeriods()));
 
-    private GraphQLFieldDefinition.Builder itemFieldDefinition(String name, String description,
-            GraphQLOutputType type, DataFetcher dataFetcher, GraphQLArgument... arguments) {
+    private <T> GraphQLFieldDefinition.Builder itemFieldDefinition(String name, String description,
+            GraphQLOutputType type, DataFetcher<T> dataFetcher, GraphQLArgument... arguments) {
         return newFieldDefinition()
                 .name(name)
                 .type(type)

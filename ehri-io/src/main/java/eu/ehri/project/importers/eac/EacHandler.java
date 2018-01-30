@@ -122,16 +122,16 @@ public class EacHandler extends SaxXmlHandler {
         if (names instanceof String) {
             nameValue = names.toString();
         } else if (names instanceof List) {
-            Object firstName = ((List) names).get(0);
+            Object firstName = ((List<?>) names).get(0);
             if (firstName instanceof String) {
                 nameValue = firstName.toString();
             } else {
-                Map nameMap = (Map) firstName;
+                Map<?,?> nameMap = (Map<?,?>) firstName;
                 if (nameMap.get("namePart") instanceof String) {
                     nameValue = nameMap.get("namePart").toString();
                 } else if (nameMap.get("namePart") instanceof List) {
                     nameValue = "";
-                    for (Object p : (List) nameMap.get("namePart")) {
+                    for (Object p : (List<?>) nameMap.get("namePart")) {
                         nameValue += p + " ";
                     }
 
@@ -141,8 +141,8 @@ public class EacHandler extends SaxXmlHandler {
             }
 
             Set<String> otherNames = Sets.newHashSet();
-            for (int i = 1; i < ((List) names).size(); i++) {
-                Map m = (Map) ((List) names).get(i);
+            for (int i = 1; i < ((List<?>) names).size(); i++) {
+                Map<?,?> m = (Map<?,?>) ((List<?>) names).get(i);
                 Object namePart = m.get("namePart");
                 if (namePart != null && !namePart.toString().trim().equalsIgnoreCase(nameValue)) {
                     otherNames.add(namePart.toString().trim());

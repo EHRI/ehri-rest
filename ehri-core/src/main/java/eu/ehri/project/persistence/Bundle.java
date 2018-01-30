@@ -143,7 +143,7 @@ public final class Bundle implements NestableData<Bundle> {
             } else {
                 Object current = data.get(key);
                 if (current instanceof List) {
-                    ((List)current).add(value);
+                    ((List<Object>)current).add(value);
                     data.put(key, current);
                 } else {
                     data.put(key, Lists.newArrayList(current, value));
@@ -827,7 +827,7 @@ public final class Bundle implements NestableData<Bundle> {
         for (Map.Entry<? extends String, Object> entry : data.entrySet()) {
             Object value = entry.getValue();
             if (value instanceof Enum<?>) {
-                value = ((Enum) value).name();
+                value = ((Enum<?>) value).name();
             }
             filtered.put(entry.getKey(), value);
         }

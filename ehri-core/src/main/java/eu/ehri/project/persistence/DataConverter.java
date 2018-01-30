@@ -362,9 +362,9 @@ class DataConverter {
         } else if (value instanceof Object[]) {
             return ((Object[]) value).length == 0;
         } else if (value instanceof Collection<?>) {
-            return ((Collection) value).isEmpty();
+            return ((Collection<?>) value).isEmpty();
         } else if (value instanceof Iterable<?>) {
-            return !((Iterable) value).iterator().hasNext();
+            return !((Iterable<?>) value).iterator().hasNext();
         }
         return false;
     }

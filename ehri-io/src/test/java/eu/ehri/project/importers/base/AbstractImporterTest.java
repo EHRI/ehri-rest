@@ -60,12 +60,12 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     /**
      * Convenience method for creating a Sax import manager.
      */
-    protected SaxImportManager saxImportManager(Class<? extends ItemImporter> importerClass, Class<? extends
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends
             SaxXmlHandler> handlerClass) {
         return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass);
     }
 
-    protected SaxImportManager saxImportManager(Class<? extends ItemImporter> importerClass, Class<? extends
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends
             SaxXmlHandler> handlerClass, String propertiesResource) {
         return saxImportManager(importerClass, handlerClass).withProperties(propertiesResource);
     }
@@ -97,14 +97,14 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
         for (Vertex v : graph.getVertices()) {
             logger.debug(++vcount + " -------------------------");
             for (String key : v.getPropertyKeys()) {
-                String value = "";
+                StringBuilder value = new StringBuilder();
                 if (v.getProperty(key) instanceof String[]) {
                     String[] list = v.getProperty(key);
                     for (String o : list) {
-                        value += "[" + o + "] ";
+                        value.append("[").append(o).append("] ");
                     }
                 } else {
-                    value = v.getProperty(key).toString();
+                    value = new StringBuilder(v.getProperty(key).toString());
                 }
                 logger.debug(key + ": " + value);
             }
@@ -116,11 +116,11 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     }
 
     // Print a Concept Tree from a 'top' concept down into all narrower concepts
-    public void printConceptTree(final PrintStream out, Concept c) {
+    protected void printConceptTree(final PrintStream out, Concept c) {
         printConceptTree(out, c, 0, "");
     }
 
-    public void printConceptTree(final PrintStream out, Concept c, int depth, String indent) {
+    private void printConceptTree(final PrintStream out, Concept c, int depth, String indent) {
         if (depth > 100) {
             out.println("STOP RECURSION, possibly cyclic 'tree'");
             return;
@@ -157,7 +157,6 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * @param identifier the Vertex's 'human readable' identifier
      * @return the first Vertex with the given identifier
      * @throws NoSuchElementException when there are no vertices with this identifier
-     * @see {@link eu.ehri.project.definitions.Ontology#IDENTIFIER_KEY}
      */
     protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String identifier) {
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, identifier);
@@ -171,7 +170,6 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * @param id    the Vertex's generated, slugified identifier
      * @return the first Vertex with the given identifier
      * @throws NoSuchElementException when there are no vertices with this identifier
-     * @see {@link eu.ehri.project.models.annotations.EntityType#ID_KEY}
      */
     protected Vertex getVertexById(FramedGraph<?> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(EntityType.ID_KEY, id);

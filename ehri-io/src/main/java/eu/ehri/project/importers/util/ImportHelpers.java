@@ -93,7 +93,7 @@ public class ImportHelpers {
                 && !(nodeProperties.hasProperty(entity.getName(), key)
                 && nodeProperties.isMultivaluedProperty(entity.getName(), key))) {
             logger.trace("Flattening array property value: {}: {}", key, value);
-            return stringJoiner.join((List) value);
+            return stringJoiner.join((List<?>) value);
         } else {
             return value;
         }
@@ -230,7 +230,7 @@ public class ImportHelpers {
         if (c.containsKey(property)) {
             Object currentValue = c.get(property);
             if (currentValue instanceof List) {
-                ((List) currentValue).add(normValue);
+                ((List<Object>) currentValue).add(normValue);
             } else {
                 c.put(property, Lists.newArrayList(currentValue, normValue));
             }

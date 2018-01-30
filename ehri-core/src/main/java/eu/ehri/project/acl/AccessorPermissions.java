@@ -28,7 +28,7 @@ import java.util.Map;
  * A pairing of an accessor and their non-inherited permissions.
  */
 class AccessorPermissions<T> {
-    final String accessorId;
+    private final String accessorId;
     final T permissionSet;
 
     public AccessorPermissions(String accessorId, T permissionSet) {
@@ -46,7 +46,7 @@ class AccessorPermissions<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AccessorPermissions that = (AccessorPermissions) o;
+        AccessorPermissions<?> that = (AccessorPermissions<?>) o;
 
         return accessorId.equals(that.accessorId)
                 && permissionSet.equals(that.permissionSet);

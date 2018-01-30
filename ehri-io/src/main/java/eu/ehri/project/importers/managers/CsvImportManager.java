@@ -56,7 +56,7 @@ public class CsvImportManager extends AbstractImportManager {
     public CsvImportManager(FramedGraph<?> framedGraph,
             PermissionScope permissionScope, Actioner actioner,
             boolean tolerant,
-            boolean allowUpdates, Class<? extends ItemImporter> importerClass) {
+            boolean allowUpdates, Class<? extends ItemImporter<?,?>> importerClass) {
         super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass);
     }
 
@@ -72,7 +72,7 @@ public class CsvImportManager extends AbstractImportManager {
             final ImportLog log) throws IOException, ValidationError, InputParseError {
 
         try {
-            ItemImporter importer = importerClass
+            ItemImporter<?,?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportLog.class)
                     .newInstance(framedGraph, permissionScope, actioner, log);
             logger.debug("importer of class " + importer.getClass());
@@ -93,7 +93,7 @@ public class CsvImportManager extends AbstractImportManager {
                                 entry.getKey().replaceAll("\\s", ""), entry.getValue());
                     }
                     try {
-                        importer.importItem(dataMap);
+                        ((ItemImporter<Map<String, Object>, ?>)importer).importItem(dataMap);
                     } catch (ValidationError e) {
                         if (isTolerant()) {
                             logger.error("Validation error importing item: {}", e);
@@ -104,7 +104,8 @@ public class CsvImportManager extends AbstractImportManager {
                 }
             }
         } catch (IllegalAccessException | InvocationTargetException |
-                InstantiationException | NoSuchMethodException e) {
+                InstantiationException | NoSuchMethodException |
+                ClassCastException e) {
             throw new RuntimeException(e);
         }
     }

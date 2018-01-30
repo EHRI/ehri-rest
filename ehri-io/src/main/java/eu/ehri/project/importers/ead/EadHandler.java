@@ -164,7 +164,7 @@ public class EadHandler extends SaxXmlHandler {
     private String getCurrentTopIdentifier() {
         Object current = currentGraphPath.peek().get(ImportHelpers.OBJECT_IDENTIFIER);
         if (current instanceof List<?>) {
-            return (String) ((List) current).get(0);
+            return (String) ((List<?>) current).get(0);
         } else {
             return (String) current;
         }
@@ -365,7 +365,7 @@ public class EadHandler extends SaxXmlHandler {
         if (currentGraph.containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
             Object idents = currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER);
             if (idents instanceof List) {
-                List identList = (List) idents;
+                List<?> identList = (List<?>) idents;
                 currentGraph.put(ImportHelpers.OBJECT_IDENTIFIER, identList.get(0));
                 for (Object item : identList.subList(1, identList.size())) {
                     addOtherIdentifier(currentGraph, ((String) item));

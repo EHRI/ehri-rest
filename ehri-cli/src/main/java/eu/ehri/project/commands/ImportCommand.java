@@ -50,9 +50,9 @@ import java.util.Map;
  */
 public abstract class ImportCommand extends BaseCommand {
     private final Class<? extends SaxXmlHandler> handler;
-    private final Class<? extends ItemImporter> importer;
+    private final Class<? extends ItemImporter<?, ?>> importer;
 
-    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter> importer) {
+    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends ItemImporter<?, ?>> importer) {
         this.handler = handler;
         this.importer = importer;
     }
