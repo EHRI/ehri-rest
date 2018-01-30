@@ -213,7 +213,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
             }
 
             Optional.ofNullable(desc.getProperty(Isaar.otherFormsOfName)).ifPresent(parNames -> {
-                List values = coerceList(parNames);
+                List<?> values = coerceList(parNames);
                 if (!values.isEmpty()) {
                     for (Object value : values) {
                         tag(sw, "nameEntry", () -> {
@@ -225,7 +225,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
             });
 
             Optional.ofNullable(desc.getProperty(Isaar.parallelFormsOfName)).ifPresent(parNames -> {
-                List values = coerceList(parNames);
+                List<?> values = coerceList(parNames);
                 if (!values.isEmpty()) {
                     tag(sw, "nameEntryParallel", () -> {
                         tag(sw, "nameEntry", () -> {
@@ -262,7 +262,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
             addRevisionDesc(sw, agent, desc);
 
             Optional.ofNullable(desc.getProperty(Isaar.source)).ifPresent(sources -> {
-                List sourceValues = coerceList(sources);
+                List<?> sourceValues = coerceList(sources);
                 tag(sw, "sources", () -> {
                     for (Object value : sourceValues) {
                         tag(sw, "source", () -> tag(sw, "sourceEntry", value.toString()));

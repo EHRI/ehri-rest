@@ -50,7 +50,7 @@ public abstract class AbstractStreamingXmlExporter<E extends Entity>
 
     protected List<Object> coerceList(Object value) {
         return value == null ? ImmutableList.of()
-                : (value instanceof List ? (List) value : ImmutableList.of(value));
+                : (value instanceof List ? (List<Object>) value : ImmutableList.of(value));
     }
 
     protected String resourceAsString(String resourceName) {

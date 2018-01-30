@@ -42,7 +42,7 @@ public class Neo4j2VertexIterable<T extends Neo4j2Vertex> implements CloseableIt
 
     public void close() {
         if (this.nodes instanceof IndexHits) {
-            ((IndexHits) this.nodes).close();
+            ((IndexHits<?>) this.nodes).close();
         }
     }
 

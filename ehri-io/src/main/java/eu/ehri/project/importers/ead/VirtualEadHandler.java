@@ -145,7 +145,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     private String getCurrentTopIdentifier() {
         Object current = currentGraphPath.peek().get(ImportHelpers.OBJECT_IDENTIFIER);
         if (current instanceof List<?>) {
-            return (String) ((List) current).get(0);
+            return (String) ((List<?>) current).get(0);
         } else {
             return (String) current;
         }

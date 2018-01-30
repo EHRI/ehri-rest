@@ -416,7 +416,7 @@ public class ToolsResource extends AbstractResource {
         try (final Tx tx = beginTx()) {
             for (Vertex v : graph.getVertices()) {
                 try {
-                    ((Neo4jGraphManager) manager).setLabels(v);
+                    ((Neo4jGraphManager<?>) manager).setLabels(v);
                     done++;
                 } catch (org.neo4j.graphdb.ConstraintViolationException e) {
                     logger.error("Error setting labels on {} ({})", manager.getId(v), v.getId());

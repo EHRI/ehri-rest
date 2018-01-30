@@ -61,7 +61,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     private String currentFile;
     protected Integer currentPosition;
-    protected final Class<? extends ItemImporter> importerClass;
+    protected final Class<? extends ItemImporter<?,?>> importerClass;
 
     /**
      * Constructor.
@@ -80,7 +80,7 @@ public abstract class AbstractImportManager implements ImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends ItemImporter> importerClass) {
+            Class<? extends ItemImporter<?,?>> importerClass) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;

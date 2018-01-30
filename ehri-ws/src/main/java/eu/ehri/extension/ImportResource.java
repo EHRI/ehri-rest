@@ -238,7 +238,7 @@ public class ImportResource extends AbstractResource {
             checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler
                     = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
-            Class<? extends ItemImporter> importer
+            Class<? extends ItemImporter<?, ?>> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             // Get the current user from the Authorization header and the scope
@@ -300,7 +300,7 @@ public class ImportResource extends AbstractResource {
             checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler
                     = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
-            Class<? extends ItemImporter> importer
+            Class<? extends ItemImporter<?, ?>> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             Actioner user = getCurrentActioner();
@@ -402,7 +402,7 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
-            Class<? extends ItemImporter> importer
+            Class<? extends ItemImporter<?, ?>> importer
                     = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
 
             // Get the current user from the Authorization header and the scope
@@ -553,7 +553,7 @@ public class ImportResource extends AbstractResource {
     }
 
     @SuppressWarnings("unchecked")
-    private static Class<? extends ItemImporter> getImporterCls(String importerName, String defaultImporter)
+    private static Class<? extends ItemImporter<?, ?>> getImporterCls(String importerName, String defaultImporter)
             throws DeserializationError {
         String name = nameOrDefault(importerName, defaultImporter);
         try {
@@ -562,7 +562,7 @@ public class ImportResource extends AbstractResource {
                 throw new DeserializationError("Class '" + importerName + "' is" +
                         " not an instance of " + ItemImporter.class.getSimpleName());
             }
-            return (Class<? extends ItemImporter>) importer;
+            return (Class<? extends ItemImporter<?, ?>>) importer;
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
         }

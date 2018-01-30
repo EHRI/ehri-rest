@@ -23,7 +23,7 @@ public class UniqueAdjacencyAnnotationHandler implements MethodHandler<UniqueAdj
     }
 
     @Override
-    public Object processElement(final Object frame, final Method method, final Object[] arguments, final UniqueAdjacency annotation, final FramedGraph framedGraph,
+    public Object processElement(final Object frame, final Method method, final Object[] arguments, final UniqueAdjacency annotation, final FramedGraph<?> framedGraph,
             final Element element) {
         if (element instanceof Vertex) {
             return processVertex(annotation, method, arguments, framedGraph, (Vertex) element);
@@ -85,7 +85,7 @@ public class UniqueAdjacencyAnnotationHandler implements MethodHandler<UniqueAdj
         } else if (ClassUtilities.isSetMethod(method)) {
             removeEdges(adjacency.direction(), adjacency.label(), vertex, null, framedGraph);
             if (ClassUtilities.acceptsIterable(method)) {
-                for (Object o : (Iterable) arguments[0]) {
+                for (Object o : (Iterable<?>) arguments[0]) {
                     Vertex v = ((VertexFrame) o).asVertex();
                     addEdges(adjacency, vertex, v);
                 }
@@ -123,7 +123,7 @@ public class UniqueAdjacencyAnnotationHandler implements MethodHandler<UniqueAdj
         }
     }
 
-    private void removeEdges(final Direction direction, final String label, final Vertex element, final Vertex otherVertex, final FramedGraph framedGraph) {
+    private void removeEdges(final Direction direction, final String label, final Vertex element, final Vertex otherVertex, final FramedGraph<?> framedGraph) {
         for (final Edge edge : element.getEdges(direction, label)) {
             if (null == otherVertex || edge.getVertex(direction.opposite()).equals(otherVertex)) {
                 framedGraph.removeEdge(edge);

@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -69,7 +68,7 @@ public class SaxImportManager extends AbstractImportManager {
             Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends ItemImporter> importerClass,
+            Class<? extends ItemImporter<?,?>> importerClass,
             Class<? extends SaxXmlHandler> handlerClass,
             XmlImportProperties properties,
             List<ImportCallback> callbacks) {
@@ -92,7 +91,7 @@ public class SaxImportManager extends AbstractImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             List<ImportCallback> callbacks) {
         this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass, null,
                 callbacks);
@@ -109,7 +108,7 @@ public class SaxImportManager extends AbstractImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
-            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass,
+            Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass,
             XmlImportProperties properties) {
         this(graph, scope, actioner, tolerant, allowUpdates, importerClass, handlerClass,
                 properties,
@@ -125,7 +124,7 @@ public class SaxImportManager extends AbstractImportManager {
      */
     public SaxImportManager(FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
-            Class<? extends ItemImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this(graph, scope, actioner, false, false, importerClass, handlerClass, Lists
                 .<ImportCallback>newArrayList());
     }
@@ -141,7 +140,7 @@ public class SaxImportManager extends AbstractImportManager {
     protected void importInputStream(final InputStream stream, final String tag, final ActionManager.EventContext context,
             final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
-            ItemImporter<Map<String, Object>, ?> importer = importerClass
+            ItemImporter<?, ?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class,
                             Actioner.class, ImportLog.class)
                     .newInstance(framedGraph, permissionScope, actioner, log);

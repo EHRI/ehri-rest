@@ -41,9 +41,9 @@ import java.util.Map;
  * to manipulate the graph.
  */
 public abstract class ImportCsvCommand extends BaseCommand {
-    private final Class<? extends ItemImporter> importer;
+    private final Class<? extends ItemImporter<?, ?>> importer;
 
-    public ImportCsvCommand(Class<? extends ItemImporter> importer) {
+    public ImportCsvCommand(Class<? extends ItemImporter<?, ?>> importer) {
         this.importer = importer;
     }
 

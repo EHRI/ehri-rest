@@ -151,7 +151,7 @@ public class GraphSON extends BaseCommand {
                     // safe, due to the above instanceof
                     @SuppressWarnings("unchecked")
                     FramedGraph<Neo4j2Graph> neo4j2Graph = ((FramedGraph<Neo4j2Graph>) graph);
-                    Neo4jGraphManager manager = new Neo4jGraphManager<>(neo4j2Graph);
+                    Neo4jGraphManager<?> manager = new Neo4jGraphManager<>(neo4j2Graph);
                     int i = 0;
                     for (Vertex v : graph.getVertices()) {
                         manager.setLabels(v);

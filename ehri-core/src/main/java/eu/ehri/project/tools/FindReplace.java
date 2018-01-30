@@ -141,7 +141,7 @@ public class FindReplace {
     private boolean find(String needle, Object data) {
         if (data != null) {
             if (data instanceof List) {
-                for (Object v : ((List) data)) {
+                for (Object v : ((List<?>) data)) {
                     if (find(needle, v)) {
                         return true;
                     }
@@ -157,8 +157,8 @@ public class FindReplace {
     private Object replace(String original, String replacement, Object data) {
         if (data != null) {
             if (data instanceof List) {
-                List<Object> newList = Lists.newArrayListWithExpectedSize(((List) data).size());
-                for (Object v : ((List) data)) {
+                List<Object> newList = Lists.newArrayListWithExpectedSize(((List<?>) data).size());
+                for (Object v : ((List<?>) data)) {
                     newList.add(replace(original, replacement, v));
                 }
                 return newList;

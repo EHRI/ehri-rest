@@ -178,7 +178,7 @@ public class JenaSkosExporter implements SkosExporter {
     private void writeListOrScalar(Model model, Resource resource,
             Property property, Object listOrScalar, String lang) {
         if (listOrScalar instanceof List) {
-            List<?> list = (List) listOrScalar;
+            List<?> list = (List<?>) listOrScalar;
             for (Object obj : list) {
                 logger.trace("Writing list property: {} -> {}", property, obj);
                 writeObject(model, resource, property, obj, lang);

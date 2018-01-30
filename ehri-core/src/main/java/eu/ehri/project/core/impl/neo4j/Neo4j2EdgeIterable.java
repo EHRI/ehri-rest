@@ -51,7 +51,7 @@ public class Neo4j2EdgeIterable<T extends Edge> implements CloseableIterable<Neo
 
     public void close() {
         if (this.relationships instanceof IndexHits) {
-            ((IndexHits) this.relationships).close();
+            ((IndexHits<?>) this.relationships).close();
         }
     }
 }
