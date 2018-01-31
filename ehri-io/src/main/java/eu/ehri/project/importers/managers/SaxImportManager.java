@@ -76,8 +76,8 @@ public class SaxImportManager extends AbstractImportManager {
         this.handlerClass = handlerClass;
         this.properties = properties;
         this.extraCallbacks = Lists.newArrayList(callbacks);
-        logger.info("importer used: " + importerClass);
-        logger.info("handler used: " + handlerClass);
+        logger.debug("importer used: {}", importerClass);
+        logger.debug("handler used: {}", handlerClass);
     }
 
     /**
@@ -161,11 +161,11 @@ public class SaxImportManager extends AbstractImportManager {
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);
             if (isTolerant()) {
-                logger.debug("Turning off validation and setting schema to null");
+                logger.trace("Turning off validation and setting schema to null");
                 spf.setValidating(false);
                 spf.setSchema(null);
             }
-            logger.debug("isValidating: " + spf.isValidating());
+            logger.trace("isValidating: {}", spf.isValidating());
             SAXParser saxParser = spf.newSAXParser();
             saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             InputSource src = new InputSource(stream);

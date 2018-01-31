@@ -113,7 +113,7 @@ public class EadHandler extends SaxXmlHandler {
      */
     public EadHandler(ItemImporter<Map<String, Object>, ?> importer) {
         this(importer, new XmlImportProperties(DEFAULT_PROPERTIES));
-        logger.warn("Using default properties file: {}", DEFAULT_PROPERTIES);
+        logger.trace("Using default properties file: {}", DEFAULT_PROPERTIES);
     }
 
     /**
@@ -188,7 +188,7 @@ public class EadHandler extends SaxXmlHandler {
 
         if (qName.equals(EADID)) {
             eadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
-            logger.debug("Found <{}>: {}", EADID, eadId);
+            logger.trace("Found {}: {}", EADID, eadId);
         }
 
         if (localName.equals("language") || qName.equals("language")) {
@@ -205,7 +205,7 @@ public class EadHandler extends SaxXmlHandler {
             extractIdentifier(currentGraphPath.peek());
             String topId = getCurrentTopIdentifier();
             scopeIds.push(topId);
-            logger.debug("Current id path: {}", scopeIds);
+            logger.trace("Current id path: {}", scopeIds);
         }
 
         if (needToCreateSubNode(qName)) {
@@ -234,13 +234,13 @@ public class EadHandler extends SaxXmlHandler {
                     }
 
                     if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(Entities.MAINTENANCE_EVENT)) {
-                        logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
+                        logger.trace("Adding global maintenance events: {}", globalMaintenanceEvents);
                         currentGraph.put(Entities.MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
 
-                    logger.debug("importer used: {}", importer.getClass());
+                    logger.trace("importer used: {}", importer.getClass());
                     if (depth > 0) { // if not on root level
                         children[depth - 1].add(current); // add child to parent offspring
                         // set the parent child relationships by hand
@@ -326,7 +326,7 @@ public class EadHandler extends SaxXmlHandler {
      */
     private void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            logger.debug("Using default language code: {}", defaultLanguage);
+            logger.trace("Using default language code: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
         }
     }
@@ -338,7 +338,7 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected void extractTitle(Map<String, Object> currentGraph) {
         if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
-            logger.error("no name found, using identifier {}", currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
+            logger.warn("no name found, using identifier {}", currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
             currentGraph.put(Ontology.NAME_KEY, currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
         }
     }
@@ -384,7 +384,7 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
         if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
-            logger.debug("adding alternative id: {}", otherIdentifier);
+            logger.trace("adding alternative id: {}", otherIdentifier);
             Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
             if (oids instanceof List) {
                 ((List<String>) oids).add(otherIdentifier);
@@ -393,7 +393,7 @@ public class EadHandler extends SaxXmlHandler {
                         Lists.newArrayList(oids, otherIdentifier));
             }
         } else {
-            logger.debug("adding first alt id: {}", otherIdentifier);
+            logger.trace("adding first alt id: {}", otherIdentifier);
             currentGraph.put(Ontology.OTHER_IDENTIFIERS, Lists.newArrayList(otherIdentifier));
         }
     }

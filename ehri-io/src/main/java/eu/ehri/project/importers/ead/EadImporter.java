@@ -160,12 +160,12 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
-            logger.debug("relation found: {}", rel.get(Ontology.NAME_KEY));
+            logger.trace("relation found: {}", rel.get(Ontology.NAME_KEY));
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
         for (Map<String, Object> dpb : ImportHelpers.extractSubNodes(Entities.MAINTENANCE_EVENT, itemData)) {
-            logger.debug("maintenance event found {}", dpb);
+            logger.trace("maintenance event found {}", dpb);
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
                     Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
@@ -177,7 +177,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             for (String u : unknowns.keySet()) {
                 unknownProperties.append(u);
             }
-            logger.debug("Unknown Properties found: {}", unknownProperties);
+            logger.trace("Unknown Properties found: {}", unknownProperties);
             descBuilder.addRelation(Ontology.HAS_UNKNOWN_PROPERTY,
                     Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
@@ -205,8 +205,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
 
-        logger.debug("merging: descBundle's language = {}, sourceFileId = {}",
-                languageOfDesc, thisSourceFileId);
         /*
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
@@ -266,7 +264,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                         relationNode.put(Ontology.NAME_KEY, origRelation.get(Entities.ACCESS_POINT));
                     }
                     if (!relationNode.containsKey(Ontology.ACCESS_POINT_TYPE)) {
-                        logger.debug("relationNode without type: {}", relationNode.get(Ontology.NAME_KEY));
+                        logger.warn("relationNode without type: {}", relationNode.get(Ontology.NAME_KEY));
                         relationNode.put(Ontology.ACCESS_POINT_TYPE, AccessPointType.corporateBody);
                     }
                     list.add(relationNode);

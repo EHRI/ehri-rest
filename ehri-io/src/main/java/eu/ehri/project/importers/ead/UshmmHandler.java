@@ -50,15 +50,15 @@ public class UshmmHandler extends EadHandler {
         //not all units have ids, and some have multiple, find the "irn"
         if (currentGraph.containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
             if (currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER) instanceof List) {
-                logger.debug("class of identifier: " + currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER).getClass());
+                logger.trace("class of identifier: {}", currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER).getClass());
                 List<String> identifiers = (List<String>) currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER);
                 List<String> identifierType = (List<String>) currentGraph.get("objectIdentifierType");
                 for (int i = 0; i < identifiers.size(); i++) {
                     if (identifierType.get(i).equals("irn")) {
-                        logger.debug("found official id: " + identifiers.get(i));
+                        logger.trace("found official id: {}", identifiers.get(i));
                         currentGraph.put(ImportHelpers.OBJECT_IDENTIFIER, identifiers.get(i));
                     } else {
-                        logger.debug("found other form of identifier: " + identifiers.get(i));
+                        logger.trace("found other form of identifier: {}", identifiers.get(i));
                         addOtherIdentifier(currentGraph, identifiers.get(i));
                         //currentGraph.put("otherIdentifiers", identifiers.get(i));
                     }
