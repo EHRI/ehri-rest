@@ -114,7 +114,7 @@ abstract class PropertyLoader {
     private static final Logger logger = LoggerFactory.getLogger(PropertyLoader.class);
 
     private static Properties loadPropertiesFromResource(String name, ClassLoader loader) {
-        logger.debug("loading resource {}...", name);
+        logger.trace("loading resource {}...", name);
         try (InputStream in = loader.getResourceAsStream(name)) {
             if (in != null) {
                 Properties result = new Properties();
@@ -129,7 +129,7 @@ abstract class PropertyLoader {
     }
 
     private static Properties loadPropertiesFromFile(Path path) {
-        logger.debug("loading file {}...", path.toUri());
+        logger.trace("loading file {}...", path.toUri());
         try (InputStream ios = Files.newInputStream(path)) {
             Properties result = new Properties();
             result.load(ios); // Can throw IOException

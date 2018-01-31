@@ -165,7 +165,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         currentPath.push(withoutNamespace(qName));
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
-            logger.debug("Pushing depth... {} -> {}", depth, qName);
+            logger.trace("Pushing depth... {} -> {}", depth, qName);
             currentGraphPath.push(Maps.<String, Object>newHashMap());
         }
 
@@ -181,7 +181,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                 } else if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
                     attribute = getMappedProperty(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
                 } else {
-                    logger.debug("attribute {} not found in properties", attributeName);
+                    logger.trace("attribute {} not found in properties", attributeName);
                 }
             }
         }
@@ -237,7 +237,6 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
             String isLangAttribute = withoutNamespace(attributes.getQName(attr));
             String prop = properties.getAttributeProperty(isLangAttribute);
             if (LANGUAGE_OF_DESCRIPTION.equals(prop)) {
-                logger.debug("Language detected!");
                 return Optional.of(attributes.getValue(attr));
             }
         }

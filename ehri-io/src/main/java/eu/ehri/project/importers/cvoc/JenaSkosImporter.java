@@ -258,7 +258,7 @@ public final class JenaSkosImporter implements SkosImporter {
 
             model.read(ios, null, format);
             OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-            logger.debug("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
+            logger.trace("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
             Map<Resource, Concept> imported = Maps.newHashMap();
 
             ExtendedIterator<? extends OntResource> itemIterator = conceptClass.listInstances();
@@ -316,7 +316,7 @@ public final class JenaSkosImporter implements SkosImporter {
     }
 
     private Mutation<Concept> importConcept(Resource item) throws ValidationError {
-        logger.debug("Importing: {}", item);
+        logger.trace("Importing: {}", item);
         Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())))
                 .addDataValue(Ontology.URI_KEY, item.getURI());
@@ -453,7 +453,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         if (!existingRelations.equals(newRelations)) {
-            logger.debug("Updating relations for concept: {}: {} -> {} => {}",
+            logger.trace("Updating relations for concept: {}: {} -> {} => {}",
                     propUri, current.getId(), existingRelations, newRelations);
 
             Sets.difference(existingRelations, newRelations)

@@ -92,7 +92,7 @@ public class EacHandler extends SaxXmlHandler {
         //an EAC file consists of only 1 element, so if we're back at the root, we're done
         if (currentPath.isEmpty()) {
             try {
-                logger.debug("depth close {} {}", depth, qName);
+                logger.trace("depth close {} {}", depth, qName);
                 //TODO: add any mandatory fields not yet there:
                 if (!currentGraphPath.peek().containsKey(ImportHelpers.OBJECT_IDENTIFIER)) {
                     putPropertyInCurrentGraph(ImportHelpers.OBJECT_IDENTIFIER, "id");
@@ -104,7 +104,7 @@ public class EacHandler extends SaxXmlHandler {
                     overwritePropertyInCurrentGraph(Ontology.NAME_KEY, name);
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    logger.debug("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
+                    logger.trace("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
                     putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION,
                             Locale.ENGLISH.getISO3Language());
                 }
@@ -146,7 +146,7 @@ public class EacHandler extends SaxXmlHandler {
                 Object namePart = m.get("namePart");
                 if (namePart != null && !namePart.toString().trim().equalsIgnoreCase(nameValue)) {
                     otherNames.add(namePart.toString().trim());
-                    logger.debug("other name: {}", namePart);
+                    logger.trace("other name: {}", namePart);
                 }
             }
             otherNames.forEach(n -> putPropertyInCurrentGraph("otherFormsOfName", n));

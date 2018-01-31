@@ -113,7 +113,7 @@ public class ImportHelpers {
         Map<String, Object> unit = Maps.newHashMap();
         unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
-            logger.debug("otherIdentifiers is not null");
+            logger.trace("otherIdentifiers is not null");
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
         }
         return unit;
@@ -207,7 +207,7 @@ public class ImportHelpers {
     public static void overwritePropertyInGraph(Map<String, Object> c, String property, String value) {
         String normValue = normaliseValue(property, value);
         if (normValue != null && !normValue.isEmpty()) {
-            logger.debug("overwrite property: {} {}", property, normValue);
+            logger.trace("overwrite property: {} {}", property, normValue);
             c.put(property, normValue);
         }
     }
@@ -226,7 +226,7 @@ public class ImportHelpers {
         if (normValue == null || normValue.isEmpty()) {
             return;
         }
-        logger.debug("putProp: {} -> {}", property, normValue);
+        logger.trace("putProp: {} -> {}", property, normValue);
         if (c.containsKey(property)) {
             Object currentValue = c.get(property);
             if (currentValue instanceof List) {

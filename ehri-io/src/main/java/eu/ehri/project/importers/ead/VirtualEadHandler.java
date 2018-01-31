@@ -169,10 +169,10 @@ public class VirtualEadHandler extends SaxXmlHandler {
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
         if (localName.equals("eadid") || qName.equals("eadid")) {
             eadId = (String) currentGraphPath.peek().get(SOURCEFILEID);
-            logger.debug("Found <eadid>: " + eadId);
+            logger.trace("Found <eadid>: " + eadId);
         } else if (localName.equals("author") || qName.equals("author")) {
             author = (String) currentGraphPath.peek().get(AUTHOR);
-            logger.debug("Found <author>: " + author);
+            logger.trace("Found <author>: " + author);
         }
 
         if (localName.equals("language") || qName.equals("language")) {
@@ -189,7 +189,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
             extractIdentifier(currentGraphPath.peek());
             String topId = getCurrentTopIdentifier();
             scopeIds.push(topId);
-            logger.debug("Current id path: " + scopeIds);
+            logger.trace("Current id path: " + scopeIds);
         }
 
         if (needToCreateSubNode(qName)) {
@@ -214,16 +214,17 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     addAuthor(currentGraph);
 
                     if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(Entities.MAINTENANCE_EVENT)) {
-                        logger.debug("Adding global maintenance events: {}", globalMaintenanceEvents);
+                        logger.trace(
+                                "Adding global maintenance events: {}", globalMaintenanceEvents);
                         currentGraph.put(Entities.MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
                     AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
 
                     if (current.getType().equals(Entities.VIRTUAL_UNIT)) {
-                        logger.debug("virtual unit created: " + current.getIdentifier());
+                        logger.debug("virtual unit created: {}", current.getIdentifier());
                         topLevel = (VirtualUnit) current; // if it is not overwritten, the current DU is the topLevel
-                        logger.debug("importer used: " + importer.getClass());
+                        logger.debug("importer used: {}", importer.getClass());
                         if (depth > 0) { // if not on root level
                             children[depth - 1].add(current); // add child to parent offspring
                             // set the parent child relationships by hand
@@ -233,12 +234,12 @@ public class VirtualEadHandler extends SaxXmlHandler {
                             for (AbstractUnit child : children[depth]) {
                                 if (child != null) {
                                     if (child.getType().equals(Entities.VIRTUAL_UNIT)) {
-                                        logger.debug("virtual child");
+                                        logger.trace("virtual child");
 
                                         ((VirtualUnit) current).addChild(((VirtualUnit) child));
                                         child.setPermissionScope(current);
                                     } else { //child.getType().equals(Entities.DOCUMENTARY_UNIT)
-                                        logger.debug("documentary child");
+                                        logger.trace("documentary child");
                                         ((VirtualUnit) current).addIncludedUnit(((DocumentaryUnit) child));
 
                                     }
@@ -247,7 +248,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                         }
                     } else {
                         //nothing has to happen, since the DocumentaryUnit is already created before
-                        logger.debug("documentary Unit found: " + current.getIdentifier());
+                        logger.trace("documentary Unit found: {}", current.getIdentifier());
                         if (depth > 0) { // if not on root level
                             children[depth - 1].add(current); // add child to parent offspring
                         }
@@ -320,7 +321,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            logger.debug("Using default language code: " + defaultLanguage);
+            logger.trace("Using default language code: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
         }
     }
@@ -369,14 +370,14 @@ public class VirtualEadHandler extends SaxXmlHandler {
      */
     protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
         if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
-            logger.debug("adding alternative id: " + otherIdentifier);
+            logger.trace("adding alternative id: {}", otherIdentifier);
             Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
             if (oids != null && oids instanceof ArrayList<?>) {
                 ((ArrayList<String>) oids).add(otherIdentifier);
-                logger.debug("alternative ID added");
+                logger.trace("alternative ID added");
             }
         } else {
-            logger.debug("adding first alt id: " + otherIdentifier);
+            logger.trace("adding first alt id: {}", otherIdentifier);
             List<String> oids = Lists.newArrayList();
             oids.add(otherIdentifier);
             currentGraph.put(Ontology.OTHER_IDENTIFIERS, oids);

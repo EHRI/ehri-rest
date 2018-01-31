@@ -75,7 +75,7 @@ public class CsvImportManager extends AbstractImportManager {
             ItemImporter<?,?> importer = importerClass
                     .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportLog.class)
                     .newInstance(framedGraph, permissionScope, actioner, log);
-            logger.debug("importer of class " + importer.getClass());
+            logger.trace("importer of class {}", importer.getClass());
 
             importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));

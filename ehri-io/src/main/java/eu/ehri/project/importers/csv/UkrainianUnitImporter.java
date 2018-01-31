@@ -64,7 +64,6 @@ public class UkrainianUnitImporter extends AbstractImporter<Map<String, Object>,
 
         BundleManager persister = new BundleManager(framedGraph, permissionScope.idPath());
 
-        logger.debug("-----------------------------------");
         Bundle unit = Bundle.of(EntityClass.DOCUMENTARY_UNIT, extractUnit(itemData));
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
 

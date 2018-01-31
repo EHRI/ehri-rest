@@ -100,7 +100,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
         Map<String, Object> unknowns = ImportHelpers.extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
-            logger.debug("Unknown Properties found");
+            logger.trace("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, Bundle.of(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
@@ -112,7 +112,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
             if (rel.containsKey(REL_TYPE) && rel.get(REL_TYPE).equals(AccessPointType.subject.name())) {
-                logger.debug("relation found");
+                logger.trace("relation found: {}", rel.get(REL_TYPE));
                 descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT,
                         Bundle.of(EntityClass.ACCESS_POINT, rel));
             }

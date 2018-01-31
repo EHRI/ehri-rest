@@ -72,18 +72,18 @@ public final class JavaHandlerUtils {
         if (!from.equals(to)) {
             for (Edge edge : from.getEdges(Direction.OUT, label)) {
                 if (edge.getVertex(Direction.IN).equals(to)) {
-                    logger.warn("Attempting to add relationship '{}' that already exists: {}", label, to);
+                    logger.trace("Attempting to add relationship '{}' that already exists: {}", label, to);
                     return false;
                 } else {
                     edge.remove();
-                    logger.warn("Removed prior '{}' relationship added in single mode: {}",
+                    logger.trace("Removed prior '{}' relationship added in single mode: {}",
                             label, from);
                 }
             }
             from.addEdge(label, to);
             return true;
         } else {
-            logger.warn("Attempt to add self-referential '{}' relationship " +
+            logger.trace("Attempt to add self-referential '{}' relationship " +
                     "where single relationship specified: {}",
                     label, to);
             return false;

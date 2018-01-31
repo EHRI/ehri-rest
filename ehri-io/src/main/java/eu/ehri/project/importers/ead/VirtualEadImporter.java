@@ -180,7 +180,7 @@ public class VirtualEadImporter extends EadImporter {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
         }
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
-            logger.debug("otherIdentifiers is not null");
+            logger.warn("otherIdentifiers is not null");
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
         }
         return unit;
@@ -201,7 +201,7 @@ public class VirtualEadImporter extends EadImporter {
             String unitId = itemData.get(OBJECT_IDENTIFIER).toString();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
             for (DocumentaryUnit unit : repository.getAllDocumentaryUnits()) {
-                logger.debug("{} / {} / {}", unit.getIdentifier(), unit.getId(), unitId);
+                logger.trace("{} / {} / {}", unit.getIdentifier(), unit.getId(), unitId);
                 if (unit.getIdentifier().equals(unitId)) {
                     return unit;
                 }
