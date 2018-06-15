@@ -24,6 +24,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.AbstractSkosTest;
 import eu.ehri.project.importers.cvoc.JenaSkosImporter;
 import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -32,7 +33,9 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 
@@ -79,20 +82,44 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
     @Test
     public void testExport() throws Exception {
         String[] formats = {"TTL", "RDF/XML", "N3"};
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
         String baseUri = "http://ehri01.dans.knaw.nl/";
-        importer.importFile(ClassLoader.getSystemResourceAsStream(FILE4), "test");
+        importFile(vocabulary, FILE4);
 
         for (String format : formats) {
-            SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
-                    .setFormat(format);
-            OutputStream outputStream = new ByteArrayOutputStream();
-
-            exporter.export(outputStream, baseUri);
-            String skos = outputStream.toString();
+            String skos = exportFile(vocabulary, format, baseUri);
             //System.out.println(skos);
             assertTrue(skos.contains(baseUri));
             assertTrue(skos.contains(baseUri + "989"));
         }
+    }
+
+    @Test
+    public void testLangCodes() throws Exception {
+        importFile(vocabulary, FILE5);
+        String skos = exportFile(vocabulary, "RDF/XML",
+                "http://data.ehri-project.eu/");
+        assertThat(skos, containsString("xml:lang=\"ru-latn\""));
+    }
+
+    @Test
+    public void testAbsoluteURIs() throws Exception {
+        importFile(vocabulary, FILE5);
+        String skos = exportFile(vocabulary, "RDF/XML",
+                "http://ehri01.dans.knaw.nl/");
+        assertThat(skos, containsString("rdf:about=\"http://ehri01.dans.knaw.nl/cvoc2\""));
+    }
+
+    private void importFile(Vocabulary vocabulary, String file) throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        importer.importFile(ClassLoader.getSystemResourceAsStream(file), "test");
+    }
+
+    private String exportFile(Vocabulary vocabulary, String format, String baseUri) throws Exception {
+        SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
+                .setFormat(format);
+        OutputStream outputStream = new ByteArrayOutputStream();
+
+        exporter.export(outputStream, baseUri);
+        return outputStream.toString();
     }
 }
