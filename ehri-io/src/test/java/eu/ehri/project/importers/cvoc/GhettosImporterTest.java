@@ -53,12 +53,12 @@ public class GhettosImporterTest extends AbstractImporterTest {
 
         /*  How many new nodes will have been created? We should have
          * 2 more Concepts
-         * 4 more ConceptDescription
-         * 4 UndeterminedRelationships
+         * 5 more ConceptDescription
+         * 5 UndeterminedRelationships
      	 * 3 more import Event links (2 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        assertEquals(count + 14, getNodeCount(graph));
+        assertEquals(count + 16, getNodeCount(graph));
         assertEquals(2, log.getCreated());
         assertEquals(voccount + 2, toList(vocabulary.getConcepts()).size());
 

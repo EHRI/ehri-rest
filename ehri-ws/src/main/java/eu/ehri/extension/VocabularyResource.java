@@ -45,6 +45,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFWriter;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -218,9 +219,11 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary);
             final Model model = skosImporter.export(base);
             tx.success();
-            return Response.ok((StreamingOutput) outputStream ->
-                    model.getWriter(rdfFormat).write(model, outputStream, base))
-                    .type(mediaType + "; charset=utf-8").build();
+            return Response.ok((StreamingOutput) outputStream -> {
+                RDFWriter writer = model.getWriter(rdfFormat);
+                writer.setProperty("relativeURIs", "");
+                writer.write(model, outputStream, base);
+            }).type(mediaType + "; charset=utf-8").build();
         }
     }
 }

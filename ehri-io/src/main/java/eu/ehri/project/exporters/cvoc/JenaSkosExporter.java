@@ -28,10 +28,7 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.utils.LanguageHelpers;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,13 +70,21 @@ public class JenaSkosExporter implements SkosExporter {
     @Override
     public void export(OutputStream outputStream, String base) throws IOException {
         Model model = export(base);
-        model.getWriter(format).write(model, outputStream, null);
+        RDFWriter writer = model.getWriter(format);
+        writer.setProperty("relativeURIs", "");
+        writer.write(model, outputStream, base);
     }
 
     private String getUri(Concept concept, String baseUri) {
         String fallback = baseUri + concept.getIdentifier();
         String orig = concept.getProperty(Ontology.URI_KEY);
         return Optional.ofNullable(orig).orElse(fallback);
+    }
+
+    private String getLangCode(Description description) {
+        String lang = LanguageHelpers.iso639DashOneCode(description.getLanguageOfDescription());
+        String script = description.getProperty(Ontology.IDENTIFIER_KEY);
+        return script != null ? lang + "-" + script : lang;
     }
 
     public Model export(String base) throws IOException {
@@ -121,7 +126,7 @@ public class JenaSkosExporter implements SkosExporter {
 
             for (Description description : concept.getDescriptions()) {
                 Vertex cdv = description.asVertex();
-                String lang = LanguageHelpers.iso639DashOneCode(description.getLanguageOfDescription());
+                String lang = getLangCode(description);
                 model.add(resource, prefLabelProp, description.getName(), lang);
                 for (String key : cdv.getPropertyKeys()) {
                     writeProperty(model, resource, key, cdv.getProperty(key), lang);

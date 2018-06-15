@@ -72,7 +72,7 @@ public enum SkosRDFVocabulary {
     DEFINITION("definition"),
     CHANGE_NOTE("changeNote");
 
-    public static final String DEFAULT_BASE_URI = "http://data.ehri-project.eu#";
+    public static final String DEFAULT_BASE_URI = "http://data.ehri-project.eu/";
     public static final String NAMESPACE_URI = "http://www.w3.org/2004/02/skos/core#";
 
     public static final Map<String, String> NAMESPACES = ImmutableMap.<String, String>builder()

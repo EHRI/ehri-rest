@@ -13,8 +13,8 @@
 	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
 	<owl:sameAs>http://www.yadvashem.org/yv/he/research/ghettos_encyclopedia/ghetto_details.asp?cid=1</owl:sameAs>
 	<skos:notation>1</skos:notation>
-	<rdfs:label xml:lang="he">נובי דבור</rdfs:label>
-	<rdfs:label xml:lang="en">Nowy Dwór</rdfs:label>
+	<skos:altLabel xml:lang="he">נובי דבור</skos:altLabel>
+	<skos:prefLabel xml:lang="ru-latn">Nowy Dwór</skos:prefLabel>
 	<skos:prefLabel xml:lang="he">נובי דבור</skos:prefLabel>
 	<skos:prefLabel xml:lang="en">Nowy Dwór</skos:prefLabel>
 	<rdf:type rdf:resource="http://www.w3.org/2003/01/geo/wgs84_pos#Point"/>
@@ -27,8 +27,8 @@
 	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
 	<owl:sameAs>http://www.yadvashem.org/yv/he/research/ghettos_encyclopedia/ghetto_details.asp?cid=2</owl:sameAs>
 	<skos:notation>2</skos:notation>
-	<rdfs:label xml:lang="he">סניקי</rdfs:label>
-	<rdfs:label xml:lang="en">Sanniki</rdfs:label>
+	<skos:altLabel xml:lang="he">סניקי</skos:altLabel>
+	<skos:altLabel xml:lang="en">Sanniki</skos:altLabel>
 	<skos:prefLabel xml:lang="he">סניקי</skos:prefLabel>
 	<skos:prefLabel xml:lang="en">Sanniki</skos:prefLabel>
 	<rdf:type rdf:resource="http://www.w3.org/2003/01/geo/wgs84_pos#Point"/>
