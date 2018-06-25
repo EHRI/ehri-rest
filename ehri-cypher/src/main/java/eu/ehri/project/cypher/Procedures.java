@@ -28,17 +28,20 @@ public class Procedures {
         }
     }
 
-    @Procedure("eu.ehri.project.cypher.countryCodeToName")
+    @Deprecated
+    @Procedure(value = "eu.ehri.project.cypher.countryCodeToName", deprecatedBy = "countryCodeToName")
     public Stream<Output> countryCodeToName(@Name("code") String code) {
         return Stream.of(new Output(LanguageHelpers.iso3166dashOneCodeToName(code)));
     }
 
-    @Procedure("eu.ehri.project.cypher.languageCodeToName")
+    @Deprecated
+    @Procedure(value = "eu.ehri.project.cypher.languageCodeToName", deprecatedBy = "languageCodeToName")
     public Stream<Output> languageCodeToName(@Name("code") String code) {
         return Stream.of(new Output(LanguageHelpers.codeToName(code)));
     }
 
-    @Procedure("coerceList")
+    @Deprecated
+    @Procedure(value = "coerceList", deprecatedBy = "coerceList")
     public Stream<ListOutput> toList(@Name("data") Object data) {
         if (data == null) {
             return Stream.of(new ListOutput(Collections.emptyList()));
