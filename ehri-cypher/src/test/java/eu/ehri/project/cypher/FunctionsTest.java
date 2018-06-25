@@ -3,13 +3,7 @@ package eu.ehri.project.cypher;
 import com.google.common.collect.Lists;
 import org.junit.Rule;
 import org.junit.Test;
-import org.neo4j.driver.v1.Config;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
-import org.neo4j.driver.v1.Value;
-import org.neo4j.driver.v1.Values;
+import org.neo4j.driver.v1.*;
 import org.neo4j.harness.junit.Neo4jRule;
 
 import java.util.Collections;
@@ -18,17 +12,18 @@ import java.util.List;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class ProceduresTest {
+public class FunctionsTest {
 
     @Rule
-    public Neo4jRule neo4j = new Neo4jRule().withProcedure(Procedures.class);
+    public Neo4jRule neo4j = new Neo4jRule().withFunction(Functions.class);
 
     @Test
     public void testCountryCodeToName() {
         try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
                 .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
             StatementResult result = session
-                    .run("CALL eu.ehri.project.cypher.countryCodeToName({code})", Values.parameters("code", "us"));
+                    .run("RETURN eu.ehri.project.cypher.countryCodeToName({code}) as value",
+                            Values.parameters("code", "us"));
             assertThat(result.single().get("value").asString(), equalTo("United States"));
         }
     }
@@ -38,11 +33,12 @@ public class ProceduresTest {
         try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
                 .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
             StatementResult result1 = session
-                    .run("CALL eu.ehri.project.cypher.languageCodeToName({code})", Values.parameters("code", "en"));
+                    .run("RETURN eu.ehri.project.cypher.languageCodeToName({code}) as value", Values.parameters("code", "en"));
             assertThat(result1.single().get("value").asString(), equalTo("English"));
 
             StatementResult result2 = session
-                    .run("CALL eu.ehri.project.cypher.languageCodeToName({code})", Values.parameters("code", "fra"));
+                    .run("RETURN eu.ehri.project.cypher.languageCodeToName({code}) as value",
+                            Values.parameters("code", "fra"));
             assertThat(result2.single().get("value").asString(), equalTo("French"));
         }
     }
@@ -64,7 +60,8 @@ public class ProceduresTest {
 
             for (int i = 0; i < expected.size(); i += 2) {
                 StatementResult result = session
-                        .run("CALL coerceList({data})", Values.parameters("data", expected.get(i)));
+                        .run("RETURN eu.ehri.project.cypher.coerceList({data}) as value",
+                                Values.parameters("data", expected.get(i)));
                 Value value = result.single().get("value");
                 assertThat(value.asList().toString(), equalTo(expected.get(i + 1).toString()));
             }
