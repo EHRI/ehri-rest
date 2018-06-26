@@ -29,14 +29,12 @@ import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.test.utils.GraphCleaner;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import org.eclipse.jetty.util.log.Log;
 import org.neo4j.helpers.ListenSocketAddress;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.helpers.CommunityServerBuilder;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,13 +93,6 @@ public class ServerRunner {
         // doing indexing operations (e.g. when loading fixtures or resetting
         // the graph data.) This is noisy so we lower the log level here.
         graphLogger.setLevel(logLevel);
-
-        // This combination of stuff seems to quiet Jetty's log.
-        Log.__logClass = "none";
-        Properties p = new Properties();
-        p.setProperty("root.LEVEL", "WARN");
-        p.setProperty("org.eclipse.jetty.LEVEL", "OFF");
-        org.eclipse.jetty.util.log.StdErrLog.setProperties(p);
 
         CommunityServerBuilder serverBuilder = CommunityServerBuilder.server()
                 .onAddress(new ListenSocketAddress("localhost", port));
