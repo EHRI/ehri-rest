@@ -73,10 +73,11 @@ public class OaiPmhExporterTest extends XmlExporterTest {
     @Test
     public void testListIdentifiersWithResumptionToken() throws Exception {
         Document page1 = get("verb=" + Verb.ListIdentifiers + "&metadataPrefix=oai_dc", 2);
-        assertXPath(page1, "c4", "/OAI-PMH/ListIdentifiers/header/identifier");
+        assertXPath(page1, "c4", "/OAI-PMH/ListIdentifiers/header[1]/identifier");
+        assertXPath(page1, "nl-000001-1", "/OAI-PMH/ListIdentifiers/header[2]/identifier");
         String rt = (String) xPath(page1, "/OAI-PMH/ListIdentifiers/resumptionToken");
         Document page2 = get("verb=" + Verb.ListIdentifiers + "&resumptionToken=" + rt);
-        assertXPath(page2, "nl-000001-1", "/OAI-PMH/ListIdentifiers/header/identifier");
+        assertXPath(page2, "nl-r1-m19", "/OAI-PMH/ListIdentifiers/header/identifier");
         assertXPath(page2, "", "/OAI-PMH/ListIdentifiers/resumptionToken");
     }
 
@@ -270,7 +271,7 @@ public class OaiPmhExporterTest extends XmlExporterTest {
         try (final IndentingXMLStreamWriter sw = new IndentingXMLStreamWriter(
                 xmlOutputFactory.createXMLStreamWriter(new BufferedOutputStream(out)))) {
             Api api = anonApi();
-            OaiPmhExporter oaiPmh = new OaiPmhExporter(OaiPmhData.create(api),
+            OaiPmhExporter oaiPmh = new OaiPmhExporter(OaiPmhData.create(api, true),
                     OaiPmhRenderer.defaultRenderer(api, DEFAULT_LANG_CODE), ConfigFactory.load());
             try {
                 OaiPmhState state = OaiPmhState.parse(params, limit);

@@ -32,6 +32,7 @@ import eu.ehri.project.models.Country;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
@@ -59,13 +60,19 @@ public class OaiPmhData {
     private static final Joiner setSpecJoiner = Joiner.on(':');
 
     private final Api api;
+    private final boolean sort;
 
-    private OaiPmhData(Api api) {
+    private OaiPmhData(Api api, boolean sort) {
         this.api = api;
+        this.sort = sort;
+    }
+
+    public static OaiPmhData create(Api api, boolean sort) {
+        return new OaiPmhData(api, sort);
     }
 
     public static OaiPmhData create(Api api) {
-        return new OaiPmhData(api);
+        return create(api, false);
     }
 
     QueryApi.Page<OaiPmhSet> getSets(OaiPmhState state) {
@@ -84,8 +91,9 @@ public class OaiPmhData {
         String defaultTimestamp = api.actionManager().getEventRoot().getTimestamp();
         Iterable<DocumentaryUnit> filtered = Iterables.filter(
                 getDocumentaryUnits(state.getSetSpec()), timeFilterItems(state.getFrom(), state.getUntil(), defaultTimestamp));
-        return api.query().setOffset(state.getOffset()).setLimit(state.getLimit())
-                .page(filtered, DocumentaryUnit.class);
+        QueryApi q = api.query().setOffset(state.getOffset()).setLimit(state.getLimit());
+        QueryApi sortQ = sort ? q.orderBy(EntityType.ID_KEY, QueryApi.Sort.ASC) : q;
+        return sortQ.page(filtered, DocumentaryUnit.class);
     }
 
     OaiPmhRecordResult getRecord(OaiPmhState state) throws OaiPmhError {
