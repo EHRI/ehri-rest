@@ -102,14 +102,11 @@ public class ImportHelpers {
     /**
      * Extract DocumentaryUnit properties from the itemData and return them as a new Map.
      * This implementation only extracts the objectIdentifier.
-     * <p>
-     * This implementation does not throw ValidationErrors.
      *
      * @param itemData a Map containing raw properties of a DocumentaryUnit
      * @return a new Map containing the objectIdentifier property
-     * @throws ValidationError never
      */
-    public static Map<String, Object> extractIdentifiers(Map<String, Object> itemData) throws ValidationError {
+    public static Map<String, Object> extractIdentifiers(Map<String, Object> itemData) {
         Map<String, Object> unit = Maps.newHashMap();
         unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_IDENTIFIER));
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {

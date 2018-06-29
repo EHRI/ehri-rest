@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.function.BiPredicate;
 
@@ -205,6 +206,12 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
 
+        // Ensure none of the parent items (not yet saved) have an invalid
+        // missing identifier
+        if (idPath.contains(null)) {
+            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Parent item has missing identifier");
+        }
+
         /*
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
@@ -236,9 +243,9 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                 return unitWithIds.withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
             } catch (SerializationError ex) {
-                throw new ValidationError(unit, "serialization error", ex.getMessage());
+                throw new RuntimeException("Unexpected error reading existing item: " + unitWithIds.getId(), ex);
             } catch (ItemNotFound ex) {
-                throw new ValidationError(unit, "item not found exception", ex.getMessage());
+                throw new RuntimeException("Failed to find existing item with key: " + unitWithIds.getId(), ex);
             }
         } else { // else we create a new bundle.
             return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
