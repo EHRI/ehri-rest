@@ -40,11 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -212,6 +208,7 @@ public class EadHandler extends SaxXmlHandler {
             Map<String, Object> currentGraph = currentGraphPath.pop();
 
             if (isUnitDelimiter(qName)) {
+                List<String> pathIds = pathIds();
                 try {
                     //add any mandatory fields not yet there:
                     // First: identifier(s),
@@ -238,7 +235,7 @@ public class EadHandler extends SaxXmlHandler {
                         currentGraph.put(Entities.MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
-                    DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
+                    DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds);
 
                     logger.trace("importer used: {}", importer.getClass());
                     if (depth > 0) { // if not on root level
@@ -259,7 +256,7 @@ public class EadHandler extends SaxXmlHandler {
                     if (bundle.getId() == null) {
                         // In order to indicate what has errored here if there's no
                         // ID we need to create one with the line number reference.
-                        String path = pathIds().isEmpty() ? null : Joiner.on("/").join(pathIds());
+                    String path = pathIds.isEmpty() ? null : Joiner.on("/").useForNull("[null]").join(pathIds);
                         String ref = String.format("[Item completed prior to line: %d]",
                                 locator.getLineNumber());
                         String id = Joiner.on(" ").skipNulls().join(path, locator.getSystemId(), ref);

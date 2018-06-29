@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE ead PUBLIC "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN" "http://lcweb2.loc.gov/xmlcommon/dtds/ead2002/ead.dtd">
+
+<ead>
+	<eadheader>
+		<eadid>C00001</eadid>
+		<filedesc>
+			<titlestmt>
+				<titleproper encodinganalog="Title">Test EAD Item</titleproper>
+			</titlestmt>
+		</filedesc>
+	</eadheader>
+	<archdesc level="collection" relatedencoding="ISAD(G)v2">
+		<did>
+            <unittitle>Parent</unittitle>
+		</did>
+		<dsc type="combined">
+            <c01>
+				<did>
+					<unitid>c1</unitid>
+				</did>
+			</c01>
+		</dsc>
+	</archdesc>
+</ead>
