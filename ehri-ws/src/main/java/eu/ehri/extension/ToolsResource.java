@@ -24,28 +24,16 @@ import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.base.AbstractResource;
+import eu.ehri.extension.errors.ConflictError;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Described;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
@@ -57,15 +45,7 @@ import eu.ehri.project.utils.Table;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -165,7 +145,7 @@ public class ToolsResource extends AbstractResource {
     @Produces({TURTLE_MIMETYPE, RDF_XML_MIMETYPE, N3_MIMETYPE})
     public Response exportSchema(
             final @QueryParam("format") String format,
-            final @QueryParam("baseUri") String baseUri) throws IOException {
+            final @QueryParam("baseUri") String baseUri) {
         final String rdfFormat = getRdfFormat(format, "TTL");
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
@@ -199,8 +179,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String languageCode,
             @QueryParam(SINGLE_PARAM) @DefaultValue("true") boolean excludeSingle,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant)
-            throws ItemNotFound, ValidationError,
-            PermissionDenied, DeserializationError {
+            throws ItemNotFound, ValidationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             Repository repository = manager.getEntity(repositoryId, Repository.class);
@@ -249,7 +228,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             Table data)
-            throws ItemNotFound, IOException, IdRegenerator.IdCollisionError {
+            throws ConflictError {
         try (final Tx tx = beginTx()) {
             List<String> allIds = Lists.newArrayList(ids);
             data.rows().stream()
@@ -271,6 +250,8 @@ public class ToolsResource extends AbstractResource {
                     .reGenerateIds(items);
             tx.success();
             return Table.of(remap);
+        } catch (IdRegenerator.IdCollisionError e) {
+            throw new ConflictError(e);
         }
     }
 
@@ -302,7 +283,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
-            throws IOException, IdRegenerator.IdCollisionError {
+            throws ConflictError {
         try (final Tx tx = beginTx()) {
             EntityClass entityClass = EntityClass.withName(type);
             try (CloseableIterable<Accessible> frames = manager
@@ -315,6 +296,8 @@ public class ToolsResource extends AbstractResource {
                 tx.success();
                 return Table.of(lists);
             }
+        } catch (IdRegenerator.IdCollisionError e) {
+            throw new ConflictError(e);
         }
     }
 
@@ -346,7 +329,7 @@ public class ToolsResource extends AbstractResource {
             @QueryParam("collisions") @DefaultValue("false") boolean collisions,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+            throws ItemNotFound, ConflictError {
         try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
             List<List<String>> lists = new IdRegenerator(graph)
@@ -356,6 +339,8 @@ public class ToolsResource extends AbstractResource {
                     .reGenerateIds(scope.getAllContainedItems());
             tx.success();
             return Table.of(lists);
+        } catch (IdRegenerator.IdCollisionError e) {
+            throw new ConflictError(e);
         }
     }
 
@@ -367,8 +352,7 @@ public class ToolsResource extends AbstractResource {
     @Path("regenerate-description-ids")
     public String regenerateDescriptionIds(
             @QueryParam("buffer") @DefaultValue("-1") int bufferSize,
-            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
-            throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
         EntityClass[] types = {EntityClass.DOCUMENTARY_UNIT_DESCRIPTION, EntityClass
                 .CVOC_CONCEPT_DESCRIPTION, EntityClass.HISTORICAL_AGENT_DESCRIPTION, EntityClass
                 .REPOSITORY_DESCRIPTION};
@@ -411,7 +395,7 @@ public class ToolsResource extends AbstractResource {
     @POST
     @Produces("text/plain")
     @Path("set-labels")
-    public String setLabels() throws IOException, ItemNotFound, IdRegenerator.IdCollisionError {
+    public String setLabels() {
         long done = 0;
         try (final Tx tx = beginTx()) {
             for (Vertex v : graph.getVertices()) {
@@ -469,8 +453,7 @@ public class ToolsResource extends AbstractResource {
     @POST
     @Produces("text/plain")
     @Path("full-upgrade-1to2")
-    public void fullUpgradeDb1to2()
-            throws IOException, IdRegenerator.IdCollisionError, ItemNotFound {
+    public void fullUpgradeDb1to2() throws IOException {
         upgradeDb1to2();
         setLabels();
         setConstraints();
@@ -632,8 +615,7 @@ public class ToolsResource extends AbstractResource {
     @POST
     @Path("__INITIALISE")
     public void initialize(
-            @QueryParam("yes-i-am-sure") @DefaultValue("false") boolean confirm,
-            InputStream fixtures) throws Exception {
+            @QueryParam("yes-i-am-sure") @DefaultValue("false") boolean confirm, InputStream fixtures) {
         try (final Tx tx = beginTx()) {
             sanityCheck(confirm);
 
