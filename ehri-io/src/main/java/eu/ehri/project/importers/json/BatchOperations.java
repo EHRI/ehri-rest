@@ -196,10 +196,10 @@ public class BatchOperations {
         ImportLog log = new ImportLog(logMessage.orElse(null));
         try (CloseableIterable<Bundle> bundleIter = Bundle.bundleStream(inputStream)) {
             for (Bundle bundle : bundleIter) {
-                Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
-                Bundle oldBundle = serializer.entityToBundle(entity);
-                Bundle newBundle = oldBundle.mergeDataWith(bundle);
                 try {
+                    Entity entity = manager.getEntity(bundle.getId(), bundle.getType().getJavaClass());
+                    Bundle oldBundle = serializer.entityToBundle(entity);
+                    Bundle newBundle = oldBundle.mergeDataWith(bundle);
                     Mutation<Accessible> update = dao.update(newBundle, Accessible.class);
                     switch (update.getState()) {
                         case UPDATED:
@@ -215,12 +215,12 @@ public class BatchOperations {
                         default:
                             throw new RuntimeException("Unexpected status in batch update: " + update.getState());
                     }
-                } catch (ValidationError e) {
+                } catch (ValidationError | ItemNotFound e) {
                     if (!tolerant) {
                         throw e;
                     } else {
-                        log.addError(entity.getId(), e.getMessage());
-                        logger.warn("Validation error patching {}: {}", entity.getId(), e);
+                        log.addError(bundle.getId(), e.getMessage());
+                        logger.warn("Validation error patching {}: {}", bundle.getId(), e);
                     }
                 }
             }
