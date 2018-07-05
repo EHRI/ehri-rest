@@ -1026,6 +1026,7 @@ public class GraphQLImpl {
                             r -> r.as(Repository.class).getTopLevelDocumentaryUnits(),
                             r -> r.as(Repository.class).getAllDocumentaryUnits()),
                     allArgument))
+            .fields(geoFields)
             .field(singleDescriptionFieldDefinition(repositoryDescriptionType))
             .field(descriptionsFieldDefinition(repositoryDescriptionType))
             .field(itemFieldDefinition("country", __("repository.field.country.description"),
