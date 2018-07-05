@@ -12,12 +12,12 @@ public class Functions {
 
     @UserFunction
     public String countryCodeToName(@Name("code") String code) {
-        return LanguageHelpers.iso3166dashOneCodeToName(code);
+        return code == null ? null : LanguageHelpers.iso3166dashOneCodeToName(code);
     }
 
     @UserFunction
     public String languageCodeToName(@Name("code") String code) {
-        return LanguageHelpers.codeToName(code);
+        return code == null ? null : LanguageHelpers.codeToName(code);
     }
 
     @UserFunction
