@@ -25,6 +25,11 @@ public class FunctionsTest {
                     .run("RETURN eu.ehri.project.cypher.countryCodeToName({code}) as value",
                             Values.parameters("code", "us"));
             assertThat(result.single().get("value").asString(), equalTo("United States"));
+
+            StatementResult result2 = session
+                    .run("RETURN eu.ehri.project.cypher.countryCodeToName({code}) as value",
+                            Values.parameters("code", null));
+            assertThat(result2.single().get("value").asObject(), equalTo(null));
         }
     }
 
@@ -40,6 +45,11 @@ public class FunctionsTest {
                     .run("RETURN eu.ehri.project.cypher.languageCodeToName({code}) as value",
                             Values.parameters("code", "fra"));
             assertThat(result2.single().get("value").asString(), equalTo("French"));
+
+            StatementResult result3 = session
+                    .run("RETURN eu.ehri.project.cypher.languageCodeToName({code}) as value",
+                            Values.parameters("code", null));
+            assertThat(result3.single().get("value").asObject(), equalTo(null));
         }
     }
 
