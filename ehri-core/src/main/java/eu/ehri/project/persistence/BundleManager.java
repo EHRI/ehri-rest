@@ -205,7 +205,7 @@ public final class BundleManager {
             Bundle newBundle = bundle.dependentsOnly();
             if (!currentBundle.equals(newBundle)) {
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Bundles differ: {}", bundle.getId());
+                    logger.trace("Bundles differ: {}:{}", bundle.getType(), bundle.getId());
                     logger.trace(currentBundle.diff(newBundle));
                 }
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
@@ -213,7 +213,7 @@ public final class BundleManager {
                 updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
                 return new Mutation<>(node, MutationState.UPDATED, currentBundle);
             } else {
-                logger.debug("Not updating equivalent bundle: {}", bundle.getId());
+                logger.debug("Not updating equivalent bundle: {}:{}", bundle.getType(), bundle.getId());
                 return new Mutation<>(node, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {
