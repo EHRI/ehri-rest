@@ -569,6 +569,7 @@ public class ToolsResource extends AbstractResource {
      * of dependent parent/child hierarchical IDs and output order will
      * reflect this.
      *
+     * @param commit actually perform the rename
      * @param mapping a comma-separated CSV file, exluding headers.
      * @return CSV data containing two columns: the old global ID, and
      * a newly generated global ID, derived from the new local identifier,
@@ -578,10 +579,10 @@ public class ToolsResource extends AbstractResource {
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("rename")
-    public Table rename(Table mapping)
+    public Table rename(@QueryParam("commit") @DefaultValue("false") boolean commit, Table mapping)
             throws IdRegenerator.IdCollisionError, DeserializationError {
         try (final Tx tx = beginTx()) {
-            IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(true);
+            IdRegenerator idRegenerator = new IdRegenerator(graph).withActualRename(commit);
             // Sorting the toString of each item *should* put hierarchical lists
             // in parent-child order, which is necessary to have ID-regeneration work
             // correctly.
@@ -600,7 +601,9 @@ public class ToolsResource extends AbstractResource {
                 idRegenerator.reGenerateId(item).ifPresent(done::add);
             }
 
-            tx.success();
+            if (commit) {
+                tx.success();
+            }
             return Table.of(done);
         } catch (ItemNotFound e) {
             throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
