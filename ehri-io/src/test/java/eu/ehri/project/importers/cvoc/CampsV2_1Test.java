@@ -37,7 +37,6 @@ import static org.junit.Assert.assertNotNull;
 public class CampsV2_1Test extends AbstractImporterTest {
 
     private final String SKOS_FILE = "cvoc/camps.rdf";
-    private final String SKOS_FILE_VERSION2 = "cvoc/camps-v2-1.rdf.xml";
 
     @Test
     public void testImportItems() throws Exception {
@@ -50,9 +49,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
 
-        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
-                .setTolerant(true)
-                .importFile(ios, logMessage);
+        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary).importFile(ios, logMessage);
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -119,10 +116,10 @@ public class CampsV2_1Test extends AbstractImporterTest {
         }
 
         //import version 2
-        ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE_VERSION2);
-        importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-
-        importer.setTolerant(true);
+        String version2 = "cvoc/camps-v2-1.rdf.xml";
+        ios = ClassLoader.getSystemResourceAsStream(version2);
+        importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        .allowUpdates(true);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);

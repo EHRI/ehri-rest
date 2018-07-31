@@ -52,8 +52,10 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
         );
         for (Map.Entry<String, String> entry : files.entrySet()) {
 
-            SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-            importer.setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
+            SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                    .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
+                    .allowUpdates(true);
+            importer
                     .importFile(ClassLoader.getSystemResourceAsStream(entry.getKey()), "test");
 
             List<VertexProxy> before = getGraphState(graph);
@@ -64,7 +66,9 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
             exporter.export(outputStream, "http://www.my.com/#");
             String skos = outputStream.toString();
             //System.out.println("EXPORT: " + skos);
-            ImportLog log = importer.setFormat(entry.getValue())
+            ImportLog log = importer
+                    .setFormat(entry.getValue())
+                    .allowUpdates(true)
                     .importFile(new ByteArrayInputStream(skos.getBytes()), "test");
             List<VertexProxy> after = getGraphState(graph);
             assertTrue(log.getUnchanged() > 0);

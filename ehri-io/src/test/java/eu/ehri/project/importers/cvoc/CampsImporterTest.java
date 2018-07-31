@@ -36,8 +36,7 @@ import static org.junit.Assert.assertNotNull;
 
 
 public class CampsImporterTest extends AbstractImporterTest {
-    protected final String SKOS_FILE = "cvoc/camps.rdf";
-    protected final String SKOS_FILE_VERSION2 = "cvoc/campsv02.rdf";
+    private final String SKOS_FILE = "cvoc/camps.rdf";
 
     @Test
     public void testImportItems() throws Exception {
@@ -50,9 +49,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
 
-        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
-            .setTolerant(true)
-            .importFile(ios, logMessage);
+        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary).importFile(ios, logMessage);
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -118,11 +115,11 @@ public class CampsImporterTest extends AbstractImporterTest {
         }
 
         //import version 2
-        ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE_VERSION2);
-        importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-
-        importer.setTolerant(true);
-        importer.importFile(ios, "Importing the modified camps as a SKOS file");
+        String version2 = "cvoc/campsv02.rdf";
+        ios = ClassLoader.getSystemResourceAsStream(version2);
+        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+            .allowUpdates(true)
+            .importFile(ios, "Importing the modified camps as a SKOS file");
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -135,5 +132,4 @@ public class CampsImporterTest extends AbstractImporterTest {
         assertEquals(afterNodeCount, getNodeCount(graph));
         assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
     }
-
 }
