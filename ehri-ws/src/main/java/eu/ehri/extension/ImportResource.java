@@ -137,6 +137,7 @@ public class ImportResource extends AbstractResource {
     public ImportLog importSkos(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(BASE_URI_PARAM) String baseURI,
             @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
             @QueryParam(LOG_PARAM) String logMessage,
@@ -154,6 +155,7 @@ public class ImportResource extends AbstractResource {
             ImportLog log = importer
                     .setFormat(format)
                     .setTolerant(tolerant)
+                    .allowUpdates(allowUpdates)
                     .setBaseURI(baseURI)
                     .setURISuffix(uriSuffix)
                     .importFile(stream, getLogMessage(logMessage).orElse(null));

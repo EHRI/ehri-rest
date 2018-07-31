@@ -35,8 +35,6 @@ import static org.junit.Assert.assertEquals;
 
 
 public class GhettosImporterV20140831Test extends AbstractImporterTest {
-    protected final String SKOS_FILE = "cvoc/ghettos.rdf";
-    protected final String SKOS_V2_FILE = "cvoc/ghettos-v20140831.rdf.xml";
 
     @Test
     public void testImportItems() throws Exception {
@@ -46,9 +44,10 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
-        importer.setTolerant(true);
+        InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/ghettos.rdf");
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+                .setTolerant(true)
+                .allowUpdates(true);
         ImportLog log = importer.importFile(ios, logMessage);
 
         /*  How many new nodes will have been created? We should have
@@ -76,11 +75,10 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         assertEquals("52.43333333333333", ghetto0.getProperty("latitude"));
         assertEquals("20.716666666666665", ghetto0.getProperty("longitude"));
 
-        InputStream iosV2 = ClassLoader.getSystemResourceAsStream(SKOS_V2_FILE);
+        InputStream iosV2 = ClassLoader.getSystemResourceAsStream("cvoc/ghettos-v20140831.rdf.xml");
         int origCount = getNodeCount(graph);
         importer.importFile(iosV2, logMessage);
 
-        List<VertexProxy> graphState2 = getGraphState(graph);
         /*
          * CREATED:
          * null: 3

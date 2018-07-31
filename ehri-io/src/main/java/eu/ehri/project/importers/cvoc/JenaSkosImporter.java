@@ -39,6 +39,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.base.Accessor;
@@ -105,6 +106,7 @@ public final class JenaSkosImporter implements SkosImporter {
     private final Api api;
     private final Serializer mergeSerializer;
     private final boolean tolerant;
+    private final boolean allowUpdates;
     private final String format;
     private final String baseURI;
     private final String suffix;
@@ -124,14 +126,16 @@ public final class JenaSkosImporter implements SkosImporter {
      * @param format      The RDF format
      * @param defaultLang The language to use for elements without specified language
      */
-    public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
-            Vocabulary vocabulary, boolean tolerant, String baseURI, String suffix, String format, String defaultLang) {
+    private JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
+                             Vocabulary vocabulary, boolean tolerant, boolean allowUpdates,
+                             String baseURI, String suffix, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
         this.api = ApiFactory.noLogging(framedGraph, actioner.as(Accessor.class));
         this.mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
         this.tolerant = tolerant;
+        this.allowUpdates = allowUpdates;
         this.baseURI = baseURI;
         this.suffix = suffix;
         this.format = format;
@@ -172,43 +176,50 @@ public final class JenaSkosImporter implements SkosImporter {
      */
     public JenaSkosImporter(FramedGraph<?> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
-        this(framedGraph, actioner, vocabulary, false, null, null, null, DEFAULT_LANG);
+        this(framedGraph, actioner, vocabulary, false, false, null, null, null, DEFAULT_LANG);
     }
 
     @Override
     public JenaSkosImporter setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: {}", tolerant);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setBaseURI(String prefix) {
         logger.debug("Setting importer base URI: {}", prefix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, prefix, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, prefix, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setURISuffix(String suffix) {
         logger.debug("Setting importer URI: suffix {}", suffix);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setFormat(String format) {
         logger.debug("Setting importer format: {}", format);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format, defaultLang);
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
     }
 
     @Override
     public JenaSkosImporter setDefaultLang(String lang) {
         logger.debug("Setting importer default language: {}", lang);
         return new JenaSkosImporter(
-                framedGraph, actioner, vocabulary, tolerant, baseURI, suffix, format,
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format,
                 LanguageHelpers.iso639DashTwoCode(lang));
+    }
+
+    @Override
+    public JenaSkosImporter allowUpdates(boolean allowUpdates) {
+        logger.debug("Setting importer allow updates: {}", true);
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, allowUpdates, baseURI, suffix, format, defaultLang);
     }
 
     /**
@@ -234,7 +245,7 @@ public final class JenaSkosImporter implements SkosImporter {
      * @return A log of imported nodes
      */
     @Override
-    public ImportLog importFile(InputStream ios, String logMessage) throws IOException, ValidationError {
+    public ImportLog importFile(InputStream ios, String logMessage) throws ValidationError {
 
         // Create a new action for this import
         Optional<String> logMsg = getLogMessage(logMessage);
@@ -279,6 +290,11 @@ public final class JenaSkosImporter implements SkosImporter {
                                 eventContext.addSubjects(graphConcept.getNode());
                                 break;
                             case UPDATED:
+                                if (!allowUpdates) {
+                                    throw new ModeViolation(String.format(
+                                            "Item '%s' was updated but import manager does not allow updates",
+                                            graphConcept.getNode().getId()));
+                                }
                                 log.addUpdated();
                                 eventContext.addSubjects(graphConcept.getNode());
                                 break;

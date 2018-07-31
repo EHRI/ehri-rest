@@ -90,4 +90,13 @@ public interface SkosImporter {
      * @return A new SKOS importer with the given default language
      */
     SkosImporter setDefaultLang(String lang);
+
+    /**
+     * Allow the updating of existing items.
+     *
+     * @param allowUpdates allow existing items to be updated as
+     *                     well as created.
+     * @return A new SKOS importer
+     */
+    SkosImporter allowUpdates(boolean allowUpdates);
 }
