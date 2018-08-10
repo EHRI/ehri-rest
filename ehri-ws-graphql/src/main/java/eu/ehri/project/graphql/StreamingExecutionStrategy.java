@@ -70,9 +70,9 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
         generator.writeStartObject();
-        for (String fieldName : parameters.fields().keySet()) {
+        for (String fieldName : parameters.getFields().keySet()) {
             generator.writeFieldName(fieldName);
-            resolveField(generator, executionContext, parameters, parameters.fields().get(fieldName));
+            resolveField(generator, executionContext, parameters, parameters.getFields().get(fieldName));
         }
         generator.writeEndObject();
     }
@@ -90,7 +90,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
                 .argumentValues(argumentValues)
                 .field(field)
                 .fieldDefinition(fieldDef)
-                .path(parameters.path())
+                .path(parameters.getPath())
                 .exception(e)
                 .build();
 
@@ -99,7 +99,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
     private void resolveField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
         Field field = fields.get(0);
-        GraphQLObjectType parentType = parameters.typeInfo().castType(GraphQLObjectType.class);
+        GraphQLObjectType parentType = parameters.getTypeInfo().castType(GraphQLObjectType.class);
         GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field);
 
         Map<String, Object> argumentValues = valuesResolver.getArgumentValues(fieldDef.getArguments(), field.getArguments(), executionContext.getVariables());
@@ -108,7 +108,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(executionContext, fieldType, fields);
 
         DataFetchingEnvironment environment = newDataFetchingEnvironment(executionContext)
-                .source(parameters.source())
+                .source(parameters.getSource())
                 .arguments(argumentValues)
                 .fieldDefinition(fieldDef)
                 .fields(fields)
@@ -119,39 +119,40 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
         ExecutionTypeInfo fieldTypeInfo = newTypeInfo()
                 .type(fieldType)
-                .parentInfo(parameters.typeInfo())
+                .parentInfo(parameters.getTypeInfo())
                 .build();
 
         Instrumentation instrumentation = executionContext.getInstrumentation();
 
         InstrumentationContext<ExecutionResult> fieldCtx = instrumentation.beginField(new InstrumentationFieldParameters(executionContext, fieldDef, fieldTypeInfo));
 
-        InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment));
+        InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment, parameters));
         Object resolvedValue = null;
         try {
             resolvedValue = fieldDef.getDataFetcher().get(environment);
-            fetchCtx.onEnd(resolvedValue, null);
+            fetchCtx.onCompleted(resolvedValue, null);
         } catch (Exception e) {
             handleFetchingException(executionContext, parameters, field, fieldDef, argumentValues, environment, e);
-            fetchCtx.onEnd(null, e);
+            fetchCtx.onCompleted(null, e);
         }
 
         ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
                 .typeInfo(fieldTypeInfo)
-                .fields(parameters.fields())
+                .fields(parameters.getFields())
                 .arguments(argumentValues)
-                .source(resolvedValue).build();
+                .source(resolvedValue)
+                .build();
 
         completeValue(generator, executionContext, newParameters, fields);
 
-        fieldCtx.onEnd(new ExecutionResultImpl(resolvedValue, Collections.emptyList()), null);
+        fieldCtx.onCompleted(new ExecutionResultImpl(resolvedValue, Collections.emptyList()), null);
     }
 
     private void completeValue(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
 
-        ExecutionTypeInfo typeInfo = parameters.typeInfo();
-        Object result = parameters.source();
-        GraphQLType fieldType = parameters.typeInfo().getType();
+        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
+        Object result = parameters.getSource();
+        GraphQLType fieldType = parameters.getTypeInfo().getType();
 
         if (result == null) {
             generator.writeNull();
@@ -167,8 +168,8 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
                 TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
                         .graphQLInterfaceType((GraphQLInterfaceType) fieldType)
                         .field(fields.get(0))
-                        .value(parameters.source())
-                        .argumentValues(parameters.arguments())
+                        .value(parameters.getSource())
+                        .argumentValues(parameters.getArguments())
                         .schema(executionContext.getGraphQLSchema()).build();
                 resolvedType = resolveTypeForInterface(resolutionParams);
 
@@ -176,8 +177,8 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
                 TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
                         .graphQLUnionType((GraphQLUnionType) fieldType)
                         .field(fields.get(0))
-                        .value(parameters.source())
-                        .argumentValues(parameters.arguments())
+                        .value(parameters.getSource())
+                        .argumentValues(parameters.getArguments())
                         .schema(executionContext.getGraphQLSchema()).build();
                 resolvedType = resolveTypeForUnion(resolutionParams);
             } else {
@@ -225,14 +226,14 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
     }
 
     private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields, Iterable<Object> result) throws IOException {
-        ExecutionTypeInfo typeInfo = parameters.typeInfo();
+        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
         GraphQLList fieldType = typeInfo.castType(GraphQLList.class);
 
         generator.writeStartArray();
         for (Object item : result) {
             ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
                     .typeInfo(typeInfo.treatAs(fieldType.getWrappedType()))
-                    .fields(parameters.fields())
+                    .fields(parameters.getFields())
                     .source(item).build();
 
             completeValue(generator, executionContext, newParameters, fields);

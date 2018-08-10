@@ -28,7 +28,7 @@ import graphql.InvalidSyntaxError;
 import graphql.execution.AsyncExecutionStrategy;
 import graphql.execution.ExecutionId;
 import graphql.execution.ValuesResolver;
-import graphql.execution.instrumentation.NoOpInstrumentation;
+import graphql.execution.instrumentation.SimpleInstrumentation;
 import graphql.language.Document;
 import graphql.language.NodeUtil;
 import graphql.language.OperationDefinition;
@@ -66,7 +66,7 @@ public class StreamingGraphQL {
         assertNotNull(arguments, "arguments can't be null");
         log.trace("Executing request. operation name: {}. Request: {} ", operationName, document);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new AsyncExecutionStrategy(),
-                new AsyncExecutionStrategy(), NoOpInstrumentation.INSTANCE);
+                new AsyncExecutionStrategy(), SimpleInstrumentation.INSTANCE);
         ExecutionInput input = ExecutionInput.newExecutionInput()
                 .context(context)
                 .variables(arguments)

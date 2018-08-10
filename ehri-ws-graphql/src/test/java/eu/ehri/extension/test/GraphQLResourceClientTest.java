@@ -186,7 +186,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id",
+        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id @ 'DocumentaryUnit'",
                 data.path("errors").path(0).path("message").textValue());
     }
 
@@ -282,7 +282,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id",
+        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id @ 'DocumentaryUnit'",
                 data.path("errors").path(0).path("message").textValue());
     }
 }
