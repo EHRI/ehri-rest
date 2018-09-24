@@ -132,6 +132,18 @@ query test {
         }
     }
 
+    topLevelOnly: documentaryUnits(topLevel: true) {
+        items {
+            id
+        }
+    }
+
+    allLevels: documentaryUnits(topLevel: false) {
+        items {
+            id
+        }
+    }
+
     documentaryUnits(first: 10) {
         items {
             parent {
