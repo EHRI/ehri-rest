@@ -117,6 +117,7 @@ public class GraphQLImpl {
     private static final String FROM_PARAM = "from";
     private static final String AFTER_PARAM = "after";
     private static final String ALL_PARAM = "all";
+    private static final String TOP_LEVEL_PARAM = "topLevel";
 
     private static final String HAS_PREVIOUS_PAGE = "hasPreviousPage";
     private static final String HAS_NEXT_PAGE = "hasNextPage";
@@ -259,6 +260,12 @@ public class GraphQLImpl {
 
     private DataFetcher<Iterable<SystemEvent>> itemEventsDataFetcher() {
         return env -> events().listForItem(env.<Entity>getSource().as(SystemEvent.class));
+    }
+
+    private DataFetcher<Map<String, Object>> docDataFetcher() {
+        return env -> env.getArgument(TOP_LEVEL_PARAM)
+                ? topLevelDocDataFetcher().get(env)
+                : entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT).get(env);
     }
 
     private DataFetcher<Map<String, Object>> topLevelDocDataFetcher() {
@@ -1014,6 +1021,13 @@ public class GraphQLImpl {
             .defaultValue(false)
             .build();
 
+    private static final GraphQLArgument topLevelArgument = newArgument()
+            .name(TOP_LEVEL_PARAM)
+            .description(__("graphql.argument.topLevel"))
+            .type(GraphQLBoolean)
+            .defaultValue(false)
+            .build();
+
     private final GraphQLObjectType repositoryType = newObject()
             .name(Entities.REPOSITORY)
             .description(__("repository.description"))
@@ -1261,10 +1275,11 @@ public class GraphQLImpl {
                 // Top level item connections
                 .field(connectionFieldDefinition("documentaryUnits", __("root.connection.documentaryUnit.description"),
                         documentaryUnitsConnection,
-                        entityTypeConnectionDataFetcher(EntityClass.DOCUMENTARY_UNIT)))
+                        docDataFetcher(), topLevelArgument))
                 .field(connectionFieldDefinition("topLevelDocumentaryUnits", __("root.connection.documentaryUnit.topLevel.description"),
                         documentaryUnitsConnection,
-                        topLevelDocDataFetcher()))
+                        topLevelDocDataFetcher())
+                            .deprecate(__("root.connection.documentaryUnit.topLevel.deprecationReason")))
                 .field(connectionFieldDefinition("repositories", __("root.connection.repository.description"),
                         repositoriesConnection,
                         entityTypeConnectionDataFetcher(EntityClass.REPOSITORY)))
