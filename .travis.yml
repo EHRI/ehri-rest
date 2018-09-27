@@ -10,4 +10,4 @@ cache:
 
 install: /bin/true
 script:
-  - mvn test -Dmaven.javadoc.skip=true
+  - travis_wait mvn test -Dmaven.javadoc.skip=true
