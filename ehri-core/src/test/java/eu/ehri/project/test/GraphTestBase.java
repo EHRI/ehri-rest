@@ -115,11 +115,7 @@ public abstract class GraphTestBase {
     }
 
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
-        File tempFile = File.createTempFile("neo4j-tmp", ".db");
-        tempFile.deleteOnExit();
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(tempFile)
-                .newGraphDatabase();
+        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabase();
         try (Transaction tx = rawGraph.beginTx()) {
             Neo4jGraphManager.createIndicesAndConstraints(rawGraph);
             tx.success();
