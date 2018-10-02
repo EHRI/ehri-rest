@@ -37,12 +37,11 @@ import static org.junit.Assert.assertNotNull;
  * 
  */
 public class Neo4jBasicTest {
-    protected GraphDatabaseService graphDb;
+    private GraphDatabaseService graphDb;
 
     @Before
     public void prepareTestDatabase() {
-        graphDb = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder().newGraphDatabase();
+        graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     }
 
     @After
@@ -72,7 +71,6 @@ public class Neo4jBasicTest {
 
             // The node should have an id of 0, being the first node
             // in the graph.
-            assertNotNull(n.getId());
             assertEquals(0, n.getId());
 
             // Retrieve a node by using the id of the created node. The id's and

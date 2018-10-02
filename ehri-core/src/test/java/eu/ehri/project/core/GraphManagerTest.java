@@ -103,8 +103,7 @@ public class GraphManagerTest {
         public void setUp() throws Exception {
             // NB: Not loading modules to allow use of frames methods, like GremlinGroovy
             graph = new FramedGraphFactory().create(new Neo4j2Graph(
-                    new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                            .newGraphDatabase()));
+                    new TestGraphDatabaseFactory().newImpermanentDatabase()));
             manager = cls.getConstructor(FramedGraph.class).newInstance(graph);
         }
 

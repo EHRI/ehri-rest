@@ -44,8 +44,7 @@ public class TxNeo4JGraphTest {
 
     @Before
     public void setUp() throws Exception {
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                .newGraphDatabase();
+        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabase();
         graph = new TxNeo4jGraph(rawGraph);
     }
 

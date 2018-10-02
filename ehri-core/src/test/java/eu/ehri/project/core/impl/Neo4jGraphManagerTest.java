@@ -29,8 +29,7 @@ public class Neo4jGraphManagerTest {
     @Before
     public void setUp() throws Exception {
         graph = new FramedGraphFactory().create(new Neo4j2Graph(
-                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                        .newGraphDatabase()));
+                new TestGraphDatabaseFactory().newImpermanentDatabase()));
         manager = new Neo4jGraphManager<>(graph);
     }
 
