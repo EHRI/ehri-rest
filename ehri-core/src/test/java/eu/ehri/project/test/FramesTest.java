@@ -21,6 +21,7 @@ package eu.ehri.project.test;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class FramesTest extends ModelTestBase {
 
     @Test(expected=IllegalArgumentException.class)
