@@ -12,3 +12,4 @@ if [ "$ADMIN_USER" != "" ]; then
     $NEO4J_HOME/scripts/cmd useradd $ADMIN_USER --group admin
 fi
 
+chown neo4j.neo4j -R $NEO4J_HOME/data/databases/graph.db
