@@ -47,6 +47,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -609,6 +610,18 @@ public final class Bundle implements NestableData<Bundle> {
      */
     public boolean forAny(Predicate<Bundle> f) {
         return find(f).isPresent();
+    }
+
+    /**
+     * Run a function for every item in the bundle, including the top level.
+     *
+     * @param f a consumer function
+     */
+    public void forEach(Consumer<Bundle> f) {
+        f.accept(this);
+        for (Map.Entry<String, Bundle> rel : getRelations().entries()) {
+            rel.getValue().forEach(f);
+        }
     }
 
     public Optional<Bundle> find(Predicate<Bundle> f) {

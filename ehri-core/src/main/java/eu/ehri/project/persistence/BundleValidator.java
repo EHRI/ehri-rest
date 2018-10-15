@@ -21,6 +21,7 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.core.GraphManager;
@@ -112,6 +113,7 @@ public final class BundleValidator {
         if (bundle.getId() == null)
             builder.addError(Bundle.ID_KEY, Messages
                     .getString("BundleValidator.missingIdForUpdate")); //$NON-NLS-1$
+        checkDuplicateIds(bundle, builder);
         checkUniquenessOnUpdate(bundle, builder);
         checkChildren(bundle, builder, ValidationType.update);
         return builder.build();
@@ -127,6 +129,7 @@ public final class BundleValidator {
      */
     private ErrorSet validateTreeForCreate(Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
+        checkDuplicateIds(bundle, builder);
         checkIntegrity(bundle, builder);
         checkUniqueness(bundle, builder);
         checkChildren(bundle, builder, ValidationType.create);
@@ -163,6 +166,17 @@ public final class BundleValidator {
                     break;
             }
         }
+    }
+
+    private static void checkDuplicateIds(Bundle bundle, ErrorSet.Builder builder) {
+        final Set<String> ids = Sets.newHashSet();
+        bundle.dependentsOnly().forEach(b -> {
+            if (ids.contains(b.getId())) {
+                builder.addError(Bundle.ID_KEY, MessageFormat.format(
+                        Messages.getString("BundleValidator.duplicateId"), b.getId()));
+            }
+            ids.add(b.getId());
+        });
     }
 
     /**
@@ -214,8 +228,8 @@ public final class BundleValidator {
     private static void checkEntityType(Bundle bundle, ErrorSet.Builder builder) {
         EntityType annotation = bundle.getBundleJavaClass().getAnnotation(EntityType.class);
         if (annotation == null) {
-            builder.addError(Bundle.TYPE_KEY, MessageFormat.format(Messages
-                            .getString("BundleValidator.missingTypeAnnotation"), //$NON-NLS-1$
+            builder.addError(Bundle.TYPE_KEY,
+                    MessageFormat.format(Messages.getString("BundleValidator.missingTypeAnnotation"),
                     bundle.getBundleJavaClass().getName()));
         }
     }
@@ -226,7 +240,8 @@ public final class BundleValidator {
      */
     private void checkIntegrity(Bundle bundle, ErrorSet.Builder builder) {
         if (bundle.getId() == null) {
-            builder.addError("id", MessageFormat.format(Messages.getString("BundleValidator.missingIdForCreate"),
+            builder.addError(Bundle.ID_KEY,
+                    MessageFormat.format(Messages.getString("BundleValidator.missingIdForCreate"),
                     bundle.getId()));
         }
         if (manager.exists(bundle.getId())) {
