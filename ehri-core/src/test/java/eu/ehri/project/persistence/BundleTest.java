@@ -36,10 +36,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 import static org.junit.Assert.*;
@@ -397,7 +394,7 @@ public class BundleTest {
     }
 
     @Test
-    public void testMapData() throws Exception {
+    public void testMap() throws Exception {
         Bundle n = bundle.map(d -> {
            Map<String,Object> nd = Maps.newHashMap();
            for (Map.Entry<String,Object> e : d.getData().entrySet()) {
@@ -410,14 +407,21 @@ public class BundleTest {
     }
 
     @Test
-    public void testForAnyData() throws Exception {
+    public void testForAny() throws Exception {
         assertTrue(bundle.forAny(d -> d.getDataValue(Ontology.LANGUAGE) != null));
         assertTrue(bundle.forAny(d -> "foobar".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))));
         assertFalse(bundle.forAny(d -> "test".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))));
     }
 
     @Test
-    public void testFindData() throws Exception {
+    public void testForEach() throws Exception {
+        List<String> ids = Lists.newArrayList();
+        bundle.generateIds(Collections.emptyList()).forEach(d -> ids.add(d.getId()));
+        assertEquals(Lists.newArrayList("foobar", "foobar.en"), ids);
+    }
+
+    @Test
+    public void testFind() throws Exception {
         assertTrue(bundle.find(d -> d.getDataValue(Ontology.LANGUAGE) != null).isPresent());
         assertTrue(bundle.find(d -> "foobar".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))).isPresent());
         assertFalse(bundle.find(d -> "test".equals(d.getDataValue(Ontology.IDENTIFIER_KEY))).isPresent());

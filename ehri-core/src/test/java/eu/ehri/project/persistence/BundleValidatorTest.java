@@ -1,5 +1,6 @@
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -23,6 +24,29 @@ public class BundleValidatorTest extends AbstractFixtureTest {
         Bundle test = Bundle.fromData(TestData.getTestDocBundle());
         BundleValidator bundleValidator = new BundleValidator(manager, Lists.newArrayList());
         bundleValidator.validateForCreate(test);
+    }
+
+    @Test
+    public void testValidateIntegrity() throws Exception {
+
+        Bundle test = DataUtils.setItem(
+                Bundle.fromData(TestData.getTestDocBundle()),
+                "describes[-1]", Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                        .addData(ImmutableMap.of(
+                                Ontology.IDENTIFIER_KEY, "someid-01",
+                                Ontology.NAME_KEY, "Description with duplicate identifier",
+                                Ontology.LANGUAGE_OF_DESCRIPTION, "eng"
+                        )).build());
+
+        BundleValidator bundleValidator = new BundleValidator(manager, Lists.newArrayList());
+        try {
+            bundleValidator.validateForCreate(test);
+            fail("Bundle validation should have failed with duplicate ID error");
+        } catch (ValidationError e) {
+            List<String> errs = DataUtils.get(e.getErrorSet(), "id");
+            assertEquals(1, errs.size());
+            assertThat(errs.get(0), containsString("Duplicate ID: someid_01.eng-someid_01"));
+        }
     }
 
     @Test
