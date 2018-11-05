@@ -18,6 +18,20 @@ public class FunctionsTest {
     public Neo4jRule neo4j = new Neo4jRule().withFunction(Functions.class);
 
     @Test
+    public void testJoin() {
+        try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
+                .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
+            StatementResult result = session
+                    .run("RETURN eu.ehri.project.cypher.join({list}, {sep}) as value",
+                            Values.parameters(
+                                    "list",
+                                    Lists.newArrayList("foo", "bar"),
+                                    "sep", ",")
+                    );
+            assertThat(result.single().get("value").asString(), equalTo("foo,bar"));
+        }
+    }
+    @Test
     public void testCountryCodeToName() {
         try (Driver driver = GraphDatabase.driver(neo4j.boltURI(), Config.build().withEncryptionLevel(Config
                 .EncryptionLevel.NONE).toConfig()); Session session = driver.session()) {
