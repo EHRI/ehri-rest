@@ -92,7 +92,8 @@ public class Ead2002ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/dsc/c01/did/unitid/text()");
         assertXPath(doc, "Folder 3 |||",
                 "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
-        assertXPath(doc, "Processing information note no label |||",
+        assertXPath(doc, "Processing information note no label |||\n\n" +
+                        "Processing information note content |||",
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
         assertXPath(doc, "2000",
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
