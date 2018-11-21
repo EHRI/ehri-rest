@@ -76,6 +76,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -474,7 +475,7 @@ public class ImportResource extends AbstractResource {
                 // Extract our list of paths...
                 List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
                 return importManager.importFiles(paths, message);
-            } else if (Lists.newArrayList(accepts).contains(mediaType)) {
+            } else if (isCompatibleType(mediaType, accepts)) {
                 return importManager.importInputStream(data, message);
             } else {
                 return importPotentiallyGZippedArchive(importManager, message, data);
@@ -486,6 +487,15 @@ public class ImportResource extends AbstractResource {
         } catch (IllegalArgumentException | ArchiveException e) {
             throw new DeserializationError(e.getMessage());
         }
+    }
+
+    private boolean isCompatibleType(MediaType mediaType, MediaType... accepts) {
+        for (MediaType acceptable : accepts) {
+            if (acceptable.isCompatible(mediaType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ImportLog importPotentiallyGZippedArchive(
