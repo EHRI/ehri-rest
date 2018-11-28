@@ -58,12 +58,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedInputStream;
@@ -76,7 +71,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -332,6 +326,9 @@ public class ImportResource extends AbstractResource {
             return log;
         } catch (EadSync.EadSyncError e) {
             throw new DeserializationError(e.getMessage());
+        } catch (DeserializationError e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -430,13 +427,14 @@ public class ImportResource extends AbstractResource {
     /**
      * Create multiple links via CSV or JSON tabular upload.
      * <p>
-     * Each data row must consist of 5 columns:
+     * Each data row must consist of 6 columns:
      * <ol>
-     * <li>the source item
-     * <li>the target item
+     * <li>the source item ID
+     * <li>the target item ID
+     * <li>the access point ID (optional)
      * <li>the link type, e.g. associative, hierarchical
      * <li>the link field (if applicable) e.g. relatedUnitsOfDescription
-     * <li>the link description
+     * <li>the link description (optional)
      * </ol>
      * <p>
      * A separate log item will be created for each row.

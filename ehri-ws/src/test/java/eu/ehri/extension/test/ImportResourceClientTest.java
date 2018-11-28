@@ -39,11 +39,7 @@ import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -54,9 +50,7 @@ import java.util.List;
 import static eu.ehri.extension.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class ImportResourceClientTest extends AbstractResourceClientTest {
@@ -455,15 +449,16 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testImportLinks() throws Exception {
         Table table = Table.of(ImmutableList.of(
-                ImmutableList.of("r1", "c1", "associative", "", "Test"),
-                ImmutableList.of("r4", "c4", "associative", "", "Test 2")
+                ImmutableList.of("r1", "c1", "", "associative", "", "Test"),
+                ImmutableList.of("r1", "c1", "ur1", "associative", "", "Test 2"),
+                ImmutableList.of("r4", "c4", "", "associative", "", "Test 3")
         ));
         URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "links").build();
         ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
                 .entity(table)
                 .post(ClientResponse.class);
         ImportLog out = response.getEntity(ImportLog.class);
-        assertEquals(2, out.getCreated());
+        assertEquals(3, out.getCreated());
     }
 
     private UriBuilder getImportUrl(String endPoint, String scopeId, String log, boolean tolerant) {
