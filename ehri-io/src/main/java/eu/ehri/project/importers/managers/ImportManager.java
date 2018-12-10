@@ -21,6 +21,7 @@ package eu.ehri.project.importers.managers;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 

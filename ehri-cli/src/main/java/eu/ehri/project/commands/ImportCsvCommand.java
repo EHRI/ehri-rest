@@ -64,6 +64,12 @@ public abstract class ImportCsvCommand extends BaseCommand {
                 .desc("Identifier of user to import as")
                 .build());
         options.addOption(Option.builder()
+                .longOpt("lang")
+                .hasArg()
+                .type(String.class)
+                .desc("Default language code")
+                .build());
+        options.addOption(Option.builder()
                 .longOpt("tolerant")
                 .desc("Don't error if a file is not valid.")
                 .build());
@@ -91,6 +97,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
 
         boolean tolerant = cmdLine.hasOption("tolerant");
         boolean allowUpdates = cmdLine.hasOption("allow-updates");
+        String lang = cmdLine.hasOption("lang") ? cmdLine.getOptionValue("lang") : "eng";
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getUsage());
@@ -109,7 +116,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
             UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            ImportLog log = new CsvImportManager(graph, scope, user, tolerant, allowUpdates, importer)
+            ImportLog log = new CsvImportManager(graph, scope, user, tolerant, allowUpdates, lang, importer)
                     .importFiles(filePaths, logMessage);
 
             System.out.println(log);

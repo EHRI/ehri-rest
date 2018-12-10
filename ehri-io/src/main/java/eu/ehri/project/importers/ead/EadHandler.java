@@ -40,7 +40,10 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 /**
@@ -89,7 +92,6 @@ public class EadHandler extends SaxXmlHandler {
     /**
      * Default language to use in units without language
      */
-    private String eadLanguage = Locale.ENGLISH.getISO3Language();
     private String eadId;
 
     /**
@@ -107,8 +109,8 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @param importer the importer instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>, ?> importer) {
-        this(importer, new XmlImportProperties(DEFAULT_PROPERTIES));
+    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        this(importer, defaultLang, new XmlImportProperties(DEFAULT_PROPERTIES));
         logger.trace("Using default properties file: {}", DEFAULT_PROPERTIES);
     }
 
@@ -118,9 +120,8 @@ public class EadHandler extends SaxXmlHandler {
      * @param importer   the importer instance
      * @param properties an XML node properties instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>, ?> importer,
-            XmlImportProperties properties) {
-        super(importer, properties);
+    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
+        super(importer, defaultLang, properties);
         children[depth] = Lists.newArrayList();
     }
 
@@ -189,8 +190,9 @@ public class EadHandler extends SaxXmlHandler {
 
         if (localName.equals("language") || qName.equals("language")) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
-            if (lang != null)
-                eadLanguage = lang;
+            if (lang != null) {
+                defaultLang = lang;
+            }
         }
 
         // FIXME: We need to add the 'parent' identifier to the ID stack
@@ -296,7 +298,7 @@ public class EadHandler extends SaxXmlHandler {
             logger.error("EADID not set yet, or not given in eadfile");
             return null;
         } else {
-            String suffix = "#" + eadLanguage.toUpperCase();
+            String suffix = "#" + defaultLang.toUpperCase();
             if (eadId.toUpperCase().endsWith(suffix)) {
                 return eadId;
             }
@@ -311,7 +313,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, eadLanguage);
+        useDefaultLanguage(currentGraph, defaultLang);
     }
 
     /**

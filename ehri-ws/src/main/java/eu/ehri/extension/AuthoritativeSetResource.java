@@ -200,7 +200,7 @@ public class AuthoritativeSetResource extends
     @Path("{id:[^/]+}/eac")
     @Produces("application/zip")
     public Response exportEag(@PathParam("id") String id,
-            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final AuthoritativeSet set = api().detail(id, cls);

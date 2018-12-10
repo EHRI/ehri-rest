@@ -71,9 +71,7 @@ public class ToolsResource extends AbstractResource {
     public static final String ENDPOINT = "tools";
 
     private static final String SINGLE_PARAM = "single";
-    private static final String LANG_PARAM = "lang";
     private static final String ACCESS_POINT_TYPE_PARAM = "apt";
-    private static final String DEFAULT_LANG = "eng";
 
     public ToolsResource(@Context GraphDatabaseService database) {
         super(database);

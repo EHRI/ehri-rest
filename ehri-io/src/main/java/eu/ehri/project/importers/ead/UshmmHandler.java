@@ -40,8 +40,8 @@ public class UshmmHandler extends EadHandler {
 
     private int count;
 
-    public UshmmHandler(ItemImporter<Map<String, Object>, ?> importer) {
-        super(importer, new XmlImportProperties("ushmm.properties"));
+    public UshmmHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        super(importer, defaultLang, new XmlImportProperties("ushmm.properties"));
 
     }
 

@@ -56,8 +56,8 @@ public class CsvImportManager extends AbstractImportManager {
     public CsvImportManager(FramedGraph<?> framedGraph,
             PermissionScope permissionScope, Actioner actioner,
             boolean tolerant,
-            boolean allowUpdates, Class<? extends ItemImporter<?,?>> importerClass) {
-        super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, importerClass);
+            boolean allowUpdates, String defaultLang, Class<? extends ItemImporter<?,?>> importerClass) {
+        super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, defaultLang, importerClass);
     }
 
     /**

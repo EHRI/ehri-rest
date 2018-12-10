@@ -48,7 +48,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv");
-        ImportLog importLog = new CsvImportManager(graph, ps, validUser, false, false, EadImporter.class)
+        ImportLog importLog = new CsvImportManager(graph, ps, validUser, false, false, "eng", EadImporter.class)
                 .importInputStream(ios, logMessage);
         System.out.println(importLog);
         // After...

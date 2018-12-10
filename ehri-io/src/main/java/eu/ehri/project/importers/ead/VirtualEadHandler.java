@@ -40,7 +40,6 @@ import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
@@ -77,11 +76,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
     private VirtualUnit topLevel;
 
     /**
-     * Default language to use in units without language
-     */
-    protected String eadLanguage = Locale.ENGLISH.getISO3Language();
-
-    /**
      * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
      */
     private String eadId;
@@ -103,8 +97,8 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param importer
      */
     @SuppressWarnings("unchecked")
-    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer) {
-        this(importer, new XmlImportProperties("vc.properties"));
+    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        this(importer, defaultLang, new XmlImportProperties("vc.properties"));
         logger.warn("vc.properties used");
     }
 
@@ -115,8 +109,8 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param xmlImportProperties
      */
     public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer,
-            XmlImportProperties xmlImportProperties) {
-        super(importer, xmlImportProperties);
+            String defaultLang, XmlImportProperties xmlImportProperties) {
+        super(importer, defaultLang, xmlImportProperties);
         children[depth] = Lists.newArrayList();
     }
 
@@ -178,7 +172,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
         if (localName.equals("language") || qName.equals("language")) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
             if (lang != null)
-                eadLanguage = lang;
+                defaultLang = lang;
         }
 
         // FIXME: We need to add the 'parent' identifier to the ID stack
@@ -280,25 +274,16 @@ public class VirtualEadHandler extends SaxXmlHandler {
     }
 
     protected String getSourceFileId() {
-        if (getEadId().toLowerCase().endsWith("#" + getDefaultLanguage().toLowerCase())) {
-            return getEadId();
+        if (eadId == null) {
+            logger.error("EADID not set yet, or not given in eadfile");
+            return null;
+        } else {
+            String suffix = "#" + defaultLang.toUpperCase();
+            if (eadId.toUpperCase().endsWith(suffix)) {
+                return eadId;
+            }
+            return eadId + suffix;
         }
-        return getEadId() + "#" + getDefaultLanguage().toUpperCase();
-    }
-
-    /**
-     * Get the EAD identifier of the EAD being imported
-     *
-     * @return the <code>&lt;eadid&gt;</code> or null if it was not parsed yet or empty
-     */
-    protected String getEadId() {
-        if (eadId == null)
-            logger.error("eadid not set yet or empty");
-        return eadId;
-    }
-
-    protected String getAuthor() {
-        return author;
     }
 
     /**
@@ -308,7 +293,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, getDefaultLanguage());
+        useDefaultLanguage(currentGraph, defaultLang);
     }
 
     /**
@@ -319,15 +304,10 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param defaultLanguage Language code to use as default
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
-
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
             logger.trace("Using default language code: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
         }
-    }
-
-    protected String getDefaultLanguage() {
-        return eadLanguage;
     }
 
     /**
@@ -372,7 +352,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
         if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
             logger.trace("adding alternative id: {}", otherIdentifier);
             Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
-            if (oids != null && oids instanceof ArrayList<?>) {
+            if (oids instanceof ArrayList<?>) {
                 ((ArrayList<String>) oids).add(otherIdentifier);
                 logger.trace("alternative ID added");
             }
@@ -407,8 +387,8 @@ public class VirtualEadHandler extends SaxXmlHandler {
     }
 
     private void addAuthor(Map<String, Object> currentGraph) {
-        if (getAuthor() != null && !currentGraph.containsKey(AUTHOR)) {
-            currentGraph.put(AUTHOR, getAuthor());
+        if (author != null && !currentGraph.containsKey(AUTHOR)) {
+            currentGraph.put(AUTHOR, author);
         }
     }
 }

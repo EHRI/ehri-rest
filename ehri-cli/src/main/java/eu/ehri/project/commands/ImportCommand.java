@@ -88,6 +88,12 @@ public abstract class ImportCommand extends BaseCommand {
                 .desc("Allow the ingest process to update existing items.")
                 .build());
         options.addOption(Option.builder()
+                .longOpt("lang")
+                .hasArg()
+                .type(String.class)
+                .desc("Default language code")
+                .build());
+        options.addOption(Option.builder()
                 .longOpt("log")
                 .hasArg()
                 .type(String.class)
@@ -121,6 +127,10 @@ public abstract class ImportCommand extends BaseCommand {
                 ? cmdLine.getOptionValue("log")
                 : "Imported from command-line";
 
+        String lang = cmdLine.hasOption("lang")
+                ? cmdLine.getOptionValue("lang")
+                : "eng";
+
         try {
             // Find the agent
             PermissionScope scope = SystemScope.getInstance();
@@ -142,6 +152,7 @@ public abstract class ImportCommand extends BaseCommand {
             ImportLog log = new SaxImportManager(graph, scope, user,
                     cmdLine.hasOption("tolerant"),
                     cmdLine.hasOption("allow-updates"),
+                    lang,
                     importer, handler,
                     optionalProperties,
                     Lists.<ImportCallback>newArrayList())

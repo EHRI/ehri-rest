@@ -56,6 +56,7 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final Actioner actioner;
     protected final boolean tolerant;
     protected final boolean allowUpdates;
+    protected final String defaultLang;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -80,6 +81,7 @@ public abstract class AbstractImportManager implements ImportManager {
             PermissionScope scope, Actioner actioner,
             boolean tolerant,
             boolean allowUpdates,
+            String defaultLang,
             Class<? extends ItemImporter<?,?>> importerClass) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
@@ -87,6 +89,7 @@ public abstract class AbstractImportManager implements ImportManager {
         this.actioner = actioner;
         this.tolerant = tolerant;
         this.allowUpdates = allowUpdates;
+        this.defaultLang = defaultLang;
         this.importerClass = importerClass;
     }
 

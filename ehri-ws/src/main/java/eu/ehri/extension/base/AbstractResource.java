@@ -119,7 +119,14 @@ public abstract class AbstractResource implements TxCheckedResource {
     public static final String VERSION_PARAM = "version";
     public static final String SCOPE_PARAM = "scope";
     public static final String TOLERANT_PARAM = "tolerant";
+    public static final String LANG_PARAM = "lang";
     public static final String COMMIT_PARAM = "commit";
+
+    /**
+     * Default to English... can't set this through config
+     * unfortunately since it has to be static.
+     */
+    public static final String DEFAULT_LANG = "eng";
 
     /**
      * Serialization config parameters.

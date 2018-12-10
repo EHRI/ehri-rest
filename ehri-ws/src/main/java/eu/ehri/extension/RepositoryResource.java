@@ -208,7 +208,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Path("{id:[^/]+}/eag")
     @Produces(MediaType.TEXT_XML)
     public Response exportEag(@PathParam("id") String id,
-            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Repository repository = api().detail(id, cls);
@@ -236,7 +236,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Path("{id:[^/]+}/ead")
     @Produces("application/zip")
     public Response exportEad(@PathParam("id") String id,
-            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Repository repo = api().detail(id, cls);

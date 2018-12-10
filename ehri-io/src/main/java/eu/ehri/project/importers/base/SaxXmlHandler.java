@@ -78,14 +78,16 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected int depth;
     private String attribute;
     private String languagePrefix;
+    protected String defaultLang;
 
-    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer) {
-        this(importer, null);
+    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        this(importer, defaultLang, null);
     }
 
-    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties properties) {
+    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
         super();
         this.importer = importer;
+        this.defaultLang = defaultLang;
         this.properties = properties;
         currentGraphPath.push(Maps.<String, Object>newHashMap());
     }
@@ -339,9 +341,9 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      */
     private boolean isKeyInPropertyFile(Stack<String> path, String attribute, String value) {
         logger.trace("Checking for key in property file: {}, {}, {}", path, attribute, value);
-        String all = "";
+        StringBuilder all = new StringBuilder();
         for (int i = path.size(); i > 0; i--) {
-            all = path.get(i - 1) + "/" + all;
+            all.insert(0, path.get(i - 1) + "/");
             String key = all + attribute + escapeValueForKey(value);
             if (properties.getProperty(key) != null) {
                 logger.trace(" FOUND Path key: {}", key);
