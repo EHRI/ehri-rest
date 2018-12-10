@@ -136,6 +136,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(BASE_URI_PARAM) String baseURI,
             @QueryParam(URI_SUFFIX_PARAM) String uriSuffix,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(FORMAT_PARAM) String format,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream stream)
@@ -151,6 +152,7 @@ public class ImportResource extends AbstractResource {
                     .setFormat(format)
                     .setTolerant(tolerant)
                     .allowUpdates(allowUpdates)
+                    .setDefaultLang(lang)
                     .setBaseURI(baseURI)
                     .setURISuffix(uriSuffix)
                     .importFile(stream, getLogMessage(logMessage).orElse(null));
@@ -224,6 +226,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
@@ -248,6 +251,7 @@ public class ImportResource extends AbstractResource {
             ImportManager importManager = new SaxImportManager(
                     graph, scope, user, importer, handler)
                     .allowUpdates(allowUpdates)
+                    .setDefaultLang(defaultLang)
                     .setTolerant(tolerant)
                     .withProperties(propertyFile);
             ImportLog log = importDataStream(importManager, message, data,
@@ -285,6 +289,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
@@ -311,6 +316,7 @@ public class ImportResource extends AbstractResource {
             SaxImportManager importManager = new SaxImportManager(
                     graph, scope, user, importer, handler)
                     .allowUpdates(allowUpdates)
+                    .setDefaultLang(lang)
                     .setTolerant(tolerant)
                     .withProperties(propertyFile);
             // Note that while the import manager uses the scope, here
@@ -344,13 +350,14 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(LANG_PARAM) @DefaultValue(LANG_PARAM) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
+        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile,
                 nameOrDefault(handlerClass, EagHandler.class.getName()),
                 nameOrDefault(importerClass, EagImporter.class.getName()),
                 commit, data);
@@ -368,13 +375,14 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(LANG_PARAM) @DefaultValue(LANG_PARAM) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, allowUpdates, logMessage, propertyFile,
+        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile,
                 nameOrDefault(handlerClass, EacHandler.class.getName()),
                 nameOrDefault(importerClass, EacImporter.class.getName()),
                 commit, data);
@@ -397,6 +405,7 @@ public class ImportResource extends AbstractResource {
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
@@ -413,7 +422,7 @@ public class ImportResource extends AbstractResource {
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
             ImportManager importManager = new CsvImportManager(
-                    graph, scope, user, tolerant, allowUpdates, importer);
+                    graph, scope, user, tolerant, allowUpdates, lang, importer);
             ImportLog log = importDataStream(importManager, message, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {
@@ -546,8 +555,7 @@ public class ImportResource extends AbstractResource {
     }
 
     @SuppressWarnings("unchecked")
-    private static Class<? extends SaxXmlHandler> getHandlerCls(String handlerName, String
-            defaultHandler)
+    private static Class<? extends SaxXmlHandler> getHandlerCls(String handlerName, String defaultHandler)
             throws DeserializationError {
         String name = nameOrDefault(handlerName, defaultHandler);
         try {

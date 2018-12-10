@@ -64,7 +64,7 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest {
         assertTrue(p.containsProperty("project_judaica"));
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, repo, validUser, false, false,
+        ImportLog log = new CsvImportManager(graph, repo, validUser, false, false, "eng",
                     UkrainianUnitImporter.class)
                 .importInputStream(ios, logMessage);
         assertTrue(log.hasDoneWork());

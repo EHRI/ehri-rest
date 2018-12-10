@@ -159,7 +159,7 @@ public class DocumentaryUnitResource
     @Path("{id:[^/]+}/ead")
     @Produces(MediaType.TEXT_XML)
     public Response exportEad(@PathParam("id") String id,
-            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             DocumentaryUnit unit = api().detail(id, cls);

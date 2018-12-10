@@ -134,7 +134,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     @Path("{id:[^/]+}/eac")
     @Produces(MediaType.TEXT_XML)
     public Response exportEac(@PathParam("id") String id,
-            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             HistoricalAgent agent = api().detail(id, HistoricalAgent.class);

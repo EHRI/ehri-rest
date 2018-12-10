@@ -47,8 +47,8 @@ public class EagHandler extends SaxXmlHandler {
     );
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
-    public EagHandler(ItemImporter<Map<String, Object>, ?> importer) {
-        super(importer, new XmlImportProperties("eag.properties"));
+    public EagHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        super(importer, defaultLang, new XmlImportProperties("eag.properties"));
     }
 
     @Override
@@ -89,7 +89,7 @@ public class EagHandler extends SaxXmlHandler {
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                     logger.debug("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
-                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLang);
                 }
                 if (!currentGraphPath.peek().containsKey("rulesAndConventions")) {
                     logger.debug("no rulesAndConventions found");

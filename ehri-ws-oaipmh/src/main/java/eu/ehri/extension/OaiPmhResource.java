@@ -59,7 +59,6 @@ public class OaiPmhResource extends AbstractResource {
 
     public static final String ENDPOINT = "oaipmh";
     public static final String LIMIT_HEADER_NAME = "X-Limit";
-    private static final String DEFAULT_LANG_CODE = "eng";
 
 
 
@@ -86,7 +85,7 @@ public class OaiPmhResource extends AbstractResource {
                 Api api = anonymousApi();
                 OaiPmhExporter oaiPmh = new OaiPmhExporter(
                         OaiPmhData.create(api),
-                        OaiPmhRenderer.defaultRenderer(api, DEFAULT_LANG_CODE),
+                        OaiPmhRenderer.defaultRenderer(api, DEFAULT_LANG),
                         config);
                 try {
                     OaiPmhState state = OaiPmhState.parse(uriInfo.getRequestUri().getQuery(), limit);

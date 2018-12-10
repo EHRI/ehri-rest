@@ -178,7 +178,7 @@ public class CountryResource
     @Produces("application/zip")
     public Response exportEag(
             @PathParam("id") String id,
-            final @QueryParam("lang") @DefaultValue("eng") String lang)
+            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Country country = api().detail(id, cls);

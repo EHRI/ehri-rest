@@ -48,8 +48,9 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
             Entities.ACCESS_POINT, Annotation.class
     );
 
-    public DcEuropeanaHandler(ItemImporter<Map<String, Object>, ?> importer, XmlImportProperties xmlImportProperties) {
-        super(importer, xmlImportProperties);
+    public DcEuropeanaHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang,
+                              XmlImportProperties xmlImportProperties) {
+        super(importer, defaultLang, xmlImportProperties);
     }
 
 
@@ -63,7 +64,7 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
             if (isUnitDelimiter(qName)) {
                 try {
                     //we're back at the top. find the maintenanceevents and add to the topLevel DU
-                    currentMap.put("languageCode", "nld");
+                    currentMap.put("languageCode", defaultLang);
 
                     extractIdentifier(currentMap);
                     extractName(currentMap);
