@@ -117,7 +117,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <neo4j.version>3.3.5</neo4j.version>
+        <neo4j.version>3.5.3</neo4j.version>
         <blueprints.version>2.6.0</blueprints.version>
     </properties>
 

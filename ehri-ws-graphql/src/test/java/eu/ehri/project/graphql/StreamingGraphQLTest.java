@@ -31,6 +31,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
+
 public class StreamingGraphQLTest extends AbstractFixtureTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -48,8 +49,6 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
         JsonNode json = mapper.readTree(out.toByteArray());
         //System.out.println(json);
         assertEquals("c1", json.path("firstTwo").path("items")
-                .path(0).path("id").textValue());
-        assertEquals("c4", json.path("topLevelDocumentaryUnits").path("items")
                 .path(0).path("id").textValue());
     }
 }
