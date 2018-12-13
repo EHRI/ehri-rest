@@ -199,28 +199,22 @@ public class VirtualEadHandler extends SaxXmlHandler {
             reader.setContentHandler(new VirtualEadHandler(reader, importer, defaultLang, properties,
                     currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth,
                     eadId, children, scopeIds, globalMaintenanceEvents, author));
-        }
-
-        if (localName.equals("language") || qName.equals("language")) {
+        } else if (localName.equals("language") || qName.equals("language")) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
             if (lang != null)
                 reader.setContentHandler(new VirtualEadHandler(reader, importer, defaultLang, properties,
                         currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth,
                         eadId, children, scopeIds, globalMaintenanceEvents, author));
-        }
-
-        // FIXME: We need to add the 'parent' identifier to the ID stack
-        // so that graph path IDs are created correctly. This currently
-        // assumes there's a 'did' element from which we extract this
-        // identifier.
-        if (qName.equals(DID)) {
+        } else if (qName.equals(DID)) {
+            // FIXME: We need to add the 'parent' identifier to the ID stack
+            // so that graph path IDs are created correctly. This currently
+            // assumes there's a 'did' element from which we extract this
+            // identifier.
             extractIdentifier(currentGraphPath.peek());
             String topId = getCurrentTopIdentifier();
             scopeIds.push(topId);
             logger.trace("Current id path: " + scopeIds);
-        }
-
-        if (needToCreateSubNode(qName)) {
+        } else if (needToCreateSubNode(qName)) {
             Map<String, Object> currentGraph = currentGraphPath.pop();
 
             if (isUnitDelimiter(qName)) {
