@@ -21,11 +21,7 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.VirtualUnit;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;

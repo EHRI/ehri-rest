@@ -59,9 +59,7 @@ import java.util.regex.Pattern;
 public class EadHandler extends SaxXmlHandler {
 
     // Constants for elements we need to watch for.
-    static final String EADID = "eadid",
-            ARCHDESC = "archdesc",
-            DID = "did";
+    static final String EADID = "eadid", ARCHDESC = "archdesc", DID = "did";
 
     // EAD file-level keys which are added to the data of the top-level
     // archdesc element. Note: tag->property mappings must exist for these
@@ -72,12 +70,13 @@ public class EadHandler extends SaxXmlHandler {
 
     private static final String DEFAULT_PROPERTIES = "ead2002.properties";
     private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
+
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
+
     private final Map<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
             Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
     );
-
 
     private final List<Map<String, Object>> globalMaintenanceEvents;
 
@@ -256,7 +255,7 @@ public class EadHandler extends SaxXmlHandler {
                     //only on toplevel description:
                     if (qName.equals(ARCHDESC)) {
                         //add the <author> of the ead to the processInfo
-                        addGlobalValues(currentGraph, currentGraphPath.peek(), eadFileGlobals);
+                        addGlobalValues(currentGraph, currentGraphPath.peek());
                     }
 
                     if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(Entities.MAINTENANCE_EVENT)) {
@@ -352,7 +351,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @param currentGraph Data at the current node level
      */
-    protected void extractTitle(Map<String, Object> currentGraph) {
+    private void extractTitle(Map<String, Object> currentGraph) {
         if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
             logger.warn("no name found, using identifier {}", currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
             currentGraph.put(Ontology.NAME_KEY, currentGraph.get(ImportHelpers.OBJECT_IDENTIFIER));
@@ -405,8 +404,7 @@ public class EadHandler extends SaxXmlHandler {
             if (oids instanceof List) {
                 ((List<String>) oids).add(otherIdentifier);
             } else {
-                currentGraph.put(Ontology.OTHER_IDENTIFIERS,
-                        Lists.newArrayList(oids, otherIdentifier));
+                currentGraph.put(Ontology.OTHER_IDENTIFIERS, Lists.newArrayList(oids, otherIdentifier));
             }
         } else {
             logger.trace("adding first alt id: {}", otherIdentifier);
@@ -436,7 +434,7 @@ public class EadHandler extends SaxXmlHandler {
         return childItemPattern.matcher(elementName).matches() || elementName.equals(ARCHDESC);
     }
 
-    private void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph, List<String> eadFileGlobals) {
+    private void addGlobalValues(Map<String, Object> currentGraph, Map<String, Object> globalGraph) {
         for (String key : eadFileGlobals) {
             ImportHelpers.putPropertyInGraph(currentGraph, key, ((String) globalGraph.get(key)));
         }

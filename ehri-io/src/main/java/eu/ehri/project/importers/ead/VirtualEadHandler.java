@@ -53,12 +53,12 @@ import java.util.regex.Pattern;
  * TODO: Clean up and merge with regular EadHandler
  */
 public class VirtualEadHandler extends SaxXmlHandler {
-    private static final String AUTHOR = "authors",
-            SOURCEFILEID = "sourceFileId";
+    private static final String AUTHOR = "authors",  SOURCEFILEID = "sourceFileId";
+
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.<String, Class<? extends Entity>>of(
+    private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
             Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
     );
 
@@ -151,7 +151,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
         }
     }
 
-    protected List<String> pathIds() {
+    private List<String> pathIds() {
         if (scopeIds.isEmpty()) {
             return scopeIds;
         } else {
@@ -318,7 +318,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param currentGraph    Data at the current node level
      * @param defaultLanguage Language code to use as default
      */
-    protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
+    private void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
         if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
             logger.trace("Using default language code: {}", defaultLanguage);
             currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
@@ -353,30 +353,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
      */
     protected void extractIdentifier(Map<String, Object> currentGraph) {
 
-    }
-
-    /**
-     * Helper method to add identifiers to the list of other identifiers.
-     * The property named Ontology.OTHER_IDENTIFIERS (i.e. "otherIdentifiers")
-     * is always an ArrayList of Strings.
-     *
-     * @param currentGraph    the node representation to add the otherIdentifier to
-     * @param otherIdentifier the alternative identifier to add
-     */
-    protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
-        if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
-            logger.trace("adding alternative id: {}", otherIdentifier);
-            Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
-            if (oids instanceof ArrayList<?>) {
-                ((ArrayList<String>) oids).add(otherIdentifier);
-                logger.trace("alternative ID added");
-            }
-        } else {
-            logger.trace("adding first alt id: {}", otherIdentifier);
-            List<String> oids = Lists.newArrayList();
-            oids.add(otherIdentifier);
-            currentGraph.put(Ontology.OTHER_IDENTIFIERS, oids);
-        }
     }
 
     @Override
