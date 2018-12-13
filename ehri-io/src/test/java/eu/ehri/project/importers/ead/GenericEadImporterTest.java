@@ -86,6 +86,9 @@ public class GenericEadImporterTest extends AbstractImporterTest {
                 .setDefaultLang("fre") // overridden!
                 .importInputStream(ios, "Test language import");
         assertEquals(1, log.getCreated());
+        for (DocumentaryUnitDescription dd : manager.getEntity("nl-r1-c00001", DocumentaryUnit.class).getDocumentDescriptions()) {
+            System.out.println(dd.getId());
+        }
         assertTrue(manager.exists("nl-r1-c00001.deu-2_deu"));
     }
 

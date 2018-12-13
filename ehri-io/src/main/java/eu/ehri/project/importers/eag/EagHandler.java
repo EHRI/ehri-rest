@@ -21,6 +21,7 @@ package eu.ehri.project.importers.eag;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -33,8 +34,10 @@ import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Handler that reads EAG files. The resulting {@link Map}s should be imported by
@@ -47,8 +50,9 @@ public class EagHandler extends SaxXmlHandler {
     );
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
-    public EagHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        super(importer, defaultLang, new XmlImportProperties("eag.properties"));
+    public EagHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        super(reader, importer, defaultLang, new XmlImportProperties("eag.properties"),
+                initGraphPath(), Maps.newHashMap(), new Stack<>(), new Stack<>(), null, null, 0);
     }
 
     @Override

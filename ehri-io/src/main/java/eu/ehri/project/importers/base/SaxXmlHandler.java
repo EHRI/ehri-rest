@@ -25,10 +25,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -65,10 +62,10 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     /**
      * Key in the node that denotes the object's identifier.
      */
-    protected final Stack<Map<String, Object>> currentGraphPath = new Stack<>();
-    protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
-    protected final Stack<String> currentPath = new Stack<>();
-    protected final Stack<StringBuilder> currentText = new Stack<>();
+    protected final Stack<Map<String, Object>> currentGraphPath;
+    protected final Map<String, Map<String, Object>> languageMap;
+    protected final Stack<String> currentPath;
+    protected final Stack<StringBuilder> currentText;
 
     protected String currentEntity;
 
@@ -78,18 +75,35 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected int depth;
     private String attribute;
     private String languagePrefix;
-    protected String defaultLang;
+    protected final String defaultLang;
+    protected final XMLReader reader;
 
-    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, null);
+    protected static Stack<Map<String, Object>> initGraphPath() {
+        Stack<Map<String, Object>> currentGraphPath = new Stack<>();
+        currentGraphPath.push(Maps.newHashMap());
+        return currentGraphPath;
     }
 
-    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
-        super();
+    public SaxXmlHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties,
+                         Stack<Map<String, Object>> currentGraphPath,
+                         Map<String, Map<String, Object>> languageMap,
+                         Stack<String> currentPath,
+                         Stack<StringBuilder> currentText,
+                         String currentEntity,
+                         Locator locator,
+                         int depth) {
+        this.reader = reader;
         this.importer = importer;
         this.defaultLang = defaultLang;
         this.properties = properties;
-        currentGraphPath.push(Maps.<String, Object>newHashMap());
+
+        this.currentGraphPath = currentGraphPath;
+        this.languageMap = languageMap;
+        this.currentPath = currentPath;
+        this.currentText = currentText;
+        this.currentEntity = currentEntity;
+        this.locator = locator;
+        this.depth = depth;
     }
 
     /**

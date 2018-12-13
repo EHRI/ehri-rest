@@ -21,6 +21,7 @@ package eu.ehri.project.importers.eac;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
@@ -37,10 +38,12 @@ import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 
 /**
@@ -63,12 +66,13 @@ public class EacHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
-    public EacHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, new XmlImportProperties("eac.properties"));
+    public EacHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        this(reader, importer, defaultLang, new XmlImportProperties("eac.properties"));
     }
 
-    public EacHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
-        super(importer, defaultLang, properties);
+    public EacHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
+        super(reader, importer, defaultLang, properties,
+                initGraphPath(), Maps.newHashMap(), new Stack<>(), new Stack<>(), null, null, 0);
     }
 
     @Override

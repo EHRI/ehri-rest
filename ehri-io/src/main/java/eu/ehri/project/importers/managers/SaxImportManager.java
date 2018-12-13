@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -159,13 +160,6 @@ public class SaxImportManager extends AbstractImportManager {
             importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
-            //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            SaxXmlHandler handler = properties != null
-                    ? handlerClass.getConstructor(ItemImporter.class, String.class, XmlImportProperties.class)
-                            .newInstance(importer, defaultLang, properties)
-                    : handlerClass.getConstructor(ItemImporter.class, String.class)
-                            .newInstance(importer, defaultLang);
-
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);
             if (isTolerant()) {
@@ -174,7 +168,18 @@ public class SaxImportManager extends AbstractImportManager {
                 spf.setSchema(null);
             }
             logger.trace("isValidating: {}", spf.isValidating());
+
+
             SAXParser saxParser = spf.newSAXParser();
+            XMLReader xmlReader = saxParser.getXMLReader();
+
+            //TODO decide which handler to use, HandlerFactory? now part of constructor ...
+            SaxXmlHandler handler = properties != null
+                    ? handlerClass.getConstructor(XMLReader.class, ItemImporter.class, String.class, XmlImportProperties.class)
+                    .newInstance(xmlReader, importer, defaultLang, properties)
+                    : handlerClass.getConstructor(XMLReader.class, ItemImporter.class, String.class)
+                    .newInstance(xmlReader, importer, defaultLang);
+
             saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             InputSource src = new InputSource(stream);
             src.setSystemId(tag);

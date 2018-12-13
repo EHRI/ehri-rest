@@ -21,6 +21,7 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -36,7 +37,9 @@ import eu.ehri.project.models.base.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,34 +55,29 @@ import java.util.regex.Pattern;
 public class VirtualEadHandler extends SaxXmlHandler {
     private static final String AUTHOR = "authors",
             SOURCEFILEID = "sourceFileId";
-
-    private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
+    // Pattern for EAD nodes that represent a child item
+    private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
     private final ImmutableMap<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.<String, Class<? extends Entity>>of(
             Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
     );
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(VirtualEadHandler.class);
-
-    protected final List<AbstractUnit>[] children = new ArrayList[12];
-    private final Stack<String> scopeIds = new Stack<>();
-    // Pattern for EAD nodes that represent a child item
-    private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
+    private static final Logger logger = LoggerFactory.getLogger(VirtualEadHandler.class);
 
     // Constants for elements we need to watch for.
     private final static String ARCHDESC = "archdesc";
     private final static String DID = "did";
-    /**
-     * used to attach the MaintenanceEvents to
-     */
-    private VirtualUnit topLevel;
+
+    private final List<Map<String, Object>> globalMaintenanceEvents;
+
+    protected final List<AbstractUnit>[] children;
+    private final Stack<String> scopeIds;
 
     /**
      * EAD identifier as found in <code>&lt;eadid&gt;</code> in the currently handled EAD file
      */
-    private String eadId;
-    private String author;
+    private final String eadId;
+    private final String author;
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -91,14 +89,20 @@ public class VirtualEadHandler extends SaxXmlHandler {
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
 
+    private static List<AbstractUnit>[] initChildren() {
+        List<AbstractUnit>[] children = new ArrayList[12];
+        children[0] = Lists.newArrayList();
+        return children;
+    }
+
     /**
      * Create an EadHandler using some importer. The default mapping of paths to node properties is used.
      *
      * @param importer
      */
     @SuppressWarnings("unchecked")
-    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, new XmlImportProperties("vc.properties"));
+    public VirtualEadHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        this(reader, importer, defaultLang, new XmlImportProperties("vc.properties"));
         logger.warn("vc.properties used");
     }
 
@@ -108,10 +112,34 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param importer
      * @param xmlImportProperties
      */
-    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer,
+    public VirtualEadHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer,
             String defaultLang, XmlImportProperties xmlImportProperties) {
-        super(importer, defaultLang, xmlImportProperties);
-        children[depth] = Lists.newArrayList();
+        this(reader, importer, defaultLang, xmlImportProperties,
+                initGraphPath(), Maps.newHashMap(), new Stack<>(), new Stack<>(), null, null, 0, "",
+                initChildren(), new Stack<>(), Lists.newArrayList(), "");
+    }
+
+    private VirtualEadHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer,
+                             String defaultLang, XmlImportProperties xmlImportProperties,
+                       Stack<Map<String, Object>> currentGraphPath,
+                         Map<String, Map<String, Object>> languageMap,
+                         Stack<String> currentPath,
+                         Stack<StringBuilder> currentText,
+                         String currentEntity,
+                         Locator locator,
+                         int depth,
+                         String eadId,
+                       List<AbstractUnit>[] children,
+                       Stack<String> scopeIds,
+                       List<Map<String, Object>> globalMaintenanceEvents,
+                       String author) {
+        super(reader, importer, defaultLang, xmlImportProperties,
+                currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth);
+        this.eadId = eadId;
+        this.children = children;
+        this.scopeIds = scopeIds;
+        this.globalMaintenanceEvents = globalMaintenanceEvents;
+        this.author = author;
     }
 
     @Override
@@ -138,11 +166,9 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
     private String getCurrentTopIdentifier() {
         Object current = currentGraphPath.peek().get(ImportHelpers.OBJECT_IDENTIFIER);
-        if (current instanceof List<?>) {
-            return (String) ((List<?>) current).get(0);
-        } else {
-            return (String) current;
-        }
+        return current instanceof List<?>
+            ? (String) ((List<?>) current).get(0)
+            : (String) current;
     }
 
     /**
@@ -162,17 +188,25 @@ public class VirtualEadHandler extends SaxXmlHandler {
         // If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
         if (localName.equals("eadid") || qName.equals("eadid")) {
-            eadId = (String) currentGraphPath.peek().get(SOURCEFILEID);
-            logger.trace("Found <eadid>: " + eadId);
+            String eadId = (String) currentGraphPath.peek().get(SOURCEFILEID);
+            logger.trace("Found <eadid>: {}", eadId);
+            reader.setContentHandler(new VirtualEadHandler(reader, importer, defaultLang, properties,
+                    currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth,
+                    eadId, children, scopeIds, globalMaintenanceEvents, author));
         } else if (localName.equals("author") || qName.equals("author")) {
-            author = (String) currentGraphPath.peek().get(AUTHOR);
-            logger.trace("Found <author>: " + author);
+            String author = (String) currentGraphPath.peek().get(AUTHOR);
+            logger.trace("Found <author>: {}", author);
+            reader.setContentHandler(new VirtualEadHandler(reader, importer, defaultLang, properties,
+                    currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth,
+                    eadId, children, scopeIds, globalMaintenanceEvents, author));
         }
 
         if (localName.equals("language") || qName.equals("language")) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
             if (lang != null)
-                defaultLang = lang;
+                reader.setContentHandler(new VirtualEadHandler(reader, importer, defaultLang, properties,
+                        currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth,
+                        eadId, children, scopeIds, globalMaintenanceEvents, author));
         }
 
         // FIXME: We need to add the 'parent' identifier to the ID stack
@@ -198,7 +232,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     // Second: title
                     extractTitle(currentGraph);
 
-                    useDefaultLanguage(currentGraph);
+                    useDefaultLanguage(currentGraph, defaultLang);
 
                     extractDate(currentGraph);
 
@@ -208,8 +242,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     addAuthor(currentGraph);
 
                     if (!globalMaintenanceEvents.isEmpty() && !currentGraph.containsKey(Entities.MAINTENANCE_EVENT)) {
-                        logger.trace(
-                                "Adding global maintenance events: {}", globalMaintenanceEvents);
+                        logger.trace("Adding global maintenance events: {}", globalMaintenanceEvents);
                         currentGraph.put(Entities.MAINTENANCE_EVENT, globalMaintenanceEvents);
                     }
 
@@ -217,7 +250,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
                     if (current.getType().equals(Entities.VIRTUAL_UNIT)) {
                         logger.debug("virtual unit created: {}", current.getIdentifier());
-                        topLevel = (VirtualUnit) current; // if it is not overwritten, the current DU is the topLevel
                         logger.debug("importer used: {}", importer.getClass());
                         if (depth > 0) { // if not on root level
                             children[depth - 1].add(current); // add child to parent offspring
@@ -235,7 +267,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
                                     } else { //child.getType().equals(Entities.DOCUMENTARY_UNIT)
                                         logger.trace("documentary child");
                                         ((VirtualUnit) current).addIncludedUnit(((DocumentaryUnit) child));
-
                                     }
                                 }
                             }
@@ -284,16 +315,6 @@ public class VirtualEadHandler extends SaxXmlHandler {
             }
             return eadId + suffix;
         }
-    }
-
-    /**
-     * Checks given currentGraph for a language and sets a default language code
-     * for the description if no language is found.
-     *
-     * @param currentGraph Data at the current node level
-     */
-    protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, defaultLang);
     }
 
     /**

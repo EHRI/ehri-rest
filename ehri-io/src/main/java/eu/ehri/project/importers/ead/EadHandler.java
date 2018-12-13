@@ -23,6 +23,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -38,7 +39,9 @@ import eu.ehri.project.persistence.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,31 +71,29 @@ public class EadHandler extends SaxXmlHandler {
     );
 
     private static final String DEFAULT_PROPERTIES = "ead2002.properties";
-
-    private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
-
+    private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
+    // Pattern for EAD nodes that represent a child item
+    private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
     private final Map<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
             Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
     );
 
-    private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
+
+    private final List<Map<String, Object>> globalMaintenanceEvents;
 
     @SuppressWarnings("unchecked")
-    protected final List<DocumentaryUnit>[] children = new ArrayList[12];
+    protected final List<DocumentaryUnit>[] children;
 
     /**
      * Stack of identifiers of archival units. Push/pop the identifier of the current
      * node on top/from the top of the stack.
      */
-    private final Stack<String> scopeIds = new Stack<>();
-
-    // Pattern for EAD nodes that represent a child item
-    private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
+    private final Stack<String> scopeIds;
 
     /**
-     * Default language to use in units without language
+     * EAD file identifier.
      */
-    private String eadId;
+    private final String eadId;
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -104,13 +105,19 @@ public class EadHandler extends SaxXmlHandler {
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
 
+    private static List<DocumentaryUnit>[] initChildren() {
+        List<DocumentaryUnit>[] children = new ArrayList[12];
+        children[0] = Lists.newArrayList();
+        return children;
+    }
+
     /**
      * Create an EadHandler using some importer. The default mapping of paths to node properties is used.
      *
      * @param importer the importer instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, new XmlImportProperties(DEFAULT_PROPERTIES));
+    public EadHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
+        this(reader, importer, defaultLang, new XmlImportProperties(DEFAULT_PROPERTIES));
         logger.trace("Using default properties file: {}", DEFAULT_PROPERTIES);
     }
 
@@ -120,10 +127,33 @@ public class EadHandler extends SaxXmlHandler {
      * @param importer   the importer instance
      * @param properties an XML node properties instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
-        super(importer, defaultLang, properties);
-        children[depth] = Lists.newArrayList();
+    public EadHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
+        this(reader, importer, defaultLang, properties, initGraphPath(), Maps.newHashMap(),
+                new Stack<>(), new Stack<>(), null, null, 0, "",
+                initChildren(), new Stack<>(), Lists.newArrayList());
     }
+
+    private EadHandler(XMLReader reader, ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties,
+                       Stack<Map<String, Object>> currentGraphPath,
+                         Map<String, Map<String, Object>> languageMap,
+                         Stack<String> currentPath,
+                         Stack<StringBuilder> currentText,
+                         String currentEntity,
+                         Locator locator,
+                         int depth,
+                         String eadId,
+                       List<DocumentaryUnit>[] children,
+                       Stack<String> scopeIds,
+                       List<Map<String, Object>> globalMaintenanceEvents) {
+        super(reader, importer, defaultLang, properties,
+                currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth);
+        this.eadId = eadId;
+        this.children = children;
+        this.scopeIds = scopeIds;
+        this.globalMaintenanceEvents = globalMaintenanceEvents;
+    }
+
+
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -145,7 +175,7 @@ public class EadHandler extends SaxXmlHandler {
      *
      * @return a List of Strings, i.e. identifiers, representing the path of the current node
      */
-    protected List<String> pathIds() {
+    private List<String> pathIds() {
         if (scopeIds.isEmpty()) {
             return scopeIds;
         } else {
@@ -160,11 +190,9 @@ public class EadHandler extends SaxXmlHandler {
 
     private String getCurrentTopIdentifier() {
         Object current = currentGraphPath.peek().get(ImportHelpers.OBJECT_IDENTIFIER);
-        if (current instanceof List<?>) {
-            return (String) ((List<?>) current).get(0);
-        } else {
-            return (String) current;
-        }
+        return current instanceof List<?>
+            ? (String) ((List<?>) current).get(0)
+            : (String) current;
     }
 
     /**
@@ -184,14 +212,19 @@ public class EadHandler extends SaxXmlHandler {
         // If this is the <eadid> element, store its content
 
         if (qName.equals(EADID)) {
-            eadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
-            logger.trace("Found {}: {}", EADID, eadId);
+            String newEadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
+            logger.trace("Found {}: {}", EADID, newEadId);
+            reader.setContentHandler(new EadHandler(reader, importer, defaultLang, properties,
+                    currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth, newEadId,
+                    children, scopeIds, globalMaintenanceEvents));
         }
 
         if (localName.equals("language") || qName.equals("language")) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
             if (lang != null) {
-                defaultLang = lang;
+                reader.setContentHandler(new EadHandler(reader, importer, lang, properties,
+                        currentGraphPath, languageMap, currentPath, currentText, currentEntity, locator, depth, eadId,
+                        children, scopeIds, globalMaintenanceEvents));
             }
         }
 
@@ -219,7 +252,7 @@ public class EadHandler extends SaxXmlHandler {
                     // Second: title
                     extractTitle(currentGraph);
 
-                    useDefaultLanguage(currentGraph);
+                    useDefaultLanguage(currentGraph, defaultLang);
 
                     extractDate(currentGraph);
 
@@ -304,16 +337,6 @@ public class EadHandler extends SaxXmlHandler {
             }
             return eadId + suffix;
         }
-    }
-
-    /**
-     * Checks given currentGraph for a language and sets a default language code
-     * for the description if no language is found.
-     *
-     * @param currentGraph Data at the current node level
-     */
-    protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, defaultLang);
     }
 
     /**

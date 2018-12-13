@@ -95,6 +95,7 @@ public class VirtualEadTest extends AbstractImporterTest {
 
         DocumentaryUnit c1_vreferrer = manager.getEntity(UNIT1, DocumentaryUnit.class);
         for (AbstractUnit d : toplevel.getIncludedUnits()) {
+            System.out.println(c1_vreferrer.getId() + " / " + d.getId());
             assertEquals(c1_vreferrer, d);
         }
 
