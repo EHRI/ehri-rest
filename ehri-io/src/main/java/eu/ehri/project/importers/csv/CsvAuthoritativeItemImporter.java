@@ -111,7 +111,7 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
             ImportHelpers.putPropertyInGraph(item, "typeOfEntity", "subject");
         }
         if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-            ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+            ImportHelpers.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
         }
         return item;
     }
