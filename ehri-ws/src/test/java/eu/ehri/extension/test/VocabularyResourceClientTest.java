@@ -126,7 +126,8 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
 
     @Test
     public void testDeleteVocabularyTerms() throws Exception {
-        URI uri = entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all");
+        URI uri = entityUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all")
+                .queryParam("commit", "true").build();
         testDelete(uri);
 
         // Check it's really gone...
@@ -152,12 +153,12 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
      */
 
     // Note: maybe generalize them and reuse for other tests
-    public ClientResponse testGet(URI uri) {
+    private ClientResponse testGet(URI uri) {
         return jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
     }
 
-    public ClientResponse testCreate(URI uri, String json) {
+    private ClientResponse testCreate(URI uri, String json) {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(json).post(ClientResponse.class);
@@ -165,7 +166,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
         return response;
     }
 
-    public ClientResponse testDelete(URI uri) {
+    private ClientResponse testDelete(URI uri) {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
         assertStatus(NO_CONTENT, response);

@@ -19,51 +19,33 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.CreateResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
-import eu.ehri.project.api.Api;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
-import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.importers.json.BatchOperations;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFWriter;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the Vocabulary model. Vocabularies are
@@ -150,29 +132,23 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
 
     @DELETE
     @Path("{id:[^/]+}/all")
-    public void deleteAllVocabularyConcepts(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, PermissionDenied {
+    public void deleteAllVocabularyConcepts(@PathParam("id") String id,
+                                            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+                                            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Actioner user = getCurrentActioner();
-            Api api = api().enableLogging(false);
-            Vocabulary vocabulary = api.detail(id, cls);
-            ActionManager actionManager = api.actionManager().setScope(vocabulary);
-            Iterable<Concept> concepts = vocabulary.getConcepts();
-            if (concepts.iterator().hasNext()) {
-                ActionManager.EventContext context = actionManager
-                        .newEventContext(user, EventTypes.deletion, getLogMessage());
-                for (Concept concept : concepts) {
-                    context.addSubjects(concept);
-                    context.createVersion(concept);
-                }
-                context.commit();
-                for (Concept concept : concepts) {
-                    api.delete(concept.getId());
-                }
+            Vocabulary vocabulary = api().detail(id, cls);
+            List<String> ids = StreamSupport.stream(
+                    vocabulary.getConcepts().spliterator(), false)
+                    .map(Entity::getId)
+                    .collect(Collectors.toList());
+            new BatchOperations(graph)
+                    .setScope(vocabulary)
+                    .setVersioning(version)
+                    .batchDelete(ids, getCurrentActioner(), getLogMessage());
+            if (commit) {
+                tx.success();
             }
-            tx.success();
-        } catch (SerializationError | ValidationError e) {
-            throw new RuntimeException(e);
         }
     }
 

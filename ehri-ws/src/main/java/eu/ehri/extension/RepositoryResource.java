@@ -20,13 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Lists;
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -43,20 +37,11 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -65,6 +50,8 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the Repository.
@@ -197,6 +184,29 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         }
     }
 
+
+    @DELETE
+    @Path("{id:[^/]+}/all")
+    public void deleteAllDocs(@PathParam("id") String id,
+                              @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+                              @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
+            throws ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            Repository repository = api().detail(id, cls);
+            List<String> ids = StreamSupport.stream(
+                        repository.getAllDocumentaryUnits().spliterator(), false)
+                    .map(Entity::getId)
+                    .collect(Collectors.toList());
+            new BatchOperations(graph)
+                    .setScope(repository)
+                    .setVersioning(version)
+                    .batchDelete(ids, getCurrentActioner(), getLogMessage());
+            if (commit) {
+                tx.success();
+            }
+        }
+    }
+
     /**
      * Export the given repository as an EAG file.
      *
@@ -209,7 +219,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Produces(MediaType.TEXT_XML)
     public Response exportEag(@PathParam("id") String id,
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
-            throws IOException, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Repository repository = api().detail(id, cls);
             tx.success();
