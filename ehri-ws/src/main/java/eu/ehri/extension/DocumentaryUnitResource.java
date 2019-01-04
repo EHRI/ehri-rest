@@ -19,13 +19,7 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -37,23 +31,12 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -160,7 +143,7 @@ public class DocumentaryUnitResource
     @Produces(MediaType.TEXT_XML)
     public Response exportEad(@PathParam("id") String id,
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
-            throws IOException, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             DocumentaryUnit unit = api().detail(id, cls);
             tx.success();
