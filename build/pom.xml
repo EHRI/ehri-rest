@@ -10,16 +10,13 @@
     <name>Packaging</name>
     <description>Packaging.</description>
 
-    <properties>
-        <maven-site-plugin.skip>true</maven-site-plugin.skip>
-    </properties>
-
     <build>
         <finalName>${project.parent.artifactId}-${project.parent.version} </finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
                     <!-- NB: We add these to get the version info at runtime, via the MANIFEST.MF -->
                     <archive>

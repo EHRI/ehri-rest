@@ -117,9 +117,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- Overridden by child poms we don't want to create a site for -->
-        <maven-site-plugin.skip>false</maven-site-plugin.skip>
-
         <neo4j.version>3.3.5</neo4j.version>
         <blueprints.version>2.6.0</blueprints.version>
     </properties>
@@ -135,16 +132,6 @@
                     <compilerArgs>
                         <arg>-Xlint</arg>
                     </compilerArgs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.4</version>
-                <configuration>
-                    <skip>${maven-site-plugin.skip}</skip>
-                    <port>9001</port>
-                    <tempWebappDirectory>${basedir}/target/site/tempdir</tempWebappDirectory>
                 </configuration>
             </plugin>
         </plugins>
@@ -186,16 +173,6 @@
                         </reports>
                     </reportSet>
                 </reportSets>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <xmlOutput>true</xmlOutput>
-                    <!-- Optional directory to put findbugs xdoc xml report -->
-                    <xmlOutputDirectory>target/site</xmlOutputDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

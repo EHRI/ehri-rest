@@ -3,7 +3,7 @@
 set -e
 
 DOC_REPO_PATH=$1
-DOC_PATH=docs/api/ehri-rest
+DOC_PATH=docs/technical/backend/wsapi/wsdocs/
 
 if [ -z "$DOC_REPO_PATH" ]; then
     echo "usage: public_docs.sh <doc-repository-path>"
@@ -17,12 +17,12 @@ fi
 
 mvn site
 mvn site:stage
-rsync -avl target/staging/ "${DOC_REPO_PATH}/${DOC_PATH}/"
+rsync -avl target/staging/ehri-ws/wsdocs/ "${DOC_REPO_PATH}/${DOC_PATH}/"
 
 (
     cd $DOC_REPO_PATH
     git add $DOC_PATH
-    git ci -m "Updating backend Java and web service docs" $DOC_PATH
+    git ci -m "Updating web service docs" $DOC_PATH
     git push
 )
 
