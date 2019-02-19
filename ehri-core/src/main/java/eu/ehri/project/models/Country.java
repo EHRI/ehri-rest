@@ -34,7 +34,6 @@ import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.Versioned;
-import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * Frame class representing a country. It's identifier should
