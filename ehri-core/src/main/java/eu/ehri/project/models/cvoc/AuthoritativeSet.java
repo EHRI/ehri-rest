@@ -20,19 +20,12 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.UniqueAdjacency;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.Named;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.utils.JavaHandlerUtils;
+import eu.ehri.project.models.base.*;
 
 /**
  * A frame class representing a item that holds other
@@ -40,8 +33,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * historical agents.
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
-public interface AuthoritativeSet extends Accessible,
-        PermissionScope, ItemHolder, Named {
+public interface AuthoritativeSet extends Accessible, PermissionScope, ItemHolder, Named, Promotable {
 
     @UniqueAdjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     int countChildren();
