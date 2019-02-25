@@ -35,6 +35,7 @@ import eu.ehri.project.exporters.cvoc.SchemaExporter;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
@@ -339,6 +340,41 @@ public class ToolsResource extends AbstractResource {
             return Table.of(lists);
         } catch (IdRegenerator.IdCollisionError e) {
             throw new ConflictError(e);
+        }
+    }
+
+    /**
+     * Regenerate description IDs.
+     */
+    @POST
+    @Produces("text/plain")
+    @Path("regenerate-description-id/{id:[^/]+}")
+    public String regenerateDescriptionId(@PathParam(ID_PARAM) String id,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
+            throws ItemNotFound {
+        int done = 0;
+        try (final Tx tx = beginTx()) {
+            final Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
+            Described entity = manager.getEntity(id, Described.class);
+            for (Description desc : entity.getDescriptions()) {
+                PermissionScope scope = entity.getPermissionScope();
+                List<String> idPath = scope != null
+                        ? Lists.newArrayList(scope.idPath())
+                        : Lists.newArrayList();
+                idPath.add(entity.getIdentifier());
+                Bundle descBundle = depSerializer.entityToBundle(desc);
+                String newId = DescriptionIdGenerator.INSTANCE.generateId(idPath, descBundle);
+                if (!newId.equals(desc.getId()) && commit) {
+                    manager.renameVertex(desc.asVertex(), desc.getId(), newId);
+                    done++;
+                }
+            }
+            if (commit && done > 0) {
+                tx.success();
+            }
+            return String.valueOf(done);
+        } catch (SerializationError e) {
+            throw new RuntimeException(e);
         }
     }
 
