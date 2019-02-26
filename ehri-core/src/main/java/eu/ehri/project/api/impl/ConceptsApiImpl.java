@@ -2,6 +2,8 @@ package eu.ehri.project.api.impl;
 
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.PermissionUtils;
+import eu.ehri.project.api.ConceptsApi;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -14,8 +16,6 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.acl.PermissionUtils;
-import eu.ehri.project.api.ConceptsApi;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,6 +89,22 @@ class ConceptsApiImpl implements ConceptsApi {
             concept.removeNarrowerConcept(other);
         }
         log(concept, narrower, EventTypes.modification);
+        return concept;
+    }
+
+    @Override
+    public Concept setBroaderConcepts(String id, List<String> broader) throws ItemNotFound, PermissionDenied {
+        Concept concept = manager.getEntity(id, EntityClass.CVOC_CONCEPT, Concept.class);
+        helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
+        for (Concept other : concept.getBroaderConcepts()) {
+            concept.removeBroaderConcept(other);
+        }
+        for (String otherId : broader) {
+            Concept other = manager.getEntity(otherId, Concept.class);
+            helper.checkEntityPermission(other, accessor, PermissionType.UPDATE);
+            concept.addBroaderConcept(other);
+        }
+        log(concept, broader, EventTypes.modification);
         return concept;
     }
 

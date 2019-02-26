@@ -20,18 +20,10 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.InverseOf;
-import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.annotations.Meta;
-import eu.ehri.project.models.annotations.UniqueAdjacency;
+import eu.ehri.project.models.annotations.*;
 import eu.ehri.project.models.base.Described;
 import eu.ehri.project.models.base.ItemHolder;
 
