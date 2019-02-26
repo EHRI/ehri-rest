@@ -19,4 +19,7 @@ public interface ConceptsApi {
 
     Concept removeNarrowerConcepts(String id, List<String> narrower)
             throws ItemNotFound, PermissionDenied;
+
+    Concept setBroaderConcepts(String id, List<String> broader)
+            throws ItemNotFound, PermissionDenied;
 }

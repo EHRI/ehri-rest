@@ -142,6 +142,19 @@ public class CvocConceptResource
         }
     }
 
+    @POST
+    @Path("{id:[^/]+}/broader")
+    public Response setBroaderCvocConcepts(
+        @PathParam("id") String id,
+        @QueryParam(ID_PARAM) List<String> broader
+    ) throws PermissionDenied, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            Response item = single(api().concepts().setBroaderConcepts(id, broader));
+            tx.success();
+            return item;
+        }
+    }
+
     /**
      * Add an existing concept to the list of 'narrower' relations.
      *
@@ -153,7 +166,7 @@ public class CvocConceptResource
     public Response addNarrowerCvocConcept(
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> narrower)
-            throws AccessDenied, PermissionDenied, ItemNotFound {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .addNarrowerConcepts(id, narrower));
@@ -173,7 +186,7 @@ public class CvocConceptResource
     public Response removeNarrowerCvocConcept(
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> narrower)
-            throws PermissionDenied, AccessDenied, ItemNotFound {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .removeNarrowerConcepts(id, narrower));
@@ -192,7 +205,7 @@ public class CvocConceptResource
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/broader")
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Concept concept = api().detail(id, cls);
             Response response = streamingList(concept::getBroaderConcepts);
@@ -251,7 +264,7 @@ public class CvocConceptResource
     public Response addRelatedCvocConcept(
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> related)
-            throws AccessDenied, PermissionDenied, ItemNotFound {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .addRelatedConcepts(id, related));
@@ -272,7 +285,7 @@ public class CvocConceptResource
     public Response removeRelatedCvocConcept(
             @PathParam("id") String id,
             @QueryParam(ID_PARAM) List<String> related)
-            throws AccessDenied, PermissionDenied, ItemNotFound {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response item = single(api().concepts()
                     .removeRelatedConcepts(id, related));
