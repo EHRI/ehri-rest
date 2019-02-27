@@ -84,7 +84,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         try (final Tx tx = beginTx()) {
             Vocabulary vocabulary = api().detail(id, cls);
             Response response = streamingPage(() -> getQuery()
-                    .page(vocabulary.getConcepts(), Concept.class));
+                    .page(all ? vocabulary.getConcepts() : vocabulary.getTopConcepts(), Concept.class));
             tx.success();
             return response;
         }

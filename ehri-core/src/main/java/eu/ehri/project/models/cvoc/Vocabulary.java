@@ -20,7 +20,10 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -34,4 +37,16 @@ public interface Vocabulary extends AuthoritativeSet {
 
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     Iterable<Concept> getConcepts();
+
+    @JavaHandler
+    Iterable<Concept> getTopConcepts();
+
+    abstract class Impl implements JavaHandlerContext<Vertex>, Vocabulary {
+        @Override
+        public Iterable<Concept> getTopConcepts() {
+            return frameVertices(gremlin().in(Ontology.ITEM_IN_AUTHORITATIVE_SET)
+                    .filter(v -> !v.getEdges(Direction.IN, Ontology.CONCEPT_HAS_NARROWER).iterator().hasNext()));
+        }
+
+    }
 }
