@@ -22,15 +22,10 @@ package eu.ehri.project.api;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistence.Bundle;
@@ -40,10 +35,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ApiCrudTest extends AbstractFixtureTest {
 
@@ -122,8 +114,10 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test
     public void testUpdate() throws Exception {
+        Repository repository = manager.getEntity("r1", Repository.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
+        DocumentaryUnit unit = api(validUser).withScope(repository)
+                .create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
@@ -136,10 +130,22 @@ public class ApiCrudTest extends AbstractFixtureTest {
         DocumentaryUnitDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
                 DocumentaryUnitDescription.class);
+        assertTrue(manager.exists("nl-r1-someid_01.eng-someid_01"));
+
+        // Add a new description and check ids etc
+        Bundle newDesc = Bundle.of(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "ang")
+                .withDataValue(Ontology.IDENTIFIER_KEY, "Latn")
+                .withDataValue(Ontology.NAME_KEY, "Test Desc 2");
+        DocumentaryUnit changedUnit2 = api(validUser)
+                .update(newBundle
+                        .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, newDesc
+                        ), DocumentaryUnit.class).getNode();
+        assertTrue(manager.exists("nl-r1-someid_01.ang-latn"));
 
         // Check the nested item was created correctly
         DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
-        assertTrue(datePeriod != null);
+        assertNotNull(datePeriod);
         assertEquals(TestData.TEST_START_DATE, datePeriod.getStartDate());
 
         // And that the reverse relationship works.

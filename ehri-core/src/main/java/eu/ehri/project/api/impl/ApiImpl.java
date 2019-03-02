@@ -199,8 +199,13 @@ public class ApiImpl implements Api {
     public <E extends Accessible> Mutation<E> update(Bundle bundle, Class<E> cls, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError {
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
+        // If the scope has been set explicitly, use that... otherwise use the
+        // item's current scope...
+        PermissionScope localScope = scope.equals(SystemScope.getInstance())
+                ? Optional.ofNullable(entity.getPermissionScope()).orElse(scope)
+                : scope;
         helper.checkEntityPermission(entity, accessor, PermissionType.UPDATE);
-        Mutation<E> out = bundleManager.withScopeIds(scope.idPath()).update(bundle, cls);
+        Mutation<E> out = bundleManager.withScopeIds(localScope.idPath()).update(bundle, cls);
         if (out.hasChanged()) {
             commitEvent(() -> actionManager.newEventContext(
                     out.getNode(), accessor.as(Actioner.class),
