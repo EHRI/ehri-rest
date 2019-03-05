@@ -19,13 +19,7 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
@@ -59,7 +53,7 @@ import java.util.List;
  */
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.CVOC_CONCEPT)
 public class CvocConceptResource extends AbstractAccessibleResource<Concept>
-        implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
+        implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource, ChildResource {
 
     public CvocConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
@@ -142,11 +136,27 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     }
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:[^/]+}/parent")
+    @Override
+    public Response setParents(
+            @PathParam("id") String id,
+            @QueryParam(ID_PARAM) List<String> parentIds)
+            throws PermissionDenied, ItemNotFound, DeserializationError {
+        try (final Tx tx = beginTx()) {
+            Response item = single(api().concepts().setBroaderConcepts(id, parentIds));
+            tx.success();
+            return item;
+        }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/broader")
     public Response setBroaderCvocConcepts(
         @PathParam("id") String id,
         @QueryParam(ID_PARAM) List<String> broader
-    ) throws PermissionDenied, ItemNotFound {
+    ) throws PermissionDenied, ItemNotFound, DeserializationError {
         try (final Tx tx = beginTx()) {
             Response item = single(api().concepts().setBroaderConcepts(id, broader));
             tx.success();
@@ -161,6 +171,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
      * @param narrower the narrower item IDs
      */
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/narrower")
     public Response addNarrowerCvocConcept(
             @PathParam("id") String id,

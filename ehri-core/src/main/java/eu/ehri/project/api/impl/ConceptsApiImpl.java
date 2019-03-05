@@ -7,6 +7,7 @@ import eu.ehri.project.api.ConceptsApi;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
@@ -18,6 +19,7 @@ import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 class ConceptsApiImpl implements ConceptsApi {
@@ -93,7 +95,7 @@ class ConceptsApiImpl implements ConceptsApi {
     }
 
     @Override
-    public Concept setBroaderConcepts(String id, List<String> broader) throws ItemNotFound, PermissionDenied {
+    public Concept setBroaderConcepts(String id, List<String> broader) throws ItemNotFound, PermissionDenied, DeserializationError {
         Concept concept = manager.getEntity(id, EntityClass.CVOC_CONCEPT, Concept.class);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
         for (Concept other : concept.getBroaderConcepts()) {
@@ -102,6 +104,9 @@ class ConceptsApiImpl implements ConceptsApi {
         for (String otherId : broader) {
             Concept other = manager.getEntity(otherId, Concept.class);
             helper.checkEntityPermission(other, accessor, PermissionType.UPDATE);
+            if (!Objects.equals(other.getAuthoritativeSet(), concept.getAuthoritativeSet())) {
+                throw new DeserializationError("broader concepts must belong to the same vocabulary");
+            }
             concept.addBroaderConcept(other);
         }
         log(concept, broader, EventTypes.modification);
