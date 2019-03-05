@@ -1,5 +1,6 @@
 package eu.ehri.project.api;
 
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.cvoc.Concept;
@@ -21,5 +22,5 @@ public interface ConceptsApi {
             throws ItemNotFound, PermissionDenied;
 
     Concept setBroaderConcepts(String id, List<String> broader)
-            throws ItemNotFound, PermissionDenied;
+            throws ItemNotFound, PermissionDenied, DeserializationError;
 }

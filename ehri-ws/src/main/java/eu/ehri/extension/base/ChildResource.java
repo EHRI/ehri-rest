@@ -22,42 +22,34 @@ package eu.ehri.extension.base;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.persistence.Bundle;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Methods for managing resources that have a superior (hierarchical)
+ * Methods for managing resources that have a subordinate (hierarchical)
  * relationship to another resource.
  */
-public interface ParentResource {
+public interface ChildResource {
 
     /**
-     * List available resources subordinate to this item. Behaviour is the same
-     * as the general list method with respect to parameters.
+     * Set (or change) this item's parent. Depending on the item type only
+     * one parent or multiple can be set.
      * <p>
      * Example:
      * <pre>
      *     <code>
-     * curl http://localhost:7474/ehri/[RESOURCE]/[ID]/list
+     * curl http://localhost:7474/ehri/[RESOURCE]/[ID]/parent?id=[PARENT-ID]
      *     </code>
      * </pre>
      *
-     * @return A list of serialized item representations
+     * @return the reparented item
+     * @throws ItemNotFound         when one of the provided IDs is invalid
+     * @throws PermissionDenied     when the user does not have permission to modify
+     *                              the provided items
+     * @throws DeserializationError when a condition is not met, such as the parent
+     *                              item(s) being of the wrong type
      */
-    Response listChildren(String id, boolean all) throws ItemNotFound;
-
-    /**
-     * Create a subordinate resource.
-     *
-     * @param id        The parent resource ID.
-     * @param bundle    A resource bundle.
-     * @param accessors The users/groups who can access this item.
-     * @return A serialized representation of the created resource.
-     */
-    Response createChild(String id,
-            Bundle bundle, List<String> accessors)
-            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
+    Response setParents(String id, List<String> parentIds)
+            throws PermissionDenied, ItemNotFound, DeserializationError;
 }
