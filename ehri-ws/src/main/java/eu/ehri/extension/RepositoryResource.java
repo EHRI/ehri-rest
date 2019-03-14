@@ -164,6 +164,9 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Path("{id:[^/]+}/list")
     public ImportLog addChildren(
             @PathParam("id") String id,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
@@ -176,10 +179,12 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 accessible.setPermissionScope(repository);
                 repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
             };
-            ImportLog log = new BatchOperations(graph, repository, true,
-                    false, Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
-            logger.debug("Committing batch ingest transaction...");
-            tx.success();
+            ImportLog log = new BatchOperations(graph, repository, version, tolerant,
+                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            if (commit) {
+                logger.debug("Committing batch ingest transaction...");
+                tx.success();
+            }
             return log;
         }
     }

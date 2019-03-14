@@ -20,46 +20,32 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Iterables;
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.CreateResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
+import com.google.common.collect.Lists;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
 import eu.ehri.project.exporters.eac.EacExporter;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -152,7 +138,7 @@ public class AuthoritativeSetResource extends
     @Path("{id:[^/]+}/all")
     public Response deleteAllAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, PermissionDenied {
+            throws ItemNotFound, PermissionDenied {
         try (Tx tx = beginTx()) {
             Api api = api();
             AuthoritativeSet set = api.detail(id, cls);
@@ -187,6 +173,45 @@ public class AuthoritativeSetResource extends
             return item;
         }
     }
+
+    /**
+     * Add items to a set via serialised data.
+     *
+     * @param id       the set ID
+     * @param data     a list of serialised items
+     * @return an import log
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:[^/]+}/list")
+    public ImportLog addChildren(
+            @PathParam("id") String id,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
+            InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
+        try (final Tx tx = beginTx()) {
+            Actioner user = getCurrentActioner();
+            AuthoritativeSet set = api().detail(id, cls);
+            ImportCallback cb = mutation -> {
+                Accessible accessible = mutation.getNode();
+                if (!Entities.HISTORICAL_AGENT.equals(accessible.getType())) {
+                    throw new RuntimeException("Bundle is not an historical agent: " + accessible.getId());
+                }
+                accessible.setPermissionScope(set);
+                set.addItem(accessible.as(HistoricalAgent.class));
+            };
+            ImportLog log = new BatchOperations(graph, set, version, tolerant,
+                    Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
+            if (commit) {
+                logger.debug("Committing batch ingest transaction...");
+                tx.success();
+            }
+            return log;
+        }
+    }
+
 
     /**
      * Export the given set's historical agents as EAC streamed
