@@ -43,9 +43,34 @@ public class BundleValidatorTest extends AbstractFixtureTest {
             bundleValidator.validateForCreate(test);
             fail("Bundle validation should have failed with duplicate ID error");
         } catch (ValidationError e) {
+            List<String> errs = DataUtils.get(e.getErrorSet(), "describes[1]/languageCode");
+            assertEquals(1, errs.size());
+            assertThat(errs.get(0), containsString("Value 'eng-someid_01' exists and must be unique"));
+        }
+    }
+
+    @Test
+    public void testValidateIntegrity2() throws Exception {
+        // Check a weird case where the ID of a dependent item generates the same as
+        // one elsewhere in the bundle...
+        Bundle test = DataUtils.setItem(
+                Bundle.fromData(TestData.getTestDocBundle()),
+                "describes[-1]", Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
+                        .setId("someid_01") // Uh-oh!
+                        .addData(ImmutableMap.of(
+                                Ontology.IDENTIFIER_KEY, "ok",
+                                Ontology.NAME_KEY, "Description with duplicate identifier",
+                                Ontology.LANGUAGE_OF_DESCRIPTION, "eng"
+                        )).build());
+
+        BundleValidator bundleValidator = new BundleValidator(manager, Lists.newArrayList());
+        try {
+            bundleValidator.validateForCreate(test);
+            fail("Bundle validation should have failed with duplicate ID error");
+        } catch (ValidationError e) {
             List<String> errs = DataUtils.get(e.getErrorSet(), "id");
             assertEquals(1, errs.size());
-            assertThat(errs.get(0), containsString("Duplicate ID: someid_01.eng-someid_01"));
+            assertThat(errs.get(0), containsString("Duplicate ID: someid_01"));
         }
     }
 

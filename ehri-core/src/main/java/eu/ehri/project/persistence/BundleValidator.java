@@ -30,11 +30,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
 import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class responsible for validating bundles.
@@ -113,9 +109,9 @@ public final class BundleValidator {
         if (bundle.getId() == null)
             builder.addError(Bundle.ID_KEY, Messages
                     .getString("BundleValidator.missingIdForUpdate")); //$NON-NLS-1$
-        checkDuplicateIds(bundle, builder);
         checkUniquenessOnUpdate(bundle, builder);
         checkChildren(bundle, builder, ValidationType.update);
+        checkDuplicateIds(bundle, builder);
         return builder.build();
     }
 
@@ -129,10 +125,10 @@ public final class BundleValidator {
      */
     private ErrorSet validateTreeForCreate(Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
-        checkDuplicateIds(bundle, builder);
         checkIntegrity(bundle, builder);
         checkUniqueness(bundle, builder);
         checkChildren(bundle, builder, ValidationType.create);
+        checkDuplicateIds(bundle, builder);
         return builder.build();
     }
 
@@ -153,18 +149,26 @@ public final class BundleValidator {
 
     private void checkChildren(Bundle bundle,
             ErrorSet.Builder builder, ValidationType type) {
+        final Set<String> ids = Sets.newHashSet();
         for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
-            switch (type) {
-                case data:
-                    builder.addRelation(entry.getKey(), validateTreeData(entry.getValue()));
-                    break;
-                case create:
-                    builder.addRelation(entry.getKey(), validateTreeForCreate(entry.getValue()));
-                    break;
-                case update:
-                    builder.addRelation(entry.getKey(), validateTreeForUpdate(entry.getValue()));
-                    break;
+            Bundle child = entry.getValue();
+            ErrorSet errorSet = type == ValidationType.data
+                    ? validateTreeData(child)
+                    : (type == ValidationType.create
+                        ? validateTreeForCreate(child)
+                        : validateTreeForUpdate(child));
+            if (errorSet.isEmpty() && child.getId() != null) {
+                if (ids.contains(child.getId())) {
+                    ListMultimap<String, String> errs = child.getType().getIdGen()
+                            .handleIdCollision(Lists.newArrayList(bundle.getId()), child);
+                    for (Map.Entry<String, String> err : errs.entries()) {
+                        errorSet = errorSet.withDataValue(err.getKey(), err.getValue());
+                    }
+                } else {
+                    ids.add(child.getId());
+                }
             }
+            builder.addRelation(entry.getKey(), errorSet);
         }
     }
 
