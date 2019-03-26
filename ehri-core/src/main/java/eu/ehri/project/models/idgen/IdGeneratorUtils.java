@@ -50,12 +50,13 @@ public class IdGeneratorUtils {
     protected final static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
     public static ListMultimap<String, String> handleIdCollision(Collection<String> scopeIds,
-            String dataKey, String ident) {
-
-        logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, Lists.newArrayList(scopeIds));
+            List<String> dataKeys, String ident) {
+        logger.error("ID Generation error: {}={} (scope: {})", dataKeys, ident, Lists.newArrayList(scopeIds));
         ListMultimap<String, String> errors = ArrayListMultimap.create();
-        errors.put(dataKey, MessageFormat.format(
-                Messages.getString("BundleManager.uniquenessError"), ident));
+        for (String key : dataKeys) {
+            errors.put(key, MessageFormat.format(
+                    Messages.getString("BundleManager.uniquenessError"), ident));
+        }
         return errors;
     }
 
