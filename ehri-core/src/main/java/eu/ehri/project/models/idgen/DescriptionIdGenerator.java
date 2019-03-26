@@ -21,6 +21,7 @@ package eu.ehri.project.models.idgen;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Slugify;
 
@@ -45,7 +46,8 @@ public enum DescriptionIdGenerator implements IdGenerator {
     public static final Joiner descriptionJoiner = Joiner.on(DESCRIPTION_SEPARATOR);
 
     public ListMultimap<String,String> handleIdCollision(Collection<String> scopeIds, Bundle bundle) {
-        return IdGeneratorUtils.handleIdCollision(scopeIds, LANGUAGE_OF_DESCRIPTION,
+        return IdGeneratorUtils.handleIdCollision(scopeIds,
+                Lists.newArrayList(LANGUAGE_OF_DESCRIPTION, IDENTIFIER_KEY),
                 getIdBase(bundle));
     }
 

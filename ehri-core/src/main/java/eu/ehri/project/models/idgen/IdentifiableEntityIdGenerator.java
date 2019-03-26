@@ -20,9 +20,11 @@
 package eu.ehri.project.models.idgen;
 
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.Collection;
+
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 
 /**
@@ -35,7 +37,7 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
     INSTANCE;
 
     public ListMultimap<String,String> handleIdCollision(Collection<String> scopeIds, Bundle bundle) {
-        return IdGeneratorUtils.handleIdCollision(scopeIds, IDENTIFIER_KEY, getIdBase(bundle));
+        return IdGeneratorUtils.handleIdCollision(scopeIds, Lists.newArrayList(IDENTIFIER_KEY), getIdBase(bundle));
     }
 
 
