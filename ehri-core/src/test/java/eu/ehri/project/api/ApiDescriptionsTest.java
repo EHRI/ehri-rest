@@ -173,6 +173,7 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
     public void testUpdateDependentLogging() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
         Description description = r1.getDescriptions().iterator().next();
+        Bundle updated = depSerializer.entityToBundle(r1);
         Bundle desc = depSerializer.entityToBundle(description);
         Mutation<RepositoryDescription> cou = loggingApi(validUser)
                 .updateDependent("r1", desc.withDataValue("name", "changed"),
@@ -181,8 +182,8 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
         assertTrue(cou.updated());
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
-        assertEquals(desc, old);
-        assertNotSame(depSerializer.entityToBundle(description), old);
+        assertEquals(updated, old);
+        assertNotSame(depSerializer.entityToBundle(r1), old);
     }
 
     @Test
@@ -200,11 +201,11 @@ public class ApiDescriptionsTest extends AbstractFixtureTest {
     public void testDeleteDependentLogging() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
         Description description = r1.getDescriptions().iterator().next();
-        Bundle desc = depSerializer.entityToBundle(description);
+        Bundle updated = depSerializer.entityToBundle(r1);
         loggingApi(validUser).deleteDependent("r1", description.getId(), Optional.empty());
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
-        assertEquals(desc, old);
+        assertEquals(updated, old);
     }
 }

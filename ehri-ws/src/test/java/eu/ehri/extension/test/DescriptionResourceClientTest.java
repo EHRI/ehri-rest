@@ -37,56 +37,11 @@ import static org.junit.Assert.assertFalse;
 
 public class DescriptionResourceClientTest extends AbstractResourceClientTest {
 
-    private String descriptionTestStr;
     private String accessPointTestStr;
-    private static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
 
     @Before
     public void setUp() throws Exception {
-        descriptionTestStr = readResourceFileAsString("DocumentaryUnitDescription.json");
         accessPointTestStr = readResourceFileAsString("AccessPoint.json");
-    }
-
-    @Test
-    public void testCreateDescription() throws Exception {
-        // Create additional description for c2
-        // C2 initially has one description, so it should have two afterwards
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", "descriptions"))
-                .entity(descriptionTestStr).post(ClientResponse.class);
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
-
-        Bundle node = response.getEntity(Bundle.class);
-
-        // Check ID is the correct concatenation of all the scope IDs...
-        assertEquals("nl-r1-c1-c2.en-another_description", node.getId());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, node.getDataValue(Ontology.IDENTIFIER_KEY));
-    }
-
-    @Test
-    public void testUpdateDescription() throws Exception {
-        // Update description for c2
-        // C2 initially has one description, and should still have one afterwards
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", "descriptions", "cd2"))
-                .entity(descriptionTestStr).put(ClientResponse.class);
-        assertStatus(OK, response);
-
-        Bundle node = response.getEntity(Bundle.class);
-
-        // Check ID is the correct concatenation of all the scope IDs...
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, node.getDataValue(Ontology.IDENTIFIER_KEY));
-        assertEquals(1, node.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).size());
-    }
-
-    @Test
-    public void testDeleteDescription() throws Exception {
-        // Delete description for c2
-        // C2 initially has one description, so there should be none afterwards
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(ENDPOINT, "c2", "descriptions", "cd2"))
-                .delete(ClientResponse.class);
-        assertStatus(NO_CONTENT, response);
     }
 
     @Test

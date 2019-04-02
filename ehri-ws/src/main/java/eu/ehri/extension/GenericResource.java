@@ -397,97 +397,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     }
 
     /**
-     * Create a new description for this item.
-     *
-     * @param id     the item ID
-     * @param bundle the description bundle
-     * @return the new description
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/descriptions")
-    public Response createDescription(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
-        try (final Tx tx = beginTx()) {
-            Described item = api().detail(id, Described.class);
-            Description desc = api().createDependent(id, bundle,
-                    Description.class, getLogMessage());
-            item.addDescription(desc);
-            Response response = buildResponse(item, desc, Response.Status.CREATED);
-            tx.success();
-            return response;
-        } catch (SerializationError serializationError) {
-            throw new RuntimeException(serializationError);
-        }
-    }
-
-    /**
-     * Update a description belonging to the given item.
-     *
-     * @param id     the item ID
-     * @param bundle the description bundle
-     * @return the new description
-     */
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/descriptions")
-    public Response updateDescription(@PathParam("id") String id, Bundle bundle)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, SerializationError {
-        try (final Tx tx = beginTx()) {
-            Described item = api().detail(id, Described.class);
-            Mutation<Description> desc = api().updateDependent(id, bundle,
-                    Description.class, getLogMessage());
-            Response response = buildResponse(item, desc.getNode(), Response.Status.OK);
-            tx.success();
-            return response;
-        } catch (SerializationError serializationError) {
-            throw new RuntimeException(serializationError);
-        }
-    }
-
-    /**
-     * Update a description with the given ID, belonging to the given parent item.
-     *
-     * @param id     the item ID
-     * @param did    the description ID
-     * @param bundle the description bundle
-     * @return the new description
-     */
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:[^/]+}/descriptions/{did:[^/]+}")
-    public Response updateDescriptionWithId(@PathParam("id") String id,
-            @PathParam("did") String did, Bundle bundle)
-            throws AccessDenied, PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound, SerializationError {
-        return updateDescription(id, bundle.withId(did));
-    }
-
-    /**
-     * Delete a description with the given ID, belonging to the given parent item.
-     *
-     * @param id  the item ID
-     * @param did the description ID
-     */
-    @DELETE
-    @Path("{id:[^/]+}/descriptions/{did:[^/]+}")
-    public void deleteDescription(
-            @PathParam("id") String id, @PathParam("did") String did)
-            throws PermissionDenied, ItemNotFound, ValidationError, SerializationError {
-        try (final Tx tx = beginTx()) {
-            api().deleteDependent(id, did, getLogMessage());
-            tx.success();
-        } catch (SerializationError serializationError) {
-            throw new RuntimeException(serializationError);
-        }
-    }
-
-    /**
      * Create an access point on the given description, for the given
      * parent item.
      *
@@ -501,8 +410,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/descriptions/{did:[^/]+}/access-points")
     public Response createAccessPoint(@PathParam("id") String id,
-            @PathParam("did") String did, Bundle bundle)
-            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
+                                      @PathParam("did") String did,
+                                      Bundle bundle)
+            throws PermissionDenied, ValidationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Described item = api().detail(id, Described.class);
             Description desc = api().detail(did, Description.class);
@@ -517,6 +427,27 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
         }
     }
 
+    /**
+     * Delete the access point with the given ID, on the given description,
+     * belonging to the given parent item.
+     *
+     * @param id   the parent item's ID
+     * @param did  the description's ID
+     * @param apid the access point's ID
+     */
+    @DELETE
+    @Path("{id:[^/]+}/descriptions/{did:[^/]+}/access-points/{apid:[^/]+}")
+    public void deleteAccessPoint(@PathParam("id") String id,
+                                  @PathParam("did") String did,
+                                  @PathParam("apid") String apid)
+            throws PermissionDenied, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            api().deleteDependent(id, apid, getLogMessage());
+            tx.success();
+        } catch (SerializationError serializationError) {
+            throw new RuntimeException(serializationError);
+        }
+    }
 
     /**
      * Lookup and page the versions for a given item.
@@ -533,28 +464,6 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                     .page(item.getAllPriorVersions(), Version.class));
             tx.success();
             return response;
-        }
-    }
-
-    /**
-     * Delete the access point with the given ID, on the given description,
-     * belonging to the given parent item.
-     *
-     * @param id   the parent item's ID
-     * @param did  the description's ID
-     * @param apid the access point's ID
-     */
-    @DELETE
-    @Path("{id:[^/]+}/descriptions/{did:[^/]+}/access-points/{apid:[^/]+}")
-    public void deleteAccessPoint(@PathParam("id") String id,
-            @PathParam("did") String did, @PathParam("apid") String apid)
-            throws AccessDenied, PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
-        try (final Tx tx = beginTx()) {
-            api().deleteDependent(id, apid, getLogMessage());
-            tx.success();
-        } catch (SerializationError serializationError) {
-            throw new RuntimeException(serializationError);
         }
     }
 

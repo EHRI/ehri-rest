@@ -217,7 +217,7 @@ public interface Api {
      */
     <T extends Accessible> Mutation<T> updateDependent(String parentId, Bundle data,
             Class<T> cls, Optional<String> logMessage)
-            throws ItemNotFound, PermissionDenied, ValidationError;
+            throws ItemNotFound, PermissionDenied, ValidationError, SerializationError;
 
     /**
      * Create a link between two items.
