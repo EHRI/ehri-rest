@@ -501,7 +501,7 @@ public class ApiImpl implements Api {
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         commitEvent(() -> actionManager.newEventContext(parent, accessor.as(Actioner.class),
                 EventTypes.deleteDependent, logMessage)
-                .createVersion(dependentItem));
+                .createVersion(parent));
         return bundleManager.withScopeIds(parent.idPath())
                 .delete(depSerializer.entityToBundle(dependentItem));
     }
@@ -511,23 +511,25 @@ public class ApiImpl implements Api {
             throws ItemNotFound, PermissionDenied, ValidationError {
         Described parent = detail(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
-        T out = bundleManager.withScopeIds(parent.idPath()).create(data, cls);
-        commitEvent(() -> actionManager.newEventContext(parent, accessor.as(Actioner.class),
-                EventTypes.createDependent, logMessage));
-        return out;
+        commitEvent(() -> actionManager
+                .newEventContext(parent, accessor.as(Actioner.class),
+                        EventTypes.createDependent, logMessage)
+                .createVersion(parent));
+        return bundleManager.withScopeIds(parent.idPath()).create(data, cls);
     }
 
     @Override
     public <T extends Accessible> Mutation<T> updateDependent(String parentId, Bundle data, Class<T> cls, Optional<String> logMessage)
-            throws ItemNotFound, PermissionDenied, ValidationError {
+            throws ItemNotFound, PermissionDenied, ValidationError, SerializationError {
         Described parent = detail(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
+        Bundle before = depSerializer.entityToBundle(parent);
         Mutation<T> out = bundleManager.withScopeIds(parent.idPath()).update(data, cls);
         if (out.hasChanged()) {
             commitEvent(() -> actionManager
                     .newEventContext(parent, accessor.as(Actioner.class),
                             EventTypes.modifyDependent, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get()));
+                    .createVersion(parent, before));
         }
         return out;
     }
