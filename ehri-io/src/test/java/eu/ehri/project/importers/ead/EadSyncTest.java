@@ -1,16 +1,13 @@
 package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
@@ -19,12 +16,11 @@ import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class EadSyncTest extends AbstractImporterTest {
@@ -88,6 +84,22 @@ public class EadSyncTest extends AbstractImporterTest {
                 .getLatestGlobalEvent().getPriorEvent();
         assertEquals(EventTypes.modification, transferEvent.getEventType());
         assertEquals(logMessage, transferEvent.getLogMessage());
+    }
+
+    @Test
+    public void testUnitSyncWithUserVCParent() throws Exception {
+        DocumentaryUnit scope = manager.getEntity("nl-r1-ctop_level_fonds", DocumentaryUnit.class);
+        DocumentaryUnit child = manager.getEntity("nl-r1-ctop_level_fonds-c00001-c00002-2", DocumentaryUnit.class);
+        VirtualUnit vc = manager.getEntity("vu2", VirtualUnit.class);
+        vc.addIncludedUnit(child);
+
+        runSync(scope, Sets.newHashSet(), "Test VC sync", "hierarchical-ead-sync-test.xml");
+
+        // Check the new item is in the VC
+        DocumentaryUnit moved = manager.getEntity(
+                "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2", DocumentaryUnit.class);
+        List<DocumentaryUnit> included = Lists.newArrayList(vc.getIncludedUnits());
+        assertTrue(included.contains(moved));
     }
 
     @Test(expected = EadSync.EadSyncError.class)

@@ -23,10 +23,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.PermissionScope;
@@ -224,6 +221,12 @@ public class EadSync {
                     altPart.addAnnotationPart(annotation);
                 });
             }
+            moved++;
+        }
+        List<VirtualUnit> inVc = Lists.newArrayList(from.getVirtualParents());
+        for (VirtualUnit vc : inVc) {
+            logger.debug("Moving VC membership from {} to {}", from.getId(), to.getId());
+            vc.addIncludedUnit(to);
             moved++;
         }
         return moved > 0;
