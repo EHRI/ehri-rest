@@ -106,6 +106,14 @@ public interface DocumentaryUnit extends AbstractUnit {
     Iterable<DocumentaryUnit> getAncestorsAndSelf();
 
     /**
+     * Get the immediate virtual units which include this item.
+     *
+     * @return an iterable of VirtualUnit items
+     */
+    @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.IN)
+    Iterable<VirtualUnit> getVirtualParents();
+
+    /**
      * Get virtual collections to which this documentary unit belongs.
      *
      * @return an iterable of virtual unit objects at the top level
