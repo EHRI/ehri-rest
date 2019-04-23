@@ -36,15 +36,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -109,7 +101,8 @@ public class LinkResource extends AbstractAccessibleResource<Link>
             @QueryParam(SOURCE_PARAM) String source,
             @QueryParam(TARGET_PARAM) String target,
             @QueryParam(BODY_PARAM) List<String> bodies,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+            @QueryParam("directional") @DefaultValue("false") boolean directional)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -117,8 +110,9 @@ public class LinkResource extends AbstractAccessibleResource<Link>
                 throw new DeserializationError("Both source and target must be provided");
             }
             UserProfile user = getCurrentUser();
-            Link link = api().createLink(target,
-                    source, bodies, bundle, getAccessors(accessors, user), getLogMessage());
+            Link link = api().createLink(
+                    source, target, bodies, bundle, directional,
+                    getAccessors(accessors, user), getLogMessage());
             Response response = creationResponse(link);
             tx.success();
             return response;

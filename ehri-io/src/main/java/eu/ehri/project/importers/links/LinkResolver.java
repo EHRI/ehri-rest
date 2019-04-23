@@ -17,7 +17,6 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;

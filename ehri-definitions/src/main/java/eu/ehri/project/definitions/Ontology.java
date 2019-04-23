@@ -45,6 +45,7 @@ public class Ontology {
     // Links
     public static final String LINK_HAS_BODY = "hasLinkBody";
     public static final String LINK_HAS_TARGET = "hasLinkTarget";
+    public static final String LINK_HAS_SOURCE = "hasLinkSource";
     public static final String LINK_HAS_LINKER = "hasLinker";
     public static final String LINK_HAS_TYPE = "type";
     public static final String LINK_HAS_FIELD = "field";

@@ -202,7 +202,7 @@ public interface Api {
      * @return the dependent item frame
      */
     <T extends Accessible> T createDependent(String parentId, Bundle data,
-            Class<T> cls, Optional<String> logMessage)
+                                             Class<T> cls, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError;
 
     /**
@@ -216,31 +216,37 @@ public interface Api {
      * @return the dependent item frame
      */
     <T extends Accessible> Mutation<T> updateDependent(String parentId, Bundle data,
-            Class<T> cls, Optional<String> logMessage)
+                                                       Class<T> cls, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError, SerializationError;
 
     /**
      * Create a link between two items.
      *
-     * @param targetId1 the identifier of a Accessible target of this Annotation
-     * @param targetId2 the identifier of a Annotator source of this Annotation
-     * @param bundle    the annotation itself
+     * @param source      the identifier of a Accessible source of this Annotation
+     * @param target      the identifier of a Annotator target of this Annotation
+     * @param bundle      the annotation itself
+     * @param directional whether the link is directional or not
      * @return a new link
      */
-    Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
-            Collection<Accessor> accessibleTo, Optional<String> logMessage) throws ItemNotFound, ValidationError,
+    Link createLink(String source,
+                    String target,
+                    List<String> bodies,
+                    Bundle bundle,
+                    boolean directional,
+                    Collection<Accessor> accessibleTo,
+                    Optional<String> logMessage) throws ItemNotFound, ValidationError,
             PermissionDenied;
 
     /**
      * Create a link between two items, along with an access point on the given description.
      *
-     * @param targetId1 the identifier of a Accessible target of this Annotation
-     * @param targetId2 the identifier of a Annotator source of this Annotation
+     * @param source the identifier of a Accessible target of this Annotation
+     * @param target the identifier of a Annotator source of this Annotation
      * @param bundle    the annotation itself
      * @return a new link
      */
-    Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
+    Link createAccessPointLink(String source, String target, String descriptionId, String bodyName,
+                               AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied;
 
     /**
@@ -255,7 +261,7 @@ public interface Api {
      */
 
     Annotation createAnnotation(String id, String did, Bundle bundle,
-            Collection<Accessor> accessibleTo, Optional<String> logMessage)
+                                Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound;
 
     /**
@@ -308,7 +314,7 @@ public interface Api {
          * @param permissionSet the new permissions
          */
         InheritedGlobalPermissionSet setGlobalPermissionMatrix(Accessor userOrGroup,
-                GlobalPermissionSet permissionSet) throws PermissionDenied;
+                                                               GlobalPermissionSet permissionSet) throws PermissionDenied;
 
 
         void setAccessors(Accessible entity, Set<Accessor> accessors) throws PermissionDenied;
@@ -322,7 +328,7 @@ public interface Api {
          * @return the new inherited item permission set
          */
         InheritedItemPermissionSet setItemPermissions(Accessible item, Accessor accessor,
-                Set<PermissionType> permissionList)
+                                                      Set<PermissionType> permissionList)
                 throws PermissionDenied;
 
         /**
