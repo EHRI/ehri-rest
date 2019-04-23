@@ -23,14 +23,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.persistence.Bundle;
@@ -41,9 +34,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class ApiLinkingTest extends AbstractFixtureTest {
@@ -71,11 +62,12 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
         Link link = loggingApi(validUser)
                 .createLink("c1", "a1", Lists.newArrayList("ur1"),
-                linkBundle, Lists.<Accessor>newArrayList(), Optional.empty());
+                        linkBundle, false, Lists.newArrayList(), Optional.empty());
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
+        assertNull(link.getLinkSource());
         assertEquals(1, Iterables.size(link.getLinkBodies()));
         assertTrue(Iterables.contains(link.getLinkBodies(), rel));
         assertTrue(Lists.newArrayList(api(validUser).actionManager()
@@ -83,11 +75,24 @@ public class ApiLinkingTest extends AbstractFixtureTest {
     }
 
 
+    @Test
+    public void testCreateDirectionalLink() throws Exception {
+        DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
+        HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
+        Link link = loggingApi(validUser)
+                .createLink("c1", "a1", Lists.newArrayList("ur1"),
+                        getLinkBundle("test", "associative"),
+                        true, Lists.newArrayList(), Optional.empty());
+        assertEquals(2, Iterables.size(link.getLinkTargets()));
+        assertEquals(src, link.getLinkSource());
+    }
+
+
     @Test(expected = PermissionDenied.class)
     public void testCreateLinkWithoutPermission() throws Exception {
         api(invalidUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
-                getLinkBundle("won't work!", "too bad!"),
-                Lists.<Accessor>newArrayList(), Optional.empty());
+                getLinkBundle("won't work!", "too bad!"), false,
+                Lists.newArrayList(), Optional.empty());
     }
 
     @Test
@@ -100,8 +105,8 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
         Link link = loggingApi(validUser)
                 .createAccessPointLink("c1", "a1", "cd1",
-                linkDesc, AccessPointType.subject, linkBundle,
-                Lists.<Accessor>newArrayList(validUser, invalidUser), Optional.empty());
+                        linkDesc, AccessPointType.subject, linkBundle,
+                        Lists.newArrayList(validUser, invalidUser), Optional.empty());
         assertNull(linkDesc, link.getLinkField());
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2, Iterables.size(link.getLinkTargets()));

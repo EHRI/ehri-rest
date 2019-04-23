@@ -362,43 +362,42 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public Link createLink(String targetId1, String targetId2, List<String> bodies,
-            Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
+    public Link createLink(String source, String target, List<String> bodies,
+                           Bundle bundle, boolean directional, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied {
-        Linkable t1 = manager.getEntity(targetId1, Linkable.class);
-        Linkable t2 = manager.getEntity(targetId2, Linkable.class);
-        helper.checkEntityPermission(t1, accessor, PermissionType.ANNOTATE);
+        Linkable src = manager.getEntity(source, Linkable.class);
+        Linkable dst = manager.getEntity(target, Linkable.class);
+        helper.checkEntityPermission(src, accessor, PermissionType.ANNOTATE);
         // TODO: Should this require perms to link another item???
-        //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
+        //helper.checkEntityPermission(dst, user, PermissionType.ANNOTATE);
         Link link = bundleManager.create(bundle, Link.class);
-        link.addLinkTarget(t1);
-        link.addLinkTarget(t2);
+        link.addLinkTarget(src);
+        link.addLinkTarget(dst);
         link.setLinker(accessor);
+        if (directional) {
+            link.setLinkSource(src);
+        }
         aclManager.setAccessors(link, accessibleTo);
-        ActionManager.EventContext eventContext = actionManager.setScope(t1).newEventContext(
-                accessor.as(Actioner.class),
-                EventTypes.link, logMessage)
-                .addSubjects(link)
-                .addSubjects(t2);
         for (String body : bodies) {
             Accessible item = manager.getEntity(body, Accessible.class);
             link.addLinkBody(item);
-            eventContext.addSubjects(item);
         }
-        commitEvent(() -> eventContext);
+        commitEvent(() -> actionManager.newEventContext(
+                link, accessor.as(Actioner.class), EventTypes.link, logMessage)
+                .addSubjects(src).addSubjects(dst));
         return link;
     }
 
     @Override
-    public Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
-            AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
+    public Link createAccessPointLink(String source, String target, String descriptionId, String bodyName,
+                                      AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied {
-        Linkable t1 = manager.getEntity(targetId1, Linkable.class);
-        Linkable t2 = manager.getEntity(targetId2, Linkable.class);
+        Linkable src = manager.getEntity(source, Linkable.class);
+        Linkable dst = manager.getEntity(target, Linkable.class);
         Description description = manager.getEntity(descriptionId, Description.class);
-        helper.checkEntityPermission(t1, accessor, PermissionType.ANNOTATE);
+        helper.checkEntityPermission(src, accessor, PermissionType.ANNOTATE);
         // TODO: Should this require perms to link another item???
-        //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
+        //helper.checkEntityPermission(dst, user, PermissionType.ANNOTATE);
         helper.checkEntityPermission(description.getEntity(), accessor, PermissionType.UPDATE);
         Link link = bundleManager.create(bundle, Link.class);
         Bundle relBundle = Bundle.of(EntityClass.ACCESS_POINT)
@@ -407,15 +406,15 @@ public class ApiImpl implements Api {
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, link.getDescription());
         AccessPoint rel = bundleManager.create(relBundle, AccessPoint.class);
         description.addAccessPoint(rel);
-        link.addLinkTarget(t1);
-        link.addLinkTarget(t2);
+        link.addLinkTarget(src);
+        link.addLinkTarget(dst);
         link.setLinker(accessor);
         link.addLinkBody(rel);
         aclManager.setAccessors(link, accessibleTo);
         commitEvent(() ->
             actionManager.newEventContext(
-                    t1, accessor.as(Actioner.class), EventTypes.link, logMessage)
-                    .addSubjects(link).addSubjects(t2).addSubjects(rel));
+                    link, accessor.as(Actioner.class), EventTypes.link, logMessage)
+                    .addSubjects(src).addSubjects(dst));
         return link;
     }
 

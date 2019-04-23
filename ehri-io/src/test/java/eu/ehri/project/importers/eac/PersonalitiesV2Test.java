@@ -27,7 +27,6 @@ import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.models.cvoc.Concept;

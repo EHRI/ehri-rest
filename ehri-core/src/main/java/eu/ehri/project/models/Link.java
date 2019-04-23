@@ -19,13 +19,14 @@
 
 package eu.ehri.project.models;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Indexed;
-import eu.ehri.project.models.annotations.Mandatory;
+import eu.ehri.project.models.annotations.*;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Annotatable;
@@ -44,14 +45,42 @@ public interface Link extends Promotable, Temporal, Annotatable {
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
     UserProfile getLinker();
 
-    @Adjacency(label = Ontology.LINK_HAS_LINKER)
+    @UniqueAdjacency(label = Ontology.LINK_HAS_LINKER)
     void setLinker(Accessor accessor);
 
+    /**
+     * Fetch the source of this link, or null if the link
+     * is not directional.
+     *
+     * @return a linkable item, or null
+     */
+    @Fetch(value = Ontology.LINK_HAS_SOURCE, ifLevel = 0, numLevels = 1)
+    @Adjacency(label = Ontology.LINK_HAS_SOURCE)
+    Linkable getLinkSource();
+
+    /**
+     * Set the source of this link if it is directional.
+     *
+     * @param entity a linkable item
+     */
+    @UniqueAdjacency(label = Ontology.LINK_HAS_SOURCE)
+    void setLinkSource(Linkable entity);
+
+    /**
+     * Fetch the targets attached to this link.
+     *
+     * @return an iterable of linkable items
+     */
     @Fetch(value = Ontology.LINK_HAS_TARGET, ifLevel = 0, numLevels = 1)
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
     Iterable<Linkable> getLinkTargets();
 
-    @Adjacency(label = Ontology.LINK_HAS_TARGET)
+    /**
+     * Add a target to this link.
+     *
+     * @param entity a linkable item
+     */
+    @UniqueAdjacency(label = Ontology.LINK_HAS_TARGET)
     void addLinkTarget(Linkable entity);
 
     @Adjacency(label = Ontology.LINK_HAS_TARGET)
@@ -61,7 +90,7 @@ public interface Link extends Promotable, Temporal, Annotatable {
     @Adjacency(label = Ontology.LINK_HAS_BODY)
     Iterable<Accessible> getLinkBodies();
 
-    @Adjacency(label = Ontology.LINK_HAS_BODY)
+    @UniqueAdjacency(label = Ontology.LINK_HAS_BODY)
     void addLinkBody(Accessible entity);
 
     @Mandatory
