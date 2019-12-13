@@ -8,6 +8,7 @@ import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
@@ -84,6 +85,21 @@ public class EadSyncTest extends AbstractImporterTest {
                 .getLatestGlobalEvent().getPriorEvent();
         assertEquals(EventTypes.modification, transferEvent.getEventType());
         assertEquals(logMessage, transferEvent.getLogMessage());
+    }
+
+    @Test
+    public void testUnitSyncWithAccessControl() throws Exception {
+        DocumentaryUnit scope = manager.getEntity("nl-r1-ctop_level_fonds", DocumentaryUnit.class);
+        DocumentaryUnit child = manager.getEntity("nl-r1-ctop_level_fonds-c00001-c00002-2", DocumentaryUnit.class);
+        api(validUser).acl().setAccessors(child, Sets.newHashSet(validUser));
+        runSync(scope, Sets.newHashSet(), "Test access sync", "hierarchical-ead-sync-test.xml");
+
+        // Check the new item is in the VC
+        DocumentaryUnit moved = manager.getEntity(
+                "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2", DocumentaryUnit.class);
+        List<Accessor> accessors = Lists.newArrayList(moved.getAccessors());
+        assertEquals(1, accessors.size());
+        assertTrue(accessors.contains(validUser));
     }
 
     @Test
