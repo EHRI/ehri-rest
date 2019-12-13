@@ -20,27 +20,22 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotatable;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Serializer;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 
 
@@ -156,8 +151,8 @@ public class EadSync {
         Set<String> createdIds = Sets.difference(allNewGraphIds, movedGraphIds.values());
         Set<String> deletedIds = Sets.difference(allDeletedGraphIds, movedGraphIds.keySet());
 
-        // Transfer user-generated annotations and links between moved items...
-        transferUserGeneratedContent(movedGraphIds, logMessage);
+        // Transfer access control, user-generated annotations and links between moved items...
+        transferMetadata(movedGraphIds, logMessage);
 
         // Delete items that have been deleted or moved...
         deleteDeadOrMoved(allDeletedGraphIds, logMessage);
@@ -168,7 +163,7 @@ public class EadSync {
         return new SyncLog(log, createdIds, deletedIds, movedGraphIds);
     }
 
-    private void transferUserGeneratedContent(BiMap<String, String> movedGraphIds, String logMessage) {
+    private void transferMetadata(BiMap<String, String> movedGraphIds, String logMessage) {
         if (!movedGraphIds.isEmpty()) {
             try {
                 int modified = 0;
@@ -180,8 +175,9 @@ public class EadSync {
                 for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
                     DocumentaryUnit from = api.detail(entry.getKey(), DocumentaryUnit.class);
                     DocumentaryUnit to = api.detail(entry.getValue(), DocumentaryUnit.class);
-                    boolean changed = transferUserGeneratedContent(from, to);
-                    if (changed) {
+                    boolean ugc = transferUserGeneratedContent(from, to);
+                    boolean acc = transferAccessors(from, to);
+                    if (ugc || acc) {
                         ctx.addSubjects(to);
                         modified++;
                     }
@@ -191,9 +187,9 @@ public class EadSync {
                     ctx.commit();
                 }
 
-                logger.debug("Transferred user-generated content from {} items...", modified);
+                logger.debug("Transferred metadata from {} items...", modified);
             } catch (SerializationError | ItemNotFound e) {
-                throw new RuntimeException("Unexpected error when transferring user generated content", e);
+                throw new RuntimeException("Unexpected error when transferring metadata", e);
             }
         }
     }
@@ -230,6 +226,16 @@ public class EadSync {
             moved++;
         }
         return moved > 0;
+    }
+
+    private boolean transferAccessors(DocumentaryUnit from, DocumentaryUnit to) {
+        ArrayList<Accessor> accessors = Lists.newArrayList(from.getAccessors());
+        if (!accessors.isEmpty()) {
+            api.aclManager().setAccessors(to, accessors);
+            logger.debug("Copying access control from {} to {}", from.getId(), to.getId());
+            return true;
+        }
+        return false;
     }
 
     private Optional<Annotatable> findPart(Annotatable orig, DocumentaryUnit newParent)
