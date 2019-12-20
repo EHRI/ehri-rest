@@ -48,7 +48,7 @@ public class OaiPmhExporter extends StreamingXmlDsl {
     private static final String DEFAULT_NAMESPACE = "http://www.openarchives.org/OAI/2.0/";
 
     static final DateTimeFormatter DATE_PATTERN = DateTimeFormatter
-            .ofPattern("YYYY-MM-dd'T'hh:mm:ss'Z'");
+            .ofPattern("u-MM-dd'T'hh:mm:ss'Z'");
 
     private static final Map<String, String> NAMESPACES = namespaces(
             "xsi", "http://www.w3.org/2001/XMLSchema-instance"
