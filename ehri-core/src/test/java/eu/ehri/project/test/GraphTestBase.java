@@ -45,19 +45,24 @@ import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.models.utils.UniqueAdjacencyAnnotationHandler;
 import org.junit.After;
 import org.junit.Before;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 
 public abstract class GraphTestBase {
@@ -115,16 +120,15 @@ public abstract class GraphTestBase {
     }
 
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
-        File tempFile = File.createTempFile("neo4j-tmp", ".db");
-        tempFile.deleteOnExit();
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(tempFile)
-                .newGraphDatabase();
+        Path tempDir = Files.createTempDirectory("neo4j-tmp");
+        tempDir.toFile().deleteOnExit();
+        DatabaseManagementService managementService = new DatabaseManagementServiceBuilder(tempDir.toFile()).build();
+        GraphDatabaseService rawGraph = managementService.database( DEFAULT_DATABASE_NAME );
         try (Transaction tx = rawGraph.beginTx()) {
-            Neo4jGraphManager.createIndicesAndConstraints(rawGraph);
-            tx.success();
+            Neo4jGraphManager.createIndicesAndConstraints(tx);
+            tx.commit();
         }
-        return graphFactory.create(new Neo4j2Graph(rawGraph));
+        return graphFactory.create(new Neo4j2Graph(managementService, rawGraph));
     }
 
     @After

@@ -29,7 +29,9 @@ import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.test.utils.GraphCleaner;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import org.neo4j.helpers.ListenSocketAddress;
+import org.neo4j.configuration.helpers.SocketAddress;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.helpers.CommunityServerBuilder;
 
@@ -37,6 +39,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 /**
  * Utility class to obtain a server.
@@ -95,7 +99,7 @@ public class ServerRunner {
         graphLogger.setLevel(logLevel);
 
         CommunityServerBuilder serverBuilder = CommunityServerBuilder.server()
-                .onAddress(new ListenSocketAddress("localhost", port));
+                .onAddress(new SocketAddress("localhost", port));
         for (Map.Entry<String, String> entry : packageMountPoints.entrySet()) {
             String mountPoint = entry.getValue().startsWith("/")
                     ? entry.getValue() : "/" + entry.getValue();
@@ -107,7 +111,9 @@ public class ServerRunner {
                 .build();
         neoServer.start();
 
-        TxGraph graph = new TxNeo4jGraph(neoServer.getDatabase().getGraph());
+        DatabaseManagementService dbms = neoServer.getDatabaseService().getDatabaseManagementService();
+        GraphDatabaseService service = dbms.database(DEFAULT_DATABASE_NAME);
+        TxGraph graph = new TxNeo4jGraph(dbms, service);
         framedGraph = graphFactory.create(graph);
         fixtureLoader = FixtureLoaderFactory.getInstance(framedGraph);
         graphCleaner = new GraphCleaner<>(framedGraph);

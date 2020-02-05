@@ -15,6 +15,8 @@ import com.tinkerpop.blueprints.util.StringFactory;
 import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationConverter;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -25,13 +27,15 @@ import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionFailureException;
-import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+//import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
+//import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 /**
  * A Blueprints implementation of the graph database Neo4j (http://neo4j.org)
@@ -39,6 +43,7 @@ import java.util.logging.Logger;
 public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseService> {
     private static final Logger logger = Logger.getLogger(Neo4j2Graph.class.getName());
 
+    private DatabaseManagementService managementService;
     private GraphDatabaseService rawGraph;
 
     protected final ThreadLocal<Transaction> tx = new ThreadLocal<Transaction>() {
@@ -102,30 +107,34 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         this(directory, null);
     }
 
-    public Neo4j2Graph(GraphDatabaseService rawGraph) {
-        this.rawGraph = rawGraph;
-
-        init();
-    }
-
     public Neo4j2Graph(String directory, Map<String, String> configuration) {
         try {
-            GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(directory));
-            if (null != configuration)
-                this.rawGraph = builder.setConfig(configuration).newGraphDatabase();
-            else
-                this.rawGraph = builder.newGraphDatabase();
+            DatabaseManagementServiceBuilder builder = new DatabaseManagementServiceBuilder(new File(directory));
+            builder = (configuration != null) ? builder.setConfigRaw(configuration) : builder;
+            this.managementService = builder.build();
+//            System.out.println("Pre init: " + this.managementService);
+            this.rawGraph = managementService.database( DEFAULT_DATABASE_NAME );
 
             init();
 
         } catch (Exception e) {
-            if (this.rawGraph != null)
-                this.rawGraph.shutdown();
+//            if (this.rawGraph != null) {
+//                managementService.shutdownDatabase(DEFAULT_DATABASE_NAME);
+//            }
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     protected void init() {
+//        System.out.println("Init: " + this.managementService);
+//        this.managementService.startDatabase(DEFAULT_DATABASE_NAME);
+    }
+
+    public Neo4j2Graph(DatabaseManagementService service, GraphDatabaseService rawGraph) {
+        this.managementService = service;
+        this.rawGraph = rawGraph;
+
+        init();
     }
 
     public Neo4j2Graph(Configuration configuration) {
@@ -136,7 +145,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     @Override
     public Neo4j2Vertex addVertex(Object id) {
         this.autoStartTransaction(true);
-        return new Neo4j2Vertex(this.rawGraph.createNode(), this);
+        return new Neo4j2Vertex(tx.get().createNode(), this);
     }
 
     @Override
@@ -154,7 +163,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
                 longId = ((Number) id).longValue();
             else
                 longId = Double.valueOf(id.toString()).longValue();
-            return new Neo4j2Vertex(this.rawGraph.getNodeById(longId), this);
+            return new Neo4j2Vertex(tx.get().getNodeById(longId), this);
         } catch (NotFoundException e) {
             return null;
         } catch (NumberFormatException e) {
@@ -177,7 +186,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     @Override
     public Iterable<Vertex> getVertices() {
         this.autoStartTransaction(false);
-        return new Neo4j2VertexIterable(rawGraph.getAllNodes(), this);
+        return new Neo4j2VertexIterable(tx.get().getAllNodes(), this);
     }
 
     public CloseableIterable<Vertex> getVerticesByLabel(final String label) {
@@ -185,7 +194,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
             @Override
             public ResourceIterator<Node> iterator() {
-                return rawGraph.<Node>findNodes(Label.label(label));
+                return tx.get().findNodes(Label.label(label));
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -197,7 +206,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             @Override
             public ResourceIterator<Node> iterator() {
                 autoStartTransaction(false);
-                return rawGraph.<Node>findNodes(Label.label(label), key, value);
+                return tx.get().findNodes(Label.label(label), key, value);
             }
         };
         return new Neo4j2VertexIterable(wrap, this);
@@ -218,7 +227,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         Preconditions.checkNotNull(column, "Column cannot be null");
         ResourceIterable<Node> wrap = () -> {
             autoStartTransaction(false);
-            return rawGraph
+            return tx.get()
                     .execute(query, params != null ? params : Collections.emptyMap())
                     .columnAs(column);
         };
@@ -246,7 +255,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     @Override
     public Iterable<Edge> getEdges() {
         this.autoStartTransaction(false);
-        return new Neo4j2EdgeIterable(rawGraph.getAllRelationships(), this);
+        return new Neo4j2EdgeIterable(tx.get().getAllRelationships(), this);
     }
 
     @Override
@@ -292,7 +301,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
                 longId = (Long) id;
             else
                 longId = Double.valueOf(id.toString()).longValue();
-            return new Neo4j2Edge(this.rawGraph.getRelationshipById(longId), this);
+            return new Neo4j2Edge(tx.get().getRelationshipById(longId), this);
         } catch (NotFoundException e) {
             return null;
         } catch (NumberFormatException e) {
@@ -321,7 +330,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         }
 
         try {
-            tx.get().success();
+            tx.get().commit();
         } finally {
             tx.get().close();
             tx.remove();
@@ -335,7 +344,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         }
 
         try {
-            tx.get().failure();
+            tx.get().rollback();
         } finally {
             tx.get().close();
             tx.remove();
@@ -350,7 +359,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             logger.warning("Failure on shutdown " + e.getMessage());
             // TODO: inspect why certain transactions fail
         }
-        this.rawGraph.shutdown();
+        managementService.shutdown();
     }
 
     // The forWrite flag is true when the autoStartTransaction method is
@@ -369,6 +378,10 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         return this.rawGraph;
     }
 
+    public DatabaseManagementService getManagementService() {
+        return this.managementService;
+    }
+
     public Features getFeatures() {
         return FEATURES;
     }
@@ -384,7 +397,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     public CloseableIterable<Map<String, Object>> query(String query, Map<String, Object> params) {
         ResourceIterable<Map<String, Object>> wrap = () -> {
             autoStartTransaction(false);
-            return rawGraph.execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+            return tx.get().execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
         };
         return new WrappingCloseableIterable<>(wrap);
     }

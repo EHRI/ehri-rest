@@ -38,7 +38,7 @@ import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.utils.Table;
 import org.joda.time.DateTime;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -93,11 +93,11 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     /**
      * Constructor
      *
-     * @param database the injected neo4j database
-     * @param cls      the entity Java class
+     * @param dbms  the DBMS
+     * @param cls   the entity Java class
      */
-    public AbstractAccessibleResource(@Context GraphDatabaseService database, Class<E> cls) {
-        super(database);
+    public AbstractAccessibleResource(@Context DatabaseManagementService dbms, Class<E> cls) {
+        super(dbms);
         this.cls = cls;
         aclManager = new AclManager(graph);
         actionManager = new ActionManager(graph);

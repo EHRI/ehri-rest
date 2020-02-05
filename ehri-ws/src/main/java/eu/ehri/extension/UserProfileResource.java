@@ -39,6 +39,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -65,8 +66,8 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
 
-    public UserProfileResource(@Context GraphDatabaseService database) {
-        super(database, UserProfile.class);
+    public UserProfileResource(@Context DatabaseManagementService service) {
+        super(service, UserProfile.class);
     }
 
     @GET

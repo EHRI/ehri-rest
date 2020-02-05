@@ -4,7 +4,7 @@ package eu.ehri.project.core.impl.neo4j;
 import com.tinkerpop.blueprints.CloseableIterable;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterable;
-import org.neo4j.graphdb.index.IndexHits;
+//import org.neo4j.graphdb.index.IndexHits;
 
 import java.util.Iterator;
 
@@ -41,9 +41,10 @@ public class Neo4j2VertexIterable<T extends Neo4j2Vertex> implements CloseableIt
     }
 
     public void close() {
-        if (this.nodes instanceof IndexHits) {
-            ((IndexHits<?>) this.nodes).close();
-        }
+        // FIXME: Neo4j 4
+//        if (this.nodes instanceof IndexHits) {
+//            ((IndexHits<?>) this.nodes).close();
+//        }
     }
 
 }

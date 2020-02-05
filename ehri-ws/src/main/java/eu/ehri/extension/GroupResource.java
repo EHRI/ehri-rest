@@ -32,6 +32,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -51,8 +52,8 @@ public class GroupResource
 
     public static final String MEMBER_PARAM = "member";
 
-    public GroupResource(@Context GraphDatabaseService database) {
-        super(database, Group.class);
+    public GroupResource(@Context DatabaseManagementService service) {
+        super(service, Group.class);
     }
 
     @GET

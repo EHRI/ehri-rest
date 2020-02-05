@@ -27,6 +27,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import org.apache.jena.ext.com.google.common.collect.Lists;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -44,8 +45,8 @@ import java.util.List;
 public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource, ChildResource {
 
-    public CvocConceptResource(@Context GraphDatabaseService database) {
-        super(database, Concept.class);
+    public CvocConceptResource(@Context DatabaseManagementService service) {
+        super(service, Concept.class);
     }
 
     @GET

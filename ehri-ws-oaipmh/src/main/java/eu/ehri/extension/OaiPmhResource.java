@@ -30,6 +30,7 @@ import eu.ehri.project.oaipmh.OaiPmhExporter;
 import eu.ehri.project.oaipmh.OaiPmhRenderer;
 import eu.ehri.project.oaipmh.OaiPmhState;
 import eu.ehri.project.oaipmh.errors.OaiPmhError;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.GET;
@@ -62,8 +63,8 @@ public class OaiPmhResource extends AbstractResource {
 
 
 
-    public OaiPmhResource(@Context GraphDatabaseService database) {
-        super(database);
+    public OaiPmhResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

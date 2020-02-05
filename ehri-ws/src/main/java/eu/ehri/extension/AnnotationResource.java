@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -57,8 +58,8 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     public static final String TARGET_PARAM = "target";
     public static final String BODY_PARAM = "body";
 
-    public AnnotationResource(@Context GraphDatabaseService database) {
-        super(database, Annotation.class);
+    public AnnotationResource(@Context DatabaseManagementService service) {
+        super(service, Annotation.class);
     }
 
     @GET

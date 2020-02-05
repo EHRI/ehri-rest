@@ -25,12 +25,18 @@ import eu.ehri.project.core.impl.TxNeo4jGraph;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 /**
  * This tests EHRI-specific functionalities for the subclass of
@@ -44,9 +50,9 @@ public class TxNeo4JGraphTest {
 
     @Before
     public void setUp() throws Exception {
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                .newGraphDatabase();
-        graph = new TxNeo4jGraph(rawGraph);
+        Path tempDir = Files.createTempDirectory("neo4j-tmp");
+        tempDir.toFile().deleteOnExit();
+        graph = new TxNeo4jGraph(tempDir.toString());
     }
 
     @After

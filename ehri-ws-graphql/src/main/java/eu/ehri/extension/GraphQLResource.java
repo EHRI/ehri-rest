@@ -15,6 +15,7 @@ import graphql.GraphQL;
 import graphql.introspection.IntrospectionQuery;
 import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -31,8 +32,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "graphql";
 
-    public GraphQLResource(@Context GraphDatabaseService database) {
-        super(database, Accessible.class);
+    public GraphQLResource(@Context DatabaseManagementService service) {
+        super(service, Accessible.class);
     }
 
     // Helpers

@@ -28,6 +28,7 @@ import eu.ehri.extension.errors.ConflictError;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
+import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
@@ -44,6 +45,7 @@ import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -74,8 +76,8 @@ public class ToolsResource extends AbstractResource {
     private static final String SINGLE_PARAM = "single";
     private static final String ACCESS_POINT_TYPE_PARAM = "apt";
 
-    public ToolsResource(@Context GraphDatabaseService database) {
-        super(database);
+    public ToolsResource(@Context DatabaseManagementService dbms) {
+        super(dbms);
         linker = new Linker(graph);
     }
 
@@ -473,7 +475,7 @@ public class ToolsResource extends AbstractResource {
     public void setConstraints() {
         try (final Tx tx = beginTx()) {
             logger.info("Initializing graph schema...");
-            manager.initialize();
+            Neo4jGraphManager.createIndicesAndConstraints(((TxNeo4jGraph.Neo4jTx)tx).underlying());
             tx.success();
         }
     }

@@ -32,6 +32,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.persistence.Bundle;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -59,8 +60,8 @@ import java.util.List;
 public class HistoricalAgentResource extends AbstractAccessibleResource<HistoricalAgent>
         implements GetResource, ListResource, CreateResource, UpdateResource, DeleteResource {
 
-    public HistoricalAgentResource(@Context GraphDatabaseService database) {
-        super(database, HistoricalAgent.class);
+    public HistoricalAgentResource(@Context DatabaseManagementService service) {
+        super(service, HistoricalAgent.class);
     }
 
     @GET

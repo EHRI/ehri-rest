@@ -4,7 +4,7 @@ package eu.ehri.project.core.impl.neo4j;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Edge;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.index.IndexHits;
+//import org.neo4j.graphdb.index.IndexHits;
 
 import java.util.Iterator;
 
@@ -47,8 +47,8 @@ public class Neo4j2EdgeIterable<T extends Edge> implements CloseableIterable<Neo
     }
 
     public void close() {
-        if (this.relationships instanceof IndexHits) {
-            ((IndexHits<?>) this.relationships).close();
-        }
+//        if (this.relationships instanceof IndexHits) {
+//            ((IndexHits<?>) this.relationships).close();
+//        }
     }
 }

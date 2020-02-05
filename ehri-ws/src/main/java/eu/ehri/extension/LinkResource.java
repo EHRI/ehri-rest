@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -50,8 +51,8 @@ public class LinkResource extends AbstractAccessibleResource<Link>
     public static final String SOURCE_PARAM = "source";
     public static final String BODY_PARAM = "body";
 
-    public LinkResource(@Context GraphDatabaseService database) {
-        super(database, Link.class);
+    public LinkResource(@Context DatabaseManagementService service) {
+        super(service, Link.class);
     }
 
     @GET

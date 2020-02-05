@@ -47,8 +47,9 @@ public class GenSchema extends BaseCommand {
     public int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception {
         Graph baseGraph = graph.getBaseGraph();
         if (baseGraph instanceof Neo4j2Graph) {
-            Neo4jGraphManager.createIndicesAndConstraints(
-                    ((Neo4j2Graph) baseGraph).getRawGraph());
+            // FIXME: Neo4j 4
+//            Neo4jGraphManager.createIndicesAndConstraints(
+//                    ((Neo4j2Graph) baseGraph).getRawGraph());
         } else {
             logger.warn("Cannot generate schema on a non-Neo4j2 graph");
         }

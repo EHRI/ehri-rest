@@ -28,6 +28,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DELETE;
@@ -45,8 +46,8 @@ import javax.ws.rs.core.Response;
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.PERMISSION_GRANT)
 public class PermissionGrantResource extends AbstractResource implements DeleteResource, GetResource {
 
-    public PermissionGrantResource(@Context GraphDatabaseService database) {
-        super(database);
+    public PermissionGrantResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

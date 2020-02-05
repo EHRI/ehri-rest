@@ -23,12 +23,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
@@ -39,18 +34,9 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -64,8 +50,8 @@ public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
-    public VirtualUnitResource(@Context GraphDatabaseService database) {
-        super(database, VirtualUnit.class);
+    public VirtualUnitResource(@Context DatabaseManagementService service) {
+        super(service, VirtualUnit.class);
     }
 
     @GET

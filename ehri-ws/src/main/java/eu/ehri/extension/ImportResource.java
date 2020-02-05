@@ -57,6 +57,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.shared.NoReaderForLangException;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,8 +101,8 @@ public class ImportResource extends AbstractResource {
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
 
-    public ImportResource(@Context GraphDatabaseService database) {
-        super(database);
+    public ImportResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

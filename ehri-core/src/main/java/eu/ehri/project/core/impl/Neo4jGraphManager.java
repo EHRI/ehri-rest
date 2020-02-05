@@ -31,8 +31,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
@@ -101,7 +101,6 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
 
     @Override
     public void initialize() {
-        createIndicesAndConstraints(graph.getBaseGraph().getRawGraph());
     }
 
     @Override
@@ -129,10 +128,10 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     /**
      * Create the graph schema
      *
-     * @param graph the underlying graph service
+     * @param tx a Neo4j transaction
      */
-    public static void createIndicesAndConstraints(GraphDatabaseService graph) {
-        Schema schema = graph.schema();
+    public static void createIndicesAndConstraints(Transaction tx) {
+        Schema schema = tx.schema();
         for (ConstraintDefinition constraintDefinition : schema.getConstraints()) {
             constraintDefinition.drop();
         }

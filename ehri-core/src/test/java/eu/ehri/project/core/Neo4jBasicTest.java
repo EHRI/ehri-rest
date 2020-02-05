@@ -23,51 +23,62 @@ import com.google.common.collect.Iterables;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 
 /**
  * Uses the embedded neo4j database initial code from the neo4j tutorials
- * 
  */
 public class Neo4jBasicTest {
+    protected DatabaseManagementService managementService;
     protected GraphDatabaseService graphDb;
 
     @Before
     public void prepareTestDatabase() {
-        graphDb = new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder().newGraphDatabase();
+        try {
+            File tempFile = File.createTempFile("neo4j-tmp", ".db");
+            tempFile.deleteOnExit();
+            managementService = new DatabaseManagementServiceBuilder(tempFile).build();
+            graphDb = managementService.database(DEFAULT_DATABASE_NAME);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @After
     public void destroyTestDatabase() {
-        graphDb.shutdown();
+        managementService.shutdownDatabase(DEFAULT_DATABASE_NAME);
     }
 
-    @Test(expected = org.neo4j.graphdb.NotInTransactionException.class)
-    public void notAllowCountingNodesOutsideOfATx() {
-        graphDb.getAllNodes();
-    }
+//    @Test(expected = org.neo4Vjj.graphdb.NotInTransactionException.class)
+//    public void notAllowCountingNodesOutsideOfATx() {
+//        graphDb.getAllNodes();
+//    }
 
     @Test
     public void shouldAllowCountingNodes() {
         try (Transaction tx = graphDb.beginTx()) {
-            Iterable<Node> nodes = graphDb.getAllNodes();
+            Iterable<Node> nodes = tx.getAllNodes();
             assertEquals(0, Iterables.size(nodes));
-            tx.success();
+            tx.commit();
         }
     }
 
     @Test
     public void shouldCreateNode() {
         try (Transaction tx = graphDb.beginTx()) {
-            Node n = graphDb.createNode();
+            Node n = tx.createNode();
             n.setProperty("name", "Nancy");
 
             // The node should have an id of 0, being the first node
@@ -77,12 +88,12 @@ public class Neo4jBasicTest {
 
             // Retrieve a node by using the id of the created node. The id's and
             // property should match.
-            Node foundNode = graphDb.getNodeById(n.getId());
+            Node foundNode = tx.getNodeById(n.getId());
             assertEquals(foundNode.getId(), n.getId());
             assertEquals(foundNode.getProperty("name"), "Nancy");
 
-            assertEquals(1, Iterables.size(graphDb.getAllNodes()));
-            tx.success();
+            assertEquals(1, Iterables.size(tx.getAllNodes()));
+            tx.commit();
         }
     }
 }

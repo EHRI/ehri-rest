@@ -26,6 +26,7 @@ import eu.ehri.extension.base.ListResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.ContentType;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.GET;
@@ -45,8 +46,8 @@ import javax.ws.rs.core.Response;
 public class ContentTypeResource extends AbstractAccessibleResource<ContentType>
         implements GetResource, ListResource {
 
-    public ContentTypeResource(@Context GraphDatabaseService database) {
-        super(database, ContentType.class);
+    public ContentTypeResource(@Context DatabaseManagementService service) {
+        super(service, ContentType.class);
     }
 
     @GET

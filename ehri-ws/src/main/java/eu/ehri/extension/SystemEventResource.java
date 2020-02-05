@@ -29,6 +29,7 @@ import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.events.SystemEvent;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DefaultValue;
@@ -85,8 +86,8 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
         implements GetResource {
 
 
-    public SystemEventResource(@Context GraphDatabaseService database) {
-        super(database, SystemEvent.class);
+    public SystemEventResource(@Context DatabaseManagementService service) {
+        super(service, SystemEvent.class);
     }
 
     @GET

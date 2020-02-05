@@ -36,13 +36,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
+import org.neo4j.graphdb.GraphDatabaseService;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 /**
  * Graph Manager tests. These do a bit of funky
@@ -102,9 +108,9 @@ public class GraphManagerTest {
         @Before
         public void setUp() throws Exception {
             // NB: Not loading modules to allow use of frames methods, like GremlinGroovy
-            graph = new FramedGraphFactory().create(new Neo4j2Graph(
-                    new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                            .newGraphDatabase()));
+            Path tempDir = Files.createTempDirectory("neo4j-tmp");
+            tempDir.toFile().deleteOnExit();
+            graph = new FramedGraphFactory().create(new Neo4j2Graph(tempDir.toString()));
             manager = cls.getConstructor(FramedGraph.class).newInstance(graph);
         }
 

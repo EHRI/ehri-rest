@@ -36,6 +36,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -53,8 +54,8 @@ import java.util.List;
 public class RepositoryResource extends AbstractAccessibleResource<Repository>
         implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
-    public RepositoryResource(@Context GraphDatabaseService database) {
-        super(database, Repository.class);
+    public RepositoryResource(@Context DatabaseManagementService service) {
+        super(service, Repository.class);
     }
 
     @GET
