@@ -9,21 +9,9 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.QueryApi;
-import eu.ehri.project.definitions.ContactInfo;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.definitions.IsadG;
-import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.definitions.*;
 import eu.ehri.project.exporters.xml.AbstractStreamingXmlExporter;
-import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.Address;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.RepositoryDescription;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
@@ -36,14 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamWriter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 
 public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> implements EadExporter {
@@ -140,7 +123,7 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
             descOpt.ifPresent(desc -> {
                 tag(sw, "archdesc", getLevelAttrs(descOpt, "collection"), () -> {
                     addDataSection(sw, repository, unit, desc, langCode);
-                    addPropertyValues(sw, desc);
+                    addPropertyValues(sw, unit, desc, langCode);
                     Iterable<DocumentaryUnit> orderedChildren = getOrderedChildren(unit);
                     if (orderedChildren.iterator().hasNext()) {
                         tag(sw, "dsc", () -> {
@@ -286,13 +269,13 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
 
     private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit,
             Optional<Description> priorDescOpt, String langCode) {
-        logger.trace("Adding EAD sublevel: c" + num);
+        logger.trace("Adding EAD sublevel: c{}", num);
         Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);
         tag(sw, levelTag, getLevelAttrs(descOpt, null), () -> {
             descOpt.ifPresent(desc -> {
                 addDataSection(sw, null, subUnit, desc, langCode);
-                addPropertyValues(sw, desc);
+                addPropertyValues(sw, subUnit, desc, langCode);
                 addControlAccess(sw, desc);
             });
 
@@ -346,14 +329,24 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         return Collections.emptyMap();
     }
 
-    private void addPropertyValues(XMLStreamWriter sw, Entity item) {
+    private void addPropertyValues(XMLStreamWriter sw, DocumentaryUnit unit, Entity item, String langCode) {
         Set<String> available = item.getPropertyKeys();
         for (Map.Entry<IsadG, String> pair : multiValueTextMappings.entrySet()) {
             if (available.contains(pair.getKey().name())) {
                 for (Object v : coerceList(item.getProperty(pair.getKey()))) {
-                    tag(sw, pair.getValue(), textFieldAttrs(pair.getKey()),
-                            () -> tag(sw, "p", () -> cData(sw, v.toString()))
+                    tag(sw, pair.getValue(), textFieldAttrs(pair.getKey()), () ->
+                        tag(sw, "p", () -> cData(sw, v.toString()))
                     );
+                }
+            }
+            if (pair.getKey().equals(IsadG.locationOfOriginals)) {
+                List<String> copyInfo = getCopyInfo(unit, langCode);
+                if (!copyInfo.isEmpty()) {
+                    tag(sw, pair.getValue(), () -> {
+                        for (String note : copyInfo) {
+                            tag(sw, "p", () -> cData(sw, note));
+                        }
+                    });
                 }
             }
         }
@@ -400,6 +393,16 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
                 .setLimit(-1)
                 .setStream(true)
                 .page(unit.getChildren(), DocumentaryUnit.class);
+    }
+
+    private List<String> getCopyInfo(DocumentaryUnit unit, String langCode) {
+        return StreamSupport.stream(unit.getLinks().spliterator(), false)
+                .filter(link ->
+                        Objects.equals(link.getLinkType(), "copy")
+                                && Objects.equals(link.getLinkSource(), unit))
+                .map(Link::getDescription)
+                .filter(d -> Objects.nonNull(d) && !d.trim().isEmpty())
+                .collect(Collectors.toList());
     }
 
     private String getEventDescription(EventTypes eventType) {
