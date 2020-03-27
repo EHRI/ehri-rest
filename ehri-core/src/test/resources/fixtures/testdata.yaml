@@ -592,6 +592,17 @@
     hasLinkBody: ur1
     hasLinker: mike
 
+- id: link4
+  type: Link
+  data:
+    type: copy
+    description: A link indicated that r4 is the original location of c4
+  relationships:
+    hasLinkTarget:
+      - c4
+      - r4
+    hasLinkSource: c4
+
 --- # Permission grants
 
 # Allow user Reto to create doc units within r1 scope

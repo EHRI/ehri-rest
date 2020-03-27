@@ -1047,6 +1047,7 @@ public class GraphQLImpl {
                     new GraphQLTypeReference(Entities.COUNTRY),
                     manyToOneRelationshipFetcher(r -> r.as(Repository.class).getCountry())))
             .fields(linksAndAnnotationsFields())
+            .field(relatedTypeFieldDefinition())
             .field(itemEventsFieldDefinition())
             .withInterfaces(entityInterface, describedInterface, linkableInterface, annotatableInterface)
             .build();

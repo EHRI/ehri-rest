@@ -55,7 +55,10 @@ public class Ead2002ExporterTest extends XmlExporterTest {
     @Test
     public void testExport2() throws Exception {
         DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
-        testExport(c4, "eng");
+        String xml = testExport(c4, "eng");
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "A link indicated that r4 is the original location of c4",
+                "//ead/archdesc/originalsloc/p");
     }
 
     @Test
