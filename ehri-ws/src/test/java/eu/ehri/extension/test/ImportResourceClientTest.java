@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
@@ -46,6 +47,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 import static eu.ehri.extension.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
@@ -76,6 +78,28 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
+    }
+
+    @Test
+    public void testImportEadViaJsonUrlMap() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = getPayloadStream(ImmutableMap.of("single-ead",
+                Resources.getResource(SINGLE_EAD).toURI().toString()));
+
+        String logText = "Testing import";
+        URI uri = getImportUrl("ead", "r1", logText, false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        ImportLog log = response.getEntity(ImportLog.class);
+        assertEquals(1, log.getCreated());
+        assertEquals(0, log.getUpdated());
+        assertEquals(0, log.getUnchanged());
+        assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
@@ -478,6 +502,12 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         String payloadText = Joiner.on("\n").join(paths) + "\n";
         return new ByteArrayInputStream(
                 payloadText.getBytes(Charsets.UTF_8));
+    }
+
+    private InputStream getPayloadStream(Map<String, String> data)
+            throws Exception {
+        byte[] buf = jsonMapper.writer().writeValueAsBytes(data);
+        return new ByteArrayInputStream(buf);
     }
 
     private String getTestLogFilePath(String text) throws IOException {

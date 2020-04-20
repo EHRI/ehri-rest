@@ -19,6 +19,10 @@
 
 package eu.ehri.project.importers.managers;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
@@ -40,6 +44,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -51,6 +58,8 @@ import java.util.Optional;
 public abstract class AbstractImportManager implements ImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
+    private final JsonFactory factory = new JsonFactory();
+
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
@@ -62,7 +71,7 @@ public abstract class AbstractImportManager implements ImportManager {
     // and reporting errors usefully...
     private String currentFile;
     protected Integer currentPosition;
-    protected final Class<? extends ItemImporter<?,?>> importerClass;
+    protected final Class<? extends ItemImporter<?, ?>> importerClass;
 
     /**
      * Constructor.
@@ -82,7 +91,7 @@ public abstract class AbstractImportManager implements ImportManager {
             boolean tolerant,
             boolean allowUpdates,
             String defaultLang,
-            Class<? extends ItemImporter<?,?>> importerClass) {
+            Class<? extends ItemImporter<?, ?>> importerClass) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
@@ -129,6 +138,60 @@ public abstract class AbstractImportManager implements ImportManager {
         }
 
         return log;
+    }
+
+    @Override
+    public ImportLog importJson(InputStream json, String logMessage)
+            throws IOException, ValidationError, InputParseError {
+        Preconditions.checkNotNull(json);
+        URL url = null;
+        try (final JsonParser parser = factory
+                .createParser(new InputStreamReader(json, Charsets.UTF_8))) {
+
+            JsonToken jsonToken = parser.nextValue();
+            if (!parser.isExpectedStartObjectToken()) {
+                throw new InputParseError("Stream should be an object of name/URL pairs, was: " + jsonToken);
+            }
+
+            Optional<String> msg = getLogMessage(logMessage);
+            ActionManager.EventContext action = new ActionManager(
+                    framedGraph, permissionScope).newEventContext(actioner,
+                    EventTypes.ingest, msg);
+            ImportLog log = new ImportLog(msg.orElse(null));
+
+            for (; ; ) {
+                final String name = parser.nextFieldName();
+                if (name == null) {
+                    break;
+                }
+                url = new URL(parser.nextTextValue());
+
+                try {
+                    currentFile = name;
+                    try (InputStream stream = url.openStream()) {
+                        logger.info("Importing URL with identifier: {}", name);
+                        importInputStream(stream, currentFile, action, log);
+                    }
+                } catch (ValidationError e) {
+                    log.addError(formatErrorLocation(), e.getMessage());
+                    if (!tolerant) {
+                        throw e;
+                    }
+                }
+            }
+
+            // Only mark the transaction successful if we're
+            // actually accomplished something.
+            if (log.hasDoneWork()) {
+                action.commit();
+            }
+
+            return log;
+        } catch (MalformedURLException e) {
+            throw new InputParseError("Malformed URL: " + url);
+        } catch (IOException e) {
+            throw new InputParseError("Error reading JSON", e);
+        }
     }
 
     @Override
@@ -210,12 +273,12 @@ public abstract class AbstractImportManager implements ImportManager {
      * Import an InputStream with an event context.
      *
      * @param stream  the InputStream to import
-     * @param tag        an optional tag identifying the source of the stream
+     * @param tag     an optional tag identifying the source of the stream
      * @param context the event that this import is part of
      * @param log     an import log to write to
      */
     protected abstract void importInputStream(InputStream stream,
-            String tag, ActionManager.EventContext context, ImportLog log)
+                                              String tag, ActionManager.EventContext context, ImportLog log)
             throws IOException, ValidationError, InputParseError;
 
     /**

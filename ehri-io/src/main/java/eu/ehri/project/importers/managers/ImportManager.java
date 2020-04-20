@@ -21,7 +21,6 @@ package eu.ehri.project.importers.managers;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.cvoc.SkosImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 
@@ -76,6 +75,20 @@ public interface ImportManager {
      * @throws ValidationError when the content of the file is invalid
      */
     ImportLog importInputStream(InputStream stream, String tag, String logMessage)
+            throws IOException, InputParseError, ValidationError;
+
+    /**
+     * Import multiple files via a list of file paths.
+     *
+     * @param json       a JSON-format stream in the form of a object
+     *                   consisting of name -> URL key/values
+     * @param logMessage an optional log message to describe the import
+     * @return an ImportLog for the given stream
+     * @throws IOException     when reading or writing fails
+     * @throws InputParseError when parsing the stream data fails
+     * @throws ValidationError when the content of the file is invalid
+     */
+    ImportLog importJson(InputStream json, String logMessage)
             throws IOException, InputParseError, ValidationError;
 
     /**
