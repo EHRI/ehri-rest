@@ -174,6 +174,7 @@ public class ImportResource extends AbstractResource {
      * <li>a single EAD file</li>
      * <li>multiple EAD files in an archive such as tar, tar.gz, or zip</li>
      * <li>a plain test file containing local file paths</li>
+     * <li>a JSON object consisting of file-name/URL pairs</li>
      * </ul>
      * The Content-Type header is used to distinguish the contents.
      * <p>
@@ -211,14 +212,14 @@ public class ImportResource extends AbstractResource {
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
-     *                      multiple EAD files in an archive, a list of local file
-     *                      paths. The Content-Type header is used to distinguish
+     *                      multiple EAD files in an archive, a list of file URLs.
+     *                      The Content-Type header is used to distinguish
      *                      the contents.
      * @return a JSON object showing how many records were created,
      * updated, or unchanged.
      */
     @POST
-    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Path("ead")
     public ImportLog importEad(
@@ -280,7 +281,7 @@ public class ImportResource extends AbstractResource {
      * @return a {@link SyncLog} instance.
      */
     @POST
-    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Path("ead-sync")
     public SyncLog syncEad(
@@ -342,7 +343,7 @@ public class ImportResource extends AbstractResource {
      * Import EAG files. See EAD import for details.
      */
     @POST
-    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Path("eag")
     public ImportLog importEag(
@@ -367,7 +368,7 @@ public class ImportResource extends AbstractResource {
      * Import EAC files. See EAD import for details.
      */
     @POST
-    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML,
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
     @Path("eac")
     public ImportLog importEac(
@@ -396,7 +397,7 @@ public class ImportResource extends AbstractResource {
      * Additional note: no handler class is required.
      */
     @POST
-    @Consumes({MediaType.TEXT_PLAIN, CSV_MEDIA_TYPE,
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE,
             MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("csv")
@@ -478,10 +479,12 @@ public class ImportResource extends AbstractResource {
             throws DeserializationError, ValidationError {
         MediaType mediaType = requestHeaders.getMediaType();
         try {
-            if (MediaType.TEXT_PLAIN_TYPE.equals(mediaType)) {
+            if (MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType)) {
                 // Extract our list of paths...
                 List<String> paths = getFilePaths(IOUtils.toString(data, StandardCharsets.UTF_8));
                 return importManager.importFiles(paths, message);
+            } else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType)) {
+                return importManager.importJson(data, message);
             } else if (isCompatibleType(mediaType, accepts)) {
                 return importManager.importInputStream(data, message);
             } else {
