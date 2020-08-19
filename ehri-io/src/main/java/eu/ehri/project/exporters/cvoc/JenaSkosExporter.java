@@ -68,7 +68,7 @@ public class JenaSkosExporter implements SkosExporter {
     }
 
     @Override
-    public void export(OutputStream outputStream, String base) throws IOException {
+    public void export(OutputStream outputStream, String base) {
         Model model = export(base);
         RDFWriter writer = model.getWriter(format);
         writer.setProperty("relativeURIs", "");
@@ -76,7 +76,7 @@ public class JenaSkosExporter implements SkosExporter {
     }
 
     private String getUri(Concept concept, String baseUri) {
-        String fallback = baseUri + concept.getIdentifier();
+        String fallback = baseUri + vocabulary.getIdentifier() + "/" + concept.getIdentifier();
         String orig = concept.getProperty(Ontology.URI_KEY);
         return Optional.ofNullable(orig).orElse(fallback);
     }
@@ -87,7 +87,7 @@ public class JenaSkosExporter implements SkosExporter {
         return script != null ? lang + "-" + script : lang;
     }
 
-    public Model export(String base) throws IOException {
+    public Model export(String base) {
 
         String baseUri = base == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : base;
         Iterable<Concept> concepts = vocabulary.getConcepts();
@@ -101,7 +101,7 @@ public class JenaSkosExporter implements SkosExporter {
         Property topConceptProp = model
                 .createProperty(SkosRDFVocabulary.HAS_TOP_CONCEPT.getURI().toString());
 
-        Resource vocabResource = model.createResource(baseUri + vocabulary.getId());
+        Resource vocabResource = model.createResource(baseUri + vocabulary.getIdentifier());
         model.add(vocabResource, RDF.type, model
                 .createResource(SkosRDFVocabulary.CONCEPT_SCHEME.getURI().toString()));
 
