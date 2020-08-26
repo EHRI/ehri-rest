@@ -1,5 +1,5 @@
 # Docker file for EHRI backend web service
-FROM neo4j:3.5
+FROM neo4j:3.5.21
 
 ENV NEO4J_HOME=/var/lib/neo4j
 ENV NEO4J_AUTH=none
