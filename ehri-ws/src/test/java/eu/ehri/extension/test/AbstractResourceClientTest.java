@@ -20,8 +20,8 @@
 package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -33,11 +33,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.providers.BundleProvider;
-import eu.ehri.extension.providers.GlobalPermissionSetProvider;
-import eu.ehri.extension.providers.ImportLogProvider;
-import eu.ehri.extension.providers.SyncLogProvider;
-import eu.ehri.extension.providers.TableProvider;
+import eu.ehri.extension.providers.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDeserializer;
@@ -46,7 +42,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -100,12 +95,15 @@ public class AbstractResourceClientTest extends RunningServerTest {
         return entries;
     }
 
-    protected static final ObjectMapper jsonMapper = new ObjectMapper();
+    protected static final ObjectMapper jsonMapper;
 
     static {
         SimpleModule bundleModule = new SimpleModule();
         bundleModule.addDeserializer(Bundle.class, new BundleDeserializer());
-        jsonMapper.registerModule(bundleModule);
+        jsonMapper = JsonMapper
+                .builder()
+                .addModule(bundleModule)
+                .build();
     }
 
     protected static final Pattern paginationPattern = Pattern.compile("offset=(-?\\d+); limit=(-?\\d+); total=(-?\\d+)");
@@ -155,8 +153,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
      */
     protected List<List<Bundle>> getItemListOfLists(URI uri, String userId,
             MultivaluedMap<String, String> params) throws Exception {
-        TypeReference<LinkedList<LinkedList<Bundle>>> typeRef = new
-                TypeReference<LinkedList<LinkedList<Bundle>>>() {
+        TypeReference<List<List<Bundle>>> typeRef = new TypeReference<List<List<Bundle>>>() {
                 };
         return jsonMapper.readValue(getJson(uri, userId, params), typeRef);
     }
@@ -195,7 +192,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
         String range = headers.getFirst(RANGE_HEADER_NAME);
         if (range != null && range.matches(paginationPattern.pattern())) {
             Matcher matcher = paginationPattern.matcher(range);
-            return matcher.find() ? Integer.valueOf(matcher.group(3)) : -1;
+            return matcher.find() ? Integer.parseInt(matcher.group(3)) : -1;
         }
         return -1;
     }
@@ -222,7 +219,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
                 AbstractResource.RESOURCE_ENDPOINT_PREFIX,
                 entityType);
         segs.addAll(Lists.newArrayList(segments));
-        return ehriUriBuilder(segs.toArray(new String[segs.size()]));
+        return ehriUriBuilder(segs.toArray(new String[0]));
     }
 
     protected URI entityUri(String entityType, String... segments) {
@@ -230,7 +227,7 @@ public class AbstractResourceClientTest extends RunningServerTest {
                 AbstractResource.RESOURCE_ENDPOINT_PREFIX,
                 entityType);
         segs.addAll(Lists.newArrayList(segments));
-        return ehriUriBuilder(segs.toArray(new String[segs.size()])).build();
+        return ehriUriBuilder(segs.toArray(new String[0])).build();
     }
 
     protected URI ehriUri(String... segments) {

@@ -141,8 +141,7 @@ public abstract class AbstractImportManager implements ImportManager {
     }
 
     @Override
-    public ImportLog importJson(InputStream json, String logMessage)
-            throws IOException, ValidationError, InputParseError {
+    public ImportLog importJson(InputStream json, String logMessage) throws ValidationError, InputParseError {
         Preconditions.checkNotNull(json);
         URL url = null;
         try (final JsonParser parser = factory
@@ -196,7 +195,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     @Override
     public ImportLog importFiles(List<String> filePaths, String logMessage)
-            throws IOException, ValidationError, InputParseError {
+            throws ValidationError, InputParseError {
         try {
 
             Optional<String> msg = getLogMessage(logMessage);
@@ -226,7 +225,7 @@ public abstract class AbstractImportManager implements ImportManager {
             }
 
             return log;
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -246,8 +245,7 @@ public abstract class AbstractImportManager implements ImportManager {
             try {
                 if (!entry.isDirectory()) {
                     currentFile = entry.getName();
-                    BoundedInputStream boundedInputStream
-                            = new BoundedInputStream(stream, entry.getSize());
+                    BoundedInputStream boundedInputStream = new BoundedInputStream(stream, entry.getSize());
                     boundedInputStream.setPropagateClose(false);
                     logger.info("Importing file: {}", currentFile);
                     importInputStream(boundedInputStream, currentFile, action, log);
@@ -278,7 +276,9 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param log     an import log to write to
      */
     protected abstract void importInputStream(InputStream stream,
-                                              String tag, ActionManager.EventContext context, ImportLog log)
+                                              String tag,
+                                              ActionManager.EventContext context,
+                                              ImportLog log)
             throws IOException, ValidationError, InputParseError;
 
     /**
@@ -286,28 +286,30 @@ public abstract class AbstractImportManager implements ImportManager {
      * log and event context.
      *
      * @param log      an import log
+     * @param tag      an identifier for the import source
      * @param context  an event context
      * @param mutation the item mutation
      */
-    void defaultImportCallback(ImportLog log, ActionManager.EventContext context, Mutation<? extends Accessible> mutation) {
+    void defaultImportCallback(ImportLog log, String tag, ActionManager.EventContext context, Mutation<? extends Accessible> mutation) {
+        String id = mutation.getNode().getId();
         switch (mutation.getState()) {
             case CREATED:
-                logger.info("Item created: {}", mutation.getNode().getId());
+                logger.info("Item created: {}", id);
                 context.addSubjects(mutation.getNode());
-                log.addCreated();
+                log.addCreated(tag, id);
                 break;
             case UPDATED:
                 if (!allowUpdates) {
                     throw new ModeViolation(String.format(
                             "Item '%s' was updated but import manager does not allow updates",
-                            mutation.getNode().getId()));
+                            id));
                 }
-                logger.info("Item updated: {}", mutation.getNode().getId());
+                logger.info("Item updated: {}", id);
                 context.addSubjects(mutation.getNode());
-                log.addUpdated();
+                log.addUpdated(tag, id);
                 break;
             default:
-                log.addUnchanged();
+                log.addUnchanged(tag, id);
         }
     }
 

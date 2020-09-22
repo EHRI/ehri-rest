@@ -40,7 +40,10 @@ import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -62,7 +65,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     private static final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
 
     @Test
-    public void testImportSkos() throws Exception {
+    public void testImportSkos() {
         // Get the path of an EAD file
         InputStream payloadStream = ClassLoader.getSystemResourceAsStream("simple.n3");
 
@@ -124,13 +127,14 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testImportSingleEad() throws Exception {
+    public void testImportSingleEad() {
         // Get the path of an EAD file
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream(SINGLE_EAD);
         String logText = "Testing import";
         URI uri = getImportUrl("ead", "r1", logText, false)
                 .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(TAG_PARAM, SINGLE_EAD)
                 .queryParam(COMMIT_PARAM, true)
                 .build();
         ImportLog log = callAs(getAdminUserProfileId(), uri)
@@ -141,11 +145,12 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
+        assertTrue("Tag is not in log", log.getCreatedKeys().containsKey(SINGLE_EAD));
         assertEquals(logText, log.getLogMessage().orElse(null));
     }
 
     @Test
-    public void testImportSingleEadWithValidationError() throws Exception {
+    public void testImportSingleEadWithValidationError() {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("invalid-ead.xml");
         URI uri = getImportUrl("ead", "r1", "Error test", false)
@@ -162,7 +167,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testImportSingleEadWithValidationErrorInTolerantMode() throws Exception {
+    public void testImportSingleEadWithValidationErrorInTolerantMode() {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("invalid-ead.xml");
         URI uri = getImportUrl("ead", "r1", "Error test", true)
@@ -431,7 +436,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testImportEag() throws Exception {
+    public void testImportEag() {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("eag.xml");
         String logText = "Testing import";
@@ -451,7 +456,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testImportEac() throws Exception {
+    public void testImportEac() {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("eac.xml");
         String logText = "Testing import";
@@ -471,7 +476,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testImportLinks() throws Exception {
+    public void testImportLinks() {
         Table table = Table.of(ImmutableList.of(
                 ImmutableList.of("r1", "c1", "", "associative", "", "Test"),
                 ImmutableList.of("r1", "c1", "ur1", "associative", "", "Test 2"),
@@ -492,8 +497,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .queryParam(TOLERANT_PARAM, String.valueOf(tolerant));
     }
 
-    private InputStream getPayloadStream(String... resources)
-            throws URISyntaxException, UnsupportedEncodingException {
+    private InputStream getPayloadStream(String... resources) throws URISyntaxException {
         List<String> paths = Lists.newArrayList();
         for (String resourceName : resources) {
             URL resource = Resources.getResource(resourceName);

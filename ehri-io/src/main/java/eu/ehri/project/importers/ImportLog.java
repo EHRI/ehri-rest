@@ -19,13 +19,15 @@
 
 package eu.ehri.project.importers;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.*;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
-import java.io.PrintStream;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -33,11 +35,12 @@ import java.util.Optional;
  * detailing how many items were created and updated,
  * and how many failed.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ImportLog {
 
-    private int created;
-    private int updated;
-    private int unchanged;
+    private final Multimap<String,String> createdKeys = HashMultimap.create();
+    private final Multimap<String, String> updatedKeys = HashMultimap.create();
+    private final Multimap<String, String> unchangedKeys = HashMultimap.create();
     private final String logMessage;
     private final Map<String, String> errors = Maps.newHashMap();
 
@@ -58,57 +61,81 @@ public class ImportLog {
     @JsonCreator
     public ImportLog(
             @JsonProperty("message") String logMessage,
-            @JsonProperty("created") int created,
-            @JsonProperty("updated") int updated,
-            @JsonProperty("unchanged") int unchanged,
+            @JsonProperty("created_keys") Map<String, Collection<String>> createdKeys,
+            @JsonProperty("updated_keys") Map<String, Collection<String>> updatedKeys,
+            @JsonProperty("unchanged_keys") Map<String, Collection<String>> unchangedKeys,
             @JsonProperty("errors") Map<String, String> errors) {
         this(logMessage);
-        this.created = created;
-        this.unchanged = unchanged;
-        this.updated = updated;
+        createdKeys.forEach(this.createdKeys::putAll);
+        unchangedKeys.forEach(this.unchangedKeys::putAll);
+        updatedKeys.forEach(this.updatedKeys::putAll);
         this.errors.putAll(errors);
     }
 
     /**
      * Increment the creation count.
      */
-    public void addCreated() {
-        created++;
+    public void addCreated(String sourceKey, String itemId) {
+        Preconditions.checkNotNull(sourceKey);
+        createdKeys.put(sourceKey, itemId);
     }
 
     /**
      * Increment the update count.
      */
-    public void addUpdated() {
-        updated++;
+    public void addUpdated(String sourceKey, String itemId) {
+        Preconditions.checkNotNull(sourceKey);
+        updatedKeys.put(sourceKey, itemId);
     }
 
     /**
      * Increment the unchanged count.
      */
-    public void addUnchanged() {
-        unchanged++;
+    public void addUnchanged(String sourceKey, String itemId) {
+        Preconditions.checkNotNull(sourceKey);
+        unchangedKeys.put(sourceKey, itemId);
     }
 
     /**
      * @return returns the number of created items
      */
     public int getCreated() {
-        return created;
+        return createdKeys.size();
+    }
+
+    /**
+     * @return the items created for each input key
+     */
+    public Multimap<String, String> getCreatedKeys() {
+        return createdKeys;
     }
 
     /**
      * @return returns the number of updated items
      */
     public int getUpdated() {
-        return updated;
+        return updatedKeys.size();
+    }
+
+    /**
+     * @return the items updated for each input key
+     */
+    public Multimap<String, String> getUpdatedKeys() {
+        return updatedKeys;
     }
 
     /**
      * @return returns the number of unchanged items
      */
     public int getUnchanged() {
-        return unchanged;
+        return unchangedKeys.size();
+    }
+
+    /**
+     * @return the items unchanged for each input key
+     */
+    public Multimap<String, String> getUnchangedKeys() {
+        return unchangedKeys;
     }
 
     /**
@@ -143,27 +170,31 @@ public class ImportLog {
      * @return returns whether the import succeeded
      */
     public boolean hasDoneWork() {
-        return created > 0 || updated > 0;
+        return createdKeys.size() > 0 || updatedKeys.size() > 0;
     }
 
     /**
      * @return returns the number of items that were either created or updated.
      */
     public int getChanged() {
-        return created + updated;
+        return createdKeys.size() +  updatedKeys.size();
     }
 
     @JsonValue
     public Map<String, Object> getData() {
         Map<String, Object> data = Maps.newHashMap();
-        data.put("created", created);
-        data.put("updated", updated);
-        data.put("unchanged", unchanged);
+        data.put("created", createdKeys.size());
+        data.put("created_keys", createdKeys.asMap());
+        data.put("updated", updatedKeys.size());
+        data.put("updated_keys", updatedKeys.asMap());
+        data.put("unchanged", unchangedKeys.size());
+        data.put("unchanged_keys", unchangedKeys.asMap());
         data.put("errors", errors);
         data.put("message", logMessage);
         return data;
     }
 
+    @JsonIgnore
     public Optional<String> getLogMessage() {
         return Optional.of(logMessage);
     }
@@ -172,6 +203,23 @@ public class ImportLog {
     public String toString() {
         return String.format(
                 "Created: %d, Updated: %d, Unchanged: %d, Errors: %d",
-                created, updated, unchanged, errors.size());
+                createdKeys.size(), updatedKeys.size(), unchangedKeys.size(), errors.size());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImportLog importLog = (ImportLog) o;
+        return createdKeys.equals(importLog.createdKeys) &&
+                updatedKeys.equals(importLog.updatedKeys) &&
+                unchangedKeys.equals(importLog.unchangedKeys) &&
+                logMessage.equals(importLog.logMessage) &&
+                errors.equals(importLog.errors);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(createdKeys, updatedKeys, unchangedKeys, logMessage, errors);
     }
 }

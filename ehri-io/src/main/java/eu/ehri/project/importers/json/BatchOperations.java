@@ -37,6 +37,7 @@ import java.util.Optional;
  */
 public class BatchOperations {
     private static final Logger logger = LoggerFactory.getLogger(BatchOperations.class);
+    private static final String STREAM_SOURCE_KEY = "-";
     private final FramedGraph<?> graph;
     private final ActionManager actionManager;
     private final BundleManager dao;
@@ -135,7 +136,7 @@ public class BatchOperations {
      * @return an import log
      */
     public ImportLog batchImport(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
-            throws DeserializationError, ItemNotFound, ValidationError {
+            throws DeserializationError, ValidationError {
         ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                 EventTypes.modification, logMessage);
         ImportLog log = new ImportLog(logMessage.orElse(null));
@@ -143,9 +144,10 @@ public class BatchOperations {
             for (Bundle bundle : bundleIter) {
                 try {
                     Mutation<Accessible> mutation = dao.createOrUpdate(bundle, Accessible.class);
+                    String id = mutation.getNode().getId();
                     switch (mutation.getState()) {
                         case UPDATED:
-                            log.addUpdated();
+                            log.addUpdated(STREAM_SOURCE_KEY, id);
                             ctx.addSubjects(mutation.getNode());
                             if (version) {
                                 mutation.getPrior().ifPresent(b ->
@@ -153,11 +155,11 @@ public class BatchOperations {
                             }
                             break;
                         case CREATED:
-                            log.addCreated();
+                            log.addCreated(STREAM_SOURCE_KEY, id);
                             ctx.addSubjects(mutation.getNode());
                             break;
                         default:
-                            log.addUnchanged();
+                            log.addUnchanged(STREAM_SOURCE_KEY, id);
                     }
                     for (ImportCallback callback : callbacks) {
                         callback.itemImported(mutation);
@@ -203,14 +205,14 @@ public class BatchOperations {
                     Mutation<Accessible> update = dao.update(newBundle, Accessible.class);
                     switch (update.getState()) {
                         case UPDATED:
-                            log.addUpdated();
+                            log.addUpdated(STREAM_SOURCE_KEY, newBundle.getId());
                             ctx.addSubjects(update.getNode());
                             if (version) {
                                 ctx.createVersion(entity, oldBundle);
                             }
                             break;
                         case UNCHANGED:
-                            log.addUnchanged();
+                            log.addUnchanged(STREAM_SOURCE_KEY, newBundle.getId());
                             break;
                         default:
                             throw new RuntimeException("Unexpected status in batch update: " + update.getState());

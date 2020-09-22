@@ -268,8 +268,9 @@ public final class JenaSkosImporter implements SkosImporter {
             model.add(SKOS.broader, OWL.inverseOf, SKOS.narrower);
 
             model.read(ios, null, format);
-            OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
-            logger.trace("in import file: {}", SkosRDFVocabulary.CONCEPT.getURI());
+            URI uri = SkosRDFVocabulary.CONCEPT.getURI();
+            OntClass conceptClass = model.getOntClass(uri.toString());
+            logger.trace("in import file: {}", uri);
             Map<Resource, Concept> imported = Maps.newHashMap();
 
             ExtendedIterator<? extends OntResource> itemIterator = conceptClass.listInstances();
@@ -280,13 +281,14 @@ public final class JenaSkosImporter implements SkosImporter {
                     try {
                         Mutation<Concept> graphConcept = importConcept(item);
                         imported.put(item, graphConcept.getNode());
+                        String graphId = graphConcept.getNode().getId();
 
                         switch (graphConcept.getState()) {
                             case UNCHANGED:
-                                log.addUnchanged();
+                                log.addUnchanged(uri.toString(), graphId);
                                 break;
                             case CREATED:
-                                log.addCreated();
+                                log.addCreated(uri.toString(), graphId);
                                 eventContext.addSubjects(graphConcept.getNode());
                                 break;
                             case UPDATED:
@@ -295,7 +297,7 @@ public final class JenaSkosImporter implements SkosImporter {
                                             "Item '%s' was updated but import manager does not allow updates",
                                             graphConcept.getNode().getId()));
                                 }
-                                log.addUpdated();
+                                log.addUpdated(uri.toString(), graphId);
                                 eventContext.addSubjects(graphConcept.getNode());
                                 break;
                         }

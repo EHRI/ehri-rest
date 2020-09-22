@@ -58,12 +58,12 @@ import java.util.List;
 @Consumes({MediaType.APPLICATION_JSON, AbstractResource.CSV_MEDIA_TYPE})
 public class TableProvider implements MessageBodyWriter<Table>, MessageBodyReader<Table>, JsonMessageBodyHandler {
 
-    private static CsvMapper csvMapper = new CsvMapper()
+    private static final CsvMapper csvMapper = new CsvMapper()
             .enable(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
             .enable(CsvParser.Feature.WRAP_AS_ARRAY);
-    private static CsvSchema csvSchema = csvMapper.schemaFor(List.class);
+    private static final CsvSchema csvSchema = csvMapper.schemaFor(List.class);
 
-    private static TypeReference<List<List<String>>> typeRef = new TypeReference<List<List<String>>>() {
+    private static final TypeReference<List<List<String>>> typeRef = new TypeReference<List<List<String>>>() {
     };
 
     @Override
@@ -94,7 +94,12 @@ public class TableProvider implements MessageBodyWriter<Table>, MessageBodyReade
     }
 
     @Override
-    public Table readFrom(Class<Table> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
+    public Table readFrom(Class<Table> type,
+                          Type genericType,
+                          Annotation[] annotations,
+                          MediaType mediaType,
+                          MultivaluedMap<String, String> httpHeaders,
+                          InputStream entityStream) throws IOException, WebApplicationException {
         try {
             ObjectReader reader = mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)
                     ? mapper.readerFor(typeRef)

@@ -104,7 +104,7 @@ public class LinkImporter {
                 }
 
                 eventContext.addSubjects(link);
-                log.addCreated();
+                log.addCreated("-", link.getId());
             } catch (ItemNotFound e) {
                 logger.error("Item not found at row {}: {}", i, e.getValue());
                 log.addError(e.getValue(), e.getMessage());
