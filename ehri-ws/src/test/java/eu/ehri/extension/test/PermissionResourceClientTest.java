@@ -280,7 +280,7 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
     }
 
     private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(String json) throws IOException {
-        TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>> typeRef = new TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>>() {
+        TypeReference<List<Map<String, Map<String, List<String>>>>> typeRef = new TypeReference<List<Map<String, Map<String, List<String>>>>>() {
         };
         return jsonMapper.readValue(json, typeRef);
     }

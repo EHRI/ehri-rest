@@ -89,6 +89,7 @@ public class ImportResource extends AbstractResource {
     public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
     public static final String HANDLER_PARAM = "handler";
+    public static final String TAG_PARAM = "tag";
     public static final String IMPORTER_PARAM = "importer";
     public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
@@ -209,6 +210,11 @@ public class ImportResource extends AbstractResource {
      *                      (defaults to EadImporter)
      * @param propertyFile  a local file path pointing to an import properties
      *                      configuration file.
+     * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
+     *                      provided to identify the source, e.g. the name of the file from
+     *                      which the stream derives. If a tag is not provided, or the
+     *                      input data is not an XML stream, the default value of
+     *                      &quot;-&quot; will be used
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
@@ -229,6 +235,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
@@ -255,7 +262,7 @@ public class ImportResource extends AbstractResource {
                     .setDefaultLang(defaultLang)
                     .setTolerant(tolerant)
                     .withProperties(propertyFile);
-            ImportLog log = importDataStream(importManager, message, data,
+            ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
             if (commit) {
@@ -292,6 +299,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam("ex") Set<String> ex,
@@ -323,7 +331,7 @@ public class ImportResource extends AbstractResource {
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
             EadSync syncManager = new EadSync(graph, api(), syncScope, user, importManager);
-            SyncLog log = syncManager.sync(m -> importDataStream(m, message, data,
+            SyncLog log = syncManager.sync(m -> importDataStream(m, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
 
             if (commit) {
@@ -353,12 +361,13 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(LANG_PARAM) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile,
+        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile, tag,
                 nameOrDefault(handlerClass, EagHandler.class.getName()),
                 nameOrDefault(importerClass, EagImporter.class.getName()),
                 commit, data);
@@ -378,12 +387,13 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(LANG_PARAM) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
+            @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile,
+        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile, tag,
                 nameOrDefault(handlerClass, EacHandler.class.getName()),
                 nameOrDefault(importerClass, EacImporter.class.getName()),
                 commit, data);
@@ -408,6 +418,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(IMPORTER_PARAM) String importerClass,
+            @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
@@ -424,7 +435,7 @@ public class ImportResource extends AbstractResource {
             String message = getLogMessage(logMessage).orElse(null);
             ImportManager importManager = new CsvImportManager(
                     graph, scope, user, tolerant, allowUpdates, lang, importer);
-            ImportLog log = importDataStream(importManager, message, data,
+            ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {
                 logger.debug("Committing CSV import transaction...");
@@ -460,7 +471,7 @@ public class ImportResource extends AbstractResource {
     public ImportLog importLinks(
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            Table table) throws DeserializationError, ItemNotFound {
+            Table table) throws DeserializationError {
         try (final Tx tx = beginTx()) {
             ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
                     .importLinks(table, getLogMessage().orElse(null));
@@ -475,7 +486,7 @@ public class ImportResource extends AbstractResource {
     // Helpers
 
     private ImportLog importDataStream(
-            ImportManager importManager, String message, InputStream data, MediaType... accepts)
+            ImportManager importManager, String message, String tag, InputStream data, MediaType... accepts)
             throws DeserializationError, ValidationError {
         MediaType mediaType = requestHeaders.getMediaType();
         try {
@@ -486,7 +497,7 @@ public class ImportResource extends AbstractResource {
             } else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType)) {
                 return importManager.importJson(data, message);
             } else if (isCompatibleType(mediaType, accepts)) {
-                return importManager.importInputStream(data, message);
+                return importManager.importInputStream(data, tag, message);
             } else {
                 return importPotentiallyGZippedArchive(importManager, message, data);
             }

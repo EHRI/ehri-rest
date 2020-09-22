@@ -5,7 +5,7 @@
 
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
-    <version>0.13.11</version>
+    <version>0.13.12</version>
     <packaging>pom</packaging>
 
     <name>EHRI Backend</name>
@@ -119,6 +119,7 @@
 
         <neo4j.version>3.5.21</neo4j.version>
         <blueprints.version>2.6.0</blueprints.version>
+        <jackson.version>2.10.5</jackson.version>
     </properties>
 
     <build>

@@ -77,7 +77,7 @@ public class CsvImportManager extends AbstractImportManager {
                     .newInstance(framedGraph, permissionScope, actioner, log);
             logger.trace("importer of class {}", importer.getClass());
 
-            importer.addCallback(mutation -> defaultImportCallback(log, context, mutation));
+            importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
             CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(VALUE_DELIMITER).withHeader();

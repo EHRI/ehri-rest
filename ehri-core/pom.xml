@@ -6,7 +6,7 @@
     <parent>
         <groupId>ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.13.11</version>
+        <version>0.13.12</version>
     </parent>
     <artifactId>ehri-core</artifactId>
     <packaging>jar</packaging>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>com.flipkart.zjsonpatch</groupId>
             <artifactId>zjsonpatch</artifactId>
-            <version>0.4.6</version>
+            <version>0.4.11</version>
         </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
@@ -181,8 +181,13 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.10.4</version>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 </project>

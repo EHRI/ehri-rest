@@ -39,7 +39,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 
 @Provider
@@ -54,7 +53,7 @@ public class GlobalPermissionSetProvider implements MessageBodyReader<GlobalPerm
     @Override
     public GlobalPermissionSet readFrom(Class<GlobalPermissionSet> bundleClass, Type type, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String,
-            String> headers, InputStream stream) throws IOException, WebApplicationException {
+            String> headers, InputStream stream) throws WebApplicationException {
 
         try {
             return parseMatrix(stream);
@@ -65,8 +64,8 @@ public class GlobalPermissionSetProvider implements MessageBodyReader<GlobalPerm
 
     private GlobalPermissionSet parseMatrix(InputStream json) throws DeserializationError {
         try {
-            TypeReference<HashMap<ContentTypes, List<PermissionType>>> typeRef = new TypeReference<HashMap<ContentTypes,
-                    List<PermissionType>>>() {
+            TypeReference<HashMap<ContentTypes, Collection<PermissionType>>> typeRef = new TypeReference<HashMap<ContentTypes,
+                    Collection<PermissionType>>>() {
             };
             HashMap<ContentTypes, Collection<PermissionType>> globals = mapper.readValue(json, typeRef);
             return GlobalPermissionSet.from(globals);

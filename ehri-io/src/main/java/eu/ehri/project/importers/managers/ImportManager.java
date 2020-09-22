@@ -60,7 +60,7 @@ public interface ImportManager {
      */
     default ImportLog importInputStream(InputStream stream, String logMessage)
             throws IOException, InputParseError, ValidationError {
-        return importInputStream(stream, null, logMessage);
+        return importInputStream(stream, "-", logMessage);
     }
 
     /**
