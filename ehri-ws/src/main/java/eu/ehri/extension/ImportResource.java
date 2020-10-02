@@ -208,7 +208,7 @@ public class ImportResource extends AbstractResource {
      *                      (defaults to EadHandler)
      * @param importerClass the fully-qualified import class name
      *                      (defaults to EadImporter)
-     * @param propertyFile  a local file path pointing to an import properties
+     * @param propertyFile  a local file path or URL pointing to an import properties
      *                      configuration file.
      * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
      *                      provided to identify the source, e.g. the name of the file from

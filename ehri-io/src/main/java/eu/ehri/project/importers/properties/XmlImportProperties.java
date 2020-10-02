@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -128,6 +130,18 @@ abstract class PropertyLoader {
         }
     }
 
+    private static Properties loadPropertiesFromURL(URL url) {
+        logger.trace("loading file {}...", url);
+        try (InputStream ios = url.openStream()) {
+           Properties result = new Properties();
+           result.load(ios);
+           return result;
+        } catch (IOException e) {
+            logger.error("Error loading properties file: {}: {}", url, e);
+            return null;
+        }
+    }
+
     private static Properties loadPropertiesFromFile(Path path) {
         logger.trace("loading file {}...", path.toUri());
         try (InputStream ios = Files.newInputStream(path)) {
@@ -174,12 +188,18 @@ abstract class PropertyLoader {
      * @throws IllegalArgumentException if the resource was not found
      */
     private static Properties loadProperties(String name, ClassLoader loader) throws IllegalArgumentException {
-        Properties result = loadPropertiesFromResourceOrFile(name, loader);
-        if (result == null) {
-            String err = String.format("could not load [%s] as a classpath resource", name);
-            throw new IllegalArgumentException(err);
+        try {
+            Properties result = (name.startsWith("http://") || name.startsWith("https://"))
+                    ? loadPropertiesFromURL(new URL(name))
+                    : loadPropertiesFromResourceOrFile(name, loader);
+            if (result == null) {
+                String err = String.format("could not load [%s] as a classpath resource", name);
+                throw new IllegalArgumentException(err);
+            }
+            return result;
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(String.format("could not load [%s] as URL resource", name));
         }
-        return result;
     }
 
     /**
