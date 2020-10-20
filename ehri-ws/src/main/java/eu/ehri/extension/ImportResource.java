@@ -65,6 +65,8 @@ import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -562,8 +564,12 @@ public class ImportResource extends AbstractResource {
         if (properties != null) {
             java.nio.file.Path file = Paths.get(properties);
             if (!Files.isRegularFile(file)) {
-                throw new DeserializationError("Properties file '" + properties + "' " +
-                        "either does not exist, or is not a file.");
+                try {
+                    new URL(properties);
+                } catch (MalformedURLException e) {
+                    throw new DeserializationError("Properties file '" + properties + "' " +
+                            "either does not exist as a regular file or is an invalid URL.");
+                }
             }
         }
     }
