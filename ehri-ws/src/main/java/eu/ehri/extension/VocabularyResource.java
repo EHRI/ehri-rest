@@ -186,7 +186,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             final @QueryParam("format") String format,
             final @QueryParam("baseUri") String baseUri)
             throws IOException, ItemNotFound {
-        final String rdfFormat = getRdfFormat(format, "TTL");
+        final String rdfFormat = getRdfFormat(format);
         final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));

@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import eu.ehri.project.persistence.ActionManager;
 
 import java.util.Collection;
 import java.util.Map;
@@ -38,11 +39,12 @@ import java.util.Optional;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImportLog {
 
-    private final Multimap<String,String> createdKeys = HashMultimap.create();
+    private final Multimap<String, String> createdKeys = HashMultimap.create();
     private final Multimap<String, String> updatedKeys = HashMultimap.create();
     private final Multimap<String, String> unchangedKeys = HashMultimap.create();
     private final String logMessage;
     private final Map<String, String> errors = Maps.newHashMap();
+    private final String eventId;
 
 
     /**
@@ -51,11 +53,12 @@ public class ImportLog {
      * @param logMessage a log message
      */
     public ImportLog(String logMessage) {
-        this.logMessage = logMessage;
+        this(logMessage, null);
     }
 
-    public ImportLog() {
-        this(null);
+    public ImportLog(String logMessage, String eventId) {
+        this.logMessage = logMessage;
+        this.eventId = eventId;
     }
 
     @JsonCreator
@@ -64,8 +67,9 @@ public class ImportLog {
             @JsonProperty("created_keys") Map<String, Collection<String>> createdKeys,
             @JsonProperty("updated_keys") Map<String, Collection<String>> updatedKeys,
             @JsonProperty("unchanged_keys") Map<String, Collection<String>> unchangedKeys,
-            @JsonProperty("errors") Map<String, String> errors) {
-        this(logMessage);
+            @JsonProperty("errors") Map<String, String> errors,
+            @JsonProperty("event") String eventId) {
+        this(logMessage, eventId);
         createdKeys.forEach(this.createdKeys::putAll);
         unchangedKeys.forEach(this.unchangedKeys::putAll);
         updatedKeys.forEach(this.updatedKeys::putAll);
@@ -177,7 +181,39 @@ public class ImportLog {
      * @return returns the number of items that were either created or updated.
      */
     public int getChanged() {
-        return createdKeys.size() +  updatedKeys.size();
+        return createdKeys.size() + updatedKeys.size();
+    }
+
+    /**
+     * Return a new log with the given event ID.
+     *
+     * @param id a system event ID
+     * @return a new import log
+     */
+    public ImportLog withEventId(String id) {
+        return new ImportLog(
+                logMessage,
+                createdKeys.asMap(),
+                updatedKeys.asMap(),
+                unchangedKeys.asMap(),
+                errors,
+                id
+        );
+    }
+
+    /**
+     * Return a new log updated with an event ID if change events
+     * have take place. Otherwise the same log is returned and the
+     * event context left uncommitted.
+     *
+     * @param context an event content object
+     * @return either an updated log object with the ID of the committed
+     * event context, or the same log
+     */
+    public ImportLog committing(ActionManager.EventContext context) {
+        return hasDoneWork()
+                ? withEventId(context.commit().getId())
+                : this;
     }
 
     @JsonValue
@@ -191,12 +227,18 @@ public class ImportLog {
         data.put("unchanged_keys", unchangedKeys.asMap());
         data.put("errors", errors);
         data.put("message", logMessage);
+        data.put("event", eventId);
         return data;
     }
 
     @JsonIgnore
     public Optional<String> getLogMessage() {
         return Optional.of(logMessage);
+    }
+
+    @JsonIgnore
+    public Optional<String> getEventId() {
+        return Optional.of(eventId);
     }
 
     @Override
@@ -211,15 +253,16 @@ public class ImportLog {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ImportLog importLog = (ImportLog) o;
-        return createdKeys.equals(importLog.createdKeys) &&
+        return Objects.equals(logMessage, importLog.logMessage) &&
+                Objects.equals(eventId, importLog.eventId) &&
+                createdKeys.equals(importLog.createdKeys) &&
                 updatedKeys.equals(importLog.updatedKeys) &&
                 unchangedKeys.equals(importLog.unchangedKeys) &&
-                logMessage.equals(importLog.logMessage) &&
                 errors.equals(importLog.errors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(createdKeys, updatedKeys, unchangedKeys, logMessage, errors);
+        return Objects.hash(createdKeys, updatedKeys, unchangedKeys, logMessage, errors, eventId);
     }
 }

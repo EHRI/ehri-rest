@@ -26,11 +26,7 @@ import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
@@ -48,7 +44,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -271,8 +266,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     // Helpers
 
-    protected <T extends Entity> Response exportItemsAsZip(XmlExporter<T> exporter, Iterable<T> items, String lang)
-            throws IOException {
+    protected <T extends Entity> Response exportItemsAsZip(XmlExporter<T> exporter, Iterable<T> items, String lang) {
         return Response.ok((StreamingOutput) outputStream -> {
             try (final Tx tx = beginTx();
                  ZipOutputStream zos = new ZipOutputStream(outputStream)) {
@@ -296,12 +290,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @return a new event query builder
      */
     protected EventsApi getEventsApi() {
-        List<EventTypes> eventTypes = Lists.transform(getStringListQueryParam(EVENT_TYPE_PARAM),
-                EventTypes::valueOf);
-        List<EntityClass> entityClasses = Lists.transform(getStringListQueryParam(ITEM_TYPE_PARAM),
-                EntityClass::withName);
-        List<EventsApi.ShowType> showTypes = Lists.transform(getStringListQueryParam(SHOW_PARAM),
-                EventsApi.ShowType::valueOf);
+        List<EventTypes> eventTypes = Lists.transform(getStringListQueryParam(EVENT_TYPE_PARAM), EventTypes::valueOf);
+        List<EntityClass> entityClasses = Lists.transform(getStringListQueryParam(ITEM_TYPE_PARAM), EntityClass::withName);
+        List<EventsApi.ShowType> showTypes = Lists.transform(getStringListQueryParam(SHOW_PARAM), EventsApi.ShowType::valueOf);
         List<String> fromStrings = getStringListQueryParam(FROM_PARAM);
         List<String> toStrings = getStringListQueryParam(TO_PARAM);
         List<String> users = getStringListQueryParam(USER_PARAM);
@@ -310,13 +301,13 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
                 .events()
                 .withRange(getIntQueryParam(OFFSET_PARAM, 0),
                         getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
-                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
-                .withEntityClasses(entityClasses.toArray(new EntityClass[entityClasses.size()]))
+                .withEventTypes(eventTypes.toArray(new EventTypes[0]))
+                .withEntityClasses(entityClasses.toArray(new EntityClass[0]))
                 .from(fromStrings.isEmpty() ? null : fromStrings.get(0))
                 .to(toStrings.isEmpty() ? null : toStrings.get(0))
-                .withUsers(users.toArray(new String[users.size()]))
-                .withIds(ids.toArray(new String[ids.size()]))
-                .withShowType(showTypes.toArray(new EventsApi.ShowType[showTypes.size()]));
+                .withUsers(users.toArray(new String[0]))
+                .withIds(ids.toArray(new String[0]))
+                .withShowType(showTypes.toArray(new EventsApi.ShowType[0]));
     }
 
     /**

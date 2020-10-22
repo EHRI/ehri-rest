@@ -67,10 +67,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Supplier;
 
 
@@ -103,6 +105,7 @@ public abstract class AbstractResource implements TxCheckedResource {
             TURTLE_MIMETYPE, "TTL",
             RDF_XML_MIMETYPE, "RDF/XML"
     );
+    protected final String DEFAULT_RDF_FORMAT = "TTL";
 
     /**
      * Query arguments.
@@ -198,9 +201,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     protected Serializer getSerializer() {
         Optional<List<String>> includeProps = Optional.ofNullable(uriInfo.getQueryParameters(true)
                 .get(INCLUDE_PROPS_PARAM));
-        return includeProps.isPresent()
-                ? serializer.withIncludedProperties(includeProps.get())
-                : serializer;
+        return includeProps.map(serializer::withIncludedProperties).orElse(serializer);
     }
 
     /**
@@ -211,7 +212,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      */
     protected List<String> getStringListQueryParam(String key) {
         List<String> value = uriInfo.getQueryParameters().get(key);
-        return value == null ? Lists.<String>newArrayList() : value;
+        return value == null ? Lists.newArrayList() : value;
     }
 
     /**
@@ -318,7 +319,7 @@ public abstract class AbstractResource implements TxCheckedResource {
             try {
                 return Optional.of(URLDecoder.decode(list.get(0), StandardCharsets.UTF_8.name()));
             } catch (UnsupportedEncodingException e) {
-                logger.error("Unsupported encoding in header: {}", e);
+                logger.error("Unsupported encoding in header");
                 return Optional.empty();
             }
         }
@@ -350,7 +351,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     protected boolean isStreaming() {
         List<String> list = requestHeaders.getRequestHeader(STREAM_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
-            return Boolean.valueOf(list.get(0));
+            return Boolean.parseBoolean(list.get(0));
         }
         return false;
     }
@@ -381,6 +382,7 @@ public abstract class AbstractResource implements TxCheckedResource {
             return Response.status(Response.Status.OK)
                     .entity(getSerializer().entityToJson(item).getBytes(Charsets.UTF_8))
                     .location(getItemUri(item))
+                    .lastModified(lastModified(item))
                     .cacheControl(getCacheControl(item)).build();
         } catch (SerializationError e) {
             throw new RuntimeException(e);
@@ -484,7 +486,8 @@ public abstract class AbstractResource implements TxCheckedResource {
      */
     protected Response creationResponse(Entity frame) {
         try {
-            return Response.status(Response.Status.CREATED).location(getItemUri(frame))
+            return Response.status(Response.Status.CREATED)
+                    .location(getItemUri(frame))
                     .entity(getSerializer().entityToJson(frame))
                     .build();
         } catch (SerializationError serializationError) {
@@ -512,14 +515,24 @@ public abstract class AbstractResource implements TxCheckedResource {
         return cc;
     }
 
+    protected <T extends Entity> Date lastModified(T item) {
+        try {
+            String ts = item.as(Accessible.class).getLatestEvent().getTimestamp();
+            OffsetDateTime dt = java.time.OffsetDateTime.parse(ts, DateTimeFormatter.ISO_DATE_TIME);
+            return Date.from(dt.toInstant());
+        } catch (NullPointerException e) {
+            // there's no event available for this item
+            return null;
+        }
+    }
+
     /**
      * Get an RDF format for content-negotiation form
      *
      * @param format        a format string, possibly null
-     * @param defaultFormat a default format
      * @return an RDF format
      */
-    protected String getRdfFormat(String format, String defaultFormat) {
+    protected String getRdfFormat(String format) {
         if (format == null) {
             for (String mimeValue : RDF_MIMETYPE_FORMATS.keySet()) {
                 MediaType mime = MediaType.valueOf(mimeValue);
@@ -527,9 +540,9 @@ public abstract class AbstractResource implements TxCheckedResource {
                     return RDF_MIMETYPE_FORMATS.get(mimeValue);
                 }
             }
-            return defaultFormat;
+            return DEFAULT_RDF_FORMAT;
         } else {
-            return RDF_MIMETYPE_FORMATS.containsValue(format) ? format : defaultFormat;
+            return RDF_MIMETYPE_FORMATS.containsValue(format) ? format : DEFAULT_RDF_FORMAT;
         }
     }
 
@@ -542,7 +555,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     }
 
     private Map<String, Object> getHeaders(QueryApi.Page<?> page) {
-        return ImmutableMap.<String, Object>of(
+        return ImmutableMap.of(
                 RANGE_HEADER_NAME,
                 String.format("offset=%d; limit=%d; total=%d",
                         page.getOffset(), page.getLimit(), page.getTotal()));

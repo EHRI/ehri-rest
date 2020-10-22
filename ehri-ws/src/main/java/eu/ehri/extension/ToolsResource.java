@@ -145,7 +145,7 @@ public class ToolsResource extends AbstractResource {
     public Response exportSchema(
             final @QueryParam("format") String format,
             final @QueryParam("baseUri") String baseUri) {
-        final String rdfFormat = getRdfFormat(format, "TTL");
+        final String rdfFormat = getRdfFormat(format);
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
         final SchemaExporter schemaExporter = new SchemaExporter(rdfFormat);

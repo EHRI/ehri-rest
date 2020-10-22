@@ -323,11 +323,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 concept.setPermissionScope(vocabulary);
             }
 
-            if (log.hasDoneWork()) {
-                eventContext.commit();
-            }
-
-            return log;
+            return log.committing(eventContext);
         } finally {
             model.close();
         }

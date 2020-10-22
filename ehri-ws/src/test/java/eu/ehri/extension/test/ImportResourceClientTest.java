@@ -36,6 +36,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
 import eu.ehri.project.utils.Table;
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -55,6 +56,7 @@ import java.util.Map;
 import static eu.ehri.extension.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 
 
@@ -81,6 +83,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -103,6 +106,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -124,6 +128,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -147,6 +152,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUnchanged());
         assertTrue("Tag is not in log", log.getCreatedKeys().containsKey(SINGLE_EAD));
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -308,6 +314,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
         assertEquals(count + 1L,
                 getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
     }
@@ -332,6 +339,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
         // count should be the same as before since we didn't commit
         assertEquals(count,
                 getEntityCount(Entities.DOCUMENTARY_UNIT, getAdminUserProfileId()));
@@ -361,6 +369,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -389,6 +398,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -432,7 +442,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log2.log().getUpdated());
         assertEquals(3, log2.log().getUnchanged());
         assertEquals(logText, log.log().getLogMessage().orElse(null));
-
+        assertThat(log.log().getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -453,6 +463,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test
@@ -473,6 +484,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(0, log.getUpdated());
         assertEquals(0, log.getUnchanged());
         assertEquals(logText, log.getLogMessage().orElse(null));
+        assertThat(log.getEventId().orElse(null), notNullValue());
     }
 
     @Test

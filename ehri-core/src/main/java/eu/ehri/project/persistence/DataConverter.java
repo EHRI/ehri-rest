@@ -228,6 +228,7 @@ class DataConverter {
                 }
             };
         } catch (IOException e) {
+            e.printStackTrace();
             throw new DeserializationError("Error reading JSON", e);
         }
     }
