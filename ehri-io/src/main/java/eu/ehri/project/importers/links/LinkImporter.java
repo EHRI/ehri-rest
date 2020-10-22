@@ -122,10 +122,6 @@ public class LinkImporter {
                 }
             }
         }
-        if (log.hasDoneWork()) {
-            eventContext.commit();
-        }
-
-        return log;
+        return log.committing(eventContext);
     }
 }

@@ -173,10 +173,7 @@ public class BatchOperations {
                     }
                 }
             }
-            if (log.hasDoneWork()) {
-                ctx.commit();
-            }
-            return log;
+            return log.committing(ctx);
         } catch (RuntimeJsonMappingException e) {
             throw new DeserializationError("Error reading JSON stream:", e);
         }
@@ -226,10 +223,7 @@ public class BatchOperations {
                     }
                 }
             }
-            if (log.hasDoneWork()) {
-                ctx.commit();
-            }
-            return log;
+            return log.committing(ctx);
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
         } catch (RuntimeJsonMappingException e) {

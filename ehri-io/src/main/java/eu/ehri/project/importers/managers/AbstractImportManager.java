@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.managers;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.base.Charsets;
@@ -42,10 +43,12 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -132,12 +135,9 @@ public abstract class AbstractImportManager implements ImportManager {
 
         // Do the import...
         importInputStream(stream, tag, action, log);
-        // If nothing was imported, remove the action...
-        if (log.hasDoneWork()) {
-            action.commit();
-        }
 
-        return log;
+        // Commit the action if necessary
+        return log.committing(action);
     }
 
     @Override
@@ -165,13 +165,11 @@ public abstract class AbstractImportManager implements ImportManager {
                 }
                 url = new URL(parser.nextTextValue());
 
-                try {
-                    currentFile = name;
-                    try (InputStream stream = url.openStream()) {
-                        logger.info("Importing URL with identifier: {}", name);
-                        importInputStream(stream, currentFile, action, log);
-                    }
-                } catch (ValidationError e) {
+                currentFile = name;
+                try (InputStream stream = url.openStream()) {
+                    logger.info("Importing URL with identifier: {}", name);
+                    importInputStream(stream, currentFile, action, log);
+                } catch (ValidationError | SSLException | SocketException e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
                         throw e;
@@ -181,15 +179,14 @@ public abstract class AbstractImportManager implements ImportManager {
 
             // Only mark the transaction successful if we're
             // actually accomplished something.
-            if (log.hasDoneWork()) {
-                action.commit();
-            }
-
-            return log;
+            return log.committing(action);
         } catch (MalformedURLException e) {
             throw new InputParseError("Malformed URL: " + url);
-        } catch (IOException e) {
+        } catch (JsonParseException e) {
             throw new InputParseError("Error reading JSON", e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InputParseError(e.getMessage());
         }
     }
 
@@ -204,12 +201,10 @@ public abstract class AbstractImportManager implements ImportManager {
                     EventTypes.ingest, msg);
             ImportLog log = new ImportLog(msg.orElse(null));
             for (String path : filePaths) {
-                try {
-                    currentFile = path;
-                    try (InputStream stream = Files.newInputStream(Paths.get(path))) {
-                        logger.info("Importing file: {}", path);
-                        importInputStream(stream, currentFile, action, log);
-                    }
+                currentFile = path;
+                try (InputStream stream = Files.newInputStream(Paths.get(path))) {
+                    logger.info("Importing file: {}", path);
+                    importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
@@ -220,11 +215,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
             // Only mark the transaction successful if we're
             // actually accomplished something.
-            if (log.hasDoneWork()) {
-                action.commit();
-            }
-
-            return log;
+            return log.committing(action);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -260,11 +251,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
         // Only mark the transaction successful if we're
         // actually accomplished something.
-        if (log.hasDoneWork()) {
-            action.commit();
-        }
-
-        return log;
+        return log.committing(action);
     }
 
     /**
