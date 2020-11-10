@@ -8,6 +8,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.core.impl.neo4j.Neo4j2Vertex;
 import eu.ehri.project.models.EntityClass;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +28,11 @@ public class Neo4jGraphManagerTest {
 
     private GraphManager manager;
     private FramedGraph<Neo4j2Graph> graph;
+    private Path tempDir;
 
     @Before
     public void setUp() throws Exception {
-        Path tempDir = Files.createTempDirectory("neo4j-tmp");
+        tempDir = Files.createTempDirectory("neo4j-tmp");
         graph = new FramedGraphFactory().create(new Neo4j2Graph(tempDir.toString()));
         manager = new Neo4jGraphManager<>(graph);
     }
@@ -38,6 +40,7 @@ public class Neo4jGraphManagerTest {
     @After
     public void tearDown() throws Exception {
         graph.shutdown();
+        FileUtils.deleteDirectory(tempDir.toFile());
     }
 
     @Test

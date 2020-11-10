@@ -20,10 +20,7 @@
 package eu.ehri.project.test;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
@@ -43,6 +40,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.models.utils.UniqueAdjacencyAnnotationHandler;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -71,6 +69,7 @@ public abstract class GraphTestBase {
 
     protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
+    private Path tempDir;
 
     protected static List<VertexProxy> getGraphState(FramedGraph<?> graph) {
         List<VertexProxy> list = Lists.newArrayList();
@@ -120,10 +119,10 @@ public abstract class GraphTestBase {
     }
 
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
-        Path tempDir = Files.createTempDirectory("neo4j-tmp");
-        tempDir.toFile().deleteOnExit();
-        DatabaseManagementService managementService = new DatabaseManagementServiceBuilder(tempDir.toFile()).build();
-        GraphDatabaseService rawGraph = managementService.database( DEFAULT_DATABASE_NAME );
+        tempDir = Files.createTempDirectory("neo4j-tmp");
+        DatabaseManagementService managementService = new DatabaseManagementServiceBuilder(tempDir.toFile())
+                .setConfigRaw(ImmutableMap.of("keep_logical_logs", "false")).build();
+        GraphDatabaseService rawGraph = managementService.database(DEFAULT_DATABASE_NAME);
         try (Transaction tx = rawGraph.beginTx()) {
             Neo4jGraphManager.createIndicesAndConstraints(tx);
             tx.commit();
@@ -134,6 +133,7 @@ public abstract class GraphTestBase {
     @After
     public void tearDown() throws Exception {
         graph.shutdown();
+        FileUtils.deleteDirectory(tempDir.toFile());
     }
 
     /**
