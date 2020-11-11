@@ -34,14 +34,11 @@ import java.io.IOException;
  */
 public abstract class RunningServerTest {
 
-    // Test server port - different from Neo4j default to prevent collisions.
-    final static private Integer testServerPort = 7576;
-
     // Mount point for EHRI resources
     final static private String mountPoint = "ehri";
 
     private final static ServerRunner runner = ServerRunner.getInstance(
-            testServerPort, ImmutableMap.of("eu.ehri.extension", mountPoint));
+            ImmutableMap.of("eu.ehri.extension", mountPoint));
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {
@@ -54,7 +51,7 @@ public abstract class RunningServerTest {
     }
 
     String getExtensionEntryPointUri() {
-        return runner.getServer().baseUri() + mountPoint;
+        return runner.baseUri() + mountPoint;
     }
 
     @Before

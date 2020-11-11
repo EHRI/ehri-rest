@@ -24,6 +24,7 @@ import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
 
@@ -41,13 +42,9 @@ public abstract class ModelTestBase extends GraphTestBase {
     public void setUp() throws Exception {
         super.setUp();
         helper = FixtureLoaderFactory.getInstance(graph);
-        helper.loadTestData();
-        graph.getBaseGraph().commit();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
+        try (Transaction tx = service.beginTx()) {
+            helper.loadTestData();
+            tx.commit();
+        }
     }
 }

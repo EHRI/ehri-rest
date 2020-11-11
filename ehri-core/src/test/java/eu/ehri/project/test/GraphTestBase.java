@@ -20,14 +20,15 @@
 package eu.ehri.project.test;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphConfiguration;
 import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.AbstractModule;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.api.Api;
@@ -39,16 +40,17 @@ import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
-import eu.ehri.project.models.utils.UniqueAdjacencyAnnotationHandler;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.harness.Neo4j;
+import org.neo4j.harness.Neo4jBuilders;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
@@ -60,8 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
-
 
 public abstract class GraphTestBase {
 
@@ -69,7 +69,10 @@ public abstract class GraphTestBase {
 
     protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
-    private Path tempDir;
+    protected static Neo4j neo4j;
+    protected static DatabaseManagementService dms;
+    protected static GraphDatabaseService service;
+    private static Path tempDir;
 
     protected static List<VertexProxy> getGraphState(FramedGraph<?> graph) {
         List<VertexProxy> list = Lists.newArrayList();
@@ -112,28 +115,40 @@ public abstract class GraphTestBase {
         return Paths.get(resource.toURI()).toString();
     }
 
+    @BeforeClass
+    public static void setUpAll() throws Exception {
+        tempDir = Files.createTempDirectory("neo4j-tmp");
+        neo4j = Neo4jBuilders
+                .newInProcessBuilder(tempDir.toFile())
+                .withDisabledServer()
+                .build();
+        dms = neo4j.databaseManagementService();
+        service = neo4j.defaultDatabaseService();
+    }
+
     @Before
     public void setUp() throws Exception {
         graph = getFramedGraph();
         manager = GraphManagerFactory.getInstance(graph);
-    }
-
-    protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
-        tempDir = Files.createTempDirectory("neo4j-tmp");
-        DatabaseManagementService managementService = new DatabaseManagementServiceBuilder(tempDir.toFile())
-                .setConfigRaw(ImmutableMap.of("keep_logical_logs", "false")).build();
-        GraphDatabaseService rawGraph = managementService.database(DEFAULT_DATABASE_NAME);
-        try (Transaction tx = rawGraph.beginTx()) {
+        try (Transaction tx = service.beginTx()) {
             Neo4jGraphManager.createIndicesAndConstraints(tx);
             tx.commit();
         }
-        return graphFactory.create(new Neo4j2Graph(managementService, rawGraph));
+    }
+
+    protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {
+        return graphFactory.create(new Neo4j2Graph(dms, service));
+    }
+
+    @AfterClass
+    public static void tearDownAll() throws Exception {
+        neo4j.close();
+        FileUtils.deleteDirectory(tempDir.toFile());
     }
 
     @After
     public void tearDown() throws Exception {
-        graph.shutdown();
-        FileUtils.deleteDirectory(tempDir.toFile());
+        service.executeTransactionally("MATCH (a) DETACH DELETE a");
     }
 
     /**

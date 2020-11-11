@@ -29,18 +29,16 @@ import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.test.utils.GraphCleaner;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import org.neo4j.configuration.helpers.SocketAddress;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.server.CommunityNeoServer;
-import org.neo4j.server.helpers.CommunityServerBuilder;
+import org.neo4j.harness.Neo4j;
+import org.neo4j.harness.Neo4jBuilder;
+import org.neo4j.harness.Neo4jBuilders;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 /**
  * Utility class to obtain a server.
@@ -52,7 +50,6 @@ public class ServerRunner {
     // Graph factory.
     private final static FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
-    private final int port;
     private final Map<String, String> packageMountPoints;
 
     private Level logLevel = Level.OFF;
@@ -65,30 +62,28 @@ public class ServerRunner {
     private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");
     private final static Logger graphLogger = Logger.getLogger(TxNeo4jGraph.class.getName());
 
-    private CommunityNeoServer neoServer;
+    private Neo4j neo4j;
 
-    private ServerRunner(int port, Map<String, String> packageMountPoints) {
-        this.port = port;
+    private ServerRunner(Map<String, String> packageMountPoints) {
         this.packageMountPoints = packageMountPoints;
     }
 
     /**
      * Get an instance of the server runner.
      *
-     * @param port               the port
      * @param packageMountPoints a set of package-name to mount-point mappings
      * @return a new server runner
      */
-    public static ServerRunner getInstance(int port, Map<String, String> packageMountPoints) {
+    public static ServerRunner getInstance(Map<String, String> packageMountPoints) {
         if (INSTANCE == null) {
-            INSTANCE = new ServerRunner(port, packageMountPoints);
+            INSTANCE = new ServerRunner(packageMountPoints);
         }
         return INSTANCE;
     }
 
     public void start() throws IOException {
-        if (neoServer != null) {
-            throw new IOException("Server is already running: " + neoServer.baseUri());
+        if (neo4j != null) {
+            throw new IOException("Server is already running: " + neo4j.httpURI());
         }
         sunLogger.setLevel(logLevel);
         neoLogger.setLevel(logLevel);
@@ -98,33 +93,31 @@ public class ServerRunner {
         // the graph data.) This is noisy so we lower the log level here.
         graphLogger.setLevel(logLevel);
 
-        CommunityServerBuilder serverBuilder = CommunityServerBuilder.server()
-                .onAddress(new SocketAddress("localhost", port));
+        Neo4jBuilder serverBuilder = Neo4jBuilders.newInProcessBuilder();
+
         for (Map.Entry<String, String> entry : packageMountPoints.entrySet()) {
             String mountPoint = entry.getValue().startsWith("/")
-                    ? entry.getValue() : "/" + entry.getValue();
+                     ? entry.getValue() : "/" + entry.getValue();
             serverBuilder = serverBuilder
-                    .withThirdPartyJaxRsPackage(entry.getKey(), mountPoint);
+                    .withUnmanagedExtension(mountPoint, entry.getKey());
         }
-        neoServer = serverBuilder
-                .withProperty("dbms.connector.bolt.listen_address", "0.0.0.0:7688")
-                .build();
-        neoServer.start();
 
-        DatabaseManagementService dbms = neoServer.getDatabaseService().getDatabaseManagementService();
-        GraphDatabaseService service = dbms.database(DEFAULT_DATABASE_NAME);
+        neo4j = serverBuilder.build();
+
+        DatabaseManagementService dbms = neo4j.databaseManagementService();
+        GraphDatabaseService service = neo4j.defaultDatabaseService();
         TxGraph graph = new TxNeo4jGraph(dbms, service);
         framedGraph = graphFactory.create(graph);
         fixtureLoader = FixtureLoaderFactory.getInstance(framedGraph);
         graphCleaner = new GraphCleaner<>(framedGraph);
     }
 
-    public CommunityNeoServer getServer() {
-        return neoServer;
-    }
-
     public void setLogLevel(Level logLevel) {
         this.logLevel = logLevel;
+    }
+
+    public String baseUri() {
+        return neo4j != null ? neo4j.httpURI().toString() : null;
     }
 
     public void setUpData() {
@@ -146,9 +139,9 @@ public class ServerRunner {
     }
 
     public void stop() {
-        if (neoServer != null) {
-            neoServer.stop();
-            neoServer = null;
+        if (neo4j != null) {
+            neo4j.close();
+            neo4j = null;
         }
     }
 }

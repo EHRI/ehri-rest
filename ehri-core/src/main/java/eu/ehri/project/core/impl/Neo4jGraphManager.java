@@ -125,20 +125,25 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
         return node;
     }
 
+    public static void dropIndicesAndConstraints(Transaction tx) {
+        Schema schema = tx.schema();
+        for (ConstraintDefinition definition : schema.getConstraints()) {
+            definition.drop();
+        }
+        for (IndexDefinition indexDefinition : schema.getIndexes()) {
+            indexDefinition.drop();
+        }
+    }
+
     /**
      * Create the graph schema
      *
      * @param tx a Neo4j transaction
      */
     public static void createIndicesAndConstraints(Transaction tx) {
-        Schema schema = tx.schema();
-        for (ConstraintDefinition constraintDefinition : schema.getConstraints()) {
-            constraintDefinition.drop();
-        }
-        for (IndexDefinition indexDefinition : schema.getIndexes()) {
-            indexDefinition.drop();
-        }
+//        dropIndicesAndConstraints(tx);
 
+        Schema schema = tx.schema();
         schema.constraintFor(Label.label(BASE_LABEL))
                 .assertPropertyIsUnique(EntityType.ID_KEY)
                 .create();

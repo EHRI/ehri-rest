@@ -25,6 +25,7 @@ import eu.ehri.project.models.UserProfile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.neo4j.graphdb.Transaction;
 
 abstract public class AbstractFixtureTest extends ModelTestBase {
 
@@ -32,27 +33,29 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected UserProfile validUser;
     protected UserProfile invalidUser;
     protected DocumentaryUnit item;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
+    protected Transaction tx;
 
     @Before
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        try {
+        try (Transaction tx = service.beginTx()) {
             item = manager.getEntity("c1", DocumentaryUnit.class);
             validUser = manager.getEntity("mike", UserProfile.class);
             invalidUser = manager.getEntity("reto", UserProfile.class);
+            tx.commit();
         } catch (ItemNotFound e) {
             throw new RuntimeException(e);
         }
+
+        tx = service.beginTx();
     }
 
     @After
+    @Override
     public void tearDown() throws Exception {
+        tx.rollback();
+        tx.close();
         super.tearDown();
-
     }
 }
