@@ -143,9 +143,7 @@ public abstract class AbstractImportManager implements ImportManager {
     @Override
     public ImportLog importJson(InputStream json, String logMessage) throws ValidationError, InputParseError {
         Preconditions.checkNotNull(json);
-        URL url = null;
-        try (final JsonParser parser = factory
-                .createParser(new InputStreamReader(json, Charsets.UTF_8))) {
+        try (final JsonParser parser = factory.createParser(new InputStreamReader(json, Charsets.UTF_8))) {
 
             JsonToken jsonToken = parser.nextValue();
             if (!parser.isExpectedStartObjectToken()) {
@@ -163,13 +161,13 @@ public abstract class AbstractImportManager implements ImportManager {
                 if (name == null) {
                     break;
                 }
-                url = new URL(parser.nextTextValue());
+                URL url = new URL(parser.nextTextValue());
 
                 currentFile = name;
                 try (InputStream stream = url.openStream()) {
                     logger.info("Importing URL with identifier: {}", name);
                     importInputStream(stream, currentFile, action, log);
-                } catch (ValidationError | SSLException | SocketException e) {
+                } catch (ValidationError | SSLException | MalformedURLException | SocketException e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
                         throw e;
@@ -180,8 +178,6 @@ public abstract class AbstractImportManager implements ImportManager {
             // Only mark the transaction successful if we're
             // actually accomplished something.
             return log.committing(action);
-        } catch (MalformedURLException e) {
-            throw new InputParseError("Malformed URL: " + url);
         } catch (JsonParseException e) {
             throw new InputParseError("Error reading JSON", e);
         } catch (IOException e) {
