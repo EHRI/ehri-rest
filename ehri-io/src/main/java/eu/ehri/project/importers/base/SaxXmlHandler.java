@@ -89,7 +89,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         this.importer = importer;
         this.defaultLang = defaultLang;
         this.properties = properties;
-        currentGraphPath.push(Maps.<String, Object>newHashMap());
+        currentGraphPath.push(Maps.newHashMap());
     }
 
     /**
@@ -168,7 +168,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
             logger.trace("Pushing depth... {} -> {}", depth, qName);
-            currentGraphPath.push(Maps.<String, Object>newHashMap());
+            currentGraphPath.push(Maps.newHashMap());
         }
 
         // Store attributes that are listed in the .properties file
@@ -261,7 +261,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * whitespace.
      */
     @Override
-    public void characters(char ch[], int start, int length) throws SAXException {
+    public void characters(char[] ch, int start, int length) {
         // NB: 'Blank' (whitespace) only strings are significant here, because
         // otherwise a sequence of character, line-break, and an entity will
         // end up being concatenated with the line-break removed. We therefore
