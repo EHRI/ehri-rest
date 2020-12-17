@@ -604,7 +604,7 @@ public class ToolsResource extends AbstractResource {
      * reflect this.
      *
      * @param commit actually perform the rename
-     * @param mapping a comma-separated CSV file, exluding headers.
+     * @param mapping a comma-separated CSV file, excluding headers.
      * @return CSV data containing two columns: the old global ID, and
      * a newly generated global ID, derived from the new local identifier,
      * with ordering corresponding to lexically-ordered input data.

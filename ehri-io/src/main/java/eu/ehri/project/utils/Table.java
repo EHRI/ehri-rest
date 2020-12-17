@@ -1,5 +1,6 @@
 package eu.ehri.project.utils;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import java.util.Collections;
@@ -56,5 +57,19 @@ public class Table {
                     .map(row -> row.size() < num + 1 ? "" : row.get(num))
                     .collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Table table = (Table) o;
+        return Objects.equal(data, table.data) &&
+                Objects.equal(headers, table.headers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(data, headers);
     }
 }

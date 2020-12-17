@@ -19,16 +19,19 @@
 
 package eu.ehri.extension;
 
+import com.google.common.collect.Lists;
 import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
+import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.tools.IdRegenerator;
+import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -38,6 +41,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the DocumentaryUnit model.
@@ -108,6 +113,53 @@ public class DocumentaryUnitResource
             throws PermissionDenied, ItemNotFound, ValidationError {
         try (final Tx tx = beginTx()) {
             deleteItem(id);
+            tx.success();
+        }
+    }
+
+    @POST
+    @Path("{id:[^/]+}/rename/{to:[^/]+}")
+    public Table rename(@PathParam("id") String id, @PathParam("to") String newIdentifier)
+            throws PermissionDenied, ItemNotFound, ValidationError, SerializationError,
+            DeserializationError, IdRegenerator.IdCollisionError {
+        try (final Tx tx = beginTx()) {
+            IdRegenerator idGen = new IdRegenerator(graph).withActualRename(true);
+            DocumentaryUnit entity = api().detail(id, DocumentaryUnit.class);
+            Bundle newBundle = getSerializer()
+                    .withDependentOnly(true)
+                    .entityToBundle(entity)
+                    .withDataValue(Ontology.IDENTIFIER_KEY, newIdentifier);
+            api().update(newBundle, DocumentaryUnit.class, getLogMessage());
+            List<List<String>> renamed = Lists.newArrayList();
+            idGen.reGenerateId(entity).ifPresent(renamed::add);
+            for (DocumentaryUnit child : entity.getAllChildren()) {
+                idGen.reGenerateId(child).ifPresent(renamed::add);
+            }
+            tx.success();
+            return Table.of(renamed);
+        }
+    }
+
+    @DELETE
+    @Path("{id:[^/]+}/all")
+    public void deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
+        try (final Tx tx = beginTx()) {
+            deleteItem(id, item -> {
+                // Delete the children first. If this fails due to permission
+                // errors the transaction won't be committed.
+                List<String> ids = StreamSupport.stream(
+                        item.getAllChildren().spliterator(), false)
+                        .map(Entity::getId)
+                        .collect(Collectors.toList());
+                try {
+                    new BatchOperations(graph)
+                            .setScope(item)
+                            .setVersioning(true)
+                            .batchDelete(ids, getCurrentActioner(), getLogMessage());
+                } catch (ItemNotFound e) {
+                    throw new RuntimeException(e);
+                }
+            });
             tx.success();
         }
     }
