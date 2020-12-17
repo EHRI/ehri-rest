@@ -74,7 +74,7 @@ public final class BundleManager {
      * @param graph The graph
      */
     public BundleManager(FramedGraph<?> graph) {
-        this(graph, Lists.<String>newArrayList());
+        this(graph, Lists.newArrayList());
     }
 
     /**
@@ -140,7 +140,7 @@ public final class BundleManager {
 
     // Helpers
     private int deleteCount(Bundle bundle, int count) throws Exception {
-        Integer c = count;
+        int c = count;
 
         for (Bundle child : bundle.getDependentRelations().values()) {
             c = deleteCount(child, c);

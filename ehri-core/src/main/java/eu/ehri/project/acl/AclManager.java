@@ -279,7 +279,7 @@ public final class AclManager {
             ContentType target = enumContentTypeMap.getUnchecked(ct);
             Collection<PermissionType> pset = globalsMap.containsKey(ct)
                     ? globalsMap.get(ct)
-                    : Sets.<PermissionType>newHashSet();
+                    : Sets.newHashSet();
             for (PermissionType perm : PermissionType.values()) {
                 if (pset.contains(perm)) {
                     grantPermission(target, perm, accessor);
@@ -327,9 +327,7 @@ public final class AclManager {
     public void revokePermission(Accessible entity, PermissionType permType,
             Accessor accessor) {
         Optional<PermissionGrant> maybeGrant = findPermission(entity, permType, accessor);
-        if (maybeGrant.isPresent()) {
-            manager.deleteVertex(maybeGrant.get().asVertex());
-        }
+        maybeGrant.ifPresent(permissionGrant -> manager.deleteVertex(permissionGrant.asVertex()));
     }
 
     /**
@@ -589,13 +587,13 @@ public final class AclManager {
         try {
             Vertex vertex = manager.createVertex(
                     EntityClass.PERMISSION_GRANT.getIdGen()
-                            .generateId(Lists.<String>newArrayList(), null),
+                            .generateId(Lists.newArrayList(), null),
                     EntityClass.PERMISSION_GRANT,
                     Maps.newHashMap());
             return graph.frame(vertex, PermissionGrant.class);
         } catch (IntegrityError e) {
             e.printStackTrace();
-            throw new RuntimeException("Something very unlikely has occured because two" +
+            throw new RuntimeException("Something very unlikely has occurred because two" +
                     " supposedly-random numbers have collided. Trying again should fix this.");
         }
     }

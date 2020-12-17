@@ -20,6 +20,7 @@
 package eu.ehri.extension.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -29,6 +30,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
+import eu.ehri.project.utils.Table;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,16 +39,13 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.List;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+
 
 public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTest {
 
@@ -113,6 +112,22 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         assertThat(c4cc, not(containsString("no-cache")));
         assertThat(c4cc, not(containsString("no-store")));
         assertThat(c4cc, containsString("max-age=" + AbstractResource.ITEM_CACHE_TIME));
+    }
+
+    @Test
+    public void testDeleteDocumentaryUnitAndChildren() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, "all"))
+                .delete(ClientResponse.class);
+        assertStatus(NO_CONTENT, response);
+
+        for (String id : new String[]{FIRST_DOC_ID, "c2", "c3"}) {
+            ClientResponse r1 = jsonCallAs(getAdminUserProfileId(),
+                    entityUri(Entities.DOCUMENTARY_UNIT, id))
+                    .head();
+            assertStatus(NOT_FOUND, r1);
+        }
     }
 
     @Test
@@ -206,7 +221,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         params.add(AbstractResource.SORT_PARAM, Ontology.IDENTIFIER_KEY);
         List<Bundle> data = getEntityList(
                 entityUri(Entities.DOCUMENTARY_UNIT), getAdminUserProfileId(), params);
-        assertTrue(!data.isEmpty());
+        assertFalse(data.isEmpty());
         data.sort(bundleComparator);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
@@ -227,7 +242,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
                 .get(String.class);
 
         List<Bundle> data = decodeList(s);
-        assertTrue(!data.isEmpty());
+        assertFalse(data.isEmpty());
         data.sort(bundleComparator);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
@@ -374,6 +389,21 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(CREATED_ID, updatedEntityBundle.getDataValue(Ontology.IDENTIFIER_KEY));
         assertEquals(PARTIAL_NAME, updatedEntityBundle.getDataValue(Ontology.NAME_KEY));
+    }
+
+    @Test
+    public void testRenameDocumentaryUnit() throws Exception {
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename", "z1"))
+                .post(ClientResponse.class);
+        assertStatus(OK, response);
+        Table expected = Table.of(Lists.newArrayList(
+                Lists.newArrayList("c1", "nl-r1-z1"),
+                Lists.newArrayList("c2", "nl-r1-z1-c2"),
+                Lists.newArrayList("c3", "nl-r1-z1-c2-c3")
+        ));
+        assertEquals(expected, response.getEntity(Table.class));
+
     }
 
     private URI getCreationUri() {
