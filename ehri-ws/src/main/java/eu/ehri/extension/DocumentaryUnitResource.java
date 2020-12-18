@@ -118,8 +118,10 @@ public class DocumentaryUnitResource
     }
 
     @POST
-    @Path("{id:[^/]+}/rename/{to:[^/]+}")
-    public Table rename(@PathParam("id") String id, @PathParam("to") String newIdentifier)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Path("{id:[^/]+}/rename")
+    public Table rename(@PathParam("id") String id, String newIdentifier)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError,
             DeserializationError, IdRegenerator.IdCollisionError {
         try (final Tx tx = beginTx()) {
