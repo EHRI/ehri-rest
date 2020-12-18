@@ -392,6 +392,29 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     }
 
     @Test
+    public void testRenameDocumentaryUnitWithCollision() throws Exception {
+        // When there's a confict the result should be an HTTP 409 error
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename"))
+                .entity("m19", MediaType.TEXT_PLAIN_TYPE)
+                .post(ClientResponse.class);
+        assertStatus(CONFLICT, response);
+
+        // When the check parameter is given the result should be a list
+        // of conflicting item IDs
+        ClientResponse response2 = jsonCallAs(getAdminUserProfileId(),
+                entityUriBuilder(Entities.DOCUMENTARY_UNIT, "c1", "rename")
+                        .queryParam("check", true).build())
+                .entity("m19", MediaType.TEXT_PLAIN_TYPE)
+                .post(ClientResponse.class);
+        assertStatus(OK, response2);
+        Table expected = Table.of(Lists.<List<String>>newArrayList(
+                Lists.newArrayList("c1", "nl-r1-m19")
+        ));
+        assertEquals(expected, response2.getEntity(Table.class));
+    }
+
+    @Test
     public void testRenameDocumentaryUnit() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename"))
@@ -404,7 +427,6 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
                 Lists.newArrayList("c3", "nl-r1-z1-c2-c3")
         ));
         assertEquals(expected, response.getEntity(Table.class));
-
     }
 
     private URI getCreationUri() {
