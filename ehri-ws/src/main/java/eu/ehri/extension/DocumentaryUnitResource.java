@@ -19,8 +19,10 @@
 
 package eu.ehri.extension;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.*;
+import eu.ehri.extension.errors.ConflictError;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
@@ -28,6 +30,8 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
@@ -121,24 +125,31 @@ public class DocumentaryUnitResource
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("{id:[^/]+}/rename")
-    public Table rename(@PathParam("id") String id, String newIdentifier)
+    public Table rename(
+            @PathParam("id") String id,
+            @QueryParam("check") @DefaultValue("false") boolean check,
+            String newIdentifier)
             throws PermissionDenied, ItemNotFound, ValidationError, SerializationError,
-            DeserializationError, IdRegenerator.IdCollisionError {
+            DeserializationError, ConflictError {
         try (final Tx tx = beginTx()) {
-            IdRegenerator idGen = new IdRegenerator(graph).withActualRename(true);
+            IdRegenerator idGen = new IdRegenerator(graph)
+                    .withActualRename(!check)
+                    .collisionMode(check);
             DocumentaryUnit entity = api().detail(id, DocumentaryUnit.class);
             Bundle newBundle = getSerializer()
                     .withDependentOnly(true)
                     .entityToBundle(entity)
                     .withDataValue(Ontology.IDENTIFIER_KEY, newIdentifier);
             api().update(newBundle, DocumentaryUnit.class, getLogMessage());
-            List<List<String>> renamed = Lists.newArrayList();
-            idGen.reGenerateId(entity).ifPresent(renamed::add);
+            List<DocumentaryUnit> todo = Lists.newArrayList(entity);
             for (DocumentaryUnit child : entity.getAllChildren()) {
-                idGen.reGenerateId(child).ifPresent(renamed::add);
+                todo.add(child);
             }
+            List<List<String>> done = idGen.reGenerateIds(todo);
             tx.success();
-            return Table.of(renamed);
+            return Table.of(done);
+        } catch (IdRegenerator.IdCollisionError e) {
+            throw new ConflictError(e);
         }
     }
 
