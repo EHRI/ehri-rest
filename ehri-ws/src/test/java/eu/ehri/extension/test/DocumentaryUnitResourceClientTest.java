@@ -394,7 +394,8 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     @Test
     public void testRenameDocumentaryUnit() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename", "z1"))
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1", "rename"))
+                .entity("z1", MediaType.TEXT_PLAIN_TYPE)
                 .post(ClientResponse.class);
         assertStatus(OK, response);
         Table expected = Table.of(Lists.newArrayList(
