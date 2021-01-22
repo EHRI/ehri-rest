@@ -23,17 +23,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
 
 public class AnnotationTest extends ModelTestBase {
 
@@ -47,7 +45,7 @@ public class AnnotationTest extends ModelTestBase {
     public void testUserHasAnnotation() throws ItemNotFound {
         UserProfile mike = manager.getEntity("mike", UserProfile.class);
         List<Annotation> annotations = Lists.newArrayList(mike.getAnnotations());
-        List<String> bodies = annotations.stream().map(Annotation::<String>getBody)
+        List<String> bodies = annotations.stream().map(Annotation::getBody)
                 .collect(Collectors.toList());
         assertTrue(bodies.contains(TEST_ANNOTATION_BODY));
     }
@@ -84,6 +82,6 @@ public class AnnotationTest extends ModelTestBase {
         Annotation ann1 = manager.getEntity("ann1", Annotation.class);
         List<Annotatable> parts = Lists.newArrayList(ann1.getTargetParts());
         assertEquals(1, parts.size());
-        assertEquals(manager.getEntity("cd1", Description.class), parts.get(0));
+        assertEquals(manager.getEntity("cd1", Annotatable.class), parts.get(0));
     }
 }
