@@ -42,9 +42,9 @@ import java.util.List;
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 
 
 public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTest {
@@ -120,11 +120,17 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, "all"))
                 .delete(ClientResponse.class);
-        assertStatus(NO_CONTENT, response);
+        assertStatus(OK, response);
 
-        for (String id : new String[]{FIRST_DOC_ID, "c2", "c3"}) {
+        Table expected = Table.of(Lists.newArrayList(
+                Lists.newArrayList(FIRST_DOC_ID),
+                Lists.newArrayList("c2"),
+                Lists.newArrayList("c3")
+        ));
+        assertEquals(expected, response.getEntity(Table.class));
+        for (List<String> id : expected.rows()) {
             ClientResponse r1 = jsonCallAs(getAdminUserProfileId(),
-                    entityUri(Entities.DOCUMENTARY_UNIT, id))
+                    entityUri(Entities.DOCUMENTARY_UNIT, id.get(0)))
                     .head();
             assertStatus(NOT_FOUND, r1);
         }

@@ -19,7 +19,6 @@
 
 package eu.ehri.extension;
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.ConflictError;
@@ -30,8 +29,6 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
@@ -155,25 +152,33 @@ public class DocumentaryUnitResource
 
     @DELETE
     @Path("{id:[^/]+}/all")
-    public void deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
         try (final Tx tx = beginTx()) {
-            deleteItem(id, item -> {
-                // Delete the children first. If this fails due to permission
-                // errors the transaction won't be committed.
-                List<String> ids = StreamSupport.stream(
-                        item.getAllChildren().spliterator(), false)
-                        .map(Entity::getId)
-                        .collect(Collectors.toList());
-                try {
-                    new BatchOperations(graph)
-                            .setScope(item)
-                            .setVersioning(true)
-                            .batchDelete(ids, getCurrentActioner(), getLogMessage());
-                } catch (ItemNotFound e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            tx.success();
+            DocumentaryUnit item = api().detail(id, DocumentaryUnit.class);
+
+            // Delete the children first. If this fails due to permission
+            // errors the transaction won't be committed.
+            List<String> ids = StreamSupport.stream(
+                    item.getAllChildren().spliterator(), false)
+                    .map(Entity::getId)
+                    .collect(Collectors.toList());
+            try {
+                new BatchOperations(graph)
+                        .setScope(item)
+                        .setVersioning(true)
+                        .batchDelete(ids, getCurrentActioner(), getLogMessage());
+                List<List<String>> data = ids.stream().sorted()
+                        .map(Lists::newArrayList).collect(Collectors.toList());
+                data.add(0, Lists.newArrayList(id));
+
+                // Delete the item itself...
+                deleteItem(id);
+                tx.success();
+                return Table.of(data);
+            } catch (ItemNotFound e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
