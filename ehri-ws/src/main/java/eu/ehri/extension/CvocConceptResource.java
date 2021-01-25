@@ -25,6 +25,8 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.utils.Table;
+import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -93,6 +95,22 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
+        }
+    }
+
+    @DELETE
+    @Path("{id:[^/]+}/all")
+    @Override
+    public Table deleteAll(@PathParam("id") String id)
+            throws PermissionDenied, ItemNotFound, ValidationError {
+        try {
+            // NB: While it has hierarchical behaviour this does not
+            // extend to full ownership so this action is essentially
+            // the same as a simple delete.
+            delete(id);
+            return Table.column(Lists.newArrayList(id));
+        } catch (HierarchyError e) {
+            throw new RuntimeException(e);
         }
     }
 

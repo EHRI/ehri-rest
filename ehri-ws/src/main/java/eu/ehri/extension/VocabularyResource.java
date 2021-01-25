@@ -27,6 +27,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import eu.ehri.project.importers.json.BatchOperations;
+import eu.ehri.project.models.Country;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -129,29 +130,15 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         }
     }
 
+    @Override
     @DELETE
     @Path("{id:[^/]+}/all")
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
-    public Table deleteAllVocabularyConcepts(
-                @PathParam("id") String id,
-                @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
-                @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
-            throws ItemNotFound {
+    public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
         try (final Tx tx = beginTx()) {
-            Vocabulary vocabulary = api().detail(id, cls);
-            List<String> ids = StreamSupport.stream(
-                    vocabulary.getConcepts().spliterator(), false)
-                    .map(Entity::getId)
-                    .collect(Collectors.toList());
-            new BatchOperations(graph)
-                    .setScope(vocabulary)
-                    .setVersioning(version)
-                    .batchDelete(ids, getCurrentActioner(), getLogMessage());
-
-            if (commit) {
-                tx.success();
-            }
-            return Table.column(ids);
+            Table out = deleteAll(id, Vocabulary::getAllContainedItems);
+            tx.success();
+            return out;
         }
     }
 

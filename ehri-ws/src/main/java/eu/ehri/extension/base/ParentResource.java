@@ -24,6 +24,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.utils.Table;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -45,19 +46,31 @@ public interface ParentResource {
      *     </code>
      * </pre>
      *
-     * @return A list of serialized item representations
+     * @return a list of serialized item representations
      */
     Response listChildren(String id, boolean all) throws ItemNotFound;
 
     /**
      * Create a subordinate resource.
      *
-     * @param id        The parent resource ID.
-     * @param bundle    A resource bundle.
-     * @param accessors The users/groups who can access this item.
+     * @param id        the parent resource ID.
+     * @param bundle    a resource bundle.
+     * @param accessors the users/groups who can access this item.
      * @return A serialized representation of the created resource.
      */
     Response createChild(String id,
-            Bundle bundle, List<String> accessors)
+                         Bundle bundle, List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
+
+    /**
+     * Delete a parent resource and all of its contained items.
+     *
+     * @param id the parent resource ID
+     * @return an ordered list of deleted item IDs
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     */
+    Table deleteAll(String id) throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
 }

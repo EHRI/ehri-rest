@@ -31,6 +31,7 @@ import eu.ehri.project.exporters.eac.EacExporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
@@ -138,28 +139,15 @@ public class AuthoritativeSetResource extends
         }
     }
 
+    @Override
     @DELETE
     @Path("{id:[^/]+}/all")
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
-    public Table deleteAllAuthoritativeSetHistoricalAgents(
-                @PathParam("id") String id,
-                @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
-                @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
-            throws ItemNotFound {
-        try (Tx tx = beginTx()) {
-            AuthoritativeSet set = api().detail(id, cls);
-            List<String> ids = StreamSupport.stream(
-                    set.getAuthoritativeItems().spliterator(), false)
-                    .map(Entity::getId)
-                    .collect(Collectors.toList());
-            new BatchOperations(graph)
-                    .setScope(set)
-                    .setVersioning(version)
-                    .batchDelete(ids, getCurrentActioner(), getLogMessage());
-            if (commit) {
-                tx.success();
-            }
-            return Table.column(ids);
+    public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
+        try (final Tx tx = beginTx()) {
+            Table out = deleteAll(id, AuthoritativeSet::getAllContainedItems);
+            tx.success();
+            return out;
         }
     }
 

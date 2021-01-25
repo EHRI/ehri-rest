@@ -19,8 +19,10 @@
 
 package eu.ehri.extension.test;
 
+import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.utils.Table;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -41,5 +43,26 @@ public class CountryResourceClientTest extends AbstractResourceClientTest {
             // There should be two items: r1 and r3
             assertEquals(2, readZip(stream).size());
         }
+    }
+
+    @Test
+    public void testDeleteAll() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.COUNTRY, "nl", "all"))
+                .delete(ClientResponse.class);
+        assertStatus(OK, response);
+
+        Table expected = Table.of(Lists.newArrayList(
+                Lists.newArrayList("nl"),
+                Lists.newArrayList("c1"),
+                Lists.newArrayList("c2"),
+                Lists.newArrayList("c3"),
+                Lists.newArrayList("c4"),
+                Lists.newArrayList("nl-r1-m19"),
+                Lists.newArrayList("r1"),
+                Lists.newArrayList("r3")
+        ));
+        assertEquals(expected, response.getEntity(Table.class));
     }
 }
