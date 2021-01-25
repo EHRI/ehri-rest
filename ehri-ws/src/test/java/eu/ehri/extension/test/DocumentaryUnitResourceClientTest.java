@@ -115,6 +115,15 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     }
 
     @Test
+    public void testDeleteDocumentaryWithChildren() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID))
+                .delete(ClientResponse.class);
+        assertStatus(CONFLICT, response);
+    }
+
+    @Test
     public void testDeleteDocumentaryUnitAndChildren() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),

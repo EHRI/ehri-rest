@@ -111,7 +111,7 @@ public class DocumentaryUnitResource
     @Path("{id:[^/]+}")
     @Override
     public void delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
@@ -168,15 +168,14 @@ public class DocumentaryUnitResource
                         .setScope(item)
                         .setVersioning(true)
                         .batchDelete(ids, getCurrentActioner(), getLogMessage());
-                List<List<String>> data = ids.stream().sorted()
-                        .map(Lists::newArrayList).collect(Collectors.toList());
-                data.add(0, Lists.newArrayList(id));
+                List<String> data = ids.stream().sorted().collect(Collectors.toList());
+                data.add(0, id);
 
                 // Delete the item itself...
                 deleteItem(id);
                 tx.success();
-                return Table.of(data);
-            } catch (ItemNotFound e) {
+                return Table.column(data);
+            } catch (ItemNotFound | HierarchyError e) {
                 throw new RuntimeException(e);
             }
         }

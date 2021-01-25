@@ -24,12 +24,7 @@ import eu.ehri.project.acl.GlobalPermissionSet;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
 import eu.ehri.project.acl.InheritedItemPermissionSet;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Group;
@@ -131,7 +126,7 @@ public interface Api {
      * @return the number of vertices deleted.
      */
     int delete(String id) throws PermissionDenied,
-            ValidationError, SerializationError, ItemNotFound;
+            ValidationError, SerializationError, ItemNotFound, HierarchyError;
 
     /**
      * Create or update a new object of type `E` from the given data, saving an
@@ -178,7 +173,7 @@ public interface Api {
      * @return the number of vertices deleted
      */
     int delete(String id, Optional<String> logMessage) throws PermissionDenied,
-            ValidationError, SerializationError, ItemNotFound;
+            ValidationError, SerializationError, ItemNotFound, HierarchyError;
 
     /**
      * Delete a dependent item, belonging to the given parent.

@@ -1,12 +1,7 @@
 package eu.ehri.project.importers.ead;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.core.GraphManager;
@@ -14,12 +9,9 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.*;
@@ -82,7 +74,7 @@ public class EadSync {
     /**
      * Signal that something has gone wrong with the sync operation.
      */
-    public class EadSyncError extends Exception {
+    public static class EadSyncError extends Exception {
         EadSyncError(String message, Throwable underlying) {
             super(message, underlying);
         }
@@ -255,24 +247,15 @@ public class EadSync {
                 : Optional.empty();
     }
 
-    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) throws ValidationError {
+    private void deleteDeadOrMoved(Set<String> toDeleteGraphIds, String logMessage) {
         if (!toDeleteGraphIds.isEmpty()) {
             try {
-                Api api = this.api.enableLogging(false);
-                ActionManager actionManager = api.actionManager().setScope(scope);
-                ActionManager.EventContext ctx = actionManager
-                        .newEventContext(actioner, EventTypes.deletion, Optional.ofNullable(logMessage));
-                for (String id : toDeleteGraphIds) {
-                    DocumentaryUnit item = api.detail(id, DocumentaryUnit.class);
-                    ctx.addSubjects(item);
-                    ctx.createVersion(item);
-                }
-                ctx.commit();
-                for (String id : toDeleteGraphIds) {
-                    api.delete(id);
-                }
-                logger.debug("Finished deleting {} items...", toDeleteGraphIds.size());
-            } catch (ItemNotFound | SerializationError | PermissionDenied e) {
+                int deleted = new BatchOperations(graph)
+                        .setScope(scope)
+                        .setVersioning(true)
+                        .batchDelete(toDeleteGraphIds, actioner, Optional.ofNullable(logMessage));
+                logger.debug("Finished deleting {} items...", deleted);
+            } catch (ItemNotFound e) {
                 throw new RuntimeException("Unexpected error when deleting item", e);
             }
         }

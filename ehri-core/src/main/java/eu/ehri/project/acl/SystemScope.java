@@ -86,6 +86,11 @@ public enum SystemScope implements PermissionScope {
     }
 
     @Override
+    public int countContainedItems() {
+        return 0;
+    }
+
+    @Override
     public Iterable<Accessible> getAllContainedItems() {
         return Collections.emptyList();
     }

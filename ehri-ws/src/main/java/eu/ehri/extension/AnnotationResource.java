@@ -27,12 +27,7 @@ import eu.ehri.extension.base.ListResource;
 import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
@@ -129,7 +124,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
     @Path("{id:[^/]+}")
     @Override
     public void delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();

@@ -44,7 +44,7 @@ public class CountryTest extends AbstractFixtureTest {
     public void testGetChildCountOnDeletion() throws Exception {
         Country country = manager.getEntity("nl", Country.class);
         assertEquals(2, country.countChildren());
-        api(validUser).delete("r1");
+        api(validUser).delete("r3");
         assertEquals(1, country.countChildren());
     }
 

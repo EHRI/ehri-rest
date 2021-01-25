@@ -36,7 +36,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.IOHelpers;
 import eu.ehri.project.utils.Table;
 import org.apache.commons.io.FileUtils;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -57,7 +56,9 @@ import static eu.ehri.extension.ImportResource.*;
 import static eu.ehri.project.test.IOHelpers.createZipFromResources;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class ImportResourceClientTest extends AbstractResourceClientTest {

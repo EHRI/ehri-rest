@@ -27,6 +27,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import java.util.Collection;
@@ -61,6 +62,14 @@ public interface PermissionScope extends Identifiable {
      */
     @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE, direction = Direction.IN)
     Iterable<Accessible> getContainedItems();
+
+    /**
+     * Count the number of items immediately within this scope.
+     *
+     * @return a count of lower scoped items
+     */
+    @UniqueAdjacency(label = Ontology.HAS_PERMISSION_SCOPE, direction = Direction.IN)
+    int countContainedItems();
 
     /**
      * Get an iterable of all items within this scope, recursively down

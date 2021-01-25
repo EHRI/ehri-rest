@@ -20,6 +20,10 @@ public class Table {
         return new Table(data, headers);
     }
 
+    public static Table column(List<String> column1) {
+        return new Table(column1.stream().map(Lists::newArrayList).collect(Collectors.toList()), null);
+    }
+
     public static Table of(List<List<String>> data) {
         return of(data, null);
     }

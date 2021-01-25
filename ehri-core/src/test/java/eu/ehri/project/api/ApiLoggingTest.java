@@ -20,10 +20,7 @@
 package eu.ehri.project.api;
 
 import com.google.common.collect.Iterables;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
@@ -40,9 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ApiLoggingTest extends AbstractFixtureTest {
 
@@ -118,22 +113,23 @@ public class ApiLoggingTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testDelete() throws PermissionDenied, ValidationError,
-            SerializationError, ItemNotFound {
+    public void testDelete() throws Exception {
         int shouldDelete = 1;
         int origActionCount = toList(validUser.getHistory()).size();
 
         // FIXME: Surely there's a better way of doing this???
+        DocumentaryUnit item = api(validUser).detail("c4", DocumentaryUnit.class);
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
             shouldDelete += Iterables.size(d.getDatePeriods());
             shouldDelete += Iterables.size(d.getAccessPoints());
+            shouldDelete += Iterables.size(d.getUnknownProperties());
         }
 
         String log = "Deleting item";
-        Integer deleted = loggingApi(validUser).delete(item.getId(), Optional.of(log));
-        assertEquals(Integer.valueOf(shouldDelete), deleted);
+        int deleted = loggingApi(validUser).delete(item.getId(), Optional.of(log));
+        assertEquals(shouldDelete, deleted);
 
         List<SystemEvent> actions = toList(validUser.getActions());
 

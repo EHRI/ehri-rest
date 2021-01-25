@@ -64,6 +64,12 @@ public class PermissionScopeTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void countContainedItems() throws Exception {
+        PermissionScope c1 = manager.getEntity("c1", PermissionScope.class);
+        assertEquals(1, c1.countContainedItems());
+    }
+
+    @Test
     public void testAllContainedItems() throws Exception {
         PermissionScope r1 = manager.getEntity("r1", PermissionScope.class);
         PermissionScope c1 = manager.getEntity("c1", PermissionScope.class);

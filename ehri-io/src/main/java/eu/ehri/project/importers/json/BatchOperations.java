@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -239,7 +240,7 @@ public class BatchOperations {
      * @param logMessage an optional log message
      * @return the number of items deleted
      */
-    public int batchDelete(List<String> ids, Actioner actioner, Optional<String> logMessage)
+    public int batchDelete(Collection<String> ids, Actioner actioner, Optional<String> logMessage)
             throws ItemNotFound {
         int done = 0;
         if (!ids.isEmpty()) {

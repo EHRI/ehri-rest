@@ -24,10 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessible;
@@ -105,7 +102,7 @@ public class DeleteEntities extends BaseCommand {
     }
 
     private void deleteIds(FramedGraph<?> graph, GraphManager manager, EntityClass type, UserProfile user)
-            throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
+            throws SerializationError, ValidationError, ItemNotFound, PermissionDenied, HierarchyError {
         Api api = api(graph, user).enableLogging(false);
         try (CloseableIterable<Accessible> items = manager.getEntities(type, Accessible.class)) {
             for (Accessible acc : items) {
