@@ -34,9 +34,11 @@ import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -47,6 +49,8 @@ import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the AuthoritativeSet items. model.
@@ -127,7 +131,7 @@ public class AuthoritativeSetResource extends
     @Path("{id:[^/]+}")
     @Override
     public void delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try (Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
@@ -136,21 +140,26 @@ public class AuthoritativeSetResource extends
 
     @DELETE
     @Path("{id:[^/]+}/all")
-    public Response deleteAllAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied {
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    public Table deleteAllAuthoritativeSetHistoricalAgents(
+                @PathParam("id") String id,
+                @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+                @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
+            throws ItemNotFound {
         try (Tx tx = beginTx()) {
-            Api api = api();
-            AuthoritativeSet set = api.detail(id, cls);
-            Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
-            Api scopedApi = api.withScope(set);
-            for (AuthoritativeItem agent : agents) {
-                scopedApi.delete(agent.getId());
+            AuthoritativeSet set = api().detail(id, cls);
+            List<String> ids = StreamSupport.stream(
+                    set.getAuthoritativeItems().spliterator(), false)
+                    .map(Entity::getId)
+                    .collect(Collectors.toList());
+            new BatchOperations(graph)
+                    .setScope(set)
+                    .setVersioning(version)
+                    .batchDelete(ids, getCurrentActioner(), getLogMessage());
+            if (commit) {
+                tx.success();
             }
-            tx.success();
-            return Response.status(Status.OK).build();
-        } catch (ValidationError | SerializationError e) {
-            throw new RuntimeException(e);
+            return Table.column(ids);
         }
     }
 

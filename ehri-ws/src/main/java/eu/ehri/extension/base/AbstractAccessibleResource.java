@@ -244,7 +244,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param preProcess a handler to run before deleting the item
      */
     protected void deleteItem(String id, Handler<E> preProcess)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try {
             Api api = api();
             preProcess.process(api.detail(id, cls));
@@ -260,7 +260,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param id the item's ID
      */
     protected void deleteItem(String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         deleteItem(id, noOpHandler);
     }
 

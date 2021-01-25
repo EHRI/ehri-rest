@@ -125,7 +125,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testDeleteRepository() throws Exception {
         // Create
-        URI uri = entityUri(Entities.REPOSITORY, ID);
+        URI uri = entityUri(Entities.REPOSITORY, "r2");
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
 

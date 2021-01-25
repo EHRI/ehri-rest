@@ -31,10 +31,7 @@ import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.UserProfilesApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Link;
@@ -132,7 +129,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}")
     @Override
     public void delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();

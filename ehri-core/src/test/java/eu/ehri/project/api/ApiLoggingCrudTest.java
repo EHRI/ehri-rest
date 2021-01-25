@@ -37,10 +37,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class ApiLoggingCrudTest extends AbstractFixtureTest {
@@ -93,15 +90,15 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
 
     @Test
     public void testDelete() throws Exception {
-        Repository r1 = manager.getEntity("r1", Repository.class);
+        Repository r1 = manager.getEntity("r2", Repository.class);
         Bundle before = depSerializer.entityToBundle(r1);
-        loggingApi(validUser).delete("r1");
+        loggingApi(validUser).delete("r2");
         SystemEvent event = am.getLatestGlobalEvent();
-        assertFalse(manager.exists("r1"));
+        assertFalse(manager.exists("r2"));
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(before, old);
-        Optional<Version> r1v = loggingApi(validUser).versionManager().versionAtDeletion("r1");
+        Optional<Version> r1v = loggingApi(validUser).versionManager().versionAtDeletion("r2");
         assertTrue(r1v.isPresent());
         List<Version> r1vl = Lists.newArrayList(loggingApi(validUser).versionManager()
                 .versionsAtDeletion(EntityClass.REPOSITORY, null, null));

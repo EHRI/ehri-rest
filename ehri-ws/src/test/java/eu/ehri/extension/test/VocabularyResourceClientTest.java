@@ -19,10 +19,12 @@
 
 package eu.ehri.extension.test;
 
+import com.google.common.collect.ImmutableList;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.extension.VocabularyResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.utils.Table;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,11 +53,9 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
      */
     @Test
     public void testCreateDeleteCvocVocabulary() throws Exception {
-        String jsonTestString = jsonTestVocabularyString;
 
         // Create
-        ClientResponse response = testCreate(entityUri(Entities.CVOC_VOCABULARY),
-                jsonTestString);
+        ClientResponse response = testCreate(entityUri(Entities.CVOC_VOCABULARY), jsonTestVocabularyString);
 
         // Get created entity via the response location?
         URI location = response.getLocation();
@@ -128,10 +128,13 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     public void testDeleteVocabularyTerms() throws Exception {
         URI uri = entityUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all")
                 .queryParam("commit", "true").build();
-        testDelete(uri);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals(Table.column(ImmutableList.of("cvocc2", "cvocc1")), response.getEntity(Table.class));
 
         // Check it's really gone...
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.CVOC_CONCEPT, "cvocc1"))
                 .get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
@@ -140,10 +143,19 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testDeleteVocabulary() throws Exception {
         URI uri = entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
+                .delete(ClientResponse.class);
+        assertStatus(CONFLICT, response);
+
+        // Need to delete children first...
+        testDelete(entityUri(Entities.CVOC_CONCEPT, "cvocc1"));
+        testDelete(entityUri(Entities.CVOC_CONCEPT, "cvocc2"));
+
+        // Now we should be able to delete it...
         testDelete(uri);
 
         // Check it's really gone...
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
+        response = jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }

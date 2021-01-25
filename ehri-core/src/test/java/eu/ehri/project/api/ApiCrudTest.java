@@ -19,10 +19,12 @@
 
 package eu.ehri.project.api;
 
+import com.google.common.collect.Iterables;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.HierarchyError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
@@ -189,19 +191,26 @@ public class ApiCrudTest extends AbstractFixtureTest {
         assertNull(unit.getProperty("name"));
     }
 
+    @Test(expected = HierarchyError.class)
+    public void testDeleteWithHierarchyError() throws Exception {
+        api(validUser).delete(item.getId());
+    }
+
     @Test
     public void testDelete() throws Exception {
-        Integer shouldDelete = 1;
+        int shouldDelete = 1;
 
         // FIXME: Surely there's a better way of doing this???
-        Iterator<Description> descIter = item.getDescriptions().iterator();
+        DocumentaryUnit c4 = api(validUser).detail("c4", DocumentaryUnit.class);
+        Iterator<Description> descIter = c4.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
-            for (DatePeriod ignored : d.getDatePeriods()) shouldDelete++;
-            for (AccessPoint ignored : d.getAccessPoints()) shouldDelete++;
+            shouldDelete += Iterables.size(d.getDatePeriods());
+            shouldDelete += Iterables.size(d.getAccessPoints());
+            shouldDelete += Iterables.size(d.getUnknownProperties());
         }
 
-        Integer deleted = api(validUser).delete(item.getId());
+        int deleted = api(validUser).delete(c4.getId());
         assertEquals(shouldDelete, deleted);
     }
 }

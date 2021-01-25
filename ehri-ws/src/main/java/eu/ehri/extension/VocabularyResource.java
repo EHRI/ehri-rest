@@ -19,13 +19,11 @@
 
 package eu.ehri.extension;
 
+import com.google.common.collect.Lists;
 import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
 import eu.ehri.project.importers.json.BatchOperations;
@@ -33,6 +31,7 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.utils.Table;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFWriter;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -123,7 +122,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @Path("{id:[^/]+}")
     @Override
     public void delete(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
@@ -132,9 +131,11 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
 
     @DELETE
     @Path("{id:[^/]+}/all")
-    public void deleteAllVocabularyConcepts(@PathParam("id") String id,
-                                            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
-                                            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    public Table deleteAllVocabularyConcepts(
+                @PathParam("id") String id,
+                @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
+                @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Vocabulary vocabulary = api().detail(id, cls);
@@ -146,9 +147,11 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
                     .setScope(vocabulary)
                     .setVersioning(version)
                     .batchDelete(ids, getCurrentActioner(), getLogMessage());
+
             if (commit) {
                 tx.success();
             }
+            return Table.column(ids);
         }
     }
 
@@ -185,7 +188,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     public Response exportSkos(@PathParam("id") String id,
             final @QueryParam("format") String format,
             final @QueryParam("baseUri") String baseUri)
-            throws IOException, ItemNotFound {
+            throws ItemNotFound {
         final String rdfFormat = getRdfFormat(format);
         final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS

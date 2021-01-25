@@ -20,12 +20,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.Annotation;
@@ -191,7 +186,7 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public int delete(String id) throws PermissionDenied, ValidationError, SerializationError, ItemNotFound {
+    public int delete(String id) throws PermissionDenied, ValidationError, SerializationError, ItemNotFound, HierarchyError {
         return delete(id, Optional.<String>empty());
     }
 
@@ -261,9 +256,13 @@ public class ApiImpl implements Api {
 
     @Override
     public int delete(String id, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, SerializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, SerializationError, ItemNotFound, HierarchyError {
         Accessible item = manager.getEntity(id, Accessible.class);
         helper.checkEntityPermission(item, accessor, PermissionType.DELETE);
+        int items = item.as(PermissionScope.class).countContainedItems();
+        if (items > 0) {
+            throw new HierarchyError(id, items);
+        }
         commitEvent(() -> actionManager
                 .newEventContext(item, accessor.as(Actioner.class),
                         EventTypes.deletion, logMessage)

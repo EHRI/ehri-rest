@@ -19,17 +19,9 @@
 
 package eu.ehri.project.test;
 
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.GlobalPermissionSet;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.acl.*;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -37,16 +29,12 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.acl.PermissionUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
 
-import static eu.ehri.project.acl.PermissionType.ANNOTATE;
-import static eu.ehri.project.acl.PermissionType.CREATE;
-import static eu.ehri.project.acl.PermissionType.DELETE;
-import static eu.ehri.project.acl.PermissionType.OWNER;
+import static eu.ehri.project.acl.PermissionType.*;
 import static eu.ehri.project.models.EntityClass.DOCUMENTARY_UNIT;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -62,8 +50,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     private PermissionUtils viewHelper;
 
     @Before
-    public void createTestUser() throws ValidationError, IntegrityError,
-            ItemNotFound {
+    public void createTestUser() throws Exception {
         // Add a new, fresh user with no perms to test with...
         user = new BundleManager(graph).create(Bundle.of(EntityClass.USER_PROFILE,
                         (Map<String, Object>) TestData.getTestUserBundle().get("data")),
@@ -73,22 +60,19 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test(expected = PermissionDenied.class)
-    public void testCreateAsUserWithBadPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+    public void testCreateAsUserWithBadPerms() throws Exception {
         assertNotNull(api(user).create(Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
 
     @Test
-    public void testCreateAsUserWithNewPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+    public void testCreateAsUserWithNewPerms() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         assertNotNull(api(user).create(Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
 
     @Test(expected = PermissionDenied.class)
-    public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError, ItemNotFound {
+    public void testCreateAsUserWithBadScopedPerms() throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
@@ -97,8 +81,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError, ItemNotFound {
+    public void testCreateAsUserWithGoodScopedPerms() throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
@@ -108,8 +91,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateAsUserWithGoodNestedScopedPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, ItemNotFound {
+            throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
@@ -125,8 +107,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateAsUserWithGoodDoubleNestedScopedPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, ItemNotFound {
+            throws Exception {
         // Same as above, but with the repository as the scope instead of the item.
         Repository r1 = manager.getEntity("r1", Repository.class);
         new AclManager(graph, r1).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
@@ -142,8 +123,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithDifferentScopedPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, ItemNotFound {
+            throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
         Repository badScope = manager.getEntity("r2", Repository.class);
         new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
@@ -153,17 +133,14 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test(expected = PermissionDenied.class)
-    public void testCreateAsUserWithDifferentPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+    public void testCreateAsUserWithDifferentPerms() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), DELETE, user
         );
         assertNotNull(api(user).create(Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
 
     @Test
-    public void testDeleteAsUserWithGoodPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError, ItemNotFound {
+    public void testDeleteAsUserWithGoodPerms() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), DELETE, user
@@ -175,9 +152,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testCreateDeleteAsUserWithOwnerPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError, ItemNotFound,
-            SerializationError {
+    public void testCreateDeleteAsUserWithOwnerPerms() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), OWNER, user
         );
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
@@ -187,9 +162,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testCreateDeleteAsCreator() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError, ItemNotFound {
+    public void testCreateDeleteAsCreator() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
@@ -201,9 +174,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test(expected = PermissionDenied.class)
-    public void testCreateDeleteAsUserWithWrongPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError, ItemNotFound {
+    public void testCreateDeleteAsUserWithWrongPerms() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), ANNOTATE, user
         );
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
@@ -216,9 +187,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test(expected = ValidationError.class)
-    public void testCreateWithoutRevoke() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError {
+    public void testCreateWithoutRevoke() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
@@ -230,9 +199,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test(expected = PermissionDenied.class)
-    public void testCreateAsUserThenRevoke() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError {
+    public void testCreateAsUserThenRevoke() throws Exception {
         acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
         );
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
@@ -246,9 +213,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testSetPermissionMatrix() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError, ItemNotFound {
+    public void testSetPermissionMatrix() throws Exception {
 
         GlobalPermissionSet matrix = GlobalPermissionSet.newBuilder()
                 .set(ContentTypes.DOCUMENTARY_UNIT, CREATE, DELETE)
@@ -267,9 +232,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testSetScopedPermissionMatrix() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
-            SerializationError, ItemNotFound {
+    public void testSetScopedPermissionMatrix() throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
 
         GlobalPermissionSet matrix = GlobalPermissionSet.newBuilder()

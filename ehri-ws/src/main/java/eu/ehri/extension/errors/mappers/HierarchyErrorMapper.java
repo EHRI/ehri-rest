@@ -17,20 +17,31 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.extension.base;
+package eu.ehri.extension.errors.mappers;
 
+import com.google.common.collect.ImmutableMap;
+import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.HierarchyError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
-public interface DeleteResource {
-    /**
-     * Delete a resource.
-     *
-     * @param id The resource ID.
-     */
-    void delete(String id)
-            throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError;
+/**
+ * Maps the {@link HierarchyError} exception to the Precondition Failed response.
+ */
+@Provider
+public class HierarchyErrorMapper implements ExceptionMapper<HierarchyError> {
+    @Override
+    public Response toResponse(final HierarchyError e) {
+        return WebDeserializationError.errorToJson(
+                Status.CONFLICT,
+                ImmutableMap.of(
+                        "message", e.getMessage(),
+                        "id", e.id(),
+                        "count", e.childCount()
+                )
+        );
+    }
 }
