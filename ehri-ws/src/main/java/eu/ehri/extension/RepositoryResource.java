@@ -35,7 +35,9 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -119,6 +121,18 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         try (final Tx tx = beginTx()) {
             deleteItem(id);
             tx.success();
+        }
+    }
+
+    @Override
+    @DELETE
+    @Path("{id:[^/]+}/all")
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
+        try (final Tx tx = beginTx()) {
+            Table out = deleteAll(id, Repository::getAllContainedItems);
+            tx.success();
+            return out;
         }
     }
 

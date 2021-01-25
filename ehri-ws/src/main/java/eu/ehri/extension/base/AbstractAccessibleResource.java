@@ -28,14 +28,17 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.xml.XmlExporter;
+import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.utils.Table;
 import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -46,6 +49,9 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -262,6 +268,32 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     protected void deleteItem(String id)
             throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         deleteItem(id, noOpHandler);
+    }
+
+    /**
+     * Delete an item and all of its child items.
+     * @param id the item's ID
+     * @param children an iterable of child items
+     * @return a table of delete item IDs
+     */
+    protected Table deleteAll(String id, Function<E, Iterable<Accessible>> children)
+            throws ItemNotFound, PermissionDenied, ValidationError {
+        Api api = api();
+        E scope = api.detail(id, cls);
+        List<String> ids = StreamSupport.stream(children.apply(scope).spliterator(), false)
+                .map(Entity::getId)
+                .collect(Collectors.toList());
+        new BatchOperations(graph).setScope(scope.as(PermissionScope.class))
+                .setVersioning(true)
+                .batchDelete(ids, getCurrentActioner(), getLogMessage());
+        try {
+            deleteItem(id);
+        } catch (HierarchyError e) {
+            throw new RuntimeException(e);
+        }
+        List<String> data = ids.stream().sorted().collect(Collectors.toList());
+        data.add(0, id);
+        return Table.column(data);
     }
 
     // Helpers

@@ -34,7 +34,9 @@ import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.Consumes;
@@ -122,6 +124,18 @@ public class CountryResource
             Response item = updateItem(id, bundle);
             tx.success();
             return item;
+        }
+    }
+
+    @Override
+    @DELETE
+    @Path("{id:[^/]+}/all")
+    @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
+        try (final Tx tx = beginTx()) {
+            Table out = deleteAll(id, Country::getAllContainedItems);
+            tx.success();
+            return out;
         }
     }
 

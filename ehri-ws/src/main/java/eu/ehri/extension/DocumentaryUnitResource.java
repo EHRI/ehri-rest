@@ -150,34 +150,15 @@ public class DocumentaryUnitResource
         }
     }
 
+    @Override
     @DELETE
     @Path("{id:[^/]+}/all")
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
         try (final Tx tx = beginTx()) {
-            DocumentaryUnit item = api().detail(id, DocumentaryUnit.class);
-
-            // Delete the children first. If this fails due to permission
-            // errors the transaction won't be committed.
-            List<String> ids = StreamSupport.stream(
-                    item.getAllChildren().spliterator(), false)
-                    .map(Entity::getId)
-                    .collect(Collectors.toList());
-            try {
-                new BatchOperations(graph)
-                        .setScope(item)
-                        .setVersioning(true)
-                        .batchDelete(ids, getCurrentActioner(), getLogMessage());
-                List<String> data = ids.stream().sorted().collect(Collectors.toList());
-                data.add(0, id);
-
-                // Delete the item itself...
-                deleteItem(id);
-                tx.success();
-                return Table.column(data);
-            } catch (ItemNotFound | HierarchyError e) {
-                throw new RuntimeException(e);
-            }
+            Table out = deleteAll(id, DocumentaryUnit::getAllContainedItems);
+            tx.success();
+            return out;
         }
     }
 

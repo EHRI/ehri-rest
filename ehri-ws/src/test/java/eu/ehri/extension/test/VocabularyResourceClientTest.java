@@ -125,13 +125,15 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testDeleteVocabularyTerms() throws Exception {
+    public void testDeleteAll() throws Exception {
         URI uri = entityUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all")
                 .queryParam("commit", "true").build();
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
-        assertEquals(Table.column(ImmutableList.of("cvocc2", "cvocc1")), response.getEntity(Table.class));
+        assertEquals(
+                Table.column(ImmutableList.of(TEST_CVOC_ID, "cvocc1", "cvocc2")),
+                response.getEntity(Table.class));
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(),
@@ -141,7 +143,8 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testDeleteVocabulary() throws Exception {
+    public void testDelete() throws Exception {
+        // Check we can't delete with children
         URI uri = entityUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);

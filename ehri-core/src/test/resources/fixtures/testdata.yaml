@@ -684,6 +684,7 @@
           altLabel: Another Name for Concept 1
     narrower: cvocc2
     inAuthoritativeSet: cvoc1
+    hasPermissionScope: cvoc1
 
 - id: cvocc2
   type: CvocConcept
@@ -699,6 +700,7 @@
           altLabel: Another Name for Concept 2
     related: cvocc1
     inAuthoritativeSet: cvoc1
+    hasPermissionScope: cvoc1
 
 --- # Virtual Units
 
