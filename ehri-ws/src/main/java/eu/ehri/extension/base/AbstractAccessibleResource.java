@@ -191,12 +191,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * representation
      */
     public Response getItem(String id) throws ItemNotFound {
-        logger.trace("Fetched item: {}", id);
         try (final Tx tx = beginTx()) {
-            E entity = api().detail(id, cls);
-            if (!manager.getEntityClass(entity).getJavaClass().equals(cls)) {
-                throw new ItemNotFound(id);
-            }
+            E entity = fetchAndCheckType(id);
+            logger.trace("Fetched item: {}", id);
             Response response = single(entity);
             tx.success();
             return response;
@@ -229,7 +226,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try {
-            E entity = api().detail(id, cls);
+            E entity = fetchAndCheckType(id);
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
                 Bundle existing = depSerializer.entityToBundle(entity);
@@ -252,9 +249,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
     protected void deleteItem(String id, Handler<E> preProcess)
             throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
         try {
-            Api api = api();
-            preProcess.process(api.detail(id, cls));
-            api.delete(id, getLogMessage());
+            E item = fetchAndCheckType(id);
+            preProcess.process(item);
+            api().delete(id, getLogMessage());
         } catch (SerializationError serializationError) {
             throw new RuntimeException(serializationError);
         }
@@ -278,8 +275,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      */
     protected Table deleteAll(String id, Function<E, Iterable<Accessible>> children)
             throws ItemNotFound, PermissionDenied, ValidationError {
-        Api api = api();
-        E scope = api.detail(id, cls);
+        E scope = fetchAndCheckType(id);
         List<String> ids = StreamSupport.stream(children.apply(scope).spliterator(), false)
                 .map(Entity::getId)
                 .collect(Collectors.toList());
@@ -340,6 +336,15 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
                 .withUsers(users.toArray(new String[0]))
                 .withIds(ids.toArray(new String[0]))
                 .withShowType(showTypes.toArray(new EventsApi.ShowType[0]));
+    }
+
+    private E fetchAndCheckType(String id) throws ItemNotFound {
+        E entity = api().get(id, cls);
+        EntityClass entityClass = manager.getEntityClass(entity);
+        if (!entityClass.getJavaClass().equals(cls)) {
+            throw new ItemNotFound(entity.getId(), entityClass);
+        }
+        return entity;
     }
 
     /**

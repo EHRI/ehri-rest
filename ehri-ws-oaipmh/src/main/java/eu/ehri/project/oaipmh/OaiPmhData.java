@@ -98,7 +98,7 @@ public class OaiPmhData {
 
     OaiPmhRecordResult getRecord(OaiPmhState state) throws OaiPmhError {
         try {
-            return OaiPmhRecordResult.of(api.detail(state.getIdentifier(), DocumentaryUnit.class));
+            return OaiPmhRecordResult.of(api.get(state.getIdentifier(), DocumentaryUnit.class));
         } catch (ItemNotFound e) {
             Optional<Version> deletedOpt = api.versionManager().versionAtDeletion(state.getIdentifier());
             if (deletedOpt.isPresent()) {
@@ -153,8 +153,8 @@ public class OaiPmhData {
             assert setSpec != null;
             List<String> specParts = setSpecSplitter.splitToList(setSpec);
             return specParts.size() == 1
-                    ? api.detail(specParts.get(0), Country.class).getTopLevelDocumentaryUnits()
-                    : api.detail(specParts.get(1), Repository.class).getTopLevelDocumentaryUnits();
+                    ? api.get(specParts.get(0), Country.class).getTopLevelDocumentaryUnits()
+                    : api.get(specParts.get(1), Repository.class).getTopLevelDocumentaryUnits();
         } catch (ItemNotFound e) {
             // FIXME: Should throw an invalid argument here instead
             throw new OaiPmhError(ErrorCode.badArgument, "Invalid set spec: " + setSpec);

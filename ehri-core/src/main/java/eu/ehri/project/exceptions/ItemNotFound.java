@@ -19,26 +19,41 @@
 
 package eu.ehri.project.exceptions;
 
+import eu.ehri.project.models.EntityClass;
+
+import java.util.Optional;
+
 /**
  * Represents a failure to find an item in the graph based
- * on its ID value or an arbitrary key/value pair.
+ * on its ID value, an ID with an Entity Class, or an arbitrary
+ * key/value pair.
  */
 public class ItemNotFound extends Exception {
     private static final long serialVersionUID = -3562833443079995695L;
 
     private final String key;
     private final String value;
+    private final EntityClass cls;
 
     public ItemNotFound(String id) {
         super(String.format("Item with id '%s' not found", id));
         this.key = "id";
         this.value = id;
+        this.cls = null;
+    }
+
+    public ItemNotFound(String id, EntityClass cls) {
+        super(String.format("Item with id '%s' and type '%s' not found", id, cls.getName()));
+        this.key = id;
+        this.value = id;
+        this.cls = cls;
     }
 
     public ItemNotFound(String key, String value) {
         super(String.format("Item with key '%s'='%s' not found", key, value));
         this.key = key;
         this.value = value;
+        this.cls = null;
     }
 
     public String getKey() {
@@ -49,4 +64,7 @@ public class ItemNotFound extends Exception {
         return value;
     }
 
+    public Optional<EntityClass> getEntityClass() {
+        return Optional.ofNullable(cls);
+    }
 }

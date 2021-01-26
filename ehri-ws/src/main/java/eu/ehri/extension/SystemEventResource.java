@@ -130,7 +130,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
-            SystemEvent event = api().detail(id, cls);
+            SystemEvent event = api().get(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...
             Response response = streamingPage(() -> getQuery()
                             .page(event.getSubjects(), Accessible.class),

@@ -141,7 +141,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/followers")
     public Response listFollowers(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getFollowers(), UserProfile.class));
             tx.success();
@@ -154,7 +154,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/following")
     public Response listFollowing(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getFollowing(), UserProfile.class));
             tx.success();
@@ -170,7 +170,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             boolean following = user.isFollowing(
                     manager.getEntity(otherId, UserProfile.class));
             tx.success();
@@ -186,7 +186,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             boolean follower = user.isFollower(manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return follower;
@@ -222,7 +222,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/blocked")
     public Response listBlocked(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getBlocked(), UserProfile.class));
             tx.success();
@@ -238,7 +238,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             boolean blocking = user.isBlocking(manager.getEntity(otherId, UserProfile.class));
             tx.success();
             return blocking;
@@ -274,7 +274,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/watching")
     public Response listWatching(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getWatching(), Watchable.class));
             tx.success();
@@ -314,7 +314,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @PathParam("otherId") String otherId)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             boolean watching = user.isWatching(manager.getEntity(otherId, Watchable.class));
             tx.success();
             return watching;
@@ -326,7 +326,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/annotations")
     public Response listAnnotations(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getAnnotations(), Annotation.class));
             tx.success();
@@ -339,7 +339,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/links")
     public Response pageLinks(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getLinks(), Link.class));
             tx.success();
@@ -352,7 +352,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/virtual-units")
     public Response pageVirtualUnits(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().detail(userId, cls);
+            UserProfile user = api().get(userId, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(user.getVirtualUnits(), VirtualUnit.class));
             tx.success();

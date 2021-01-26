@@ -165,8 +165,8 @@ public class EadSync {
                         .newEventContext(actioner, EventTypes.modification, Optional.ofNullable(logMessage));
 
                 for (Map.Entry<String, String> entry : movedGraphIds.entrySet()) {
-                    DocumentaryUnit from = api.detail(entry.getKey(), DocumentaryUnit.class);
-                    DocumentaryUnit to = api.detail(entry.getValue(), DocumentaryUnit.class);
+                    DocumentaryUnit from = api.get(entry.getKey(), DocumentaryUnit.class);
+                    DocumentaryUnit to = api.get(entry.getValue(), DocumentaryUnit.class);
                     boolean ugc = transferUserGeneratedContent(from, to);
                     boolean acc = transferAccessors(from, to);
                     if (ugc || acc) {

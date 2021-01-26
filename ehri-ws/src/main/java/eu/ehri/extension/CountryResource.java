@@ -34,7 +34,6 @@ import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -90,7 +89,7 @@ public class CountryResource
     public Response listChildren(@PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Country country = api().detail(id, cls);
+            Country country = api().get(id, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(country.getRepositories(), Repository.class));
             tx.success();
@@ -167,7 +166,7 @@ public class CountryResource
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
-            final Country country = api().detail(id, cls);
+            final Country country = api().get(id, cls);
             Response item = createItem(bundle, accessors,
                     repository -> repository.setCountry(country),
                     api().withScope(country), Repository.class);
@@ -192,7 +191,7 @@ public class CountryResource
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Country country = api().detail(id, cls);
+            final Country country = api().get(id, cls);
             final EagExporter eagExporter = new Eag2012Exporter(api());
             Response response = exportItemsAsZip(eagExporter, country.getRepositories(), lang);
             tx.success();

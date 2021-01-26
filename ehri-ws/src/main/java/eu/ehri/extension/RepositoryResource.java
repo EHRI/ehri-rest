@@ -35,7 +35,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -86,7 +85,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Repository repository = api().detail(id, cls);
+            Repository repository = api().get(id, cls);
             Response response = streamingPage(() -> {
                 Iterable<DocumentaryUnit> units = all
                         ? repository.getAllDocumentaryUnits()
@@ -153,7 +152,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Repository repository = api().detail(id, cls);
+            final Repository repository = api().get(id, cls);
             Response response = createItem(bundle, accessors,
                     repository::addTopLevelDocumentaryUnit,
                     api().withScope(repository), DocumentaryUnit.class);
@@ -181,7 +180,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
-            Repository repository = api().detail(id, cls);
+            Repository repository = api().get(id, cls);
             ImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.DOCUMENTARY_UNIT.equals(accessible.getType())) {
@@ -208,7 +207,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                               @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Repository repository = api().detail(id, cls);
+            Repository repository = api().get(id, cls);
             List<String> ids = StreamSupport.stream(
                         repository.getAllDocumentaryUnits().spliterator(), false)
                     .map(Entity::getId)
@@ -237,7 +236,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Repository repository = api().detail(id, cls);
+            Repository repository = api().get(id, cls);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
@@ -265,7 +264,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Repository repo = api().detail(id, cls);
+            final Repository repo = api().get(id, cls);
             final EadExporter eadExporter = new Ead2002Exporter(api());
             Response response = exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang);
             tx.success();

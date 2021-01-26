@@ -32,7 +32,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     @Override
     public UserProfile addWatching(String userId, List<String> ids) throws ItemNotFound {
-        UserProfile user = api.detail(userId, UserProfile.class);
+        UserProfile user = api.get(userId, UserProfile.class);
         for (String id : ids) {
             user.addWatching(manager.getEntity(id, Watchable.class));
         }
@@ -42,7 +42,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     @Override
     public UserProfile removeWatching(String userId, List<String> ids) throws ItemNotFound {
-        UserProfile user = api.detail(userId, UserProfile.class);
+        UserProfile user = api.get(userId, UserProfile.class);
         for (String id : ids) {
             user.removeWatching(manager.getEntity(id, Watchable.class));
         }
@@ -52,7 +52,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     @Override
     public UserProfile addFollowers(String userId, List<String> ids) throws ItemNotFound {
-        UserProfile user = api.detail(userId, UserProfile.class);
+        UserProfile user = api.get(userId, UserProfile.class);
         for (String id : ids) {
             user.addFollowing(manager.getEntity(id, UserProfile.class));
         }
@@ -62,7 +62,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     @Override
     public UserProfile removeFollowers(String userId, List<String> ids) throws ItemNotFound {
-        UserProfile user = api.detail(userId, UserProfile.class);
+        UserProfile user = api.get(userId, UserProfile.class);
         for (String id : ids) {
             user.removeFollowing(manager.getEntity(id, UserProfile.class));
         }
@@ -72,7 +72,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     @Override
     public UserProfile addBlocked(String userId, List<String> ids) throws ItemNotFound {
-        UserProfile user = api.detail(userId, UserProfile.class);
+        UserProfile user = api.get(userId, UserProfile.class);
         for (String id : ids) {
             user.addBlocked(manager.getEntity(id, UserProfile.class));
         }
@@ -82,7 +82,7 @@ class UserProfilesApiImpl implements UserProfilesApi {
 
     @Override
     public UserProfile removeBlocked(String userId, List<String> ids) throws ItemNotFound {
-        UserProfile user = api.detail(userId, UserProfile.class);
+        UserProfile user = api.get(userId, UserProfile.class);
         for (String id : ids) {
             user.removeBlocked(manager.getEntity(id, UserProfile.class));
         }

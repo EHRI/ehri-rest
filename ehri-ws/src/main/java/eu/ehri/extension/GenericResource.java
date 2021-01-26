@@ -55,7 +55,6 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.Versioned;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.Mutation;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -64,7 +63,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -203,7 +201,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, SerializationError {
         try (final Tx tx = beginTx()) {
-            Accessible item = api().detail(id, Accessible.class);
+            Accessible item = api().get(id, Accessible.class);
             Accessor current = getRequesterUserProfile();
             Set<Accessor> accessors = getAccessors(accessorIds, current);
             api().acl().setAccessors(item, accessors);
@@ -306,7 +304,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
-            Accessible item = api().detail(id, Accessible.class);
+            Accessible item = api().get(id, Accessible.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
             Response response = streamingListOfLists(() -> eventsApi.aggregateForItem(item));
@@ -414,8 +412,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                                       Bundle bundle)
             throws PermissionDenied, ValidationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Described item = api().detail(id, Described.class);
-            Description desc = api().detail(did, Description.class);
+            Described item = api().get(id, Described.class);
+            Description desc = api().get(did, Description.class);
             AccessPoint rel = api().createDependent(id, bundle,
                     AccessPoint.class, getLogMessage());
             desc.addAccessPoint(rel);
@@ -459,7 +457,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/versions")
     public Response listVersions(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
-            Versioned item = api().detail(id, Versioned.class);
+            Versioned item = api().get(id, Versioned.class);
             Response response = streamingPage(() -> getQuery().setStream(true)
                     .page(item.getAllPriorVersions(), Version.class));
             tx.success();
@@ -475,7 +473,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @QueryParam("lang") String langCode)
             throws AccessDenied, ItemNotFound, IOException {
         try (final Tx tx = beginTx()) {
-            Described item = api().detail(id, Described.class);
+            Described item = api().get(id, Described.class);
             DublinCoreExporter exporter = new DublinCore11Exporter(api());
             Document doc = exporter.export(item, langCode);
             tx.success();

@@ -121,7 +121,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     public Response listChildren(@PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().detail(id, cls);
+            Concept concept = api().get(id, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(concept.getNarrowerConcepts(), Concept.class));
             tx.success();
@@ -139,7 +139,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Concept parent = api().detail(id, cls);
+            final Concept parent = api().get(id, cls);
             Response item = createItem(bundle, accessors, concept -> {
                 parent.addNarrowerConcept(concept);
                 concept.setVocabulary(parent.getVocabulary());
@@ -231,7 +231,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().detail(id, cls);
+            Concept concept = api().get(id, cls);
             Response response = streamingList(concept::getBroaderConcepts);
             tx.success();
             return response;
@@ -249,7 +249,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Path("{id:[^/]+}/related")
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().detail(id, cls);
+            Concept concept = api().get(id, cls);
             Response response = streamingList(concept::getRelatedConcepts);
             tx.success();
             return response;
@@ -269,7 +269,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Path("{id:[^/]+}/relatedBy")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().detail(id, cls);
+            Concept concept = api().get(id, cls);
             Response response = streamingList(concept::getRelatedByConcepts);
             tx.success();
             return response;

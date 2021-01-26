@@ -43,8 +43,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  * that can be assigned permissions.
  */
 @EntityType(EntityClass.GROUP)
-public interface Group extends Accessor, Accessible,
-        PermissionScope, Named, ItemHolder {
+public interface Group extends Accessor, Accessible, Named, ItemHolder {
     
     String ADMIN_GROUP_IDENTIFIER = "admin";
     String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";

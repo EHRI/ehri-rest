@@ -125,7 +125,7 @@ public final class VirtualUnitResource extends
             throws ItemNotFound, PermissionDenied {
         try (final Tx tx = beginTx()) {
             UserProfile currentUser = getCurrentUser();
-            VirtualUnit parent = api().detail(id, cls);
+            VirtualUnit parent = api().get(id, cls);
             Response item = single(api().virtualUnits().addIncludedUnits(parent,
                     getIncludedUnits(includedIds, currentUser)));
             tx.success();
@@ -140,7 +140,7 @@ public final class VirtualUnitResource extends
             throws ItemNotFound, PermissionDenied {
         try (final Tx tx = beginTx()) {
             UserProfile currentUser = getCurrentUser();
-            VirtualUnit parent = api().detail(id, cls);
+            VirtualUnit parent = api().get(id, cls);
             Response item = single(api().virtualUnits().removeIncludedUnits(parent,
                     getIncludedUnits(includedIds, currentUser)));
             tx.success();
@@ -156,8 +156,8 @@ public final class VirtualUnitResource extends
             throws ItemNotFound, PermissionDenied {
         try (final Tx tx = beginTx()) {
             UserProfile currentUser = getCurrentUser();
-            VirtualUnit fromVu = api().detail(fromId, cls);
-            VirtualUnit toVu = api().detail(toId, cls);
+            VirtualUnit fromVu = api().get(fromId, cls);
+            VirtualUnit toVu = api().get(toId, cls);
             Iterable<DocumentaryUnit> units = getIncludedUnits(includedIds, currentUser);
             api().virtualUnits().moveIncludedUnits(fromVu, toVu, units);
             tx.success();
@@ -227,7 +227,7 @@ public final class VirtualUnitResource extends
             Accessor currentUser = getRequesterUserProfile();
             final Iterable<DocumentaryUnit> includedUnits
                     = getIncludedUnits(includedIds, currentUser);
-            final VirtualUnit parent = api().detail(id, cls);
+            final VirtualUnit parent = api().get(id, cls);
 
             // NB: Unlike most other items created in another context, virtual
             // units do not inherit the permission scope of their 'parent',

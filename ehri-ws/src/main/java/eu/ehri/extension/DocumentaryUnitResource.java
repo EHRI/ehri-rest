@@ -27,9 +27,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
-import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.utils.Table;
@@ -42,8 +40,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.transform.TransformerException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the DocumentaryUnit model.
@@ -132,7 +128,7 @@ public class DocumentaryUnitResource
             IdRegenerator idGen = new IdRegenerator(graph)
                     .withActualRename(!check)
                     .collisionMode(check);
-            DocumentaryUnit entity = api().detail(id, DocumentaryUnit.class);
+            DocumentaryUnit entity = api().get(id, DocumentaryUnit.class);
             Bundle newBundle = getSerializer()
                     .withDependentOnly(true)
                     .entityToBundle(entity)
@@ -172,7 +168,7 @@ public class DocumentaryUnitResource
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final DocumentaryUnit parent = api().detail(id, cls);
+            final DocumentaryUnit parent = api().get(id, cls);
             Response resource = createItem(bundle, accessors,
                     parent::addChild,
                     api().withScope(parent), cls);
@@ -195,7 +191,7 @@ public class DocumentaryUnitResource
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            DocumentaryUnit unit = api().detail(id, cls);
+            DocumentaryUnit unit = api().get(id, cls);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
