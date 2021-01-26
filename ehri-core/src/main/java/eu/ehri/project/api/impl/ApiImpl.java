@@ -2,58 +2,22 @@ package eu.ehri.project.api.impl;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.GlobalPermissionSet;
-import eu.ehri.project.acl.InheritedGlobalPermissionSet;
-import eu.ehri.project.acl.InheritedItemPermissionSet;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.PermissionUtils;
-import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.api.Api;
-import eu.ehri.project.api.ConceptsApi;
-import eu.ehri.project.api.EventsApi;
-import eu.ehri.project.api.QueryApi;
-import eu.ehri.project.api.UserProfilesApi;
-import eu.ehri.project.api.VirtualUnitsApi;
+import eu.ehri.project.acl.*;
+import eu.ehri.project.api.*;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.Described;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.Promotable;
-import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.persistence.VersionManager;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistence.*;
+import eu.ehri.project.utils.GraphInitializer;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
+
+import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 
 public class ApiImpl implements Api {
 
@@ -158,14 +122,13 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public <E extends Accessible> E detail(String id, Class<E> cls) throws ItemNotFound {
+    public <E extends Accessible> E get(String id, Class<E> cls) throws ItemNotFound {
         E item = manager.getEntity(id, cls);
         if (!aclManager.canAccess(item, accessor)) {
             throw new ItemNotFound(id);
         }
         return item;
     }
-
 
     @Override
     public <E extends Accessible> Mutation<E> update(Bundle bundle, Class<E> cls)
@@ -187,7 +150,7 @@ public class ApiImpl implements Api {
 
     @Override
     public int delete(String id) throws PermissionDenied, ValidationError, SerializationError, ItemNotFound, HierarchyError {
-        return delete(id, Optional.<String>empty());
+        return delete(id, Optional.empty());
     }
 
     @Override
@@ -258,11 +221,16 @@ public class ApiImpl implements Api {
     public int delete(String id, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError, ItemNotFound, HierarchyError {
         Accessible item = manager.getEntity(id, Accessible.class);
-        helper.checkEntityPermission(item, accessor, PermissionType.DELETE);
+
+        // Sanity checks: don't delete reserved items or things with children.
         int items = item.as(PermissionScope.class).countContainedItems();
         if (items > 0) {
             throw new HierarchyError(id, items);
+        } else if (GraphInitializer.RESERVED.contains(id)) {
+            throw new PermissionDenied(
+                    accessor.getId(), id, PermissionType.DELETE.getName(), scope.getId());
         }
+        helper.checkEntityPermission(item, accessor, PermissionType.DELETE);
         commitEvent(() -> actionManager
                 .newEventContext(item, accessor.as(Actioner.class),
                         EventTypes.deletion, logMessage)
@@ -450,7 +418,7 @@ public class ApiImpl implements Api {
 
     @Override
     public Promotable promote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError {
-        Promotable item = detail(id, Promotable.class);
+        Promotable item = get(id, Promotable.class);
         helper.checkEntityPermission(item, accessor, PermissionType.PROMOTE);
         if (!item.isPromotable()) {
             throw new NotPromotableError(item.getId());
@@ -463,14 +431,14 @@ public class ApiImpl implements Api {
 
     @Override
     public Promotable removePromotion(String id) throws ItemNotFound, PermissionDenied {
-        Promotable item = detail(id, Promotable.class);
+        Promotable item = get(id, Promotable.class);
         item.removePromotion(accessor.as(UserProfile.class));
         return item;
     }
 
     @Override
     public Promotable demote(String id) throws ItemNotFound, PermissionDenied, NotPromotableError {
-        Promotable item = detail(id, Promotable.class);
+        Promotable item = get(id, Promotable.class);
         helper.checkEntityPermission(item, accessor, PermissionType.PROMOTE);
         if (!item.isPromotable()) {
             throw new ApiImpl.NotPromotableError(item.getId());
@@ -483,7 +451,7 @@ public class ApiImpl implements Api {
 
     @Override
     public Promotable removeDemotion(String id) throws ItemNotFound, PermissionDenied {
-        Promotable item = detail(id, Promotable.class);
+        Promotable item = get(id, Promotable.class);
         item.removeDemotion(accessor.as(UserProfile.class));
         return item;
     }
@@ -491,7 +459,7 @@ public class ApiImpl implements Api {
     @Override
     public int deleteDependent(String parentId, String id, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError {
-        Described parent = detail(parentId, Described.class);
+        Described parent = get(parentId, Described.class);
         Accessible dependentItem = manager.getEntity(id, Accessible.class);
         if (!itemsInSubtree(parent).contains(dependentItem)) {
             throw new PermissionDenied("Given description does not belong to its parent item");
@@ -507,7 +475,7 @@ public class ApiImpl implements Api {
     @Override
     public <T extends Accessible> T createDependent(String parentId, Bundle data, Class<T> cls, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError {
-        Described parent = detail(parentId, Described.class);
+        Described parent = get(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         commitEvent(() -> actionManager
                 .newEventContext(parent, accessor.as(Actioner.class),
@@ -519,7 +487,7 @@ public class ApiImpl implements Api {
     @Override
     public <T extends Accessible> Mutation<T> updateDependent(String parentId, Bundle data, Class<T> cls, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, ValidationError, SerializationError {
-        Described parent = detail(parentId, Described.class);
+        Described parent = get(parentId, Described.class);
         helper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
         Bundle before = depSerializer.entityToBundle(parent);
         Mutation<T> out = bundleManager.withScopeIds(parent.idPath()).update(data, cls);

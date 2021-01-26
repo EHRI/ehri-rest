@@ -22,7 +22,6 @@ package eu.ehri.extension;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.*;
-import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -31,11 +30,9 @@ import eu.ehri.project.exporters.eac.EacExporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
@@ -46,12 +43,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the AuthoritativeSet items. model.
@@ -91,7 +85,7 @@ public class AuthoritativeSetResource extends
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
 
         try (final Tx tx = beginTx()) {
-            AuthoritativeSet set = api().detail(id, cls);
+            AuthoritativeSet set = api().get(id, cls);
             Response response = streamingPage(() ->
                     getQuery().page(set.getAuthoritativeItems(), AuthoritativeItem.class));
             tx.success();
@@ -161,7 +155,7 @@ public class AuthoritativeSetResource extends
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
-            final AuthoritativeSet set = api().detail(id, cls);
+            final AuthoritativeSet set = api().get(id, cls);
             Response item = createItem(bundle, accessors, agent -> {
                 set.addItem(agent);
                 agent.setPermissionScope(set);
@@ -190,7 +184,7 @@ public class AuthoritativeSetResource extends
             InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
-            AuthoritativeSet set = api().detail(id, cls);
+            AuthoritativeSet set = api().get(id, cls);
             ImportCallback cb = mutation -> {
                 Accessible accessible = mutation.getNode();
                 if (!Entities.HISTORICAL_AGENT.equals(accessible.getType())) {
@@ -225,7 +219,7 @@ public class AuthoritativeSetResource extends
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final AuthoritativeSet set = api().detail(id, cls);
+            final AuthoritativeSet set = api().get(id, cls);
             final EacExporter eacExporter = new Eac2010Exporter(api());
             Iterable<HistoricalAgent> agents = Iterables
                     .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));

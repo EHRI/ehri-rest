@@ -20,6 +20,7 @@
 package eu.ehri.project.utils;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.ContentTypes;
@@ -46,6 +47,19 @@ public class GraphInitializer {
     private final GraphManager manager;
 
     private static final String INIT_MESSAGE = "Initialising graph";
+    public static ImmutableSet<String> RESERVED;
+
+    static {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        builder.add(ActionManager.GLOBAL_EVENT_ROOT, Group.ADMIN_GROUP_IDENTIFIER);
+        for (PermissionType t : PermissionType.values()) {
+            builder.add(t.getName());
+        }
+        for (ContentTypes t : ContentTypes.values()) {
+            builder.add(t.getName());
+        }
+        RESERVED = builder.build();
+    }
 
     public GraphInitializer(FramedGraph<?> graph) {
         manager = GraphManagerFactory.getInstance(graph);
@@ -74,13 +88,13 @@ public class GraphInitializer {
         // Create permission nodes corresponding to the Enum values
         for (PermissionType pt : PermissionType.values()) {
             manager.createVertex(pt.getName(), EntityClass.PERMISSION,
-                    Maps.<String, Object>newHashMap());
+                    Maps.newHashMap());
         }
 
         // Create content type nodes corresponding to the Enum values
         for (ContentTypes ct : ContentTypes.values()) {
             manager.createVertex(ct.getName(), EntityClass.CONTENT_TYPE,
-                    Maps.<String, Object>newHashMap());
+                    Maps.newHashMap());
         }
     }
 }

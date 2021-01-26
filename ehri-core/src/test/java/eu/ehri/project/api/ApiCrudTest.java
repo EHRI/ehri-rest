@@ -23,6 +23,7 @@ import com.google.common.collect.Iterables;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.HierarchyError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -43,24 +44,24 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test
     public void testDetail() throws ItemNotFound {
-        DocumentaryUnit unit = api(validUser).detail(item.getId(), DocumentaryUnit.class);
+        DocumentaryUnit unit = api(validUser).get(item.getId(), DocumentaryUnit.class);
         assertEquals(item.asVertex(), unit.asVertex());
     }
 
     @Test
     public void testUserProfile() throws ItemNotFound {
-        UserProfile user = api(validUser).detail(validUser.getId(), UserProfile.class);
+        UserProfile user = api(validUser).get(validUser.getId(), UserProfile.class);
         assertEquals(validUser.asVertex(), user.asVertex());
     }
 
     @Test(expected = ItemNotFound.class)
     public void testDetailAnonymous() throws ItemNotFound {
-        anonApi().detail(item.getId(), DocumentaryUnit.class);
+        anonApi().get(item.getId(), DocumentaryUnit.class);
     }
 
     @Test(expected = ItemNotFound.class)
     public void testDetailPermissionDenied() throws ItemNotFound {
-        api(invalidUser).detail(item.getId(), DocumentaryUnit.class);
+        api(invalidUser).get(item.getId(), DocumentaryUnit.class);
     }
 
     @Test
@@ -111,7 +112,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test
     public void testUserDetailAccessDenied() throws ItemNotFound {
-        api(invalidUser).detail(validUser.getId(), UserProfile.class);
+        api(invalidUser).get(validUser.getId(), UserProfile.class);
     }
 
     @Test
@@ -197,11 +198,24 @@ public class ApiCrudTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testDeleteAdmin() throws Exception {
+        try {
+            api(validUser).delete(Group.ADMIN_GROUP_IDENTIFIER);
+            fail("Should not have been able to delete admin group");
+        } catch (PermissionDenied e) {
+            assertEquals(Group.ADMIN_GROUP_IDENTIFIER, e.getEntity());
+            assertEquals(validUser.getId(), e.getAccessor());
+            assertEquals(PermissionType.DELETE.getName(), e.getPermission());
+            assertEquals(SystemScope.getInstance().getId(), e.getScope());
+        }
+    }
+
+    @Test
     public void testDelete() throws Exception {
         int shouldDelete = 1;
 
         // FIXME: Surely there's a better way of doing this???
-        DocumentaryUnit c4 = api(validUser).detail("c4", DocumentaryUnit.class);
+        DocumentaryUnit c4 = api(validUser).get("c4", DocumentaryUnit.class);
         Iterator<Description> descIter = c4.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);

@@ -379,7 +379,7 @@ public class GraphQLImpl {
     private DataFetcher<Entity> entityIdDataFetcher(String type) {
         return env -> {
             try {
-                Accessible detail = api().detail(env.getArgument(Bundle.ID_KEY), Accessible.class);
+                Accessible detail = api().get(env.getArgument(Bundle.ID_KEY), Accessible.class);
                 return Objects.equals(detail.getType(), type) ? detail : null;
             } catch (ItemNotFound e) {
                 return null;

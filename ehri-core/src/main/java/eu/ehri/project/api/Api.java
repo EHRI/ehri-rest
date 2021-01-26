@@ -84,7 +84,7 @@ public interface Api {
      * @param cls the item's class
      * @return the given framed vertex
      */
-    <E extends Accessible> E detail(String id, Class<E> cls) throws ItemNotFound;
+    <E extends Accessible> E get(String id, Class<E> cls) throws ItemNotFound;
 
     /**
      * Update an object bundle, also updating dependent items.

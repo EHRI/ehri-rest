@@ -118,7 +118,7 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         int origActionCount = toList(validUser.getHistory()).size();
 
         // FIXME: Surely there's a better way of doing this???
-        DocumentaryUnit item = api(validUser).detail("c4", DocumentaryUnit.class);
+        DocumentaryUnit item = api(validUser).get("c4", DocumentaryUnit.class);
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);

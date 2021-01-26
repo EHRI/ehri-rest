@@ -134,7 +134,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws IOException, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            HistoricalAgent agent = api().detail(id, HistoricalAgent.class);
+            HistoricalAgent agent = api().get(id, HistoricalAgent.class);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {

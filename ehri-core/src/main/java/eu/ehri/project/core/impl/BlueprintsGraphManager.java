@@ -106,9 +106,12 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
-    public <E> E getEntity(String id, EntityClass type, Class<E> cls)
-            throws ItemNotFound {
-        return graph.frame(getVertex(id), cls);
+    public <E> E getEntity(String id, EntityClass type, Class<E> cls) throws ItemNotFound {
+        Vertex vertex = getVertex(id);
+        if (!getType(vertex).equals(type.getName())) {
+            throw new ItemNotFound(id, getEntityClass(vertex));
+        }
+        return graph.frame(vertex, cls);
     }
 
     @Override
@@ -125,8 +128,7 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
 
     @Override
     public Vertex getVertex(String id) throws ItemNotFound {
-        Preconditions
-                .checkNotNull(id, "attempt to fetch vertex with a null id");
+        Preconditions.checkNotNull(id, "attempt to fetch vertex with a null id");
         try {
             return graph.getVertices(EntityType.ID_KEY, id).iterator().next();
         } catch (NoSuchElementException e) {

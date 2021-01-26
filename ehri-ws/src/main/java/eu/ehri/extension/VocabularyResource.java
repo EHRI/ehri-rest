@@ -19,16 +19,12 @@
 
 package eu.ehri.extension;
 
-import com.google.common.collect.Lists;
 import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.cvoc.JenaSkosExporter;
 import eu.ehri.project.importers.cvoc.SkosRDFVocabulary;
-import eu.ehri.project.importers.json.BatchOperations;
-import eu.ehri.project.models.Country;
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
@@ -42,10 +38,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the Vocabulary model. Vocabularies are
@@ -82,7 +75,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Vocabulary vocabulary = api().detail(id, cls);
+            Vocabulary vocabulary = api().get(id, cls);
             Response response = streamingPage(() -> getQuery()
                     .page(all ? vocabulary.getConcepts() : vocabulary.getTopConcepts(), Concept.class));
             tx.success();
@@ -152,7 +145,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Vocabulary vocabulary = api().detail(id, cls);
+            final Vocabulary vocabulary = api().get(id, cls);
             Response item = createItem(bundle, accessors,
                     concept -> concept.setVocabulary(vocabulary),
                     api().withScope(vocabulary), Concept.class);
@@ -181,7 +174,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
         final MediaType mediaType = MediaType.valueOf(RDF_MIMETYPE_FORMATS
                 .inverse().get(rdfFormat));
         try (final Tx tx = beginTx()) {
-            final Vocabulary vocabulary = api().detail(id, cls);
+            final Vocabulary vocabulary = api().get(id, cls);
             final JenaSkosExporter skosImporter = new JenaSkosExporter(graph, vocabulary);
             final Model model = skosImporter.export(base);
             tx.success();
