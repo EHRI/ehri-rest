@@ -19,10 +19,7 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 
@@ -58,19 +55,26 @@ public interface ParentResource {
      * @param accessors the users/groups who can access this item.
      * @return A serialized representation of the created resource.
      */
-    Response createChild(String id,
-                         Bundle bundle, List<String> accessors)
+    Response createChild(String id, Bundle bundle, List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
 
     /**
-     * Delete a parent resource and all of its contained items.
+     * Delete all
      *
-     * @param id the parent resource ID
+     * <p>
+     * Example:
+     * <pre>
+     *     <code>
+     * curl -XDELETE -HX-User:admin http://localhost:7474/ehri/[RESOURCE]/[ID]/list
+     *     </code>
+     * </pre>
+     *
+     * @param id  the parent resource ID
+     * @param all descend into the hierarchy of any child items
      * @return an ordered list of deleted item IDs
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
+     * @throws HierarchyError if an attempt is made to delete child items that have
+     *                        children themselves without using the {{all}} parameter.
      */
-    Table deleteAll(String id) throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
+    Table deleteChildren(String id, boolean all)
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound, HierarchyError;
 }

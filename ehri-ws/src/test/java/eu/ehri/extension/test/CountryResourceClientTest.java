@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static eu.ehri.extension.base.AbstractResource.ALL_PARAM;
 import static org.junit.Assert.assertEquals;
 
 public class CountryResourceClientTest extends AbstractResourceClientTest {
@@ -49,12 +50,13 @@ public class CountryResourceClientTest extends AbstractResourceClientTest {
     public void testDeleteAll() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.COUNTRY, "nl", "all"))
+                entityUriBuilder(Entities.COUNTRY, "nl", "list")
+                    .queryParam(ALL_PARAM, "true")
+                    .build())
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
 
         Table expected = Table.of(Lists.newArrayList(
-                Lists.newArrayList("nl"),
                 Lists.newArrayList("c1"),
                 Lists.newArrayList("c2"),
                 Lists.newArrayList("c3"),

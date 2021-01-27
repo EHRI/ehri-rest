@@ -33,6 +33,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static eu.ehri.extension.base.AbstractResource.ALL_PARAM;
 import static org.junit.Assert.assertEquals;
 
 
@@ -125,14 +126,14 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
-    public void testDeleteAll() throws Exception {
-        URI uri = entityUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all")
-                .queryParam("commit", "true").build();
+    public void testDeleteChildren() throws Exception {
+        URI uri = entityUriBuilder(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "list")
+                .queryParam(ALL_PARAM, "true").build();
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
         assertEquals(
-                Table.column(ImmutableList.of(TEST_CVOC_ID, "cvocc1", "cvocc2")),
+                Table.column(ImmutableList.of("cvocc1", "cvocc2")),
                 response.getEntity(Table.class));
 
         // Check it's really gone...

@@ -20,6 +20,7 @@
 package eu.ehri.project.api;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
@@ -37,6 +38,8 @@ import eu.ehri.project.test.TestData;
 import org.junit.Test;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -226,5 +229,16 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
         int deleted = api(validUser).delete(c4.getId());
         assertEquals(shouldDelete, deleted);
+    }
+
+    @Test(expected = HierarchyError.class)
+    public void testDeleteChildrenWithError() throws Exception {
+        api(validUser).deleteChildren(item.getId(), false, Optional.empty());
+    }
+
+    @Test
+    public void testDeleteChildren() throws Exception {
+        List<String> out = api(validUser).deleteChildren(item.getId(), true, Optional.empty());
+        assertEquals(Lists.newArrayList("c2", "c3"), out);
     }
 }

@@ -187,6 +187,19 @@ public interface Api {
             throws ItemNotFound, PermissionDenied, SerializationError;
 
     /**
+     * Delete all item's within the given item's permission scope.
+     *
+     * @param parentId   the parent ID
+     * @param all        whether to recursively delete children of this item.
+     * @param logMessage an optional log message
+     * @return the IDs of delete items
+     * @throws HierarchyError if {{all}} is not given and a child item has children
+     *                        of its own.
+     */
+    List<String> deleteChildren(String parentId, boolean all, Optional<String> logMessage)
+            throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError;
+
+    /**
      * Create a dependent item, belonging to the given parent.
      *
      * @param parentId   the parent ID
@@ -237,7 +250,7 @@ public interface Api {
      *
      * @param source the identifier of a Accessible target of this Annotation
      * @param target the identifier of a Annotator source of this Annotation
-     * @param bundle    the annotation itself
+     * @param bundle the annotation itself
      * @return a new link
      */
     Link createAccessPointLink(String source, String target, String descriptionId, String bodyName,

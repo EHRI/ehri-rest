@@ -16,6 +16,8 @@ import eu.ehri.project.utils.GraphInitializer;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 
@@ -239,6 +241,7 @@ public class ApiImpl implements Api {
                 .delete(depSerializer.entityToBundle(item));
     }
 
+
     @Override
     public AclManager aclManager() {
         return aclManager;
@@ -294,13 +297,10 @@ public class ApiImpl implements Api {
                 // fact that individual grants can, in theory, have more than one
                 // target content type.
                 for (PermissionGrantTarget tg : grant.getTargets()) {
-                    switch (manager.getEntityClass(tg)) {
-                        case CONTENT_TYPE:
-                            helper.checkContentPermission(accessor, ContentTypes.withName(tg.getId()), PermissionType.GRANT);
-                            break;
-                        default:
-                            helper.checkEntityPermission(
-                                    tg.as(Accessible.class), accessor, PermissionType.GRANT);
+                    if (manager.getEntityClass(tg) == EntityClass.CONTENT_TYPE) {
+                        helper.checkContentPermission(accessor, ContentTypes.withName(tg.getId()), PermissionType.GRANT);
+                    } else {
+                        helper.checkEntityPermission(tg.as(Accessible.class), accessor, PermissionType.GRANT);
                     }
                 }
                 aclManager.revokePermissionGrant(grant);
@@ -470,6 +470,54 @@ public class ApiImpl implements Api {
                 .createVersion(parent));
         return bundleManager.withScopeIds(parent.idPath())
                 .delete(depSerializer.entityToBundle(dependentItem));
+    }
+
+    @Override
+    public List<String> deleteChildren(String parentId, boolean all, Optional<String> logMessage)
+            throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError {
+
+        Accessible parent = manager.getEntity(parentId, Accessible.class);
+        PermissionScope scope = parent.as(PermissionScope.class);
+        Iterable<Accessible> children = all
+                ? scope.getAllContainedItems()
+                : scope.getContainedItems();
+        List<String> ids = StreamSupport
+                .stream(children.spliterator(), false)
+                .map(Entity::getId)
+                .sorted()
+                .collect(Collectors.toList());
+
+        if (!ids.isEmpty()) {
+            commitEvent(() -> {
+                ActionManager.EventContext ctx = actionManager.newEventContext(accessor.as(Actioner.class),
+                        EventTypes.deletion, logMessage);
+                try {
+                    for (String id : ids) {
+                        Entity entity = manager.getEntity(id, Entity.class);
+                        ctx = ctx.addSubjects(entity.as(Accessible.class));
+                        ctx = ctx.createVersion(entity);
+                    }
+                    return ctx;
+                } catch (ItemNotFound e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            try {
+                for (String id : ids) {
+                    Accessible item = manager.getEntity(id, Accessible.class);
+                    int count = item.as(PermissionScope.class).countContainedItems();
+                    if (!all && count > 0) {
+                        throw new HierarchyError(id, count);
+                    }
+                    helper.setScope(scope).checkEntityPermission(item, accessor, PermissionType.DELETE);
+                    bundleManager.delete(depSerializer.entityToBundle(item));
+                }
+            } catch (SerializationError e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return ids;
     }
 
     @Override
