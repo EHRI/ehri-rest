@@ -273,23 +273,15 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param children an iterable of child items
      * @return a table of delete item IDs
      */
-    protected Table deleteAll(String id, Function<E, Iterable<Accessible>> children)
-            throws ItemNotFound, PermissionDenied, ValidationError {
-        E scope = fetchAndCheckType(id);
-        List<String> ids = StreamSupport.stream(children.apply(scope).spliterator(), false)
-                .map(Entity::getId)
-                .collect(Collectors.toList());
-        new BatchOperations(graph).setScope(scope.as(PermissionScope.class))
-                .setVersioning(true)
-                .batchDelete(ids, getCurrentActioner(), getLogMessage());
+    protected Table deleteContents(String id, boolean all)
+            throws ItemNotFound, PermissionDenied, ValidationError, HierarchyError {
+        fetchAndCheckType(id);
         try {
-            deleteItem(id);
-        } catch (HierarchyError e) {
-            throw new RuntimeException(e);
+            List<String> data = api().deleteChildren(id, all, getLogMessage());
+            return Table.column(data);
+        } catch (SerializationError e) {
+           throw new RuntimeException(e);
         }
-        List<String> data = ids.stream().sorted().collect(Collectors.toList());
-        data.add(0, id);
-        return Table.column(data);
     }
 
     // Helpers

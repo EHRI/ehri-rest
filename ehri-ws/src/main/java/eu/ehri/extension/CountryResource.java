@@ -126,13 +126,14 @@ public class CountryResource
         }
     }
 
-    @Override
     @DELETE
-    @Path("{id:[^/]+}/all")
+    @Path("{id:[^/]+}/list")
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
-    public Table deleteAll(@PathParam("id") String id) throws ItemNotFound, PermissionDenied, ValidationError {
+    @Override
+    public Table deleteChildren(@PathParam("id") String id, @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, PermissionDenied, ValidationError, HierarchyError {
         try (final Tx tx = beginTx()) {
-            Table out = deleteAll(id, Country::getAllContainedItems);
+            Table out = deleteContents(id, all);
             tx.success();
             return out;
         }

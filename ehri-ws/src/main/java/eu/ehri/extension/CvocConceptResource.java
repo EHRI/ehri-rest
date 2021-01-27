@@ -101,7 +101,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @DELETE
     @Path("{id:[^/]+}/all")
     @Override
-    public Table deleteAll(@PathParam("id") String id)
+    public Table deleteChildren(@PathParam("id") String id, boolean all)
             throws PermissionDenied, ItemNotFound, ValidationError {
         try {
             // NB: While it has hierarchical behaviour this does not

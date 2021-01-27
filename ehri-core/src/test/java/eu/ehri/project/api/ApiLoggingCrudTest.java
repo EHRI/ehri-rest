@@ -19,7 +19,10 @@
 
 package eu.ehri.project.api;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.HierarchyError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
@@ -103,5 +106,14 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
         List<Version> r1vl = Lists.newArrayList(loggingApi(validUser).versionManager()
                 .versionsAtDeletion(EntityClass.REPOSITORY, null, null));
         assertEquals(1, r1vl.size());
+    }
+
+    @Test
+    public void testDeleteChildren() throws Exception {
+        List<String> out = loggingApi(validUser).deleteChildren(item.getId(), true, Optional.empty());
+        assertEquals(Lists.newArrayList("c2", "c3"), out);
+        SystemEvent event = am.getLatestGlobalEvent();
+        assertEquals(EventTypes.deletion, event.getEventType());
+        assertEquals(Iterables.size(event.getPriorVersions()), 2);
     }
 }

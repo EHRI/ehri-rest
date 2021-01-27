@@ -40,6 +40,7 @@ import java.net.URI;
 import java.util.List;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static eu.ehri.extension.base.AbstractResource.ALL_PARAM;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -124,15 +125,16 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
     }
 
     @Test
-    public void testDeleteDocumentaryUnitAndChildren() throws Exception {
+    public void testDeleteChildren() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                entityUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, "all"))
+                entityUriBuilder(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, "list")
+                        .queryParam(ALL_PARAM, "true")
+                        .build())
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
 
         Table expected = Table.of(Lists.newArrayList(
-                Lists.newArrayList(FIRST_DOC_ID),
                 Lists.newArrayList("c2"),
                 Lists.newArrayList("c3")
         ));
