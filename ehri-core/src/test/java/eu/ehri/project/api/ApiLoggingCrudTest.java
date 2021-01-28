@@ -115,5 +115,6 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(EventTypes.deletion, event.getEventType());
         assertEquals(Iterables.size(event.getPriorVersions()), 2);
+        assertEquals(item, event.getEventScope());
     }
 }
