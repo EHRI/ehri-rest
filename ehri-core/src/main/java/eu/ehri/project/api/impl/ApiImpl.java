@@ -489,8 +489,9 @@ public class ApiImpl implements Api {
 
         if (!ids.isEmpty()) {
             commitEvent(() -> {
-                ActionManager.EventContext ctx = actionManager.newEventContext(accessor.as(Actioner.class),
-                        EventTypes.deletion, logMessage);
+                ActionManager.EventContext ctx = actionManager
+                            .setScope(scope)
+                            .newEventContext(accessor.as(Actioner.class), EventTypes.deletion, logMessage);
                 try {
                     for (String id : ids) {
                         Entity entity = manager.getEntity(id, Entity.class);
@@ -504,14 +505,18 @@ public class ApiImpl implements Api {
             });
 
             try {
+                BundleManager dao = bundleManager.withScopeIds(scope.idPath());
+                PermissionUtils checker = helper.setScope(scope);
                 for (String id : ids) {
                     Accessible item = manager.getEntity(id, Accessible.class);
-                    int count = item.as(PermissionScope.class).countContainedItems();
-                    if (!all && count > 0) {
-                        throw new HierarchyError(id, count);
+                    if (!all) {
+                        int count = item.as(PermissionScope.class).countContainedItems();
+                        if (count > 0) {
+                            throw new HierarchyError(id, count);
+                        }
                     }
-                    helper.setScope(scope).checkEntityPermission(item, accessor, PermissionType.DELETE);
-                    bundleManager.delete(depSerializer.entityToBundle(item));
+                    checker.checkEntityPermission(item, accessor, PermissionType.DELETE);
+                    dao.delete(depSerializer.entityToBundle(item));
                 }
             } catch (SerializationError e) {
                 throw new RuntimeException(e);
