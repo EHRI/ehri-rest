@@ -73,6 +73,7 @@
                             <include>org.apache.commons:commons-compress</include>
                             <include>com.typesafe:config</include>
                             <include>com.flipkart.zjsonpatch:zjsonpatch</include>
+                            <include>org.apache.commons:commons-collections4</include>
 
                             <!-- GraphQL deps -->
                             <include>org.antlr:antlr4-runtime</include>
