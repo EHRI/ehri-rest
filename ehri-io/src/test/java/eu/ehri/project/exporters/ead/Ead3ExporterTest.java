@@ -1,0 +1,179 @@
+/*
+ * Copyright 2020 Data Archiving and Networked Services (an institute of
+ * Koninklijke Nederlandse Akademie van Wetenschappen), King's College London,
+ * Georg-August-Universitaet Goettingen Stiftung Oeffentlichen Rechts
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
+package eu.ehri.project.exporters.ead;
+
+import eu.ehri.project.exporters.test.XmlExporterTest;
+import eu.ehri.project.importers.ead.EadHandler;
+import eu.ehri.project.importers.ead.EadImporter;
+import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.Repository;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ResourceBundle;
+
+import static eu.ehri.project.test.XmlTestHelpers.*;
+
+
+public class Ead3ExporterTest extends XmlExporterTest {
+
+    private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());
+
+    @Test
+    public void testExport1() throws Exception {
+        DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
+        String xml = testExport(c1, "eng");
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "auths", "//controlaccess/subject/@source");
+        assertXPath(doc, "a1", "//controlaccess/subject/@authfilenumber");
+    }
+
+    @Test
+    public void testExport2() throws Exception {
+        DocumentaryUnit c4 = manager.getEntity("c4", DocumentaryUnit.class);
+        String xml = testExport(c4, "eng");
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "A link indicated that r4 is the original location of c4",
+                "//ead/archdesc/originalsloc/p");
+    }
+
+    @Test
+    public void testImportExport1() throws Exception {
+        Repository repo = manager.getEntity("r1", Repository.class);
+        testImportExport(repo, "hierarchical-ead.xml", "Ctop level fonds", "eng");
+    }
+
+    @Test
+    public void testImportExport2() throws Exception {
+        Repository repo = manager.getEntity("r1", Repository.class);
+        String xml = testImportExport(repo, "EAD3test.xml",
+                "Resource (call) |||.Ident (num) |||", "eng");
+        //System.out.println(xml);
+        Document doc = parseDocument(xml);
+        if (config.getBoolean("io.export.ead.includeRevisions")) {
+            assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
+                    "//ead/control/revisiondesc/change/item/text()");
+        }
+        assertXPath(doc, "eng",
+                "//ead/control/profiledesc/langusage/language/@langcode");
+        assertXPath(doc, "Local",
+                "//ead/control/profiledesc/descrules");
+        assertXPath(doc, "NIOD Description",
+                "//ead/control/filedesc/publicationstmt/publisher/text()");
+        assertXPath(doc, "NIOD Description",
+                "//ead/archdesc/did/repository/corpname/text()");
+        assertXPath(doc, "Scope and contents note content no label |||\n\n" +
+                        "Scope and contents note content |||",
+                "//ead/archdesc/scopecontent/p/text()");
+        assertXPath(doc, "Separated materials note content no label |||",
+                "//ead/archdesc/separatedmaterial[2]/p/text()");
+        assertXPath(doc, "Series I |||",
+                "//ead/archdesc/dsc/c01/did/unitid/text()");
+        assertXPath(doc, "Folder 3 |||",
+                "//ead/archdesc/dsc/c01[3]/c02[2]/did/unitid/text()");
+        assertXPath(doc, "Processing information note no label |||\n\n" +
+                        "Processing information note content |||",
+                "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
+        assertXPath(doc, "2000",
+                "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
+        assertXPath(doc, "Source information |||",
+                "//ead/archdesc/processinfo/p/bibref");
+    }
+
+    @Test
+    public void testExportWithComprehensiveFixture() throws Exception {
+        DocumentaryUnit test = manager.getEntity("nl-000001-1", DocumentaryUnit.class);
+        String xml = testExport(test, "eng");
+        //System.out.println(xml);
+        Document doc = parseDocument(xml);
+        assertXPath(doc, "nl-000001-1", "/ead/control/recordid");
+        assertXPath(doc, "Example Documentary Unit 1",
+                "//ead/control/filedesc/titlestmt/titleproper");
+        assertXPath(doc, readResourceFileAsString("creationprocess-boilerplate.txt"),
+                "//ead/control/filedesc/notestmt/note/p");
+        assertXPath(doc, "Institution Example",
+                "//ead/control/filedesc/publicationstmt/publisher");
+        assertXPath(doc, "Netherlands",
+                "//ead/control/filedesc/publicationstmt/address/addressline[8]");
+        assertXPath(doc, "Example text",
+                "//ead/control/profiledesc/descrules[1]");
+        assertXPath(doc, "eng", "//ead/control/profiledesc/langusage/language/@langcode");
+        assertXPath(doc, "1", "//ead/archdesc/did/unitid");
+        assertXPath(doc, "Example Documentary Unit 1", "//ead/archdesc/did/unittitle");
+        assertXPath(doc, "Institution Example", "//ead/archdesc/did/repository/corpname/part");
+        assertXPath(doc, "a", "//ead/archdesc/dsc/c01/did/unitid");
+        assertXPath(doc, "i", "//ead/archdesc/dsc/c01/c02/did/unitid");
+        assertXPath(doc, "Example text", "//ead/archdesc/scopecontent/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/arrangement/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/bibliography/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/altformavail/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/originalsloc/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/bioghist/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/accessrestrict/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/userestrict/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/accruals/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/acqinfo/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/appraisal/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/custodhist/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/phystech/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/odd/p");
+        assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
+        assertXPath(doc, "2000", "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
+        assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@type='Sources']/p/bibref");
+        assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname/part");
+        assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject/part");
+
+    }
+
+    private String testExport(DocumentaryUnit unit, String lang) throws Exception {
+        Ead3Exporter exporter = new Ead3Exporter(api(validUser));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exporter.export(unit, baos, lang);
+        String xml = baos.toString("UTF-8");
+        isValidEad(xml);
+        return xml;
+    }
+
+    private String testImportExport(Repository repository, String resourceName,
+            String topLevelIdentifier, String lang) throws Exception {
+        InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
+        new SaxImportManager(graph, repository, validUser,
+                EadImporter.class, EadHandler.class)
+                .withProperties("ead3.properties")
+                .importInputStream(ios, "Testing import/export");
+        DocumentaryUnit fonds = graph.frame(
+                getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
+        Ead3Exporter exporter = new Ead3Exporter(api(validUser));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exporter.export(fonds, baos, lang);
+        String xml = baos.toString("UTF-8");
+        isValidEad(xml);
+        return xml;
+    }
+
+    private void isValidEad(String eadXml) throws IOException, SAXException {
+        validatesSchema(eadXml, "ead3.xsd");
+    }
+}

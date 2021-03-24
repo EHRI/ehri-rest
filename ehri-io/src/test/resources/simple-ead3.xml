@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="http://ead3.archivists.org/schema/">
+	<control>
+		<recordid>test-1</recordid>
+		<filedesc>
+			<titlestmt>
+				<titleproper>Test 1</titleproper>
+				<subtitle>An EAD3 Test File</subtitle>
+				<author>EHRI</author>
+			</titlestmt>
+			<publicationstmt>
+				<p>EHRI</p>
+			</publicationstmt>
+		</filedesc>
+		<maintenancestatus value="new"/>
+		<maintenanceagency>
+			<agencyname>EHRI</agencyname>
+		</maintenanceagency>
+		<languagedeclaration>
+			<language langcode="eng"/>
+			<script scriptcode="Latn"/>
+		</languagedeclaration>
+		<conventiondeclaration>
+			<citation>DACS</citation>
+		</conventiondeclaration>
+		<maintenancehistory>
+			<maintenanceevent>
+				<eventtype value="created"/>
+				<eventdatetime>March 2021</eventdatetime>
+				<agenttype value="human"/>
+				<agent>Mike</agent>
+			</maintenanceevent>
+		</maintenancehistory>
+	</control>
+	<archdesc level="collection">
+		<did>
+			<head>Collection Summary</head>
+			<repository label="Repository:" encodinganalog="855">
+				<corpname source="LCNAF" encodinganalog="110">
+					<part localtype="a">EHRI</part>
+					<part localtype="b">WP9</part>
+				</corpname>
+			</repository>
+			<origination label="Creator:" encodinganalog="100">
+				<persname rules="AACR" encodinganalog="100">
+					<part localtype="a">EHRI</part>
+					<part localtype="d">2010-2024</part>
+				</persname>
+			</origination>
+			<unittitle label="Title:" encodinganalog="245">Test Item 1</unittitle>
+			<unitdatestructured label="Dates:" unitdatetype="inclusive" encodinganalog="245">
+				<daterange>
+					<fromdate>2020</fromdate>
+					<todate>2021</todate>
+				</daterange>
+			</unitdatestructured>
+
+			<unitid label="Collection Number:">t1</unitid>
+
+			<abstract label="Abstract:">Some t1 Text Here</abstract>
+			<didnote label="Note:">Information about the collection.</didnote>
+			<langmaterial label="Language:">
+				<language langcode="eng">English</language>
+				<descriptivenote>
+					<p>Materials in this collection are written in English.</p>
+				</descriptivenote>
+			</langmaterial>
+			<physloc label="Location:">Virtual</physloc>
+		</did>
+
+		<bioghist encodinganalog="545">
+			<head>Biography Info</head>
+			<p>Some text</p>
+		</bioghist>
+		<scopecontent encodinganalog="520">
+			<head>Scope and Contents of the Papers</head>
+			<p>Para 1</p>
+			<p>Para 2</p>
+		</scopecontent>
+		<arrangement encodinganalog="351">
+			<head>Arrangement of the Papers</head>
+			<p>Info</p>
+			<list>
+				<item>
+					<ref target="series1">Info item 1</ref>
+				</item>
+			</list>
+		</arrangement>
+
+		<controlaccess>
+			<head>Index Terms</head>
+			<p>For some reason this test item nests controlaccess sections</p>
+			<controlaccess>
+				<head>Persons</head>
+				<persname source="AACR" encodinganalog="700">
+					<part localtype="a">Person A</part>
+				</persname>
+			</controlaccess>
+			<controlaccess>
+				<head>Topics:</head>
+				<subject source="LCSH" encodinganalog="650">
+					<part>Topic A</part>
+				</subject>
+			</controlaccess>
+
+			<controlaccess>
+				<head>Document Types</head>
+				<genreform source="LCSH" encodinganalog="655">
+					<part localtype="a">Novels</part>
+				</genreform>
+			</controlaccess>
+		</controlaccess>
+		<relatedmaterial encodinganalog="544">
+			<head>Related Records</head>
+			<p>Related info</p>
+		</relatedmaterial>
+
+		<accessrestrict encodinganalog="506">
+			<head>Restrictions on Access</head>
+			<p>Access info</p>
+		</accessrestrict>
+
+		<userestrict>
+			<head>Restrictions on Use</head>
+			<p>Use info</p>
+		</userestrict>
+
+		<acqinfo encodinganalog="541">
+			<head>Acquisition Information</head>
+			<p>Acquisition info</p>
+		</acqinfo>
+
+		<processinfo encodinganalog="583">
+			<head>Processing Information</head>
+			<p>Processing info</p>
+		</processinfo>
+		<altformavail>
+			<head>Other Formats</head>
+			<p>This collection is also available on microfilm.</p>
+		</altformavail>
+		<appraisal>
+			<head>Appraisal</head>
+			<p>Portions of this collection were heavily weeded.</p>
+		</appraisal>
+		<custodhist>
+			<head>Custodial History</head>
+			<p>Created for test purposes</p>
+		</custodhist>
+		<fileplan>
+			<head>File Plan</head>
+			<p>Some info</p>
+		</fileplan>
+
+		<accruals>
+			<head>Additions to the Collection</head>
+			<p>No additions are anticipated.</p>
+		</accruals>
+		<legalstatus>
+			<head>Legal Status:</head>
+			<p>Some info</p>
+		</legalstatus>
+		<odd>
+			<head>Other Information</head>
+			<p>Some info</p>
+		</odd>
+		<originalsloc>
+			<head>Location of Originals</head>
+			<p>Some info</p>
+		</originalsloc>
+		<prefercite>
+			<head>Cite As</head>
+			<p>Some info</p>
+		</prefercite>
+		<otherfindaid>
+			<head>Other Finding Aids</head>
+			<p>Some info</p>
+		</otherfindaid>
+		<phystech>
+			<head>Technical Issues</head>
+			<p>Some info</p>
+		</phystech>
+
+		<separatedmaterial>
+			<head>Separated Materials</head>
+			<p>Some info</p>
+		</separatedmaterial>
+
+		<dsc>
+			<head>Detailed Description of the Collection</head>
+			<p>The following section contains a detailed listing of the materials in the collection.</p>
+
+			<c01 level="series" id="series1">
+				<did>
+                    <unitid>c1</unitid>
+					<unittitle>Child item 1</unittitle>
+					<unitdatestructured label="Dates:" unitdatetype="inclusive" encodinganalog="245">
+						<daterange>
+							<fromdate>2021</fromdate>
+							<todate>2021</todate>
+						</daterange>
+					</unitdatestructured>
+					<physdesc>5 folders</physdesc>
+				</did>
+				<scopecontent>
+					<p>Child info</p>
+				</scopecontent>
+			</c01>
+		</dsc>
+	</archdesc>
+</ead>

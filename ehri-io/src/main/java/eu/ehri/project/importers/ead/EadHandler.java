@@ -57,6 +57,7 @@ public class EadHandler extends SaxXmlHandler {
 
     // Constants for elements we need to watch for.
     static final String EADID = "eadid",
+            RECORDID = "recordid",
             ARCHDESC = "archdesc",
             DID = "did";
 
@@ -186,6 +187,11 @@ public class EadHandler extends SaxXmlHandler {
         if (qName.equals(EADID)) {
             eadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
             logger.trace("Found {}: {}", EADID, eadId);
+        }
+
+        if (qName.equals(RECORDID)) {
+            eadId = ((String) currentGraphPath.peek().get(Ontology.SOURCEFILE_KEY));
+            logger.trace("Found {}: {}", RECORDID, eadId);
         }
 
         if (localName.equals("language") || qName.equals("language")) {
