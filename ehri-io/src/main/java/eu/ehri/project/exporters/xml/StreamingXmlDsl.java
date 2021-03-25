@@ -22,6 +22,7 @@ package eu.ehri.project.exporters.xml;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.apache.jena.ext.com.google.common.collect.Lists;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -46,6 +47,10 @@ public abstract class StreamingXmlDsl {
             }
         }
         return m;
+    }
+
+    protected static List<String> path(String... values) {
+        return Lists.newArrayList(values);
     }
 
     protected static Map<String, String> namespaces(Object... kv) {
@@ -96,6 +101,10 @@ public abstract class StreamingXmlDsl {
 
     protected void tag(XMLStreamWriter sw, String tag, Runnable runnable) {
         tag(sw, tag, attrs(), runnable);
+    }
+
+    protected void tag(XMLStreamWriter sw, String tag, Map<String, String> attrs) {
+        tag(sw, ImmutableList.of(tag), attrs, () -> {});
     }
 
     protected void tag(XMLStreamWriter sw, String tag, Map<String, String> attrs, Runnable runnable) {

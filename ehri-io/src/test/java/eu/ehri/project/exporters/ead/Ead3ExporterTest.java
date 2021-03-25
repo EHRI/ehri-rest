@@ -49,7 +49,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         String xml = testExport(c1, "eng");
         Document doc = parseDocument(xml);
         assertXPath(doc, "auths", "//controlaccess/subject/@source");
-        assertXPath(doc, "a1", "//controlaccess/subject/@authfilenumber");
+        assertXPath(doc, "a1", "//controlaccess/subject/@identifier");
     }
 
     @Test
@@ -70,22 +70,22 @@ public class Ead3ExporterTest extends XmlExporterTest {
     @Test
     public void testImportExport2() throws Exception {
         Repository repo = manager.getEntity("r1", Repository.class);
-        String xml = testImportExport(repo, "EAD3test.xml",
+        String xml = testImportExport(repo, "comprehensive-ead-ead3.xml",
                 "Resource (call) |||.Ident (num) |||", "eng");
-        //System.out.println(xml);
+        System.out.println(xml);
         Document doc = parseDocument(xml);
         if (config.getBoolean("io.export.ead.includeRevisions")) {
             assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
                     "//ead/control/revisiondesc/change/item/text()");
         }
         assertXPath(doc, "eng",
-                "//ead/control/profiledesc/langusage/language/@langcode");
+                "//ead/control/languagedeclaration/language/@langcode");
         assertXPath(doc, "Local",
-                "//ead/control/profiledesc/descrules");
+                "//ead/control/conventiondeclaration/descriptivenote/p/text()");
         assertXPath(doc, "NIOD Description",
                 "//ead/control/filedesc/publicationstmt/publisher/text()");
         assertXPath(doc, "NIOD Description",
-                "//ead/archdesc/did/repository/corpname/text()");
+                "//ead/archdesc/did/repository/corpname/part/text()");
         assertXPath(doc, "Scope and contents note content no label |||\n\n" +
                         "Scope and contents note content |||",
                 "//ead/archdesc/scopecontent/p/text()");
@@ -101,7 +101,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         assertXPath(doc, "2000",
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
         assertXPath(doc, "Source information |||",
-                "//ead/archdesc/processinfo/p/bibref");
+                "//ead/archdesc/processinfo/p/ref");
     }
 
     @Test
@@ -114,14 +114,14 @@ public class Ead3ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example Documentary Unit 1",
                 "//ead/control/filedesc/titlestmt/titleproper");
         assertXPath(doc, readResourceFileAsString("creationprocess-boilerplate.txt"),
-                "//ead/control/filedesc/notestmt/note/p");
+                "//ead/control/filedesc/notestmt/controlnote/p");
         assertXPath(doc, "Institution Example",
                 "//ead/control/filedesc/publicationstmt/publisher");
         assertXPath(doc, "Netherlands",
                 "//ead/control/filedesc/publicationstmt/address/addressline[8]");
         assertXPath(doc, "Example text",
-                "//ead/control/profiledesc/descrules[1]");
-        assertXPath(doc, "eng", "//ead/control/profiledesc/langusage/language/@langcode");
+                "//ead/control/conventiondeclaration/descriptivenote/p[1]");
+        assertXPath(doc, "eng", "//ead/control/languagedeclaration/language/@langcode");
         assertXPath(doc, "1", "//ead/archdesc/did/unitid");
         assertXPath(doc, "Example Documentary Unit 1", "//ead/archdesc/did/unittitle");
         assertXPath(doc, "Institution Example", "//ead/archdesc/did/repository/corpname/part");
@@ -143,7 +143,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text", "//ead/archdesc/odd/p");
         assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@encodinganalog='3.7.1']/p");
         assertXPath(doc, "2000", "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
-        assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@type='Sources']/p/bibref");
+        assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@localtype='Sources']/p/ref");
         assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname/part");
         assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject/part");
 
@@ -154,6 +154,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
+        System.out.println(xml);
         isValidEad(xml);
         return xml;
     }

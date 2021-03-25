@@ -103,8 +103,8 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
                     "schemaLocation", DEFAULT_NAMESPACE);
 
             Repository repository = unit.getRepository();
-            Optional<Description> descOpt = LanguageHelpers.getBestDescription(
-                    unit, Optional.empty(), langCode);
+            Optional<Description> descOpt = LanguageHelpers.getBestDescription(unit, Optional.empty(), langCode);
+            String title = descOpt.map(Description::getName).orElse(unit.getIdentifier());
 
             tag(sw, "control", attrs("relatedencoding", "DC",
                     "scriptencoding", "iso15924",
@@ -113,10 +113,30 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
                     "countryencoding", "iso3166-1"), () -> {
 
                 tag(sw, "recordid", unit.getId());
-                descOpt.ifPresent(desc -> {
-                    addFileDesc(sw, langCode, repository, desc);
-                    addProfileDesc(sw, desc);
+                tag(sw, "filedesc", () -> {
+                    tag(sw, "titlestmt", () -> tag(sw, "titleproper", title));
+                    descOpt.ifPresent(desc -> addFileDesc(sw, langCode, repository, desc));
                 });
+
+                tag(sw, "maintenancestatus", attrs("value", "derived"));
+                tag(sw, path("maintenanceagency", "agencyname"), "EHRI");
+                tag(sw, "languagedeclaration", () -> {
+                    tag(sw, "language", LanguageHelpers.codeToName(langCode), attrs("langcode", langCode));
+
+                    // FIXME: not sure we have this info?...
+                    comment(sw, "Beware: this (assumed) script code may be inaccurate...");
+                    tag(sw, "script", "Latin", attrs("scriptcode", "latn"));
+                });
+
+                descOpt.flatMap(desc -> Optional.ofNullable(desc.<String>getProperty(IsadG.rulesAndConventions))).ifPresent(value -> {
+                    tag(sw, "conventiondeclaration", () -> {
+                        tag(sw, "citation", () -> {});
+                        tag(sw, "descriptivenote", attrs("encodinganalog", "3.7.2"), () -> {
+                            tag(sw, "p", value);
+                        });
+                    });
+                });
+
                 addRevisionDesc(sw, unit);
             });
 
@@ -138,76 +158,60 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
         });
     }
 
-    private void addProfileDesc(XMLStreamWriter sw, Description desc) {
-        tag(sw, "profiledesc", () -> {
-            tag(sw, "creation", () -> {
-                characters(sw, resourceAsString("export-boilerplate.txt"));
-                DateTime now = DateTime.now();
-                tag(sw, "date", now.toString(), attrs("normal", unitDateNormalFormat.print(now)
-                ));
-            });
-            tag(sw, "langusage", () -> tag(sw, "language",
-                    LanguageHelpers.codeToName(desc.getLanguageOfDescription()),
-                    attrs("langcode", desc.getLanguageOfDescription())
-            ));
-            Optional.ofNullable(desc.<String>getProperty(IsadG.rulesAndConventions)).ifPresent(value ->
-                    tag(sw, "descrules", value, attrs("encodinganalog", "3.7.2"))
-            );
-        });
-    }
-
     private void addFileDesc(XMLStreamWriter sw, String langCode, Repository repository, Description desc) {
-        tag(sw, "filedesc", () -> {
-            tag(sw, "titlestmt", () -> tag(sw, "titleproper", desc.getName()));
-            tag(sw, "publicationstmt", () -> {
-                LanguageHelpers.getBestDescription(
-                        repository, Optional.empty(), langCode).ifPresent(repoDesc -> {
-                    tag(sw, "publisher", repoDesc.getName());
-                    for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
-                        tag(sw, "address", () -> {
-                            for (ContactInfo key : addressKeys) {
-                                for (Object v : coerceList(address.getProperty(key))) {
-                                    tag(sw, "addressline", v.toString());
-                                }
+        tag(sw, "publicationstmt", () -> {
+            LanguageHelpers.getBestDescription(repository, Optional.empty(), langCode).ifPresent(repoDesc -> {
+                tag(sw, "publisher", repoDesc.getName());
+                for (Address address : repoDesc.as(RepositoryDescription.class).getAddresses()) {
+                    tag(sw, "address", () -> {
+                        for (ContactInfo key : addressKeys) {
+                            for (Object v : coerceList(address.getProperty(key))) {
+                                tag(sw, "addressline", v.toString());
                             }
-                            tag(sw, "addressline",
-                                    LanguageHelpers.countryCodeToName(
-                                            repository.getCountry().getId()));
-                        });
-                    }
-                });
+                        }
+                        tag(sw, "addressline",
+                                LanguageHelpers.countryCodeToName(
+                                        repository.getCountry().getId()));
+                    });
+                }
             });
-            if (Description.CreationProcess.IMPORT.equals(desc.getCreationProcess())) {
-                tag(sw, ImmutableList.of("notestmt", "note", "p"), resourceAsString("creationprocess-boilerplate.txt"));
-            }
         });
-    }
-
-    private void addRevisionDesc(XMLStreamWriter sw, DocumentaryUnit unit) {
-        if (config.getBoolean("io.export.ead.includeRevisions")) {
-            List<List<SystemEvent>> eventList = Lists.newArrayList(api.events().aggregateForItem(unit));
-            if (!eventList.isEmpty()) {
-                tag(sw, "revisiondesc", () -> {
-                    for (List<SystemEvent> agg : eventList) {
-                        SystemEvent event = agg.get(0);
-                        String eventDesc = getEventDescription(event.getEventType());
-                        tag(sw, "change", () -> {
-                            tag(sw, "date", new DateTime(event.getTimestamp()).toString());
-                            if (event.getLogMessage() == null || event.getLogMessage().isEmpty()) {
-                                tag(sw, "item", eventDesc);
-                            } else {
-                                tag(sw, "item", String.format("%s [%s]",
-                                        event.getLogMessage(), eventDesc));
-                            }
-                        });
-                    }
-                });
-            }
+        if (Description.CreationProcess.IMPORT.equals(desc.getCreationProcess())) {
+            tag(sw, ImmutableList.of("notestmt", "controlnote", "p"), resourceAsString("creationprocess-boilerplate.txt"));
         }
     }
 
+    private void addRevisionDesc(XMLStreamWriter sw, DocumentaryUnit unit) {
+        tag(sw, "maintenancehistory", () -> {
+            tag(sw, "maintenanceevent", () -> {
+                tag(sw, "eventtype", attrs("value", "derived"));
+                tag(sw, "eventdatetime", DateTime.now().toString());
+                tag(sw, "agenttype", attrs("value", "machine"));
+                tag(sw, "agent", "EHRI Portal");
+                tag(sw, "eventdescription", resourceAsString("export-boilerplate.txt"));
+            });
+            List<List<SystemEvent>> eventList = Lists.newArrayList(api.events().aggregateForItem(unit));
+            if (!eventList.isEmpty()) {
+                for (List<SystemEvent> agg : eventList) {
+                    SystemEvent event = agg.get(0);
+                    String eventDesc = getEventDescription(event.getEventType());
+                    String text = event.getLogMessage() == null || event.getLogMessage().trim().isEmpty()
+                            ? eventDesc
+                            : String.format("%s [%s]", event.getLogMessage(), eventDesc);
+                    tag(sw, "maintenanceevent", () -> {
+                        tag(sw, "eventtype", attrs("value", "derived"));
+                        tag(sw, "eventdatetime", new DateTime(event.getTimestamp()).toString());
+                        tag(sw, "agenttype", attrs("value", "machine"));
+                        tag(sw, "agent", "EHRI Portal");
+                        tag(sw, "eventdescription", text);
+                    });
+                }
+            }
+        });
+    }
+
     private void addDataSection(XMLStreamWriter sw, Repository repository, DocumentaryUnit subUnit,
-            Description desc, String langCode) {
+                                Description desc, String langCode) {
         tag(sw, "did", () -> {
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
@@ -260,15 +264,14 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
 
             Optional.ofNullable(repository).ifPresent(repo -> {
                 LanguageHelpers.getBestDescription(repo, Optional.empty(), langCode).ifPresent(repoDesc ->
-                        tag(sw, "repository", () ->
-                                tag(sw, "corpname", repoDesc.getName()))
+                    tag(sw, path("repository", "corpname", "part"), repoDesc.getName())
                 );
             });
         });
     }
 
     private void addEadLevel(XMLStreamWriter sw, int num, DocumentaryUnit subUnit,
-            Optional<Description> priorDescOpt, String langCode) {
+                             Optional<Description> priorDescOpt, String langCode) {
         logger.trace("Adding EAD sublevel: c{}", num);
         Optional<Description> descOpt = LanguageHelpers.getBestDescription(subUnit, priorDescOpt, langCode);
         String levelTag = String.format("c%02d", num);
@@ -302,8 +305,9 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
             tag(sw, "controlaccess", () -> {
                 AccessPointType type = entry.getKey();
                 for (AccessPoint accessPoint : entry.getValue()) {
-                    tag(sw, controlAccessMappings.get(type), accessPoint.getName(),
-                            getAccessPointAttributes(accessPoint));
+                    tag(sw, controlAccessMappings.get(type), getAccessPointAttributes(accessPoint), () -> {
+                       tag(sw, "part", accessPoint.getName());
+                    });
                 }
             });
         }
@@ -318,7 +322,7 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
                     try {
                         return ImmutableMap.of(
                                 "source", item.getAuthoritativeSet().getId(),
-                                "authfilenumber", item.getIdentifier()
+                                "identifier", item.getIdentifier()
                         );
                     } catch (NullPointerException e) {
                         logger.warn("Authoritative item with missing set: {}", item.getId());
@@ -335,7 +339,7 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
             if (available.contains(pair.getKey().name())) {
                 for (Object v : coerceList(item.getProperty(pair.getKey()))) {
                     tag(sw, pair.getValue(), textFieldAttrs(pair.getKey()), () ->
-                        tag(sw, "p", () -> cData(sw, v.toString()))
+                            tag(sw, "p", () -> cData(sw, v.toString()))
                     );
                 }
             }
@@ -352,14 +356,14 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
         }
         for (Object v : coerceList(item.getProperty(IsadG.datesOfDescriptions))) {
             tag(sw, "processinfo", textFieldAttrs(IsadG.datesOfDescriptions), () -> {
-                tag(sw, Lists.newArrayList("p", "date"), () -> cData(sw, v.toString()));
+                tag(sw, path("p", "date"), () -> cData(sw, v.toString()));
             });
         }
         if (available.contains(IsadG.sources.name())) {
-            tag(sw, "processinfo", textFieldAttrs(IsadG.sources, "type", "Sources"), () -> {
+            tag(sw, "processinfo", textFieldAttrs(IsadG.sources, "localtype", "Sources"), () -> {
                 tag(sw, "p", () -> {
                     for (Object v : coerceList(item.getProperty(IsadG.sources))) {
-                        tag(sw, "bibref", () -> cData(sw, v.toString()));
+                        tag(sw, "ref", () -> cData(sw, v.toString()));
                     }
                 });
             });
