@@ -4,6 +4,7 @@
   elements for which it was missing.
 
   After that it was converted to EAD 3 using the official EAD 2002 to EAD 3 xsl transformation.
+  The first <unitdate> element was converted to <unitdatestructured> for testing purposes.
 
   https://raw.githubusercontent.com/SAA-SDT/EAD3/master/samples/ead2002/Kitchen_sink_AT_output_EAD_with_enumerated_Cs.xml
   --><ead xmlns="http://ead3.archivists.org/schema/">
@@ -129,7 +130,13 @@
                 <!-- ELEMENT OR ATTRIBUTE extent REMOVED FROM physdesc. -->1.0 Cubic feet
                 <!-- ELEMENT OR ATTRIBUTE extent REMOVED FROM physdesc. -->Container summary|||
             </physdesc>
-         <unitdate normal="1989/1999" unitdatetype="bulk">Bulk, 1989-1999</unitdate>
+         <!-- Manually added standardized date instance -->
+         <unitdatestructured unitdatetype="bulk">
+            <daterange>
+               <fromdate standarddate="1989">1989</fromdate>
+               <todate standarddate="1999">1999</todate>
+            </daterange>
+         </unitdatestructured>
          <unitdate normal="1000/2000" unitdatetype="inclusive">Date expression (AT outputs this instead
                 of date range as EAD, uses date range if this empty)|||</unitdate>
          <abstract id="ref7" label="Abstract">Abstract without a label content -- 1st note input,
