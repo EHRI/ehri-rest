@@ -53,7 +53,9 @@
             <creation>This finding aid was produced using the Archivists' Toolkit
                     <date>2013-02-12T11:11-0500</date>
             </creation>
-            <langusage>Language of Finding AId (langusage?) |||</langusage>
+            <langusage>Language of Finding AId (langusage?) |||
+                <language langcode="eng">English</language>
+            </langusage>
             <descrules>Local</descrules>
         </profiledesc>
         <revisiondesc>
