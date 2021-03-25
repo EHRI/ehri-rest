@@ -8,6 +8,8 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -20,7 +22,24 @@ import java.util.regex.Pattern;
 
 import static eu.ehri.project.importers.util.ImportHelpers.getSubNode;
 
+/**
+ * This class contains static functions to extract date information from
+ * largely unstructured maps.
+ *
+ * There are two main scenarios:
+ *
+ *  - Pre-structured date periods, as found within EAD-3 daterange nodes. These
+ *    are a map or list of maps with the key 'DatePeriod'
+ *  - Unstructured text-based dates in formats we recognise as a range, keyed to
+ *    either 'unitDates', 'creationDate', or 'existDate' (or others added to
+ *    `dates.properties`.)
+ *
+ *  Notable, the function that returns the dates removes the data from
+ *  which they were extracted
+ */
 class DateParser {
+
+    private static final Logger logger = LoggerFactory.getLogger(DateParser.class);
 
     // Various date patterns
     private static final Pattern[] datePatterns = {
@@ -48,8 +67,7 @@ class DateParser {
     // time zones such as: Cannot parse "1940-05-16": Illegal instant due to time zone
     // offset transition (Europe/Amsterdam)
     // https://en.wikipedia.org/wiki/UTC%2B00:20
-    private static final DateTimeFormatter isoDateTimeFormat = ISODateTimeFormat.date()
-            .withLocale(Locale.ENGLISH);
+    private static final DateTimeFormatter isoDateTimeFormat = ISODateTimeFormat.date().withLocale(Locale.ENGLISH);
 
     // NB: Not static yet since these objects aren't thread safe :(
     private static final SimpleDateFormat yearMonthDateFormat = new SimpleDateFormat("yyyy-MM");
@@ -57,27 +75,40 @@ class DateParser {
     private static final XmlImportProperties dates = new XmlImportProperties("dates.properties");
 
 
+    /**
+     * Extract a set of dates from input data. The input data is mutated to
+     * remove the raw data.
+     *
+     * @param data a map of input data
+     * @return a list of parsed date period maps
+     */
     static List<Map<String, Object>> extractDates(Map<String, Object> data) {
         List<Map<String, Object>> extractedDates = Lists.newArrayList();
 
-        for (String key : data.keySet()) {
-            if (key.equals(Entities.DATE_PERIOD) && data.get(key) instanceof List) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
+        if (data.containsKey(Entities.DATE_PERIOD)) {
+            Object dateRep = data.get(Entities.DATE_PERIOD);
+            if (dateRep instanceof List) {
+                for (Map<String, Object> event : (List<Map<String, Object>>) dateRep) {
                     extractedDates.add(getSubNode(event));
                 }
+            } else if (dateRep instanceof Map) {
+                extractedDates.add(getSubNode((Map<String, Object>) dateRep));
+            } else {
+                logger.warn("Found a DatePeriod sub-node with unexpected type: " + dateRep);
             }
+            data.remove(Entities.DATE_PERIOD);
         }
 
         Map<String, String> dateValues = returnDatesAsString(data);
         for (String s : dateValues.keySet()) {
             extractDate(s).ifPresent(extractedDates::add);
         }
-        replaceDates(data, extractedDates);
+        replaceDates(data, extractedDates, dateValues);
+
         return extractedDates;
     }
 
-    private static void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates) {
-        Map<String, String> dateValues = returnDatesAsString(data);
+    private static void replaceDates(Map<String, Object> data, List<Map<String, Object>> extractedDates, Map<String, String> dateValues) {
         Map<String, String> dateTypes = Maps.newHashMap();
         for (String dateValue : dateValues.keySet()) {
             dateTypes.put(dateValues.get(dateValue), null);
@@ -86,12 +117,12 @@ class DateParser {
             dateValues.remove(dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
         }
         //replace dates in data map
-        for (String datevalue : dateValues.keySet()) {
-            String dateType = dateValues.get(datevalue);
+        for (String dateValue : dateValues.keySet()) {
+            String dateType = dateValues.get(dateValue);
             if (dateTypes.containsKey(dateType) && dateTypes.get(dateType) != null) {
-                dateTypes.put(dateType, dateTypes.get(dateType) + ", " + datevalue.trim());
+                dateTypes.put(dateType, dateTypes.get(dateType) + ", " + dateValue.trim());
             } else {
-                dateTypes.put(dateType, datevalue.trim());
+                dateTypes.put(dateType, dateValue.trim());
             }
         }
         for (String dateType : dateTypes.keySet()) {
@@ -114,8 +145,7 @@ class DateParser {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
                 data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
-                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
-                        .groupCount() > 1 ? 2 : 1), true));
+                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher.groupCount() > 1 ? 2 : 1), true));
                 data.put(Ontology.DATE_HAS_DESCRIPTION, date);
                 break;
             }

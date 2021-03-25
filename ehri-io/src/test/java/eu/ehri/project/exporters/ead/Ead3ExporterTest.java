@@ -26,6 +26,7 @@ import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -37,6 +38,7 @@ import java.util.ResourceBundle;
 import static eu.ehri.project.test.XmlTestHelpers.*;
 
 
+@Ignore
 public class Ead3ExporterTest extends XmlExporterTest {
 
     private static ResourceBundle i18n = ResourceBundle.getBundle(Ead2002Exporter.class.getName());

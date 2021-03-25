@@ -26,6 +26,7 @@ Unit,otherIdentifiers,,,
 DatePeriod,type,,,
 DatePeriod,startDate,,,
 DatePeriod,endDate,,,
+DatePeriod,precision,,,
 DocumentaryUnitDescription,parallelFormsOfName,,,
 DocumentaryUnitDescription,ref,,,
 DocumentaryUnitDescription,creationDate,,,1

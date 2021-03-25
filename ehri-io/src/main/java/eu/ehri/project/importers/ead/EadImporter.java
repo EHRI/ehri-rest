@@ -151,8 +151,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
 
         Map<String, Object> raw = ImportHelpers.extractDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
 
-        Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
-                .addData(raw);
+        Bundle.Builder descBuilder = Bundle.Builder.withClass(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION).addData(raw);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -160,16 +159,15 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
             descBuilder.addRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 
-        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(Identifiable.IDENTIFIER_KEY)
+        for (Map<String, Object> rel : extractRelations(itemData)) {
             logger.trace("relation found: {}", rel.get(Ontology.NAME_KEY));
             descBuilder.addRelation(Ontology.HAS_ACCESS_POINT, Bundle.of(EntityClass.ACCESS_POINT, rel));
         }
 
         for (Map<String, Object> dpb : ImportHelpers.extractSubNodes(Entities.MAINTENANCE_EVENT, itemData)) {
             logger.trace("maintenance event found {}", dpb);
-            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT,
-                    Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
+            // dates in maintenanceEvents are not DatePeriods, they are not something to search on
+            descBuilder.addRelation(Ontology.HAS_MAINTENANCE_EVENT, Bundle.of(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
         Map<String, Object> unknowns = ImportHelpers.extractUnknownProperties(itemData);
