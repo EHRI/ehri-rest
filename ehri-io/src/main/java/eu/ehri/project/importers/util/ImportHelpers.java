@@ -57,7 +57,7 @@ public class ImportHelpers {
     /**
      * Keys in the graph that encode a language code must start with the LANGUAGE_KEY_PREFIX.
      */
-    private static final String LANGUAGE_KEY_PREFIX = "language";
+    public static final String LANGUAGE_KEY_PREFIX = "language";
 
     private static final Logger logger = LoggerFactory.getLogger(ImportHelpers.class);
     private static final Joiner stringJoiner = Joiner.on("\n\n").skipNulls();

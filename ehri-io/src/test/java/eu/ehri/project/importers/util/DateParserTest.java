@@ -1,9 +1,11 @@
 package eu.ehri.project.importers.util;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.EntityClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,49 +21,59 @@ public class DateParserTest {
     private Map<String, Object> mapWithMultipleDatesAsList;
 
     @Before
-    public void init() throws ItemNotFound {
+    public void init() {
         mapWithOneParseableDate = Maps.newHashMap();
         mapWithOneParseableDate.put("unitDates", "1934/1936");
 
         mapWithMultipleDates = Maps.newHashMap();
         mapWithMultipleDates.put("unitDates", "1934/1936, summer 1978");
         mapWithMultipleDates.put("existDate", "1900");
+        mapWithMultipleDates.put(Entities.DATE_PERIOD, ImmutableMap.of(
+                Ontology.DATE_PERIOD_START_DATE, "1920",
+                Ontology.DATE_PERIOD_END_DATE, "1940"));
 
         mapWithMultipleDatesAsList = Maps.newHashMap();
-        List<String> datelist = Lists.newArrayList();
-        datelist.add("1934/1936");
-        datelist.add("1978");
-        mapWithMultipleDatesAsList.put("unitDates", datelist);
+        mapWithMultipleDatesAsList.put("unitDates", Lists.newArrayList("1934/1936", "1978"));
+        mapWithMultipleDatesAsList.put(Entities.DATE_PERIOD, Lists.newArrayList(
+                ImmutableMap.of(
+                    Ontology.DATE_PERIOD_START_DATE, "1920",
+                    Ontology.DATE_PERIOD_END_DATE, "1940"
+                ),
+                ImmutableMap.of(
+                    Ontology.DATE_PERIOD_START_DATE, "1941",
+                    Ontology.DATE_PERIOD_END_DATE, "1950"
+                )));
     }
 
     @Test
-    public void extractDatesFromDateProperty() throws ItemNotFound {
-        List<Map<String, Object>> extractedDates = ImportHelpers
-                .extractDates(mapWithOneParseableDate);
-        for (Map<String, Object> dateMap : extractedDates) {
-            assertEquals("1934/1936", dateMap.get(Ontology.DATE_HAS_DESCRIPTION));
-        }
+    public void extractDatesFromDateProperty() {
+        List<Map<String, Object>> extractedDates = ImportHelpers.extractDates(mapWithOneParseableDate);
+        assertEquals(1, extractedDates.size());
+        assertEquals("1934/1936", extractedDates.get(0).get(Ontology.DATE_HAS_DESCRIPTION));
     }
 
     @Test
-    public void removeDateFromDateProperty() throws ItemNotFound {
+    public void removeDateFromDateProperty() {
         assertTrue(mapWithOneParseableDate.containsKey("unitDates"));
         ImportHelpers.extractDates(mapWithOneParseableDate);
         assertFalse(mapWithOneParseableDate.containsKey("unitDates"));
     }
 
     @Test
-    public void removeDatesFromDateProperty() throws ItemNotFound {
+    public void removeDatesFromDateProperty() {
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
         assertTrue(mapWithMultipleDates.containsKey("existDate"));
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
-        ImportHelpers.extractDates(mapWithMultipleDates);
+        assertTrue(mapWithMultipleDates.containsKey(Entities.DATE_PERIOD));
+        List<Map<String, Object>> dates = ImportHelpers.extractDates(mapWithMultipleDates);
+        assertEquals(3, dates.size());
+        assertFalse(mapWithMultipleDates.containsKey(Entities.DATE_PERIOD));
         assertEquals("summer 1978", mapWithMultipleDates.get("unitDates"));
         assertFalse(mapWithMultipleDates.containsKey("existDate"));
     }
 
     @Test
-    public void removeDatesFromDatePropertyList() throws ItemNotFound {
+    public void removeDatesFromDatePropertyList() {
         assertTrue(mapWithMultipleDatesAsList.containsKey("unitDates"));
         ImportHelpers.extractDates(mapWithMultipleDatesAsList);
         assertFalse(mapWithMultipleDatesAsList.containsKey("unitDates"));

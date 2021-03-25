@@ -41,7 +41,7 @@ public class Ead3ImporterTest extends AbstractImporterTest {
         saxImportManager(EadImporter.class, EadHandler.class, "ead3.properties")
                 .importInputStream(ios, logMessage);
         List<VertexProxy> after = getGraphState(graph);
-        //diffGraph(before, after).printDebug(System.out, true);
+        diffGraph(before, after).printDebug(System.out, true);
 
         // TODO: lots of information is missing here!
         /*
@@ -51,10 +51,10 @@ public class Ead3ImporterTest extends AbstractImporterTest {
          *  - 1 system event
          *  - 3 event link
          *  - 5 access points
-         *  - 0 maintenance event #FIXME
-         *  - 0 date period #FIXME
-         *  - 2 unknown properties
+         *  - 2 maintenance events
+         *  - 5 date periods
+         *  - 1 unknown properties
          */
-        assertEquals(origCount + 15, getNodeCount(graph));
+        assertEquals(origCount + 21, getNodeCount(graph));
     }
 }

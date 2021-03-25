@@ -30,6 +30,7 @@ import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.MaintenanceEventType;
@@ -68,12 +69,19 @@ public class EadHandler extends SaxXmlHandler {
             "rulesAndConventions", "processInfo"
     );
 
+    private static final List<String> eventContext = ImmutableList.of(
+            "profiledesc", // ???
+            "change", // EAD 2002
+            "maintenanceevent" // EAD 3
+    );
+
     private static final String DEFAULT_PROPERTIES = "ead2002.properties";
 
     private final List<Map<String, Object>> globalMaintenanceEvents = Lists.newArrayList();
 
     private final Map<String, Class<? extends Entity>> possibleSubNodes = ImmutableMap.of(
-            Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
+            Entities.MAINTENANCE_EVENT, MaintenanceEvent.class,
+            Entities.DATE_PERIOD, DatePeriod.class
     );
 
     private static final Logger logger = LoggerFactory.getLogger(EadHandler.class);
@@ -194,7 +202,7 @@ public class EadHandler extends SaxXmlHandler {
             logger.trace("Found {}: {}", RECORDID, eadId);
         }
 
-        if (localName.equals("language") || qName.equals("language")) {
+        if (qName.equals(ImportHelpers.LANGUAGE_KEY_PREFIX) || localName.equals(ImportHelpers.LANGUAGE_KEY_PREFIX)) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
             if (lang != null) {
                 defaultLang = lang;
@@ -276,9 +284,8 @@ public class EadHandler extends SaxXmlHandler {
                     scopeIds.pop();
                 }
             } else {
-                // import the MaintenanceEvent
-                if (getMappedProperty(currentPath).equals(Entities.MAINTENANCE_EVENT)
-                        && (qName.equals("profiledesc") || qName.equals("change"))) {
+                // import the MaintenanceEvent from the file global data..
+                if (getMappedProperty(currentPath).equals(Entities.MAINTENANCE_EVENT) && eventContext.contains(qName)) {
                     Map<String, Object> me = ImportHelpers.getSubNode(currentGraph);
                     me.put("order", globalMaintenanceEvents.size());
                     globalMaintenanceEvents.add(me);
@@ -411,7 +418,8 @@ public class EadHandler extends SaxXmlHandler {
         if (path != null) {
             need = need || path.endsWith("AccessPoint");
         }
-        return need || possibleSubNodes.containsKey(getMappedProperty(currentPath));
+        boolean subs = possibleSubNodes.containsKey(getMappedProperty(currentPath));
+        return need || subs;
     }
 
     /**

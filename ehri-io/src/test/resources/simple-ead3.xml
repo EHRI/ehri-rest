@@ -50,8 +50,8 @@
 			<unittitle label="Title:" encodinganalog="245">Test Item 1</unittitle>
 			<unitdatestructured label="Dates:" unitdatetype="inclusive" encodinganalog="245">
 				<daterange>
-					<fromdate>2020</fromdate>
-					<todate>2021</todate>
+					<fromdate>2018</fromdate>
+					<todate>2019</todate>
 				</daterange>
 			</unitdatestructured>
 
@@ -195,9 +195,19 @@
 					<unittitle>Child item 1</unittitle>
 					<unitdatestructured label="Dates:" unitdatetype="inclusive" encodinganalog="245">
 						<daterange>
-							<fromdate>2021</fromdate>
+							<fromdate>2020</fromdate>
 							<todate>2021</todate>
 						</daterange>
+					</unitdatestructured>
+					<unitdatestructured>
+                        <dateset>
+							<datesingle>1943</datesingle>
+							<datesingle>1942</datesingle>
+							<daterange>
+								<fromdate>1940</fromdate>
+								<todate>1946</todate>
+							</daterange>
+						</dateset>
 					</unitdatestructured>
 					<physdesc>5 folders</physdesc>
 				</did>
