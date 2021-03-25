@@ -72,12 +72,12 @@ public class Ead3ExporterTest extends XmlExporterTest {
         Repository repo = manager.getEntity("r1", Repository.class);
         String xml = testImportExport(repo, "comprehensive-ead-ead3.xml",
                 "Resource (call) |||.Ident (num) |||", "eng");
-        System.out.println(xml);
+        // System.out.println(xml);
         Document doc = parseDocument(xml);
-        if (config.getBoolean("io.export.ead.includeRevisions")) {
-            assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
-                    "//ead/control/revisiondesc/change/item/text()");
-        }
+        assertXPath(doc, readResourceFileAsString("export-boilerplate.txt"),
+                "//ead/control/maintenancehistory/maintenanceevent[1]/eventdescription/text()");
+        assertXPath(doc, String.format("Testing import/export [%s]", i18n.getString("ingest")),
+                "//ead/control/maintenancehistory/maintenanceevent[2]/eventdescription/text()");
         assertXPath(doc, "eng",
                 "//ead/control/languagedeclaration/language/@langcode");
         assertXPath(doc, "Local",
@@ -102,6 +102,10 @@ public class Ead3ExporterTest extends XmlExporterTest {
                 "//ead/archdesc/processinfo[@encodinganalog='3.7.3']/p/date");
         assertXPath(doc, "Source information |||",
                 "//ead/archdesc/processinfo/p/ref");
+        assertXPath(doc, "1989",
+                "//ead/archdesc/did/unitdatestructured/daterange/fromdate");
+        assertXPath(doc, "1999",
+                "//ead/archdesc/did/unitdatestructured/daterange/todate");
     }
 
     @Test
@@ -111,6 +115,8 @@ public class Ead3ExporterTest extends XmlExporterTest {
         //System.out.println(xml);
         Document doc = parseDocument(xml);
         assertXPath(doc, "nl-000001-1", "/ead/control/recordid");
+        assertXPath(doc, readResourceFileAsString("export-boilerplate.txt"),
+                "//ead/control/maintenancehistory/maintenanceevent[1]/eventdescription/text()");
         assertXPath(doc, "Example Documentary Unit 1",
                 "//ead/control/filedesc/titlestmt/titleproper");
         assertXPath(doc, readResourceFileAsString("creationprocess-boilerplate.txt"),
@@ -146,6 +152,13 @@ public class Ead3ExporterTest extends XmlExporterTest {
         assertXPath(doc, "Example text", "//ead/archdesc/processinfo[@localtype='Sources']/p/ref");
         assertXPath(doc, "Example Person 1", "//ead/archdesc/controlaccess/persname/part");
         assertXPath(doc, "Example Subject 1", "//ead/archdesc/controlaccess/subject/part");
+        assertXPath(doc, "1939-1945", "//ead/archdesc/did/unitdate");
+        assertXPath(doc, "1939-01-01", "//ead/archdesc/did/unitdatestructured/daterange/fromdate/@standarddate");
+        assertXPath(doc, "1945-01-01", "//ead/archdesc/did/unitdatestructured/daterange/todate/@standarddate");
+        assertXPath(doc, "1939-01-01", "//ead/archdesc/dsc/c01/did/unitdatestructured/daterange/fromdate/@standarddate");
+        assertXPath(doc, "1945-01-01", "//ead/archdesc/dsc/c01/did/unitdatestructured/daterange/todate/@standarddate");
+        assertXPath(doc, "1939-01-01", "//ead/archdesc/dsc/c01/c02/did/unitdatestructured/daterange/fromdate/@standarddate");
+        assertXPath(doc, "1945-01-01", "//ead/archdesc/dsc/c01/c02/did/unitdatestructured/daterange/todate/@standarddate");
 
     }
 
@@ -154,7 +167,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
-        System.out.println(xml);
+//        System.out.println(xml);
         isValidEad(xml);
         return xml;
     }

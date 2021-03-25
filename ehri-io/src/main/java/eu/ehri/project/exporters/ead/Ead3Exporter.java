@@ -33,7 +33,7 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
 
     private static final Logger logger = LoggerFactory.getLogger(Ead3Exporter.class);
     private static final Config config = ConfigFactory.load();
-    private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYYMMdd");
+    private static final DateTimeFormatter unitDateNormalFormat = DateTimeFormat.forPattern("YYYY-MM-dd");
 
     private static final ResourceBundle i18n = ResourceBundle.getBundle(Ead3Exporter.class.getName());
 
@@ -216,26 +216,29 @@ public class Ead3Exporter extends AbstractStreamingXmlExporter<DocumentaryUnit> 
             tag(sw, "unitid", subUnit.getIdentifier());
             tag(sw, "unittitle", desc.getName(), attrs("encodinganalog", "3.1.2"));
 
+            // Render structured dates. Additional unstructured dates are possible in <unitdate>
             for (DatePeriod datePeriod : desc.as(DocumentaryUnitDescription.class).getDatePeriods()) {
-                if (DatePeriod.DatePeriodType.creation.equals(datePeriod.getDateType())) {
-                    String start = datePeriod.getStartDate();
-                    String end = datePeriod.getEndDate();
-                    if (start != null && end != null) {
-                        DateTime startDateTime = new DateTime(start);
-                        DateTime endDateTime = new DateTime(end);
-                        String normal = String.format("%s/%s",
-                                unitDateNormalFormat.print(startDateTime),
-                                unitDateNormalFormat.print(endDateTime));
-                        String text = String.format("%s/%s",
-                                startDateTime.year().get(), endDateTime.year().get());
-                        tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
-                    } else if (start != null) {
-                        DateTime startDateTime = new DateTime(start);
-                        String normal = String.format("%s",
-                                unitDateNormalFormat.print(startDateTime));
-                        String text = String.format("%s", startDateTime.year().get());
-                        tag(sw, "unitdate", text, attrs("normal", normal, "encodinganalog", "3.1.3"));
-                    }
+                String start = datePeriod.getStartDate();
+                String end = datePeriod.getEndDate();
+                if (start != null && end != null) {
+                    DateTime startDateTime = DateTime.parse(start);
+                    DateTime endDateTime = DateTime.parse(end);
+                    tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
+                        tag(sw, "daterange", () -> {
+                            tag(sw, "fromdate", Integer.toString(startDateTime.year().get()),
+                                    attrs("standarddate", unitDateNormalFormat.print(startDateTime)));
+                           tag(sw, "todate", Integer.toString(endDateTime.year().get()),
+                                   attrs("standarddate", unitDateNormalFormat.print(endDateTime)));
+                        });
+                    });
+                } else if (start != null || end != null) {
+                    String date = start != null ? start : end;
+                    DateTime dt = DateTime.parse(date);
+                    String stdDate = unitDateNormalFormat.print(dt);
+                    String text = String.format("%s", dt.year().get());
+                    tag(sw, "unitdatestructured", attrs("encodinganalog", "3.1.3"), () -> {
+                        tag(sw, "datesingle", text, attrs("standarddate", stdDate));
+                    });
                 }
             }
 
