@@ -87,6 +87,12 @@ public abstract class ImportCommand extends BaseCommand {
                 .desc("Allow the ingest process to update existing items.")
                 .build());
         options.addOption(Option.builder()
+                .longOpt("use-source-id")
+                .desc("Allow adding multiple descriptions with the same language by using the " +
+                        "source file ID (usually the EAD ID) to disambiguate descriptions in " +
+                        "addition to the language code.")
+                .build());
+        options.addOption(Option.builder()
                 .longOpt("lang")
                 .hasArg()
                 .type(String.class)
@@ -149,6 +155,7 @@ public abstract class ImportCommand extends BaseCommand {
                     .withProperties(cmdLine.getOptionValue("properties"))
                     .withUpdates(cmdLine.hasOption("allow-updates"))
                     .withTolerant(cmdLine.hasOption("tolerant"))
+                    .withUseSourceId(cmdLine.hasOption("use-source-id"))
                     .withDefaultLang(lang);
 
             ImportLog log = SaxImportManager.create(graph, scope, user,

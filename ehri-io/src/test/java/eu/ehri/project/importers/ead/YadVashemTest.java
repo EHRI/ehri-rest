@@ -84,7 +84,7 @@ public class YadVashemTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
         ImportOptions options = ImportOptions.properties("yadvashem.properties")
                 .withUpdates(true)
-                .withMerging(true);
+                .withUseSourceId(true);
         saxImportManager(EadImporter.class, EadHandler.class, options)
                 .importInputStream(ios, logMessage);
 
@@ -126,7 +126,7 @@ public class YadVashemTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportOptions options = ImportOptions.properties("yadvashem.properties")
                 .withUpdates(true)
-                .withMerging(true);
+                .withUseSourceId(true);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, options);
         importManager.importInputStream(ios, logMessage);
 
