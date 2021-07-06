@@ -83,7 +83,7 @@ public class ImportOptions {
         return new ImportOptions(tolerant, updates, useSourceId, defaultLang, properties);
     }
 
-    public ImportOptions withMerging(boolean merging) {
+    public ImportOptions withUseSourceId(boolean merging) {
         return new ImportOptions(tolerant, updates, merging, defaultLang, properties);
     }
 }
