@@ -22,7 +22,6 @@ package eu.ehri.extension;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -254,20 +253,24 @@ public class ImportResource extends AbstractResource {
 
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
-            Class<? extends SaxXmlHandler> handler
-                    = getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER);
-            Class<? extends ItemImporter<?, ?>> importer
-                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
-
-            // Get the current user from the Authorization header and the scope
-            // from the query params...
-            Actioner user = getCurrentActioner();
-            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, defaultLang, propertyFile);
-            ImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
+            ImportOptions options = ImportOptions.create(
+                    tolerant,
+                    allowUpdates,
+                    useSourceId,
+                    defaultLang,
+                    propertyFile
+            );
+            ImportManager importManager = SaxImportManager.create(
+                    graph,
+                    manager.getEntity(scopeId, PermissionScope.class),
+                    getCurrentActioner(),
+                    getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
+                    getHandlerCls(handlerClass, DEFAULT_EAD_HANDLER),
+                    options
+            );
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -370,13 +373,36 @@ public class ImportResource extends AbstractResource {
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        String eagFile = propertyFile == null
-                ? Resources.getResource(EagImporter.class, "eag.properties").getFile()
-                : propertyFile;
-        return importEad(scopeId, tolerant, allowUpdates, false, logMessage, defaultLang, eagFile, tag,
-                nameOrDefault(handlerClass, EagHandler.class.getName()),
-                nameOrDefault(importerClass, EagImporter.class.getName()),
-                commit, data);
+        try (final Tx tx = beginTx()) {
+            checkPropertyFile(propertyFile);
+
+            // Run the import!
+            String message = getLogMessage(logMessage).orElse(null);
+            ImportOptions options = ImportOptions.create(
+                    tolerant,
+                    allowUpdates,
+                    false,
+                    defaultLang,
+                    nameOrDefault(propertyFile, "eag.properties")
+            );
+            ImportManager importManager = SaxImportManager.create(
+                    graph,
+                    manager.getEntity(scopeId, PermissionScope.class),
+                    getCurrentActioner(),
+                    getImporterCls(importerClass, EagImporter.class.getName()),
+                    getHandlerCls(handlerClass, EagHandler.class.getName()),
+                    options
+            );
+            ImportLog log = importDataStream(importManager, message, tag, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
+
+            if (commit) {
+                logger.debug("Committing EAG import transaction...");
+                tx.success();
+            }
+
+            return log;
+        }
     }
 
     /**
@@ -399,13 +425,36 @@ public class ImportResource extends AbstractResource {
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        String eacFile = propertyFile == null
-                ? Resources.getResource(EacImporter.class, "eac.properties").getFile()
-                : propertyFile;
-        return importEad(scopeId, tolerant, allowUpdates, false, logMessage, defaultLang, eacFile, tag,
-                nameOrDefault(handlerClass, EacHandler.class.getName()),
-                nameOrDefault(importerClass, EacImporter.class.getName()),
-                commit, data);
+        try (final Tx tx = beginTx()) {
+            checkPropertyFile(propertyFile);
+
+            // Run the import!
+            String message = getLogMessage(logMessage).orElse(null);
+            ImportOptions options = ImportOptions.create(
+                    tolerant,
+                    allowUpdates,
+                    false,
+                    defaultLang,
+                    nameOrDefault(propertyFile, "eac.properties")
+            );
+            ImportManager importManager = SaxImportManager.create(
+                    graph,
+                    manager.getEntity(scopeId, PermissionScope.class),
+                    getCurrentActioner(),
+                    getImporterCls(importerClass, EacImporter.class.getName()),
+                    getHandlerCls(handlerClass, EacHandler.class.getName()),
+                    options
+            );
+            ImportLog log = importDataStream(importManager, message, tag, data,
+                    MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
+
+            if (commit) {
+                logger.debug("Committing EAC import transaction...");
+                tx.success();
+            }
+
+            return log;
+        }
     }
 
     /**
@@ -432,18 +481,23 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
-            Class<? extends ItemImporter<?, ?>> importer
-                    = getImporterCls(importerClass, DEFAULT_EAD_IMPORTER);
-
-            // Get the current user from the Authorization header and the scope
-            // from the query params...
-            Actioner user = getCurrentActioner();
-            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, false, lang, null);
-            ImportManager importManager = CsvImportManager.create(graph, scope, user, importer, options);
+            ImportOptions options = ImportOptions.create(
+                    tolerant,
+                    allowUpdates,
+                    false,
+                    lang,
+                    null
+            );
+            ImportManager importManager = CsvImportManager.create(
+                    graph,
+                    manager.getEntity(scopeId, PermissionScope.class),
+                    getCurrentActioner(),
+                    getImporterCls(importerClass, DEFAULT_EAD_IMPORTER),
+                    options
+            );
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {
