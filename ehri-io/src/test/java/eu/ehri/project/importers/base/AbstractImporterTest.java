@@ -62,11 +62,11 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
      * Convenience method for creating a Sax import manager.
      */
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
-        return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass, options);
+        return SaxImportManager.create(graph, repository, validUser, importerClass, handlerClass, options);
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
-        return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass, ImportOptions.basic());
+        return SaxImportManager.create(graph, repository, validUser, importerClass, handlerClass, ImportOptions.basic());
     }
 
     protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {

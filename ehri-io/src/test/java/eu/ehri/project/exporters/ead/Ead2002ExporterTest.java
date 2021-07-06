@@ -162,7 +162,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
     private String testImportExport(Repository repository, String resourceName,
             String topLevelIdentifier, String lang) throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
-        new SaxImportManager(graph, repository, validUser,
+        SaxImportManager.create(graph, repository, validUser,
                 EadImporter.class, EadHandler.class, ImportOptions.basic())
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(

@@ -116,7 +116,7 @@ public abstract class ImportCsvCommand extends BaseCommand {
                     .withUpdates(cmdLine.hasOption("allow-updates"))
                     .withDefaultLang(cmdLine.getOptionValue("lang"));
 
-            ImportLog log = new CsvImportManager(graph, scope, user, importer, options)
+            ImportLog log = CsvImportManager.create(graph, scope, user, importer, options)
                     .importFiles(filePaths, logMessage);
 
             System.out.println(log);

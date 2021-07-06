@@ -54,10 +54,16 @@ public class CsvImportManager extends AbstractImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
-    public CsvImportManager(FramedGraph<?> framedGraph,
-                            PermissionScope permissionScope, Actioner actioner,
-                            Class<? extends ItemImporter<?,?>> importerClass, ImportOptions options) {
+    private CsvImportManager(FramedGraph<?> framedGraph,
+                             PermissionScope permissionScope, Actioner actioner,
+                             Class<? extends ItemImporter<?, ?>> importerClass, ImportOptions options) {
         super(framedGraph, permissionScope, actioner, importerClass, options);
+    }
+
+    public static CsvImportManager create(FramedGraph<?> framedGraph,
+                                          PermissionScope permissionScope, Actioner actioner,
+                                          Class<? extends ItemImporter<?, ?>> importerClass, ImportOptions options) {
+        return new CsvImportManager(framedGraph, permissionScope, actioner, importerClass, options);
     }
 
     /**

@@ -225,7 +225,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                 Bundle oldBundle = mergeSerializer.vertexToBundle(manager.getVertex(unitWithIds.getId()));
 
                 // Filter out dependents that a) are descriptions, b) have the same language/code.
-                // If the merging option is enabled this allows us to have multiple
+                // If the useSourceId option is enabled this allows us to have multiple
                 // descriptions in the same language if they have different source file IDs,
                 // so in that case only remove those if the source ID matches.
                 // I know this is confusing: TODO: improve this.
@@ -235,11 +235,12 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
                     return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
                             && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                             && (lang != null && lang.equals(languageOfDesc))
-                            && (!options.merging || (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId)));
+                            && (!options.useSourceId || (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId)));
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
 
-                return unitWithIds.withRelations(filtered.getRelations())
+                return unitWithIds
+                        .withRelations(filtered.getRelations())
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
             } catch (SerializationError ex) {
                 throw new RuntimeException("Unexpected error reading existing item: " + unitWithIds.getId(), ex);

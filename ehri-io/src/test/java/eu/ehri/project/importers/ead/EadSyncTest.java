@@ -131,7 +131,7 @@ public class EadSyncTest extends AbstractImporterTest {
     }
 
     private SyncLog runSync(PermissionScope scope, Set<String> excludes, String logMessage, String ead) throws Exception {
-        EadSync sync = new EadSync(graph, api(validUser), scope, validUser, importManager);
+        EadSync sync = EadSync.create(graph, api(validUser), scope, validUser, importManager);
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead);
         return sync.sync(m -> {
             try {
