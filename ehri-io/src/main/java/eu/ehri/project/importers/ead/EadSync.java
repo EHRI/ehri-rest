@@ -46,7 +46,7 @@ public class EadSync {
     private final GraphManager manager;
     private final Serializer depSerializer;
 
-    public EadSync(
+    private EadSync(
             FramedGraph<?> graph,
             Api api,
             PermissionScope scope,
@@ -59,6 +59,15 @@ public class EadSync {
         this.importManager = importManager;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.depSerializer = api.serializer().withDependentOnly(true);
+    }
+
+    public static EadSync create(
+            FramedGraph<?> graph,
+            Api api,
+            PermissionScope scope,
+            Actioner actioner,
+            SaxImportManager importManager) {
+        return new EadSync(graph, api, scope, actioner, importManager);
     }
 
     /**

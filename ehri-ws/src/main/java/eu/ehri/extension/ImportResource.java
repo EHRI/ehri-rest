@@ -57,7 +57,6 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.shared.NoReaderForLangException;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +92,7 @@ public class ImportResource extends AbstractResource {
     public static final String BASE_URI_PARAM = "baseURI";
     public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
-    public static final String DESCRIPTION_MERGING_PARAM = "merging";
+    public static final String USE_SOURCE_ID_PARAM = "use-source-id";
     public static final String HANDLER_PARAM = "handler";
     public static final String TAG_PARAM = "tag";
     public static final String IMPORTER_PARAM = "importer";
@@ -208,6 +207,10 @@ public class ImportResource extends AbstractResource {
      * @param allowUpdates  allow the importer to update items that already exist. If it
      *                      attempts to do so without this option enabled an error will
      *                      be thrown
+     * @param useSourceId   by default a description will update an existing description if it
+     *                      has the same language code. Setting this option to 'true' allows adding
+     *                      multiple descriptions in the same language by taking into account the
+     *                      value of the EAD ID.
      * @param logMessage    log message for import. If this refers to an accessible local file
      *                      its contents will be used.
      * @param handlerClass  the fully-qualified handler class name
@@ -238,7 +241,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @DefaultValue("false") @QueryParam(DESCRIPTION_MERGING_PARAM) Boolean merging,
+            @DefaultValue("false") @QueryParam(USE_SOURCE_ID_PARAM) Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
@@ -263,9 +266,8 @@ public class ImportResource extends AbstractResource {
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = new ImportOptions(tolerant, allowUpdates, merging, defaultLang, propertyFile);
-            ImportManager importManager = new SaxImportManager(
-                    graph, scope, user, importer, handler, options);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, defaultLang, propertyFile);
+            ImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -300,7 +302,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam("fonds") String fonds,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
-            @DefaultValue("false") @QueryParam(DESCRIPTION_MERGING_PARAM) Boolean merging,
+            @DefaultValue("false") @QueryParam(USE_SOURCE_ID_PARAM) Boolean useSourceId,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
@@ -327,12 +329,11 @@ public class ImportResource extends AbstractResource {
 
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = new ImportOptions(tolerant, allowUpdates, merging, lang, propertyFile);
-            SaxImportManager importManager = new SaxImportManager(
-                    graph, scope, user, importer, handler, options);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, useSourceId, lang, propertyFile);
+            SaxImportManager importManager = SaxImportManager.create(graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
-            EadSync syncManager = new EadSync(graph, api(), syncScope, user, importManager);
+            EadSync syncManager = EadSync.create(graph, api(), syncScope, user, importManager);
             SyncLog log = syncManager.sync(m -> importDataStream(m, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE), ex, message);
 
@@ -441,8 +442,8 @@ public class ImportResource extends AbstractResource {
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
-            ImportOptions options = new ImportOptions(tolerant, allowUpdates, false, lang, null);
-            ImportManager importManager = new CsvImportManager(graph, scope, user, importer, options);
+            ImportOptions options = ImportOptions.create(tolerant, allowUpdates, false, lang, null);
+            ImportManager importManager = CsvImportManager.create(graph, scope, user, importer, options);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {

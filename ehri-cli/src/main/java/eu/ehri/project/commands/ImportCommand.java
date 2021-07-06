@@ -25,13 +25,11 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
@@ -153,7 +151,7 @@ public abstract class ImportCommand extends BaseCommand {
                     .withTolerant(cmdLine.hasOption("tolerant"))
                     .withDefaultLang(lang);
 
-            ImportLog log = new SaxImportManager(graph, scope, user,
+            ImportLog log = SaxImportManager.create(graph, scope, user,
                     importer,
                     handler,
                     options,
