@@ -21,14 +21,11 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -71,8 +68,8 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .setTolerant(true)
+        ImportOptions options = ImportOptions.basic().withTolerant(true);
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
                 .importInputStream(ios, "Test invalid item import");
         System.out.println(log.getErrors());
         assertEquals(1, log.getErrored());
@@ -82,8 +79,8 @@ public class GenericEadImporterTest extends AbstractImporterTest {
     @Test
     public void testImportWithLang() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu.xml");
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .setDefaultLang("fre") // overridden!
+        ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
                 .importInputStream(ios, "Test language import");
         assertEquals(1, log.getCreated());
         assertTrue(manager.exists("nl-r1-c00001.deu-2_deu"));
@@ -92,8 +89,8 @@ public class GenericEadImporterTest extends AbstractImporterTest {
     @Test
     public void testImportWithDefaultLang() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-no-lang.xml");
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .setDefaultLang("fre")
+        ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
                 .importInputStream(ios, "Test language import");
         assertEquals(1, log.getCreated());
         assertTrue(manager.exists("nl-r1-c00001.fre-1_fre"));

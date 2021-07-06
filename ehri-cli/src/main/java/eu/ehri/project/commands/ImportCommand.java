@@ -27,6 +27,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -142,20 +143,21 @@ public abstract class ImportCommand extends BaseCommand {
             UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            XmlImportProperties optionalProperties = null;
             if (cmdLine.hasOption("properties")) {
-                XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
                 logMessage += " Using properties file : " + cmdLine.getOptionValue("properties");
-                optionalProperties = properties;
             }
 
+            ImportOptions options = ImportOptions.basic()
+                    .withProperties(cmdLine.getOptionValue("properties"))
+                    .withUpdates(cmdLine.hasOption("allow-updates"))
+                    .withTolerant(cmdLine.hasOption("tolerant"))
+                    .withDefaultLang(lang);
+
             ImportLog log = new SaxImportManager(graph, scope, user,
-                    cmdLine.hasOption("tolerant"),
-                    cmdLine.hasOption("allow-updates"),
-                    lang,
-                    importer, handler,
-                    optionalProperties,
-                    Lists.<ImportCallback>newArrayList())
+                    importer,
+                    handler,
+                    options,
+                    Lists.newArrayList())
                     .importFiles(filePaths, logMessage);
             System.out.println(log);
 

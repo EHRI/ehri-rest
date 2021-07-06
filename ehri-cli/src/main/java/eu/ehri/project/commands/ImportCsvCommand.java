@@ -24,6 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
@@ -95,10 +96,6 @@ public abstract class ImportCsvCommand extends BaseCommand {
             logMessage = cmdLine.getOptionValue("log");
         }
 
-        boolean tolerant = cmdLine.hasOption("tolerant");
-        boolean allowUpdates = cmdLine.hasOption("allow-updates");
-        String lang = cmdLine.hasOption("lang") ? cmdLine.getOptionValue("lang") : "eng";
-
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getUsage());
 
@@ -113,10 +110,13 @@ public abstract class ImportCsvCommand extends BaseCommand {
             }
 
             // Find the user
-            UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"),
-                    UserProfile.class);
+            UserProfile user = manager.getEntity(cmdLine.getOptionValue("user"), UserProfile.class);
+            ImportOptions options = ImportOptions.basic()
+                    .withTolerant(cmdLine.hasOption("tolerant"))
+                    .withUpdates(cmdLine.hasOption("allow-updates"))
+                    .withDefaultLang(cmdLine.getOptionValue("lang"));
 
-            ImportLog log = new CsvImportManager(graph, scope, user, tolerant, allowUpdates, lang, importer)
+            ImportLog log = new CsvImportManager(graph, scope, user, importer, options)
                     .importFiles(filePaths, logMessage);
 
             System.out.println(log);

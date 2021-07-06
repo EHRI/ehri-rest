@@ -23,6 +23,7 @@
  */
 package eu.ehri.project.importers.csv;
 
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -62,7 +63,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        new CsvImportManager(graph, authoritativeSet, validUser, true, false, "eng", CsvConceptImporter.class)
+        new CsvImportManager(graph, authoritativeSet, validUser, CsvConceptImporter.class, ImportOptions.basic())
                 .importInputStream(ios, logMessage);
         /*
          * 18 Concept

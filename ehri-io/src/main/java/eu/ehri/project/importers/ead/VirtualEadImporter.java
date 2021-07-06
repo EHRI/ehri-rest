@@ -26,6 +26,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -74,8 +75,8 @@ public class VirtualEadImporter extends EadImporter {
      * @param log             the import log
      */
     public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
-            Actioner actioner, ImportLog log) {
-        super(graph, permissionScope, actioner, log);
+                              Actioner actioner, ImportOptions options, ImportLog log) {
+        super(graph, permissionScope, actioner, options, log);
     }
 
     /**

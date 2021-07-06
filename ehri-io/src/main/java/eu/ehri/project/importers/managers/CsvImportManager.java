@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.util.ImportHelpers;
@@ -54,10 +55,9 @@ public class CsvImportManager extends AbstractImportManager {
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
 
     public CsvImportManager(FramedGraph<?> framedGraph,
-            PermissionScope permissionScope, Actioner actioner,
-            boolean tolerant,
-            boolean allowUpdates, String defaultLang, Class<? extends ItemImporter<?,?>> importerClass) {
-        super(framedGraph, permissionScope, actioner, tolerant, allowUpdates, defaultLang, importerClass);
+                            PermissionScope permissionScope, Actioner actioner,
+                            Class<? extends ItemImporter<?,?>> importerClass, ImportOptions options) {
+        super(framedGraph, permissionScope, actioner, importerClass, options);
     }
 
     /**
@@ -68,13 +68,13 @@ public class CsvImportManager extends AbstractImportManager {
      * @param log     an import log instance
      */
     @Override
-    protected void importInputStream(InputStream stream, String tag, final ActionManager.EventContext context,
-            final ImportLog log) throws IOException, ValidationError, InputParseError {
+    protected void importInputStream(InputStream stream, String tag, final ActionManager.EventContext context, final ImportLog log)
+            throws IOException, ValidationError, InputParseError {
 
         try {
             ItemImporter<?,?> importer = importerClass
-                    .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportLog.class)
-                    .newInstance(framedGraph, permissionScope, actioner, log);
+                    .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportOptions.class, ImportLog.class)
+                    .newInstance(framedGraph, permissionScope, actioner, options, log);
             logger.trace("importer of class {}", importer.getClass());
 
             importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));

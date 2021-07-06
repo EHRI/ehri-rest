@@ -21,7 +21,7 @@ package eu.ehri.project.importers.base;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.util.ImportHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,22 +73,18 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected String currentEntity;
 
     protected final ItemImporter<Map<String, Object>, ?> importer;
-    protected final XmlImportProperties properties;
+    protected final ImportOptions options;
 
     protected int depth;
     private String attribute;
     private String languagePrefix;
-    protected String defaultLang;
+    protected String langCode;
 
-    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, null);
-    }
-
-    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
+    public SaxXmlHandler(ItemImporter<Map<String, Object>, ?> importer, ImportOptions options) {
         super();
         this.importer = importer;
-        this.defaultLang = defaultLang;
-        this.properties = properties;
+        this.options = options;
+        this.langCode = options.defaultLang;
         currentGraphPath.push(Maps.newHashMap());
     }
 
@@ -174,14 +170,14 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         // Store attributes that are listed in the .properties file
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attributeName = withoutNamespace(attributes.getQName(attr));
-            if (properties.hasAttributeProperty(attributeName)
-                    && !properties.getAttributeProperty(attributeName).equals(LANGUAGE_OF_DESCRIPTION)) {
+            if (options.properties.hasAttributeProperty(attributeName)
+                    && !options.properties.getAttributeProperty(attributeName).equals(LANGUAGE_OF_DESCRIPTION)) {
 
-                if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "")) {
-                    String path = getMappedProperty(currentPath, "@" + properties.getAttributeProperty(attributeName), "");
+                if (isKeyInPropertyFile(currentPath, "@" + options.properties.getAttributeProperty(attributeName), "")) {
+                    String path = getMappedProperty(currentPath, "@" + options.properties.getAttributeProperty(attributeName), "");
                     putPropertyInCurrentGraph(path, attributes.getValue(attr));
-                } else if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
-                    attribute = getMappedProperty(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
+                } else if (isKeyInPropertyFile(currentPath, "@" + options.properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
+                    attribute = getMappedProperty(currentPath, "@" + options.properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
                 } else {
                     logger.trace("attribute {} not found in properties", attributeName);
                 }
@@ -237,7 +233,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     private Optional<String> languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String isLangAttribute = withoutNamespace(attributes.getQName(attr));
-            String prop = properties.getAttributeProperty(isLangAttribute);
+            String prop = options.properties.getAttributeProperty(isLangAttribute);
             if (LANGUAGE_OF_DESCRIPTION.equals(prop)) {
                 return Optional.of(attributes.getValue(attr));
             }
@@ -321,7 +317,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         StringBuilder all = new StringBuilder();
         for (int i = path.size(); i > 0; i--) {
             all.insert(0, path.get(i - 1) + "/");
-            String key = properties.getProperty(all + attribute + escapeValueForKey(value));
+            String key = options.properties.getProperty(all + attribute + escapeValueForKey(value));
             if (key != null) {
                 return key;
             }
@@ -345,7 +341,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         for (int i = path.size(); i > 0; i--) {
             all.insert(0, path.get(i - 1) + "/");
             String key = all + attribute + escapeValueForKey(value);
-            if (properties.getProperty(key) != null) {
+            if (options.properties.getProperty(key) != null) {
                 logger.trace(" FOUND Path key: {}", key);
                 return true;
             }

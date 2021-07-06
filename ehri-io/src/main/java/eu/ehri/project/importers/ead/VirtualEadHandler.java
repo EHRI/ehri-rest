@@ -24,9 +24,9 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -48,6 +48,8 @@ import java.util.regex.Pattern;
  * Handler of Virtual EAD files.
  *
  * TODO: Clean up and merge with regular EadHandler
+ *
+ * TODO: Remove entirely
  */
 public class VirtualEadHandler extends SaxXmlHandler {
     private static final String AUTHOR = "authors",
@@ -59,8 +61,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
             Entities.MAINTENANCE_EVENT, MaintenanceEvent.class
     );
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(VirtualEadHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(VirtualEadHandler.class);
 
     protected final List<AbstractUnit>[] children = new ArrayList[12];
     private final Stack<String> scopeIds = new Stack<>();
@@ -70,6 +71,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     // Constants for elements we need to watch for.
     private final static String ARCHDESC = "archdesc";
     private final static String DID = "did";
+
     /**
      * used to attach the MaintenanceEvents to
      */
@@ -92,25 +94,13 @@ public class VirtualEadHandler extends SaxXmlHandler {
     }
 
     /**
-     * Create an EadHandler using some importer. The default mapping of paths to node properties is used.
-     *
-     * @param importer
-     */
-    @SuppressWarnings("unchecked")
-    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, new XmlImportProperties("vc.properties"));
-        logger.warn("vc.properties used");
-    }
-
-    /**
      * Create an EadHandler using some importer, and a mapping of paths to node properties.
      *
-     * @param importer
-     * @param xmlImportProperties
+     * @param importer the importer instance
+     * @param options  an ImportOptions instance
      */
-    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer,
-            String defaultLang, XmlImportProperties xmlImportProperties) {
-        super(importer, defaultLang, xmlImportProperties);
+    public VirtualEadHandler(ItemImporter<Map<String, Object>, ?> importer, ImportOptions options) {
+        super(importer, options);
         children[depth] = Lists.newArrayList();
     }
 
@@ -171,8 +161,9 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
         if (localName.equals("language") || qName.equals("language")) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
-            if (lang != null)
-                defaultLang = lang;
+            if (lang != null) {
+                langCode = lang;
+            }
         }
 
         // FIXME: We need to add the 'parent' identifier to the ID stack
@@ -278,7 +269,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
             logger.error("EADID not set yet, or not given in eadfile");
             return null;
         } else {
-            String suffix = "#" + defaultLang.toUpperCase();
+            String suffix = "#" + langCode.toUpperCase();
             if (eadId.toUpperCase().endsWith(suffix)) {
                 return eadId;
             }
@@ -293,7 +284,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, defaultLang);
+        useDefaultLanguage(currentGraph, langCode);
     }
 
     /**

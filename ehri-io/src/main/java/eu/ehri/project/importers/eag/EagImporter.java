@@ -24,6 +24,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.util.ImportHelpers;
@@ -61,8 +62,8 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
      * @param permissionScope A permission scope, e.g. a country
      * @param log             An import log instance
      */
-    public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, log);
+    public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, options, log);
     }
 
     @Override

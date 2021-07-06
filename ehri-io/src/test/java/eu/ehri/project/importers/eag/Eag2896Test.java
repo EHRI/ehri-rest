@@ -23,6 +23,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Country;
@@ -60,7 +61,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
         SaxImportManager importManager = new SaxImportManager(graph, country, validUser,
-                EagImporter.class, EagHandler.class);
+                EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
         ImportLog log = importManager.importInputStream(ios, logMessage);
         //printGraph(graph);
         // How many new nodes will have been created? We should have

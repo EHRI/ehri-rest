@@ -28,6 +28,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
@@ -49,7 +50,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Stack;
 import java.util.function.BiPredicate;
 
@@ -78,8 +78,8 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * @param permissionScope the permission scope
      * @param log             the log
      */
-    public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
-        super(graph, permissionScope, actioner, log);
+    public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(graph, permissionScope, actioner, options, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
         linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
 
@@ -111,8 +111,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         }
 
         Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(mergeWithPreviousAndSave(unit,
-                        description, idPath), DocumentaryUnit.class);
+                persister.createOrUpdate(mergeDescriptions(unit, description, idPath), DocumentaryUnit.class);
         logger.debug("Imported item: {}", itemData.get("name"));
         DocumentaryUnit frame = mutation.getNode();
 
@@ -200,7 +199,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * @param idPath     the ID path of this bundle (will be relative to the ID path of the permission scope)
      * @return A bundle with description relationships merged.
      */
-    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
+    protected Bundle mergeDescriptions(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
 
@@ -223,18 +222,20 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         if (manager.exists(unitWithIds.getId())) {
             try {
                 // read the current item’s bundle
-                Bundle oldBundle = mergeSerializer
-                        .vertexToBundle(manager.getVertex(unitWithIds.getId()));
+                Bundle oldBundle = mergeSerializer.vertexToBundle(manager.getVertex(unitWithIds.getId()));
 
-                // filter out dependents that a) are descriptions, b) have the same language/code,
-                // and c) have the same source file ID
+                // Filter out dependents that a) are descriptions, b) have the same language/code.
+                // If the merging option is enabled this allows us to have multiple
+                // descriptions in the same language if they have different source file IDs,
+                // so in that case only remove those if the source ID matches.
+                // I know this is confusing: TODO: improve this.
                 BiPredicate<String, Bundle> filter = (relationLabel, bundle) -> {
                     String lang = bundle.getDataValue(Ontology.LANGUAGE);
                     String oldSourceFileId = bundle.getDataValue(Ontology.SOURCEFILE_KEY);
                     return relationLabel.equals(Ontology.DESCRIPTION_FOR_ENTITY)
                             && bundle.getType().equals(EntityClass.DOCUMENTARY_UNIT_DESCRIPTION)
                             && (lang != null && lang.equals(languageOfDesc))
-                            && (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId));
+                            && (!options.merging || (oldSourceFileId != null && oldSourceFileId.equals(thisSourceFileId)));
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
 

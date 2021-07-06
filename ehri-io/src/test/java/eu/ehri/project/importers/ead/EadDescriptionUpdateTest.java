@@ -2,6 +2,7 @@ package eu.ehri.project.importers.ead;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -24,7 +25,8 @@ public class EadDescriptionUpdateTest extends AbstractImporterTest {
     public void testUpdateDescription() throws Exception {
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-multilang-eng.xml");
-        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class);
+        ImportOptions options = ImportOptions.basic();
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, options);
         importManager.importInputStream(ios, "Import English description");
 
         // Added: 1 event, 2 event links, 1 doc unit, 1 description
@@ -34,7 +36,8 @@ public class EadDescriptionUpdateTest extends AbstractImporterTest {
         assertEquals(1, Iterables.size(unit.getDocumentDescriptions()));
 
         InputStream ios2 = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu.xml");
-        importManager.allowUpdates(true).importInputStream(ios2, "Import German description");
+        SaxImportManager importManager2 = saxImportManager(EadImporter.class, EadHandler.class, options.withUpdates(true));
+        importManager2.importInputStream(ios2, "Import German description");
 
         // Should only have: 1 event, 2 event links , 1 new description
         assertEquals(count + 9, getNodeCount(graph));
@@ -45,7 +48,7 @@ public class EadDescriptionUpdateTest extends AbstractImporterTest {
 
         // Updating the German description should only create event nodes
         InputStream ios3 = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu-2.xml");
-        importManager.allowUpdates(true).importInputStream(ios3, "Import German description again");
+        importManager2.importInputStream(ios3, "Import German description again");
         // Should only have: 1 event, 2 event links
         assertEquals(count + 12, getNodeCount(graph));
     }

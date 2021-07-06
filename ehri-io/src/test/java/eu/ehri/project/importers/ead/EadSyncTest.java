@@ -36,7 +36,7 @@ public class EadSyncTest extends AbstractImporterTest {
         repo = manager.getEntity("r1", Repository.class);
         importManager = saxImportManager(EadImporter.class, EadHandler.class)
                 .withScope(repo)
-                .allowUpdates(true);
+                .withUpdates(true);
         importManager.importInputStream(ios, "Initial setup");
     }
 
@@ -122,7 +122,7 @@ public class EadSyncTest extends AbstractImporterTest {
     public void testUnitSyncWithDuplicateIds() throws Exception {
         // Import the data again but with an additional item that duplicates
         // one of the local IDs. If they are non-unique we cannot sync.
-        importManager.allowUpdates(true).withScope(repo)
+        importManager.withUpdates(true).withScope(repo)
                 .importInputStream(ClassLoader.getSystemResourceAsStream(
                         "hierarchical-ead-sync-test-bad.xml"),
                         "Adding item with non-unique ID");

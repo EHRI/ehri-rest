@@ -161,7 +161,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         // Check the importer is Idempotent
         ImportLog log2 = importManager
-                .allowUpdates(true)
+                .withUpdates(true)
                 .importInputStream(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(6, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());

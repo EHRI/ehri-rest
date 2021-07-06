@@ -20,6 +20,7 @@
 package eu.ehri.project.exporters.eag;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -51,7 +52,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
         Country nl = manager.getEntity("nl", Country.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml");
         SaxImportManager importManager = new SaxImportManager(graph, nl, validUser,
-                EagImporter.class, EagHandler.class);
+                EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
         importManager.importInputStream(ios, "Text EAG import/export");
         Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
         testExport(repo, "eng");

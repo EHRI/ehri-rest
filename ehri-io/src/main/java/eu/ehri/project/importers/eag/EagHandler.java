@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -47,8 +48,8 @@ public class EagHandler extends SaxXmlHandler {
     );
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
-    public EagHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        super(importer, defaultLang, new XmlImportProperties("eag.properties"));
+    public EagHandler(ItemImporter<Map<String, Object>, ?> importer, ImportOptions options) {
+        super(importer, options);
     }
 
     @Override
@@ -89,7 +90,7 @@ public class EagHandler extends SaxXmlHandler {
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                     logger.debug("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
-                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLang);
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, langCode);
                 }
                 if (!currentGraphPath.peek().containsKey("rulesAndConventions")) {
                     logger.debug("no rulesAndConventions found");

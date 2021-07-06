@@ -24,6 +24,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
@@ -60,14 +61,16 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
     /**
      * Convenience method for creating a Sax import manager.
      */
-    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends
-            SaxXmlHandler> handlerClass) {
-        return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass);
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
+        return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass, options);
     }
 
-    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends
-            SaxXmlHandler> handlerClass, String propertiesResource) {
-        return saxImportManager(importerClass, handlerClass).withProperties(propertiesResource);
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+        return new SaxImportManager(graph, repository, validUser, importerClass, handlerClass, ImportOptions.basic());
+    }
+
+    protected SaxImportManager saxImportManager(Class<? extends ItemImporter<?,?>> importerClass, Class<? extends SaxXmlHandler> handlerClass, String propertiesResource) {
+        return saxImportManager(importerClass, handlerClass, ImportOptions.properties(propertiesResource));
     }
 
     /**

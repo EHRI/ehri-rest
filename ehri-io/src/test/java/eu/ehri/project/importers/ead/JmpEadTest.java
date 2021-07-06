@@ -52,8 +52,7 @@ public class JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("wp2ead.properties")
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, "wp2ead.properties")
                 .importInputStream(ios, logMessage);
 
         // How many new nodes will have been created? We should have

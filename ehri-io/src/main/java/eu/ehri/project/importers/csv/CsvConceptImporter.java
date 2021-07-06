@@ -28,6 +28,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -46,8 +47,8 @@ import java.util.Map;
 public class CsvConceptImporter extends CsvAuthoritativeItemImporter {
 
     public CsvConceptImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
-            Actioner actioner, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, log);
+                              Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, options, log);
     }
 
     @Override

@@ -50,8 +50,7 @@ public class Jmp130Test extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("jmp.properties")
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, "jmp.properties")
                 .importInputStream(ios, logMessage);
 
         List<VertexProxy> graphState1 = getGraphState(graph);

@@ -26,10 +26,10 @@ import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
@@ -56,7 +56,7 @@ public class SaxImportManager extends AbstractImportManager {
 
     private static final Config config = ConfigFactory.load();
     private final Class<? extends SaxXmlHandler> handlerClass;
-    private final XmlImportProperties properties;
+    private final ImportOptions options;
     private final List<ImportCallback> extraCallbacks;
 
     /**
@@ -69,72 +69,31 @@ public class SaxImportManager extends AbstractImportManager {
     public SaxImportManager(FramedGraph<?> graph,
                             PermissionScope scope,
                             Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates,
-                            String defaultLang,
                             Class<? extends ItemImporter<?,?>> importerClass,
                             Class<? extends SaxXmlHandler> handlerClass,
-                            XmlImportProperties properties,
+                            ImportOptions options,
                             List<ImportCallback> callbacks) {
-        super(graph, scope, actioner, tolerant, allowUpdates, defaultLang, importerClass);
+        super(graph, scope, actioner, importerClass, options);
         this.handlerClass = handlerClass;
-        this.properties = properties;
         this.extraCallbacks = Lists.newArrayList(callbacks);
+        this.options = options;
         logger.debug("importer used: {}", importerClass);
         logger.debug("handler used: {}", handlerClass);
     }
 
     /**
      * Constructor.
-     *
-     * @param graph    the framed graph
+     *  @param graph    the framed graph
      * @param scope    a permission scope
      * @param actioner the actioner
+     * @param options an import options instance
      */
     public SaxImportManager(FramedGraph<?> graph,
                             PermissionScope scope,
                             Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates,
-                            String defaultLang,
-                            Class<? extends ItemImporter<?,?>> importerClass,
-                            Class<? extends SaxXmlHandler> handlerClass,
-                            List<ImportCallback> callbacks) {
-        this(graph, scope, actioner, tolerant, allowUpdates, defaultLang, importerClass, handlerClass, null, callbacks);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param graph    the framed graph
-     * @param scope    a permission scope
-     * @param actioner the actioner
-     */
-    public SaxImportManager(FramedGraph<?> graph,
-                            PermissionScope scope,
-                            Actioner actioner,
-                            boolean tolerant,
-                            boolean allowUpdates,
-                            String defaultLang,
-                            Class<? extends ItemImporter<?,?>> importerClass,
-                            Class<? extends SaxXmlHandler> handlerClass,
-                            XmlImportProperties properties) {
-        this(graph, scope, actioner, tolerant, allowUpdates, defaultLang, importerClass, handlerClass, properties, Lists.newArrayList());
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param graph    the framed graph
-     * @param scope    a permission scope
-     * @param actioner the actioner
-     */
-    public SaxImportManager(FramedGraph<?> graph,
-                            PermissionScope scope,
-                            Actioner actioner,
-                            Class<? extends ItemImporter<?,?>> importerClass,
-                            Class<? extends SaxXmlHandler> handlerClass) {
-        this(graph, scope, actioner, false, false, config.getString("defaultLang"), importerClass, handlerClass, Lists.newArrayList());
+                            Class<? extends ItemImporter<?, ?>> importerClass,
+                            Class<? extends SaxXmlHandler> handlerClass, ImportOptions options) {
+        this(graph, scope, actioner, importerClass, handlerClass, options, Lists.newArrayList());
     }
 
     /**
@@ -149,9 +108,8 @@ public class SaxImportManager extends AbstractImportManager {
             final ImportLog log) throws IOException, ValidationError, InputParseError {
         try {
             ItemImporter<?, ?> importer = importerClass
-                    .getConstructor(FramedGraph.class, PermissionScope.class,
-                            Actioner.class, ImportLog.class)
-                    .newInstance(framedGraph, permissionScope, actioner, log);
+                    .getConstructor(FramedGraph.class, PermissionScope.class, Actioner.class, ImportOptions.class, ImportLog.class)
+                    .newInstance(framedGraph, permissionScope, actioner, options, log);
 
             for (ImportCallback callback : extraCallbacks) {
                 importer.addCallback(callback);
@@ -160,12 +118,8 @@ public class SaxImportManager extends AbstractImportManager {
             importer.addCallback(mutation -> defaultImportCallback(log, tag, context, mutation));
             importer.addErrorCallback(ex -> defaultErrorCallback(log, ex));
 
-            //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            SaxXmlHandler handler = properties != null
-                    ? handlerClass.getConstructor(ItemImporter.class, String.class, XmlImportProperties.class)
-                            .newInstance(importer, defaultLang, properties)
-                    : handlerClass.getConstructor(ItemImporter.class, String.class)
-                            .newInstance(importer, defaultLang);
+            SaxXmlHandler handler = handlerClass.getConstructor(ItemImporter.class, ImportOptions.class)
+                            .newInstance(importer, options);
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);
@@ -198,36 +152,19 @@ public class SaxImportManager extends AbstractImportManager {
         }
     }
 
-    public SaxImportManager withProperties(String properties) {
-        XmlImportProperties xmlImportProperties = properties == null ? null : new XmlImportProperties(properties);
-        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant, allowUpdates, defaultLang,
-                importerClass, handlerClass, xmlImportProperties, extraCallbacks);
-    }
-
-    public SaxImportManager setTolerant(boolean tolerant) {
-        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
-                allowUpdates, defaultLang, importerClass, handlerClass, properties, extraCallbacks);
-    }
-
-    public SaxImportManager allowUpdates(boolean allowUpdates) {
-        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
-                allowUpdates, defaultLang, importerClass, handlerClass, properties, extraCallbacks);
-    }
-
     public SaxImportManager withScope(PermissionScope scope) {
-        return new SaxImportManager(framedGraph, scope, actioner, tolerant, allowUpdates, defaultLang,
-                importerClass, handlerClass, properties, extraCallbacks);
-    }
-
-    public SaxImportManager setDefaultLang(String defaultLang) {
-        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
-                allowUpdates, defaultLang, importerClass, handlerClass, properties, extraCallbacks);
+        return new SaxImportManager(framedGraph, scope, actioner, importerClass, handlerClass, options, extraCallbacks);
     }
 
     public SaxImportManager withCallback(ImportCallback callback) {
         List<ImportCallback> newCbs = Lists.newArrayList(extraCallbacks);
         newCbs.add(callback);
-        return new SaxImportManager(framedGraph, permissionScope, actioner, tolerant,
-                allowUpdates, defaultLang, importerClass, handlerClass, properties, newCbs);
+        return new SaxImportManager(framedGraph, permissionScope, actioner,
+                importerClass, handlerClass, options, newCbs);
+    }
+
+    public SaxImportManager withUpdates(boolean updates) {
+        return new SaxImportManager(framedGraph, permissionScope, actioner, importerClass, handlerClass,
+                options.withUpdates(updates), extraCallbacks);
     }
 }

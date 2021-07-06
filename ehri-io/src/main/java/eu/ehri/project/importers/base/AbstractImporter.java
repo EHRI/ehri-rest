@@ -24,10 +24,10 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ErrorCallback;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -42,6 +42,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     protected final Actioner actioner;
     protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
+    protected final ImportOptions options;
     protected final ImportLog log;
     private final List<ImportCallback> callbacks = Lists.newArrayList();
     private final List<ErrorCallback> errorCallbacks = Lists.newArrayList();
@@ -82,11 +83,12 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
      * @param actioner the user performing the import
      * @param log      the log object
      */
-    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, Actioner actioner, ImportLog log) {
+    public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, Actioner actioner, ImportOptions options, ImportLog log) {
         this.permissionScope = scope;
         this.framedGraph = graph;
         this.actioner = actioner;
         this.log = log;
+        this.options = options;
         manager = GraphManagerFactory.getInstance(graph);
     }
 

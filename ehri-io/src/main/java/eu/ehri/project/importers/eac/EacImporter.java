@@ -27,6 +27,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
@@ -65,8 +66,8 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
      * @param permissionScope the permission scope
      * @param log             the import log
      */
-    public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportLog log) {
-        super(graph, permissionScope, actioner, log);
+    public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(graph, permissionScope, actioner, options, log);
         linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
     }
 

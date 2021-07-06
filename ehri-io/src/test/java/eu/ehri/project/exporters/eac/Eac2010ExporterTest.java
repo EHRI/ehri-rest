@@ -20,6 +20,7 @@
 package eu.ehri.project.exporters.eac;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.eac.EacHandler;
 import eu.ehri.project.importers.eac.EacImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -51,7 +52,7 @@ public class Eac2010ExporterTest extends XmlExporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream("abwehr.xml");
         String logMessage = "Test EAC import/export";
         new SaxImportManager(graph, auths, validUser,
-                EacImporter.class, EacHandler.class)
+                EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
                 .importInputStream(ios, logMessage);
         HistoricalAgent repo = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
         String xml = testExport(repo, "eng");

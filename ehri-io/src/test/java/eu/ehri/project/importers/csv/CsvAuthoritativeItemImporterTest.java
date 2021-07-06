@@ -25,6 +25,7 @@ package eu.ehri.project.importers.csv;
 
 import com.google.common.collect.Lists;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.models.base.Accessible;
@@ -58,7 +59,7 @@ public class CsvAuthoritativeItemImporterTest extends AbstractImporterTest {
 
         List<VertexProxy> graphState1 = getGraphState(graph);
         ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser,
-                false, false, "eng", CsvAuthoritativeItemImporter.class).importInputStream(ios, logMessage);
+                CsvAuthoritativeItemImporter.class, ImportOptions.basic()).importInputStream(ios, logMessage);
         assertEquals(9, log.getCreated());
         printGraph(graph);
 
