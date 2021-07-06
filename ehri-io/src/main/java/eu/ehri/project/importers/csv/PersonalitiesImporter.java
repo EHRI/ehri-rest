@@ -26,6 +26,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
@@ -52,13 +53,10 @@ import java.util.Map;
  */
 public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>, HistoricalAgent> {
 
-    private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
-
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
 
-    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner,
-            ImportLog log) {
-        super(framedGraph, permissionScope, actioner, log);
+    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, options.withProperties("personalities.properties"), log);
     }
 
     @Override
@@ -128,10 +126,10 @@ public class PersonalitiesImporter extends AbstractImporter<Map<String, Object>,
         ImportHelpers.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
-                if (!p.containsProperty(key)) {
+                if (!options.properties.containsProperty(key)) {
                     ImportHelpers.putPropertyInGraph(item, ImportHelpers.UNKNOWN_PREFIX + key, itemData.get(key).toString());
                 } else {
-                    ImportHelpers.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
+                    ImportHelpers.putPropertyInGraph(item, options.properties.getProperty(key), itemData.get(key).toString());
                 }
             }
 

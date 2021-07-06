@@ -22,12 +22,14 @@ package eu.ehri.extension;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
 import eu.ehri.project.importers.cvoc.SkosImporter;
@@ -55,6 +57,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.shared.NoReaderForLangException;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +93,7 @@ public class ImportResource extends AbstractResource {
     public static final String BASE_URI_PARAM = "baseURI";
     public static final String URI_SUFFIX_PARAM = "suffix";
     public static final String ALLOW_UPDATES_PARAM = "allow-update";
+    public static final String DESCRIPTION_MERGING_PARAM = "merging";
     public static final String HANDLER_PARAM = "handler";
     public static final String TAG_PARAM = "tag";
     public static final String IMPORTER_PARAM = "importer";
@@ -234,6 +238,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @DefaultValue("false") @QueryParam(DESCRIPTION_MERGING_PARAM) Boolean merging,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String defaultLang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
@@ -258,12 +263,9 @@ public class ImportResource extends AbstractResource {
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
+            ImportOptions options = new ImportOptions(tolerant, allowUpdates, merging, defaultLang, propertyFile);
             ImportManager importManager = new SaxImportManager(
-                    graph, scope, user, importer, handler)
-                    .allowUpdates(allowUpdates)
-                    .setDefaultLang(defaultLang)
-                    .setTolerant(tolerant)
-                    .withProperties(propertyFile);
+                    graph, scope, user, importer, handler, options);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
 
@@ -298,6 +300,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam("fonds") String fonds,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("false") @QueryParam(ALLOW_UPDATES_PARAM) Boolean allowUpdates,
+            @DefaultValue("false") @QueryParam(DESCRIPTION_MERGING_PARAM) Boolean merging,
             @QueryParam(LOG_PARAM) String logMessage,
             @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang,
             @QueryParam(PROPERTIES_PARAM) String propertyFile,
@@ -324,12 +327,9 @@ public class ImportResource extends AbstractResource {
 
             // Run the sync...
             String message = getLogMessage(logMessage).orElse(null);
+            ImportOptions options = new ImportOptions(tolerant, allowUpdates, merging, lang, propertyFile);
             SaxImportManager importManager = new SaxImportManager(
-                    graph, scope, user, importer, handler)
-                    .allowUpdates(allowUpdates)
-                    .setDefaultLang(lang)
-                    .setTolerant(tolerant)
-                    .withProperties(propertyFile);
+                    graph, scope, user, importer, handler, options);
             // Note that while the import manager uses the scope, here
             // we use the fonds as the scope, which might be different.
             EadSync syncManager = new EadSync(graph, api(), syncScope, user, importManager);
@@ -369,7 +369,10 @@ public class ImportResource extends AbstractResource {
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile, tag,
+        String eagFile = propertyFile == null
+                ? Resources.getResource("eag.properties").getFile()
+                : propertyFile;
+        return importEad(scopeId, tolerant, allowUpdates, false, logMessage, defaultLang, eagFile, tag,
                 nameOrDefault(handlerClass, EagHandler.class.getName()),
                 nameOrDefault(importerClass, EagImporter.class.getName()),
                 commit, data);
@@ -395,7 +398,10 @@ public class ImportResource extends AbstractResource {
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
-        return importEad(scopeId, tolerant, allowUpdates, logMessage, defaultLang, propertyFile, tag,
+        String eacFile = propertyFile == null
+                ? Resources.getResource("eac.properties").getFile()
+                : propertyFile;
+        return importEad(scopeId, tolerant, allowUpdates, false, logMessage, defaultLang, eacFile, tag,
                 nameOrDefault(handlerClass, EacHandler.class.getName()),
                 nameOrDefault(importerClass, EacImporter.class.getName()),
                 commit, data);
@@ -435,8 +441,8 @@ public class ImportResource extends AbstractResource {
 
             // Run the import!
             String message = getLogMessage(logMessage).orElse(null);
-            ImportManager importManager = new CsvImportManager(
-                    graph, scope, user, tolerant, allowUpdates, lang, importer);
+            ImportOptions options = new ImportOptions(tolerant, allowUpdates, false, lang, null);
+            ImportManager importManager = new CsvImportManager(graph, scope, user, importer, options);
             ImportLog log = importDataStream(importManager, message, tag, data,
                     MediaType.valueOf(CSV_MEDIA_TYPE));
             if (commit) {

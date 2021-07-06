@@ -23,6 +23,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.DatePeriod;
@@ -61,9 +62,8 @@ public class NiodEadXsdTest extends AbstractImporterTest {
         //  Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .setTolerant(true)
-                .withProperties("niodead.properties")
+        ImportOptions options = ImportOptions.properties("niodead.properties").withTolerant(true);
+        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
                 .importInputStream(ios, logMessage);
 
         // One item without an ID errored

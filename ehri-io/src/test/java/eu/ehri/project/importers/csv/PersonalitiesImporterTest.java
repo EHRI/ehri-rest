@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.csv;
 
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.CsvImportManager;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -55,8 +56,8 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        new CsvImportManager(graph, authoritativeSet, validUser, false, false, "eng",
-                PersonalitiesImporter.class).importInputStream(ios, logMessage);
+        new CsvImportManager(graph, authoritativeSet, validUser,
+                PersonalitiesImporter.class, ImportOptions.basic()).importInputStream(ios, logMessage);
         SystemEvent ev = actionManager.getLatestGlobalEvent();
 
         /*

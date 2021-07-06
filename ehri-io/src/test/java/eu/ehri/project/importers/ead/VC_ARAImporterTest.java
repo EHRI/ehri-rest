@@ -57,8 +57,7 @@ public class VC_ARAImporterTest extends AbstractImporterTest {
         printGraph(graph);
 
         InputStream ios_vc = ClassLoader.getSystemResourceAsStream(VC_EAD);
-        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class)
-                .withProperties("vc_ara.properties")
+        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc_ara.properties")
                 .importInputStream(ios_vc, logMessage);
     }
 }

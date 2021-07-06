@@ -25,6 +25,7 @@ package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.managers.SaxImportManager;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -64,6 +65,8 @@ public class YadVashemTest extends AbstractImporterTest {
      * the unit described in the test file that is imported here.
      * This test checks that the existing description (which has a different source)
      * is untouched and the description from the test file is added.
+     * NB: this behaviour relies on the 'merging' option being enabled on the
+     * importer.
      */
     @Test
     public void testWithExistingDescription() throws Exception {
@@ -79,8 +82,10 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
-        saxImportManager(EadImporter.class, EadHandler.class, "yadvashem.properties")
-                .allowUpdates(true)
+        ImportOptions options = ImportOptions.properties("yadvashem.properties")
+                .withUpdates(true)
+                .withMerging(true);
+        saxImportManager(EadImporter.class, EadHandler.class, options)
                 .importInputStream(ios, logMessage);
 
         // After...
@@ -119,9 +124,11 @@ public class YadVashemTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = saxImportManager(
-                EadImporter.class, EadHandler.class, "yadvashem.properties");
-        importManager.allowUpdates(true).importInputStream(ios, logMessage);
+        ImportOptions options = ImportOptions.properties("yadvashem.properties")
+                .withUpdates(true)
+                .withMerging(true);
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, options);
+        importManager.importInputStream(ios, logMessage);
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -153,7 +160,7 @@ public class YadVashemTest extends AbstractImporterTest {
         assertEquals(1, nrOfDesc);
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-        importManager.allowUpdates(true).importInputStream(ios, logMessage);
+        importManager.withUpdates(true).importInputStream(ios, logMessage);
 
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
@@ -204,8 +211,7 @@ public class YadVashemTest extends AbstractImporterTest {
     public void testIdempotentImportViaXmlAndZip() throws Exception {
         String resource = "MS1_O84_HEB-partial-unicode.xml";
         InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
-        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("yadvashem.properties");
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "yadvashem.properties");
         ImportLog log = importManager.importInputStream(ios, "Test");
         assertEquals(1, log.getCreated());
 
@@ -217,7 +223,7 @@ public class YadVashemTest extends AbstractImporterTest {
              ArchiveInputStream archiveInputStream = new ArchiveStreamFactory(
                      StandardCharsets.UTF_8.displayName()).createArchiveInputStream(bis)) {
             ImportLog log2 = importManager
-                    .allowUpdates(true)
+                    .withUpdates(true)
                     .importArchive(archiveInputStream, "Test 2");
             assertEquals(1, log2.getUnchanged());
             assertEquals(0, log2.getUpdated());

@@ -20,6 +20,7 @@
 package eu.ehri.project.importers.csv;
 
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
@@ -48,7 +49,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv");
-        ImportLog importLog = new CsvImportManager(graph, ps, validUser, false, false, "eng", EadImporter.class)
+        ImportLog importLog = new CsvImportManager(graph, ps, validUser, EadImporter.class, ImportOptions.basic())
                 .importInputStream(ios, logMessage);
         System.out.println(importLog);
         // After...

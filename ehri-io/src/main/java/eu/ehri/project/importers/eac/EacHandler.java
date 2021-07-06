@@ -25,9 +25,9 @@ import com.google.common.collect.Sets;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.DatePeriod;
@@ -63,12 +63,8 @@ public class EacHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
-    public EacHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, new XmlImportProperties("eac.properties"));
-    }
-
-    public EacHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
-        super(importer, defaultLang, properties);
+    public EacHandler(ItemImporter<Map<String, Object>, ?> importer, ImportOptions options) {
+        super(importer, options);
     }
 
     @Override
@@ -104,7 +100,7 @@ public class EacHandler extends SaxXmlHandler {
                 }
                 if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                     logger.trace("no {} found", Ontology.LANGUAGE_OF_DESCRIPTION);
-                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLang);
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, langCode);
                 }
 
                 importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());

@@ -26,9 +26,9 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.base.SaxXmlHandler;
-import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -114,23 +114,13 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     /**
-     * Create an EadHandler using some importer. The default mapping of paths to node properties is used.
-     *
-     * @param importer the importer instance
-     */
-    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang) {
-        this(importer, defaultLang, new XmlImportProperties(DEFAULT_PROPERTIES));
-        logger.trace("Using default properties file: {}", DEFAULT_PROPERTIES);
-    }
-
-    /**
      * Create an EadHandler using some importer, and a mapping of paths to node properties.
      *
      * @param importer   the importer instance
-     * @param properties an XML node properties instance
+     * @param options    an ImportOptions instance
      */
-    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, String defaultLang, XmlImportProperties properties) {
-        super(importer, defaultLang, properties);
+    public EadHandler(ItemImporter<Map<String, Object>, ?> importer, ImportOptions options) {
+        super(importer, options);
         children[depth] = Lists.newArrayList();
     }
 
@@ -205,7 +195,7 @@ public class EadHandler extends SaxXmlHandler {
         if (qName.equals(ImportHelpers.LANGUAGE_KEY_PREFIX) || localName.equals(ImportHelpers.LANGUAGE_KEY_PREFIX)) {
             String lang = (String) currentGraphPath.peek().get("languageCode");
             if (lang != null) {
-                defaultLang = lang;
+                langCode = lang;
             }
         }
 
@@ -310,7 +300,7 @@ public class EadHandler extends SaxXmlHandler {
             logger.error("EADID not set yet, or not given in eadfile");
             return null;
         } else {
-            String suffix = "#" + defaultLang.toUpperCase();
+            String suffix = "#" + langCode.toUpperCase();
             if (eadId.toUpperCase().endsWith(suffix)) {
                 return eadId;
             }
@@ -325,7 +315,7 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-        useDefaultLanguage(currentGraph, defaultLang);
+        useDefaultLanguage(currentGraph, langCode);
     }
 
     /**

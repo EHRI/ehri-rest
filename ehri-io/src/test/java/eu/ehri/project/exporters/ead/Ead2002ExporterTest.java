@@ -20,6 +20,7 @@
 package eu.ehri.project.exporters.ead;
 
 import eu.ehri.project.exporters.test.XmlExporterTest;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.ead.EadHandler;
 import eu.ehri.project.importers.ead.EadImporter;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -162,7 +163,7 @@ public class Ead2002ExporterTest extends XmlExporterTest {
             String topLevelIdentifier, String lang) throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
         new SaxImportManager(graph, repository, validUser,
-                EadImporter.class, EadHandler.class)
+                EadImporter.class, EadHandler.class, ImportOptions.basic())
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);

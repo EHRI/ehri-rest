@@ -29,6 +29,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.EntityClass;
@@ -55,8 +56,8 @@ public class CsvAuthoritativeItemImporter extends AbstractImporter<Map<String, O
     private static final Logger logger = LoggerFactory.getLogger(CsvAuthoritativeItemImporter.class);
 
     public CsvAuthoritativeItemImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
-            Actioner actioner, ImportLog log) {
-        super(framedGraph, permissionScope, actioner, log);
+                                        Actioner actioner, ImportOptions options, ImportLog log) {
+        super(framedGraph, permissionScope, actioner, options, log);
     }
 
     @Override

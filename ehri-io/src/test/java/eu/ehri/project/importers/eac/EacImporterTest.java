@@ -24,6 +24,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.HistoricalAgent;
@@ -59,7 +60,7 @@ public class EacImporterTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = GraphTestBase.getGraphState(graph);
-        saxImportManager(EacImporter.class, EacHandler.class)
+        saxImportManager(EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
                 .withScope(SystemScope.getInstance())
                 .importInputStream(ios, logMessage);
         // After...
@@ -102,7 +103,7 @@ public class EacImporterTest extends AbstractImporterTest {
         List<VertexProxy> before = GraphTestBase.getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile);
-        ImportLog log = saxImportManager(EacImporter.class, EacHandler.class)
+        ImportLog log = saxImportManager(EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
                 .withScope(SystemScope.getInstance())
                 .importInputStream(ios, logMessage);
 

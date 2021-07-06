@@ -61,8 +61,7 @@ public class ItsTest extends AbstractImporterTest {
     public void testUnitdate() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
         final String logMessage = "Importing a single EAD by ItsTest";
-        saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("its-pertinence.properties")
+        saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence.properties")
                 .importInputStream(ios, logMessage);
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
@@ -88,7 +87,7 @@ public class ItsTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence" +
-                ".properties").allowUpdates(true);
+                ".properties").withUpdates(true);
         ImportLog log_en = importManager.importInputStream(ios, logMessage);
         ImportLog log_de = importManager.importInputStream(ios2, logMessage);
 
@@ -168,8 +167,7 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("its-provenance.properties")
+        saxImportManager(EadImporter.class, EadHandler.class, "its-provenance.properties")
                 .importInputStream(ios, logMessage);
 
         // After...
@@ -235,8 +233,7 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("its-provenance.properties")
+        saxImportManager(EadImporter.class, EadHandler.class, "its-provenance.properties")
                 .importInputStream(ios, logMessage);
 
         // After...
@@ -267,8 +264,7 @@ public class ItsTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EadImporter.class, EadHandler.class)
-                .withProperties("its-pertinence.properties")
+        saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence.properties")
                 .importInputStream(ios, logMessage);
 
         // After...

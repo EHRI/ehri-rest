@@ -29,6 +29,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
@@ -66,9 +67,7 @@ public abstract class AbstractImportManager implements ImportManager {
     protected final FramedGraph<?> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
-    protected final boolean tolerant;
-    protected final boolean allowUpdates;
-    protected final String defaultLang;
+    protected final ImportOptions options;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -82,27 +81,20 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param graph         the framed graph
      * @param scope         the permission scope
      * @param actioner      the actioner
-     * @param tolerant      allow individual items to fail validation without
-     *                      failing an entire batch
-     * @param allowUpdates  allow this import manager to update data items as well
-     *                      as create them
      * @param importerClass the class of the item importer object
+     * @param options       an import options instance
      */
     public AbstractImportManager(
             FramedGraph<?> graph,
             PermissionScope scope, Actioner actioner,
-            boolean tolerant,
-            boolean allowUpdates,
-            String defaultLang,
-            Class<? extends ItemImporter<?, ?>> importerClass) {
+            Class<? extends ItemImporter<?, ?>> importerClass,
+            ImportOptions options) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
         this.framedGraph = graph;
         this.permissionScope = scope;
         this.actioner = actioner;
-        this.tolerant = tolerant;
-        this.allowUpdates = allowUpdates;
-        this.defaultLang = defaultLang;
         this.importerClass = importerClass;
+        this.options = options;
     }
 
     /**
@@ -111,7 +103,7 @@ public abstract class AbstractImportManager implements ImportManager {
      * @return a boolean value
      */
     public boolean isTolerant() {
-        return tolerant;
+        return options.tolerant;
     }
 
     @Override
@@ -169,7 +161,7 @@ public abstract class AbstractImportManager implements ImportManager {
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError | SSLException | MalformedURLException | SocketException e) {
                     log.addError(formatErrorLocation(), e.getMessage());
-                    if (!tolerant) {
+                    if (!options.tolerant) {
                         throw e;
                     }
                 }
@@ -203,7 +195,7 @@ public abstract class AbstractImportManager implements ImportManager {
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
-                    if (!tolerant) {
+                    if (!options.tolerant) {
                         throw e;
                     }
                 }
@@ -239,7 +231,7 @@ public abstract class AbstractImportManager implements ImportManager {
                 }
             } catch (InputParseError | ValidationError e) {
                 log.addError(formatErrorLocation(), e.getMessage());
-                if (!tolerant) {
+                if (!options.tolerant) {
                     throw e;
                 }
             }
@@ -282,7 +274,7 @@ public abstract class AbstractImportManager implements ImportManager {
                 log.addCreated(tag, id);
                 break;
             case UPDATED:
-                if (!allowUpdates) {
+                if (!options.updates) {
                     throw new ModeViolation(String.format(
                             "Item '%s' was updated but import manager does not allow updates",
                             id));
