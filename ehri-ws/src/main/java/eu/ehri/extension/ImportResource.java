@@ -371,7 +371,7 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         String eagFile = propertyFile == null
-                ? Resources.getResource("eag.properties").getFile()
+                ? Resources.getResource(EagImporter.class, "eag.properties").getFile()
                 : propertyFile;
         return importEad(scopeId, tolerant, allowUpdates, false, logMessage, defaultLang, eagFile, tag,
                 nameOrDefault(handlerClass, EagHandler.class.getName()),
@@ -400,7 +400,7 @@ public class ImportResource extends AbstractResource {
             InputStream data)
             throws ItemNotFound, ValidationError, IOException, DeserializationError {
         String eacFile = propertyFile == null
-                ? Resources.getResource("eac.properties").getFile()
+                ? Resources.getResource(EacImporter.class, "eac.properties").getFile()
                 : propertyFile;
         return importEad(scopeId, tolerant, allowUpdates, false, logMessage, defaultLang, eacFile, tag,
                 nameOrDefault(handlerClass, EacHandler.class.getName()),

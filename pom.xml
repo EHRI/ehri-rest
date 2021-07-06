@@ -5,7 +5,7 @@
 
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
-    <version>0.13.12</version>
+    <version>0.14.0</version>
     <packaging>pom</packaging>
 
     <name>EHRI Backend</name>

@@ -458,7 +458,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .type(MediaType.TEXT_XML_TYPE)
                 .entity(payloadStream)
                 .post(ClientResponse.class);
-
+        assertStatus(ClientResponse.Status.OK, response);
         ImportLog log = response.getEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
@@ -480,6 +480,7 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
                 .entity(payloadStream)
                 .post(ClientResponse.class);
 
+        assertStatus(ClientResponse.Status.OK, response);
         ImportLog log = response.getEntity(ImportLog.class);
         assertEquals(1, log.getCreated());
         assertEquals(0, log.getUpdated());
