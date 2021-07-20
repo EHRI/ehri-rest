@@ -40,39 +40,34 @@ import eu.ehri.project.core.impl.neo4j.Neo4j2Graph;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.harness.Neo4j;
-import org.neo4j.harness.Neo4jBuilders;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
+
 
 public abstract class GraphTestBase {
 
+    private static final TestDatabaseManagementServiceBuilder dbBuilder = new TestDatabaseManagementServiceBuilder().impermanent();
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule(), new CustomAnnotationsModule());
 
     protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
-    protected static Neo4j neo4j;
-    protected static DatabaseManagementService dms;
-    protected static GraphDatabaseService service;
-    private static Path tempDir;
+    protected DatabaseManagementService dms;
+    protected GraphDatabaseService service;
 
     protected static List<VertexProxy> getGraphState(FramedGraph<?> graph) {
         List<VertexProxy> list = Lists.newArrayList();
@@ -115,19 +110,10 @@ public abstract class GraphTestBase {
         return Paths.get(resource.toURI()).toString();
     }
 
-    @BeforeClass
-    public static void setUpAll() throws Exception {
-        tempDir = Files.createTempDirectory("neo4j-tmp");
-        neo4j = Neo4jBuilders
-                .newInProcessBuilder(tempDir.toFile())
-                .withDisabledServer()
-                .build();
-        dms = neo4j.databaseManagementService();
-        service = neo4j.defaultDatabaseService();
-    }
-
     @Before
     public void setUp() throws Exception {
+        dms = dbBuilder.build();
+        service = dms.database(DEFAULT_DATABASE_NAME);
         graph = getFramedGraph();
         manager = GraphManagerFactory.getInstance(graph);
         try (Transaction tx = service.beginTx()) {
@@ -140,15 +126,9 @@ public abstract class GraphTestBase {
         return graphFactory.create(new Neo4j2Graph(dms, service));
     }
 
-    @AfterClass
-    public static void tearDownAll() throws Exception {
-        neo4j.close();
-        FileUtils.deleteDirectory(tempDir.toFile());
-    }
-
     @After
     public void tearDown() throws Exception {
-        service.executeTransactionally("MATCH (a) DETACH DELETE a");
+        dms.shutdown();
     }
 
     /**

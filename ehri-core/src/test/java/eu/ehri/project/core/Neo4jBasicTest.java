@@ -24,13 +24,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
-
-import java.io.File;
-import java.io.IOException;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -46,24 +43,18 @@ public class Neo4jBasicTest {
 
     @Before
     public void prepareTestDatabase() {
-        try {
-            File tempFile = File.createTempFile("neo4j-tmp", ".db");
-            tempFile.deleteOnExit();
-            managementService = new DatabaseManagementServiceBuilder(tempFile).build();
-            graphDb = managementService.database(DEFAULT_DATABASE_NAME);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        managementService = new TestDatabaseManagementServiceBuilder().impermanent().build();
+        graphDb = managementService.database(DEFAULT_DATABASE_NAME);
     }
 
     @After
     public void destroyTestDatabase() {
-        managementService.shutdownDatabase(DEFAULT_DATABASE_NAME);
+        managementService.shutdown();
     }
 
-//    @Test(expected = org.neo4Vjj.graphdb.NotInTransactionException.class)
+//    @Test(expected = org.neo4j.graphdb.NotInTransactionException.class)
 //    public void notAllowCountingNodesOutsideOfATx() {
-//        graphDb.getAllNodes();
+//        graphDb.
 //    }
 
     @Test

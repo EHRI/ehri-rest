@@ -55,7 +55,7 @@ public class CvocConceptTest extends ModelTestBase {
     public void testConceptHierarchy() throws Exception {
         // Fruit, Apples and Bananas etc.
 
-        Map<String, Object> data = new HashMap<String, Object>() {
+        Map<String, Object> data = new HashMap<>() {
             {
                 put(Ontology.IDENTIFIER_KEY, "fruit");
             }
@@ -63,7 +63,7 @@ public class CvocConceptTest extends ModelTestBase {
         Vertex v_fruit = manager.createVertex("fruit_id",
                 EntityClass.CVOC_CONCEPT, data);
 
-        data = new HashMap<String, Object>() {
+        data = new HashMap<>() {
             {
                 put(Ontology.IDENTIFIER_KEY, "apples");
             }
@@ -71,7 +71,7 @@ public class CvocConceptTest extends ModelTestBase {
         Vertex v_apples = manager.createVertex("applies_id",
                 EntityClass.CVOC_CONCEPT, data);
 
-        data = new HashMap<String, Object>() {
+        data = new HashMap<>() {
             {
                 put(Ontology.IDENTIFIER_KEY, "bananas");
             }
@@ -79,7 +79,7 @@ public class CvocConceptTest extends ModelTestBase {
         Vertex v_bananas = manager.createVertex("bananas_id",
                 EntityClass.CVOC_CONCEPT, data);
 
-        data = new HashMap<String, Object>() {
+        data = new HashMap<>() {
             {
                 put(Ontology.IDENTIFIER_KEY, "trees");
             }
@@ -97,7 +97,6 @@ public class CvocConceptTest extends ModelTestBase {
         // OK, framed, now construct relations etc.
         fruit.addNarrowerConcept(apples);
         fruit.addNarrowerConcept(bananas);
-        graph.getBaseGraph().commit();
 
         // fruit should now be the broader concept
         assertEquals(fruit.getId(), apples.getBroaderConcepts()
@@ -107,7 +106,6 @@ public class CvocConceptTest extends ModelTestBase {
 
         // make a relation to Trees concept
         apples.addRelatedConcept(trees);
-        graph.getBaseGraph().commit();
 
         // is it symmetric?
         assertEquals(apples.getId(), trees.getRelatedByConcepts()
@@ -123,7 +121,7 @@ public class CvocConceptTest extends ModelTestBase {
     protected Map<String, Object> getAppleTestBundle() {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
-        return new HashMap<String, Object>() {{
+        return new HashMap<>() {{
             put(Bundle.ID_KEY, null);
             put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
@@ -155,7 +153,6 @@ public class CvocConceptTest extends ModelTestBase {
         Bundle bundle = Bundle.fromData(getAppleTestBundle());
 
         Concept concept = api(validUser).create(bundle, Concept.class);
-        graph.getBaseGraph().commit();
 
         // Does the label have the correct properties
         assertNotNull(concept);

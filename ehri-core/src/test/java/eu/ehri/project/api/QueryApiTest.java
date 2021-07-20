@@ -26,11 +26,13 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.api.QueryApi;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -199,6 +201,7 @@ public class QueryApiTest extends AbstractFixtureTest {
         list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 QueryApi.FilterPredicate.GT, "c3").page(
                 EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class));
+        list.sort(Comparator.comparing(Entity::getId));
         assertEquals(2, list.size());
         assertEquals("c4", list.get(0).getIdentifier());
 

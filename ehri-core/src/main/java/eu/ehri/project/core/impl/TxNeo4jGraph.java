@@ -50,12 +50,7 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
         super(directory);
     }
 
-    private ThreadLocal<Neo4jTx> etx = new ThreadLocal<Neo4jTx>() {
-        @Override
-        public Neo4jTx initialValue() {
-            return null;
-        }
-    };
+    private final ThreadLocal<Neo4jTx> etx = ThreadLocal.withInitial(() -> null);
 
     public Tx beginTx() {
         logger.trace("Begin tx: {}", Thread.currentThread().getName());
@@ -103,18 +98,6 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
     @Override
     public void autoStartTransaction(boolean forWrite) {
         // Not allowing auto-start TX
-    }
-
-    /**
-     * Since we override autoStartTx to do nothing, we must also
-     * override this function (which loads key indices and sneakily
-     * commits them) when the graph is constructed. We do not use
-     * key indexable functionality so nothing is lost (unless the
-     * base class is changed, but, can't do much about that.)
-     */
-    @Override
-    public void init() {
-        // Don't load key indices
     }
 
     /**

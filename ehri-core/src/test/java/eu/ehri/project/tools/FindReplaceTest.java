@@ -7,6 +7,7 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -23,6 +24,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
                 "name", "Description",
                 "Test", validUser, "This is a test");
+        names.sort(Comparator.comparing(o -> o.get(0)));
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
         assertEquals(10, diff.added.size());

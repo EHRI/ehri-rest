@@ -1,36 +1,15 @@
 package eu.ehri.project.core.impl.neo4j;
 
 import com.google.common.base.Preconditions;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Features;
-import com.tinkerpop.blueprints.GraphQuery;
-import com.tinkerpop.blueprints.MetaGraph;
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.util.DefaultGraphQuery;
-import com.tinkerpop.blueprints.util.ExceptionFactory;
-import com.tinkerpop.blueprints.util.PropertyFilteredIterable;
-import com.tinkerpop.blueprints.util.StringFactory;
-import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
+import com.tinkerpop.blueprints.*;
+import com.tinkerpop.blueprints.util.*;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationConverter;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ResourceIterable;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.TransactionFailureException;
-//import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
-//import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.*;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -109,32 +88,21 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
 
     public Neo4j2Graph(String directory, Map<String, String> configuration) {
         try {
-            DatabaseManagementServiceBuilder builder = new DatabaseManagementServiceBuilder(new File(directory));
+            DatabaseManagementServiceBuilder builder = new DatabaseManagementServiceBuilder(Paths.get(directory));
             builder = (configuration != null) ? builder.setConfigRaw(configuration) : builder;
             this.managementService = builder.build();
-//            System.out.println("Pre init: " + this.managementService);
             this.rawGraph = managementService.database( DEFAULT_DATABASE_NAME );
-
-            init();
-
         } catch (Exception e) {
-//            if (this.rawGraph != null) {
-//                managementService.shutdownDatabase(DEFAULT_DATABASE_NAME);
-//            }
+            if (this.rawGraph != null) {
+                managementService.shutdown();
+            }
             throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    protected void init() {
-//        System.out.println("Init: " + this.managementService);
-//        this.managementService.startDatabase(DEFAULT_DATABASE_NAME);
     }
 
     public Neo4j2Graph(DatabaseManagementService service, GraphDatabaseService rawGraph) {
         this.managementService = service;
         this.rawGraph = rawGraph;
-
-        init();
     }
 
     public Neo4j2Graph(Configuration configuration) {
