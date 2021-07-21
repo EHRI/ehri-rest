@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -278,9 +279,15 @@ public class AbstractResourceClientTest extends RunningServerTest {
 
     private String getJson(URI uri, String userId, MultivaluedMap<String, String> params) {
         WebResource resource = client.resource(uri).queryParams(params);
-        return resource.accept(MediaType.APPLICATION_JSON)
+        try {
+            return resource
+                .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME, userId)
                 .get(String.class);
+        } catch (UniformInterfaceException e) {
+            System.out.println(e.getResponse().getEntity(String.class));
+            throw e;
+        }
     }
 }

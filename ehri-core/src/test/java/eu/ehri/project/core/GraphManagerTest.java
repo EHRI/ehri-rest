@@ -32,6 +32,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -41,6 +42,7 @@ import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -79,6 +81,7 @@ public class GraphManagerTest {
         private GraphManager manager;
         private FramedGraph<? extends TransactionalGraph> graph;
         private final Class<? extends GraphManager> cls;
+        Path tempDir;
 
         public Suite(Class<? extends GraphManager> cls) {
             this.cls = cls;
@@ -108,8 +111,7 @@ public class GraphManagerTest {
         @Before
         public void setUp() throws Exception {
             // NB: Not loading modules to allow use of frames methods, like GremlinGroovy
-            Path tempDir = Files.createTempDirectory("neo4j-tmp");
-            tempDir.toFile().deleteOnExit();
+            tempDir = Files.createTempDirectory("neo4j-tmp");
             graph = new FramedGraphFactory().create(new Neo4j2Graph(tempDir.toString()));
             manager = cls.getConstructor(FramedGraph.class).newInstance(graph);
         }
@@ -117,6 +119,11 @@ public class GraphManagerTest {
         @After
         public void tearDown() {
             graph.shutdown();
+            try {
+                FileUtils.deleteDirectory(tempDir.toFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Test

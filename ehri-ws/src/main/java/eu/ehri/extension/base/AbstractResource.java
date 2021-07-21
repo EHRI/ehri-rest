@@ -52,7 +52,6 @@ import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.persistence.Serializer;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -232,11 +231,15 @@ public abstract class AbstractResource implements TxCheckedResource {
      */
     protected QueryApi getQuery() {
         return api().query()
-                .setOffset(getIntQueryParam(OFFSET_PARAM, 0))
-                .setLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
+                .withOffset(getIntQueryParam(OFFSET_PARAM, 0))
+                .withLimit(getIntQueryParam(LIMIT_PARAM, DEFAULT_LIST_LIMIT))
                 .filter(getStringListQueryParam(FILTER_PARAM))
                 .orderBy(getStringListQueryParam(SORT_PARAM))
-                .setStream(isStreaming());
+                .withStreaming(isStreaming());
+    }
+
+    protected void checkExists(String id, Class<?> cls) throws ItemNotFound {
+        manager.getEntity(id, cls);
     }
 
     /**
@@ -247,7 +250,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      */
     protected Accessor getRequesterUserProfile() {
         Optional<String> id = getRequesterIdentifier();
-        if (!id.isPresent()) {
+        if (id.isEmpty()) {
             return AnonymousAccessor.getInstance();
         } else {
             try {
@@ -561,12 +564,10 @@ public abstract class AbstractResource implements TxCheckedResource {
                         page.getOffset(), page.getLimit(), page.getTotal()));
     }
 
-    private Response streamingVertexList(
-            Supplier<Iterable<Vertex>> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+    private Response streamingVertexList(Supplier<Iterable<Vertex>> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();
-            try (Tx tx = beginTx();
-                 JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
+            try (Tx tx = beginTx(); JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
                 g.writeStartArray();
                 for (Vertex item : page.get()) {
                     g.writeRaw('\n');
@@ -580,12 +581,10 @@ public abstract class AbstractResource implements TxCheckedResource {
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    private <T extends Entity> Response streamingList(
-            Supplier<Iterable<T>> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+    private <T extends Entity> Response streamingList(Supplier<Iterable<T>> page, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();
-            try (Tx tx = beginTx();
-                 JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
+            try (Tx tx = beginTx(); JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
                 g.writeStartArray();
                 for (T item : page.get()) {
                     g.writeRaw('\n');
@@ -595,16 +594,17 @@ public abstract class AbstractResource implements TxCheckedResource {
                 tx.success();
             } catch (SerializationError e) {
                 throw new RuntimeException(e);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                throw e;
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    private <T extends Entity> Response streamingGroup(
-            Supplier<Iterable<? extends Collection<T>>> groups, Serializer serializer, Response.ResponseBuilder responseBuilder) {
+    private <T extends Entity> Response streamingGroup(Supplier<Iterable<? extends Collection<T>>> groups, Serializer serializer, Response.ResponseBuilder responseBuilder) {
         return responseBuilder.entity((StreamingOutput) outputStream -> {
             final Serializer cacheSerializer = serializer.withCache();
-            try (Tx tx = beginTx();
-                 JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
+            try (Tx tx = beginTx(); JsonGenerator g = jsonFactory.createGenerator(outputStream)) {
                 g.writeStartArray();
                 for (Collection<T> collect : groups.get()) {
                     g.writeStartArray();
@@ -618,6 +618,7 @@ public abstract class AbstractResource implements TxCheckedResource {
 
                 tx.success();
             } catch (SerializationError e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }).type(MediaType.APPLICATION_JSON_TYPE).build();

@@ -135,10 +135,11 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
                               final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            HistoricalAgent agent = api().get(id, HistoricalAgent.class);
+            api().get(id, HistoricalAgent.class);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
+                    HistoricalAgent agent = manager.getEntityUnchecked(id, HistoricalAgent.class);
                     new Eac2010Exporter(api()).export(agent, outputStream, lang);
                     tx2.success();
                 }

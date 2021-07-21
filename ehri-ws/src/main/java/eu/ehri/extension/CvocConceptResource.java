@@ -113,9 +113,9 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().get(id, cls);
+            checkExists(id, cls);
             Response response = streamingPage(() -> getQuery()
-                    .page(concept.getNarrowerConcepts(), Concept.class));
+                    .page(manager.getEntityUnchecked(id, cls).getNarrowerConcepts(), Concept.class));
             tx.success();
             return response;
         }
@@ -205,8 +205,8 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().get(id, cls);
-            Response response = streamingList(concept::getBroaderConcepts);
+            checkExists(id, cls);
+            Response response = streamingList(() -> manager.getEntityUnchecked(id, cls).getBroaderConcepts());
             tx.success();
             return response;
         }
@@ -217,8 +217,8 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Path("{id:[^/]+}/related")
     public Response getCvocRelatedConcepts(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().get(id, cls);
-            Response response = streamingList(concept::getRelatedConcepts);
+            checkExists(id, cls);
+            Response response = streamingList(() -> manager.getEntityUnchecked(id, cls).getRelatedConcepts());
             tx.success();
             return response;
         }
@@ -229,8 +229,8 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Path("{id:[^/]+}/relatedBy")
     public Response getCvocRelatedByConcepts(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Concept concept = api().get(id, cls);
-            Response response = streamingList(concept::getRelatedByConcepts);
+            checkExists(id, cls);
+            Response response = streamingList(() -> manager.getEntityUnchecked(id, cls).getRelatedByConcepts());
             tx.success();
             return response;
         }

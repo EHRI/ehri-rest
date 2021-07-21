@@ -106,6 +106,15 @@ public class BlueprintsGraphManager<T extends Graph> implements GraphManager {
     }
 
     @Override
+    public <E> E getEntityUnchecked(String id, Class<E> cls) {
+        try {
+            return graph.frame(getVertex(id), cls);
+        } catch (ItemNotFound itemNotFound) {
+            return null;
+        }
+    }
+
+    @Override
     public <E> E getEntity(String id, EntityClass type, Class<E> cls) throws ItemNotFound {
         Vertex vertex = getVertex(id);
         if (!getType(vertex).equals(type.getName())) {

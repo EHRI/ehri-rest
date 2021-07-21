@@ -57,7 +57,6 @@ public class PermissionsTest extends AbstractFixtureTest {
                 UserProfile.class);
         viewHelper = new PermissionUtils(graph);
         acl = new AclManager(graph);
-        System.out.println("Done creating test user...");
     }
 
     @Test(expected = PermissionDenied.class)

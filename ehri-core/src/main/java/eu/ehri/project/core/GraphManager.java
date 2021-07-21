@@ -112,6 +112,8 @@ public interface GraphManager {
      */
     <T> T getEntity(String id, Class<T> cls) throws ItemNotFound;
 
+    <E> E getEntityUnchecked(String id, Class<E> cls);
+
     /**
      * Get a node with the given ID and type, framing it with the given
      * interface class.

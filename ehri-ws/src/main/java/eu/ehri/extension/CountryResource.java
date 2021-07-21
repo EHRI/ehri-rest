@@ -90,9 +90,9 @@ public class CountryResource
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Country country = api().get(id, cls);
+            checkExists(id, cls);
             Response response = streamingPage(() -> getQuery()
-                    .page(country.getRepositories(), Repository.class));
+                    .page(manager.getEntityUnchecked(id, cls).getRepositories(), Repository.class));
             tx.success();
             return response;
         }
@@ -198,9 +198,11 @@ public class CountryResource
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Country country = api().get(id, cls);
-            final EagExporter eagExporter = new Eag2012Exporter(api());
-            Response response = exportItemsAsZip(eagExporter, country.getRepositories(), lang);
+            checkExists(id, cls);
+            Response response = exportItemsAsZip(() -> new Eag2012Exporter(api()), () -> {
+                final Country country = manager.getEntityUnchecked(id, cls);
+                return country.getRepositories();
+            }, lang);
             tx.success();
             return response;
         }

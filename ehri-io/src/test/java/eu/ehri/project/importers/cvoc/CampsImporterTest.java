@@ -21,7 +21,6 @@ package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.cvoc.Concept;
@@ -66,7 +65,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         String skosConceptId = "675";
         QueryApi query = api(validUser).query();
         // Query for document identifier.
-        List<Concept> list = toList(query.setLimit(1).page(
+        List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
@@ -104,7 +103,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         String skosConceptId = "675";
         QueryApi query = api(validUser).query();
         // Query for document identifier.
-        List<Concept> list = toList(query.setLimit(1).page(
+        List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());

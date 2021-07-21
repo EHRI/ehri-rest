@@ -29,6 +29,7 @@ import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.test.utils.GraphCleaner;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
+import org.apache.commons.io.FileUtils;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.harness.Neo4j;
@@ -36,6 +37,8 @@ import org.neo4j.harness.Neo4jBuilder;
 import org.neo4j.harness.Neo4jBuilders;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,6 +66,7 @@ public class ServerRunner {
     private final static Logger graphLogger = Logger.getLogger(TxNeo4jGraph.class.getName());
 
     private Neo4j neo4j;
+    private Path path;
 
     private ServerRunner(Map<String, String> packageMountPoints) {
         this.packageMountPoints = packageMountPoints;
@@ -93,7 +97,8 @@ public class ServerRunner {
         // the graph data.) This is noisy so we lower the log level here.
         graphLogger.setLevel(logLevel);
 
-        Neo4jBuilder serverBuilder = Neo4jBuilders.newInProcessBuilder();
+        path = Files.createTempDirectory("neo4j-tmp");
+        Neo4jBuilder serverBuilder = Neo4jBuilders.newInProcessBuilder(path);
 
         for (Map.Entry<String, String> entry : packageMountPoints.entrySet()) {
             String mountPoint = entry.getValue().startsWith("/")
@@ -142,6 +147,11 @@ public class ServerRunner {
         if (neo4j != null) {
             neo4j.close();
             neo4j = null;
+            try {
+                FileUtils.deleteDirectory(path.toFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

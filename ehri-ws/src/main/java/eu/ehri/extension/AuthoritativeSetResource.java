@@ -85,9 +85,9 @@ public class AuthoritativeSetResource extends
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
 
         try (final Tx tx = beginTx()) {
-            AuthoritativeSet set = api().get(id, cls);
+            api().get(id, cls);
             Response response = streamingPage(() ->
-                    getQuery().page(set.getAuthoritativeItems(), AuthoritativeItem.class));
+                    getQuery().page(manager.getEntityUnchecked(id, cls).getAuthoritativeItems(), AuthoritativeItem.class));
             tx.success();
             return response;
         }
@@ -213,11 +213,12 @@ public class AuthoritativeSetResource extends
     public Response exportEag(@PathParam("id") String id,
                               final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final AuthoritativeSet set = api().get(id, cls);
-            final EacExporter eacExporter = new Eac2010Exporter(api());
-            Iterable<HistoricalAgent> agents = Iterables
-                    .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));
-            Response response = exportItemsAsZip(eacExporter, agents, lang);
+            checkExists(id, cls);
+            Response response = exportItemsAsZip(() -> new Eac2010Exporter(api()), () -> {
+                final AuthoritativeSet set = manager.getEntityUnchecked(id, cls);
+                return Iterables
+                        .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));
+            }, lang);
             tx.success();
             return response;
         }

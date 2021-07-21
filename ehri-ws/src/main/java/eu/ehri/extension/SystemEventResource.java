@@ -30,7 +30,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.events.SystemEvent;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -108,12 +107,9 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation) {
+    public Response list(@QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation) {
         try (final Tx tx = beginTx()) {
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi::aggregate);
+            Response response = streamingListOfLists(() -> getEventsApi().withAggregation(aggregation).aggregate());
             tx.success();
             return response;
         }
@@ -131,10 +127,10 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     @Path("{id:[^/]+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            SystemEvent event = api().get(id, cls);
+            checkExists(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...
             Response response = streamingPage(() -> getQuery()
-                            .page(event.getSubjects(), Accessible.class),
+                            .page(manager.getEntityUnchecked(id, cls).getSubjects(), Accessible.class),
                     getSerializer().withDepth(1).withCache());
             tx.success();
             return response;

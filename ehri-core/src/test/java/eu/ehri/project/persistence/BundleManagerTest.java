@@ -20,6 +20,7 @@
 package eu.ehri.project.persistence;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -134,8 +135,7 @@ public class BundleManagerTest extends ModelTestBase {
     }
 
     @Test
-    public void testDeletingDependents() throws SerializationError,
-            ValidationError, IntegrityError, ItemNotFound {
+    public void testDeletingDependents() throws SerializationError, ValidationError, IntegrityError, ItemNotFound, InterruptedException {
         DocumentaryUnit c1 = manager.getEntity(ID, DocumentaryUnit.class);
         DocumentaryUnitDescription cd1 = manager.getEntity("cd1", DocumentaryUnitDescription.class);
         Bundle bundle = new Serializer(graph).entityToBundle(cd1);
@@ -143,42 +143,34 @@ public class BundleManagerTest extends ModelTestBase {
         assertEquals(2, Iterables.size(cd1.getDatePeriods()));
 
         String deletePath = "hasDate[0]";
-        String dpid = DataUtils
-                .getItem(bundle, deletePath).getId();
+        String dpId = DataUtils.getItem(bundle, deletePath).getId();
         try {
-            manager.getEntity(dpid, DatePeriod.class);
+            manager.getEntity(dpId, DatePeriod.class);
         } catch (ItemNotFound e) {
-            fail("Date period '" + dpid
-                    + "' not found in index before delete test.");
+            fail("Date period '" + dpId + "' not found in index before delete test.");
         }
 
         // Delete the *second* date period from the first description...
-        Bundle newBundle = DataUtils.deleteItem(
-                bundle, deletePath);
-        System.out.println("Delete bundle: " + newBundle);
+        Bundle newBundle = DataUtils.deleteItem(bundle, deletePath);
         BundleManager persister = new BundleManager(graph);
-        Mutation<DocumentaryUnit> mutation
-                = persister.update(newBundle, DocumentaryUnit.class);
+        Mutation<DocumentaryUnit> mutation = persister.update(newBundle, DocumentaryUnit.class);
 
         assertEquals(MutationState.UPDATED, mutation.getState());
-
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
-
-        assertEquals(1, Iterables.size(manager.getEntity("cd1", DocumentaryUnitDescription.class)
-                .getDatePeriods()));
+        assertEquals(1, Iterables.size(manager.getEntity("cd1", DocumentaryUnitDescription.class).getDatePeriods()));
 
         // The second date period should be gone from the index
         try {
-            manager.getEntity(dpid, DatePeriod.class);
-            fail("Date period '" + dpid + "' found in index AFTER delete test.");
+            DatePeriod e = manager.getEntity(dpId, DatePeriod.class);
+            fail("Date period '" + dpId + "' found in index AFTER delete test.");
         } catch (ItemNotFound e) {
             // No problem
         }
 
         // It should also not exist as a node...
         try {
-            graph.getVertices(EntityType.ID_KEY, dpid).iterator().next();
-            fail("Date period '" + dpid + "' found in index AFTER delete test.");
+            graph.getVertices(EntityType.ID_KEY, dpId).iterator().next();
+            fail("Date period '" + dpId + "' found in index AFTER delete test.");
         } catch (NoSuchElementException e) {
             // No problem
         }

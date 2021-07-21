@@ -28,7 +28,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.api.QueryApi;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -71,27 +70,27 @@ public class QueryApiTest extends AbstractFixtureTest {
         assertEquals(toList(allDocs).size(), list.size());
 
         // Test the limit function
-        QueryApi.Page<DocumentaryUnit> page = query.setLimit(1).page(DocumentaryUnit.class);
+        QueryApi.Page<DocumentaryUnit> page = query.withLimit(1).page(DocumentaryUnit.class);
         list = toList(page);
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
 
         // Test the offset function
-        list = toList(query.setLimit(2).setOffset(0).page(DocumentaryUnit.class));
+        list = toList(query.withLimit(2).withOffset(0).page(DocumentaryUnit.class));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
 
         // Test negative count (all items)
-        list = toList(query.setLimit(-1).page(DocumentaryUnit.class));
+        list = toList(query.withLimit(-1).page(DocumentaryUnit.class));
         assertFalse(list.isEmpty());
         assertEquals(5, list.size());
 
         // Test negative count (all items) and an offset
-        list = toList(query.setOffset(1).setLimit(-1).page(DocumentaryUnit.class));
+        list = toList(query.withOffset(1).withLimit(-1).page(DocumentaryUnit.class));
         assertFalse(list.isEmpty());
         assertEquals(4, list.size());
 
-        list = toList(query.setLimit(0).page(DocumentaryUnit.class));
+        list = toList(query.withLimit(0).page(DocumentaryUnit.class));
         assertEquals(0, list.size());
     }
 
@@ -107,7 +106,7 @@ public class QueryApiTest extends AbstractFixtureTest {
                 .getVertices(EntityClass.DOCUMENTARY_UNIT);
 
         // Test the limit function
-        QueryApi.Page<DocumentaryUnit> page = query.setLimit(1)
+        QueryApi.Page<DocumentaryUnit> page = query.withLimit(1)
                 .page(DocumentaryUnit.class);
         List<DocumentaryUnit> list = toList(page.getIterable());
         assertFalse(list.isEmpty());
@@ -140,7 +139,7 @@ public class QueryApiTest extends AbstractFixtureTest {
         QueryApi query = getQuery();
 
         // Query for document identifier c1.
-        List<DocumentaryUnit> list = toList(query.setLimit(1).page(
+        List<DocumentaryUnit> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", DocumentaryUnit.class));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
@@ -148,10 +147,10 @@ public class QueryApiTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithStreaming() throws Exception {
-        QueryApi query = getQuery().setStream(true);
+        QueryApi query = getQuery().withStreaming(true);
 
         // Query for document identifier c1.
-        QueryApi.Page<DocumentaryUnit> list = query.setLimit(1).page(
+        QueryApi.Page<DocumentaryUnit> list = query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, "c1", DocumentaryUnit.class);
         assertEquals(-1, list.getTotal());
     }

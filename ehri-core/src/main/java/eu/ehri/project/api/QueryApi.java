@@ -10,13 +10,19 @@ import java.util.Iterator;
 public interface QueryApi {
     int DEFAULT_LIMIT = 20;
 
+    int offset();
+
+    int limit();
+
+    boolean streaming();
+
     /**
      * Set the offset of this query.
      *
      * @param offset the number of items to skip
      * @return a new query
      */
-    QueryApi setOffset(int offset);
+    QueryApi withOffset(int offset);
 
     /**
      * Set the limit of this query.
@@ -24,7 +30,7 @@ public interface QueryApi {
      * @param limit the limit of the number of items returned
      * @return a new query
      */
-    QueryApi setLimit(int limit);
+    QueryApi withLimit(int limit);
 
     /**
      * Add a filter predicate.
@@ -70,7 +76,7 @@ public interface QueryApi {
      * @param stream whether to assume streaming
      * @return a new query with streaming enable/disabled
      */
-    QueryApi setStream(boolean stream);
+    QueryApi withStreaming(boolean stream);
 
     /**
      * Return a Page instance containing a total of total items, and an iterable

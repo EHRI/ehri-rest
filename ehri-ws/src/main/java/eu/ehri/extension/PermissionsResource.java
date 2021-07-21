@@ -253,9 +253,9 @@ public class PermissionsResource extends AbstractResource {
     @Path("{userOrGroup:[^/]+}/permission-grants")
     public Response listPermissionGrants(@PathParam("userOrGroup") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Accessor user = manager.getEntity(id, Accessor.class);
+            checkExists(id, Accessor.class);
             Response response = streamingPage(() -> getQuery()
-                    .page(user.getPermissionGrants(), PermissionGrant.class));
+                    .page(manager.getEntityUnchecked(id, Accessor.class).getPermissionGrants(), PermissionGrant.class));
             tx.success();
             return response;
         }

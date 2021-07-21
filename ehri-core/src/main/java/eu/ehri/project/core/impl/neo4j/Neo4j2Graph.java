@@ -159,23 +159,15 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
 
     public CloseableIterable<Vertex> getVerticesByLabel(final String label) {
         this.autoStartTransaction(false);
-        ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
-            @Override
-            public ResourceIterator<Node> iterator() {
-                return tx.get().findNodes(Label.label(label));
-            }
-        };
+        ResourceIterable<Node> wrap = () -> tx.get().findNodes(Label.label(label));
         return new Neo4j2VertexIterable(wrap, this);
     }
 
     public CloseableIterable<Vertex> getVerticesByLabelKeyValue(
             final String label, final String key, final Object value) {
-        ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
-            @Override
-            public ResourceIterator<Node> iterator() {
-                autoStartTransaction(false);
-                return tx.get().findNodes(Label.label(label), key, value);
-            }
+        ResourceIterable<Node> wrap = () -> {
+            autoStartTransaction(false);
+            return tx.get().findNodes(Label.label(label), key, value);
         };
         return new Neo4j2VertexIterable(wrap, this);
     }
@@ -338,8 +330,9 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     // between the beginning of a write operation and the beginning of a read
     // operation.
     public void autoStartTransaction(boolean forWrite) {
-        if (tx.get() == null)
+        if (tx.get() == null) {
             tx.set(this.rawGraph.beginTx());
+        }
     }
 
     public GraphDatabaseService getRawGraph() {

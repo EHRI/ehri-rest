@@ -33,7 +33,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -166,8 +165,9 @@ public class GroupResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
+            manager.getEntity(id, EntityClass.GROUP, cls);
             Response response = streamingPage(() -> {
+                Group group = manager.getEntityUnchecked(id, cls);
                 Iterable<Accessible> members = all
                         ? group.getAllUserProfileMembers()
                         : group.getMemberEntities();
@@ -207,10 +207,12 @@ public class GroupResource
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Actioner group = manager.getEntity(userId, Actioner.class);
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(() -> eventsApi.aggregateActions(group));
+            manager.getEntity(userId, Actioner.class);
+            Response response = streamingListOfLists(() -> {
+                EventsApi eventsApi = getEventsApi()
+                        .withAggregation(aggregation);
+                return eventsApi.aggregateActions(manager.getEntityUnchecked(userId, Actioner.class));
+            });
             tx.success();
             return response;
         }

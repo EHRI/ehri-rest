@@ -35,6 +35,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
+import org.neo4j.graphdb.schema.IndexType;
 import org.neo4j.graphdb.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,8 +167,7 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
 
             Collection<String> uniquePropertyKeys = ClassUtils.getUniquePropertyKeys(cls.getJavaClass());
             for (String unique : uniquePropertyKeys) {
-                logger.trace("Creating constraint on unique property: {} -> {}",
-                        cls.getName(), unique);
+                logger.trace("Creating constraint on unique property: {} -> {}", cls.getName(), unique);
                 schema.constraintFor(Label.label(cls.getName()))
                         .assertPropertyIsUnique(unique)
                         .create();

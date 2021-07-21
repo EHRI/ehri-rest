@@ -112,14 +112,18 @@ public abstract class GraphTestBase {
 
     @Before
     public void setUp() throws Exception {
-        dms = dbBuilder.build();
-        service = dms.database(DEFAULT_DATABASE_NAME);
+        resetGraph();
         graph = getFramedGraph();
         manager = GraphManagerFactory.getInstance(graph);
         try (Transaction tx = service.beginTx()) {
             Neo4jGraphManager.createIndicesAndConstraints(tx);
             tx.commit();
         }
+    }
+
+    protected void resetGraph() throws Exception {
+        dms = dbBuilder.build();
+        service = dms.database(DEFAULT_DATABASE_NAME);
     }
 
     protected FramedGraph<? extends TransactionalGraph> getFramedGraph() throws IOException {

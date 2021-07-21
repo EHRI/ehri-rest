@@ -23,7 +23,6 @@ import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.junit.Test;
@@ -66,7 +65,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         QueryApi query = api(validUser).query();
 
         // Query for document identifier.
-        List<Concept> list = toList(query.setLimit(1).page(
+        List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         Concept location = list.get(0);

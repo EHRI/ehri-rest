@@ -32,7 +32,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.utils.Table;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -76,8 +75,9 @@ public class DocumentaryUnitResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            DocumentaryUnit parent = api().get(id, DocumentaryUnit.class);
+            checkExists(id, cls);
             Response response = streamingPage(() -> {
+                DocumentaryUnit parent = manager.getEntityUnchecked(id, DocumentaryUnit.class);
                 Iterable<DocumentaryUnit> units = all
                         ? parent.getAllChildren()
                         : parent.getChildren();
