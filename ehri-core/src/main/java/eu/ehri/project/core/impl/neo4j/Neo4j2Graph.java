@@ -113,7 +113,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     @Override
     public Neo4j2Vertex addVertex(Object id) {
         this.autoStartTransaction(true);
-        return new Neo4j2Vertex(tx.get().createNode(), this);
+        return new Neo4j2Vertex(getTransaction().createNode(), this);
     }
 
     @Override
@@ -124,14 +124,14 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             throw ExceptionFactory.vertexIdCanNotBeNull();
 
         try {
-            Long longId;
+            long longId;
             if (id instanceof Long)
                 longId = (Long) id;
             else if (id instanceof Number)
                 longId = ((Number) id).longValue();
             else
                 longId = Double.valueOf(id.toString()).longValue();
-            return new Neo4j2Vertex(tx.get().getNodeById(longId), this);
+            return new Neo4j2Vertex(getTransaction().getNodeById(longId), this);
         } catch (NotFoundException e) {
             return null;
         } catch (NumberFormatException e) {
@@ -152,14 +152,22 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
      * @return all the vertices in the graph
      */
     @Override
-    public Iterable<Vertex> getVertices() {
+    public CloseableIterable<Vertex> getVertices() {
         this.autoStartTransaction(false);
-        return new Neo4j2VertexIterable(tx.get().getAllNodes(), this);
+        return new Neo4j2VertexIterable(getTransaction().getAllNodes(), this);
+    }
+
+    private Transaction getTransaction() {
+        Transaction tx = this.tx.get();
+        if (tx == null) {
+            throw new NotInTransactionException();
+        }
+        return tx;
     }
 
     public CloseableIterable<Vertex> getVerticesByLabel(final String label) {
         this.autoStartTransaction(false);
-        ResourceIterable<Node> wrap = () -> tx.get().findNodes(Label.label(label));
+        ResourceIterable<Node> wrap = () -> getTransaction().findNodes(Label.label(label));
         return new Neo4j2VertexIterable(wrap, this);
     }
 
@@ -167,7 +175,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             final String label, final String key, final Object value) {
         ResourceIterable<Node> wrap = () -> {
             autoStartTransaction(false);
-            return tx.get().findNodes(Label.label(label), key, value);
+            return getTransaction().findNodes(Label.label(label), key, value);
         };
         return new Neo4j2VertexIterable(wrap, this);
     }
@@ -187,7 +195,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         Preconditions.checkNotNull(column, "Column cannot be null");
         ResourceIterable<Node> wrap = () -> {
             autoStartTransaction(false);
-            return tx.get()
+            return getTransaction()
                     .execute(query, params != null ? params : Collections.emptyMap())
                     .columnAs(column);
         };
@@ -195,7 +203,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     }
 
     @Override
-    public Iterable<Vertex> getVertices(String key, Object value) {
+    public CloseableIterable<Vertex> getVertices(String key, Object value) {
         this.autoStartTransaction(false);
         return new PropertyFilteredIterable<>(key, value, this.getVertices());
     }
@@ -213,13 +221,13 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
      * @return all the edges in the graph
      */
     @Override
-    public Iterable<Edge> getEdges() {
+    public CloseableIterable<Edge> getEdges() {
         this.autoStartTransaction(false);
-        return new Neo4j2EdgeIterable(tx.get().getAllRelationships(), this);
+        return new Neo4j2EdgeIterable(getTransaction().getAllRelationships(), this);
     }
 
     @Override
-    public Iterable<Edge> getEdges(String key, Object value) {
+    public CloseableIterable<Edge> getEdges(String key, Object value) {
         this.autoStartTransaction(false);
         return new PropertyFilteredIterable<>(key, value, this.getEdges());
     }
@@ -261,7 +269,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
                 longId = (Long) id;
             else
                 longId = Double.valueOf(id.toString()).longValue();
-            return new Neo4j2Edge(tx.get().getRelationshipById(longId), this);
+            return new Neo4j2Edge(getTransaction().getRelationshipById(longId), this);
         } catch (NotFoundException e) {
             return null;
         } catch (NumberFormatException e) {
@@ -358,7 +366,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     public CloseableIterable<Map<String, Object>> query(String query, Map<String, Object> params) {
         ResourceIterable<Map<String, Object>> wrap = () -> {
             autoStartTransaction(false);
-            return tx.get().execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+            return getTransaction().execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
         };
         return new WrappingCloseableIterable<>(wrap);
     }

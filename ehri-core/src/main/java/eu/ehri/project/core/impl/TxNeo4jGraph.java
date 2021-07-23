@@ -85,8 +85,6 @@ public class TxNeo4jGraph extends Neo4j2Graph implements TxGraph {
 
     @Override
     public void shutdown() {
-
-        // FIXME: Neo4j 4
         getManagementService().shutdown();
     }
 

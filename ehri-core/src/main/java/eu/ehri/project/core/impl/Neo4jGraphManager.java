@@ -35,7 +35,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
-import org.neo4j.graphdb.schema.IndexType;
 import org.neo4j.graphdb.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +141,7 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
      * @param tx a Neo4j transaction
      */
     public static void createIndicesAndConstraints(Transaction tx) {
-//        dropIndicesAndConstraints(tx);
+        //dropIndicesAndConstraints(tx);
 
         Schema schema = tx.schema();
         schema.constraintFor(Label.label(BASE_LABEL))

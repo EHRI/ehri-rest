@@ -66,11 +66,10 @@ public class TxNeo4JGraphTest {
         }
     }
 
-    // FIXME: Neo4j 4
-//    @Test(expected = NotInTransactionException.class)
-//    public void testNodeCountNotInTx() {
-//        Iterables.size(graph.getVertices());
-//    }
+    @Test(expected = NotInTransactionException.class)
+    public void testNodeCountNotInTx() {
+        Iterables.size(graph.getVertices());
+    }
 
     @Test
     public void testNodeCount() {
