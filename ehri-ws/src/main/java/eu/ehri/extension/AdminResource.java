@@ -161,9 +161,7 @@ public class AdminResource extends AbstractResource {
         if (json == null || json.trim().equals("")) {
             return Maps.newHashMap();
         } else {
-            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<
-                    HashMap<String, Object>
-                    >() {
+            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<>() {
             };
             return jsonMapper.readValue(json, typeRef);
         }

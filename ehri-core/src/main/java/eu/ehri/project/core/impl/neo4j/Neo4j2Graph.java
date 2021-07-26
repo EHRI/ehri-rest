@@ -1,6 +1,5 @@
 package eu.ehri.project.core.impl.neo4j;
 
-import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.*;
 import com.tinkerpop.blueprints.util.*;
 import org.apache.commons.configuration.Configuration;
@@ -25,17 +24,9 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     private DatabaseManagementService managementService;
     private GraphDatabaseService rawGraph;
 
-    protected final ThreadLocal<Transaction> tx = new ThreadLocal<Transaction>() {
-        protected Transaction initialValue() {
-            return null;
-        }
-    };
+    protected final ThreadLocal<Transaction> tx = ThreadLocal.withInitial(() -> null);
 
-    protected final ThreadLocal<Boolean> checkElementsInTransaction = new ThreadLocal<Boolean>() {
-        protected Boolean initialValue() {
-            return false;
-        }
-    };
+    protected final ThreadLocal<Boolean> checkElementsInTransaction = ThreadLocal.withInitial(() -> false);
 
     private static final Features FEATURES = new Features();
 
@@ -176,28 +167,6 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
         ResourceIterable<Node> wrap = () -> {
             autoStartTransaction(false);
             return getTransaction().findNodes(Label.label(label), key, value);
-        };
-        return new Neo4j2VertexIterable(wrap, this);
-    }
-
-    /**
-     * Get an iterable of vertices via a Cypher query.
-     *
-     * @param query  the cypher query
-     * @param params a map of parameters
-     * @param column the name of the column from which to extract the vertices. The column
-     *               must be a node or a class cast exception will be thrown when the
-     *               iterable is accessed
-     * @return an iterable of vertices
-     */
-    public CloseableIterable<Vertex> getVerticesByQuery(final String query, final Map<String, Object> params, String column) {
-        Preconditions.checkNotNull(query, "Query cannot be null");
-        Preconditions.checkNotNull(column, "Column cannot be null");
-        ResourceIterable<Node> wrap = () -> {
-            autoStartTransaction(false);
-            return getTransaction()
-                    .execute(query, params != null ? params : Collections.emptyMap())
-                    .columnAs(column);
         };
         return new Neo4j2VertexIterable(wrap, this);
     }
