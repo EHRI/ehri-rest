@@ -19,11 +19,7 @@
 
 package eu.ehri.project.api.impl;
 
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
+import com.google.common.collect.*;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -31,19 +27,18 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.util.structures.Pair;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.api.QueryApi;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.api.QueryApi;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.SortedMap;
 
 /**
@@ -92,8 +87,8 @@ public final class QueryApiImpl implements QueryApi {
      * Query builder.
      */
     public static class Builder {
-        private FramedGraph<?> graph;
-        private Accessor accessor;
+        private final FramedGraph<?> graph;
+        private final Accessor accessor;
         private int offset;
         private int limit = DEFAULT_LIMIT;
         private SortedMap<String, Sort> sort = ImmutableSortedMap.of();
@@ -157,21 +152,6 @@ public final class QueryApiImpl implements QueryApi {
     }
 
     @Override
-    public int offset() {
-        return offset;
-    }
-
-    @Override
-    public int limit() {
-        return limit;
-    }
-
-    @Override
-    public boolean streaming() {
-        return stream;
-    }
-
-    @Override
     public QueryApiImpl withOffset(int offset) {
         return new Builder(this).setOffset(offset).build();
     }
@@ -213,16 +193,22 @@ public final class QueryApiImpl implements QueryApi {
         return new Builder(this).setStream(stream).build();
     }
 
-    private static class FramedVertexIterableAdaptor<T extends Entity>
-            implements Iterable<Vertex> {
+    /**
+     * Wrapper method for FramedVertexIterables that converts a
+     * {@code FramedVertexIterable<T>} back into a plain {@code Iterable<Vertex>}.
+     *
+     * @param <T>
+     */
+    private static class FramedVertexIterableAdaptor<T extends Entity> implements Iterable<Vertex> {
         final Iterable<T> iterable;
 
         FramedVertexIterableAdaptor(Iterable<T> iterable) {
             this.iterable = iterable;
         }
 
+        @Override
         public Iterator<Vertex> iterator() {
-            return new Iterator<Vertex>() {
+            return new Iterator<>() {
                 private final Iterator<T> iterator = iterable.iterator();
 
                 public void remove() {
@@ -252,8 +238,7 @@ public final class QueryApiImpl implements QueryApi {
 
     @Override
     public <E extends Entity> Page<E> page(Iterable<? extends E> entities, Class<E> cls) {
-        PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
-                .getAclFilterFunction(accessor);
+        PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager.getAclFilterFunction(accessor);
 
         GremlinPipeline<E, Vertex> pipeline = new GremlinPipeline<E, Vertex>(
                 new FramedVertexIterableAdaptor<>(entities))
@@ -357,8 +342,7 @@ public final class QueryApiImpl implements QueryApi {
     //
     private PipeFunction<Vertex, Boolean> getFilterFunction() {
         return vertex -> {
-            for (Entry<String, Pair<FilterPredicate, Object>> entry : filters
-                    .entrySet()) {
+            for (Entry<String, Pair<FilterPredicate, Object>> entry : filters.entrySet()) {
                 String p = vertex.getProperty(entry.getKey());
                 if (p == null || !matches(p, entry.getValue()
                         .getB(), entry.getValue().getA())) {

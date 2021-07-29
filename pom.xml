@@ -5,7 +5,7 @@
 
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
-    <version>0.15.0</version>
+    <version>0.16.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>EHRI Backend</name>
@@ -13,7 +13,7 @@
     <url>https://github.com/EHRI</url>
     <organization>
         <name>The European Holocaust Research Infrastructure (EHRI)</name>
-        <url>http://ehri-project.eu</url>
+        <url>https://www.ehri-project.eu</url>
     </organization>
 
     <developers>

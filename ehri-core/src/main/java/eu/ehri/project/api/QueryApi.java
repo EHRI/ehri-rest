@@ -10,12 +10,6 @@ import java.util.Iterator;
 public interface QueryApi {
     int DEFAULT_LIMIT = 20;
 
-    int offset();
-
-    int limit();
-
-    boolean streaming();
-
     /**
      * Set the offset of this query.
      *
