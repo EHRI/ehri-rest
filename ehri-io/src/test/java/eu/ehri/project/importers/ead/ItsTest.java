@@ -27,11 +27,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.base.AbstractImporterTest;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.managers.SaxImportManager;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.MaintenanceEventType;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Ignore;
@@ -97,7 +93,7 @@ public class ItsTest extends AbstractImporterTest {
         printGraph(graph);
         diff.printDebug(System.out);
 
-        /**
+        /*
          * relationship: 2
          * null: 10 
          * DocumentaryUnit: 4
@@ -157,7 +153,7 @@ public class ItsTest extends AbstractImporterTest {
     }
 
     @Test
-    public void testGestapo() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void testGestapo() throws Exception {
         final String logMessage = "Importing the gestapo (provenance) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
@@ -223,7 +219,7 @@ public class ItsTest extends AbstractImporterTest {
 
     @Test
     @Ignore
-    public void testGestapoWhole() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void testGestapoWhole() throws Exception {
         final String logMessage = "Importing the gestapo (provenance) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
@@ -254,7 +250,7 @@ public class ItsTest extends AbstractImporterTest {
     }
 
     @Test
-    public void testEsterwegenWhole() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void testEsterwegenWhole() throws Exception {
         final String logMessage = "Importing the esterwegen (pertinence) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);

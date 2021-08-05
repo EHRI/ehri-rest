@@ -50,7 +50,7 @@ public class CegesomaABTest extends AbstractImporterTest {
     protected final String ARCHDESC = "AB 2029";
 
     @Test
-    public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void cegesomaTest() throws Exception {
 
         final String logMessage = "Importing an example Cegesoma EAD";
 

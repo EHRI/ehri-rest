@@ -19,10 +19,10 @@
 
 package eu.ehri.project.importers.ead;
 
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
+import eu.ehri.project.importers.exceptions.ImportValidationError;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -56,7 +56,7 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         assertEquals(origCount + 11, getNodeCount(graph));
     }
 
-    @Test(expected = ValidationError.class)
+    @Test(expected = ImportValidationError.class)
     public void testImportInvalidItem() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
         saxImportManager(EadImporter.class, EadHandler.class)

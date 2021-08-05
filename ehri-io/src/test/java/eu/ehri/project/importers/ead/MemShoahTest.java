@@ -47,7 +47,7 @@ public class MemShoahTest extends AbstractImporterTest {
     DocumentaryUnit archdesc;
 
     @Test
-    public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void cegesomaTest() throws Exception {
 
         final String logMessage = "Importing an example MemShoah EAD";
 

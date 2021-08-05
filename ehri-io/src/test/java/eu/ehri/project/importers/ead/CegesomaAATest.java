@@ -55,7 +55,7 @@ public class CegesomaAATest extends AbstractImporterTest {
     DocumentaryUnit archdesc, c1, c2_1, c2_2;
 
     @Test
-    public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void cegesomaTest() throws Exception {
 
         final String logMessage = "Importing an example Cegesoma EAD";
 

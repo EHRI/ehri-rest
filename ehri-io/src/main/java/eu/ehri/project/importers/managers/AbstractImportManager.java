@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.ItemImporter;
+import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.ModeViolation;
 import eu.ehri.project.models.base.Accessible;
@@ -44,12 +45,9 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.SocketException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -108,7 +106,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     @Override
     public ImportLog importFile(String filePath, String logMessage)
-            throws IOException, InputParseError, ValidationError {
+            throws IOException, InputParseError, ImportValidationError {
         try (InputStream ios = Files.newInputStream(Paths.get(filePath))) {
             return importInputStream(ios, filePath, logMessage);
         }
@@ -116,7 +114,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     @Override
     public ImportLog importInputStream(InputStream stream, String tag, String logMessage)
-            throws IOException, InputParseError, ValidationError {
+            throws IOException, InputParseError, ImportValidationError {
         // Create a new action for this import
         Optional<String> msg = getLogMessage(logMessage);
         ActionManager.EventContext action = new ActionManager(
@@ -126,14 +124,18 @@ public abstract class AbstractImportManager implements ImportManager {
         ImportLog log = new ImportLog(msg.orElse(null));
 
         // Do the import...
-        importInputStream(stream, tag, action, log);
+        try {
+            importInputStream(stream, tag, action, log);
+        } catch (ValidationError e) {
+            throw new ImportValidationError(formatErrorLocation(), e);
+        }
 
         // Commit the action if necessary
         return log.committing(action);
     }
 
     @Override
-    public ImportLog importJson(InputStream json, String logMessage) throws ValidationError, InputParseError {
+    public ImportLog importJson(InputStream json, String logMessage) throws ImportValidationError, InputParseError {
         Preconditions.checkNotNull(json);
         try (final JsonParser parser = factory.createParser(new InputStreamReader(json, Charsets.UTF_8))) {
 
@@ -159,7 +161,12 @@ public abstract class AbstractImportManager implements ImportManager {
                 try (InputStream stream = url.openStream()) {
                     logger.info("Importing URL with identifier: {}", name);
                     importInputStream(stream, currentFile, action, log);
-                } catch (ValidationError | IOException e) {
+                } catch (ValidationError e) {
+                    log.addError(formatErrorLocation(), e.getMessage());
+                    if (!options.tolerant) {
+                        throw new ImportValidationError(formatErrorLocation(), e);
+                    }
+                } catch (IOException | InputParseError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!options.tolerant) {
                         throw e;
@@ -180,7 +187,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     @Override
     public ImportLog importFiles(List<String> filePaths, String logMessage)
-            throws ValidationError, InputParseError {
+            throws ImportValidationError, InputParseError {
         try {
 
             Optional<String> msg = getLogMessage(logMessage);
@@ -196,7 +203,7 @@ public abstract class AbstractImportManager implements ImportManager {
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!options.tolerant) {
-                        throw e;
+                        throw new ImportValidationError(formatErrorLocation(), e);
                     }
                 }
             }
@@ -212,7 +219,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     @Override
     public ImportLog importArchive(ArchiveInputStream stream, String logMessage)
-            throws IOException, InputParseError, ValidationError {
+            throws IOException, InputParseError, ImportValidationError {
         Optional<String> msg = getLogMessage(logMessage);
         ActionManager.EventContext action = new ActionManager(
                 framedGraph, permissionScope).newEventContext(actioner,
@@ -229,7 +236,12 @@ public abstract class AbstractImportManager implements ImportManager {
                     logger.info("Importing file: {}", currentFile);
                     importInputStream(boundedInputStream, currentFile, action, log);
                 }
-            } catch (InputParseError | ValidationError e) {
+            } catch (ValidationError e) {
+                log.addError(formatErrorLocation(), e.getMessage());
+                if (!options.tolerant) {
+                    throw new ImportValidationError(formatErrorLocation(), e);
+                }
+            } catch (InputParseError e) {
                 log.addError(formatErrorLocation(), e.getMessage());
                 if (!options.tolerant) {
                     throw e;
