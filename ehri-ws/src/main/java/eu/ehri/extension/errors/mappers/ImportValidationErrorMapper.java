@@ -17,30 +17,28 @@
  * permissions and limitations under the Licence.
  */
 
-package eu.ehri.project.importers.ead;
+package eu.ehri.extension.errors.mappers;
 
-import eu.ehri.project.importers.base.AbstractImporterTest;
+import eu.ehri.extension.errors.WebDeserializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.ImportValidationError;
-import org.junit.Test;
 
-import java.io.InputStream;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 
-public class MissingParentUnitIdEadTest extends AbstractImporterTest {
-
-    @Test
-    public void testImportItems() throws Exception {
-        String ead = "missing-parent-unitid-ead.xml";
-        InputStream ios = ClassLoader.getSystemResourceAsStream(ead);
-        try {
-            saxImportManager(EadImporter.class, EadHandler.class).importInputStream(ios, "Test");
-            fail("Import with " + ead + " should have thrown a validation error");
-        } catch (ImportValidationError ex) {
-            assertThat(ex.getError().getMessage(), containsString("Parent item has missing identifier"));
-        }
+/**
+ * Serialize a tree of validation errors to JSON.
+ */
+@Provider
+public class ImportValidationErrorMapper implements ExceptionMapper<ImportValidationError> {
+    @Override
+    public Response toResponse(ImportValidationError e) {
+        return WebDeserializationError.errorToJson(
+                Status.BAD_REQUEST,
+                e.getContext(),
+                e.getError().getErrorSet().toData());
     }
 }

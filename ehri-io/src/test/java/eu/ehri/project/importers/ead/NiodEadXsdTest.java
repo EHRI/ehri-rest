@@ -53,7 +53,7 @@ public class NiodEadXsdTest extends AbstractImporterTest {
             C03_2 = "MF1086398";
 
     @Test
-    public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void niodEadTest() throws Exception {
 
         final String logMessage = "Importing a part of a NIOD EAD";
 

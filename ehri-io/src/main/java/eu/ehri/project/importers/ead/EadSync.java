@@ -11,6 +11,7 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.importers.managers.ImportManager;
 import eu.ehri.project.importers.managers.SaxImportManager;
@@ -77,7 +78,7 @@ public class EadSync {
      * here.
      */
     public interface EadIngestOperation {
-        ImportLog runIngest(ImportManager manager) throws ValidationError, DeserializationError, IOException;
+        ImportLog runIngest(ImportManager manager) throws ImportValidationError, DeserializationError, IOException;
     }
 
     /**
@@ -107,7 +108,7 @@ public class EadSync {
      * @throws EadSyncError if local identifiers are not unique
      */
     public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
-            throws ValidationError, DeserializationError, IOException, EadSyncError {
+            throws ImportValidationError, DeserializationError, IOException, EadSyncError {
 
         // Get a mapping of graph ID to local ID within the scope,
         // Pre-sync, ALL of the local IDs must be unique (and

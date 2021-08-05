@@ -38,13 +38,28 @@ public class WebDeserializationError extends WebApplicationException implements 
     }
 
     public static Response errorToJson(Status status, Object details) {
+        return response(status, ImmutableMap.of(
+                "status", status.getStatusCode(),
+                "error", status.getReasonPhrase(),
+                "details", details
+        ));
+    }
+
+    public static Response errorToJson(Status status, String context, Object details) {
+        return response(status, ImmutableMap.of(
+                "status", status.getStatusCode(),
+                "error", status.getReasonPhrase(),
+                "context", context,
+                "details", details
+        ));
+    }
+
+    private static Response response(Status status, ImmutableMap<String, Object> map) {
         try {
-            return Response.status(status)
-                    .entity(mapper.writeValueAsString(ImmutableMap.of(
-                            "status", status.getStatusCode(),
-                            "error", status.getReasonPhrase(),
-                            "details", details
-                    )).getBytes(Charsets.UTF_8)).build();
+            return Response
+                    .status(status)
+                    .entity(mapper.writeValueAsString(map).getBytes(Charsets.UTF_8))
+                    .build();
         } catch (Exception err) {
             throw new RuntimeException(err);
         }

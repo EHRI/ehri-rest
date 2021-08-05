@@ -57,7 +57,7 @@ public class IpnTest extends AbstractImporterTest {
 
     @Test
     @Ignore
-    public void polishVirtualCollectionTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void polishVirtualCollectionTest() throws Exception {
         final String logMessage = "Importing a part of the IPN Virtual Collection";
 
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
@@ -92,7 +92,7 @@ public class IpnTest extends AbstractImporterTest {
     }
 
     @Test
-    public void polishBranch_1_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void polishBranch_1_EadTest() throws Exception {
 
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";
@@ -177,7 +177,7 @@ public class IpnTest extends AbstractImporterTest {
 
     @Test
     @Ignore
-    public void polishBranch_2_EadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void polishBranch_2_EadTest() throws Exception {
 
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a the IPN Polish Branches EAD, without preprocessing done";

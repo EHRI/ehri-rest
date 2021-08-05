@@ -47,7 +47,7 @@ public class CegesomaCATest extends AbstractImporterTest {
     protected final String ARCHDESC = "CA FE 1437";
 
     @Test
-    public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void cegesomaTest() throws Exception {
         final String logMessage = "Importing an example Cegesoma EAD";
         int origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);

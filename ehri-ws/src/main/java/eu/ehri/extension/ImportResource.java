@@ -41,6 +41,7 @@ import eu.ehri.project.importers.ead.EadSync;
 import eu.ehri.project.importers.ead.SyncLog;
 import eu.ehri.project.importers.eag.EagHandler;
 import eu.ehri.project.importers.eag.EagImporter;
+import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.links.LinkImporter;
 import eu.ehri.project.importers.managers.CsvImportManager;
@@ -249,7 +250,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
@@ -315,7 +316,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam("ex") Set<String> ex,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
 
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
@@ -372,7 +373,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
 
@@ -424,7 +425,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(IMPORTER_PARAM) String importerClass,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
             checkPropertyFile(propertyFile);
 
@@ -479,7 +480,7 @@ public class ImportResource extends AbstractResource {
             @QueryParam(TAG_PARAM) @DefaultValue("-") String tag,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             InputStream data)
-            throws ItemNotFound, ValidationError, IOException, DeserializationError {
+            throws ItemNotFound, ImportValidationError, IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
 
             // Run the import!
@@ -550,7 +551,7 @@ public class ImportResource extends AbstractResource {
 
     private ImportLog importDataStream(
             ImportManager importManager, String message, String tag, InputStream data, MediaType... accepts)
-            throws DeserializationError, ValidationError {
+            throws DeserializationError, ImportValidationError {
         MediaType mediaType = requestHeaders.getMediaType();
         try {
             if (MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType)) {
@@ -584,7 +585,7 @@ public class ImportResource extends AbstractResource {
 
     private ImportLog importPotentiallyGZippedArchive(
             ImportManager importManager, String message, InputStream data)
-            throws IOException, ValidationError, ArchiveException, InputParseError {
+            throws IOException, ImportValidationError, ArchiveException, InputParseError {
         try (BufferedInputStream bufStream = new BufferedInputStream(data)) {
             bufStream.mark(0);
             try (GZIPInputStream gzipStream = new GZIPInputStream(bufStream)) {
@@ -600,7 +601,7 @@ public class ImportResource extends AbstractResource {
     }
 
     private ImportLog importArchive(ImportManager importManager, String message, InputStream data)
-            throws IOException, ValidationError, ArchiveException, InputParseError {
+            throws IOException, ImportValidationError, ArchiveException, InputParseError {
         try (BufferedInputStream bis = new BufferedInputStream(data);
              ArchiveInputStream archiveInputStream = new
                      ArchiveStreamFactory(StandardCharsets.UTF_8.displayName())

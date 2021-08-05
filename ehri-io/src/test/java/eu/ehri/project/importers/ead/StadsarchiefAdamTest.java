@@ -49,7 +49,7 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
             C03_2 = "NL-SAA-22752538";
 
     @Test
-    public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void niodEadTest() throws Exception {
 
         PermissionScope agent = manager.getEntity(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a part of a Stadsarchief EAD, with preprocessing done";

@@ -19,8 +19,8 @@
 
 package eu.ehri.project.importers.managers;
 
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.ImportValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 
@@ -43,10 +43,10 @@ public interface ImportManager {
      * @return an ImportLog for the given file
      * @throws IOException     when reading or writing files fails
      * @throws InputParseError when parsing the file fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importFile(String filePath, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ImportValidationError;
 
     /**
      * Import an item via an input stream.
@@ -56,10 +56,10 @@ public interface ImportManager {
      * @return an ImportLog for the given stream
      * @throws IOException     when reading or writing fails
      * @throws InputParseError when parsing the stream data fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws ImportValidationError when the content of the file is invalid
      */
     default ImportLog importInputStream(InputStream stream, String logMessage)
-            throws IOException, InputParseError, ValidationError {
+            throws IOException, InputParseError, ImportValidationError {
         return importInputStream(stream, "-", logMessage);
     }
 
@@ -72,10 +72,10 @@ public interface ImportManager {
      * @return an ImportLog for the given stream
      * @throws IOException     when reading or writing fails
      * @throws InputParseError when parsing the stream data fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importInputStream(InputStream stream, String tag, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ImportValidationError;
 
     /**
      * Import multiple files via a list of file paths.
@@ -86,10 +86,10 @@ public interface ImportManager {
      * @return an ImportLog for the given stream
      * @throws IOException     when reading or writing fails
      * @throws InputParseError when parsing the stream data fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importJson(InputStream json, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ImportValidationError;
 
     /**
      * Import multiple files via a list of file paths.
@@ -99,10 +99,10 @@ public interface ImportManager {
      * @return an ImportLog for the given stream
      * @throws IOException     when reading or writing fails
      * @throws InputParseError when parsing the stream data fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importFiles(List<String> filePaths, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ImportValidationError;
 
     /**
      * Import multiple items via an archive input stream.
@@ -112,8 +112,8 @@ public interface ImportManager {
      * @return an ImportLog for the given stream
      * @throws IOException     when reading or writing fails
      * @throws InputParseError when parsing the stream data fails
-     * @throws ValidationError when the content of the file is invalid
+     * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importArchive(ArchiveInputStream stream, String logMessage)
-            throws IOException, InputParseError, ValidationError;
+            throws IOException, InputParseError, ImportValidationError;
 }

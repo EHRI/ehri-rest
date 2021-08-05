@@ -42,7 +42,7 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
     protected final String ARCHDESC = "NS 1";
 
     @Test
-    public void bundesarchiveTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void bundesarchiveTest() throws Exception {
 
         final String logMessage = "Importing a part of the Split Bundesarchive EAD";
 

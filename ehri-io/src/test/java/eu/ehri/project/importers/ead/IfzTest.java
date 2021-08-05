@@ -54,7 +54,7 @@ public class IfzTest extends AbstractImporterTest {
     DocumentaryUnit archdesc, c1, c2, c3_2;
 
     @Test
-    public void ifzTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
+    public void ifzTest() throws Exception {
 
         final String logMessage = "Importing an example Ifz EAD";
 
