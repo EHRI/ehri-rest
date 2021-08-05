@@ -159,7 +159,7 @@ public abstract class AbstractImportManager implements ImportManager {
                 try (InputStream stream = url.openStream()) {
                     logger.info("Importing URL with identifier: {}", name);
                     importInputStream(stream, currentFile, action, log);
-                } catch (ValidationError | SSLException | MalformedURLException | SocketException e) {
+                } catch (ValidationError | IOException e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!options.tolerant) {
                         throw e;
