@@ -150,16 +150,11 @@ public abstract class AbstractImportManager implements ImportManager {
                     EventTypes.ingest, msg);
             ImportLog log = new ImportLog(msg.orElse(null));
 
-            for (int i = 1; /* No condition here */; i++) {
-                final String name = parser.nextFieldName();
-                if (name == null) {
-                    break;
-                }
+            for (int i = 1; (currentFile = parser.nextFieldName()) != null; i++) {
                 URL url = new URL(parser.nextTextValue());
 
-                currentFile = name;
                 try (InputStream stream = url.openStream()) {
-                    logger.info("Importing URL {} with identifier: {}", i, name);
+                    logger.info("Importing URL {} with identifier: {}", i, currentFile);
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
@@ -227,13 +222,13 @@ public abstract class AbstractImportManager implements ImportManager {
         ImportLog log = new ImportLog(msg.orElse(null));
 
         ArchiveEntry entry;
-        while ((entry = stream.getNextEntry()) != null) {
+        for (int i = 1; (entry = stream.getNextEntry()) != null; i++) {
             try {
                 if (!entry.isDirectory()) {
                     currentFile = entry.getName();
                     BoundedInputStream boundedInputStream = new BoundedInputStream(stream, entry.getSize());
                     boundedInputStream.setPropagateClose(false);
-                    logger.info("Importing file: {}", currentFile);
+                    logger.info("Importing file {}: {}", i, currentFile);
                     importInputStream(boundedInputStream, currentFile, action, log);
                 }
             } catch (ValidationError e) {
