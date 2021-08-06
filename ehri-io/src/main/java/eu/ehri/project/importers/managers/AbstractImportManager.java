@@ -150,7 +150,7 @@ public abstract class AbstractImportManager implements ImportManager {
                     EventTypes.ingest, msg);
             ImportLog log = new ImportLog(msg.orElse(null));
 
-            for (; ; ) {
+            for (int i = 1; /* No condition here */; i++) {
                 final String name = parser.nextFieldName();
                 if (name == null) {
                     break;
@@ -159,7 +159,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
                 currentFile = name;
                 try (InputStream stream = url.openStream()) {
-                    logger.info("Importing URL with identifier: {}", name);
+                    logger.info("Importing URL {} with identifier: {}", i, name);
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
