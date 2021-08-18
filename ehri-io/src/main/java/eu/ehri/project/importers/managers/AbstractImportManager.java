@@ -153,7 +153,7 @@ public abstract class AbstractImportManager implements ImportManager {
             for (int i = 1; (currentFile = parser.nextFieldName()) != null; i++) {
                 URL url = new URL(parser.nextTextValue());
 
-                try (InputStream stream = url.openStream()) {
+                try (InputStream stream = readUrl(url, 0)) {
                     logger.info("Importing URL {} with identifier: {}", i, currentFile);
                     importInputStream(stream, currentFile, action, log);
                 } catch (ValidationError e) {
@@ -162,6 +162,7 @@ public abstract class AbstractImportManager implements ImportManager {
                         throw new ImportValidationError(formatErrorLocation(), e);
                     }
                 } catch (IOException | InputParseError e) {
+                    e.printStackTrace();
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!options.tolerant) {
                         throw e;
@@ -328,5 +329,34 @@ public abstract class AbstractImportManager implements ImportManager {
     private String formatErrorLocation() {
         return String.format("File: %s, XML document: %d", currentFile,
                 currentPosition);
+    }
+
+    private InputStream readUrl(URL url, int retry) throws IOException {
+        // EXTREMELY INADVISABLE CODE! This stuff runs inside the database
+        // where Thread.sleep()ing is obviously not a good idea. However,
+        // since import errors caused by HTTP rate-limiting are generally
+        // very rare I've resorted to it here with exponential backoff as
+        // by far the easiest way to prevent sporadic import problems.
+        // Generally we only need one retry with a 100ms sleep per several
+        // thousand import URLs to make HTTP imports much more resilient,
+        // and very few dataset batches have that many items anyway.
+        try {
+            return url.openStream();
+        } catch (IOException e) {
+            if (isSlowDownError(e) && retry < 3) {
+                logger.debug("Got slow down error... retry {}, {}", retry + 1, url);
+                try {
+                    Thread.sleep((long) (Math.pow(2, retry) * 100));
+                    return readUrl(url, retry + 1);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            throw e;
+        }
+    }
+
+    private boolean isSlowDownError(IOException e) {
+        return e.getMessage().contains("Server returned HTTP response code: 503");
     }
 }
