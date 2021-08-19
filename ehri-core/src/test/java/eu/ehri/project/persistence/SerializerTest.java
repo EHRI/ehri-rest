@@ -110,8 +110,8 @@ public class SerializerTest extends AbstractFixtureTest {
         String t1 = DataUtils.get(serialized, "hasLinkTarget[0]/identifier");
         String t2 = DataUtils.get(serialized, "hasLinkTarget[1]/identifier");
         assertNotEquals(t1, t2);
-        assertTrue(Lists.newArrayList("c3", "a1").contains(t1));
-        assertTrue(Lists.newArrayList("c3", "a1").contains(t2));
+        assertTrue(Lists.newArrayList("c3", "a1", "a2").contains(t1));
+        assertTrue(Lists.newArrayList("c3", "a1", "a2").contains(t2));
         try {
             DataUtils.getItem(serialized, "hasLinkTarget[0]/childOf[0]/describes[0]");
             fail("Max ifBelowLevel serialization should ignore childOf relation for item c3");

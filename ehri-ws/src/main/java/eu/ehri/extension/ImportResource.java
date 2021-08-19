@@ -24,6 +24,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.project.core.Tx;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
@@ -510,6 +511,42 @@ public class ImportResource extends AbstractResource {
     }
 
     /**
+     * Link items in a scope via an access point coreference table.
+     * <p>
+     * Each data row must consist of 2 columns:
+     * <ol>
+     * <li>the access point label (text string)
+     * <li>the target item ID
+     * </ol>
+     * <p>
+     * A single log item will be created for the entire CSV.
+     *
+     * @param scopeId the id of the permission scope item
+     * @param table the tabular data
+     * @return an import log
+     * @throws DeserializationError the problems are found with the import data
+     */
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("coreferences")
+    public ImportLog importCoreferences(@QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
+            Table table) throws DeserializationError, ItemNotFound {
+        try (final Tx tx = beginTx()) {
+            PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
+            ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
+                    .importCoreferences(scope, table, getLogMessage().orElse(null));
+            if (commit) {
+                logger.debug("Committing coreference import transaction...");
+                tx.success();
+            }
+            return log;
+        }
+    }
+
+    /**
      * Create multiple links via CSV or JSON tabular upload.
      * <p>
      * Each data row must consist of 6 columns:
@@ -522,10 +559,10 @@ public class ImportResource extends AbstractResource {
      * <li>the link description (optional)
      * </ol>
      * <p>
-     * A separate log item will be created for each row.
+     * A single log item will be created for the entire CSV.
      *
      * @param table the tabular data
-     * @return a single column table of link IDs
+     * @return an import log
      * @throws DeserializationError the problems are found with the import data
      */
     @POST

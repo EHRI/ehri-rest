@@ -49,13 +49,13 @@ public class LinkerTest extends AbstractFixtureTest {
         Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         int eventCount = Iterables.size(actionManager.getLatestGlobalEvents());
         // The doc c1 contains two access point nodes which should be made
-        // into links
+        // into links, and c3 contains 2
         String logMessage = "This is a test!";
         int newLinkCount = linker
                 .withExcludeSingles(false)
                 .withLogMessage(logMessage)
                 .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
-        assertEquals(2, newLinkCount);
+        assertEquals(4, newLinkCount);
         assertEquals(eventCount + 2,
                 Iterables.size(actionManager.getLatestGlobalEvents()));
         assertEquals(actionManager.getLatestGlobalEvent().getLogMessage(), logMessage);
@@ -88,8 +88,7 @@ public class LinkerTest extends AbstractFixtureTest {
         // This won't create any links because all of the access points only point
         // to single items
         int newLinkCount = linker.withExcludeSingles(true)
-            .createAndLinkRepositoryVocabulary(repository, vocabulary,
-                    validUser);
+            .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
         assertEquals(0, newLinkCount);
         // No new events should have been created...
         assertEquals(eventCount,

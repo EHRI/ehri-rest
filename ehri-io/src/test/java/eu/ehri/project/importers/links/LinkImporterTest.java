@@ -6,6 +6,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Linkable;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -15,8 +16,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class LinkImporterTest extends AbstractFixtureTest {
 
@@ -61,6 +61,21 @@ public class LinkImporterTest extends AbstractFixtureTest {
         ImportLog log = new LinkImporter(graph, validUser, true)
                 .importLinks(badData, "testing");
         assertEquals(3, log.getCreated());
+    }
+
+    @Test
+    public void importCoreferences() throws Exception {
+        Repository r1 = manager.getEntity("r1", Repository.class);
+        Table data = Table.of(ImmutableList.of(
+                        ImmutableList.of("Subject Access 1", "a1"), // already exists
+                        ImmutableList.of("Person Access 2", "a1"),
+                        ImmutableList.of("Disconnected Access 1", "r4") // Updated
+
+        ));
+        ImportLog log = new LinkImporter(graph, validUser, false)
+                .importCoreferences(r1, data, "Testing");
+        assertEquals(1, log.getCreated());
+        assertEquals(1, log.getUpdated());
     }
 
     private boolean linkExists(String srcId, String dstId, String bodyId, String text) {

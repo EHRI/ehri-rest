@@ -337,6 +337,14 @@
                 type: creation
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+          relatesTo:
+            - id: ur3
+              type: AccessPoint
+              data:
+                name: Person Access 2
+                type: person
+                description: test description
+                category: associative
     childOf: c2
     hasPermissionScope: c2    
     access:
@@ -364,6 +372,12 @@
                 type: creation
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+          relatesTo:
+            - id: ur4
+              type: AccessPoint
+              data:
+                name: Disconnected Access 1
+                type: subject
           hasUnknownProperty:
             - id: c4-unp1
               type: UnknownProperty
@@ -588,8 +602,8 @@
   relationships:
     hasLinkTarget:
      - c3
-     - a1
-    hasLinkBody: ur1
+     - a2
+    hasLinkBody: ur3
     hasLinker: mike
 
 - id: link4
