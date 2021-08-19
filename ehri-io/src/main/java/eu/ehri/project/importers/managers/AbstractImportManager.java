@@ -59,6 +59,7 @@ import java.util.Optional;
  */
 public abstract class AbstractImportManager implements ImportManager {
 
+    private static final int MAX_RETRIES = 3;
     private static final Logger logger = LoggerFactory.getLogger(AbstractImportManager.class);
     private final JsonFactory factory = new JsonFactory();
 
@@ -72,6 +73,7 @@ public abstract class AbstractImportManager implements ImportManager {
     private String currentFile;
     protected Integer currentPosition;
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
+    private int consecutiveIoErrors = 0;
 
     /**
      * Constructor.
@@ -164,7 +166,9 @@ public abstract class AbstractImportManager implements ImportManager {
                 } catch (IOException | InputParseError e) {
                     e.printStackTrace();
                     log.addError(formatErrorLocation(), e.getMessage());
-                    if (!options.tolerant) {
+                    // Error regardless of tolerant setting if more than 5 consecutive items
+                    // fail to download... this prevents an endless blocking stall...
+                    if (!options.tolerant || consecutiveIoErrors > (MAX_RETRIES * 5)) {
                         throw e;
                     }
                 }
@@ -341,10 +345,13 @@ public abstract class AbstractImportManager implements ImportManager {
         // thousand import URLs to make HTTP imports much more resilient,
         // and very few dataset batches have that many items anyway.
         try {
-            return url.openStream();
+            InputStream stream = url.openStream();
+            consecutiveIoErrors = 0;
+            return stream;
         } catch (IOException e) {
-            if (isSlowDownError(e) && retry < 3) {
+            if (isSlowDownError(e) && retry < MAX_RETRIES) {
                 logger.debug("Got slow down error... retry {}, {}", retry + 1, url);
+                consecutiveIoErrors++;
                 try {
                     Thread.sleep((long) (Math.pow(2, retry) * 100));
                     return readUrl(url, retry + 1);
