@@ -2,7 +2,9 @@ package eu.ehri.project.importers.links;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -14,17 +16,17 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Linkable;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleManager;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class LinkImporter {
@@ -45,6 +47,7 @@ public class LinkImporter {
     private final Actioner actioner;
     private final ActionManager actionManager;
     private final BundleManager bundleManager;
+    private final AclManager aclManager;
     private final boolean tolerant;
 
     public LinkImporter(FramedGraph<?> framedGraph, Actioner actioner, boolean tolerant) {
@@ -53,7 +56,97 @@ public class LinkImporter {
         this.actioner = actioner;
         this.actionManager = new ActionManager(framedGraph);
         this.bundleManager = new BundleManager(framedGraph);
+        this.aclManager = new AclManager(framedGraph);
         this.tolerant = tolerant;
+    }
+
+    private boolean isConnected(AccessPoint ap, Linkable target) {
+        // Check if there's an existing description...
+        for (Link link : ap.getLinks()) {
+            for (Linkable t : link.getLinkTargets()) {
+                if (t.equals(target)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private Mutation<Link> connect(Described entity, Linkable target, AccessPoint ap) {
+        // Otherwise check if there's an existing link between the two items...
+        for (Link link : entity.getLinks()) {
+            for (Linkable t : link.getLinkTargets()) {
+                if (t.equals(target)) {
+                    link.addLinkBody(ap);
+                    return Mutation.updated(link);
+                }
+            }
+        }
+        Bundle linkBundle = Bundle.Builder.withClass(EntityClass.LINK)
+                .addDataValue(Ontology.LINK_HAS_TYPE, "associative")
+                .build();
+        try {
+            Link link = bundleManager.create(linkBundle, Link.class);
+            link.addLinkBody(ap);
+            link.addLinkTarget(entity);
+            link.addLinkTarget(target);
+            return Mutation.created(link);
+        } catch (ValidationError validationError) {
+            // Shouldn't happen...
+            throw new RuntimeException(validationError);
+        }
+    }
+
+    public ImportLog importCoreferences(PermissionScope scope, Table table, String logMessage) throws DeserializationError {
+        if (!table.rows().isEmpty() && table.rows().get(0).size() != 2) {
+            throw new DeserializationError("Input CSV must have 2 columns: access point text, target id");
+        }
+
+        ImportLog log = new ImportLog(logMessage);
+        ActionManager.EventContext eventContext = actionManager.newEventContext(
+                actioner,
+                EventTypes.ingest,
+                Optional.ofNullable(logMessage));
+
+        Map<String, Linkable> map = Maps.newHashMap();
+        for (int i = 0; i < table.rows().size(); i++) {
+            List<String> row = table.rows().get(i);
+            String label = row.get(0);
+            String targetId = row.get(1);
+            try {
+                map.put(label, manager.getEntity(targetId, Linkable.class));
+            } catch (ItemNotFound itemNotFound) {
+                throw new DeserializationError("Target not found: " + targetId);
+            }
+        }
+
+        for (Accessible item : scope.getAllContainedItems()) {
+            Described described = item.as(Described.class);
+            logger.info("Scanning coreferences for {}", item.getId());
+            for (Description description : described.getDescriptions()) {
+                for (AccessPoint ap : description.getAccessPoints()) {
+                    if (map.containsKey(ap.getName())) {
+                        Linkable target = map.get(ap.getName());
+                        if (!isConnected(ap, target)) {
+                            Mutation<Link> mutation = connect(described, target, ap);
+                            switch (mutation.getState()) {
+                                case CREATED:
+                                    logger.debug("Created link for access point '{}' on item {}", ap.getName(), item.getId());
+                                    log.addCreated("-", mutation.getNode().getId());
+                                    break;
+                                case UPDATED:
+                                    logger.debug("Updated access point connection for '{}' on item {}", ap.getName(), item.getId());
+                                    log.addUpdated("-", mutation.getNode().getId());
+                                    break;
+                            }
+                        } else {
+                            logger.debug("Found existing access point connection for '{}' on item {}", ap.getName(), item.getId());
+                        }
+                    }
+                }
+            }
+        }
+        return log.committing(eventContext);
     }
 
     public ImportLog importLinks(Table table, String logMessage) throws DeserializationError {

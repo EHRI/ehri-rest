@@ -16,14 +16,14 @@
           scopeAndContent: Some description text for c5
         relationships:
           relatesTo:
-            - id: ur3
+            - id: ur5
               type: AccessPoint
               data:
                 name: Unresolved 1
                 type: person
                 cvoc: auths
                 target: a1
-            - id: ur4
+            - id: ur6
               type: AccessPoint
               data:
                 name: Unresolved 2

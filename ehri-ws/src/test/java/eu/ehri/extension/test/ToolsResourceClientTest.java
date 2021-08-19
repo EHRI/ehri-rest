@@ -142,7 +142,7 @@ public class ToolsResourceClientTest extends AbstractResourceClientTest {
                         Table.of(ImmutableList.of(ImmutableList.of("a1", "a2"))));
         String out = response.getEntity(String.class);
         assertStatus(OK, response);
-        assertEquals("a1,a2,2\n", out);
+        assertEquals("a1,a2,1\n", out);
     }
 
     @Test

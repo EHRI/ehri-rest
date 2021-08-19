@@ -45,6 +45,18 @@ public final class Mutation<T> {
         this(node, state, Optional.ofNullable(bundle));
     }
 
+    public static <T> Mutation<T> created(T item) {
+        return new Mutation<>(item, MutationState.CREATED);
+    }
+
+    public static <T> Mutation<T> updated(T item) {
+        return new Mutation<>(item, MutationState.UPDATED);
+    }
+
+    public static <T> Mutation<T> unchanged(T item) {
+        return new Mutation<>(item, MutationState.UNCHANGED);
+    }
+
     public T getNode() {
         return node;
     }

@@ -504,6 +504,25 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
         assertEquals(3, out.getCreated());
     }
 
+    @Test
+    public void testImportCoreferences() {
+        Table table = Table.of(ImmutableList.of(
+                ImmutableList.of("Subject Access 1", "a1"), // already exists
+                ImmutableList.of("Person Access 2", "a1"),
+                ImmutableList.of("Disconnected Access 1", "r4") // Updated
+        ));
+        URI jsonUri = ehriUriBuilder(ImportResource.ENDPOINT, "coreferences")
+                .queryParam("scope", "r1")
+                .queryParam("commit", "true")
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), jsonUri)
+                .entity(table)
+                .post(ClientResponse.class);
+        ImportLog out = response.getEntity(ImportLog.class);
+        assertEquals(1, out.getCreated());
+        assertEquals(1, out.getUpdated());
+    }
+
     private UriBuilder getImportUrl(String endPoint, String scopeId, String log, boolean tolerant) {
         return ehriUriBuilder(ImportResource.ENDPOINT, endPoint)
                 .queryParam(LOG_PARAM, log)
