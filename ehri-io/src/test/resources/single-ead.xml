@@ -62,6 +62,9 @@
 				<language langcode="rum">Romanian</language>
 				<language langcode="yid">Yiddish</language>
 			</langmaterial>
+            <materialspec label="Web Source">
+				<extptr href="https://www.example.com/a" />
+			</materialspec>
 		</did>
 		<scopecontent encodinganalog="3.3.1">
 			<p>
