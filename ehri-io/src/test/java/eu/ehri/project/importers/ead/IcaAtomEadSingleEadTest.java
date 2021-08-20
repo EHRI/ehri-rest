@@ -85,8 +85,8 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
                 "This is some test scope and content.\n\n" +
                         "This contains Something & Something else.\n\n" +
                         "This is another paragraph.";
-
         assertEquals(expected, scopeContent);
+        assertEquals("https://www.example.com/a", firstDesc.getProperty("ref"));
 
         // Check the right nodes get created.
         int createCount = origCount + 13;
