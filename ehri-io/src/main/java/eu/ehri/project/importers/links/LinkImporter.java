@@ -132,11 +132,11 @@ public class LinkImporter {
                             switch (mutation.getState()) {
                                 case CREATED:
                                     logger.debug("Created link for access point '{}' on item {}", ap.getName(), item.getId());
-                                    log.addCreated("-", mutation.getNode().getId());
+                                    log.addCreated(ap.getName(), mutation.getNode().getId());
                                     break;
                                 case UPDATED:
                                     logger.debug("Updated access point connection for '{}' on item {}", ap.getName(), item.getId());
-                                    log.addUpdated("-", mutation.getNode().getId());
+                                    log.addUpdated(ap.getName(), mutation.getNode().getId());
                                     break;
                             }
                         } else {
