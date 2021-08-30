@@ -503,6 +503,7 @@ public class ToolsResource extends AbstractResource {
      * another and moves changes the link target of anything linked
      * to <code>from</code> to <code>to</code>.
      *
+     * @param commit  actually commit changes
      * @param mapping a comma-separated TSV file, excluding headers
      * @return CSV data with each row indicating the source, target, and how many items
      * were relinked for each
@@ -511,7 +512,7 @@ public class ToolsResource extends AbstractResource {
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("relink-targets")
-    public Table relink(Table mapping) throws DeserializationError {
+    public Table relink(@QueryParam("commit") @DefaultValue("false") boolean commit, Table mapping) throws DeserializationError {
         try (final Tx tx = beginTx()) {
             List<List<String>> done = Lists.newArrayList();
             for (List<String> row : mapping.rows()) {
@@ -532,6 +533,9 @@ public class ToolsResource extends AbstractResource {
                 done.add(Lists.newArrayList(fromId, toId, String.valueOf(relinked)));
             }
 
+            if (commit) {
+                tx.success();
+            }
             tx.success();
             return Table.of(done);
         } catch (ItemNotFound e) {
