@@ -248,16 +248,28 @@ public class BatchOperations {
                 ActionManager.EventContext ctx = actionManager.newEventContext(actioner,
                         EventTypes.deletion, logMessage);
                 for (String id : ids) {
-                    Entity entity = manager.getEntity(id, Entity.class);
-                    ctx = ctx.addSubjects(entity.as(Accessible.class));
-                    if (version) {
-                        ctx = ctx.createVersion(entity);
+                    try {
+                        Entity entity = manager.getEntity(id, Entity.class);
+                        ctx = ctx.addSubjects(entity.as(Accessible.class));
+                        if (version) {
+                            ctx = ctx.createVersion(entity);
+                        }
+                    } catch (ItemNotFound e) {
+                        if (!tolerant) {
+                            throw e;
+                        }
                     }
                 }
                 ctx.commit();
-                for (String id : ids) {
-                    dao.delete(serializer.entityToBundle(manager.getEntity(id, Entity.class)));
-                    done++;
+                try {
+                    for (String id : ids) {
+                        dao.delete(serializer.entityToBundle(manager.getEntity(id, Entity.class)));
+                        done++;
+                    }
+                } catch (ItemNotFound e) {
+                    if (!tolerant) {
+                        throw e;
+                    }
                 }
             } catch (SerializationError serializationError) {
                 throw new RuntimeException(serializationError);

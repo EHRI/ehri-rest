@@ -117,6 +117,7 @@ public class BatchResource extends AbstractResource {
     @Path("delete")
     public String batchDelete(
             @QueryParam(SCOPE_PARAM) String scope,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
@@ -127,7 +128,7 @@ public class BatchResource extends AbstractResource {
             PermissionScope parent = scope != null
                     ? manager.getEntity(scope, PermissionScope.class)
                     : null;
-            int done = new BatchOperations(graph, parent, version, false, Collections.emptyList())
+            int done = new BatchOperations(graph, parent, version, tolerant, Collections.emptyList())
                     .batchDelete(ids.column(0), user, getLogMessage(log));
             if (commit) {
                 logger.debug("Committing batch delete transaction...");
