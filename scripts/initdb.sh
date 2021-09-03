@@ -1,9 +1,12 @@
 #!/bin/sh
 
-echo "Initializing DB: $NEO4J_HOME/data/databases/graph.db"
 
-$NEO4J_HOME/scripts/cmd initialize
-$NEO4J_HOME/scripts/cmd gen-schema
+NEO4J_DB="$NEO4J_HOME/data/databases/graph.db"
+if [ ! -d "$NEO4J_DB" ]; then
+  echo "Initializing DB: $NEO4J_DB"
+  $NEO4J_HOME/scripts/cmd initialize
+  $NEO4J_HOME/scripts/cmd gen-schema
+fi
 
 ADMIN_USER=${ADMIN_USER:-""}
 
