@@ -87,6 +87,7 @@ public class ImportHelpers {
      * @param key    a property key
      * @param value  a property value
      * @param entity the EntityClass with which this frameMap must comply
+     * @return an object which, if the input was a list, will be joined by newlines
      */
     public static Object flattenNonMultivaluedProperties(String key, Object value, EntityClass entity) {
         if (value instanceof List
@@ -172,6 +173,7 @@ public class ImportHelpers {
      *
      * @param data the data map. This is an out parameter from which
      *             keys associated with extracted dates will be removed
+     * @return a list of entity bundles
      */
     public static List<Map<String, Object>> extractDates(Map<String, Object> data) {
         return DateParser.extractDates(data);

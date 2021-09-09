@@ -83,6 +83,7 @@ public final class ErrorSet implements NestableData<ErrorSet> {
      *
      * @param key   The property key in error
      * @param error The string description of the property error
+     * @return A new error set
      */
     public static ErrorSet fromError(String key, String error) {
         Multimap<String, String> tmp = ArrayListMultimap.create();

@@ -184,9 +184,6 @@ public class CmdEntryPoint extends BaseCommand {
         return RetCode.OK.getCode();
     }
 
-    /**
-     * Application launcher.
-     */
     public static void main(String[] args) throws Exception {
         System.exit(run(args));
     }

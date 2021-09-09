@@ -61,7 +61,7 @@ import java.util.Map.Entry;
  * a list (even if there is typically only one), the YAML format allows using a
  * single item and it will be loaded as if it were a list containing just one
  * item, i.e, instead of writing
- * <p>
+ * </p>
  * <pre>
  *     <code>
  * relationships: heldBy: - some-repo
@@ -69,7 +69,7 @@ import java.util.Map.Entry;
  * </pre>
  * <p>
  * we can just write:
- * <p>
+ * </p>
  * <pre>
  *     <code>
  * relationships: heldBy: some-repo

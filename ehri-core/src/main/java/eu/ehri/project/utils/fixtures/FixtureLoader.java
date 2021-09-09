@@ -29,6 +29,9 @@ public interface FixtureLoader {
     /**
      * Toggle whether or not initialization occurs before
      * loading (default: true)
+     *
+     * @param toggle Enable/disable initialization
+     * @return a new fixture loader
      */
     FixtureLoader setInitializing(boolean toggle);
 
@@ -40,6 +43,7 @@ public interface FixtureLoader {
     /**
      * Load a given InputStream as test data. The stream
      * will be closed automatically.
+     *
      * @param inputStream An imput stream of fixture data
      */
     void loadTestData(InputStream inputStream);

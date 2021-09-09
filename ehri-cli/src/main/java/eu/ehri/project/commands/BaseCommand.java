@@ -38,7 +38,6 @@ import java.util.Optional;
 /**
  * Abstract base class for commands. Provides the main
  * entry points for interaction:
- * <p>
  * <ul>
  * <li>Set options</li>
  * <li>Get help</li>

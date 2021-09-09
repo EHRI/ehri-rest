@@ -50,7 +50,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
     /**
      * Call all registered ImportCallbacks for the given mutation.
      *
-     * @param mutation the Mutation to handle callbacks for
+     * @param mutation the Mutation to handle callbacks for item events
      */
     protected void handleCallbacks(Mutation<? extends Accessible> mutation) {
         for (ImportCallback callback : callbacks) {
@@ -81,6 +81,7 @@ public abstract class AbstractImporter<I, T extends Accessible> implements ItemI
      * @param graph    the framed graph
      * @param scope    the permission scope
      * @param actioner the user performing the import
+     * @param options  the import options
      * @param log      the log object
      */
     public AbstractImporter(FramedGraph<?> graph, PermissionScope scope, Actioner actioner, ImportOptions options, ImportLog log) {

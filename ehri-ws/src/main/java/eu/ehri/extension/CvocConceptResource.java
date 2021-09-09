@@ -29,16 +29,7 @@ import eu.ehri.project.utils.Table;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -119,7 +110,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
+                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Concept concept = api().get(id, cls);
             Response response = streamingPage(() -> getQuery()
@@ -135,7 +126,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors, Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -168,8 +159,8 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/broader")
     public Response setBroaderCvocConcepts(
-        @PathParam("id") String id,
-        @QueryParam(ID_PARAM) List<String> broader
+            @PathParam("id") String id,
+            @QueryParam(ID_PARAM) List<String> broader
     ) throws PermissionDenied, ItemNotFound, DeserializationError {
         try (final Tx tx = beginTx()) {
             Response item = single(api().concepts().setBroaderConcepts(id, broader));
@@ -178,12 +169,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * Add an existing concept to the list of 'narrower' relations.
-     *
-     * @param id       the item ID
-     * @param narrower the narrower item IDs
-     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/narrower")
@@ -199,12 +184,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * Remove a narrower relationship between two concepts.
-     *
-     * @param id       the item ID
-     * @param narrower the narrower item IDs
-     */
     @DELETE
     @Path("{id:[^/]+}/narrower")
     public Response removeNarrowerCvocConcept(
@@ -219,12 +198,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * List broader concepts.
-     *
-     * @param id The item ID
-     * @return A list of broader resources
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/broader")
@@ -238,12 +211,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * List concepts related to another concept.
-     *
-     * @param id The item ID
-     * @return A list of related resources
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/related")
@@ -256,14 +223,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * List concepts related to another concept. This is the
-     * &quot;reverse&quot; form of the &quot;/related&quot;
-     * method.
-     *
-     * @param id The item ID
-     * @return A list of related resources
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/relatedBy")
@@ -276,13 +235,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * Add a relation by creating the 'related' edge between the two <em>existing</em>
-     * items.
-     *
-     * @param id      the item ID
-     * @param related the related item IDs
-     */
     @POST
     @Path("{id:[^/]+}/related")
     public Response addRelatedCvocConcept(
@@ -297,13 +249,6 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
         }
     }
 
-    /**
-     * Remove a relation by deleting the edge, not the vertex of the related
-     * concept.
-     *
-     * @param id      the item ID
-     * @param related the related item ID
-     */
     @DELETE
     @Path("{id:[^/]+}/related")
     public Response removeRelatedCvocConcept(

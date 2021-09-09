@@ -38,6 +38,8 @@ public enum AnonymousAccessor implements Accessor {
     /**
      * Obtain the shared instance of the Anonymous Accessor.
      * There Can Be Only One.
+     *
+     * @return the global anonymous access instance
      */
     public static Accessor getInstance() {
         return INSTANCE;

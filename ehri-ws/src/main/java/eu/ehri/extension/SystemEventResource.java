@@ -48,7 +48,6 @@ import javax.ws.rs.core.Response;
  * <p>
  * The following query parameters apply to all actions in this
  * resource to apply filtering to the event streams.
- * <p>
  * <dl>
  * <dt>eventTypes</dt><dd>Filter events by type</dd>
  * <dt>itemTypes</dt><dd>Filter events based on the item type of their subjects</dd>
@@ -104,6 +103,7 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      * @param aggregation The manner in which to aggregate the results, accepting
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    "user".
+     * @return a list of events
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -123,12 +123,12 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      *
      * @param id the event id
      * @return a list of subject items
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/subjects")
-    public Response pageSubjectsForEvent(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied {
+    public Response pageSubjectsForEvent(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             SystemEvent event = api().get(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...

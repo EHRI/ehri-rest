@@ -17,11 +17,7 @@ import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -48,7 +44,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ExecutionResult describe() throws Exception {
+    public ExecutionResult describe() {
         try (final Tx tx = beginTx()) {
             GraphQLSchema schema = new GraphQLImpl(api()).getSchema();
             tx.success();
@@ -67,7 +63,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response query(GraphQLQuery q) throws Exception {
+    public Response query(GraphQLQuery q) {
         try (final Tx tx = beginTx()) {
             boolean stream = isStreaming();
             GraphQLSchema schema = new GraphQLImpl(api(), stream).getSchema();
@@ -86,7 +82,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_OCTET_STREAM})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response query(String q) throws Exception {
+    public Response query(String q) {
         return query(new GraphQLQuery(q));
     }
 

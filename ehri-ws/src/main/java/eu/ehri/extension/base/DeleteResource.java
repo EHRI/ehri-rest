@@ -19,10 +19,7 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.project.exceptions.HierarchyError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 
 
 public interface DeleteResource {
@@ -30,6 +27,10 @@ public interface DeleteResource {
      * Delete a resource.
      *
      * @param id The resource ID.
+     * @throws ItemNotFound     if the parent does not exist
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ValidationError  if data constraints are not met
+     * @throws HierarchyError   if the action would result in orphaned child items
      */
     void delete(String id)
             throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError;

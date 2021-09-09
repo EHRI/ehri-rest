@@ -60,6 +60,8 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
      *
      * @param framedGraph     The graph instance
      * @param permissionScope A permission scope, e.g. a country
+     * @param actioner        the current user
+     * @param options         the import options
      * @param log             An import log instance
      */
     public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
@@ -96,6 +98,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
 
     /**
      * @param itemData A data tree
+     * @return the resulting repository object
      */
     @Override
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {

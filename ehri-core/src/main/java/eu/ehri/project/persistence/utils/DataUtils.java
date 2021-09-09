@@ -46,7 +46,6 @@ public class DataUtils {
 
     /**
      * XPath-like method for getting the value of a nested relation's attribute.
-     * <p>
      * <pre>
      * {@code
      * String lang = DataUtils.get(item, "describes[0]/languageCode"));
@@ -56,6 +55,7 @@ public class DataUtils {
      * @param item the item
      * @param path a path string
      * @param <T>  the type to fetch
+     * @param <N>  the container type
      * @return a property of type T
      */
     public static <T, N extends NestableData<N>> T get(N item, String path) {
@@ -66,7 +66,6 @@ public class DataUtils {
 
     /**
      * XPath-like method for getting a item at a given path.
-     * <p>
      * <pre>
      * {@code
      * Bundle description = DataUtils.getItem(item, "describes[0]"));
@@ -75,6 +74,7 @@ public class DataUtils {
      *
      * @param item the item
      * @param path a path string
+     * @param <N>  the container type
      * @return a item found at the given path
      */
     public static <N extends NestableData<N>> N getItem(N item, String path) {
@@ -84,7 +84,6 @@ public class DataUtils {
     /**
      * XPath-like method for deleting the value of a nested relation's
      * attribute.
-     * <p>
      * <pre>
      * {@code
      * Bundle newBundle = DataUtils.delete(item, "describes[0]/languageCode"));
@@ -93,6 +92,7 @@ public class DataUtils {
      *
      * @param item the item
      * @param path a path string
+     * @param <N>  the container type
      * @return the item with the item at the given path deleted
      */
     public static <N extends NestableData<N>> N delete(N item, String path) {
@@ -103,7 +103,6 @@ public class DataUtils {
 
     /**
      * XPath-like method for deleting a node from a nested tree, i.e:
-     * <p>
      * <pre>
      * {@code
      * Bundle newBundle = DataUtils.deleteItem(item, "describes[0]"));
@@ -112,6 +111,7 @@ public class DataUtils {
      *
      * @param item the item
      * @param path a path string
+     * @param <N>  the container type
      * @return the item with the item at the given path deleted
      */
     public static <N extends NestableData<N>> N deleteItem(N item, String path) {
@@ -121,7 +121,6 @@ public class DataUtils {
     /**
      * Xpath-like method for creating a new item by updating a nested relation
      * of an existing item.
-     * <p>
      * <pre>
      * {@code
      * Bundle newBundle = DataUtils.set(oldBundle, "hasDate[0]/startDate", "1923-10-10");
@@ -132,6 +131,7 @@ public class DataUtils {
      * @param path  a path string
      * @param value the value being set
      * @param <T>   the type of property being set
+     * @param <N>  the container type
      * @return the item with the property at the given path set
      */
     public static <T, N extends NestableData<N>> N set(N item, String path, final T value) {
@@ -142,20 +142,19 @@ public class DataUtils {
     /**
      * Xpath-like method for creating a new item by updating a nested relation
      * of an existing item.
-     * <p>
      * <pre>
      * {@code
      * Bundle dateBundle = ...
      * Bundle newItem = DataUtils.setItem(oldBundle, "hasDate[0]", dateBundle);
      * }
      * </pre>
-     * <p>
      * Use an index of -1 to create a relationship set or append to
      * an existing one.
      *
      * @param item    the item
      * @param path    a path string
      * @param newItem the new item to set at the path
+     * @param <N>  the container type
      * @return a item with the given item set at the given path
      */
     public static <N extends NestableData<N>> N setItem(N item, String path, N newItem) {
@@ -164,7 +163,6 @@ public class DataUtils {
 
     /**
      * Xpath-like method to fetch a set of nested relations.
-     * <p>
      * <pre>
      * {@code
      * List<Bundle> dates = DataUtils.getRelations(item, "hasDate");
@@ -173,6 +171,7 @@ public class DataUtils {
      *
      * @param item the item
      * @param path a path string
+     * @param <N>  the container type
      * @return a list of bundles at the given relationship path
      */
     public static <N extends NestableData<N>> List<N> getRelations(N item, String path) {

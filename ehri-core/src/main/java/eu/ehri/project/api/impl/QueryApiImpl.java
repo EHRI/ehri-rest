@@ -63,9 +63,6 @@ public final class QueryApiImpl implements QueryApi {
     private final GraphManager manager;
     private final Accessor accessor;
 
-    /**
-     * Full Constructor.
-     */
     public QueryApiImpl(
             FramedGraph<?> graph,
             Accessor accessor,
@@ -86,9 +83,6 @@ public final class QueryApiImpl implements QueryApi {
         manager = GraphManagerFactory.getInstance(graph);
     }
 
-    /**
-     * Simple constructor.
-     */
     public QueryApiImpl(FramedGraph<?> graph, Accessor accessor) {
         this(graph, accessor, 0, DEFAULT_LIMIT,
                 ImmutableSortedMap.of(), null, ImmutableSortedMap.of(), false);
@@ -204,12 +198,6 @@ public final class QueryApiImpl implements QueryApi {
         return new Builder(this).setStream(stream).build();
     }
 
-    /**
-     * Wrapper method for FramedVertexIterables that converts a
-     * {@code FramedVertexIterable<T>} back into a plain {@code Iterable<Vertex>}.
-     *
-     * @param <T>
-     */
     private static class FramedVertexIterableAdaptor<T extends Entity>
             implements Iterable<Vertex> {
         final Iterable<T> iterable;
@@ -237,28 +225,16 @@ public final class QueryApiImpl implements QueryApi {
         }
     }
 
-    /**
-     * Return a Page instance containing a total of total items, and an iterable
-     * for the given page/count.
-     */
     @Override
     public <E extends Entity> Page<E> page(Class<E> cls) {
         return page(ClassUtils.getEntityType(cls), cls);
     }
 
-    /**
-     * Return a Page instance containing a total of total items, and an iterable
-     * for the given page/count.
-     */
     @Override
     public <E extends Entity> Page<E> page(EntityClass type, Class<E> cls) {
         return page(manager.getEntities(type, cls), cls);
     }
 
-    /**
-     * Return a Page instance containing a total of total items, and an iterable
-     * for the given page/count.
-     */
     @Override
     public <E extends Entity> Page<E> page(Iterable<? extends E> entities, Class<E> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
@@ -282,10 +258,6 @@ public final class QueryApiImpl implements QueryApi {
         }
     }
 
-    /**
-     * Return a Page instance containing a total of total items, and an iterable
-     * for the given page/count.
-     */
     @Override
     public <E extends Entity> Page<E> page(String key, String query, Class<E> cls) {
         try (CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
@@ -307,22 +279,12 @@ public final class QueryApiImpl implements QueryApi {
         }
     }
 
-    /**
-     * Count items accessible to a given user.
-     * <p>
-     * NB: Count doesn't 'account' for ACL privileges!
-     */
     @Override
     public long count(Iterable<?> vertices) {
         GremlinPipeline<?, Vertex> filter = new GremlinPipeline<>(vertices);
         return setFilters(filter).count();
     }
 
-    /**
-     * Count all items of a given type.
-     * <p>
-     * NB: Count doesn't 'account' for ACL privileges!
-     */
     @Override
     public long count(EntityClass type) {
         return count(manager.getVertices(type));
@@ -356,10 +318,10 @@ public final class QueryApiImpl implements QueryApi {
         return filters.isEmpty() ? pipe : pipe.filter(getFilterFunction());
     }
 
-    /**
-     * Get a PipeFunction which sorted vertices by the ordered list
-     * of sort parameters.
-     */
+    //
+    // Get a PipeFunction which sorted vertices by the ordered list
+    // of sort parameters.
+    //
     private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction(final SortedMap<String, Sort> sort) {
         final Ordering<Comparable<?>> order = Ordering.natural().nullsLast();
         return pair -> {
@@ -375,9 +337,9 @@ public final class QueryApiImpl implements QueryApi {
         };
     }
 
-    /**
-     * Create a function that filters nodes given a string and a predicate.
-     */
+    //
+    // Create a function that filters nodes given a string and a predicate.
+    //
     private PipeFunction<Vertex, Boolean> getFilterFunction() {
         return vertex -> {
             for (Entry<String, Pair<FilterPredicate, Object>> entry : filters

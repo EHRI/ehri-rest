@@ -75,6 +75,8 @@ public final class Serializer {
 
     /**
      * Basic constructor.
+     *
+     * @param graph the framed graph
      */
     public Serializer(FramedGraph<?> graph) {
         this(new Builder(graph));
@@ -152,7 +154,7 @@ public final class Serializer {
      *                      with common attributes, and NOT for reusable serializers
      */
     private Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite,
-            List<String> includeProps, LruCache<String, Bundle> cache) {
+                       List<String> includeProps, LruCache<String, Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
@@ -215,10 +217,11 @@ public final class Serializer {
      * Convert a vertex frame to a raw bundle of data.
      *
      * @param item The framed item
+     * @param <T>  The generic type of the item
      * @return A map of data
+     * @throws SerializationError if the data cannot be serialized
      */
-    public <T extends Entity> Map<String, Object> entityToData(T item)
-            throws SerializationError {
+    public <T extends Entity> Map<String, Object> entityToData(T item) throws SerializationError {
         return entityToBundle(item).toData();
     }
 
@@ -227,9 +230,9 @@ public final class Serializer {
      *
      * @param item The item vertex
      * @return A map of data
+     * @throws SerializationError if the data cannot be serialized
      */
-    public Map<String, Object> vertexToData(Vertex item)
-            throws SerializationError {
+    public Map<String, Object> vertexToData(Vertex item) throws SerializationError {
         return vertexToBundle(item).toData();
     }
 
@@ -238,10 +241,11 @@ public final class Serializer {
      * relations.
      *
      * @param item The framed item
+     * @param <T>  The generic type of the item
      * @return A data bundle
+     * @throws SerializationError if the data cannot be serialized
      */
-    public <T extends Entity> Bundle entityToBundle(T item)
-            throws SerializationError {
+    public <T extends Entity> Bundle entityToBundle(T item) throws SerializationError {
         return vertexToBundle(item.asVertex(), 0, maxTraversals, false);
     }
 
@@ -251,9 +255,9 @@ public final class Serializer {
      *
      * @param item The item vertex
      * @return A data bundle
+     * @throws SerializationError if the data cannot be serialized
      */
-    public Bundle vertexToBundle(Vertex item)
-            throws SerializationError {
+    public Bundle vertexToBundle(Vertex item) throws SerializationError {
         return vertexToBundle(item, 0, maxTraversals, false);
     }
 
@@ -261,10 +265,11 @@ public final class Serializer {
      * Serialise a vertex frame to JSON.
      *
      * @param item The framed item
+     * @param <T>  The generic type of the item
      * @return A JSON string
+     * @throws SerializationError if the data cannot be serialized
      */
-    public <T extends Entity> String entityToJson(T item)
-            throws SerializationError {
+    public <T extends Entity> String entityToJson(T item) throws SerializationError {
         return DataConverter.bundleToJson(entityToBundle(item));
     }
 
@@ -273,9 +278,9 @@ public final class Serializer {
      *
      * @param item The item vertex
      * @return A JSON string
+     * @throws SerializationError if the data cannot be serialized
      */
-    public String vertexToJson(Vertex item)
-            throws SerializationError {
+    public String vertexToJson(Vertex item) throws SerializationError {
         return DataConverter.bundleToJson(vertexToBundle(item));
     }
 
@@ -285,9 +290,9 @@ public final class Serializer {
      *
      * @param item The item
      * @param cb   A callback object
+     * @param <T>  The generic type of the item
      */
-    public <T extends Entity> void traverseSubtree(T item,
-            TraversalCallback cb) {
+    public <T extends Entity> void traverseSubtree(T item, TraversalCallback cb) {
         traverseSubtree(item, 0, cb);
     }
 
@@ -298,12 +303,11 @@ public final class Serializer {
      * @param item  The item vertex
      * @param depth The maximum serialization depth
      * @return A data bundle
+     * @throws SerializationError if the data cannot be serialized
      */
-    private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite)
-            throws SerializationError {
+    private Bundle vertexToBundle(Vertex item, int depth, int maxDepth, boolean lite) throws SerializationError {
         try {
-            EntityClass type = EntityClass.withName(item
-                    .getProperty(EntityType.TYPE_KEY));
+            EntityClass type = EntityClass.withName(item.getProperty(EntityType.TYPE_KEY));
             String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
 
@@ -421,22 +425,21 @@ public final class Serializer {
 
         if (dependentOnly && dep == null) {
             logger.trace(
-                    "Terminating fetch dependent only is specified: {}, ifBelowLevel {}, limit {}, {}",
+                    "Terminating fetch dependent only is specified: {}, ifBelowLevel {}, limit {}",
                     relationName, level, fetchProps.ifBelowLevel());
             return false;
         }
 
         if (lite && fetchProps.whenNotLite()) {
             logger.trace(
-                    "Terminating fetch because it specifies whenNotLite: {}, ifBelowLevel {}, limit {}, {}",
+                    "Terminating fetch because it specifies whenNotLite: {}, ifBelowLevel {}, limit {}",
                     relationName, level, fetchProps.ifBelowLevel());
             return false;
         }
 
         if (level >= fetchProps.ifBelowLevel()) {
             logger.trace(
-                    "Terminating fetch because level exceeded ifBelowLevel on fetch clause: {}, ifBelowLevel {}, " +
-                            "limit {}, {}",
+                    "Terminating fetch because level exceeded ifBelowLevel on fetch clause: {}, ifBelowLevel {}, limit {}",
                     relationName, level, fetchProps.ifBelowLevel());
             return false;
         }
@@ -445,7 +448,7 @@ public final class Serializer {
         // we've exceeded that, don't serialize.
         if (fetchProps.ifLevel() != -1 && level > fetchProps.ifLevel()) {
             logger.trace(
-                    "Terminating fetch because ifLevel clause found on {}, ifBelowLevel {}, {}",
+                    "Terminating fetch because ifLevel clause found on {}, ifBelowLevel {}",
                     relationName, level);
             return false;
         }
@@ -525,7 +528,7 @@ public final class Serializer {
      * the top-level node.
      */
     private <T extends Entity> void traverseSubtree(T item, int depth,
-            TraversalCallback cb) {
+                                                    TraversalCallback cb) {
 
         if (depth < maxTraversals) {
             Class<?> cls = EntityClass

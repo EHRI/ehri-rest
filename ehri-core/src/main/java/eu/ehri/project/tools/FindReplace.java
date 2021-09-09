@@ -64,6 +64,7 @@ public class FindReplace {
      * @param logMessage  a mandatory log message
      * @return a list of lists each comprising: the parent item ID, the
      * child item ID, and the current text value in which a match was found
+     * @throws ValidationError if the operation would violate constraints
      */
     public List<List<String>> findAndReplace(
             EntityClass contentType, EntityClass entityType,

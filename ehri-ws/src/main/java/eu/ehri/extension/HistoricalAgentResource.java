@@ -49,7 +49,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.util.List;
 
@@ -85,7 +84,7 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
             Response item = createItem(bundle, accessors);
@@ -126,13 +125,14 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAD XML Document
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/eac")
     @Produces(MediaType.TEXT_XML)
     public Response exportEac(@PathParam("id") String id,
-            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
-            throws IOException, ItemNotFound {
+                              final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             HistoricalAgent agent = api().get(id, HistoricalAgent.class);
             tx.success();
@@ -140,8 +140,6 @@ public class HistoricalAgentResource extends AbstractAccessibleResource<Historic
                 try (final Tx tx2 = beginTx()) {
                     new Eac2010Exporter(api()).export(agent, outputStream, lang);
                     tx2.success();
-                } catch (TransformerException e) {
-                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }

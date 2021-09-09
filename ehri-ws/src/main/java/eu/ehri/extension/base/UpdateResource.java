@@ -19,10 +19,7 @@
 
 package eu.ehri.extension.base;
 
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistence.Bundle;
 
 import javax.ws.rs.core.Response;
@@ -35,6 +32,10 @@ public interface UpdateResource {
      * @param id     The resource ID.
      * @param bundle A resource bundle, with or without an ID.
      * @return A serialized representation of the updated resource.
+     * @throws ItemNotFound         if the item does not exist
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws ValidationError      if data constraints are not met
+     * @throws DeserializationError if the incoming data is badly-formed
      */
     Response update(String id, Bundle bundle)
             throws PermissionDenied,

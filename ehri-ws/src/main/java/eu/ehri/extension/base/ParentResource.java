@@ -43,7 +43,10 @@ public interface ParentResource {
      *     </code>
      * </pre>
      *
+     * @param id  the parent item
+     * @param all whether or not to fetch children-of-children (and so on)
      * @return a list of serialized item representations
+     * @throws ItemNotFound if the parent does not exist
      */
     Response listChildren(String id, boolean all) throws ItemNotFound;
 
@@ -51,11 +54,15 @@ public interface ParentResource {
      * Create a subordinate resource.
      *
      * @param id        the parent resource ID.
-     * @param bundle    a resource bundle.
      * @param accessors the users/groups who can access this item.
+     * @param bundle    a resource bundle.
      * @return A serialized representation of the created resource.
+     * @throws ItemNotFound         if the parent does not exist
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws DeserializationError if the input data is not well formed
+     * @throws ValidationError      if data constraints are not met
      */
-    Response createChild(String id, Bundle bundle, List<String> accessors)
+    Response createChild(String id, List<String> accessors, Bundle bundle)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound;
 
     /**
@@ -72,8 +79,12 @@ public interface ParentResource {
      * @param id  the parent resource ID
      * @param all descend into the hierarchy of any child items
      * @return an ordered list of deleted item IDs
-     * @throws HierarchyError if an attempt is made to delete child items that have
-     *                        children themselves without using the {{all}} parameter.
+     * @throws ItemNotFound         if the parent does not exist
+     * @throws HierarchyError       if an attempt is made to delete child items that have
+     *                              children themselves without using the {{all}} parameter.
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws DeserializationError if the input data is not well formed
+     * @throws ValidationError      if data constraints are not met
      */
     Table deleteChildren(String id, boolean all)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound, HierarchyError;

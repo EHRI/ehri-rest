@@ -104,8 +104,12 @@ public class EadSync {
      *
      * @param op         the ingest operation
      * @param logMessage a log message that will be attached to the delete event
+     * @param excludes   item IDs to exclude from cleanup/sync
      * @return a {@link SyncLog} instance
-     * @throws EadSyncError if local identifiers are not unique
+     * @throws EadSyncError          if local identifiers are not unique
+     * @throws DeserializationError  if the input data is not well-formed
+     * @throws IOException           if the input data cannot be read
+     * @throws ImportValidationError if data constraints are not met
      */
     public SyncLog sync(EadIngestOperation op, Set<String> excludes, String logMessage)
             throws ImportValidationError, DeserializationError, IOException, EadSyncError {

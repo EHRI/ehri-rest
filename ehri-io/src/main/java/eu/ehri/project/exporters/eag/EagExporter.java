@@ -4,7 +4,6 @@ import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.Repository;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -22,7 +21,7 @@ public interface EagExporter extends XmlExporter<Repository> {
      *                     descriptions are available
      */
     void export(Repository repository,
-            OutputStream outputStream, String langCode) throws IOException, TransformerException;
+            OutputStream outputStream, String langCode) throws IOException;
 
     /**
      * Export a repository as an EAG document.

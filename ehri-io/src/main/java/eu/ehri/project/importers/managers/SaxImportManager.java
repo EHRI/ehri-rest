@@ -85,11 +85,14 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Factory method.
      *
-     * @param graph     the framed graph
-     * @param scope     the permission scope
-     * @param actioner  the actioner
-     * @param options   an ImportOptions instance
-     * @param callbacks a list of ImportCallback instances
+     * @param graph         the framed graph
+     * @param scope         the permission scope
+     * @param actioner      the actioner
+     * @param importerClass the import class
+     * @param handlerClass  the handler class
+     * @param options       an ImportOptions instance
+     * @param callbacks     a list of ImportCallback instances
+     * @return a new import manager
      */
     public static SaxImportManager create(FramedGraph<?> graph,
                                           PermissionScope scope,
@@ -104,10 +107,13 @@ public class SaxImportManager extends AbstractImportManager {
     /**
      * Factory method.
      *
-     * @param graph    the framed graph
-     * @param scope    a permission scope
-     * @param actioner the actioner
-     * @param options  an import options instance
+     * @param graph         the framed graph
+     * @param scope         a permission scope
+     * @param actioner      the actioner
+     * @param importerClass the import class
+     * @param handlerClass  the handler class
+     * @param options       an import options instance
+     * @return a new import manager
      */
     public static SaxImportManager create(FramedGraph<?> graph,
                                           PermissionScope scope,
@@ -118,13 +124,6 @@ public class SaxImportManager extends AbstractImportManager {
         return new SaxImportManager(graph, scope, actioner, importerClass, handlerClass, options);
     }
 
-    /**
-     * Import XML from the given InputStream, as part of the given action.
-     *
-     * @param stream  an input stream
-     * @param context the event context
-     * @param log     a logger object
-     */
     @Override
     protected void importInputStream(final InputStream stream, final String tag, final ActionManager.EventContext context,
                                      final ImportLog log) throws IOException, ValidationError, InputParseError {

@@ -31,6 +31,7 @@ public interface GetResource {
      *
      * @param id The requested item id
      * @return A serialized item representation
+     * @throws ItemNotFound if the item does not exist
      */
     Response get(String id) throws ItemNotFound;
 

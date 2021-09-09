@@ -51,7 +51,9 @@ public class VersionManager {
     /**
      * Get the last version for all deleted items.
      *
-     * @param type the entity class
+     * @param type  the entity class
+     * @param from  a date string indicating the start of the range
+     * @param until a date string indicating the end of the range
      * @return an iterable of Version frames
      */
     public CloseableIterable<Version> versionsAtDeletion(EntityClass type, String from, String until) {

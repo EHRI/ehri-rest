@@ -65,7 +65,7 @@ import java.util.Set;
  * possible to fetch new events easily and prevent having to sort
  * by timestamp, etc. Schematically, the graph thus formed looks
  * something like:
- * <p>
+ * </p>
  * <pre>
  * <code>
  * Actioner              SystemEventQueue             Subject
@@ -105,6 +105,7 @@ public final class ActionManager {
      * Constructor with scope.
      *
      * @param graph The framed graph
+     * @param scope The scope entity
      */
     public ActionManager(FramedGraph<?> graph, Entity scope) {
         this.graph = graph;
@@ -143,9 +144,9 @@ public final class ActionManager {
          * @param logMessage An optional log message
          */
         EventContext(Actioner actioner,
-                EventTypes type,
-                String timestamp, Optional<String> logMessage,
-                Set<Pair<Entity, Bundle>> toVersion) {
+                     EventTypes type,
+                     String timestamp, Optional<String> logMessage,
+                     Set<Pair<Entity, Bundle>> toVersion) {
             this.actionType = type;
             this.actioner = actioner;
             this.logMessage = logMessage;
@@ -237,6 +238,8 @@ public final class ActionManager {
 
         /**
          * Flush this event log to the graph.
+         *
+         * @return the created {@link SystemEvent} item
          */
         public SystemEvent commit() {
             Vertex vertex = getLinkNode(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
@@ -320,8 +323,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext newEventContext(Actioner user, EventTypes type, Optional<String> logMessage) {
-        return new EventContext(user, type, getTimestamp(), logMessage,
-                Sets.<Pair<Entity, Bundle>>newHashSet());
+        return new EventContext(user, type, getTimestamp(), logMessage, Sets.<Pair<Entity, Bundle>>newHashSet());
     }
 
     /**
@@ -344,8 +346,7 @@ public final class ActionManager {
      * @param type    The event type
      * @return An EventContext object
      */
-    public EventContext newEventContext(Accessible subject, Actioner user,
-            EventTypes type) {
+    public EventContext newEventContext(Accessible subject, Actioner user, EventTypes type) {
         return newEventContext(subject, user, type, Optional.<String>empty());
     }
 
@@ -353,13 +354,13 @@ public final class ActionManager {
      * Create an action node that describes what user U has done with subject S
      * via logMessage log.
      *
-     * @param subject    The subjject node
+     * @param subject    The subject node
      * @param user       The actioner
+     * @param type       The event type
      * @param logMessage A log message
      * @return An EventContext object
      */
-    public EventContext newEventContext(Accessible subject, Actioner user,
-            EventTypes type, Optional<String> logMessage) {
+    public EventContext newEventContext(Accessible subject, Actioner user, EventTypes type, Optional<String> logMessage) {
         EventContext context = newEventContext(user, type, logMessage);
         context.addSubjects(subject);
         return context;
@@ -380,7 +381,7 @@ public final class ActionManager {
     /**
      * Determine if two events are the same according to the following
      * definition:
-     * <p>
+     *
      * <ol>
      * <li>They have the same scope and subject</li>
      * <li>They have the same actioner</li>
@@ -539,8 +540,7 @@ public final class ActionManager {
      * @param relation  The relationship between them
      * @param direction The direction of the relationship
      */
-    private void replaceAtHead(Vertex head, Vertex newHead, String headRelation,
-            String relation, Direction direction) {
+    private void replaceAtHead(Vertex head, Vertex newHead, String headRelation, String relation, Direction direction) {
         Iterator<Vertex> iter = head.getVertices(direction, headRelation).iterator();
         if (iter.hasNext()) {
             Vertex current = iter.next();

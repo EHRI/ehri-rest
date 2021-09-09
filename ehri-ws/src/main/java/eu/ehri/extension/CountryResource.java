@@ -87,7 +87,7 @@ public class CountryResource
     @Path("{id:[^/]+}/list")
     @Override
     public Response listChildren(@PathParam("id") String id,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
+                                 @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Country country = api().get(id, cls);
             Response response = streamingPage(() -> getQuery()
@@ -102,7 +102,7 @@ public class CountryResource
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = beginTx()) {
             Response item = createItem(bundle, accessors);
@@ -156,6 +156,10 @@ public class CountryResource
      * @param id     The country id
      * @param bundle The new repository data
      * @return The new repository
+     * @throws ItemNotFound         if the parent does not exist
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws DeserializationError if the input data is not well formed
+     * @throws ValidationError      if data constraints are not met
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -163,9 +167,9 @@ public class CountryResource
     @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                Bundle bundle)
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
             final Country country = api().get(id, cls);
             Response item = createItem(bundle, accessors,
@@ -183,6 +187,7 @@ public class CountryResource
      * @param id   the country ID
      * @param lang a three-letter ISO639-2 code
      * @return a zip containing the country's repositories as EAG
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/eag")
@@ -190,7 +195,7 @@ public class CountryResource
     public Response exportEag(
             @PathParam("id") String id,
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
-            throws IOException, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Country country = api().get(id, cls);
             final EagExporter eagExporter = new Eag2012Exporter(api());

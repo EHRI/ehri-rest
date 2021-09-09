@@ -35,6 +35,9 @@ public interface SkosImporter {
      * @param filePath   The file path
      * @param logMessage A log message
      * @return An import log
+     * @throws IOException     if there is an error reading the input file
+     * @throws InputParseError if there is an error parsing the input file
+     * @throws ValidationError if data constraints are not met
      */
     ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError;
@@ -45,6 +48,9 @@ public interface SkosImporter {
      * @param ios        The input stream
      * @param logMessage A log message
      * @return An import log
+     * @throws IOException     if there is an error reading the input file
+     * @throws InputParseError if there is an error parsing the input file
+     * @throws ValidationError if data constraints are not met
      */
     ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, InputParseError, ValidationError;

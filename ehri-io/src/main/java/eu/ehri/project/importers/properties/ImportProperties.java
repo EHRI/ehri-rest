@@ -26,22 +26,24 @@ import java.util.Set;
  */
 public interface ImportProperties {
 
-	/**
+    /**
      * Get the value for the specified key.
+     *
+     * @param key a property key
+     * @return a property value, or null
      */
     String getProperty(String key);
 
     /**
      * See whether a value exists in the properties file.
-     * 
+     *
      * @param value a value to look for
      * @return true when found, false when it doesn't exist in the file
      */
     boolean containsPropertyValue(String value);
 
     /**
-     * 
-     * @return the right-hand side of the properties file 
+     * @return the right-hand side of the properties file
      */
     Set<String> getAllNonAttributeValues();
 
@@ -51,6 +53,9 @@ public interface ImportProperties {
 
     /**
      * Get the value for the given attribute name.
+     *
+     * @param key a property key
+     * @return a property attribute value, or null
      */
     String getAttributeProperty(String key);
 }

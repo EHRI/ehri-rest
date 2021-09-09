@@ -54,6 +54,7 @@ public @interface Fetch {
      * from the current item. i.e. if this item is at level N
      * the serialization of it's relations should stop at level
      * N + {@code Fetch.numLevels()}.
+     * @return the number of level traversed
      */
     int numLevels() default -1;
 

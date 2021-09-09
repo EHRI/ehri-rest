@@ -101,6 +101,7 @@ public class ToolsResource extends AbstractResource {
      *                 (defaults to 100)
      * @param commit   actually commit the changes
      * @return a list of item IDs for those items changed
+     * @throws ValidationError if data constraints are not met
      */
     @POST
     @Path("find-replace")
@@ -167,6 +168,9 @@ public class ToolsResource extends AbstractResource {
      * @param excludeSingle    don't create concepts/links for access points that
      *                         are unique to a single item
      * @return the number of links created
+     * @throws ItemNotFound     if the repository or vocabulary do not exist
+     * @throws ValidationError  if data constraints are not met
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -214,8 +218,10 @@ public class ToolsResource extends AbstractResource {
      * @param tolerant   skip items that could cause collisions rather
      *                   then throwing an error
      * @param commit     whether or not to rename the item
+     * @param data       the data table
      * @return a tab old-to-new mapping, or an empty
      * body if nothing was changed
+     * @throws ConflictError if a regenerated ID conflicts with an existing item
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -273,6 +279,7 @@ public class ToolsResource extends AbstractResource {
      * @param commit     whether or not to rename the items
      * @return a tab list old-to-new mappings, or an empty
      * body if nothing was changed
+     * @throws ConflictError if a regenerated ID conflicts with an existing item
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -319,6 +326,8 @@ public class ToolsResource extends AbstractResource {
      * @param commit     whether or not to rename the items
      * @return a tab list old-to-new mappings, or an empty
      * body if nothing was changed
+     * @throws ItemNotFound  if the scope item does not exist
+     * @throws ConflictError if a regenerated ID conflicts with an existing item
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -345,12 +354,16 @@ public class ToolsResource extends AbstractResource {
 
     /**
      * Regenerate description IDs.
+     *
+     * @param id     the target item ID
+     * @param commit actually commit the changes
+     * @throws ItemNotFound if the target item does not exist
      */
     @POST
     @Produces("text/plain")
     @Path("regenerate-description-id/{id:[^/]+}")
     public String regenerateDescriptionId(@PathParam(ID_PARAM) String id,
-            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
+                                          @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
             throws ItemNotFound {
         int done = 0;
         try (final Tx tx = beginTx()) {
@@ -380,6 +393,9 @@ public class ToolsResource extends AbstractResource {
 
     /**
      * Regenerate description IDs.
+     *
+     * @param bufferSize the transaction buffer size
+     * @param commit     actually commit the changes
      */
     @POST
     @Produces("text/plain")
@@ -504,18 +520,19 @@ public class ToolsResource extends AbstractResource {
      * to <code>from</code> to <code>to</code>.
      *
      * @param tolerant don't error if items have been deleted
-     * @param commit  actually commit changes
-     * @param mapping a comma-separated TSV file, excluding headers
+     * @param commit   actually commit changes
+     * @param mapping  a comma-separated TSV file, excluding headers
      * @return CSV data with each row indicating the source, target, and how many items
      * were relinked for each
+     * @throws DeserializationError if the input data is not well-formed
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Path("relink-targets")
     public Table relink(
-            @QueryParam("tolerant") @DefaultValue("false") boolean tolerant,
-            @QueryParam("commit") @DefaultValue("false") boolean commit,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             Table mapping) throws DeserializationError {
         try (final Tx tx = beginTx()) {
             List<List<String>> done = Lists.newArrayList();
@@ -561,6 +578,7 @@ public class ToolsResource extends AbstractResource {
      * @param mapping a comma-separated CSV file, exluding headers.
      * @return CSV data containing two columns: the old global ID, and
      * a newly generated global ID, derived from the new hierarchy.
+     * @throws DeserializationError if the input data is not well-formed
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -617,11 +635,13 @@ public class ToolsResource extends AbstractResource {
      * of dependent parent/child hierarchical IDs and output order will
      * reflect this.
      *
-     * @param commit actually perform the rename
+     * @param commit  actually perform the rename
      * @param mapping a comma-separated CSV file, excluding headers.
      * @return CSV data containing two columns: the old global ID, and
      * a newly generated global ID, derived from the new local identifier,
      * with ordering corresponding to lexically-ordered input data.
+     * @throws IdRegenerator.IdCollisionError if renaming an item would violate a unique ID constraint
+     * @throws DeserializationError           if the input data is not well-formed
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -662,6 +682,7 @@ public class ToolsResource extends AbstractResource {
      * Extremely lossy helper method for cleaning a test instance
      *
      * @param fixtures YAML fixture data to be loaded into the fresh graph
+     * @param confirm  confirm you want to do this thing
      */
     @POST
     @Path("__INITIALISE")

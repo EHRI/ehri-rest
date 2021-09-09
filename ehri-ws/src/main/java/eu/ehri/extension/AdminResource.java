@@ -75,11 +75,12 @@ public class AdminResource extends AbstractResource {
      * <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">GraphSON</a> format.
      * <p>
      * The mode used is EXTENDED.
+     * @return A graphson stream
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("export-graphson")
-    public Response getGraphSON() throws Exception {
+    public Response getGraphSON() {
         return Response.ok((StreamingOutput) stream -> {
             try (final Tx tx = beginTx()) {
                 Accessor accessor = getRequesterUserProfile();
@@ -93,7 +94,7 @@ public class AdminResource extends AbstractResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("export-json")
-    public Response exportNodes() throws Exception {
+    public Response exportNodes() {
         return Response.ok((StreamingOutput) stream -> {
             try (final Tx tx = beginTx()) {
                 Accessor accessor = getRequesterUserProfile();
@@ -115,8 +116,7 @@ public class AdminResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("create-default-user-profile")
-    public Response createDefaultUserProfile(String jsonData,
-            @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
+    public Response createDefaultUserProfile(String jsonData, @QueryParam(GROUP_PARAM) List<String> groups) {
         try (final Tx tx = beginTx()) {
             String ident = getNextDefaultUserId();
             Bundle bundle = Bundle.Builder.withClass(EntityClass.USER_PROFILE)
@@ -140,6 +140,8 @@ public class AdminResource extends AbstractResource {
             Response response = creationResponse(user);
             tx.success();
             return response;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

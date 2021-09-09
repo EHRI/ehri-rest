@@ -38,7 +38,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.transform.TransformerException;
 import java.util.List;
 
 /**
@@ -165,9 +164,9 @@ public class DocumentaryUnitResource
     @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                Bundle bundle)
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final DocumentaryUnit parent = api().get(id, cls);
             Response resource = createItem(bundle, accessors,
@@ -184,6 +183,7 @@ public class DocumentaryUnitResource
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAD XML Document
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/ead")
@@ -198,8 +198,6 @@ public class DocumentaryUnitResource
                 try (final Tx tx2 = beginTx()) {
                     new Ead2002Exporter(api()).export(unit, outputStream, lang);
                     tx2.success();
-                } catch (TransformerException e) {
-                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }

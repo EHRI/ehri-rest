@@ -42,8 +42,9 @@ public class PropertiesRow {
     /**
      * only add key value pair if value is no empty String
      *
-     * @param key
-     * @param value
+     * @param key   the row key
+     * @param value the row value
+     * @return a new row
      */
     protected PropertiesRow add(String key, String value) {
         if (!value.equals("")) {
@@ -53,7 +54,7 @@ public class PropertiesRow {
     }
 
     /**
-     * @param key
+     * @param key the key
      * @return return value if exists, null otherwise
      */
     protected String get(String key) {

@@ -58,7 +58,7 @@ public final class BundleManager {
     /**
      * Constructor with a given scope.
      *
-     * @param graph The graph
+     * @param graph    The graph
      * @param scopeIds The ID set for the current scope.
      */
     public BundleManager(FramedGraph<?> graph, Collection<String> scopeIds) {
@@ -81,8 +81,11 @@ public final class BundleManager {
      * Entry-point for updating a bundle.
      *
      * @param bundle The bundle to create or update
-     * @param cls The frame class of the return type
+     * @param cls    The frame class of the return type
+     * @param <T>    The generic type of the entity
      * @return A framed vertex mutation
+     * @throws ItemNotFound    if the item doesn't exist
+     * @throws ValidationError if data constraints are not met
      */
     public <T extends Entity> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
@@ -96,11 +99,12 @@ public final class BundleManager {
      * Entry-point for creating a bundle.
      *
      * @param bundle The bundle to create or update
-     * @param cls The frame class of the return type
+     * @param cls    The frame class of the return type
+     * @param <T>    The generic type
      * @return A framed vertex
+     * @throws ValidationError if data constraints are not met
      */
-    public <T extends Entity> T create(Bundle bundle, Class<T> cls)
-            throws ValidationError {
+    public <T extends Entity> T create(Bundle bundle, Class<T> cls) throws ValidationError {
         Bundle bundleWithIds = validator.validateForCreate(bundle);
         return graph.frame(createInner(bundleWithIds), cls);
     }
@@ -109,11 +113,12 @@ public final class BundleManager {
      * Entry point for creating or updating a bundle, depending on whether it has a supplied id.
      *
      * @param bundle The bundle to create or update
-     * @param cls The frame class of the return type
+     * @param cls    The frame class of the return type
+     * @param <T>    The generic type
      * @return A frame mutation
+     * @throws ValidationError if data constraints are not met
      */
-    public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
-            throws ValidationError {
+    public <T extends Entity> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls) throws ValidationError {
         Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
         return new Mutation<>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
@@ -170,7 +175,7 @@ public final class BundleManager {
                     e);
         }
     }
-    
+
     /**
      * Insert a bundle and save its dependent items.
      *
@@ -199,22 +204,21 @@ public final class BundleManager {
      * @return A vertex mutation
      */
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
-        Vertex node = manager.getVertex(bundle.getId());
+        Vertex vertex = manager.getVertex(bundle.getId());
         try {
-            Bundle currentBundle = serializer.vertexToBundle(node);
+            Bundle currentBundle = serializer.vertexToBundle(vertex);
             Bundle newBundle = bundle.dependentsOnly();
             if (!currentBundle.equals(newBundle)) {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Bundles differ: {}:{}", bundle.getType(), bundle.getId());
                     logger.trace(currentBundle.diff(newBundle));
                 }
-                node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                        bundle.getData());
-                updateDependents(node, bundle.getBundleJavaClass(), bundle.getRelations());
-                return new Mutation<>(node, MutationState.UPDATED, currentBundle);
+                vertex = manager.updateVertex(bundle.getId(), bundle.getType(), bundle.getData());
+                updateDependents(vertex, bundle.getBundleJavaClass(), bundle.getRelations());
+                return new Mutation<>(vertex, MutationState.UPDATED, currentBundle);
             } else {
                 logger.debug("Not updating equivalent bundle: {}:{}", bundle.getType(), bundle.getId());
-                return new Mutation<>(node, MutationState.UNCHANGED);
+                return new Mutation<>(vertex, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {
             throw new RuntimeException("Unexpected serialization error " +
@@ -225,14 +229,12 @@ public final class BundleManager {
     /**
      * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
      *
-     * @param master The master vertex
-     * @param cls The master vertex class
+     * @param master    The master vertex
+     * @param cls       The master vertex class
      * @param relations A map of relations
      */
-    private void createDependents(Vertex master,
-            Class<?> cls, Multimap<String, Bundle> relations) {
-        Map<String, Direction> dependents = ClassUtils
-                .getDependentRelations(cls);
+    private void createDependents(Vertex master, Class<?> cls, Multimap<String, Bundle> relations) {
+        Map<String, Direction> dependents = ClassUtils.getDependentRelations(cls);
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle bundle : relations.get(relation)) {
@@ -249,16 +251,15 @@ public final class BundleManager {
     /**
      * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
      *
-     * @param master The master vertex
-     * @param cls The master vertex class
+     * @param master    The master vertex
+     * @param cls       The master vertex class
      * @param relations A map of relations
      */
     private void updateDependents(Vertex master, Class<?> cls, Multimap<String, Bundle> relations) {
 
         // Get a list of dependent relationships for this class, and their
         // directions.
-        Map<String, Direction> dependents = ClassUtils
-                .getDependentRelations(cls);
+        Map<String, Direction> dependents = ClassUtils.getDependentRelations(cls);
         // Build a list of the IDs of existing dependents we're going to be
         // updating.
         Set<String> updating = getUpdateSet(relations);
@@ -287,7 +288,7 @@ public final class BundleManager {
                 }
             } else {
                 logger.warn("Nested data being ignored on update because " +
-                        "it is not a dependent relation: {}: {}",
+                                "it is not a dependent relation: {}: {}",
                         relation, relations.get(relation));
             }
         }
@@ -304,7 +305,7 @@ public final class BundleManager {
     }
 
     private void deleteMissingFromUpdateSet(Vertex master,
-            Map<String, Direction> dependents, Set<String> updating) {
+                                            Map<String, Direction> dependents, Set<String> updating) {
         for (Entry<String, Direction> relEntry : dependents.entrySet()) {
             for (Vertex v : getCurrentRelationships(master,
                     relEntry.getKey(), relEntry.getValue())) {
@@ -323,14 +324,13 @@ public final class BundleManager {
     /**
      * Get the nodes that terminate a given relationship from a particular source node.
      *
-     *
-     * @param src The source vertex
-     * @param label The relationship label
+     * @param src       The source vertex
+     * @param label     The relationship label
      * @param direction The relationship direction
      * @return A set of related nodes
      */
     private Set<Vertex> getCurrentRelationships(Vertex src,
-            String label, Direction direction) {
+                                                String label, Direction direction) {
         HashSet<Vertex> out = Sets.newHashSet();
         for (Vertex end : src.getVertices(direction, label)) {
             out.add(end);
@@ -341,13 +341,13 @@ public final class BundleManager {
     /**
      * Create a relationship between a parent and child vertex.
      *
-     * @param master The master vertex
-     * @param child The child vertex
-     * @param label The relationship label
+     * @param master    The master vertex
+     * @param child     The child vertex
+     * @param label     The relationship label
      * @param direction The direction of the relationship
      */
     private void createChildRelationship(Vertex master, Vertex child,
-            String label, Direction direction) {
+                                         String label, Direction direction) {
         if (direction == Direction.OUT) {
             graph.addEdge(null, master, child, label);
         } else {
