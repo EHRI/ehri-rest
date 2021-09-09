@@ -84,6 +84,11 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
      * @param bundle    the JSON representation of the annotation
      * @param accessors user IDs who can access the annotation
      * @return the annotation
+     * @throws AccessDenied         if the user cannot access the item
+     * @throws ItemNotFound         if the parent does not exist
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws ValidationError      if data constraints are not met
+     * @throws DeserializationError if the input data is not valid
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -93,8 +98,7 @@ public class AnnotationResource extends AbstractAccessibleResource<Annotation>
             @QueryParam(BODY_PARAM) String did,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             Bundle bundle)
-            throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
-            ItemNotFound, SerializationError {
+            throws PermissionDenied, AccessDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             if (id == null) {
                 throw new DeserializationError("Target must be provided");

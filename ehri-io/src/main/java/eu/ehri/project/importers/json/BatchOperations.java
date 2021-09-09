@@ -52,14 +52,15 @@ public class BatchOperations {
     /**
      * Constructor.
      *
-     * @param graph    the graph object
-     * @param scopeOpt a nullable scope entity
-     * @param version  whether to created versioned for changed items
-     * @param tolerant whether to allow individual validation errors
-     *                 without failing the entire batch
+     * @param graph     the graph object
+     * @param scopeOpt  a nullable scope entity
+     * @param version   whether to created versioned for changed items
+     * @param tolerant  whether to allow individual validation errors
+     *                  without failing the entire batch
+     * @param callbacks a set of import callbacks to run on item import
      */
     public BatchOperations(FramedGraph<?> graph, PermissionScope scopeOpt, boolean version, boolean tolerant,
-            List<ImportCallback> callbacks) {
+                           List<ImportCallback> callbacks) {
         this.graph = graph;
         this.scope = Optional.ofNullable(scopeOpt).orElse(SystemScope.getInstance());
         this.version = version;
@@ -120,10 +121,10 @@ public class BatchOperations {
      * @param callbacks one or more ImportCallback instances
      * @return a new batch operation manager
      */
-    public BatchOperations withCallbacks(ImportCallback ...callbacks) {
+    public BatchOperations withCallbacks(ImportCallback... callbacks) {
         List<ImportCallback> newCallbacks = Lists.newArrayList(callbacks);
         newCallbacks.addAll(this.callbacks);
-        return new BatchOperations(graph,  scope, version, tolerant, newCallbacks);
+        return new BatchOperations(graph, scope, version, tolerant, newCallbacks);
     }
 
     /**
@@ -135,6 +136,8 @@ public class BatchOperations {
      * @param actioner    the current user
      * @param logMessage  a log message
      * @return an import log
+     * @throws DeserializationError if the input stream is not well-formed
+     * @throws ValidationError      if data constraints are not met
      */
     public ImportLog batchImport(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
             throws DeserializationError, ValidationError {
@@ -188,6 +191,9 @@ public class BatchOperations {
      * @param actioner    the current user
      * @param logMessage  a log message
      * @return an import log
+     * @throws ItemNotFound         if one of the items in the input stream does not exist
+     * @throws DeserializationError if the input stream is not well-formed
+     * @throws ValidationError      if data constraints are not met
      */
     public ImportLog batchUpdate(InputStream inputStream, Actioner actioner, Optional<String> logMessage)
             throws DeserializationError, ItemNotFound, ValidationError {
@@ -239,6 +245,8 @@ public class BatchOperations {
      * @param actioner   the current user
      * @param logMessage an optional log message
      * @return the number of items deleted
+     * @throws ItemNotFound if one or more of the input IDs does not exist and tolerant
+     *                      mode is not enabled
      */
     public int batchDelete(Collection<String> ids, Actioner actioner, Optional<String> logMessage)
             throws ItemNotFound {

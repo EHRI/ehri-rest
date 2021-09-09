@@ -392,7 +392,8 @@ public abstract class AbstractResource implements TxCheckedResource {
     /**
      * Stream a single page with total, limit, and offset info.
      *
-     * @param page A page of data
+     * @param page a page of data
+     * @param <T>  the item's generic type
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingPage(Supplier<QueryApi.Page<T>> page) {
@@ -405,6 +406,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      *
      * @param page       a page of data
      * @param serializer a custom serializer instance
+     * @param <T>        the item's generic type
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingPage(
@@ -438,6 +440,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * Return a streaming response from an iterable.
      *
      * @param list A list of framed items
+     * @param <T>  the item's generic type
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingList(Supplier<Iterable<T>> list) {
@@ -448,6 +451,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * Return a streaming response from an iterable of item lists.
      *
      * @param lists an iterable of item groups
+     * @param <T>   the item's generic type
      * @return a streaming response
      */
     protected <T extends Entity> Response streamingListOfLists(Supplier<Iterable<? extends Collection<T>>> lists) {
@@ -459,6 +463,8 @@ public abstract class AbstractResource implements TxCheckedResource {
      * entity converter.
      *
      * @param list A list of framed items
+     * @param serializer a serializer for writing the response
+     * @param <T>  the item's generic type
      * @return A streaming response
      */
     protected <T extends Entity> Response streamingList(Supplier<Iterable<T>> list, Serializer serializer) {
@@ -501,6 +507,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      * to cache the response.
      *
      * @param item The item
+     * @param <T>  the item's generic type
      * @return A cache control object.
      */
     protected <T extends Entity> CacheControl getCacheControl(T item) {
@@ -529,7 +536,7 @@ public abstract class AbstractResource implements TxCheckedResource {
     /**
      * Get an RDF format for content-negotiation form
      *
-     * @param format        a format string, possibly null
+     * @param format a format string, possibly null
      * @return an RDF format
      */
     protected String getRdfFormat(String format) {

@@ -78,6 +78,9 @@ public class ImportLog {
 
     /**
      * Increment the creation count.
+     *
+     * @param sourceKey the source specifier key
+     * @param itemId    the newly-created item ID
      */
     public void addCreated(String sourceKey, String itemId) {
         Preconditions.checkNotNull(sourceKey);
@@ -86,6 +89,9 @@ public class ImportLog {
 
     /**
      * Increment the update count.
+     *
+     * @param sourceKey the source specifier key
+     * @param itemId    the newly-updated item ID
      */
     public void addUpdated(String sourceKey, String itemId) {
         Preconditions.checkNotNull(sourceKey);
@@ -94,6 +100,9 @@ public class ImportLog {
 
     /**
      * Increment the unchanged count.
+     *
+     * @param sourceKey the source specifier key
+     * @param itemId    the unchanged item ID
      */
     public void addUnchanged(String sourceKey, String itemId) {
         Preconditions.checkNotNull(sourceKey);

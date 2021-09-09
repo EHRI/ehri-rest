@@ -34,7 +34,6 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -44,12 +43,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Provides a web service interface for the Repository.
@@ -142,6 +137,10 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @param id     The repository ID
      * @param bundle The new unit data
      * @return The new unit
+     * @throws ItemNotFound         if the parent does not exist
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws DeserializationError if the input data is not well formed
+     * @throws ValidationError      if data constraints are not met
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -149,7 +148,8 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -162,13 +162,6 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         }
     }
 
-    /**
-     * Add items to a repository via serialised data.
-     *
-     * @param id       the repository ID
-     * @param data     a list of serialised items
-     * @return an import log
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -176,9 +169,8 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     public ImportLog addChildren(
             @PathParam("id") String id,
             @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
-            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            InputStream data) throws ItemNotFound, DeserializationError, ValidationError {
+            InputStream data) throws ItemNotFound, DeserializationError, ValidationError, PermissionDenied {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             Repository repository = api().get(id, cls);
@@ -190,7 +182,7 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 accessible.setPermissionScope(repository);
                 repository.addTopLevelDocumentaryUnit(accessible.as(DocumentaryUnit.class));
             };
-            ImportLog log = new BatchOperations(graph, repository, version, tolerant,
+            ImportLog log = new BatchOperations(graph, repository, true, tolerant,
                     Lists.newArrayList(cb)).batchImport(data, user, getLogMessage());
             if (commit) {
                 logger.debug("Committing batch ingest transaction...");
@@ -200,35 +192,13 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
         }
     }
 
-
-    @DELETE
-    @Path("{id:[^/]+}/all")
-    public void deleteAllDocs(@PathParam("id") String id,
-                              @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
-                              @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit)
-            throws ItemNotFound {
-        try (final Tx tx = beginTx()) {
-            Repository repository = api().get(id, cls);
-            List<String> ids = StreamSupport.stream(
-                        repository.getAllDocumentaryUnits().spliterator(), false)
-                    .map(Entity::getId)
-                    .collect(Collectors.toList());
-            new BatchOperations(graph)
-                    .setScope(repository)
-                    .setVersioning(version)
-                    .batchDelete(ids, getCurrentActioner(), getLogMessage());
-            if (commit) {
-                tx.success();
-            }
-        }
-    }
-
     /**
      * Export the given repository as an EAG file.
      *
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAG XML Document
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/eag")
@@ -243,8 +213,6 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
                 try (final Tx tx2 = beginTx()) {
                     new Eag2012Exporter(api()).export(repository, outputStream, lang);
                     tx2.success();
-                } catch (TransformerException e) {
-                    throw new WebApplicationException(e);
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
         }
@@ -257,13 +225,14 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @param id   the unit id
      * @param lang a three-letter ISO639-2 code
      * @return an EAD XML Document
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/ead")
     @Produces("application/zip")
     public Response exportEad(@PathParam("id") String id,
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
-            throws IOException, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Repository repo = api().get(id, cls);
             final EadExporter eadExporter = new Ead2002Exporter(api());

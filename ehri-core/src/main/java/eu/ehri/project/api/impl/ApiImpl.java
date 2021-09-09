@@ -221,7 +221,7 @@ public class ApiImpl implements Api {
 
     @Override
     public int delete(String id, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, SerializationError, ItemNotFound, HierarchyError {
+            throws PermissionDenied, SerializationError, ItemNotFound, HierarchyError {
         Accessible item = manager.getEntity(id, Accessible.class);
 
         // Sanity checks: don't delete reserved items or things with children.

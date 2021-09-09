@@ -28,12 +28,10 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.xml.XmlExporter;
-import eu.ehri.project.importers.json.BatchOperations;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
@@ -42,23 +40,17 @@ import eu.ehri.project.utils.Table;
 import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.transform.TransformerException;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 
 /**
- * Handle CRUD operations on Accessible's by using the
- * eu.ehri.project.views.Views class generic code. Resources for specific
+ * Handle CRUD operations on Accessible entities. Resources for specific
  * entities can extend this class.
  *
  * @param <E> the specific Accessible derived class
@@ -104,8 +96,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param database the injected neo4j database
      * @param cls      the entity Java class
      */
-    public AbstractAccessibleResource(
-            @Context GraphDatabaseService database, Class<E> cls) {
+    public AbstractAccessibleResource(@Context GraphDatabaseService database, Class<E> cls) {
         super(database);
         this.cls = cls;
         aclManager = new AclManager(graph);
@@ -141,6 +132,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param <T>          the generic type of class T
      * @return the response of the create request, the 'location' will contain
      * the url of the newly created instance.
+     * @throws ValidationError      if the action would violate constraints
+     * @throws PermissionDenied     if the user does not have permission to perform the action
+     * @throws DeserializationError if the incoming data cannot be parsed
      */
     public <T extends Accessible> Response createItem(
             Bundle entityBundle,
@@ -172,6 +166,9 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *                     relationships to the new item.
      * @return the response of the create request, the 'location' will contain
      * the url of the newly created instance.
+     * @throws ValidationError      if the action would violate constraints
+     * @throws PermissionDenied     if the user does not have permission to perform the action
+     * @throws DeserializationError if the incoming data cannot be parsed
      */
     public Response createItem(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, DeserializationError {
@@ -187,8 +184,8 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * Retieve (get) an instance of the 'entity' in the database
      *
      * @param id the Entities identifier string
-     * @return the response of the request, which contains the json
-     * representation
+     * @return the response of the request, which contains the JSON representation
+     * @throws ItemNotFound if the item does not exist
      */
     public Response getItem(String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -205,6 +202,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param entityBundle the bundle
      * @return the response of the update request
+     * @throws ValidationError      if the action would violate constraints
+     * @throws ItemNotFound         if the item does not exist
+     * @throws PermissionDenied     if the user does not have permission to perform the action
+     * @throws DeserializationError if the incoming data cannot be parsed
      */
     public Response updateItem(Bundle entityBundle)
             throws PermissionDenied, ValidationError, ItemNotFound, DeserializationError {
@@ -221,6 +222,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param id        the item's ID
      * @param rawBundle the bundle
      * @return the response of the update request
+     * @throws ValidationError      if the action would violate constraints
+     * @throws ItemNotFound         if the item does not exist
+     * @throws PermissionDenied     if the user does not have permission to perform the action
+     * @throws DeserializationError if the incoming data cannot be parsed
      */
     public Response updateItem(String id, Bundle rawBundle)
             throws PermissionDenied, ValidationError,
@@ -245,6 +250,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param id         the item's ID
      * @param preProcess a handler to run before deleting the item
+     * @throws ValidationError  if the action would violate constraints
+     * @throws ItemNotFound     if the item does not exist
+     * @throws PermissionDenied if the user does not have permission to perform the action
+     * @throws HierarchyError   if the action would orphan child items
      */
     protected void deleteItem(String id, Handler<E> preProcess)
             throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
@@ -261,6 +270,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * Delete (remove) an instance of the 'entity' in the database
      *
      * @param id the item's ID
+     * @throws ValidationError  if the action would violate constraints
+     * @throws ItemNotFound     if the item does not exist
+     * @throws PermissionDenied if the user does not have permission to perform the action
+     * @throws HierarchyError   if the action would orphan child items
      */
     protected void deleteItem(String id)
             throws PermissionDenied, ItemNotFound, ValidationError, HierarchyError {
@@ -269,9 +282,14 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     /**
      * Delete an item and all of its child items.
-     * @param id the item's ID
-     * @param children an iterable of child items
+     *
+     * @param id  the item's ID
+     * @param all an iterable of child items
      * @return a table of delete item IDs
+     * @throws ValidationError  if the action would violate constraints
+     * @throws ItemNotFound     if the item does not exist
+     * @throws PermissionDenied if the user does not have permission to perform the action
+     * @throws HierarchyError   if the action would orphan child items
      */
     protected Table deleteContents(String id, boolean all)
             throws ItemNotFound, PermissionDenied, ValidationError, HierarchyError {
@@ -280,7 +298,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
             List<String> data = api().deleteChildren(id, all, getLogMessage());
             return Table.column(data);
         } catch (SerializationError e) {
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -298,8 +316,6 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
                     zos.closeEntry();
                 }
                 tx.success();
-            } catch (TransformerException e) {
-                throw new WebApplicationException(e);
             }
         }).type("application/zip").build();
     }

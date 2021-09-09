@@ -4,7 +4,6 @@ import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.base.Described;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -18,7 +17,7 @@ public interface DublinCoreExporter extends XmlExporter<Described> {
      *                     descriptions are available
      */
     void export(Described item,
-            OutputStream outputStream, String langCode) throws IOException, TransformerException;
+            OutputStream outputStream, String langCode) throws IOException;
 
     /**
      * Export an item as a DC document.

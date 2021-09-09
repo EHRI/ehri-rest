@@ -109,7 +109,6 @@ public class ImportResource extends AbstractResource {
      * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
      * <p>
      * Example:
-     * <p>
      * <pre>
      *    <code>
      * curl -X POST \
@@ -119,20 +118,27 @@ public class ImportResource extends AbstractResource {
      *     </code>
      * </pre>
      *
-     * @param scopeId    the id of the import scope (i.e. repository)
-     * @param tolerant   whether or not to die on the first validation error
-     * @param logMessage log message for import. If this refers to an accessible local file
-     *                   its contents will be used.
-     * @param baseURI    a URI prefix common to ingested items that will be removed
-     *                   from each item's URI to obtain the local identifier.
-     * @param uriSuffix  a URI suffix common to ingested items that will be removed
-     *                   from each item's URI to obtain the local identifier.
-     * @param format     the RDF format of the POSTed data
-     * @param commit     commit the operation to the database. The default
-     *                   mode is to operate as a dry-run
-     * @param stream     a stream of SKOS data in a valid format.
+     * @param scopeId      the id of the import scope (i.e. repository)
+     * @param tolerant     whether or not to die on the first validation error
+     * @param logMessage   log message for import. If this refers to an accessible local file
+     *                     its contents will be used.
+     * @param baseURI      a URI prefix common to ingested items that will be removed
+     *                     from each item's URI to obtain the local identifier.
+     * @param uriSuffix    a URI suffix common to ingested items that will be removed
+     *                     from each item's URI to obtain the local identifier.
+     * @param format       the RDF format of the POSTed data
+     * @param commit       commit the operation to the database. The default
+     *                     mode is to operate as a dry-run
+     * @param allowUpdates allow the operation to update existing items
+     * @param lang         the default language of description fields if not inferrable
+     *                     the data
+     * @param stream       a stream of SKOS data in a valid format.
      * @return a JSON object showing how many records were created,
      * updated, or unchanged.
+     * @throws ItemNotFound         if the scope does not exist
+     * @throws ValidationError      if data constraints are not met
+     * @throws IOException          if an error occurs reading the input data
+     * @throws DeserializationError if the input data is not well-formed
      */
     @POST
     @Path("skos")
@@ -186,7 +192,6 @@ public class ImportResource extends AbstractResource {
      * The Content-Type header is used to distinguish the contents.
      * <p>
      * The way you would run with would typically be:
-     * <p>
      * <pre>
      *    <code>
      *     curl -X POST \
@@ -204,35 +209,36 @@ public class ImportResource extends AbstractResource {
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       the id of the import scope (i.e. repository)
-     * @param tolerant      whether or not to die on the first validation error
-     * @param allowUpdates  allow the importer to update items that already exist. If it
-     *                      attempts to do so without this option enabled an error will
-     *                      be thrown
      * @param useSourceId   by default a description will update an existing description if it
      *                      has the same language code. Setting this option to 'true' allows adding
      *                      multiple descriptions in the same language by taking into account the
      *                      value of the EAD ID.
      * @param logMessage    log message for import. If this refers to an accessible local file
      *                      its contents will be used.
-     * @param handlerClass  the fully-qualified handler class name
-     *                      (defaults to EadHandler)
-     * @param importerClass the fully-qualified import class name
-     *                      (defaults to EadImporter)
-     * @param propertyFile  a local file path or URL pointing to an import properties
-     *                      configuration file.
+     * @param handlerClass  the fully-qualified handler class name (defaults to EadHandler)
+     * @param importerClass the fully-qualified import class name (defaults to EadImporter)
+     * @param propertyFile  a local file path or URL pointing to an import properties configuration file.
+     * @param defaultLang   the default description language, if not inferrable from the data
      * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
      *                      provided to identify the source, e.g. the name of the file from
      *                      which the stream derives. If a tag is not provided, or the
      *                      input data is not an XML stream, the default value of
      *                      &quot;-&quot; will be used
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
+     * @param tolerant      whether or not to die on the first validation error
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
      *                      multiple EAD files in an archive, a list of file URLs.
      *                      The Content-Type header is used to distinguish
      *                      the contents.
-     * @return a JSON object showing how many records were created,
-     * updated, or unchanged.
+     * @return a JSON object showing how many records were created, updated, or unchanged.
+     * @throws ItemNotFound          if the scope does not exist
+     * @throws ImportValidationError if data constraints are not met
+     * @throws IOException           if an error occurs reading the input data
+     * @throws DeserializationError  if the input data is not well-formed
      */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -292,11 +298,41 @@ public class ImportResource extends AbstractResource {
      * allows specifying items to ignore, and fondsId, which allows
      * synchronising just within a specific item.
      *
-     * @param fonds the ID of a specific fonds within the repository
-     *              scope to synchronise. If missing the scope will be
-     *              used
-     * @param ex    the ID of an item to be excluded from the sync operation
+     * @param scopeId       the id of the import scope (i.e. repository)
+     * @param fonds         the ID of a specific fonds within the repository
+     *                      scope to synchronise. If missing the scope will be
+     *                      used
+     * @param ex            the ID of an item to be excluded from the sync operation
+     * @param useSourceId   by default a description will update an existing description if it
+     *                      has the same language code. Setting this option to 'true' allows adding
+     *                      multiple descriptions in the same language by taking into account the
+     *                      value of the EAD ID.
+     * @param logMessage    log message for import. If this refers to an accessible local file
+     *                      its contents will be used.
+     * @param handlerClass  the fully-qualified handler class name (defaults to EadHandler)
+     * @param importerClass the fully-qualified import class name (defaults to EadImporter)
+     * @param propertyFile  a local file path or URL pointing to an import properties configuration file.
+     * @param lang          the default description language, if not inferrable from the data
+     * @param tag           if the data is a stream of XML a string &quot;tag&quot; can be
+     *                      provided to identify the source, e.g. the name of the file from
+     *                      which the stream derives. If a tag is not provided, or the
+     *                      input data is not an XML stream, the default value of
+     *                      &quot;-&quot; will be used
+     * @param allowUpdates  allow the importer to update items that already exist. If it
+     *                      attempts to do so without this option enabled an error will
+     *                      be thrown
+     * @param tolerant      whether or not to die on the first validation error
+     * @param commit        commit the operation to the database. The default
+     *                      mode is to operate as a dry-run
+     * @param data          file data containing one of: a single EAD file,
+     *                      multiple EAD files in an archive, a list of file URLs.
+     *                      The Content-Type header is used to distinguish
+     *                      the contents.
      * @return a {@link SyncLog} instance.
+     * @throws ItemNotFound          if the scope does not exist
+     * @throws ImportValidationError if data constraints are not met
+     * @throws IOException           if an error occurs reading the input data
+     * @throws DeserializationError  if the input data is not well-formed
      */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -355,9 +391,6 @@ public class ImportResource extends AbstractResource {
         }
     }
 
-    /**
-     * Import EAG files. See EAD import for details.
-     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
@@ -407,9 +440,6 @@ public class ImportResource extends AbstractResource {
         }
     }
 
-    /**
-     * Import EAC files. See EAD import for details.
-     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
             MediaType.TEXT_XML, MediaType.APPLICATION_OCTET_STREAM})
@@ -459,13 +489,6 @@ public class ImportResource extends AbstractResource {
         }
     }
 
-    /**
-     * Import a set of CSV files. See EAD handler for options and
-     * defaults but substitute text/csv for the input mimetype when
-     * a single file is POSTed.
-     * <p>
-     * Additional note: no handler class is required.
-     */
     @POST
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE,
             MediaType.APPLICATION_OCTET_STREAM})
@@ -521,8 +544,10 @@ public class ImportResource extends AbstractResource {
      * <p>
      * A single log item will be created for the entire CSV.
      *
-     * @param scopeId the id of the permission scope item
-     * @param table the tabular data
+     * @param scopeId  the id of the permission scope item
+     * @param table    the tabular data
+     * @param tolerant don't abort on the first error
+     * @param commit   actually change the graph
      * @return an import log
      * @throws DeserializationError the problems are found with the import data
      */
@@ -531,9 +556,9 @@ public class ImportResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("coreferences")
     public ImportLog importCoreferences(@QueryParam(SCOPE_PARAM) String scopeId,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            Table table) throws DeserializationError, ItemNotFound {
+                                        @QueryParam(TOLERANT_PARAM) @DefaultValue("false") Boolean tolerant,
+                                        @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
+                                        Table table) throws DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(scopeId, PermissionScope.class);
             ImportLog log = new LinkImporter(graph, getCurrentActioner(), tolerant)
@@ -550,6 +575,7 @@ public class ImportResource extends AbstractResource {
      * Create multiple links via CSV or JSON tabular upload.
      * <p>
      * Each data row must consist of 6 columns:
+     * </p>
      * <ol>
      * <li>the source item ID
      * <li>the target item ID
@@ -560,8 +586,11 @@ public class ImportResource extends AbstractResource {
      * </ol>
      * <p>
      * A single log item will be created for the entire CSV.
+     * </p>
      *
-     * @param table the tabular data
+     * @param tolerant don't abort on the first error
+     * @param commit   actually change the graph
+     * @param table    the tabular data
      * @return an import log
      * @throws DeserializationError the problems are found with the import data
      */

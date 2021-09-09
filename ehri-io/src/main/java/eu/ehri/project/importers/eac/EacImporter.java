@@ -64,6 +64,8 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
      *
      * @param graph           the framed graph
      * @param permissionScope the permission scope
+     * @param actioner        the current user
+     * @param options         the import options
      * @param log             the import log
      */
     public EacImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
@@ -79,6 +81,8 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
 
     /**
      * @param itemData the item data map
+     * @return the new historical agent
+     * @throws ValidationError if data constraints are not met
      */
     @Override
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {

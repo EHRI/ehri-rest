@@ -75,7 +75,9 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * Construct an EadImporter object.
      *
      * @param graph           the framed graph
+     * @param actioner        the current user
      * @param permissionScope the permission scope
+     * @param options         the import options
      * @param log             the log
      */
     public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
@@ -91,7 +93,8 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * @param itemData The raw data map
      * @param idPath   The identifiers of parent documents,
      *                 not including those of the overall permission scope
-     * @throws ValidationError when the itemData does not contain an identifier for the unit or...
+     * @return the new unit
+     * @throws ValidationError when data constraints are not met
      */
     @Override
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
@@ -144,6 +147,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      *
      * @param itemData the raw data map
      * @return a description bundle
+     * @throws ValidationError when data constraints are not met
      */
     protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
         List<Map<String, Object>> extractedDates = ImportHelpers.extractDates(itemData);

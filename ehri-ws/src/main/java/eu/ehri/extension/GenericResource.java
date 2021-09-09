@@ -90,7 +90,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     /**
      * Fetch a list of items by their ID.
-     *
+     * <p>
      * Note: if <i>both</i> global IDs and graph IDs (GIDs) are given as query
      * parameters, GIDs will be returned at the head of the response list.
      *
@@ -121,7 +121,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
 
     /**
      * Fetch a list of items by their ID.
-     *
+     * <p>
      * Note: if <i>both</i> global IDs and graph IDs (GIDs) are given as query
      * parameters, GIDs will be returned at the head of the response list.
      *
@@ -129,12 +129,13 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *             either strings or (if a number) graph (long) ids.
      * @return A serialized list of items, with nulls for items that are not
      * found or inaccessible.
+     * @throws DeserializationError if the input JSON is not well-formed
+     * @throws IOException          if the input cannot be read
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response listFromJson(String json)
-            throws ItemNotFound, PermissionDenied, DeserializationError, IOException {
+    public Response listFromJson(String json) throws DeserializationError, IOException {
         IdSet set = parseGraphIds(json);
         return this.list(set.ids, set.gids);
     }
@@ -144,6 +145,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the item's ID
      * @return A serialized representation.
+     * @throws ItemNotFound if the item does not exist
+     * @throws AccessDenied if the user cannot access the item
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -171,12 +174,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item
      * @return a list of accessor frames
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/access")
-    public Response visibility(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, SerializationError {
+    public Response visibility(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessible item = manager.getEntity(id, Accessible.class);
             Iterable<Accessor> accessors = item.getAccessors();
@@ -193,13 +196,15 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id          the ID of the item
      * @param accessorIds the IDs of the users who can access this item.
      * @return the updated object
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ItemNotFound     if the item does not exist
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/access")
     public Response setVisibility(@PathParam("id") String id,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
-            throws PermissionDenied, ItemNotFound, SerializationError {
+                                  @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessible item = api().get(id, Accessible.class);
             Accessor current = getRequesterUserProfile();
@@ -216,6 +221,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to promote.
      * @return 200 response
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ItemNotFound     if the item does not exist
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -237,12 +244,14 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to remove
      * @return 200 response
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ItemNotFound     if the item does not exist
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/promote")
     public Response removePromotion(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response response = single(api().removePromotion(id));
             tx.success();
@@ -255,6 +264,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to promote.
      * @return 200 response
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ItemNotFound     if the item does not exist
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -276,12 +287,14 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the ID of the item to remove
      * @return 200 response
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ItemNotFound     if the item does not exist
      */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/demote")
     public Response removeDemotion(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Response item = single(api().removeDemotion(id));
             tx.success();
@@ -295,6 +308,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id          the event id
      * @param aggregation the aggregation strategy
      * @return A list of events
+     * @throws ItemNotFound if the item does not exist
+     * @throws AccessDenied if the user cannot access the item
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -318,12 +333,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the item ID
      * @return a list of annotations on the item
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/annotations")
-    public Response annotations(
-            @PathParam("id") String id) throws ItemNotFound {
+    public Response annotations(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Annotatable entity = manager.getEntity(id, Annotatable.class);
             Response response = streamingPage(() -> getQuery().page(
@@ -339,6 +354,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the item ID
      * @return a list of links with the item as a target
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -357,13 +373,14 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     /**
      * List all the permission grants that relate specifically to this item.
      *
+     * @param id the item ID
      * @return a list of grants for this item
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/permission-grants")
-    public Response permissionGrants(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound {
+    public Response permissionGrants(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             PermissionGrantTarget target = manager.getEntity(id, PermissionGrantTarget.class);
             Response response = streamingPage(() -> getQuery()
@@ -377,13 +394,14 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     /**
      * List all the permission grants that relate specifically to this scope.
      *
+     * @param id the item ID
      * @return a list of grants for which this item is the scope
+     * @throws ItemNotFound if one of the given items does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id:[^/]+}/scope-permission-grants")
-    public Response permissionGrantsAsScope(@PathParam("id") String id)
-            throws ItemNotFound {
+    public Response permissionGrantsAsScope(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
             Response response = streamingPage(() -> getQuery()
@@ -402,6 +420,9 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param did    the description's ID
      * @param bundle the access point data
      * @return the new access point
+     * @throws ItemNotFound     if one of the given items does not exist
+     * @throws PermissionDenied if the user cannot perform the action
+     * @throws ValidationError  if data constraints are not met
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -432,6 +453,8 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      * @param id   the parent item's ID
      * @param did  the description's ID
      * @param apid the access point's ID
+     * @throws ItemNotFound     if one of the given items does not exist
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @DELETE
     @Path("{id:[^/]+}/descriptions/{did:[^/]+}/access-points/{apid:[^/]+}")
@@ -452,10 +475,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
      *
      * @param id the event id
      * @return a list of versions
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/versions")
-    public Response listVersions(@PathParam("id") String id) throws ItemNotFound, AccessDenied {
+    public Response listVersions(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Versioned item = api().get(id, Versioned.class);
             Response response = streamingPage(() -> getQuery().setStream(true)
@@ -471,7 +495,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Document exportDc(
             @PathParam("id") String id,
             @QueryParam("lang") String langCode)
-            throws AccessDenied, ItemNotFound, IOException {
+            throws ItemNotFound, IOException {
         try (final Tx tx = beginTx()) {
             Described item = api().get(id, Described.class);
             DublinCoreExporter exporter = new DublinCore11Exporter(api());

@@ -75,29 +75,52 @@ public interface QueryApi {
     /**
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
+     *
+     * @param cls the entity class
+     * @param <E> the generic type
+     * @return a page of items
      */
     <E extends Entity> Page<E> page(Class<E> cls);
 
     /**
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
+     *
+     * @param type the entity type
+     * @param cls  the entity class
+     * @param <E>  the generic type
+     * @return a page of items
      */
     <E extends Entity> Page<E> page(EntityClass type, Class<E> cls);
 
     /**
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
+     *
+     * @param entities the full set of items
+     * @param cls      the items' class
+     * @param <E>      the generic type
+     * @return a page of items
      */
     <E extends Entity> Page<E> page(Iterable<? extends E> entities, Class<E> cls);
 
     /**
      * Return a Page instance containing a total of total items, and an iterable
      * for the given page/count.
+     *
+     * @param key a search key
+     * @param query the query for the value of the key
+     * @param cls the Java class
+     * @param <E> the generic type
+     * @return a page of items
      */
     <E extends Entity> Page<E> page(String key, String query, Class<E> cls);
 
     /**
      * Count items accessible to a given user.
+     *
+     * @param vertices the input item set
+     * @return the number of accessible items
      */
     long count(Iterable<?> vertices);
 
@@ -105,6 +128,9 @@ public interface QueryApi {
      * Count all items of a given type.
      * <p>
      * NB: Count doesn't 'account' for ACL privileges!
+     *
+     * @param type the entity type
+     * @return the number of accessible items, disregarding ACL
      */
     long count(EntityClass type);
 

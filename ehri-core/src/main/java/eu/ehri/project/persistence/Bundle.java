@@ -195,6 +195,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @param type      The bundle's type class
      * @param data      An initial map of data
      * @param relations An initial set of relations
+     * @return a new bundle
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations) {
@@ -209,6 +210,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @param data      An initial map of data
      * @param relations An initial set of relations
      * @param meta      An initial map of metadata
+     * @return a new bundle
      */
     public static Bundle of(String id, EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations, Map<String, Object> meta) {
@@ -221,6 +223,7 @@ public final class Bundle implements NestableData<Bundle> {
      * @param type      The bundle's type class
      * @param data      An initial map of data
      * @param relations An initial set of relations
+     * @return a new bundle
      */
     public static Bundle of(EntityClass type, Map<String, Object> data,
             Multimap<String, Bundle> relations) {
@@ -231,6 +234,7 @@ public final class Bundle implements NestableData<Bundle> {
      * Constructor for just a type.
      *
      * @param type The bundle's type class
+     * @return a new bundle
      */
     public static Bundle of(EntityClass type) {
         return of(null, type, Maps.<String, Object>newHashMap(), ArrayListMultimap
@@ -242,6 +246,7 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param type The bundle's type class
      * @param data An initial map of data
+     * @return a new bundle
      */
     public static Bundle of(EntityClass type, Map<String, Object> data) {
         return of(null, type, data, ArrayListMultimap.<String, Bundle>create(),
@@ -262,6 +267,7 @@ public final class Bundle implements NestableData<Bundle> {
      * Get a bundle with the given id.
      *
      * @param id The bundle's id
+     * @return a bundle with the given ID
      */
     public Bundle withId(String id) {
         checkNotNull(id);
@@ -670,6 +676,7 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param data A raw data object
      * @return A bundle
+     * @throws DeserializationError if the input object is badly-formed
      */
     public static Bundle fromData(Object data) throws DeserializationError {
         return DataConverter.dataToBundle(data);
@@ -689,6 +696,7 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param json A JSON representation
      * @return A bundle
+     * @throws DeserializationError if the input JSON is badly-formed
      */
     public static Bundle fromString(String json) throws DeserializationError {
         return DataConverter.jsonToBundle(json);
@@ -699,6 +707,7 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param stream A JSON stream
      * @return A bundle
+     * @throws DeserializationError if the input stream is badly-formed
      */
     public static Bundle fromStream(InputStream stream) throws DeserializationError {
         return DataConverter.streamToBundle(stream);
@@ -709,11 +718,19 @@ public final class Bundle implements NestableData<Bundle> {
      *
      * @param bundle the bundle
      * @param stream the output stream
+     * @throws SerializationError if the graph data cannot be serialized
      */
     public static void toStream(Bundle bundle, OutputStream stream) throws SerializationError {
         DataConverter.bundleToStream(bundle, stream);
     }
 
+    /**
+     * Convert an input stream to a stream of bundles.
+     *
+     * @param inputStream an input stream object
+     * @return an iterable of bundle objects
+     * @throws DeserializationError if the stream is badly-formed
+     */
     public static CloseableIterable<Bundle> bundleStream(InputStream inputStream) throws DeserializationError {
         return DataConverter.bundleStream(inputStream);
     }

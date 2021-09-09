@@ -133,6 +133,7 @@ public final class JavaHandlerUtils {
      * @param from   The source vertex
      * @param to     The target vertex
      * @param labels The set of labels
+     * @return If any relationships were removed
      */
     public static boolean removeAllRelationships(Vertex from, Vertex to, String... labels) {
         int removed = 0;

@@ -342,7 +342,7 @@ public final class Eac2010Exporter extends AbstractStreamingXmlExporter<Historic
     }
 
     private Optional<String> getLinkName(Described entity,
-            Description description, Link link, String lang) {
+                                         Description description, Link link, String lang) {
         for (Accessible other : link.getLinkBodies()) {
             // We only use an access point body for the name of this link
             // if the access point is on the current entity (otherwise the

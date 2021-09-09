@@ -62,32 +62,17 @@ import static eu.ehri.project.importers.util.ImportHelpers.OBJECT_IDENTIFIER;
  * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
  * should not be any c-levels beneath such a c-level
  */
+@Deprecated
 public class VirtualEadImporter extends EadImporter {
 
     private static final String REPOID = "vcRepository";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
 
-    /**
-     * Construct a VirtualEadImporter object.
-     *
-     * @param graph           the framed graph
-     * @param permissionScope the permission scope
-     * @param log             the import log
-     */
     public VirtualEadImporter(FramedGraph<?> graph, PermissionScope permissionScope,
                               Actioner actioner, ImportOptions options, ImportLog log) {
         super(graph, permissionScope, actioner, options, log);
     }
 
-    /**
-     * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth. this will import the
-     * structure as VirtualUnits, which either have a DocDescription (VirtualLevel, like series) or they point to an
-     * existing DocDesc from an existing DocumentaryUnit (VirtualReferrer).
-     *
-     * @param itemData The data map
-     * @param idPath   The identifiers of parent documents, not including those of the overall permission scope
-     * @throws ValidationError when the itemData does not contain an identifier for the unit or...
-     */
     @Override
     public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
@@ -167,14 +152,6 @@ public class VirtualEadImporter extends EadImporter {
         return list;
     }
 
-    /**
-     * Creates a Map containing properties of a Virtual Unit.
-     * <p>
-     * These properties are the unit's identifiers.
-     *
-     * @param itemData Map of all extracted information
-     * @return a Map representing a Documentary Unit node
-     */
     private Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = Maps.newHashMap();
         if (itemData.get(OBJECT_IDENTIFIER) != null) {

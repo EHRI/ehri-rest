@@ -368,6 +368,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>strict</b>.
      * @return a list of event ranges
+     * @throws ItemNotFound if the user does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -395,6 +396,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>user</b>.
      * @return a list of event ranges
+     * @throws ItemNotFound if the user does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

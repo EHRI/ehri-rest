@@ -43,7 +43,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -98,7 +97,7 @@ public class AuthoritativeSetResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (Tx tx = beginTx()) {
             Response response = createItem(bundle, accessors);
@@ -152,9 +151,9 @@ public class AuthoritativeSetResource extends
     @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                Bundle bundle)
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (Tx tx = beginTx()) {
             final AuthoritativeSet set = api().get(id, cls);
             Response item = createItem(bundle, accessors, agent -> {
@@ -166,13 +165,6 @@ public class AuthoritativeSetResource extends
         }
     }
 
-    /**
-     * Add items to a set via serialised data.
-     *
-     * @param id       the set ID
-     * @param data     a list of serialised items
-     * @return an import log
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -212,13 +204,13 @@ public class AuthoritativeSetResource extends
      * @param id   the set ID
      * @param lang a three-letter ISO639-2 code
      * @return a zip containing the set's historical agents as EAC
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/eac")
     @Produces("application/zip")
     public Response exportEag(@PathParam("id") String id,
-            final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
-            throws IOException, ItemNotFound {
+                              final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             final AuthoritativeSet set = api().get(id, cls);
             final EacExporter eacExporter = new Eac2010Exporter(api());

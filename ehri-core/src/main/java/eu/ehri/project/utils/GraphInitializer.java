@@ -36,7 +36,6 @@ import java.util.HashMap;
 
 /**
  * Initialize the graph with a minimal set of vertices. This includes:
- * <p>
  * <ul>
  *     <li>an admin account</li>
  *     <li>permission nodes</li>

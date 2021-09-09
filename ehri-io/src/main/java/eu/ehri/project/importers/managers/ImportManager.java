@@ -41,8 +41,8 @@ public interface ImportManager {
      * @param filePath   path to the file to import
      * @param logMessage an optional message to describe the import
      * @return an ImportLog for the given file
-     * @throws IOException     when reading or writing files fails
-     * @throws InputParseError when parsing the file fails
+     * @throws IOException           when reading or writing files fails
+     * @throws InputParseError       when parsing the file fails
      * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importFile(String filePath, String logMessage)
@@ -54,8 +54,8 @@ public interface ImportManager {
      * @param stream     the input stream
      * @param logMessage an optional log message to describe the import
      * @return an ImportLog for the given stream
-     * @throws IOException     when reading or writing fails
-     * @throws InputParseError when parsing the stream data fails
+     * @throws IOException           when reading or writing fails
+     * @throws InputParseError       when parsing the stream data fails
      * @throws ImportValidationError when the content of the file is invalid
      */
     default ImportLog importInputStream(InputStream stream, String logMessage)
@@ -70,8 +70,8 @@ public interface ImportManager {
      * @param tag        an optional tag identifying the source of the stream
      * @param logMessage an optional log message to describe the import
      * @return an ImportLog for the given stream
-     * @throws IOException     when reading or writing fails
-     * @throws InputParseError when parsing the stream data fails
+     * @throws IOException           when reading or writing fails
+     * @throws InputParseError       when parsing the stream data fails
      * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importInputStream(InputStream stream, String tag, String logMessage)
@@ -81,11 +81,11 @@ public interface ImportManager {
      * Import multiple files via a list of file paths.
      *
      * @param json       a JSON-format stream in the form of a object
-     *                   consisting of name -> URL key/values
+     *                   consisting of name/URL key/values
      * @param logMessage an optional log message to describe the import
      * @return an ImportLog for the given stream
-     * @throws IOException     when reading or writing fails
-     * @throws InputParseError when parsing the stream data fails
+     * @throws IOException           when reading or writing fails
+     * @throws InputParseError       when parsing the stream data fails
      * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importJson(InputStream json, String logMessage)
@@ -97,8 +97,8 @@ public interface ImportManager {
      * @param filePaths  a list of file paths
      * @param logMessage an optional log message to describe the import
      * @return an ImportLog for the given stream
-     * @throws IOException     when reading or writing fails
-     * @throws InputParseError when parsing the stream data fails
+     * @throws IOException           when reading or writing fails
+     * @throws InputParseError       when parsing the stream data fails
      * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importFiles(List<String> filePaths, String logMessage)
@@ -110,8 +110,8 @@ public interface ImportManager {
      * @param stream     the archive input stream
      * @param logMessage an optional log message to describe the import
      * @return an ImportLog for the given stream
-     * @throws IOException     when reading or writing fails
-     * @throws InputParseError when parsing the stream data fails
+     * @throws IOException           when reading or writing fails
+     * @throws InputParseError       when parsing the stream data fails
      * @throws ImportValidationError when the content of the file is invalid
      */
     ImportLog importArchive(ArchiveInputStream stream, String logMessage)

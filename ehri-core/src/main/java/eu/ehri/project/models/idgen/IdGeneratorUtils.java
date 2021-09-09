@@ -68,6 +68,7 @@ public class IdGeneratorUtils {
      * @param scope  the permission scope
      * @param bundle the item's data bundle
      * @param ident  the item's identifier
+     * @return a unique ID incorporating the item's local identifier and its scope
      */
     public static String generateId(PermissionScope scope, Bundle bundle, String ident) {
         List<String> scopeIds = Lists.newArrayList();

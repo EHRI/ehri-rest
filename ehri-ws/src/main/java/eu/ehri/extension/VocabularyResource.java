@@ -88,7 +88,7 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response create(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
             Response item = createItem(bundle, accessors);
@@ -142,7 +142,8 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
     @Path("{id:[^/]+}")
     @Override
     public Response createChild(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                Bundle bundle)
             throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -162,13 +163,14 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
      * @param format  the RDF format. Can be one of: RDF/XML, N3, TTL
      * @param baseUri the base URI for exported items
      * @return a SKOS vocabulary
+     * @throws ItemNotFound if the item does not exist
      */
     @GET
     @Path("{id:[^/]+}/export")
     @Produces({TURTLE_MIMETYPE, RDF_XML_MIMETYPE, N3_MIMETYPE})
     public Response exportSkos(@PathParam("id") String id,
-            final @QueryParam("format") String format,
-            final @QueryParam("baseUri") String baseUri)
+                               final @QueryParam("format") String format,
+                               final @QueryParam("baseUri") String baseUri)
             throws ItemNotFound {
         final String rdfFormat = getRdfFormat(format);
         final String base = baseUri == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : baseUri;

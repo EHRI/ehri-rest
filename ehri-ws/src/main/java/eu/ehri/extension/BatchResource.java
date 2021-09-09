@@ -34,13 +34,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -72,9 +66,14 @@ public class BatchResource extends AbstractResource {
      * @param tolerant    whether to allow individual validation failures
      * @param version     whether to create a version prior to delete
      * @param log         an optional log message
+     * @param commit  actually change the graph
      * @param inputStream a JSON document containing partial bundles containing
      *                    the needed data transformations
      * @return an import log describing the changes committed
+     * @throws IOException          if an error occurs reading the stream
+     * @throws DeserializationError if the input data is not well-formed
+     * @throws ItemNotFound         if the scope does not exist
+     * @throws ValidationError      if data constraints are not met
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -109,7 +108,12 @@ public class BatchResource extends AbstractResource {
      * @param scope   the ID of there item's permission scope
      * @param version whether to create a version prior to delete
      * @param log     an optional log message.
+     * @param tolerant don't abort on individual errors
+     * @param commit  actually change the graph
+     * @param ids a table containing IDs to delete
      * @return the number of items deleted
+     * @throws IOException          if an error occurs reading the stream
+     * @throws DeserializationError if the input data is not well-formed
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
@@ -121,8 +125,7 @@ public class BatchResource extends AbstractResource {
             @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
-            Table ids)
-            throws IOException, DeserializationError {
+            Table ids) throws IOException, DeserializationError {
         try (final Tx tx = beginTx()) {
             Actioner user = getCurrentActioner();
             PermissionScope parent = scope != null

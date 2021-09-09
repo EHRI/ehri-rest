@@ -4,7 +4,6 @@ import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -22,7 +21,7 @@ public interface EadExporter extends XmlExporter<DocumentaryUnit> {
      *                     descriptions are available
      */
     void export(DocumentaryUnit unit,
-            OutputStream outputStream, String langCode) throws IOException, TransformerException;
+            OutputStream outputStream, String langCode) throws IOException;
 
     /**
      * Export a documentary unit as an EAD document.

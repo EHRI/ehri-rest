@@ -74,11 +74,11 @@ public class PermissionsResource extends AbstractResource {
      * on the Authorization header.
      *
      * @return The current user's global permissions
+     * @throws ItemNotFound if there is not corresponding user in the system
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public InheritedGlobalPermissionSet getGlobalMatrix() throws PermissionDenied,
-            ItemNotFound {
+    public InheritedGlobalPermissionSet getGlobalMatrix() throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             InheritedGlobalPermissionSet matrix = getGlobalMatrix(getRequesterUserProfile().getId());
             tx.success();
@@ -91,12 +91,13 @@ public class PermissionsResource extends AbstractResource {
      *
      * @param userId The user ID
      * @return The user's global permissions
+     * @throws ItemNotFound if the user or group does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userOrGroup:[^/]+}")
     public InheritedGlobalPermissionSet getGlobalMatrix(@PathParam("userOrGroup") String userId)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             InheritedGlobalPermissionSet set = api()
@@ -113,6 +114,8 @@ public class PermissionsResource extends AbstractResource {
      * @param userId  The user ID
      * @param globals The permission matrix data
      * @return The new permissions
+     * @throws ItemNotFound if the user or group does not exist
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -136,13 +139,14 @@ public class PermissionsResource extends AbstractResource {
      * @param userId The user's ID
      * @param id     The item id
      * @return The user's permissions for that item
+     * @throws ItemNotFound if the user or group does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userOrGroup:[^/]+}/item/{id:[^/]+}")
     public InheritedItemPermissionSet getEntityMatrix(
             @PathParam("userOrGroup") String userId,
-            @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
+            @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             Accessible entity = manager.getEntity(id, Accessible.class);
@@ -159,6 +163,9 @@ public class PermissionsResource extends AbstractResource {
      * @param id        the item id
      * @param userId    the user id
      * @param itemPerms the serialized permission list
+     * @return an inherited permission set
+     * @throws ItemNotFound if the user or group does not exist
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -184,12 +191,13 @@ public class PermissionsResource extends AbstractResource {
      * @param userId The user's permissions
      * @param id     The scope ID
      * @return The matrix for the given scope
+     * @throws ItemNotFound if the user or group does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userOrGroup:[^/]+}/scope/{id:[^/]+}")
     public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userOrGroup") String userId,
-            @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
+            @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
             PermissionScope scope = manager.getEntity(id, PermissionScope.class);
@@ -209,6 +217,8 @@ public class PermissionsResource extends AbstractResource {
      * @param id      the scope id
      * @param globals the serialized permission list
      * @return The new permission matrix
+     * @throws ItemNotFound if the user or group does not exist
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -235,6 +245,7 @@ public class PermissionsResource extends AbstractResource {
      *
      * @param id the user's id
      * @return a list of permission grants for the user
+     * @throws ItemNotFound if the user or group does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

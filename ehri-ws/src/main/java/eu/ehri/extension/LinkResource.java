@@ -89,6 +89,10 @@ public class LinkResource extends AbstractAccessibleResource<Link>
      * @param bodies    optional list of entities to provide the body
      * @param accessors The IDs of accessors who can see this link
      * @return the created link item
+     * @throws ItemNotFound         if the item does not exist
+     * @throws PermissionDenied     if the user cannot perform the action
+     * @throws DeserializationError if the input data is not well formed
+     * @throws ValidationError      if data constraints are not met
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -100,8 +104,7 @@ public class LinkResource extends AbstractAccessibleResource<Link>
             @QueryParam(BODY_PARAM) List<String> bodies,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam("directional") @DefaultValue("false") boolean directional)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             if (source == null || target == null) {
                 throw new DeserializationError("Both source and target must be provided");

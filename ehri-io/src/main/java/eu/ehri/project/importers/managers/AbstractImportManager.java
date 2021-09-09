@@ -86,7 +86,8 @@ public abstract class AbstractImportManager implements ImportManager {
      */
     public AbstractImportManager(
             FramedGraph<?> graph,
-            PermissionScope scope, Actioner actioner,
+            PermissionScope scope,
+            Actioner actioner,
             Class<? extends ItemImporter<?, ?>> importerClass,
             ImportOptions options) {
         Preconditions.checkNotNull(scope, "Scope cannot be null");
@@ -260,7 +261,10 @@ public abstract class AbstractImportManager implements ImportManager {
      * @param stream  the InputStream to import
      * @param tag     an optional tag identifying the source of the stream
      * @param context the event that this import is part of
-     * @param log     an import log to write to
+     * @param log     an import log to which the result will be written
+     * @throws IOException     if the input stream cannot be read
+     * @throws ValidationError if data constraints are not met
+     * @throws InputParseError if the input stream cannot be parsed
      */
     protected abstract void importInputStream(InputStream stream,
                                               String tag,

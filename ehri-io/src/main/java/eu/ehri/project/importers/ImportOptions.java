@@ -24,6 +24,8 @@ public class ImportOptions {
 
     /**
      * Basic factory method.
+     *
+     * @return an options object
      */
     public static ImportOptions basic() {
         return create(false, false, false, null, (String) null);
@@ -59,6 +61,7 @@ public class ImportOptions {
      *                     in the same language/script to exist
      * @param defaultLang  the default language code to use for newly-created items
      * @param properties   a property mapping configuration
+     * @return an options object
      */
     public static ImportOptions create(boolean tolerant, boolean allowUpdates, boolean useSourceId, String defaultLang, String properties) {
         return new ImportOptions(tolerant, allowUpdates, useSourceId, defaultLang, properties);

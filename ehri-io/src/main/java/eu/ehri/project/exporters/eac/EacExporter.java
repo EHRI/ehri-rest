@@ -23,7 +23,6 @@ import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.models.HistoricalAgent;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -41,7 +40,7 @@ public interface EacExporter extends XmlExporter<HistoricalAgent> {
      *                     descriptions are available
      */
     void export(HistoricalAgent agent,
-            OutputStream outputStream, String langCode) throws IOException, TransformerException;
+                OutputStream outputStream, String langCode) throws IOException;
 
     /**
      * Export a historical agent as an EAC document.

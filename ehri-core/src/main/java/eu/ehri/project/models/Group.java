@@ -59,10 +59,12 @@ public interface Group extends Accessor, Accessible, Named, ItemHolder {
     Iterable<Group> getGroups();
 
     /**
-     * TODO FIXME use this in case we need Accessible items's instead of Accessors,
+     * Get members of this group as {@link Accessible} items.
+     *
+     * @return an iterable of user or group frames
      */
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.IN)
-    Iterable<Accessible> getMembersAsEntities();
+    Iterable<Accessible> getMemberEntities();
 
     /**
      * Get members of this group.

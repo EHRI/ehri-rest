@@ -9,7 +9,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,14 +29,13 @@ public abstract class AbstractStreamingXmlExporter<E extends Entity>
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             export(item, baos, langCode);
             return new DocumentReader().read(new ByteArrayInputStream(baos.toByteArray()));
-        } catch (ParserConfigurationException | TransformerException | SAXException e) {
+        } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void export(E unit, OutputStream outputStream, String langCode)
-            throws IOException, TransformerException {
+    public void export(E unit, OutputStream outputStream, String langCode) throws IOException {
         try (final IndentingXMLStreamWriter sw = new IndentingXMLStreamWriter(
                 xmlOutputFactory.createXMLStreamWriter(new BufferedOutputStream(outputStream)))) {
             sw.writeStartDocument();

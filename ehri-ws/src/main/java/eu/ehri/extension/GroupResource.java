@@ -20,12 +20,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
@@ -39,16 +34,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -88,8 +74,8 @@ public class GroupResource
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createGroup(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-            @QueryParam(MEMBER_PARAM) List<String> members)
+                                @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+                                @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             final Api.Acl acl = api().acl();
@@ -125,6 +111,11 @@ public class GroupResource
 
     /**
      * Add an accessor to a group.
+     *
+     * @param id  the group ID
+     * @param aid the accessor ID
+     * @throws ItemNotFound     if an item does not exist
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @POST
     @Path("{id:[^/]+}/{aid:[^/]+}")
@@ -140,6 +131,11 @@ public class GroupResource
 
     /**
      * Remove an accessor from a group.
+     *
+     * @param id  the group ID
+     * @param aid the accessor ID
+     * @throws ItemNotFound     if an item does not exist
+     * @throws PermissionDenied if the user cannot perform the action
      */
     @DELETE
     @Path("{id:[^/]+}/{aid:[^/]+}")
@@ -156,6 +152,11 @@ public class GroupResource
     /**
      * list members of the specified group;
      * UserProfiles and sub-Groups (direct descendants)
+     *
+     * @param id  the group ID
+     * @param all list members of nested groups as well
+     * @return a list of group members
+     * @throws ItemNotFound if the group does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -168,7 +169,7 @@ public class GroupResource
             Response response = streamingPage(() -> {
                 Iterable<Accessible> members = all
                         ? group.getAllUserProfileMembers()
-                        : group.getMembersAsEntities();
+                        : group.getMemberEntities();
                 return getQuery().page(members, Accessible.class);
             });
             tx.success();
@@ -195,6 +196,7 @@ public class GroupResource
      *                    "user", "strict" or "off" (no aggregation). Default is
      *                    <b>strict</b>.
      * @return a list of event ranges
+     * @throws ItemNotFound if the group does not exist
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

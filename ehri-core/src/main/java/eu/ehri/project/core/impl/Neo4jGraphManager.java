@@ -82,20 +82,20 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
 
     @Override
     public CloseableIterable<Vertex> getVertices(String key, Object value,
-            EntityClass type) {
+                                                 EntityClass type) {
         return graph.getBaseGraph().getVerticesByLabelKeyValue(type.getName(),
                 key, value);
     }
 
     @Override
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, ?> data) throws IntegrityError {
+                               Map<String, ?> data) throws IntegrityError {
         return setLabels(super.createVertex(id, type, data));
     }
 
     @Override
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, ?> data) throws ItemNotFound {
+                               Map<String, ?> data) throws ItemNotFound {
         return setLabels(super.updateVertex(id, type, data));
     }
 
@@ -127,7 +127,9 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     }
 
     /**
-     * Create
+     * Create the graph schema
+     *
+     * @param graph the underlying graph service
      */
     public static void createIndicesAndConstraints(GraphDatabaseService graph) {
         Schema schema = graph.schema();
