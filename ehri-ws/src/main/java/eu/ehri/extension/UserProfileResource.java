@@ -90,8 +90,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public Response createUserProfile(Bundle bundle,
             @QueryParam(GROUP_PARAM) List<String> groupIds,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
-            ValidationError, DeserializationError,
-            ItemNotFound {
+            ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
             final Api.Acl acl = api().acl();
             final Set<Group> groups = Sets.newHashSet();
@@ -106,7 +105,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             tx.success();
             return item;
         } catch (ItemNotFound e) {
-            throw new DeserializationError("User or group given as accessor not found: " + e.getValue());
+            throw new DeserializationError("User or group given as accessor not found: " + e.getId());
         }
     }
 
@@ -168,7 +167,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public boolean isFollowing(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().get(userId, cls);
             boolean following = user.isFollowing(
@@ -184,10 +183,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public boolean isFollower(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().get(userId, cls);
-            boolean follower = user.isFollower(manager.getEntity(otherId, UserProfile.class));
+            UserProfile otherUser = api().get(otherId, UserProfile.class);
+            boolean follower = user.isFollower(otherUser);
             tx.success();
             return follower;
         }
@@ -198,7 +198,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public void followUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             userProfilesApi().addFollowers(userId, otherIds);
             tx.success();
@@ -210,7 +210,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public void unfollowUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             userProfilesApi().removeFollowers(userId, otherIds);
             tx.success();
@@ -236,10 +236,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public boolean isBlocking(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().get(userId, cls);
-            boolean blocking = user.isBlocking(manager.getEntity(otherId, UserProfile.class));
+            UserProfile otherUser = api().get(otherId, UserProfile.class);
+            boolean blocking = user.isBlocking(otherUser);
             tx.success();
             return blocking;
         }
@@ -250,7 +251,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public void blockUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             userProfilesApi().addBlocked(userId, otherIds);
             tx.success();
@@ -262,7 +263,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public void unblockUserProfile(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             userProfilesApi().removeBlocked(userId, otherIds);
             tx.success();
@@ -287,7 +288,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public void watchItem(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             userProfilesApi().addWatching(userId, otherIds);
             tx.success();
@@ -299,7 +300,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public void unwatchItem(
             @PathParam("id") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             userProfilesApi().removeWatching(userId, otherIds);
             tx.success();
@@ -312,10 +313,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     public boolean isWatching(
             @PathParam("id") String userId,
             @PathParam("otherId") String otherId)
-            throws PermissionDenied, ItemNotFound {
+            throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             UserProfile user = api().get(userId, cls);
-            boolean watching = user.isWatching(manager.getEntity(otherId, Watchable.class));
+            Watchable otherUser = api().get(otherId, Watchable.class);
+            boolean watching = user.isWatching(otherUser);
             tx.success();
             return watching;
         }
@@ -378,7 +380,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = manager.getEntity(userId, UserProfile.class);
+            UserProfile user = api().get(userId, UserProfile.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
             Response response = streamingListOfLists(() -> eventsApi.aggregateActions(user));
@@ -406,7 +408,7 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile asUser = manager.getEntity(userId, UserProfile.class);
+            UserProfile asUser = api().get(userId, UserProfile.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
             Response response = streamingListOfLists(() -> eventsApi.aggregateAsUser(asUser));

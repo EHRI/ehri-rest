@@ -103,13 +103,12 @@ public class HistoricalAgentResourceClientTest extends AbstractResourceClientTes
     public void testDeleteAuthority() throws Exception {
         // Create
         URI uri = entityUri(Entities.HISTORICAL_AGENT, TEST_ID);
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                uri)
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .delete(ClientResponse.class);
         assertStatus(NO_CONTENT, response);
 
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
-        assertStatus(NOT_FOUND, response);
+        assertStatus(GONE, response);
     }
 }

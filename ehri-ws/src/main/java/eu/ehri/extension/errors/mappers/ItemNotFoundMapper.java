@@ -35,13 +35,25 @@ import javax.ws.rs.ext.Provider;
 public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
     @Override
     public Response toResponse(final ItemNotFound e) {
-        return WebDeserializationError.errorToJson(
-                Status.NOT_FOUND,
-                ImmutableMap.of(
-                        "message", e.getMessage(),
-                        "key", e.getKey(),
-                        "value", e.getValue()
-                )
-        );
+        if (!e.getDeletedAt().isPresent()) {
+            return WebDeserializationError.errorToJson(
+                    Status.NOT_FOUND,
+                    ImmutableMap.of(
+                            "message", e.getMessage(),
+                            "key", "id",
+                            "value", e.getId()
+                    )
+            );
+        } else {
+            return WebDeserializationError.errorToJson(
+                    Status.GONE,
+                    ImmutableMap.of(
+                            "message", e.getMessage(),
+                            "key", "id",
+                            "value", e.getId(),
+                            "since", e.getDeletedAt().get()
+                    )
+            );
+        }
     }
 }

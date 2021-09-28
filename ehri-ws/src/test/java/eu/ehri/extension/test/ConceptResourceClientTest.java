@@ -32,10 +32,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
-import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
-import static com.sun.jersey.api.client.ClientResponse.Status.NO_CONTENT;
-import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -219,7 +216,7 @@ public class ConceptResourceClientTest extends AbstractResourceClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
-        assertStatus(NOT_FOUND, response);
+        assertStatus(GONE, response);
     }
 
     /**

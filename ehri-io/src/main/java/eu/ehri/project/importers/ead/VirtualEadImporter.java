@@ -117,7 +117,7 @@ public class VirtualEadImporter extends EadImporter {
                 //find the DocumentaryUnit using the repository_id/unit_id combo
                 return findReferredToDocumentaryUnit(itemData);
             } catch (ItemNotFound ex) {
-                throw new ValidationError(unit, ex.getKey(), ex.getMessage());
+                throw new ValidationError(unit, ex.getId(), ex.getMessage());
             }
         }
     }

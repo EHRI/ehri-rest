@@ -566,7 +566,7 @@ public class ToolsResource extends AbstractResource {
             tx.success();
             return Table.of(done);
         } catch (ItemNotFound e) {
-            throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
+            throw new DeserializationError("Unable to locate item with ID: " + e.getId());
         }
     }
 
@@ -623,7 +623,7 @@ public class ToolsResource extends AbstractResource {
             }
             return Table.of(done);
         } catch (ItemNotFound e) {
-            throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
+            throw new DeserializationError("Unable to locate item with ID: " + e.getId());
         }
     }
 
@@ -674,7 +674,7 @@ public class ToolsResource extends AbstractResource {
             }
             return Table.of(done);
         } catch (ItemNotFound e) {
-            throw new DeserializationError("Unable to locate item with ID: " + e.getValue());
+            throw new DeserializationError("Unable to locate item with ID: " + e.getId());
         }
     }
 

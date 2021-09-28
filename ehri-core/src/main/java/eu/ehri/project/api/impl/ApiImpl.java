@@ -11,6 +11,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.*;
 import eu.ehri.project.utils.GraphInitializer;
 
@@ -125,11 +127,23 @@ public class ApiImpl implements Api {
 
     @Override
     public <E extends Accessible> E get(String id, Class<E> cls) throws ItemNotFound {
-        E item = manager.getEntity(id, cls);
-        if (!aclManager.canAccess(item, accessor)) {
-            throw new ItemNotFound(id);
+        try {
+            E item = manager.getEntity(id, cls);
+            if (!aclManager.canAccess(item, accessor)) {
+                throw new ItemNotFound(id);
+            }
+            return item;
+        } catch (ItemNotFound e) {
+            // If the item has been deleted, augment the exception with a deletion time...
+            Optional<Version> versionOpt = versionManager.versionAtDeletion(id);
+            if (versionOpt.isPresent()) {
+                Version version = versionOpt.get();
+                SystemEvent event = version.getTriggeringEvent();
+                throw e.withDeletedAt(event.getTimestamp());
+            } else {
+                throw e;
+            }
         }
-        return item;
     }
 
     @Override

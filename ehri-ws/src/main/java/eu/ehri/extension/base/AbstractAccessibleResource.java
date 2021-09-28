@@ -228,8 +228,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @throws DeserializationError if the incoming data cannot be parsed
      */
     public Response updateItem(String id, Bundle rawBundle)
-            throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
         try {
             E entity = fetchAndCheckType(id);
             if (isPatch()) {
@@ -286,13 +285,12 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @param id  the item's ID
      * @param all an iterable of child items
      * @return a table of delete item IDs
-     * @throws ValidationError  if the action would violate constraints
      * @throws ItemNotFound     if the item does not exist
      * @throws PermissionDenied if the user does not have permission to perform the action
      * @throws HierarchyError   if the action would orphan child items
      */
     protected Table deleteContents(String id, boolean all)
-            throws ItemNotFound, PermissionDenied, ValidationError, HierarchyError {
+            throws ItemNotFound, PermissionDenied, HierarchyError {
         fetchAndCheckType(id);
         try {
             List<String> data = api().deleteChildren(id, all, getLogMessage());
@@ -346,7 +344,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
                 .withShowType(showTypes.toArray(new EventsApi.ShowType[0]));
     }
 
-    private E fetchAndCheckType(String id) throws ItemNotFound {
+    protected E fetchAndCheckType(String id) throws ItemNotFound {
         E entity = api().get(id, cls);
         EntityClass entityClass = manager.getEntityClass(entity);
         if (!entityClass.getJavaClass().equals(cls)) {
