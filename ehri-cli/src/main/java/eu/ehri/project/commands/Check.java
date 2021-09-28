@@ -116,7 +116,7 @@ public class Check extends BaseCommand {
                     manager.getEntity(ct.getName(), ContentType.class);
                 }
             } catch (ItemNotFound itemNotFound) {
-                System.err.println("Unable to find item in graph with id: " + itemNotFound.getValue());
+                System.err.println("Unable to find item in graph with id: " + itemNotFound.getId());
             }
         } else {
             System.err.println("Graph contains no vertices (has it been initialized?)");

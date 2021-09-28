@@ -143,7 +143,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
             ClientResponse r1 = jsonCallAs(getAdminUserProfileId(),
                     entityUri(Entities.DOCUMENTARY_UNIT, id.get(0)))
                     .head();
-            assertStatus(NOT_FOUND, r1);
+            assertStatus(GONE, r1);
         }
     }
 

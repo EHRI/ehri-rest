@@ -76,7 +76,7 @@ public class GroupResource
     public Response createGroup(Bundle bundle,
                                 @QueryParam(ACCESSOR_PARAM) List<String> accessors,
                                 @QueryParam(MEMBER_PARAM) List<String> members)
-            throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound {
+            throws PermissionDenied, ValidationError, DeserializationError {
         try (final Tx tx = beginTx()) {
             final Api.Acl acl = api().acl();
             final Set<Accessor> groupMembers = Sets.newHashSet();
@@ -91,7 +91,7 @@ public class GroupResource
             tx.success();
             return item;
         } catch (ItemNotFound e) {
-            throw new DeserializationError("User or group not found: " + e.getValue());
+            throw new DeserializationError("User or group not found: " + e.getId());
         }
     }
 

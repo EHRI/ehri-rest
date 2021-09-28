@@ -149,7 +149,7 @@ public class PermissionsResource extends AbstractResource {
             @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
-            Accessible entity = manager.getEntity(id, Accessible.class);
+            Accessible entity = api().get(id, Accessible.class);
             AclManager acl = api().withScope(entity.getPermissionScope()).aclManager();
             InheritedItemPermissionSet set = acl.getInheritedItemPermissions(entity, accessor);
             tx.success();
@@ -177,7 +177,7 @@ public class PermissionsResource extends AbstractResource {
             ItemPermissionSet itemPerms) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
-            Accessible item = manager.getEntity(id, Accessible.class);
+            Accessible item = api().get(id, Accessible.class);
             InheritedItemPermissionSet set = api().acl()
                     .setItemPermissions(item, accessor, itemPerms.asSet());
             tx.success();
@@ -200,9 +200,9 @@ public class PermissionsResource extends AbstractResource {
             @PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
-            PermissionScope scope = manager.getEntity(id, PermissionScope.class);
+            Accessible scope = api().get(id, Accessible.class);
             InheritedGlobalPermissionSet set = api()
-                    .withScope(scope)
+                    .withScope(scope.as(PermissionScope.class))
                     .aclManager()
                     .getInheritedGlobalPermissions(accessor);
             tx.success();
@@ -230,9 +230,9 @@ public class PermissionsResource extends AbstractResource {
             GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor accessor = manager.getEntity(userId, Accessor.class);
-            PermissionScope scope = manager.getEntity(id, PermissionScope.class);
+            Accessible scope = api().get(id, Accessible.class);
             InheritedGlobalPermissionSet matrix = api()
-                    .withScope(scope)
+                    .withScope(scope.as(PermissionScope.class))
                     .acl()
                     .setGlobalPermissionMatrix(accessor, globals);
             tx.success();

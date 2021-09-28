@@ -206,7 +206,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
                                   @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Accessible item = api().get(id, Accessible.class);
+            Accessible item = manager.getEntity(id, Accessible.class);
             Accessor current = getRequesterUserProfile();
             Set<Accessor> accessors = getAccessors(accessorIds, current);
             api().acl().setAccessors(item, accessors);
@@ -319,7 +319,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
-            Accessible item = api().get(id, Accessible.class);
+            Accessible item = manager.getEntity(id, Accessible.class);
             EventsApi eventsApi = getEventsApi()
                     .withAggregation(aggregation);
             Response response = streamingListOfLists(() -> eventsApi.aggregateForItem(item));

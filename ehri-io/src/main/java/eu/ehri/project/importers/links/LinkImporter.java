@@ -199,11 +199,11 @@ public class LinkImporter {
                 eventContext.addSubjects(link);
                 log.addCreated("-", link.getId());
             } catch (ItemNotFound e) {
-                logger.error("Item not found at row {}: {}", i, e.getValue());
-                log.addError(e.getValue(), e.getMessage());
+                logger.error("Item not found at row {}: {}", i, e.getId());
+                log.addError(e.getId(), e.getMessage());
                 if (!tolerant) {
                     throw new DeserializationError(
-                            String.format("Item ID '%s' not found at row: %d", e.getValue(), i));
+                            String.format("Item ID '%s' not found at row: %d", e.getId(), i));
                 }
             } catch (ValidationError e) {
                 log.addError(from, e.getMessage());

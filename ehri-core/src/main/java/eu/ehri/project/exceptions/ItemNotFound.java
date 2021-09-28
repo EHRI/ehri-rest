@@ -19,8 +19,11 @@
 
 package eu.ehri.project.exceptions;
 
+import com.google.common.base.Preconditions;
 import eu.ehri.project.models.EntityClass;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
@@ -31,40 +34,41 @@ import java.util.Optional;
 public class ItemNotFound extends Exception {
     private static final long serialVersionUID = -3562833443079995695L;
 
-    private final String key;
-    private final String value;
+    private final String id;
     private final EntityClass cls;
+    private final String deleted;
 
     public ItemNotFound(String id) {
         super(String.format("Item with id '%s' not found", id));
-        this.key = "id";
-        this.value = id;
+        Preconditions.checkNotNull(id);
+        this.id = id;
         this.cls = null;
+        this.deleted = null;
     }
 
-    public ItemNotFound(String id, EntityClass cls) {
-        super(String.format("Item with id '%s' and type '%s' not found", id, cls.getName()));
-        this.key = id;
-        this.value = id;
+    public ItemNotFound(@Nonnull String id, @Nonnull EntityClass cls) {
+        this(id, cls, null);
+    }
+
+    public ItemNotFound(String id, @Nullable EntityClass cls, @Nullable String deletedAt) {
+        super(String.format("Item with id '%s' and type '%s' not found", id, cls != null ? cls.getName() : null));
+        this.id = id;
         this.cls = cls;
+        this.deleted = deletedAt;
     }
 
-    public ItemNotFound(String key, String value) {
-        super(String.format("Item with key '%s'='%s' not found", key, value));
-        this.key = key;
-        this.value = value;
-        this.cls = null;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getValue() {
-        return value;
+    public String getId() {
+        return id;
     }
 
     public Optional<EntityClass> getEntityClass() {
         return Optional.ofNullable(cls);
+    }
+
+    public Optional<String> getDeletedAt() { return Optional.ofNullable(deleted); }
+
+    public ItemNotFound withDeletedAt(String deletedAt) {
+        Preconditions.checkNotNull(deletedAt);
+        return new ItemNotFound(id, cls, deletedAt);
     }
 }

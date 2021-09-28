@@ -140,7 +140,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(getAdminUserProfileId(),
                 entityUri(Entities.CVOC_CONCEPT, "cvocc1"))
                 .get(ClientResponse.class);
-        assertStatus(NOT_FOUND, response);
+        assertStatus(GONE, response);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class VocabularyResourceClientTest extends AbstractResourceClientTest {
         // Check it's really gone...
         response = jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
-        assertStatus(NOT_FOUND, response);
+        assertStatus(GONE, response);
     }
 
     /**

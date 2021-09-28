@@ -135,7 +135,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
         response = jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
 
-        assertStatus(NOT_FOUND, response);
+        assertStatus(GONE, response);
     }
 
     @Test

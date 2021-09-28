@@ -64,8 +64,6 @@ public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
-    public static final String INCLUDED = "includes";
-
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
     }
@@ -171,7 +169,7 @@ public final class VirtualUnitResource extends
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(ID_PARAM) List<String> includedIds)
             throws PermissionDenied, ValidationError,
-            DeserializationError, ItemNotFound {
+            DeserializationError {
         try (final Tx tx = beginTx()) {
             final Accessor currentUser = getCurrentUser();
             final Iterable<DocumentaryUnit> includedUnits
@@ -221,7 +219,7 @@ public final class VirtualUnitResource extends
     public Response createChildVirtualUnit(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(ID_PARAM) List<String> includedIds)
-            throws AccessDenied, PermissionDenied, ValidationError,
+            throws PermissionDenied, ValidationError,
             DeserializationError, ItemNotFound {
         try (final Tx tx = beginTx()) {
             Accessor currentUser = getRequesterUserProfile();
@@ -249,7 +247,7 @@ public final class VirtualUnitResource extends
      * they actually are the right type.
      */
     private List<DocumentaryUnit> getIncludedUnits(
-            List<String> ids, Accessor accessor) throws ItemNotFound {
+            List<String> ids, Accessor accessor) {
         Iterable<Vertex> vertices = manager.getVertices(ids);
 
         PipeFunction<Vertex, Boolean> aclFilter = AclManager.getAclFilterFunction(accessor);
