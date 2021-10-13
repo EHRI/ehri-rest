@@ -84,7 +84,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         String skosConceptId = "698";
         QueryApi query = api(validUser).query();
         // Query for document identifier.
-        List<Concept> list = toList(query.setLimit(1).page(
+        List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());

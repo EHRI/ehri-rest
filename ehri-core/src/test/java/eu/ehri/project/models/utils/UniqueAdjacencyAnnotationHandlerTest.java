@@ -28,6 +28,7 @@ public class UniqueAdjacencyAnnotationHandlerTest extends GraphTestBase {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         graph = getFramedGraph();
         f1 = graph.frame(graph.addVertex(1), TestFrame.class);
         f2 = graph.frame(graph.addVertex(2), TestFrame.class);

@@ -25,7 +25,6 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
-import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
@@ -80,15 +79,16 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Repository repository = api().get(id, cls);
-            Response response = streamingPage(() -> {
+            checkExists(id, cls);
+            Response page = streamingPage(() -> {
+                Repository repository = manager.getEntityUnchecked(id, cls);
                 Iterable<DocumentaryUnit> units = all
                         ? repository.getAllDocumentaryUnits()
                         : repository.getTopLevelDocumentaryUnits();
                 return getQuery().page(units, DocumentaryUnit.class);
             });
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -207,10 +207,11 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Repository repository = api().get(id, cls);
+            checkExists(id, cls);
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
+                    Repository repository = manager.getEntityUnchecked(id, cls);
                     new Eag2012Exporter(api()).export(repository, outputStream, lang);
                     tx2.success();
                 }
@@ -234,9 +235,11 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Repository repo = api().get(id, cls);
-            final EadExporter eadExporter = new Ead2002Exporter(api());
-            Response response = exportItemsAsZip(eadExporter, repo.getTopLevelDocumentaryUnits(), lang);
+            checkExists(id, cls);
+            Response response = streamingXmlZip(() -> new Ead2002Exporter(api()), () -> {
+                final Repository repo = manager.getEntityUnchecked(id, cls);
+                return repo.getTopLevelDocumentaryUnits();
+            }, lang);
             tx.success();
             return response;
         }

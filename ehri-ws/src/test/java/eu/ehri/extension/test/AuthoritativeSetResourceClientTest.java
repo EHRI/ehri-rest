@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 
 public class AuthoritativeSetResourceClientTest extends AbstractResourceClientTest {
     @Test
-    public void testExportEad() throws Exception {
+    public void testExportEac() throws Exception {
         // Create
         URI uri = entityUri(Entities.AUTHORITATIVE_SET, "auths", "eac");
         ClientResponse response = callAs(getAdminUserProfileId(), uri)

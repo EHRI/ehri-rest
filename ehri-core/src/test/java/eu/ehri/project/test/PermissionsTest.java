@@ -66,16 +66,14 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateAsUserWithNewPerms() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         assertNotNull(api(user).create(Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithBadScopedPerms() throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
-        new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.withScope(scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         assertNotNull(api(user).withScope(SystemScope.getInstance()).create(
                 Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
@@ -83,8 +81,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test
     public void testCreateAsUserWithGoodScopedPerms() throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
-        new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.withScope(scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         assertNotNull(api(user).withScope(scope).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class));
     }
@@ -93,8 +90,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithGoodNestedScopedPerms()
             throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
-        new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.withScope(scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         DocumentaryUnit c1 = api(user).withScope(scope).create(
                 Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class);
         // We should be able to create another item with c1 as the scope,
@@ -110,7 +106,7 @@ public class PermissionsTest extends AbstractFixtureTest {
             throws Exception {
         // Same as above, but with the repository as the scope instead of the item.
         Repository r1 = manager.getEntity("r1", Repository.class);
-        new AclManager(graph, r1).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
+        acl.withScope(r1).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         api(user).withScope(r1).create(
                 Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class);
         // We should be able to create another item with c1 as the r1,
@@ -126,25 +122,21 @@ public class PermissionsTest extends AbstractFixtureTest {
             throws Exception {
         Repository scope = manager.getEntity("r1", Repository.class);
         Repository badScope = manager.getEntity("r2", Repository.class);
-        new AclManager(graph, scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.withScope(scope).grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         assertNotNull(api(user).withScope(badScope).create(
                 Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithDifferentPerms() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), DELETE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), DELETE, user);
         assertNotNull(api(user).create(Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class));
     }
 
     @Test
     public void testDeleteAsUserWithGoodPerms() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), DELETE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), DELETE, user);
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class);
         assertNotNull(unit);
@@ -153,8 +145,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateDeleteAsUserWithOwnerPerms() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), OWNER, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), OWNER, user);
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class);
         assertNotNull(unit);
@@ -163,8 +154,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateDeleteAsCreator() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class);
         assertNotNull(unit);
@@ -175,8 +165,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateDeleteAsUserWithWrongPerms() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), ANNOTATE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), ANNOTATE, user);
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class);
         assertNotNull(unit);
@@ -188,8 +177,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test(expected = ValidationError.class)
     public void testCreateWithoutRevoke() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class);
         assertNotNull(unit);
@@ -200,13 +188,11 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserThenRevoke() throws Exception {
-        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.grantPermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         DocumentaryUnit unit = api(user).create(Bundle.fromData(TestData.getTestDocBundle()),
                 DocumentaryUnit.class);
         assertNotNull(unit);
-        acl.revokePermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user
-        );
+        acl.revokePermission(viewHelper.getContentTypeNode(DOCUMENTARY_UNIT), CREATE, user);
         // Should throw an error
         api(user).create(Bundle.fromData(TestData.getTestDocBundle()), DocumentaryUnit.class);
         fail();

@@ -31,42 +31,20 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.impl.ApiImpl;
 import eu.ehri.project.core.Tx;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.dc.DublinCore11Exporter;
 import eu.ehri.project.exporters.dc.DublinCoreExporter;
 import eu.ehri.project.models.AccessPoint;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.Described;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.Entity;
-import eu.ehri.project.models.base.Linkable;
-import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.Versioned;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -103,19 +81,21 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Produces(MediaType.APPLICATION_JSON)
     public Response list(@QueryParam("id") List<String> ids, @QueryParam("gid") List<Long> gids) {
         try (Tx tx = beginTx()) {
-            PipeFunction<Vertex, Boolean> aclFilter = AclManager
-                    .getAclFilterFunction(getRequesterUserProfile());
-            PipeFunction<Vertex, Boolean> contentFilter = aclManager
-                    .getContentTypeFilterFunction();
-            Function<Vertex, Vertex> filter = v ->
-                    (contentFilter.compute(v) && aclFilter.compute(v)) ? v : null;
+            // Check auth...
+            checkUser();
+            Response list = streamingVertexList(() -> {
+                PipeFunction<Vertex, Boolean> aclFilter = AclManager.getAclFilterFunction(getRequesterUserProfile());
+                PipeFunction<Vertex, Boolean> contentFilter = aclManager.getContentTypeFilterFunction();
+                Function<Vertex, Vertex> filter = v ->
+                        (contentFilter.compute(v) && aclFilter.compute(v)) ? v : null;
 
-            Iterable<Vertex> byGid = Iterables.transform(gids, graph::getVertex);
-            Iterable<Vertex> byId = manager.getVertices(ids);
-            Iterable<Vertex> all = Iterables.concat(byGid, byId);
-            Response response = streamingVertexList(() -> Iterables.transform(all, filter::apply));
+                Iterable<Vertex> byGid = Iterables.transform(gids, graph::getVertex);
+                Iterable<Vertex> byId = manager.getVertices(ids);
+                Iterable<Vertex> all = Iterables.concat(byGid, byId);
+                return Iterables.transform(all, filter::apply);
+            });
             tx.success();
-            return response;
+            return list;
         }
     }
 
@@ -181,11 +161,10 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/access")
     public Response visibility(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Accessible item = manager.getEntity(id, Accessible.class);
-            Iterable<Accessor> accessors = item.getAccessors();
-            Response response = streamingList(() -> accessors);
+            checkExists(id, Accessible.class);
+            Response list = streamingList(() -> manager.getEntityUnchecked(id, Accessible.class).getAccessors());
             tx.success();
-            return response;
+            return list;
         }
     }
 
@@ -319,12 +298,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound, AccessDenied {
         try (final Tx tx = beginTx()) {
-            Accessible item = manager.getEntity(id, Accessible.class);
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(() -> eventsApi.aggregateForItem(item));
+            checkExists(id, cls);
+            Response list = streamingListOfLists(() -> getEventsApi()
+                    .withAggregation(aggregation)
+                    .aggregateForItem(manager.getEntityUnchecked(id, cls)));
             tx.success();
-            return response;
+            return list;
         }
     }
 
@@ -340,12 +319,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/annotations")
     public Response annotations(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Annotatable entity = manager.getEntity(id, Annotatable.class);
-            Response response = streamingPage(() -> getQuery().page(
-                    entity.getAnnotations(),
-                    Annotation.class));
+            checkExists(id, Annotatable.class);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(id, Annotatable.class)
+                            .getAnnotations(), Annotation.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -361,12 +340,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/links")
     public Response links(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Linkable entity = manager.getEntity(id, Linkable.class);
-            Response response = streamingPage(() -> getQuery().page(
-                    entity.getLinks(),
-                    Link.class));
+            checkExists(id, Linkable.class);
+            Response page = streamingPage(() -> getQuery().page(
+                    manager.getEntityUnchecked(id, Linkable.class).getLinks(), Link.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -382,12 +360,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/permission-grants")
     public Response permissionGrants(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            PermissionGrantTarget target = manager.getEntity(id, PermissionGrantTarget.class);
-            Response response = streamingPage(() -> getQuery()
-                    .page(target.getPermissionGrants(),
+            checkExists(id, PermissionGrantTarget.class);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(id, PermissionGrantTarget.class).getPermissionGrants(),
                             PermissionGrant.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -403,12 +381,12 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/scope-permission-grants")
     public Response permissionGrantsAsScope(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            PermissionScope scope = manager.getEntity(id, PermissionScope.class);
-            Response response = streamingPage(() -> getQuery()
-                    .page(scope.getPermissionGrants(),
-                            PermissionGrant.class));
+            checkExists(id, PermissionScope.class);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(id, PermissionScope.class)
+                            .getPermissionGrants(), PermissionGrant.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -481,11 +459,11 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     @Path("{id:[^/]+}/versions")
     public Response listVersions(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Versioned item = api().get(id, Versioned.class);
-            Response response = streamingPage(() -> getQuery().setStream(true)
-                    .page(item.getAllPriorVersions(), Version.class));
+            checkExists(id, Versioned.class);
+            Response page = streamingPage(() -> getQuery().withStreaming(true)
+                    .page(manager.getEntityUnchecked(id, Versioned.class).getAllPriorVersions(), Version.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 

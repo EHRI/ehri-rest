@@ -26,7 +26,6 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eac.Eac2010Exporter;
-import eu.ehri.project.exporters.eac.EacExporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
@@ -82,13 +81,12 @@ public class AuthoritativeSetResource extends
     public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
-
         try (final Tx tx = beginTx()) {
-            AuthoritativeSet set = api().get(id, cls);
-            Response response = streamingPage(() ->
-                    getQuery().page(set.getAuthoritativeItems(), AuthoritativeItem.class));
+            checkExists(id, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(id, cls).getAuthoritativeItems(), AuthoritativeItem.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -212,11 +210,12 @@ public class AuthoritativeSetResource extends
     public Response exportEag(@PathParam("id") String id,
                               final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final AuthoritativeSet set = api().get(id, cls);
-            final EacExporter eacExporter = new Eac2010Exporter(api());
-            Iterable<HistoricalAgent> agents = Iterables
-                    .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));
-            Response response = exportItemsAsZip(eacExporter, agents, lang);
+            checkExists(id, cls);
+            Response response = streamingXmlZip(() -> new Eac2010Exporter(api()), () -> {
+                final AuthoritativeSet set = manager.getEntityUnchecked(id, cls);
+                return Iterables
+                        .transform(set.getAuthoritativeItems(), a -> a.as(HistoricalAgent.class));
+            }, lang);
             tx.success();
             return response;
         }

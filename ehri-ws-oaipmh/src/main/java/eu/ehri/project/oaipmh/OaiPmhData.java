@@ -91,7 +91,7 @@ public class OaiPmhData {
         String defaultTimestamp = api.actionManager().getEventRoot().getTimestamp();
         Iterable<DocumentaryUnit> filtered = Iterables.filter(
                 getDocumentaryUnits(state.getSetSpec()), timeFilterItems(state.getFrom(), state.getUntil(), defaultTimestamp));
-        QueryApi q = api.query().setOffset(state.getOffset()).setLimit(state.getLimit());
+        QueryApi q = api.query().withOffset(state.getOffset()).withLimit(state.getLimit());
         QueryApi sortQ = sort ? q.orderBy(EntityType.ID_KEY, QueryApi.Sort.ASC) : q;
         return sortQ.page(filtered, DocumentaryUnit.class);
     }
@@ -167,7 +167,7 @@ public class OaiPmhData {
     }
 
     private QueryApi getQuery() {
-        return api.query().setStream(true).setLimit(-1)
+        return api.query().withStreaming(true).withLimit(-1)
                 .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC);
     }
 

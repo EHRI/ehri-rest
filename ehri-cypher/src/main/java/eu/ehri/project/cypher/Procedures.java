@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 public class Procedures {
 
-    public class Output {
+    public static class Output {
         public final String value;
 
         Output(String value) {
@@ -20,7 +20,7 @@ public class Procedures {
         }
     }
 
-    public class ListOutput {
+    public static class ListOutput {
         public final List<Object> value;
 
         ListOutput(List<Object> value) {

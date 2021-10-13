@@ -28,7 +28,7 @@ public class AclEdgeIterable implements CloseableIterable<Edge> {
     @Override
     public Iterator<Edge> iterator() {
         return new Iterator<Edge>() {
-            private Iterator<Edge> itty = iterable.iterator();
+            private final Iterator<Edge> itty = iterable.iterator();
             private AclEdge nextEdge;
 
             public void remove() {

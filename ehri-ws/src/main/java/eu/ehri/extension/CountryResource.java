@@ -19,39 +19,21 @@
 
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.AbstractAccessibleResource;
-import eu.ehri.extension.base.AbstractResource;
-import eu.ehri.extension.base.CreateResource;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.ParentResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
-import eu.ehri.project.exporters.eag.EagExporter;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -89,11 +71,11 @@ public class CountryResource
     public Response listChildren(@PathParam("id") String id,
                                  @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Country country = api().get(id, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(country.getRepositories(), Repository.class));
+            checkExists(id, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(id, cls).getRepositories(), Repository.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -197,9 +179,11 @@ public class CountryResource
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            final Country country = api().get(id, cls);
-            final EagExporter eagExporter = new Eag2012Exporter(api());
-            Response response = exportItemsAsZip(eagExporter, country.getRepositories(), lang);
+            checkExists(id, cls);
+            Response response = streamingXmlZip(() -> new Eag2012Exporter(api()), () -> {
+                final Country country = manager.getEntityUnchecked(id, cls);
+                return country.getRepositories();
+            }, lang);
             tx.success();
             return response;
         }

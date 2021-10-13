@@ -75,11 +75,14 @@ public class VocabularyResource extends AbstractAccessibleResource<Vocabulary>
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Vocabulary vocabulary = api().get(id, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(all ? vocabulary.getConcepts() : vocabulary.getTopConcepts(), Concept.class));
+            checkExists(id, cls);
+            Response page = streamingPage(() -> {
+                Vocabulary vocabulary = manager.getEntityUnchecked(id, cls);
+                return getQuery()
+                        .page(all ? vocabulary.getConcepts() : vocabulary.getTopConcepts(), Concept.class);
+            });
             tx.success();
-            return response;
+            return page;
         }
     }
 

@@ -25,18 +25,12 @@ import eu.ehri.extension.base.GetResource;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.events.SystemEvent;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -107,14 +101,11 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(
-            @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation) {
+    public Response list(@QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation) {
         try (final Tx tx = beginTx()) {
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(eventsApi::aggregate);
+            Response list = streamingListOfLists(() -> getEventsApi().withAggregation(aggregation).aggregate());
             tx.success();
-            return response;
+            return list;
         }
     }
 
@@ -130,13 +121,13 @@ public class SystemEventResource extends AbstractAccessibleResource<SystemEvent>
     @Path("{id:[^/]+}/subjects")
     public Response pageSubjectsForEvent(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            SystemEvent event = api().get(id, cls);
+            checkExists(id, cls);
             // Subjects are only serialized to depth 1 for efficiency...
-            Response response = streamingPage(() -> getQuery()
-                            .page(event.getSubjects(), Accessible.class),
+            Response page = streamingPage(() -> getQuery()
+                            .page(manager.getEntityUnchecked(id, cls).getSubjects(), Accessible.class),
                     getSerializer().withDepth(1).withCache());
             tx.success();
-            return response;
+            return page;
         }
     }
 }
