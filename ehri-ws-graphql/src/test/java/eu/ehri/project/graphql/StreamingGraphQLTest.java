@@ -29,7 +29,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 
 public class StreamingGraphQLTest extends AbstractFixtureTest {
@@ -48,7 +50,7 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
         }
         JsonNode json = mapper.readTree(out.toByteArray());
         //System.out.println(json);
-        assertEquals("c1", json.path("firstTwo").path("items")
-                .path(0).path("id").textValue());
+        String first = json.path("firstTwo").path("items").path(0).path("id").textValue();
+        assertThat(first, anyOf(containsString("c1"), containsString("nl-r1-m19")));
     }
 }

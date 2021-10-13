@@ -140,11 +140,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/followers")
     public Response listFollowers(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getFollowers(), UserProfile.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getFollowers(), UserProfile.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -153,11 +153,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/following")
     public Response listFollowing(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getFollowing(), UserProfile.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getFollowing(), UserProfile.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -222,11 +222,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/blocked")
     public Response listBlocked(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getBlocked(), UserProfile.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getBlocked(), UserProfile.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -275,11 +275,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/watching")
     public Response listWatching(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getWatching(), Watchable.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getWatching(), Watchable.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -328,11 +328,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/annotations")
     public Response listAnnotations(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getAnnotations(), Annotation.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getAnnotations(), Annotation.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -341,11 +341,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/links")
     public Response pageLinks(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getLinks(), Link.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getLinks(), Link.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -354,11 +354,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
     @Path("{id:[^/]+}/virtual-units")
     public Response pageVirtualUnits(@PathParam("id") String userId) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, cls);
-            Response response = streamingPage(() -> getQuery()
-                    .page(user.getVirtualUnits(), VirtualUnit.class));
+            checkExists(userId, cls);
+            Response page = streamingPage(() -> getQuery()
+                    .page(manager.getEntityUnchecked(userId, cls).getVirtualUnits(), VirtualUnit.class));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -380,12 +380,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile user = api().get(userId, UserProfile.class);
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(() -> eventsApi.aggregateActions(user));
+            checkExists(userId, cls);
+            Response list = streamingListOfLists(() -> getEventsApi().withAggregation(aggregation)
+                    .aggregateActions(manager.getEntityUnchecked(userId, cls)));
             tx.success();
-            return response;
+            return list;
         }
     }
 
@@ -408,12 +407,11 @@ public class UserProfileResource extends AbstractAccessibleResource<UserProfile>
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("user") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            UserProfile asUser = api().get(userId, UserProfile.class);
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(() -> eventsApi.aggregateAsUser(asUser));
+            checkExists(userId, cls);
+            Response list = streamingListOfLists(() -> getEventsApi().withAggregation(aggregation)
+                    .aggregateAsUser(manager.getEntityUnchecked(userId, cls)));
             tx.success();
-            return response;
+            return list;
         }
     }
 

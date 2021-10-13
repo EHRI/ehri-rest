@@ -165,15 +165,16 @@ public class GroupResource
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Group group = manager.getEntity(id, EntityClass.GROUP, Group.class);
-            Response response = streamingPage(() -> {
+            checkExists(id, cls);
+            Response page = streamingPage(() -> {
+                Group group = manager.getEntityUnchecked(id, cls);
                 Iterable<Accessible> members = all
                         ? group.getAllUserProfileMembers()
                         : group.getMemberEntities();
                 return getQuery().page(members, Accessible.class);
             });
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -206,12 +207,14 @@ public class GroupResource
             @QueryParam(AGGREGATION_PARAM) @DefaultValue("strict") EventsApi.Aggregation aggregation)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
-            Actioner group = manager.getEntity(userId, Actioner.class);
-            EventsApi eventsApi = getEventsApi()
-                    .withAggregation(aggregation);
-            Response response = streamingListOfLists(() -> eventsApi.aggregateActions(group));
+            checkExists(userId, Actioner.class);
+            Response list = streamingListOfLists(() -> {
+                EventsApi eventsApi = getEventsApi()
+                        .withAggregation(aggregation);
+                return eventsApi.aggregateActions(manager.getEntityUnchecked(userId, Actioner.class));
+            });
             tx.success();
-            return response;
+            return list;
         }
     }
 }

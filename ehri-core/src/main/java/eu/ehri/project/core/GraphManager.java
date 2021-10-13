@@ -113,6 +113,17 @@ public interface GraphManager {
     <T> T getEntity(String id, Class<T> cls) throws ItemNotFound;
 
     /**
+     * Get a node with the given ID, and frame it with the given interface
+     * class, returning null if it does not exist.
+     *
+     * @param id  The vertex's string ID
+     * @param cls The desired frame class
+     * @param <E> the expected type of the entity
+     * @return The framed vertex, or null
+     */
+    <E> E getEntityUnchecked(String id, Class<E> cls);
+
+    /**
      * Get a node with the given ID and type, framing it with the given
      * interface class.
      *

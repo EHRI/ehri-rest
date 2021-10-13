@@ -45,6 +45,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -110,9 +111,10 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      */
     public Response listItems() {
         try (final Tx tx = beginTx()) {
-            Response response = streamingPage(() -> getQuery().page(cls));
+            checkUser();
+            Response page = streamingPage(() -> getQuery().page(cls));
             tx.success();
-            return response;
+            return page;
         }
     }
 
@@ -283,7 +285,7 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * Delete an item and all of its child items.
      *
      * @param id  the item's ID
-     * @param all an iterable of child items
+     * @param all whether to descend recursively into hierarchical items
      * @return a table of delete item IDs
      * @throws ItemNotFound     if the item does not exist
      * @throws PermissionDenied if the user does not have permission to perform the action
@@ -302,15 +304,15 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
 
     // Helpers
 
-    protected <T extends Entity> Response exportItemsAsZip(XmlExporter<T> exporter, Iterable<T> items, String lang) {
+    protected <T extends Entity> Response streamingXmlZip(Supplier<XmlExporter<T>> exporter, Supplier<Iterable<T>> items, String lang) {
         return Response.ok((StreamingOutput) outputStream -> {
             try (final Tx tx = beginTx();
                  ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-                for (T item : items) {
+                for (T item : items.get()) {
                     ZipEntry zipEntry = new ZipEntry(item.getId() + ".xml");
                     zipEntry.setComment("Exported from the EHRI portal at " + (DateTime.now()));
                     zos.putNextEntry(zipEntry);
-                    exporter.export(item, zos, lang);
+                    exporter.get().export(item, zos, lang);
                     zos.closeEntry();
                 }
                 tx.success();

@@ -271,7 +271,7 @@ public class GraphQLImpl {
     private DataFetcher<Map<String, Object>> topLevelDocDataFetcher() {
         return connectionDataFetcher(() -> {
             Iterable<Country> countries = api().query()
-                    .setStream(true).setLimit(-1).page(EntityClass.COUNTRY, Country.class);
+                    .withStreaming(true).withLimit(-1).page(EntityClass.COUNTRY, Country.class);
             Iterable<Iterable<Entity>> docs = Iterables.transform(countries, c ->
                     Iterables.transform(c.getTopLevelDocumentaryUnits(), d -> d.as(Entity.class)));
             return Iterables.concat(docs);
@@ -286,7 +286,7 @@ public class GraphQLImpl {
         // applies pagination. This is a bit gross but the speed difference
         // appears to be negligible.
         return connectionDataFetcher(() -> api().query()
-                .setStream(true).setLimit(-1).page(type, Entity.class));
+                .withStreaming(true).withLimit(-1).page(type, Entity.class));
     }
 
     private DataFetcher<Map<String, Object>> hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -337,7 +337,7 @@ public class GraphQLImpl {
         // since to assemble the PageInfo we need to count the total number
         // of items, which involves fetching the iterator twice.
         long total = Iterables.size(iter.get());
-        QueryApi query = api().query().setStream(true).setLimit(limit).setOffset(offset);
+        QueryApi query = api().query().withStreaming(true).withLimit(limit).withOffset(offset);
         QueryApi.Page<Entity> page = query.page(iter.get(), Entity.class);
         List<Entity> items = Lists.newArrayList(page);
 
@@ -359,7 +359,7 @@ public class GraphQLImpl {
     }
 
     private Map<String, Object> lazyConnectionData(Supplier<Iterable<? extends Entity>> iter, int limit, int offset) {
-        QueryApi query = api().query().setLimit(limit).setOffset(offset);
+        QueryApi query = api().query().withLimit(limit).withOffset(offset);
         QueryApi.Page<Entity> items = query.page(iter.get(), Entity.class);
         boolean hasPrev = items.getOffset() > 0;
 
@@ -463,7 +463,7 @@ public class GraphQLImpl {
     private DataFetcher<Iterable<Entity>> oneToManyRelationshipFetcher(Function<Entity, Iterable<? extends Entity>> f) {
         return env -> {
             Iterable<? extends Entity> elements = f.apply((env.getSource()));
-            return api().query().setStream(true).setLimit(-1).page(elements, Entity.class);
+            return api().query().withStreaming(true).withLimit(-1).page(elements, Entity.class);
         };
     }
 

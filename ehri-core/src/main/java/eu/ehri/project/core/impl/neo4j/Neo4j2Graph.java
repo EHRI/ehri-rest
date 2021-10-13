@@ -147,7 +147,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
             throw ExceptionFactory.vertexIdCanNotBeNull();
 
         try {
-            Long longId;
+            long longId;
             if (id instanceof Long)
                 longId = (Long) id;
             else if (id instanceof Number)
@@ -175,58 +175,28 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
      * @return all the vertices in the graph
      */
     @Override
-    public Iterable<Vertex> getVertices() {
+    public CloseableIterable<Vertex> getVertices() {
         this.autoStartTransaction(false);
         return new Neo4j2VertexIterable(rawGraph.getAllNodes(), this);
     }
 
     public CloseableIterable<Vertex> getVerticesByLabel(final String label) {
         this.autoStartTransaction(false);
-        ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
-            @Override
-            public ResourceIterator<Node> iterator() {
-                return rawGraph.<Node>findNodes(Label.label(label));
-            }
-        };
+        ResourceIterable<Node> wrap = () -> rawGraph.findNodes(Label.label(label));
         return new Neo4j2VertexIterable(wrap, this);
     }
 
     public CloseableIterable<Vertex> getVerticesByLabelKeyValue(
             final String label, final String key, final Object value) {
-        ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
-            @Override
-            public ResourceIterator<Node> iterator() {
-                autoStartTransaction(false);
-                return rawGraph.<Node>findNodes(Label.label(label), key, value);
-            }
-        };
-        return new Neo4j2VertexIterable(wrap, this);
-    }
-
-    /**
-     * Get an iterable of vertices via a Cypher query.
-     *
-     * @param query  the cypher query
-     * @param params a map of parameters
-     * @param column the name of the column from which to extract the vertices. The column
-     *               must be a node or a class cast exception will be thrown when the
-     *               iterable is accessed
-     * @return an iterable of vertices
-     */
-    public CloseableIterable<Vertex> getVerticesByQuery(final String query, final Map<String, Object> params, String column) {
-        Preconditions.checkNotNull(query, "Query cannot be null");
-        Preconditions.checkNotNull(column, "Column cannot be null");
         ResourceIterable<Node> wrap = () -> {
             autoStartTransaction(false);
-            return rawGraph
-                    .execute(query, params != null ? params : Collections.emptyMap())
-                    .columnAs(column);
+            return rawGraph.findNodes(Label.label(label), key, value);
         };
         return new Neo4j2VertexIterable(wrap, this);
     }
 
     @Override
-    public Iterable<Vertex> getVertices(String key, Object value) {
+    public CloseableIterable<Vertex> getVertices(String key, Object value) {
         this.autoStartTransaction(false);
         return new PropertyFilteredIterable<>(key, value, this.getVertices());
     }
@@ -244,7 +214,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
      * @return all the edges in the graph
      */
     @Override
-    public Iterable<Edge> getEdges() {
+    public CloseableIterable<Edge> getEdges() {
         this.autoStartTransaction(false);
         return new Neo4j2EdgeIterable(rawGraph.getAllRelationships(), this);
     }
@@ -361,8 +331,9 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     // between the beginning of a write operation and the beginning of a read
     // operation.
     public void autoStartTransaction(boolean forWrite) {
-        if (tx.get() == null)
+        if (tx.get() == null) {
             tx.set(this.rawGraph.beginTx());
+        }
     }
 
     public GraphDatabaseService getRawGraph() {

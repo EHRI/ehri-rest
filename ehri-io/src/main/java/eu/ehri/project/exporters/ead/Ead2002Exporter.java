@@ -390,8 +390,8 @@ public class Ead2002Exporter extends AbstractStreamingXmlExporter<DocumentaryUni
         return api
                 .query()
                 .orderBy(Ontology.IDENTIFIER_KEY, QueryApi.Sort.ASC)
-                .setLimit(-1)
-                .setStream(true)
+                .withLimit(-1)
+                .withStreaming(true)
                 .page(unit.getChildren(), DocumentaryUnit.class);
     }
 

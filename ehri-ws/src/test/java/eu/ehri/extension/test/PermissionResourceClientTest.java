@@ -76,7 +76,6 @@ public class PermissionResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(OK, response);
         String data = response.getEntity(String.class);
-        System.out.println("DATA: " + data);
 
         List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(data);
         // Check we don't ALREADY have DocumentaryUnit -> create/delete perms

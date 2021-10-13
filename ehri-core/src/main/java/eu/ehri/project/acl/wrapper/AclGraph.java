@@ -1,11 +1,6 @@
 package eu.ehri.project.acl.wrapper;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Features;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.GraphQuery;
-import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.*;
 import com.tinkerpop.blueprints.util.wrappers.WrappedGraphQuery;
 import com.tinkerpop.blueprints.util.wrappers.WrapperGraph;
 import com.tinkerpop.pipes.PipeFunction;
@@ -57,13 +52,13 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
     }
 
     @Override
-    public Iterable<Vertex> getVertices() {
+    public CloseableIterable<Vertex> getVertices() {
         return new AclVertexIterable(baseGraph.getVertices(), this);
 
     }
 
     @Override
-    public Iterable<Vertex> getVertices(String s, Object o) {
+    public CloseableIterable<Vertex> getVertices(String s, Object o) {
         return new AclVertexIterable(baseGraph.getVertices(s, o), this);
     }
 
@@ -86,12 +81,12 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
     }
 
     @Override
-    public Iterable<Edge> getEdges() {
+    public CloseableIterable<Edge> getEdges() {
         return new AclEdgeIterable(baseGraph.getEdges(), this);
     }
 
     @Override
-    public Iterable<Edge> getEdges(String s, Object o) {
+    public CloseableIterable<Edge> getEdges(String s, Object o) {
         return new AclEdgeIterable(baseGraph.getEdges(s, o), this);
     }
 
@@ -100,12 +95,12 @@ public class AclGraph<T extends Graph> implements WrapperGraph<T>, Graph {
         final AclGraph<?> graph = this;
         return new WrappedGraphQuery(this.baseGraph.query()) {
             @Override
-            public Iterable<Edge> edges() {
+            public CloseableIterable<Edge> edges() {
                 return new AclEdgeIterable(this.query.edges(), graph);
             }
 
             @Override
-            public Iterable<Vertex> vertices() {
+            public CloseableIterable<Vertex> vertices() {
                 return new AclVertexIterable(this.query.vertices(), graph);
             }
         };
