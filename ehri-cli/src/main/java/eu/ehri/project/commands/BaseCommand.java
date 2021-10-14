@@ -73,12 +73,13 @@ public abstract class BaseCommand implements Command {
 
     @Override
     public String getDetailedHelp() {
+        String sep = System.getProperty("line.separator");
         HelpFormatter formatter = new HelpFormatter();
         setCustomOptions(options);
         StringWriter out = new StringWriter();
         formatter.printHelp(
-                new PrintWriter(out), 80, getUsage(), "\n" + getHelp() + "\n\n",
-                options, 5, 0, "\n" + getHelpFooter());
+                new PrintWriter(out), 80, getUsage(), sep + getHelp() + sep + sep,
+                options, 5, 0, sep + getHelpFooter());
         return out.toString();
     }
 
@@ -91,8 +92,7 @@ public abstract class BaseCommand implements Command {
      * @param cmdLine the parsed command line object
      * @return a command return code
      */
-    public abstract int execWithOptions(FramedGraph<?> graph,
-            CommandLine cmdLine) throws Exception;
+    public abstract int execWithOptions(FramedGraph<?> graph, CommandLine cmdLine) throws Exception;
 
     /**
      * Utility to get a parsed command line from some args. This is
