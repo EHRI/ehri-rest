@@ -1,5 +1,7 @@
 #!/bin/sh
 
+VERSION=$($NEO4J_HOME/scripts/cmd version 2>&1)
+echo "EHRI version: $VERSION"
 
 NEO4J_DB="$NEO4J_HOME/data/databases/graph.db"
 if [ ! -d "$NEO4J_DB" ]; then

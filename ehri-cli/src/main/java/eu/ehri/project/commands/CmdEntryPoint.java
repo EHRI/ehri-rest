@@ -28,11 +28,7 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.TxGraph;
 import eu.ehri.project.core.impl.TxNeo4jGraph;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
-import org.apache.commons.cli.AlreadySelectedException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.cli.MissingOptionException;
-import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.cli.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -121,8 +117,8 @@ public class CmdEntryPoint extends BaseCommand {
             buffer.append(sep);
             buffer.append("Use 'help <command>' for usage details.");
             return buffer.toString();
-        } catch (NoSuchMethodException|IllegalAccessException|InvocationTargetException
-                |InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException
+                | InstantiationException e) {
             throw new RuntimeException(e);
         }
     }
@@ -142,6 +138,9 @@ public class CmdEntryPoint extends BaseCommand {
 
         if (args.length < 2) {
             return new CmdEntryPoint().exec(null, args);
+        } else if (args[1].equals("version")) {
+            System.err.println(CmdEntryPoint.class.getPackage().getImplementationVersion());
+            return RetCode.OK.getCode();
         } else if (args[1].equals("help")) {
             if (args.length > 2 && COMMANDS.containsKey(args[2])) {
                 Command cmd = COMMANDS.get(args[2]).getConstructor().newInstance();
@@ -163,7 +162,7 @@ public class CmdEntryPoint extends BaseCommand {
                     } else {
                         tx.failure();
                     }
-                } catch (MissingArgumentException |MissingOptionException|AlreadySelectedException|
+                } catch (MissingArgumentException | MissingOptionException | AlreadySelectedException |
                         UnrecognizedOptionException e) {
                     // options or parameters where not correct, so print the correct usage
                     System.err.println(e.getMessage());
