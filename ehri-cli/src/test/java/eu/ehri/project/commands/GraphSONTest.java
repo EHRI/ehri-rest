@@ -66,6 +66,7 @@ public class GraphSONTest extends GraphTestBase {
 
         assertEquals(0, graphSON.execWithOptions(graph1, outCmdLine));
         graph1.shutdown();
+        resetGraph();
 
         assertTrue(temp.exists());
         assertTrue(temp.length() > 0L);

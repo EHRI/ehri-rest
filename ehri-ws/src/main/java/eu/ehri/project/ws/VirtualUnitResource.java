@@ -33,8 +33,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.ws.base.*;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -50,8 +49,8 @@ public final class VirtualUnitResource extends
         AbstractAccessibleResource<VirtualUnit>
         implements GetResource, ListResource, UpdateResource, DeleteResource {
 
-    public VirtualUnitResource(@Context GraphDatabaseService database) {
-        super(database, VirtualUnit.class);
+    public VirtualUnitResource(@Context DatabaseManagementService service) {
+        super(service, VirtualUnit.class);
     }
 
     @GET

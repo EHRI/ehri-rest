@@ -51,6 +51,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Entity;
 import eu.ehri.project.models.utils.CustomAnnotationsModule;
 import eu.ehri.project.persistence.Serializer;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,8 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Supplier;
+
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 
 /**
@@ -162,10 +165,10 @@ public abstract class AbstractResource implements TxCheckedResource {
     /**
      * Constructer.
      *
-     * @param database A Neo4j graph database
+     * @param dbms A Neo4j graph database service
      */
-    public AbstractResource(@Context GraphDatabaseService database) {
-        graph = graphFactory.create(new TxNeo4jGraph(database));
+    public AbstractResource(@Context DatabaseManagementService dbms) {
+        graph = graphFactory.create(new TxNeo4jGraph(dbms, dbms.database(DEFAULT_DATABASE_NAME)));
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();
     }
@@ -268,7 +271,7 @@ public abstract class AbstractResource implements TxCheckedResource {
      */
     protected Accessor getRequesterUserProfile() {
         Optional<String> id = getRequesterIdentifier();
-        if (!id.isPresent()) {
+        if (id.isEmpty()) {
             return AnonymousAccessor.getInstance();
         } else {
             try {

@@ -17,7 +17,7 @@ import graphql.execution.instrumentation.ChainedInstrumentation;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.introspection.IntrospectionQuery;
 import graphql.schema.GraphQLSchema;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -40,8 +40,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     private static final int MAX_COMPLEXITY = config.getInt("graphql.limits.maxComplexity");
     private static final int MAX_COMPLEXITY_ANON = config.getInt("graphql.limits.maxComplexityAnonymous");
 
-    public GraphQLResource(@Context GraphDatabaseService database) {
-        super(database, Accessible.class);
+    public GraphQLResource(@Context DatabaseManagementService service) {
+        super(service, Accessible.class);
     }
 
     // Helpers
