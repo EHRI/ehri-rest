@@ -31,8 +31,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
@@ -101,7 +101,6 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
 
     @Override
     public void initialize() {
-        createIndicesAndConstraints(graph.getBaseGraph().getRawGraph());
     }
 
     @Override
@@ -127,19 +126,27 @@ public final class Neo4jGraphManager<T extends Neo4j2Graph> extends BlueprintsGr
     }
 
     /**
-     * Create the graph schema
+     * Drop the existing schema.
      *
-     * @param graph the underlying graph service
+     * @param tx the underlying graph transactions
      */
-    public static void createIndicesAndConstraints(GraphDatabaseService graph) {
-        Schema schema = graph.schema();
+    public static void dropIndicesAndConstraints(Transaction tx) {
+        Schema schema = tx.schema();
         for (ConstraintDefinition constraintDefinition : schema.getConstraints()) {
             constraintDefinition.drop();
         }
         for (IndexDefinition indexDefinition : schema.getIndexes()) {
             indexDefinition.drop();
         }
+    }
 
+    /**
+     * Create the graph schema
+     *
+     * @param tx the underlying graph transaction
+     */
+    public static void createIndicesAndConstraints(Transaction tx) {
+        Schema schema = tx.schema();
         schema.constraintFor(Label.label(BASE_LABEL))
                 .assertPropertyIsUnique(EntityType.ID_KEY)
                 .create();
