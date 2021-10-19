@@ -167,7 +167,8 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <!-- NB: later versions are incompatible w/ Neo4j 3.5 -->
+            <version>1.19</version>
         </dependency>
         <dependency>
             <groupId>com.flipkart.zjsonpatch</groupId>
