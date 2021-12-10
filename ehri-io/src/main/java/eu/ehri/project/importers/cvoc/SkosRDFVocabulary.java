@@ -112,10 +112,12 @@ public enum SkosRDFVocabulary {
             .put(SkosMultilingual.altLabel.name(), Lists.newArrayList(ALT_LABEL.getURI()))
             .put(SkosMultilingual.hiddenLabel.name(), Lists.newArrayList(HIDDEN_LABEL.getURI()))
             .put(SkosMultilingual.definition.name(), Lists.newArrayList(DEFINITION.getURI()))
+            .put(SkosMultilingual.note.name(), Lists.newArrayList(NOTE.getURI()))
+            .put(SkosMultilingual.changeNote.name(), Lists.newArrayList(CHANGE_NOTE.getURI()))
+            .put(SkosMultilingual.editorialNote.name(), Lists.newArrayList(EDITORIAL_NOTE.getURI()))
+            .put(SkosMultilingual.historyNote.name(), Lists.newArrayList(HISTORY_NOTE.getURI()))
             .put(SkosMultilingual.scopeNote.name(), Lists.newArrayList(SCOPE_NOTE.getURI(),
                     URI.create("http://www.w3.org/2000/01/rdf-schema#comment")))
-            .put(SkosMultilingual.note.name(), Lists.newArrayList(NOTE.getURI()))
-            .put(SkosMultilingual.editorialNote.name(), Lists.newArrayList(EDITORIAL_NOTE.getURI()))
             .build();
 
     private final URI uri;

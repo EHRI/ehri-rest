@@ -6,9 +6,10 @@ public enum SkosMultilingual implements DefinitionList {
     hiddenLabel(true),
     definition(true),
     note(true),
-    scopeNote(true),
+    changeNote(true),
     editorialNote(true),
-    historyNote(true);
+    historyNote(true),
+    scopeNote(true);
 
     private final Boolean multiValued;
 
