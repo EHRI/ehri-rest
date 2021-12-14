@@ -41,9 +41,7 @@ public abstract class ModelTestBase extends GraphTestBase {
     public void setUp() throws Exception {
         super.setUp();
         helper = FixtureLoaderFactory.getInstance(graph);
-        try (Transaction tx = service.beginTx()) {
-            helper.loadTestData();
-            tx.commit();
-        }
+        helper.loadTestData();
+        graph.getBaseGraph().commit();
     }
 }
