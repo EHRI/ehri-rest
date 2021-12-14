@@ -98,6 +98,7 @@ public class AclGraphTest extends AbstractFixtureTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GraphSONWriter.outputGraph(invalidUserGraph, baos, GraphSONMode.EXTENDED);
 
+        resetGraph();
         FramedGraph<? extends TransactionalGraph> newGraph = getFramedGraph();
         ByteArrayInputStream ios = new ByteArrayInputStream(baos.toByteArray());
         GraphSONReader.inputGraph(newGraph, ios);
