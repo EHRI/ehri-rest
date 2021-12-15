@@ -38,7 +38,7 @@ public abstract class RunningServerTest {
     final static private String mountPoint = "ehri";
 
     private final static ServerRunner runner = ServerRunner.getInstance(
-            ImmutableMap.of("eu.ehri.extension", mountPoint));
+            ImmutableMap.of("eu.ehri.project.ws", mountPoint));
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {
