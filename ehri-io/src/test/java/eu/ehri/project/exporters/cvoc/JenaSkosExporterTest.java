@@ -91,9 +91,10 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
 
         for (String format : formats) {
             String skos = exportFile(vocabulary, format, baseUri);
-            //System.out.println(skos);
+            // System.out.println(skos);
             assertTrue(skos.contains(baseUri));
             assertTrue(skos.contains(baseUri + "989"));
+            assertTrue(skos.contains("dc:name"));
         }
     }
 

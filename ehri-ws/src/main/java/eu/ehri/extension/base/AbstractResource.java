@@ -89,11 +89,14 @@ public abstract class AbstractResource implements TxCheckedResource {
      */
     public final static String TURTLE_MIMETYPE = "text/turtle";
     public final static String RDF_XML_MIMETYPE = "application/rdf+xml";
+    // RDF/XML-ABBREV produces more readable XML but is very, very slow and inefficient...
+    // public final static String RDF_XML_ABBREV_MIMETYPE = "application/rdf+xml+abbrev";
     public final static String N3_MIMETYPE = "application/n-triples";
     protected final BiMap<String, String> RDF_MIMETYPE_FORMATS = ImmutableBiMap.of(
             N3_MIMETYPE, "N3",
             TURTLE_MIMETYPE, "TTL",
             RDF_XML_MIMETYPE, "RDF/XML"
+            // RDF_XML_ABBREV_MIMETYPE, "RDF/XML-ABBREV"
     );
     protected final String DEFAULT_RDF_FORMAT = "TTL";
 

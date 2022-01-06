@@ -77,7 +77,7 @@ public enum SkosRDFVocabulary {
 
     public static final Map<String, String> NAMESPACES = ImmutableMap.<String, String>builder()
             .put("skos", "http://www.w3.org/2004/02/skos/core#")
-            .put("dc", "http://purl.org/dc/elements/1.1/name")
+            .put("dc", "http://purl.org/dc/elements/1.1/")
             .put("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
             .put("foaf", "http://xmlns.com/foaf/0.1/")
             .put("sem", "http://semanticweb.cs.vu.nl/2009/11/sem/")
