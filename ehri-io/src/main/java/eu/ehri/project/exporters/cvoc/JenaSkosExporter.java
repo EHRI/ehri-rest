@@ -30,10 +30,10 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.utils.LanguageHelpers;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SKOS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
@@ -92,18 +92,10 @@ public class JenaSkosExporter implements SkosExporter {
         String baseUri = base == null ? SkosRDFVocabulary.DEFAULT_BASE_URI : base;
         Iterable<Concept> concepts = vocabulary.getConcepts();
         Model model = ModelFactory.createDefaultModel();
-        Resource skosConcept = model.createResource(SkosRDFVocabulary.CONCEPT.getURI().toString());
         model.setNsPrefixes(SkosRDFVocabulary.NAMESPACES);
-        Property prefLabelProp = model
-                .createProperty(SkosRDFVocabulary.PREF_LABEL.getURI().toString());
-        Property inSchemeProp = model
-                .createProperty(SkosRDFVocabulary.IN_SCHEME.getURI().toString());
-        Property topConceptProp = model
-                .createProperty(SkosRDFVocabulary.HAS_TOP_CONCEPT.getURI().toString());
 
         Resource vocabResource = model.createResource(baseUri + vocabulary.getIdentifier());
-        model.add(vocabResource, RDF.type, model
-                .createResource(SkosRDFVocabulary.CONCEPT_SCHEME.getURI().toString()));
+        vocabResource.addProperty(RDF.type, SKOS.ConceptScheme);
 
         // Write name and description as DC elements.
         for (String dcElement : new String[]{"name", "description"}) {
@@ -117,8 +109,8 @@ public class JenaSkosExporter implements SkosExporter {
         for (Concept concept : concepts) {
             Vertex cv = concept.asVertex();
             Resource resource = model.createResource(getUri(concept, baseUri));
-            model.add(resource, RDF.type, skosConcept);
-            model.add(resource, inSchemeProp, vocabResource);
+            resource.addProperty(RDF.type, SKOS.Concept);
+            resource.addProperty(SKOS.inScheme, vocabResource);
 
             for (String key : cv.getPropertyKeys()) {
                 writeProperty(model, resource, key, cv.getProperty(key), null);
@@ -127,7 +119,7 @@ public class JenaSkosExporter implements SkosExporter {
             for (Description description : concept.getDescriptions()) {
                 Vertex cdv = description.asVertex();
                 String lang = getLangCode(description);
-                model.add(resource, prefLabelProp, description.getName(), lang);
+                resource.addProperty(SKOS.prefLabel, description.getName(), lang);
                 for (String key : cdv.getPropertyKeys()) {
                     writeProperty(model, resource, key, cdv.getProperty(key), lang);
                 }
@@ -138,7 +130,7 @@ public class JenaSkosExporter implements SkosExporter {
                     for (String key : prop.getPropertyKeys()) {
                         String value = prop.getProperty(key);
                         if (SkosRDFVocabulary.RELATION_PROPS.containsKey(key)) {
-                            model.add(resource,
+                            resource.addProperty(
                                     model.createProperty(SkosRDFVocabulary.RELATION_PROPS.get(key).toString()), value);
                         }
                     }
@@ -147,20 +139,20 @@ public class JenaSkosExporter implements SkosExporter {
 
             // if there are no broader concepts, assume it's a top concept
             if (!concept.getBroaderConcepts().iterator().hasNext()) {
-                model.add(vocabResource, topConceptProp, resource);
+                vocabResource.addProperty(SKOS.topConceptOf, resource);
             }
 
             for (Concept other : concept.getBroaderConcepts()) {
                 Resource otherResource = model.createResource(getUri(other, baseUri));
-                model.add(resource, model.createProperty(SkosRDFVocabulary.BROADER.getURI().toString()), otherResource);
+                resource.addProperty(SKOS.broader, otherResource);
             }
             for (Concept other : concept.getNarrowerConcepts()) {
                 Resource otherResource = model.createResource(getUri(other, baseUri));
-                model.add(resource, model.createProperty(SkosRDFVocabulary.NARROWER.getURI().toString()), otherResource);
+                resource.addProperty(SKOS.narrower, otherResource);
             }
             for (Concept other : concept.getRelatedConcepts()) {
                 Resource otherResource = model.createResource(getUri(other, baseUri));
-                model.add(resource, model.createProperty(SkosRDFVocabulary.RELATED.getURI().toString()), otherResource);
+                resource.addProperty(SKOS.related, otherResource);
             }
         }
         return model;
@@ -194,12 +186,11 @@ public class JenaSkosExporter implements SkosExporter {
         }
     }
 
-    private void writeObject(Model model, Resource resource,
-            Property property, Object value, String lang) {
+    private void writeObject(Model model, Resource resource, Property property, Object value, String lang) {
         if (value instanceof String) {
-            model.add(resource, property, (String) value, lang);
+            resource.addProperty(property, (String) value, lang);
         } else {
-            model.add(resource, property, model.createTypedLiteral(value));
+            resource.addProperty(property, model.createTypedLiteral(value));
         }
     }
 }
