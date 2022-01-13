@@ -19,6 +19,7 @@
 
 package eu.ehri.project.exporters.cvoc;
 
+import com.google.common.collect.ImmutableMap;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -98,11 +100,11 @@ public class JenaSkosExporter implements SkosExporter {
         vocabResource.addProperty(RDF.type, SKOS.ConceptScheme);
 
         // Write name and description as DC elements.
-        for (String dcElement : new String[]{"name", "description"}) {
-            Object prop = vocabulary.getProperty(dcElement);
+        for (Map.Entry<String, URI> dcElement : SkosRDFVocabulary.VOCAB_PROPS.entrySet()) {
+            Object prop = vocabulary.getProperty(dcElement.getKey());
             if (prop != null) {
                 writeListOrScalar(model, vocabResource,
-                        model.createProperty(DC_URI + dcElement), prop, "en");
+                        model.createProperty(dcElement.getValue().toString()), prop, "en");
             }
         }
 
