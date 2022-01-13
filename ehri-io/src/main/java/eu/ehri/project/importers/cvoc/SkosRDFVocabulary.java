@@ -85,6 +85,12 @@ public enum SkosRDFVocabulary {
             .put("owl", "http://www.w3.org/2002/07/owl#")
             .build();
 
+    // Vocabulary properties
+    public static final Map<String, URI> VOCAB_PROPS = ImmutableMap.<String, URI>builder()
+            .put("name", URI.create("http://purl.org/dc/elements/1.1/title"))
+            .put("description", URI.create("http://purl.org/dc/elements/1.1/description"))
+            .build();
+
     // Language-agnostic properties.
     public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
             .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
