@@ -23,34 +23,62 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.test.AbstractFixtureTest;
+import graphql.ExecutionInput;
+import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 
-public class StreamingGraphQLTest extends AbstractFixtureTest {
+public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    @Test
-    public void textExecute() throws Exception {
-        String testQuery = readResourceFileAsString("testquery-connection.graphql");
+    public JsonNode executeStream(String query, Map<String, Object> params) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
             GraphQLSchema schema = new GraphQLImpl(api(validUser), true).getSchema();
-            StreamingGraphQL ql = new StreamingGraphQL(schema);
-            ql.execute(generator, testQuery, null, null, Collections.emptyMap());
+
+            final StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
+            final ExecutionInput input = ExecutionInput.newExecutionInput()
+                    .query(query)
+                    .operationName(null)
+                    .variables(params)
+                    .build();
+
+            final GraphQL graphQL = GraphQL
+                    .newGraphQL(schema)
+                    .queryExecutionStrategy(strategy)
+                    .build();
+
+            graphQL.execute(input);
+
         }
-        JsonNode json = mapper.readTree(out.toByteArray());
-        //System.out.println(json);
-        String first = json.path("firstTwo").path("items").path(0).path("id").textValue();
+        return mapper.readTree(out.toByteArray());
+    }
+
+    @Test
+    public void testExecuteWithErrors() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-bad.graphql");
+        JsonNode json = executeStream(testQuery, Collections.emptyMap());
+        assertEquals("", json.toPrettyString());
+    }
+
+    @Test
+    public void textExecute() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-connection.graphql");
+        JsonNode json = executeStream(testQuery, Collections.emptyMap());
+        // System.out.println("JSON: " + json);
+        String first = json.path("data").path("firstTwo").path("items").path(0).path("id").textValue();
         assertThat(first, anyOf(containsString("c1"), containsString("nl-r1-m19")));
     }
 }
