@@ -65,6 +65,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.LanguageHelpers;
+import graphql.GraphQL;
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
@@ -711,7 +712,7 @@ public class GraphQLImpl {
 
     // Type definitions...
 
-    private static GraphQLOutputType edgeType(GraphQLOutputType wrapped) {
+    private static GraphQLOutputType edgeType(GraphQLTypeReference wrapped) {
         return newObject()
                 .name(wrapped.getName() + "Edge")
                 .description(MessageFormat.format(__("graphql.edge.description"), wrapped.getName()))
@@ -728,7 +729,7 @@ public class GraphQLImpl {
                 .build();
     }
 
-    private static List<GraphQLFieldDefinition> connectionFields(GraphQLOutputType wrappedType) {
+    private static List<GraphQLFieldDefinition> connectionFields(GraphQLTypeReference wrappedType) {
         return ImmutableList.of(
                 newFieldDefinition()
                         .name(ITEMS)
@@ -774,7 +775,7 @@ public class GraphQLImpl {
         );
     }
 
-    private static GraphQLOutputType connectionType(GraphQLOutputType wrappedType, String name) {
+    private static GraphQLOutputType connectionType(GraphQLTypeReference wrappedType, String name) {
         return newObject()
                 .name(name)
                 .description(MessageFormat.format(__("graphql.connection.description"), wrappedType.getName()))

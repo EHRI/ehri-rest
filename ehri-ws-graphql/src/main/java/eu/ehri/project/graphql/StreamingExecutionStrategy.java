@@ -27,7 +27,7 @@ import graphql.execution.DataFetcherExceptionHandlerParameters;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionStrategy;
 import graphql.execution.ExecutionStrategyParameters;
-import graphql.execution.ExecutionTypeInfo;
+//import graphql.execution.ExecutionTypeInfo;
 import graphql.execution.FieldCollectorParameters;
 import graphql.execution.TypeResolutionParameters;
 import graphql.execution.instrumentation.Instrumentation;
@@ -55,9 +55,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
+//import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
 import static graphql.execution.FieldCollectorParameters.newParameters;
-import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
+//import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
 
 /**
  * Streaming version of an execution strategy.
@@ -69,12 +69,12 @@ import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvir
 public class StreamingExecutionStrategy extends ExecutionStrategy {
 
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
-        generator.writeStartObject();
-        for (String fieldName : parameters.getFields().keySet()) {
-            generator.writeFieldName(fieldName);
-            resolveField(generator, executionContext, parameters, parameters.getFields().get(fieldName));
-        }
-        generator.writeEndObject();
+//        generator.writeStartObject();
+//        for (String fieldName : parameters.getFields().keySet()) {
+//            generator.writeFieldName(fieldName);
+//            resolveField(generator, executionContext, parameters, parameters.getFields().get(fieldName));
+//        }
+//        generator.writeEndObject();
     }
 
     private void handleFetchingException(ExecutionContext executionContext,
@@ -84,128 +84,129 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
             Map<String, Object> argumentValues,
             DataFetchingEnvironment environment,
             Throwable e) {
-        DataFetcherExceptionHandlerParameters handlerParameters = DataFetcherExceptionHandlerParameters.newExceptionParameters()
-                .executionContext(executionContext)
-                .dataFetchingEnvironment(environment)
-                .argumentValues(argumentValues)
-                .field(field)
-                .fieldDefinition(fieldDef)
-                .path(parameters.getPath())
-                .exception(e)
-                .build();
-
-        dataFetcherExceptionHandler.accept(handlerParameters);
+//        DataFetcherExceptionHandlerParameters handlerParameters = DataFetcherExceptionHandlerParameters
+//                .newExceptionParameters()
+//                .executionContext(executionContext)
+//                .dataFetchingEnvironment(environment)
+//                .argumentValues(argumentValues)
+//                .field(field)
+//                .fieldDefinition(fieldDef)
+//                .path(parameters.getPath())
+//                .exception(e)
+//                .build();
+//
+//        dataFetcherExceptionHandler.accept(handlerParameters);
     }
 
     private void resolveField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
-        Field field = fields.get(0);
-        GraphQLObjectType parentType = parameters.getTypeInfo().castType(GraphQLObjectType.class);
-        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field);
-
-        Map<String, Object> argumentValues = valuesResolver.getArgumentValues(fieldDef.getArguments(), field.getArguments(), executionContext.getVariables());
-
-        GraphQLOutputType fieldType = fieldDef.getType();
-        DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(executionContext, fieldType, fields);
-
-        DataFetchingEnvironment environment = newDataFetchingEnvironment(executionContext)
-                .source(parameters.getSource())
-                .arguments(argumentValues)
-                .fieldDefinition(fieldDef)
-                .fields(fields)
-                .fieldType(fieldType)
-                .parentType(parentType)
-                .selectionSet(fieldCollector)
-                .build();
-
-        ExecutionTypeInfo fieldTypeInfo = newTypeInfo()
-                .type(fieldType)
-                .parentInfo(parameters.getTypeInfo())
-                .build();
-
-        Instrumentation instrumentation = executionContext.getInstrumentation();
-
-        InstrumentationContext<ExecutionResult> fieldCtx = instrumentation.beginField(new InstrumentationFieldParameters(executionContext, fieldDef, fieldTypeInfo));
-
-        InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment, parameters));
-        Object resolvedValue = null;
-        try {
-            resolvedValue = fieldDef.getDataFetcher().get(environment);
-            fetchCtx.onCompleted(resolvedValue, null);
-        } catch (Exception e) {
-            handleFetchingException(executionContext, parameters, field, fieldDef, argumentValues, environment, e);
-            fetchCtx.onCompleted(null, e);
-        }
-
-        ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                .typeInfo(fieldTypeInfo)
-                .fields(parameters.getFields())
-                .arguments(argumentValues)
-                .source(resolvedValue)
-                .build();
-
-        completeValue(generator, executionContext, newParameters, fields);
-
-        fieldCtx.onCompleted(new ExecutionResultImpl(resolvedValue, Collections.emptyList()), null);
+//        Field field = fields.get(0);
+//        GraphQLObjectType parentType = parameters.getTypeInfo().castType(GraphQLObjectType.class);
+//        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field);
+//
+//        Map<String, Object> argumentValues = valuesResolver.getArgumentValues(fieldDef.getArguments(), field.getArguments(), executionContext.getVariables());
+//
+//        GraphQLOutputType fieldType = fieldDef.getType();
+//        DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(executionContext, fieldType, fields);
+//
+//        DataFetchingEnvironment environment = newDataFetchingEnvironment(executionContext)
+//                .source(parameters.getSource())
+//                .arguments(argumentValues)
+//                .fieldDefinition(fieldDef)
+//                .fields(fields)
+//                .fieldType(fieldType)
+//                .parentType(parentType)
+//                .selectionSet(fieldCollector)
+//                .build();
+//
+//        ExecutionTypeInfo fieldTypeInfo = newTypeInfo()
+//                .type(fieldType)
+//                .parentInfo(parameters.getTypeInfo())
+//                .build();
+//
+//        Instrumentation instrumentation = executionContext.getInstrumentation();
+//
+//        InstrumentationContext<ExecutionResult> fieldCtx = instrumentation.beginField(new InstrumentationFieldParameters(executionContext, fieldDef, fieldTypeInfo));
+//
+//        InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment, parameters));
+//        Object resolvedValue = null;
+//        try {
+//            resolvedValue = fieldDef.getDataFetcher().get(environment);
+//            fetchCtx.onCompleted(resolvedValue, null);
+//        } catch (Exception e) {
+//            handleFetchingException(executionContext, parameters, field, fieldDef, argumentValues, environment, e);
+//            fetchCtx.onCompleted(null, e);
+//        }
+//
+//        ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
+//                .typeInfo(fieldTypeInfo)
+//                .fields(parameters.getFields())
+//                .arguments(argumentValues)
+//                .source(resolvedValue)
+//                .build();
+//
+//        completeValue(generator, executionContext, newParameters, fields);
+//
+//        fieldCtx.onCompleted(new ExecutionResultImpl(resolvedValue, Collections.emptyList()), null);
     }
 
     private void completeValue(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
 
-        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
-        Object result = parameters.getSource();
-        GraphQLType fieldType = parameters.getTypeInfo().getType();
-
-        if (result == null) {
-            generator.writeNull();
-        } else if (fieldType instanceof GraphQLList) {
-            completeValueForList(generator, executionContext, parameters, fields, result);
-        } else if (fieldType instanceof GraphQLScalarType) {
-            completeValueForScalar(generator, (GraphQLScalarType) fieldType, result);
-        } else if (fieldType instanceof GraphQLEnumType) {
-            completeValueForEnum(generator, (GraphQLEnumType) fieldType, result);
-        } else {
-            GraphQLObjectType resolvedType;
-            if (fieldType instanceof GraphQLInterfaceType) {
-                TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
-                        .graphQLInterfaceType((GraphQLInterfaceType) fieldType)
-                        .field(fields.get(0))
-                        .value(parameters.getSource())
-                        .argumentValues(parameters.getArguments())
-                        .schema(executionContext.getGraphQLSchema()).build();
-                resolvedType = resolveTypeForInterface(resolutionParams);
-
-            } else if (fieldType instanceof GraphQLUnionType) {
-                TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
-                        .graphQLUnionType((GraphQLUnionType) fieldType)
-                        .field(fields.get(0))
-                        .value(parameters.getSource())
-                        .argumentValues(parameters.getArguments())
-                        .schema(executionContext.getGraphQLSchema()).build();
-                resolvedType = resolveTypeForUnion(resolutionParams);
-            } else {
-                resolvedType = (GraphQLObjectType) fieldType;
-            }
-
-            FieldCollectorParameters collectorParameters = newParameters()
-                    .schema(executionContext.getGraphQLSchema())
-                    .objectType(resolvedType)
-                    .fragments(executionContext.getFragmentsByName())
-                    .variables(executionContext.getVariables())
-                    .build();
-
-            Map<String, List<Field>> subFields = fieldCollector.collectFields(collectorParameters, fields);
-
-            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .typeInfo(typeInfo.treatAs(resolvedType))
-                    .fields(subFields)
-                    .source(result).build();
-
-            // Calling this from the executionContext to ensure we shift back from mutation strategy to the query strategy.
-            execute(generator, executionContext, newParameters);
-        }
+//        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
+//        Object result = parameters.getSource();
+//        GraphQLType fieldType = parameters.getTypeInfo().getType();
+//
+//        if (result == null) {
+//            generator.writeNull();
+//        } else if (fieldType instanceof GraphQLList) {
+//            completeValueForList(generator, executionContext, parameters, fields, result);
+//        } else if (fieldType instanceof GraphQLScalarType) {
+//            completeValueForScalar(generator, (GraphQLScalarType) fieldType, result);
+//        } else if (fieldType instanceof GraphQLEnumType) {
+//            completeValueForEnum(generator, (GraphQLEnumType) fieldType, result);
+//        } else {
+//            GraphQLObjectType resolvedType;
+//            if (fieldType instanceof GraphQLInterfaceType) {
+//                TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
+//                        .graphQLInterfaceType((GraphQLInterfaceType) fieldType)
+//                        .field(fields.get(0))
+//                        .value(parameters.getSource())
+//                        .argumentValues(parameters.getArguments())
+//                        .schema(executionContext.getGraphQLSchema()).build();
+//                resolvedType = resolveTypeForInterface(resolutionParams);
+//
+//            } else if (fieldType instanceof GraphQLUnionType) {
+//                TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
+//                        .graphQLUnionType((GraphQLUnionType) fieldType)
+//                        .field(fields.get(0))
+//                        .value(parameters.getSource())
+//                        .argumentValues(parameters.getArguments())
+//                        .schema(executionContext.getGraphQLSchema()).build();
+//                resolvedType = resolveTypeForUnion(resolutionParams);
+//            } else {
+//                resolvedType = (GraphQLObjectType) fieldType;
+//            }
+//
+//            FieldCollectorParameters collectorParameters = newParameters()
+//                    .schema(executionContext.getGraphQLSchema())
+//                    .objectType(resolvedType)
+//                    .fragments(executionContext.getFragmentsByName())
+//                    .variables(executionContext.getVariables())
+//                    .build();
+//
+//            Map<String, List<Field>> subFields = fieldCollector.collectFields(collectorParameters, fields);
+//
+//            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
+//                    .typeInfo(typeInfo.treatAs(resolvedType))
+//                    .fields(subFields)
+//                    .source(result).build();
+//
+//            // Calling this from the executionContext to ensure we shift back from mutation strategy to the query strategy.
+//            execute(generator, executionContext, newParameters);
+//        }
     }
 
     private void completeValueForEnum(JsonGenerator generator, GraphQLEnumType enumType, Object result) throws IOException {
-        generator.writeObject(enumType.getCoercing().serialize(result));
+//        generator.writeObject(enumType.getCoercing().serialize(result));
     }
 
     private void completeValueForScalar(JsonGenerator generator, GraphQLScalarType scalarType, Object result) throws IOException {
@@ -226,19 +227,19 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
     }
 
     private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields, Iterable<Object> result) throws IOException {
-        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
-        GraphQLList fieldType = typeInfo.castType(GraphQLList.class);
-
-        generator.writeStartArray();
-        for (Object item : result) {
-            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-                    .typeInfo(typeInfo.treatAs(fieldType.getWrappedType()))
-                    .fields(parameters.getFields())
-                    .source(item).build();
-
-            completeValue(generator, executionContext, newParameters, fields);
-        }
-        generator.writeEndArray();
+//        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
+//        GraphQLList fieldType = typeInfo.castType(GraphQLList.class);
+//
+//        generator.writeStartArray();
+//        for (Object item : result) {
+//            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
+//                    .typeInfo(typeInfo.treatAs(fieldType.getWrappedType()))
+//                    .fields(parameters.getFields())
+//                    .source(item).build();
+//
+//            completeValue(generator, executionContext, newParameters, fields);
+//        }
+//        generator.writeEndArray();
     }
 
 
