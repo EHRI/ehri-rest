@@ -1,0 +1,13 @@
+{
+    c1: DocumentaryUnit(id: "c1") {
+        id
+        firstEnglishDescription: description(languageCode: "eng", identifier: "c1-desc") {
+            identifier
+        }
+        allChildren: children(all: true) {
+            items {
+                id
+            }
+        }
+    }
+}

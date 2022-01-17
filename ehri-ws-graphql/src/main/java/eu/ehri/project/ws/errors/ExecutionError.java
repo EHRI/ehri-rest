@@ -29,6 +29,7 @@ import graphql.GraphqlErrorHelper;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExecutionError extends WebApplicationException {
@@ -39,15 +40,17 @@ public class ExecutionError extends WebApplicationException {
                 .entity(errorToJson(errors).getBytes(Charsets.UTF_8)).build());
     }
 
+    public static Map<String, List<Object>> toSpecification(List<? extends GraphQLError> errors) {
+        return ImmutableMap.of("errors", errors
+                .stream()
+                .map(GraphqlErrorHelper::toSpecification)
+                .collect(Collectors.toList()));
+
+    }
+
     private static String errorToJson(List<? extends GraphQLError> errors) {
         try {
-            return mapper.writeValueAsString(
-                    ImmutableMap.of("errors", errors
-                            .stream()
-                            .map(GraphqlErrorHelper::toSpecification)
-                            .collect(Collectors.toList())
-                    )
-            );
+            return mapper.writeValueAsString(toSpecification(errors));
         } catch (JsonProcessingException err) {
             throw new RuntimeException(err);
         }

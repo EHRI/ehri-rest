@@ -1,19 +1,21 @@
 package eu.ehri.project.ws;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import eu.ehri.project.ws.base.AbstractAccessibleResource;
-import eu.ehri.project.ws.errors.ExecutionError;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
-import eu.ehri.project.graphql.StreamingGraphQL;
+import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.persistence.Bundle;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
+import eu.ehri.project.ws.base.AbstractAccessibleResource;
+import eu.ehri.project.ws.errors.ExecutionError;
+import graphql.*;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
+import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.execution.instrumentation.ChainedInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
 import graphql.introspection.IntrospectionQuery;
-import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -30,6 +32,13 @@ import javax.ws.rs.core.StreamingOutput;
 public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "graphql";
+
+    private static final Config config = ConfigFactory.load();
+
+    private static final int MAX_DEPTH = config.getInt("graphql.limits.maxDepth");
+    private static final int MAX_DEPTH_ANON = config.getInt("graphql.limits.maxDepthAnonymous");
+    private static final int MAX_COMPLEXITY = config.getInt("graphql.limits.maxComplexity");
+    private static final int MAX_COMPLEXITY_ANON = config.getInt("graphql.limits.maxComplexityAnonymous");
 
     public GraphQLResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
@@ -87,7 +96,10 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build()
+        ExecutionResult executionResult = GraphQL
+                .newGraphQL(schema)
+                .instrumentation(getInstrumentation())
+                .build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(q.getQuery())
                         .operationName(q.getOperationName())
@@ -99,23 +111,36 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
-        // FIXME: Ugly: have to reinitialise the schema in this transaction
-        // otherwise iterables will be invalid.
-        final StreamingGraphQL ql = new StreamingGraphQL(schema);
-        // Check parsing, we have to do this again as well :(
-        ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
+        final ExecutionInput input = ExecutionInput.newExecutionInput()
+                .query(q.getQuery())
+                .operationName(q.getOperationName())
+                .variables(q.getVariables())
+                .build();
+        ParseAndValidateResult validator = ParseAndValidate.parseAndValidate(schema, input);
+        if (validator.isFailure()) {
+            throw new ExecutionError(validator.getErrors());
+        }
+
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory.createGenerator(outputStream).useDefaultPrettyPrinter()) {
-                final StreamingGraphQL ql2 = new StreamingGraphQL(new GraphQLImpl(api(), true).getSchema());
-                Document document = ql2.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
-                generator.writeStartObject();
-                generator.writeFieldName(Bundle.DATA_KEY);
-                ql2.execute(generator, q.getQuery(), document, q.getOperationName(),
-                        null, q.getVariables());
-                generator.writeEndObject();
+                StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
+
+                final GraphQL graphQL = GraphQL
+                        .newGraphQL(schema)
+                        .instrumentation(getInstrumentation())
+                        .queryExecutionStrategy(strategy)
+                        .build();
+                graphQL.execute(input);
                 tx.success();
             }
         };
+    }
+
+    private Instrumentation getInstrumentation() {
+        final boolean anonymous = getRequesterUserProfile().isAnonymous();
+        return new ChainedInstrumentation(
+            new MaxQueryComplexityInstrumentation(anonymous ? MAX_COMPLEXITY_ANON : MAX_COMPLEXITY),
+            new MaxQueryDepthInstrumentation(anonymous ? MAX_DEPTH_ANON : MAX_DEPTH));
     }
 }
