@@ -1,0 +1,50 @@
+{
+    c1: DocumentaryUnit(id: "c1") {
+        id
+        children(all: true) {
+            items {
+                id
+                children(all: true) {
+                    items {
+                        id
+                        children(all: true) {
+                            items {
+                                id
+                                children(all: true) {
+                                    items {
+                                        id
+                                        children(all: true) {
+                                            items {
+                                                id
+                                                children(all: true) {
+                                                    items {
+                                                        id
+                                                        children(all: true) {
+                                                            items {
+                                                                id
+                                                                children(all: true) {
+                                                                    items {
+                                                                        id
+                                                                        children(all: true) {
+                                                                            items {
+                                                                                id
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

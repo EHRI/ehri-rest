@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>eu.ehri-project</groupId>
@@ -51,6 +51,16 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <!-- Copy the reference.conf file... -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>reference.conf</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
     <reporting>
@@ -83,12 +93,11 @@
         </plugins>
     </reporting>
 
-
     <dependencies>
         <dependency>
             <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>${project.parent.version} </version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -103,7 +112,7 @@
         <dependency>
             <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
-            <version>${project.parent.version} </version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -171,7 +180,7 @@
         <dependency>
             <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
-            <version>${project.parent.version} </version>
+            <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
