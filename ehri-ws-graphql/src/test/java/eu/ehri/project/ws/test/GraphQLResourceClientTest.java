@@ -82,7 +82,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertNull(response.getHeaders().getFirst("Transfer-Encoding"));
 
         JsonNode data = response.getEntity(JsonNode.class);
-        //System.out.println(data);
+        // System.out.println(data);
         assertStatus(OK, response);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
@@ -282,6 +282,20 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
         assertEquals("Validation error of type MissingFieldArgument: Missing field argument id @ 'DocumentaryUnit'",
+                data.path("errors").path(0).path("message").textValue());
+    }
+
+    @Test
+    public void testGraphQLExceedingMaxComplexity() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-depth10.graphql");
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = client.resource(queryUri)
+                .entity(testQuery)
+                .post(ClientResponse.class);
+
+        assertStatus(BAD_REQUEST, response);
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("maximum query depth exceeded 10 > 6",
                 data.path("errors").path(0).path("message").textValue());
     }
 }

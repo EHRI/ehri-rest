@@ -6,14 +6,15 @@ import eu.ehri.project.ws.errors.ExecutionError;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
-import eu.ehri.project.graphql.StreamingGraphQL;
+import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.persistence.Bundle;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
+import graphql.*;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
+import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.execution.instrumentation.ChainedInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
 import graphql.introspection.IntrospectionQuery;
-import graphql.language.Document;
+import graphql.schema.CoercingParseValueException;
 import graphql.schema.GraphQLSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -30,6 +31,13 @@ import javax.ws.rs.core.StreamingOutput;
 public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "graphql";
+
+    // TODO: Move these to config and resolve issue w/ HOCON picking up
+    // the wrong reference.conf...
+    public static final int MAX_DEPTH = 10;
+    public static final int MAX_DEPTH_ANONYMOUS = 6;
+    public static final int MAX_FIELDS = 200;
+    public static final int MAX_FIELDS_ANONYMOUS = 20;
 
     public GraphQLResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
@@ -70,6 +78,9 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
             Object data = stream ? lazyExecution(schema, q) : strictExecution(schema, q);
             tx.success();
             return Response.ok(data).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -87,7 +98,10 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build()
+        ExecutionResult executionResult = GraphQL
+                .newGraphQL(schema)
+                .instrumentation(getInstrumentation())
+                .build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(q.getQuery())
                         .operationName(q.getOperationName())
@@ -98,24 +112,40 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         return executionResult;
     }
 
+    // FIXME: no way to know here if instrumentation threw an error such as exceeding
+    // the query depth. The result will be an empty string.
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
-        // FIXME: Ugly: have to reinitialise the schema in this transaction
-        // otherwise iterables will be invalid.
-        final StreamingGraphQL ql = new StreamingGraphQL(schema);
-        // Check parsing, we have to do this again as well :(
-        ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
+        final ExecutionInput input = ExecutionInput.newExecutionInput()
+                .query(q.getQuery())
+                .operationName(q.getOperationName())
+                .variables(q.getVariables())
+                .build();
+        ParseAndValidateResult validator = ParseAndValidate.parseAndValidate(schema, input);
+        if (validator.isFailure()) {
+            throw new ExecutionError(validator.getErrors());
+        }
+
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory.createGenerator(outputStream).useDefaultPrettyPrinter()) {
-                final StreamingGraphQL ql2 = new StreamingGraphQL(new GraphQLImpl(api(), true).getSchema());
-                Document document = ql2.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
-                generator.writeStartObject();
-                generator.writeFieldName(Bundle.DATA_KEY);
-                ql2.execute(generator, q.getQuery(), document, q.getOperationName(),
-                        null, q.getVariables());
-                generator.writeEndObject();
+                StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
+
+                final GraphQL graphQL = GraphQL
+                        .newGraphQL(schema)
+                        .instrumentation(getInstrumentation())
+                        .queryExecutionStrategy(strategy)
+                        .build();
+                graphQL.execute(input);
                 tx.success();
             }
         };
+    }
+
+    private Instrumentation getInstrumentation() {
+        final boolean anonymous = getRequesterUserProfile().isAnonymous();
+        return new ChainedInstrumentation(
+//                new MaxQueryComplexityInstrumentation(anonymous ? MAX_FIELDS_ANONYMOUS : MAX_FIELDS),
+                new MaxQueryDepthInstrumentation(anonymous ? MAX_DEPTH_ANONYMOUS : MAX_DEPTH)
+        );
     }
 }
