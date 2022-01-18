@@ -397,6 +397,7 @@ public class GraphQLImpl {
     private static final DataFetcher<Object> attributeDataFetcher = env -> {
         Entity source = env.<Entity>getSource();
         String name = env.getFields().get(0).getName();
+        System.out.println("Fetching attribute " + name + " at " + env.getContext());
         return source.getProperty(name);
     };
 
@@ -1121,7 +1122,7 @@ public class GraphQLImpl {
                     .description(__("country.field.name.description"))
                     .type(new GraphQLNonNull(GraphQLString))
                     .dataFetcher(transformingDataFetcher(idDataFetcher,
-                            obj -> LanguageHelpers.countryCodeToName(obj.toString())))
+                            LanguageHelpers::countryCodeToName))
                     .build()
             )
             .fields(countryDescriptionNullFields)

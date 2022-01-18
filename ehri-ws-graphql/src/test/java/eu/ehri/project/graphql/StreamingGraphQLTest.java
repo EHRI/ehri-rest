@@ -41,6 +41,9 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
     @Test
     public void textExecute() throws Exception {
         String testQuery = readResourceFileAsString("testquery-connection.graphql");
+//        String testQuery = "{c1: DocumentaryUnit(id: \"c1\") { id\ndescription(languageCode: \"eng\", identifier: \"c1-desc\") {\n" +
+//                "            identifier\n" +
+//                "        }}}";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
@@ -49,7 +52,7 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
             ql.execute(generator, testQuery, null, null, Collections.emptyMap());
         }
         JsonNode json = mapper.readTree(out.toByteArray());
-        //System.out.println(json);
+        System.out.println(json);
         String first = json.path("firstTwo").path("items").path(0).path("id").textValue();
         assertThat(first, anyOf(containsString("c1"), containsString("nl-r1-m19")));
     }

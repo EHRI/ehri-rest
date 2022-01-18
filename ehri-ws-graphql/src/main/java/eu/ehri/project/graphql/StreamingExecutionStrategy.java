@@ -22,41 +22,37 @@ package eu.ehri.project.graphql;
 import com.fasterxml.jackson.core.JsonGenerator;
 import graphql.ExecutionResult;
 import graphql.ExecutionResultImpl;
-import graphql.execution.AsyncExecutionStrategy;
-import graphql.execution.DataFetcherExceptionHandlerParameters;
-import graphql.execution.ExecutionContext;
-import graphql.execution.ExecutionStrategy;
-import graphql.execution.ExecutionStrategyParameters;
+import graphql.SerializationError;
+import graphql.TrivialDataFetcher;
+import graphql.execution.*;
 //import graphql.execution.ExecutionTypeInfo;
-import graphql.execution.FieldCollectorParameters;
-import graphql.execution.TypeResolutionParameters;
+import graphql.execution.directives.QueryDirectives;
+import graphql.execution.directives.QueryDirectivesImpl;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.InstrumentationContext;
+import graphql.execution.instrumentation.parameters.InstrumentationFieldCompleteParameters;
 import graphql.execution.instrumentation.parameters.InstrumentationFieldFetchParameters;
 import graphql.execution.instrumentation.parameters.InstrumentationFieldParameters;
 import graphql.language.Field;
-import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.DataFetchingFieldSelectionSet;
-import graphql.schema.DataFetchingFieldSelectionSetImpl;
-import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInterfaceType;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLScalarType;
-import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLUnionType;
+import graphql.normalized.NormalizedField;
+import graphql.schema.*;
+import graphql.util.FpKit;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 //import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
+import static graphql.execution.Async.exceptionallyCompletedFuture;
 import static graphql.execution.FieldCollectorParameters.newParameters;
+import static graphql.execution.FieldValueInfo.CompleteValueType.*;
+import static graphql.execution.FieldValueInfo.CompleteValueType.OBJECT;
+import static graphql.schema.DataFetchingEnvironmentImpl.newDataFetchingEnvironment;
+import static graphql.schema.GraphQLTypeUtil.*;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 //import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
 
 /**
@@ -69,182 +65,269 @@ import static graphql.execution.FieldCollectorParameters.newParameters;
 public class StreamingExecutionStrategy extends ExecutionStrategy {
 
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
-//        generator.writeStartObject();
-//        for (String fieldName : parameters.getFields().keySet()) {
-//            generator.writeFieldName(fieldName);
-//            resolveField(generator, executionContext, parameters, parameters.getFields().get(fieldName));
-//        }
-//        generator.writeEndObject();
+        MergedSelectionSet fields = parameters.getFields();
+        Set<String> fieldNames = fields.keySet();
+        List<CompletableFuture<FieldValueInfo>> futures = new ArrayList<>(fieldNames.size());
+        List<String> resolvedFields = new ArrayList<>(fieldNames.size());
+
+        generator.writeStartObject();
+        for (String fieldName : parameters.getFields().keySet()) {
+            MergedField currentField = fields.getSubField(fieldName);
+            ResultPath fieldPath = parameters.getPath().segment(mkNameForPath(currentField));
+            ExecutionStrategyParameters newParameters = parameters
+                    .transform(builder -> builder.field(currentField).path(fieldPath).parent(parameters));
+            System.out.println("Writing field: " + fieldName + " subfield " + currentField.getName() + " path " + fieldPath);
+            generator.writeFieldName(fieldName);
+            final CompletableFuture<FetchedValue> completableFuture = fetchField(executionContext, newParameters);
+            FetchedValue fetchedValue = completableFuture.join();
+            System.out.println("Completing field with value " + fetchedValue.getRawFetchedValue());
+            completeField(generator, executionContext, newParameters, fetchedValue);
+        }
+        generator.writeEndObject();
     }
 
-    private void handleFetchingException(ExecutionContext executionContext,
-            ExecutionStrategyParameters parameters,
-            Field field,
-            GraphQLFieldDefinition fieldDef,
-            Map<String, Object> argumentValues,
-            DataFetchingEnvironment environment,
-            Throwable e) {
-//        DataFetcherExceptionHandlerParameters handlerParameters = DataFetcherExceptionHandlerParameters
-//                .newExceptionParameters()
-//                .executionContext(executionContext)
-//                .dataFetchingEnvironment(environment)
-//                .argumentValues(argumentValues)
-//                .field(field)
-//                .fieldDefinition(fieldDef)
-//                .path(parameters.getPath())
-//                .exception(e)
-//                .build();
+//    protected void fetchField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
+//        MergedField field = parameters.getField();
+//        System.out.println("Fetch field: " + field);
+//        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getUnwrappedNonNullType();
+//        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field.getSingleField());
 //
-//        dataFetcherExceptionHandler.accept(handlerParameters);
-    }
-
-    private void resolveField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
-//        Field field = fields.get(0);
-//        GraphQLObjectType parentType = parameters.getTypeInfo().castType(GraphQLObjectType.class);
-//        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field);
-//
-//        Map<String, Object> argumentValues = valuesResolver.getArgumentValues(fieldDef.getArguments(), field.getArguments(), executionContext.getVariables());
-//
+//        GraphQLCodeRegistry codeRegistry = executionContext.getGraphQLSchema().getCodeRegistry();
 //        GraphQLOutputType fieldType = fieldDef.getType();
-//        DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(executionContext, fieldType, fields);
+//
+//        // if the DF (like PropertyDataFetcher) does not use the arguments of execution step info then dont build any
+//        ExecutionStepInfo executionStepInfo = createExecutionStepInfo(executionContext, parameters, fieldDef, parentType);
+//        Map<String, Object> argumentValues = executionStepInfo.getArguments();
+//
+//        Supplier<NormalizedField> normalizedFieldSupplier = getNormalizedField(executionContext, parameters, () -> executionStepInfo);
+//
+//        // DataFetchingFieldSelectionSet and QueryDirectives is a supplier of sorts - eg a lazy pattern
+//        DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(fieldType, normalizedFieldSupplier);
+//        QueryDirectives queryDirectives = new QueryDirectivesImpl(field, executionContext.getGraphQLSchema(), executionContext.getVariables());
+//
 //
 //        DataFetchingEnvironment environment = newDataFetchingEnvironment(executionContext)
 //                .source(parameters.getSource())
+//                .localContext(parameters.getLocalContext())
 //                .arguments(argumentValues)
 //                .fieldDefinition(fieldDef)
-//                .fields(fields)
+//                .mergedField(parameters.getField())
 //                .fieldType(fieldType)
+//                .executionStepInfo(executionStepInfo)
 //                .parentType(parentType)
 //                .selectionSet(fieldCollector)
+//                .queryDirectives(queryDirectives)
 //                .build();
 //
-//        ExecutionTypeInfo fieldTypeInfo = newTypeInfo()
-//                .type(fieldType)
-//                .parentInfo(parameters.getTypeInfo())
-//                .build();
-//
-//        Instrumentation instrumentation = executionContext.getInstrumentation();
-//
-//        InstrumentationContext<ExecutionResult> fieldCtx = instrumentation.beginField(new InstrumentationFieldParameters(executionContext, fieldDef, fieldTypeInfo));
-//
-//        InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment, parameters));
-//        Object resolvedValue = null;
+//        DataFetcher<?> dataFetcher = codeRegistry.getDataFetcher(parentType, fieldDef);
+//        Object fetchedValue = null;
 //        try {
-//            resolvedValue = fieldDef.getDataFetcher().get(environment);
-//            fetchCtx.onCompleted(resolvedValue, null);
+//            fetchedValue = dataFetcher.get(environment);
+//            completeField(generator, executionContext, parameters, FetchedValue.newFetchedValue().fetchedValue(fetchedValue).build());
 //        } catch (Exception e) {
-//            handleFetchingException(executionContext, parameters, field, fieldDef, argumentValues, environment, e);
-//            fetchCtx.onCompleted(null, e);
+//            // TODO
+//            System.out.println("Fetch field exception: ");
+//            e.printStackTrace();
 //        }
 //
-//        ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-//                .typeInfo(fieldTypeInfo)
-//                .fields(parameters.getFields())
-//                .arguments(argumentValues)
-//                .source(resolvedValue)
-//                .build();
 //
-//        completeValue(generator, executionContext, newParameters, fields);
-//
-//        fieldCtx.onCompleted(new ExecutionResultImpl(resolvedValue, Collections.emptyList()), null);
+//    }
+
+
+    private void completeField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, FetchedValue fetchedValue) throws IOException {
+        Field field = parameters.getField().getSingleField();
+        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getUnwrappedNonNullType();
+        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field);
+        ExecutionStepInfo executionStepInfo = createExecutionStepInfo(executionContext, parameters, fieldDef, parentType);
+
+//        Instrumentation instrumentation = executionContext.getInstrumentation();
+//        InstrumentationFieldCompleteParameters instrumentationParams = new InstrumentationFieldCompleteParameters(executionContext, parameters, () -> executionStepInfo, fetchedValue);
+//        InstrumentationContext<ExecutionResult> ctxCompleteField = instrumentation.beginFieldComplete(
+//                instrumentationParams
+//        );
+
+        NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, executionStepInfo);
+
+        ExecutionStrategyParameters newParameters = parameters.transform(builder ->
+                builder.executionStepInfo(executionStepInfo)
+                        .source(fetchedValue.getFetchedValue())
+                        .localContext(fetchedValue.getLocalContext())
+                        .nonNullFieldValidator(nonNullableFieldValidator)
+        );
+
+        System.out.println("Calling complete field with fetched: " + fetchedValue);
+        completeValue(generator, executionContext, newParameters);
+
+//        ctxCompleteField.onCompleted(newParameters.getSource(), null);
     }
 
-    private void completeValue(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields) throws IOException {
 
-//        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
-//        Object result = parameters.getSource();
-//        GraphQLType fieldType = parameters.getTypeInfo().getType();
-//
-//        if (result == null) {
-//            generator.writeNull();
-//        } else if (fieldType instanceof GraphQLList) {
-//            completeValueForList(generator, executionContext, parameters, fields, result);
-//        } else if (fieldType instanceof GraphQLScalarType) {
-//            completeValueForScalar(generator, (GraphQLScalarType) fieldType, result);
-//        } else if (fieldType instanceof GraphQLEnumType) {
-//            completeValueForEnum(generator, (GraphQLEnumType) fieldType, result);
-//        } else {
-//            GraphQLObjectType resolvedType;
-//            if (fieldType instanceof GraphQLInterfaceType) {
-//                TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
-//                        .graphQLInterfaceType((GraphQLInterfaceType) fieldType)
-//                        .field(fields.get(0))
-//                        .value(parameters.getSource())
-//                        .argumentValues(parameters.getArguments())
-//                        .schema(executionContext.getGraphQLSchema()).build();
-//                resolvedType = resolveTypeForInterface(resolutionParams);
-//
-//            } else if (fieldType instanceof GraphQLUnionType) {
-//                TypeResolutionParameters resolutionParams = TypeResolutionParameters.newParameters()
-//                        .graphQLUnionType((GraphQLUnionType) fieldType)
-//                        .field(fields.get(0))
-//                        .value(parameters.getSource())
-//                        .argumentValues(parameters.getArguments())
-//                        .schema(executionContext.getGraphQLSchema()).build();
-//                resolvedType = resolveTypeForUnion(resolutionParams);
-//            } else {
-//                resolvedType = (GraphQLObjectType) fieldType;
-//            }
-//
-//            FieldCollectorParameters collectorParameters = newParameters()
-//                    .schema(executionContext.getGraphQLSchema())
-//                    .objectType(resolvedType)
-//                    .fragments(executionContext.getFragmentsByName())
-//                    .variables(executionContext.getVariables())
-//                    .build();
-//
-//            Map<String, List<Field>> subFields = fieldCollector.collectFields(collectorParameters, fields);
-//
-//            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-//                    .typeInfo(typeInfo.treatAs(resolvedType))
-//                    .fields(subFields)
-//                    .source(result).build();
-//
-//            // Calling this from the executionContext to ensure we shift back from mutation strategy to the query strategy.
-//            execute(generator, executionContext, newParameters);
-//        }
+    private void completeValue(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
+        ExecutionStepInfo executionStepInfo = parameters.getExecutionStepInfo();
+
+        final Object source = parameters.getSource();
+        final ValueUnboxer valueUnboxer = executionContext.getValueUnboxer();
+        Object result = valueUnboxer.unbox(source);
+        GraphQLType fieldType = executionStepInfo.getUnwrappedNonNullType();
+        System.out.println("Fieldtype: " + fieldType + " Source: " + source);
+
+        if (result == null) {
+            System.out.println("Writing null " + source);
+            generator.writeNull();
+        } else if (isList(fieldType)) {
+            System.out.println("Writing list " + result);
+            completeValueForList(generator, executionContext, parameters, result);
+        } else if (isScalar(fieldType)) {
+            System.out.println("Writing scalar " + result);
+            completeValueForScalar(generator, executionContext, parameters, (GraphQLScalarType) fieldType, result);
+        } else if (isEnum(fieldType)) {
+            System.out.println("Writing enum " + result);
+            completeValueForEnum(generator, (GraphQLEnumType) fieldType, result);
+        } else {
+            // when we are here, we have a complex type: Interface, Union or Object
+            // and we must go deeper
+            //
+            GraphQLObjectType resolvedObjectType;
+            try {
+                resolvedObjectType = resolveType(executionContext, parameters, fieldType);
+//            fieldValue = completeValueForObject(executionContext, parameters, resolvedObjectType, result);
+                System.out.println("Writing object... " + result);
+                completeValueForObject(generator, executionContext, parameters, resolvedObjectType, result);
+
+            } catch (UnresolvedTypeException ex) {
+                System.out.println("Unresolved type: " + ex);
+                ex.printStackTrace();
+                // consider the result to be null and add the error on the context
+//            handleUnresolvedTypeProblem(executionContext, parameters, ex);
+                // and validate the field is nullable, if non-nullable throw exception
+                parameters.getNonNullFieldValidator().validate(parameters.getPath(), null);
+                // complete the field as null
+//            fieldValue = completedFuture(new ExecutionResultImpl(null, null));
+            }
+//        return FieldValueInfo.newFieldValueInfo(OBJECT).fieldValue(fieldValue).build();
+
+
+        }
+    }
+
+    protected void completeValueForObject(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, GraphQLObjectType resolvedObjectType, Object result) throws IOException {
+        ExecutionStepInfo executionStepInfo = parameters.getExecutionStepInfo();
+
+        FieldCollectorParameters collectorParameters = newParameters()
+                .schema(executionContext.getGraphQLSchema())
+                .objectType(resolvedObjectType)
+                .fragments(executionContext.getFragmentsByName())
+                .variables(executionContext.getVariables())
+                .build();
+
+        final MergedField field = parameters.getField();
+        System.out.println("Merged field: " + field);
+        MergedSelectionSet subFields = fieldCollector.collectFields(collectorParameters, field);
+
+        ExecutionStepInfo newExecutionStepInfo = executionStepInfo.changeTypeWithPreservedNonNull(resolvedObjectType);
+        NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, newExecutionStepInfo);
+
+        ExecutionStrategyParameters newParameters = parameters.transform(builder ->
+                builder.executionStepInfo(newExecutionStepInfo)
+                        .fields(subFields)
+                        .nonNullFieldValidator(nonNullableFieldValidator)
+                        .source(result)
+        );
+
+        // Calling this from the executionContext to ensure we shift back from mutation strategy to the query strategy.
+
+        execute(generator, executionContext, newParameters);
     }
 
     private void completeValueForEnum(JsonGenerator generator, GraphQLEnumType enumType, Object result) throws IOException {
-//        generator.writeObject(enumType.getCoercing().serialize(result));
+        System.out.println();
     }
 
-    private void completeValueForScalar(JsonGenerator generator, GraphQLScalarType scalarType, Object result) throws IOException {
-        Object serialized = scalarType.getCoercing().serialize(result);
+    private void completeValueForScalar(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, GraphQLScalarType scalarType, Object result) throws IOException {
+        Object serialized;
+        try {
+            serialized = scalarType.getCoercing().serialize(result);
+        } catch (CoercingSerializeException e) {
+            serialized = handleCoercionProblem(executionContext, parameters, e);
+        }
+
+        // TODO: fix that: this should not be handled here
         //6.6.1 http://facebook.github.io/graphql/#sec-Field-entries
         if (serialized instanceof Double && ((Double) serialized).isNaN()) {
             serialized = null;
         }
+        try {
+            serialized = parameters.getNonNullFieldValidator().validate(parameters.getPath(), serialized);
+        } catch (NonNullableFieldWasNullException e) {
+            e.printStackTrace();
+            // FIXME: ?
+        }
         generator.writeObject(serialized);
     }
 
-    private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields, Object result) throws IOException {
-        if (result.getClass().isArray()) {
-            result = Arrays.asList((Object[]) result);
+    private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, Object result) throws IOException {
+        Iterable<Object> resultIterable = toIterable(executionContext, parameters, result);
+        try {
+            resultIterable = parameters.getNonNullFieldValidator().validate(parameters.getPath(), resultIterable);
+            completeValueForList(generator, executionContext, parameters, resultIterable);
+        } catch (NonNullableFieldWasNullException e) {
+            // FIXME
         }
-
-        completeValueForList(generator, executionContext, parameters, fields, (Iterable<Object>) result);
+        if (resultIterable == null) {
+            // FIXME
+        }
     }
 
-    private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, List<Field> fields, Iterable<Object> result) throws IOException {
-//        ExecutionTypeInfo typeInfo = parameters.getTypeInfo();
-//        GraphQLList fieldType = typeInfo.castType(GraphQLList.class);
-//
-//        generator.writeStartArray();
-//        for (Object item : result) {
-//            ExecutionStrategyParameters newParameters = ExecutionStrategyParameters.newParameters()
-//                    .typeInfo(typeInfo.treatAs(fieldType.getWrappedType()))
-//                    .fields(parameters.getFields())
-//                    .source(item).build();
-//
-//            completeValue(generator, executionContext, newParameters, fields);
-//        }
-//        generator.writeEndArray();
-    }
+    private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, Iterable<Object> result) throws IOException {
+        OptionalInt size = FpKit.toSize(result);
+        ExecutionStepInfo typeInfo = parameters.getExecutionStepInfo();
 
+        generator.writeStartArray();
+        int index = 0;
+        for (Object item : result) {
+            int finalIndex = index;
+            FetchedValue value = unboxPossibleDataFetcherResult(executionContext, parameters, item);
+            System.out.println("List index: " + index + " Item: " + item + " unboxed: " + value);
+            ResultPath indexedPath = parameters.getPath().segment(index);
+            ExecutionStepInfo stepInfoForListElement = executionStepInfoFactory.newExecutionStepInfoForListElement(typeInfo, index);
+            NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, stepInfoForListElement);
+            ExecutionStrategyParameters newParameters = parameters.transform(builder -> builder
+                    .localContext(value.getLocalContext())
+                    .listSize(size.orElse(-1))
+                    .nonNullFieldValidator(nonNullableFieldValidator)
+                    .executionStepInfo(stepInfoForListElement)
+                    .currentListIndex(finalIndex)
+                    .path(indexedPath)
+                    .fields(parameters.getFields())
+                    .source(value)
+                    .build());
+
+            completeValue(generator, executionContext, newParameters);
+            index++;
+        }
+        generator.writeEndArray();
+    }
 
     @Override
     public CompletableFuture<ExecutionResult> execute(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
         return new AsyncExecutionStrategy().execute(executionContext, parameters);
+    }
+
+    private void handleFetchingException(ExecutionContext executionContext,
+                                         ExecutionStrategyParameters parameters,
+                                         Field field,
+                                         GraphQLFieldDefinition fieldDef,
+                                         Map<String, Object> argumentValues,
+                                         DataFetchingEnvironment environment,
+                                         Throwable e) {
+        // TODO
+    }
+
+    private Object handleCoercionProblem(ExecutionContext context, ExecutionStrategyParameters parameters, CoercingSerializeException e) {
+        SerializationError error = new SerializationError(parameters.getPath(), e);
+        System.out.println("Coercion problem: " + error.getMessage());
+        context.addError(error);
+
+        return null;
     }
 }

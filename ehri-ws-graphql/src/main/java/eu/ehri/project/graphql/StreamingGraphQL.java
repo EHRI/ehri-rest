@@ -25,9 +25,7 @@ import eu.ehri.extension.errors.ExecutionError;
 import graphql.ExecutionInput;
 import graphql.GraphQLError;
 import graphql.InvalidSyntaxError;
-import graphql.execution.AsyncExecutionStrategy;
-import graphql.execution.ExecutionId;
-import graphql.execution.ValuesResolver;
+import graphql.execution.*;
 import graphql.execution.instrumentation.SimpleInstrumentation;
 import graphql.language.Document;
 import graphql.language.NodeUtil;
@@ -63,10 +61,10 @@ public class StreamingGraphQL {
 
     public void execute(JsonGenerator generator, String requestString, Document document, String operationName, Object context, Map<String, Object>
             arguments) throws IOException {
-//        assertNotNull(arguments, "arguments can't be null");
+        assertNotNull(arguments, () -> "arguments can't be null");
         log.trace("Executing request. operation name: {}. Request: {} ", operationName, document);
         StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new AsyncExecutionStrategy(),
-                new AsyncExecutionStrategy(), SimpleInstrumentation.INSTANCE);
+                new SubscriptionExecutionStrategy(), SimpleInstrumentation.INSTANCE, ValueUnboxer.DEFAULT);
         ExecutionInput input = ExecutionInput.newExecutionInput()
                 .context(context)
                 .variables(arguments)
@@ -77,7 +75,7 @@ public class StreamingGraphQL {
     }
 
     public void execute(JsonGenerator generator, String requestString, String operationName, Object context, Map<String, Object> arguments) throws IOException {
-//        assertNotNull(arguments, "arguments can't be null");
+        assertNotNull(arguments, () -> "arguments can't be null");
         log.trace("Executing request. operation name: {}. Request: {} ", operationName, requestString);
         Document document = parseAndValidate(requestString, operationName, arguments);
         execute(generator, requestString, document, operationName, context, arguments);
@@ -109,7 +107,7 @@ public class StreamingGraphQL {
         List<VariableDefinition> variableDefinitions = operationDefinition.getVariableDefinitions();
 
         try {
-//            valuesResolver.coerceArgumentValues(graphQLSchema, variableDefinitions, variables);
+            valuesResolver.coerceVariableValues(graphQLSchema, variableDefinitions, variables);
         } catch (RuntimeException rte) {
             if (rte instanceof GraphQLError) {
                 throw new ExecutionError(Lists.newArrayList((GraphQLError)rte));
