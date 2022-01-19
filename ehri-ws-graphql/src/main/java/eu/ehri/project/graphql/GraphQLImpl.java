@@ -397,7 +397,6 @@ public class GraphQLImpl {
     private static final DataFetcher<Object> attributeDataFetcher = env -> {
         Entity source = env.<Entity>getSource();
         String name = env.getFields().get(0).getName();
-        System.out.println("Fetching attribute " + name + " at " + env.getContext());
         return source.getProperty(name);
     };
 
