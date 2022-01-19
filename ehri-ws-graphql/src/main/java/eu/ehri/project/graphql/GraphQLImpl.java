@@ -534,17 +534,19 @@ public class GraphQLImpl {
                 ).collect(Collectors.toList());
     }
 
-    private static final GraphQLFieldDefinition.Builder idField = newFieldDefinition()
+    private static final GraphQLFieldDefinition idField = newFieldDefinition()
             .type(GraphQLNonNullString)
             .name(Bundle.ID_KEY)
             .description(__("graphql.field.id.description"))
-            .dataFetcher(idDataFetcher);
+            .dataFetcher(idDataFetcher)
+            .build();
 
-    private static final GraphQLFieldDefinition.Builder typeField = newFieldDefinition()
-            .type(new GraphQLNonNull(GraphQLString))
+    private static final GraphQLFieldDefinition typeField = newFieldDefinition()
+            .type(GraphQLNonNullString)
             .name(Bundle.TYPE_KEY)
             .description(__("graphql.field.type.description"))
-            .dataFetcher(typeDataFetcher);
+            .dataFetcher(typeDataFetcher)
+            .build();
 
     private static GraphQLFieldDefinition.Builder singleDescriptionFieldDefinition(GraphQLOutputType descriptionType) {
         return newFieldDefinition()
@@ -619,7 +621,7 @@ public class GraphQLImpl {
     }
 
     private static final List<GraphQLFieldDefinition> entityFields =
-            ImmutableList.of(idField.build(), typeField.build());
+            ImmutableList.of(idField, typeField);
 
     private static final List<GraphQLFieldDefinition> geoFields = ImmutableList.of(
             newFieldDefinition()

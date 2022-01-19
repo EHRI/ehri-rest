@@ -30,26 +30,22 @@ import graphql.execution.directives.QueryDirectives;
 import graphql.execution.directives.QueryDirectivesImpl;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.InstrumentationContext;
-import graphql.execution.instrumentation.parameters.InstrumentationFieldCompleteParameters;
 import graphql.execution.instrumentation.parameters.InstrumentationFieldFetchParameters;
-import graphql.execution.instrumentation.parameters.InstrumentationFieldParameters;
 import graphql.language.Field;
 import graphql.normalized.NormalizedField;
 import graphql.schema.*;
 import graphql.util.FpKit;
+import graphql.util.LogKit;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 //import static graphql.execution.ExecutionTypeInfo.newTypeInfo;
 import static graphql.execution.Async.exceptionallyCompletedFuture;
 import static graphql.execution.FieldCollectorParameters.newParameters;
-import static graphql.execution.FieldValueInfo.CompleteValueType.*;
-import static graphql.execution.FieldValueInfo.CompleteValueType.OBJECT;
 import static graphql.schema.DataFetchingEnvironmentImpl.newDataFetchingEnvironment;
 import static graphql.schema.GraphQLTypeUtil.*;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -63,22 +59,22 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
  * and rationalise things for easier maintenance and upgrading.
  */
 public class StreamingExecutionStrategy extends ExecutionStrategy {
+    private static final Logger logNotSafe = LogKit.getNotPrivacySafeLogger(ExecutionStrategy.class);
 
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
         MergedSelectionSet fields = parameters.getFields();
-        Set<String> fieldNames = fields.keySet();
-        List<CompletableFuture<FieldValueInfo>> futures = new ArrayList<>(fieldNames.size());
-        List<String> resolvedFields = new ArrayList<>(fieldNames.size());
+
+        System.out.println("EXECUTE: " + fields.keySet());
 
         generator.writeStartObject();
-        for (String fieldName : parameters.getFields().keySet()) {
+        for (String fieldName : fields.keySet()) {
             MergedField currentField = fields.getSubField(fieldName);
             ResultPath fieldPath = parameters.getPath().segment(mkNameForPath(currentField));
             ExecutionStrategyParameters newParameters = parameters
                     .transform(builder -> builder.field(currentField).path(fieldPath).parent(parameters));
             System.out.println("Writing field: " + fieldName + " subfield " + currentField.getName() + " path " + fieldPath);
             generator.writeFieldName(fieldName);
-            final CompletableFuture<FetchedValue> completableFuture = fetchField(executionContext, newParameters);
+            final CompletableFuture<FetchedValue> completableFuture = fetchField(generator, executionContext, newParameters);
             FetchedValue fetchedValue = completableFuture.join();
             System.out.println("Completing field with value " + fetchedValue.getRawFetchedValue());
             completeField(generator, executionContext, newParameters, fetchedValue);
@@ -86,52 +82,76 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         generator.writeEndObject();
     }
 
-//    protected void fetchField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
-//        MergedField field = parameters.getField();
-//        System.out.println("Fetch field: " + field);
-//        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getUnwrappedNonNullType();
-//        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field.getSingleField());
-//
-//        GraphQLCodeRegistry codeRegistry = executionContext.getGraphQLSchema().getCodeRegistry();
-//        GraphQLOutputType fieldType = fieldDef.getType();
-//
-//        // if the DF (like PropertyDataFetcher) does not use the arguments of execution step info then dont build any
-//        ExecutionStepInfo executionStepInfo = createExecutionStepInfo(executionContext, parameters, fieldDef, parentType);
-//        Map<String, Object> argumentValues = executionStepInfo.getArguments();
-//
-//        Supplier<NormalizedField> normalizedFieldSupplier = getNormalizedField(executionContext, parameters, () -> executionStepInfo);
-//
-//        // DataFetchingFieldSelectionSet and QueryDirectives is a supplier of sorts - eg a lazy pattern
-//        DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(fieldType, normalizedFieldSupplier);
-//        QueryDirectives queryDirectives = new QueryDirectivesImpl(field, executionContext.getGraphQLSchema(), executionContext.getVariables());
-//
-//
-//        DataFetchingEnvironment environment = newDataFetchingEnvironment(executionContext)
-//                .source(parameters.getSource())
-//                .localContext(parameters.getLocalContext())
-//                .arguments(argumentValues)
-//                .fieldDefinition(fieldDef)
-//                .mergedField(parameters.getField())
-//                .fieldType(fieldType)
-//                .executionStepInfo(executionStepInfo)
-//                .parentType(parentType)
-//                .selectionSet(fieldCollector)
-//                .queryDirectives(queryDirectives)
-//                .build();
-//
-//        DataFetcher<?> dataFetcher = codeRegistry.getDataFetcher(parentType, fieldDef);
-//        Object fetchedValue = null;
-//        try {
-//            fetchedValue = dataFetcher.get(environment);
-//            completeField(generator, executionContext, parameters, FetchedValue.newFetchedValue().fetchedValue(fetchedValue).build());
-//        } catch (Exception e) {
-//            // TODO
-//            System.out.println("Fetch field exception: ");
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
+    protected CompletableFuture<FetchedValue> fetchField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
+        MergedField field = parameters.getField();
+        GraphQLObjectType parentType = (GraphQLObjectType) parameters.getExecutionStepInfo().getUnwrappedNonNullType();
+        GraphQLFieldDefinition fieldDef = getFieldDef(executionContext.getGraphQLSchema(), parentType, field.getSingleField());
+
+        GraphQLCodeRegistry codeRegistry = executionContext.getGraphQLSchema().getCodeRegistry();
+        GraphQLOutputType fieldType = fieldDef.getType();
+
+        // if the DF (like PropertyDataFetcher) does not use the arguments of execution step info then dont build any
+//        Supplier<ExecutionStepInfo> executionStepInfo = FpKit.intraThreadMemoize(
+//                () -> createExecutionStepInfo(executionContext, parameters, fieldDef, parentType));
+        Supplier<ExecutionStepInfo> executionStepInfo = () -> createExecutionStepInfo(executionContext, parameters, fieldDef, parentType);
+        Supplier<Map<String, Object>> argumentValues = () -> executionStepInfo.get().getArguments();
+
+        Supplier<NormalizedField> normalizedFieldSupplier = getNormalizedField(executionContext, parameters, executionStepInfo);
+
+        // DataFetchingFieldSelectionSet and QueryDirectives is a supplier of sorts - eg a lazy pattern
+        DataFetchingFieldSelectionSet fieldCollector = DataFetchingFieldSelectionSetImpl.newCollector(fieldType, normalizedFieldSupplier);
+        QueryDirectives queryDirectives = new QueryDirectivesImpl(field, executionContext.getGraphQLSchema(), executionContext.getVariables());
+
+
+        DataFetchingEnvironment environment = newDataFetchingEnvironment(executionContext)
+                .source(parameters.getSource())
+                .localContext(parameters.getLocalContext())
+                .arguments(argumentValues)
+                .fieldDefinition(fieldDef)
+                .mergedField(parameters.getField())
+                .fieldType(fieldType)
+                .executionStepInfo(executionStepInfo)
+                .parentType(parentType)
+                .selectionSet(fieldCollector)
+                .queryDirectives(queryDirectives)
+                .build();
+
+        DataFetcher<?> dataFetcher = codeRegistry.getDataFetcher(parentType, fieldDef);
+
+        Instrumentation instrumentation = executionContext.getInstrumentation();
+
+        InstrumentationFieldFetchParameters instrumentationFieldFetchParams = new InstrumentationFieldFetchParameters(executionContext, fieldDef, environment, parameters, dataFetcher instanceof TrivialDataFetcher);
+        InstrumentationContext<Object> fetchCtx = instrumentation.beginFieldFetch(instrumentationFieldFetchParams);
+
+        CompletableFuture<Object> fetchedValue;
+        dataFetcher = instrumentation.instrumentDataFetcher(dataFetcher, instrumentationFieldFetchParams);
+        ExecutionId executionId = executionContext.getExecutionId();
+        try {
+            Object fetchedValueRaw = dataFetcher.get(environment);
+            System.out.println("PATH " + environment.getField().getName() + " DF " + dataFetcher + " env " + environment.getSource() + " PARENT " + parentType.getName() + " RESULT: " + fetchedValueRaw);
+            fetchedValue = Async.toCompletableFuture(fetchedValueRaw);
+        } catch (Exception e) {
+            if (logNotSafe.isDebugEnabled()) {
+                logNotSafe.debug(String.format("'%s', field '%s' fetch threw exception", executionId, executionStepInfo.get().getPath()), e);
+            }
+
+            fetchedValue = new CompletableFuture<>();
+            fetchedValue.completeExceptionally(e);
+        }
+        fetchCtx.onDispatched(fetchedValue);
+        return fetchedValue
+                .handle((result, exception) -> {
+                    fetchCtx.onCompleted(result, exception);
+                    if (exception != null) {
+                        handleFetchingException(executionContext, environment, exception);
+                        return null;
+                    } else {
+                        return result;
+                    }
+                })
+                .thenApply(result -> unboxPossibleDataFetcherResult(executionContext, parameters, result));
+
+    }
 
 
     private void completeField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, FetchedValue fetchedValue) throws IOException {
@@ -182,7 +202,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
             completeValueForScalar(generator, executionContext, parameters, (GraphQLScalarType) fieldType, result);
         } else if (isEnum(fieldType)) {
             System.out.println("Writing enum " + result);
-            completeValueForEnum(generator, (GraphQLEnumType) fieldType, result);
+            completeValueForEnum(generator, executionContext, parameters, (GraphQLEnumType) fieldType, result);
         } else {
             // when we are here, we have a complex type: Interface, Union or Object
             // and we must go deeper
@@ -221,7 +241,6 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
                 .build();
 
         final MergedField field = parameters.getField();
-        System.out.println("Merged field: " + field);
         MergedSelectionSet subFields = fieldCollector.collectFields(collectorParameters, field);
 
         ExecutionStepInfo newExecutionStepInfo = executionStepInfo.changeTypeWithPreservedNonNull(resolvedObjectType);
@@ -239,8 +258,20 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
         execute(generator, executionContext, newParameters);
     }
 
-    private void completeValueForEnum(JsonGenerator generator, GraphQLEnumType enumType, Object result) throws IOException {
-        System.out.println();
+    private void completeValueForEnum(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, GraphQLEnumType enumType, Object result) throws IOException {
+        Object serialized;
+        try {
+            serialized = enumType.serialize(result);
+        } catch (CoercingSerializeException e) {
+            serialized = handleCoercionProblem(executionContext, parameters, e);
+        }
+        try {
+            serialized = parameters.getNonNullFieldValidator().validate(parameters.getPath(), serialized);
+        } catch (NonNullableFieldWasNullException e) {
+            e.printStackTrace();
+            // FIXME ?
+        }
+        generator.writeObject(serialized);
     }
 
     private void completeValueForScalar(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, GraphQLScalarType scalarType, Object result) throws IOException {
@@ -272,36 +303,40 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
             completeValueForList(generator, executionContext, parameters, resultIterable);
         } catch (NonNullableFieldWasNullException e) {
             // FIXME
+            e.printStackTrace();
         }
         if (resultIterable == null) {
             // FIXME
+            throw new RuntimeException("Iterable result is null!");
         }
     }
 
     private void completeValueForList(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, Iterable<Object> result) throws IOException {
         OptionalInt size = FpKit.toSize(result);
-        ExecutionStepInfo typeInfo = parameters.getExecutionStepInfo();
+        ExecutionStepInfo executionStepInfo = parameters.getExecutionStepInfo();
 
         generator.writeStartArray();
         int index = 0;
         for (Object item : result) {
+            index++;
+            ResultPath indexedPath = parameters.getPath().segment(index);
+
+            ExecutionStepInfo stepInfoForListElement = executionStepInfoFactory.newExecutionStepInfoForListElement(executionStepInfo, index);
+
+            NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, stepInfoForListElement);
+
             int finalIndex = index;
             FetchedValue value = unboxPossibleDataFetcherResult(executionContext, parameters, item);
-            System.out.println("List index: " + index + " Item: " + item + " unboxed: " + value);
-            ResultPath indexedPath = parameters.getPath().segment(index);
-            ExecutionStepInfo stepInfoForListElement = executionStepInfoFactory.newExecutionStepInfoForListElement(typeInfo, index);
-            NonNullableFieldValidator nonNullableFieldValidator = new NonNullableFieldValidator(executionContext, stepInfoForListElement);
-            ExecutionStrategyParameters newParameters = parameters.transform(builder -> builder
-                    .localContext(value.getLocalContext())
-                    .listSize(size.orElse(-1))
-                    .nonNullFieldValidator(nonNullableFieldValidator)
-                    .executionStepInfo(stepInfoForListElement)
-                    .currentListIndex(finalIndex)
-                    .path(indexedPath)
-                    .fields(parameters.getFields())
-                    .source(value)
-                    .build());
 
+            ExecutionStrategyParameters newParameters = parameters.transform(builder ->
+                    builder.executionStepInfo(stepInfoForListElement)
+                            .nonNullFieldValidator(nonNullableFieldValidator)
+                            .listSize(size.orElse(-1)) // -1 signals that we don't know the size
+                            .localContext(value.getLocalContext())
+                            .currentListIndex(finalIndex)
+                            .path(indexedPath)
+                            .source(value.getFetchedValue())
+            );
             completeValue(generator, executionContext, newParameters);
             index++;
         }
