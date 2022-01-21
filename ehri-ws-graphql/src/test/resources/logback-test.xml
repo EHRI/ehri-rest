@@ -9,6 +9,7 @@
   </appender>
 
   <logger name="eu.ehri" level="${ehri.log.level:-info}" />
+  <logger name="graphql" level="TRACE"/>
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

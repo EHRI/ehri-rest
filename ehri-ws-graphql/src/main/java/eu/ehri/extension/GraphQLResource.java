@@ -6,12 +6,15 @@ import eu.ehri.extension.errors.ExecutionError;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
+import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.graphql.StreamingGraphQL;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Bundle;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
+import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.introspection.IntrospectionQuery;
 import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
@@ -87,7 +90,10 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
-        ExecutionResult executionResult = GraphQL.newGraphQL(schema).build()
+        ExecutionResult executionResult = GraphQL
+                .newGraphQL(schema)
+//                .instrumentation(new MaxQueryDepthInstrumentation(4))
+                .build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(q.getQuery())
                         .operationName(q.getOperationName())
@@ -101,18 +107,27 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
         // FIXME: Ugly: have to reinitialise the schema in this transaction
         // otherwise iterables will be invalid.
-        final StreamingGraphQL ql = new StreamingGraphQL(schema);
-        // Check parsing, we have to do this again as well :(
-        ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
+//        final MaxQueryDepthInstrumentation instrumentation = new MaxQueryDepthInstrumentation(2);
+//        final StreamingGraphQL ql = new StreamingGraphQL(schema, instrumentation);
+//        // Check parsing, we have to do this again as well :(
+//        ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
+
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory.createGenerator(outputStream).useDefaultPrettyPrinter()) {
-                final StreamingGraphQL ql2 = new StreamingGraphQL(new GraphQLImpl(api(), true).getSchema());
-                Document document = ql2.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
-                ql2.execute(generator, q.getQuery(), document, q.getOperationName(),
-                        null, q.getVariables());
+                final ExecutionInput input = ExecutionInput.newExecutionInput()
+                        .query(q.getQuery())
+                        .operationName(q.getOperationName())
+                        .variables(q.getVariables())
+                        .build();
+                final GraphQL graphQL = GraphQL
+                        .newGraphQL(schema)
+                        .queryExecutionStrategy(new StreamingExecutionStrategy(generator))
+//                        .instrumentation(new MaxQueryDepthInstrumentation(2))
+                        .build();
+                graphQL.execute(input);
                 generator.writeEndObject();
                 tx.success();
             }

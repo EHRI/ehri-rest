@@ -666,7 +666,7 @@ public class GraphQLImpl {
                 .type(GraphQLNonNull.nonNull(GraphQLInt))
                 .name("itemCount")
                 .description(__("graphql.field.itemCount.description"))
-                .dataFetcher(env -> Math.toIntExact(f.apply(env.<Entity>getSource())));
+                .dataFetcher(env -> Math.toIntExact(f.apply(env.getSource())));
     }
 
     private final GraphQLFieldDefinition.Builder linkFieldDefinition =

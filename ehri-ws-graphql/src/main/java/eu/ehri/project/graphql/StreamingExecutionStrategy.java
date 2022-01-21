@@ -21,9 +21,12 @@ package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import graphql.ExecutionResult;
+import graphql.ExecutionResultImpl;
 import graphql.SerializationError;
 import graphql.UnresolvedTypeError;
 import graphql.execution.*;
+import graphql.execution.instrumentation.ExecutionStrategyInstrumentationContext;
+import graphql.execution.instrumentation.parameters.InstrumentationExecutionStrategyParameters;
 import graphql.language.Field;
 import graphql.schema.*;
 import graphql.util.FpKit;
@@ -48,7 +51,18 @@ import static graphql.schema.GraphQLTypeUtil.*;
 public class StreamingExecutionStrategy extends ExecutionStrategy {
     private static final Logger logNotSafe = LogKit.getNotPrivacySafeLogger(ExecutionStrategy.class);
 
+    private final JsonGenerator generator;
+
+    public StreamingExecutionStrategy(JsonGenerator generator) {
+        super();
+        this.generator = generator;
+    }
+
     public void execute(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters) throws IOException {
+        InstrumentationExecutionStrategyParameters instrumentationParameters = new InstrumentationExecutionStrategyParameters(executionContext, parameters);
+
+        ExecutionStrategyInstrumentationContext executionStrategyCtx = executionContext.getInstrumentation().beginExecutionStrategy(instrumentationParameters);
+
         MergedSelectionSet fields = parameters.getFields();
 
         generator.writeStartObject();
@@ -64,6 +78,8 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
             completeField(generator, executionContext, newParameters, fetchedValue);
         }
         generator.writeEndObject();
+
+        executionStrategyCtx.onCompleted(null, null);
     }
 
     private void completeField(JsonGenerator generator, ExecutionContext executionContext, ExecutionStrategyParameters parameters, FetchedValue fetchedValue) throws IOException {
@@ -232,7 +248,12 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
     @Override
     public CompletableFuture<ExecutionResult> execute(ExecutionContext executionContext, ExecutionStrategyParameters parameters) {
-        return new AsyncExecutionStrategy().execute(executionContext, parameters);
+        try {
+            execute(generator, executionContext, parameters);
+            return Async.toCompletableFuture(new ExecutionResultImpl(null, null));
+        } catch (IOException e) {
+            return Async.exceptionallyCompletedFuture(e);
+        }
     }
 
     private void handleUnresolvedTypeProblem(ExecutionContext context, ExecutionStrategyParameters parameters, UnresolvedTypeException e) {

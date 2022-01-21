@@ -23,6 +23,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.test.AbstractFixtureTest;
+import graphql.ExecutionInput;
+import graphql.GraphQL;
+import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
@@ -48,8 +51,23 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
             GraphQLSchema schema = new GraphQLImpl(api(validUser), true).getSchema();
-            StreamingGraphQL ql = new StreamingGraphQL(schema);
-            ql.execute(generator, testQuery, null, null, Collections.emptyMap());
+//            StreamingGraphQL ql = new StreamingGraphQL(schema);
+//            ql.execute(generator, testQuery, null, null, Collections.emptyMap());
+
+            final StreamingExecutionStrategy strategy = new StreamingExecutionStrategy(generator);
+            final ExecutionInput input = ExecutionInput.newExecutionInput()
+                    .query(testQuery)
+                    .operationName(null)
+                    .variables(Collections.emptyMap())
+                    .build();
+
+            final GraphQL graphQL = GraphQL
+                    .newGraphQL(schema)
+                    .queryExecutionStrategy(strategy)
+                    .build();
+
+            graphQL.execute(input);
+
         }
         JsonNode json = mapper.readTree(out.toByteArray());
         System.out.println(json);

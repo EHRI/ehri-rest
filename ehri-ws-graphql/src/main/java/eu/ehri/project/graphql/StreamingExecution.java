@@ -46,7 +46,6 @@ public class StreamingExecution extends Execution {
     private final ValueUnboxer valueUnboxer;
 
     public StreamingExecution(ExecutionStrategy queryStrategy, ExecutionStrategy mutationStrategy, ExecutionStrategy subscriptionStrategy, Instrumentation instrumentation, ValueUnboxer unboxer) {
-//        super(queryStrategy, mutationStrategy, subscriptionStrategy, instrumentation);
         super(queryStrategy, mutationStrategy, subscriptionStrategy, instrumentation, unboxer);
         this.queryStrategy = queryStrategy;
         this.mutationStrategy = mutationStrategy;
@@ -95,7 +94,7 @@ public class StreamingExecution extends Execution {
                 .path(ResultPath.rootPath())
                 .build();
 
-        new StreamingExecutionStrategy().execute(generator, executionContext, parameters);
+        new StreamingExecutionStrategy(generator).execute(generator, executionContext, parameters);
     }
 
     public void execute(JsonGenerator generator, GraphQLSchema graphQLSchema, Document document, ExecutionId executionId, ExecutionInput executionInput) throws IOException {

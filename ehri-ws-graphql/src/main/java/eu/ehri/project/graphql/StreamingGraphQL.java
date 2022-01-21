@@ -23,10 +23,14 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.errors.ExecutionError;
 import graphql.ExecutionInput;
+import graphql.ExecutionResult;
 import graphql.GraphQLError;
 import graphql.InvalidSyntaxError;
 import graphql.execution.*;
+import graphql.execution.instrumentation.ExecutionStrategyInstrumentationContext;
+import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.SimpleInstrumentation;
+import graphql.execution.instrumentation.parameters.InstrumentationExecutionStrategyParameters;
 import graphql.language.Document;
 import graphql.language.NodeUtil;
 import graphql.language.OperationDefinition;
@@ -44,6 +48,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 
 import static graphql.Assert.assertNotNull;
 
@@ -53,18 +58,25 @@ public class StreamingGraphQL {
     private static final Logger log = LoggerFactory.getLogger(StreamingGraphQL.class);
 
     private final GraphQLSchema graphQLSchema;
+    private final Instrumentation instrumentation;
 
     public StreamingGraphQL(GraphQLSchema schema) {
-        this.graphQLSchema = schema;
+        this(schema, SimpleInstrumentation.INSTANCE);
     }
 
+    public StreamingGraphQL(GraphQLSchema schema, Instrumentation instrumentation) {
+        this.graphQLSchema = schema;
+        this.instrumentation = instrumentation;
+    }
 
     public void execute(JsonGenerator generator, String requestString, Document document, String operationName, Object context, Map<String, Object>
             arguments) throws IOException {
         assertNotNull(arguments, () -> "arguments can't be null");
         log.trace("Executing request. operation name: {}. Request: {} ", operationName, document);
-        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(), new AsyncExecutionStrategy(),
-                new SubscriptionExecutionStrategy(), SimpleInstrumentation.INSTANCE, ValueUnboxer.DEFAULT);
+
+        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(generator), new AsyncExecutionStrategy(),
+                new SubscriptionExecutionStrategy(), instrumentation, ValueUnboxer.DEFAULT);
+
         ExecutionInput input = ExecutionInput.newExecutionInput()
                 .context(context)
                 .variables(arguments)
