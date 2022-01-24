@@ -8,7 +8,6 @@ import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.models.base.Accessible;
-import eu.ehri.project.persistence.Bundle;
 import graphql.*;
 import graphql.introspection.IntrospectionQuery;
 import graphql.schema.GraphQLSchema;
@@ -86,7 +85,6 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
         ExecutionResult executionResult = GraphQL
                 .newGraphQL(schema)
-//                .instrumentation(new MaxQueryDepthInstrumentation(4))
                 .build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(q.getQuery())
@@ -114,14 +112,11 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                  final JsonGenerator generator = jsonFactory.createGenerator(outputStream).useDefaultPrettyPrinter()) {
                 StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
 
-                generator.writeStartObject();
-                generator.writeFieldName(Bundle.DATA_KEY);
                 final GraphQL graphQL = GraphQL
                         .newGraphQL(schema)
                         .queryExecutionStrategy(strategy)
                         .build();
                 graphQL.execute(input);
-                generator.writeEndObject();
                 tx.success();
             }
         };

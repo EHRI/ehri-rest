@@ -36,22 +36,17 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
-public class StreamingGraphQLTest extends AbstractFixtureTest {
+public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void textExecute() throws Exception {
         String testQuery = readResourceFileAsString("testquery-connection.graphql");
-//        String testQuery = "{c1: DocumentaryUnit(id: \"c1\") { id\ndescription(languageCode: \"eng\", identifier: \"c1-desc\") {\n" +
-//                "            identifier\n" +
-//                "        }}}";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
             GraphQLSchema schema = new GraphQLImpl(api(validUser), true).getSchema();
-//            StreamingGraphQL ql = new StreamingGraphQL(schema);
-//            ql.execute(generator, testQuery, null, null, Collections.emptyMap());
 
             final StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
             final ExecutionInput input = ExecutionInput.newExecutionInput()
@@ -69,8 +64,8 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
 
         }
         JsonNode json = mapper.readTree(out.toByteArray());
-        System.out.println(json);
-        String first = json.path("firstTwo").path("items").path(0).path("id").textValue();
+        // System.out.println("JSON: " + json);
+        String first = json.path("data").path("firstTwo").path("items").path(0).path("id").textValue();
         assertThat(first, anyOf(containsString("c1"), containsString("nl-r1-m19")));
     }
 }
