@@ -20,6 +20,7 @@
 package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import eu.ehri.extension.errors.ExecutionError;
 import eu.ehri.project.persistence.Bundle;
 import graphql.ExecutionResult;
 import graphql.ExecutionResultImpl;

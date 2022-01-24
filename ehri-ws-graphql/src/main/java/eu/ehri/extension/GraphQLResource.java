@@ -1,6 +1,7 @@
 package eu.ehri.extension;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.Lists;
 import eu.ehri.extension.base.AbstractAccessibleResource;
 import eu.ehri.extension.errors.ExecutionError;
 import eu.ehri.project.core.Tx;
@@ -9,7 +10,12 @@ import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.models.base.Accessible;
 import graphql.*;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
+import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.execution.instrumentation.ChainedInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
 import graphql.introspection.IntrospectionQuery;
+import graphql.schema.CoercingParseValueException;
 import graphql.schema.GraphQLSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -26,6 +32,13 @@ import javax.ws.rs.core.StreamingOutput;
 public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "graphql";
+
+    // TODO: Move these to config and resolve issue w/ HOCON picking up
+    // the wrong reference.conf...
+    public static final int MAX_DEPTH = 10;
+    public static final int MAX_DEPTH_ANONYMOUS = 6;
+    public static final int MAX_FIELDS = 200;
+    public static final int MAX_FIELDS_ANONYMOUS = 20;
 
     public GraphQLResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
@@ -66,6 +79,9 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
             Object data = stream ? lazyExecution(schema, q) : strictExecution(schema, q);
             tx.success();
             return Response.ok(data).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -85,6 +101,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     private ExecutionResult strictExecution(GraphQLSchema schema, GraphQLQuery q) {
         ExecutionResult executionResult = GraphQL
                 .newGraphQL(schema)
+                .instrumentation(getInstrumentation())
                 .build()
                 .execute(ExecutionInput.newExecutionInput()
                         .query(q.getQuery())
@@ -96,6 +113,8 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         return executionResult;
     }
 
+    // FIXME: no way to know here if instrumentation threw an error such as exceeding
+    // the query depth. The result will be an empty string.
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
         final ExecutionInput input = ExecutionInput.newExecutionInput()
                 .query(q.getQuery())
@@ -114,11 +133,20 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
                 final GraphQL graphQL = GraphQL
                         .newGraphQL(schema)
+                        .instrumentation(getInstrumentation())
                         .queryExecutionStrategy(strategy)
                         .build();
                 graphQL.execute(input);
                 tx.success();
             }
         };
+    }
+
+    private Instrumentation getInstrumentation() {
+        final boolean anonymous = getRequesterUserProfile().isAnonymous();
+        return new ChainedInstrumentation(
+//                new MaxQueryComplexityInstrumentation(anonymous ? MAX_FIELDS_ANONYMOUS : MAX_FIELDS),
+                new MaxQueryDepthInstrumentation(anonymous ? MAX_DEPTH_ANONYMOUS : MAX_DEPTH)
+        );
     }
 }

@@ -195,7 +195,6 @@
                     <failOnViolation>false</failOnViolation>
                     <outputFileFormat>xml</outputFileFormat>
                     <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
-                    <useFile>true</useFile>
                 </configuration>
             </plugin>
         </plugins>

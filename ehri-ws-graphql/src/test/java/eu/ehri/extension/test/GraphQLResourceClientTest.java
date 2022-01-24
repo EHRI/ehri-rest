@@ -26,6 +26,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.typesafe.config.Config;
 import eu.ehri.extension.GraphQLResource;
 import eu.ehri.extension.base.AbstractResource;
 import eu.ehri.extension.providers.GraphQLQueryProvider;
@@ -283,6 +284,20 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
         assertEquals("Validation error of type MissingFieldArgument: Missing field argument id @ 'DocumentaryUnit'",
+                data.path("errors").path(0).path("message").textValue());
+    }
+
+    @Test
+    public void testGraphQLExceedingMaxComplexity() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-depth10.graphql");
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = client.resource(queryUri)
+                .entity(testQuery)
+                .post(ClientResponse.class);
+
+        assertStatus(BAD_REQUEST, response);
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertEquals("maximum query depth exceeded 10 > 6",
                 data.path("errors").path(0).path("message").textValue());
     }
 }

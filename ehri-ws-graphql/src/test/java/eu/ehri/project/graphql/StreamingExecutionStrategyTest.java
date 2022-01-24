@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.test.AbstractFixtureTest;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
+import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
@@ -58,6 +59,7 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
             final GraphQL graphQL = GraphQL
                     .newGraphQL(schema)
                     .queryExecutionStrategy(strategy)
+                    .instrumentation(new MaxQueryDepthInstrumentation(5))
                     .build();
 
             graphQL.execute(input);
@@ -70,6 +72,14 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
     public void testExecuteWithErrors() throws Exception {
         String testQuery = readResourceFileAsString("testquery-bad.graphql");
         JsonNode json = executeStream(testQuery, Collections.emptyMap());
+        assertEquals("", json.toPrettyString());
+    }
+
+    @Test
+    public void textExecuteMaxDepth() throws Exception {
+        String testQuery = readResourceFileAsString("testquery-depth10.graphql");
+        JsonNode json = executeStream(testQuery, Collections.emptyMap());
+        // System.out.println("JSON: " + json);
         assertEquals("", json.toPrettyString());
     }
 
