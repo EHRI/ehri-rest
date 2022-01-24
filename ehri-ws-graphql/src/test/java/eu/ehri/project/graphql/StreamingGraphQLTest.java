@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ehri.project.test.AbstractFixtureTest;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
-import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
@@ -54,7 +53,7 @@ public class StreamingGraphQLTest extends AbstractFixtureTest {
 //            StreamingGraphQL ql = new StreamingGraphQL(schema);
 //            ql.execute(generator, testQuery, null, null, Collections.emptyMap());
 
-            final StreamingExecutionStrategy strategy = new StreamingExecutionStrategy(generator);
+            final StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
             final ExecutionInput input = ExecutionInput.newExecutionInput()
                     .query(testQuery)
                     .operationName(null)

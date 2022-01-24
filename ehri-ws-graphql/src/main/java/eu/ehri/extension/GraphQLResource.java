@@ -7,16 +7,10 @@ import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.graphql.StreamingExecutionStrategy;
-import eu.ehri.project.graphql.StreamingGraphQL;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.persistence.Bundle;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.analysis.MaxQueryComplexityInstrumentation;
-import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.*;
 import graphql.introspection.IntrospectionQuery;
-import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -105,27 +99,26 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     }
 
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
-        // FIXME: Ugly: have to reinitialise the schema in this transaction
-        // otherwise iterables will be invalid.
-//        final MaxQueryDepthInstrumentation instrumentation = new MaxQueryDepthInstrumentation(2);
-//        final StreamingGraphQL ql = new StreamingGraphQL(schema, instrumentation);
-//        // Check parsing, we have to do this again as well :(
-//        ql.parseAndValidate(q.getQuery(), q.getOperationName(), q.getVariables());
+        final ExecutionInput input = ExecutionInput.newExecutionInput()
+                .query(q.getQuery())
+                .operationName(q.getOperationName())
+                .variables(q.getVariables())
+                .build();
+        ParseAndValidateResult validator = ParseAndValidate.parseAndValidate(schema, input);
+        if (validator.isFailure()) {
+            throw new ExecutionError(validator.getErrors());
+        }
 
         return outputStream -> {
             try (final Tx tx = beginTx();
                  final JsonGenerator generator = jsonFactory.createGenerator(outputStream).useDefaultPrettyPrinter()) {
+                StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
+
                 generator.writeStartObject();
                 generator.writeFieldName(Bundle.DATA_KEY);
-                final ExecutionInput input = ExecutionInput.newExecutionInput()
-                        .query(q.getQuery())
-                        .operationName(q.getOperationName())
-                        .variables(q.getVariables())
-                        .build();
                 final GraphQL graphQL = GraphQL
                         .newGraphQL(schema)
-                        .queryExecutionStrategy(new StreamingExecutionStrategy(generator))
-//                        .instrumentation(new MaxQueryDepthInstrumentation(2))
+                        .queryExecutionStrategy(strategy)
                         .build();
                 graphQL.execute(input);
                 generator.writeEndObject();

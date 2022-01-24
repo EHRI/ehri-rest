@@ -53,7 +53,11 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
 
     private final JsonGenerator generator;
 
-    public StreamingExecutionStrategy(JsonGenerator generator) {
+    public static StreamingExecutionStrategy jsonGenerator(JsonGenerator generator) {
+        return new StreamingExecutionStrategy(generator);
+    }
+
+    private StreamingExecutionStrategy(JsonGenerator generator) {
         super();
         this.generator = generator;
     }

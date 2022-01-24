@@ -23,14 +23,11 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.errors.ExecutionError;
 import graphql.ExecutionInput;
-import graphql.ExecutionResult;
 import graphql.GraphQLError;
 import graphql.InvalidSyntaxError;
 import graphql.execution.*;
-import graphql.execution.instrumentation.ExecutionStrategyInstrumentationContext;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.SimpleInstrumentation;
-import graphql.execution.instrumentation.parameters.InstrumentationExecutionStrategyParameters;
 import graphql.language.Document;
 import graphql.language.NodeUtil;
 import graphql.language.OperationDefinition;
@@ -48,7 +45,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 import static graphql.Assert.assertNotNull;
 
@@ -74,7 +70,7 @@ public class StreamingGraphQL {
         assertNotNull(arguments, () -> "arguments can't be null");
         log.trace("Executing request. operation name: {}. Request: {} ", operationName, document);
 
-        StreamingExecution execution = new StreamingExecution(new StreamingExecutionStrategy(generator), new AsyncExecutionStrategy(),
+        StreamingExecution execution = new StreamingExecution(StreamingExecutionStrategy.jsonGenerator(generator), new AsyncExecutionStrategy(),
                 new SubscriptionExecutionStrategy(), instrumentation, ValueUnboxer.DEFAULT);
 
         ExecutionInput input = ExecutionInput.newExecutionInput()

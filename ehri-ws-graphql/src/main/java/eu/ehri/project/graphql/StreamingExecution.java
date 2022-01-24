@@ -94,7 +94,7 @@ public class StreamingExecution extends Execution {
                 .path(ResultPath.rootPath())
                 .build();
 
-        new StreamingExecutionStrategy(generator).execute(generator, executionContext, parameters);
+        StreamingExecutionStrategy.jsonGenerator(generator).execute(generator, executionContext, parameters);
     }
 
     public void execute(JsonGenerator generator, GraphQLSchema graphQLSchema, Document document, ExecutionId executionId, ExecutionInput executionInput) throws IOException {
