@@ -15,7 +15,6 @@ public class GraphQLImplTest extends AbstractFixtureTest {
         GraphQLSchema schema = graphQL.getSchema();
         String testQuery = readResourceFileAsString("testquery.graphql");
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(testQuery);
-        // System.out.println(result);
         assertTrue(result.getErrors().isEmpty());
     }
 }

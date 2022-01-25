@@ -1,7 +1,4 @@
 {
-    DocumentaryUnit(id: "c1") {
-        id
-    }
     firstTwo: documentaryUnits(first: 2, after: "LTI=") {
         items {
             id
