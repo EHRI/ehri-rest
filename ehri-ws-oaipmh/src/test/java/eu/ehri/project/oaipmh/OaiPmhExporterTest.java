@@ -46,6 +46,8 @@ public class OaiPmhExporterTest extends XmlExporterTest {
     public void testListMetadataFormats() throws Exception {
         Document doc = get("verb=" + Verb.ListMetadataFormats);
         assertXPath(doc, "oai_dc", "/OAI-PMH/ListMetadataFormats/metadataFormat/metadataPrefix");
+        assertXPath(doc, "ead", "/OAI-PMH/ListMetadataFormats/metadataFormat[2]/metadataPrefix");
+        assertXPath(doc, "ead3", "/OAI-PMH/ListMetadataFormats/metadataFormat[3]/metadataPrefix");
     }
 
     @Test

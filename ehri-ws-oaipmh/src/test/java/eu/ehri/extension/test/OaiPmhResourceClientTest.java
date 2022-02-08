@@ -74,7 +74,7 @@ public class OaiPmhResourceClientTest extends AbstractResourceClientTest {
                 .accept(MediaType.TEXT_XML_TYPE)
                 .header(OaiPmhResource.LIMIT_HEADER_NAME, limit)
                 .get(ClientResponse.class);
-        String entity = response.<String>getEntity(String.class);
+        String entity = response.getEntity(String.class);
         //System.out.println(entity);
         return parseDocument(entity);
     }

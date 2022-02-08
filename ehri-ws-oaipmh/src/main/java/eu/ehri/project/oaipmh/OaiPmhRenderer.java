@@ -22,6 +22,7 @@ package eu.ehri.project.oaipmh;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.exporters.dc.DublinCore11Exporter;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
+import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.models.DocumentaryUnit;
 
 import javax.xml.stream.XMLStreamWriter;
@@ -45,6 +46,8 @@ public interface OaiPmhRenderer {
         return (w, mp, item) -> {
             if (MetadataPrefix.ead.equals(mp)) {
                 new Ead2002Exporter(api).export(w, item, langCode);
+            } else if (MetadataPrefix.ead3.equals(mp)) {
+                new Ead3Exporter(api).export(w, item, langCode);
             } else {
                 new DublinCore11Exporter(api).export(w, item, langCode);
             }

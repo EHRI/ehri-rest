@@ -27,7 +27,8 @@ import eu.ehri.project.oaipmh.errors.OaiPmhError;
  */
 enum MetadataPrefix {
     oai_dc("http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://www.openarchives.org/OAI/2.0/oai_dc/"),
-    ead("http://www.loc.gov/ead/ead.xsd", "urn:isbn:1-931666-22-9");
+    ead("http://www.loc.gov/ead/ead.xsd", "urn:isbn:1-931666-22-9"),
+    ead3("https://www.loc.gov/ead/ead3_undeprecated.xsd", "http://ead3.archivists.org/schema/");
 
     private final String schema;
     private final String namespace;
