@@ -54,7 +54,6 @@
                             <include>org.codehaus.jettison:jettison</include>
                             <include>org.neo4j:neo4j-graphviz</include>
                             <include>org.slf4j:slf4j-api</include>
-                            <include>ch.qos.logback:*</include>
 
                             <!-- Additional EHRI deps -->
                             <include>joda-time:joda-time</include>

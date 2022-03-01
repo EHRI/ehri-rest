@@ -50,7 +50,7 @@ public class GenSchema extends BaseCommand {
             Neo4jGraphManager.createIndicesAndConstraints(
                     ((Neo4j2Graph) baseGraph).getRawGraph());
         } else {
-            logger.warn("Cannot generate schema on a non-Neo4j2 graph");
+            System.err.println("ERROR: Cannot generate schema on a non-Neo4j2 graph");
         }
         return 0;
     }
