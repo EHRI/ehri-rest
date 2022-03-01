@@ -20,16 +20,10 @@
 package eu.ehri.project.commands;
 
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.api.Api;
 import eu.ehri.project.api.ApiFactory;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
+import eu.ehri.project.models.base.Accessor;
+import org.apache.commons.cli.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -47,7 +41,6 @@ import java.util.Optional;
  */
 public abstract class BaseCommand implements Command {
 
-    static final Logger logger = org.slf4j.LoggerFactory.getLogger(Command.class);
     protected final Options options = new Options();
     private final CommandLineParser parser = new DefaultParser();
 
