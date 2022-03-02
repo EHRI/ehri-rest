@@ -21,7 +21,7 @@ package eu.ehri.project.graphql;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.Lists;
-import eu.ehri.extension.errors.ExecutionError;
+import eu.ehri.project.ws.errors.ExecutionError;
 import graphql.ExecutionInput;
 import graphql.GraphQLError;
 import graphql.InvalidSyntaxError;

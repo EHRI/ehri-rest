@@ -11,7 +11,7 @@ LABEL git_commit=$GIT_COMMIT
 # Set Neo4j configuration
 ENV NEO4J_HOME=/var/lib/neo4j
 ENV NEO4J_AUTH=none
-ENV NEO4J_dbms_unmanagedExtensionClasses=eu.ehri.extension=/ehri
+ENV NEO4J_dbms_unmanagedExtensionClasses=eu.ehri.project.ws=/ehri
 
 # Copy the output of mvn package to the Neo4j plugin folder...
 COPY build/target/ehri-data*.jar plugins

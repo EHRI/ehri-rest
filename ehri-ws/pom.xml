@@ -3,9 +3,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>ehri-project</groupId>
+        <groupId>eu.ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.15.0</version>
+        <version>0.15.1</version>
     </parent>
     <artifactId>ehri-ws</artifactId>
     <name>Web Service</name>
@@ -67,7 +67,7 @@
                         <exclude>org.neo4j.**</exclude>
                     </excludes>
                     <includes>
-                        <include>eu.ehri.extension.**</include>
+                        <include>eu.ehri.project.ws.**</include>
                     </includes>
                     <enunciateArtifactId>docs</enunciateArtifactId>
                 </configuration>
@@ -86,7 +86,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
             <version>${project.parent.version} </version>
             <exclusions>
@@ -101,7 +101,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
             <version>${project.parent.version} </version>
             <exclusions>
@@ -169,7 +169,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
             <version>${project.parent.version} </version>
             <type>test-jar</type>
