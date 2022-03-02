@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>ehri-project</groupId>
+        <groupId>eu.ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.15.0</version>
+        <version>0.15.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>build</artifactId>
@@ -46,7 +46,7 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>ehri-project:*</include>
+                            <include>eu.ehri-project:*</include>
                             <include>com.tinkerpop:*</include>
                             <include>com.tinkerpop.*:*</include>
                             <include>stax:stax-api</include>
@@ -132,42 +132,42 @@
 
     <dependencies>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-cli</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-ws-graphql</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-ws-oaipmh</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-cypher</artifactId>
             <version>${project.parent.version} </version>
         </dependency>

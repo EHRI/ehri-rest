@@ -43,6 +43,7 @@ local.properties
 
 # Ignore target
 **/target/*
+build/dependency-reduced-pom.xml
 
 Intellij
 *iml

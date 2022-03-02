@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>ehri-data</artifactId>
-        <groupId>ehri-project</groupId>
-        <version>0.15.0</version>
+        <groupId>eu.ehri-project</groupId>
+        <version>0.15.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -26,21 +26,21 @@
         </dependency>
 
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-core</artifactId>
             <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-io</artifactId>
             <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-ws</artifactId>
             <version>${project.parent.version}</version>
             <type>test-jar</type>

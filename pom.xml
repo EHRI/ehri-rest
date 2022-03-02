@@ -3,9 +3,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ehri-project</groupId>
+    <groupId>eu.ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
-    <version>0.15.0</version>
+    <version>0.15.1</version>
     <packaging>pom</packaging>
 
     <name>EHRI Backend</name>
@@ -73,6 +73,9 @@
     </issueManagement>
 
     <distributionManagement>
+        <relocation>
+            <groupId>ehri-project</groupId>
+        </relocation>
         <site>
             <id>ehri-rest-site</id>
             <name>Ehri Backend Site</name>

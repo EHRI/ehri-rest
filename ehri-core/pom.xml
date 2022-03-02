@@ -4,9 +4,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>ehri-project</groupId>
+        <groupId>eu.ehri-project</groupId>
         <artifactId>ehri-data</artifactId>
-        <version>0.15.0</version>
+        <version>0.15.1</version>
     </parent>
     <artifactId>ehri-core</artifactId>
     <packaging>jar</packaging>
@@ -172,7 +172,7 @@
             <version>0.4.11</version>
         </dependency>
         <dependency>
-            <groupId>ehri-project</groupId>
+            <groupId>eu.ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
             <version>${project.parent.version} </version>
         </dependency>
