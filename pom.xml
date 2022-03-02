@@ -73,9 +73,6 @@
     </issueManagement>
 
     <distributionManagement>
-        <relocation>
-            <groupId>ehri-project</groupId>
-        </relocation>
         <site>
             <id>ehri-rest-site</id>
             <name>Ehri Backend Site</name>
