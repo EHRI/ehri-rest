@@ -13,9 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb</artifactId>
+            <version>${ongdb.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -25,9 +25,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.neo4j.test</groupId>
-            <artifactId>neo4j-harness</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb.test</groupId>
+            <artifactId>ongdb-harness</artifactId>
+            <version>${ongdb.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

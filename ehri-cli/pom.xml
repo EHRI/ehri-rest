@@ -50,8 +50,8 @@
             <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>neo4j-management</artifactId>
-                    <groupId>org.neo4j</groupId>
+                    <artifactId>ongdb-management</artifactId>
+                    <groupId>org.graphfoundation.ongdb</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -87,25 +87,19 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb-kernel</artifactId>
+            <version>${ongdb.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-io</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb-io</artifactId>
+            <version>${ongdb.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j.community</groupId>
-            <artifactId>it-test-support</artifactId>
-            <version>${neo4j.version}</version>
             <scope>test</scope>
         </dependency>
 

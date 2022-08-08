@@ -118,46 +118,40 @@
 
         <!-- neo4j -->
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb</artifactId>
+            <version>${ongdb.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb-kernel</artifactId>
+            <version>${ongdb.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.neo4j.app</groupId>
-            <artifactId>neo4j-server</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb.app</groupId>
+            <artifactId>ongdb-server</artifactId>
+            <version>${ongdb.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.neo4j.app</groupId>
-            <artifactId>neo4j-server</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb.app</groupId>
+            <artifactId>ongdb-server</artifactId>
+            <version>${ongdb.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb-kernel</artifactId>
+            <version>${ongdb.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-io</artifactId>
-            <version>${neo4j.version}</version>
+            <groupId>org.graphfoundation.ongdb</groupId>
+            <artifactId>ongdb-io</artifactId>
+            <version>${ongdb.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j.community</groupId>
-            <artifactId>it-test-support</artifactId>
-            <version>${neo4j.version}</version>
             <scope>test</scope>
         </dependency>
 
