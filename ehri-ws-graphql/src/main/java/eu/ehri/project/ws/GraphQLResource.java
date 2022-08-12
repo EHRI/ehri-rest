@@ -1,20 +1,20 @@
 package eu.ehri.project.ws;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import eu.ehri.project.ws.base.AbstractAccessibleResource;
-import eu.ehri.project.ws.errors.ExecutionError;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.graphql.GraphQLImpl;
 import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.graphql.StreamingExecutionStrategy;
 import eu.ehri.project.models.base.Accessible;
+import eu.ehri.project.ws.base.AbstractAccessibleResource;
+import eu.ehri.project.ws.errors.ExecutionError;
 import graphql.*;
-import graphql.analysis.MaxQueryComplexityInstrumentation;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.instrumentation.ChainedInstrumentation;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.introspection.IntrospectionQuery;
-import graphql.schema.CoercingParseValueException;
 import graphql.schema.GraphQLSchema;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -32,12 +32,12 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
 
     public static final String ENDPOINT = "graphql";
 
-    // TODO: Move these to config and resolve issue w/ HOCON picking up
-    // the wrong reference.conf...
-    public static final int MAX_DEPTH = 10;
-    public static final int MAX_DEPTH_ANONYMOUS = 6;
-    public static final int MAX_FIELDS = 200;
-    public static final int MAX_FIELDS_ANONYMOUS = 20;
+    private static final Config config = ConfigFactory.load();
+
+    private static final int MAX_DEPTH = config.getInt("graphql.limits.maxDepth");
+    private static final int MAX_DEPTH_ANON = config.getInt("graphql.limits.maxDepthAnonymous");
+    private static final int MAX_COMPLEXITY = config.getInt("graphql.limits.maxComplexity");
+    private static final int MAX_COMPLEXITY_ANON = config.getInt("graphql.limits.maxComplexityAnonymous");
 
     public GraphQLResource(@Context GraphDatabaseService database) {
         super(database, Accessible.class);
@@ -78,9 +78,6 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
             Object data = stream ? lazyExecution(schema, q) : strictExecution(schema, q);
             tx.success();
             return Response.ok(data).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
         }
     }
 
@@ -144,8 +141,10 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
     private Instrumentation getInstrumentation() {
         final boolean anonymous = getRequesterUserProfile().isAnonymous();
         return new ChainedInstrumentation(
-//                new MaxQueryComplexityInstrumentation(anonymous ? MAX_FIELDS_ANONYMOUS : MAX_FIELDS),
-                new MaxQueryDepthInstrumentation(anonymous ? MAX_DEPTH_ANONYMOUS : MAX_DEPTH)
+                // FIXME: for now, max complexity checks are disabled because they hinder testing, and we
+                // cannot at the moment override/inject testing-specific configuration.
+                //new MaxQueryComplexityInstrumentation(anonymous ? MAX_COMPLEXITY_ANON : MAX_COMPLEXITY),
+                new MaxQueryDepthInstrumentation(anonymous ? MAX_DEPTH_ANON : MAX_DEPTH)
         );
     }
 }

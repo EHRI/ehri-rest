@@ -13,28 +13,18 @@
     <description>GraphQL endpoint for web service.</description>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
-                <configuration>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                            <resource>reference.conf</resource>
-                        </transformer>
-                    </transformers>
-                </configuration>
-            </plugin>
-        </plugins>
-
-        <!-- Copy messages_*.properties files from the source tree. These are
-        typically used for externalized i18n strings. -->
+        <!-- Copy the reference.conf file... -->
         <resources>
             <resource>
                 <directory>src/main/java</directory>
                 <includes>
                     <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>reference.conf</include>
                 </includes>
             </resource>
         </resources>
