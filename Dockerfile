@@ -1,5 +1,5 @@
 # Docker file for EHRI backend web service
-FROM neo4j:3.5.28
+FROM graphfoundation/ongdb:1.0.4
 
 # Set git commit build revision as a label which
 # we can inspect to figure out the image version.
@@ -9,7 +9,7 @@ ARG GIT_COMMIT=unspecified
 LABEL git_commit=$GIT_COMMIT
 
 # Set Neo4j configuration
-ENV NEO4J_HOME=/var/lib/neo4j
+ENV NEO4J_HOME=/var/lib/ongdb
 ENV NEO4J_AUTH=none
 ENV NEO4J_dbms_unmanagedExtensionClasses=eu.ehri.project.ws=/ehri
 
