@@ -55,7 +55,7 @@
                             <include>org.neo4j:neo4j-graphviz</include>
                             <include>org.slf4j:slf4j-api</include>
 
-                            <!-- Additional EHRI deps -->
+                            <!-- Additional EHRI deps which aren't in Neo4j -->
                             <include>joda-time:joda-time</include>
                             <include>org.yaml:snakeyaml</include>
                             <include>com.fasterxml.uuid:*</include>
@@ -68,8 +68,6 @@
                             <include>org.apache.jena:*</include>
                             <include>xerces:xercesImpl</include>
                             <include>xml-apis:xml-apis</include>
-                            <include>org.apache.commons:commons-lang3</include>
-                            <include>org.apache.commons:commons-compress</include>
                             <include>com.typesafe:config</include>
                             <include>com.flipkart.zjsonpatch:zjsonpatch</include>
                             <include>org.apache.commons:commons-collections4</include>
