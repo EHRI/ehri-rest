@@ -77,7 +77,7 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
 
     @Test
     public void textExecuteMaxDepth() throws Exception {
-        String testQuery = readResourceFileAsString("testquery-depth10.graphql");
+        String testQuery = readResourceFileAsString("testquery-depth20.graphql");
         JsonNode json = executeStream(testQuery, Collections.emptyMap());
         // System.out.println("JSON: " + json);
         assertEquals("", json.toPrettyString());

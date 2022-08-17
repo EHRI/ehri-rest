@@ -31,6 +31,7 @@ import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.ws.providers.GraphQLQueryProvider;
 import eu.ehri.project.graphql.GraphQLQuery;
 import eu.ehri.project.persistence.Bundle;
+import graphql.introspection.IntrospectionQuery;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -65,8 +66,20 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
                 .get(ClientResponse.class);
 
-        JsonNode data = response.getEntity(JsonNode.class);
         assertStatus(OK, response);
+        JsonNode data = response.getEntity(JsonNode.class);
+        assertFalse(data.path("data").path("__schema").isMissingNode());
+    }
+
+    @Test
+    public void testGraphQLSchemaIntrospection() throws Exception {
+        URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
+        ClientResponse response = callAs(getRegularUserProfileId(), queryUri)
+                .entity(new GraphQLQuery(IntrospectionQuery.INTROSPECTION_QUERY), MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class);
+
+        assertStatus(OK, response);
+        JsonNode data = response.getEntity(JsonNode.class);
         assertFalse(data.path("data").path("__schema").isMissingNode());
     }
 
@@ -81,9 +94,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         // Without the X-Stream header we should get strict execution.
         assertNull(response.getHeaders().getFirst("Transfer-Encoding"));
 
-        JsonNode data = response.getEntity(JsonNode.class);
-        // System.out.println(data);
         assertStatus(OK, response);
+        JsonNode data = response.getEntity(JsonNode.class);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertEquals(0, data.path("data").path("c1").path("ancestors").size());
         assertEquals(1, data.path("data").path("c1")
@@ -136,7 +148,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         String testQuery = readResourceFileAsString("testquery.graphql");
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
         ClientResponse response = callAs(getRegularUserProfileId(), queryUri)
-                .entity(testQuery)
+                .entity(new GraphQLQuery(testQuery), MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -185,7 +197,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id @ 'DocumentaryUnit'",
+        assertEquals("Validation error (MissingFieldArgument@[DocumentaryUnit]) : Missing field argument 'id'",
                 data.path("errors").path(0).path("message").textValue());
     }
 
@@ -216,6 +228,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .entity(new GraphQLQuery(testQuery, vars, null))
                 .post(ClientResponse.class);
 
+        assertStatus(OK, response);
         JsonNode data = response.getEntity(JsonNode.class);
         //System.out.println(data);
         assertEquals(4, data.path("data").path("test").path("items").size());
@@ -241,7 +254,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         ClientResponse response = callAs(getAdminUserProfileId(), queryUri)
                 .entity(new GraphQLQuery(testQuery, vars, null))
                 .post(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
+        //System.out.println(response.getEntity(String.class));
         assertStatus(BAD_REQUEST, response);
     }
 
@@ -264,6 +277,8 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .header(AbstractResource.STREAM_HEADER_NAME, "true")
                 .entity(testQuery)
                 .post(ClientResponse.class);
+        //System.out.println(response.getEntity(String.class));
+        assertStatus(OK, response);
         JsonNode data = response.getEntity(JsonNode.class);
         assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
@@ -281,13 +296,13 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("Validation error of type MissingFieldArgument: Missing field argument id @ 'DocumentaryUnit'",
+        assertEquals("Validation error (MissingFieldArgument@[DocumentaryUnit]) : Missing field argument 'id'",
                 data.path("errors").path(0).path("message").textValue());
     }
 
     @Test
     public void testGraphQLExceedingMaxComplexity() throws Exception {
-        String testQuery = readResourceFileAsString("testquery-depth10.graphql");
+        String testQuery = readResourceFileAsString("testquery-depth20.graphql");
         URI queryUri = ehriUriBuilder(GraphQLResource.ENDPOINT).build();
         ClientResponse response = client.resource(queryUri)
                 .entity(testQuery)
@@ -295,7 +310,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
 
         assertStatus(BAD_REQUEST, response);
         JsonNode data = response.getEntity(JsonNode.class);
-        assertEquals("maximum query depth exceeded 10 > 6",
+        assertEquals("maximum query depth exceeded 20 > 15",
                 data.path("errors").path(0).path("message").textValue());
     }
 }

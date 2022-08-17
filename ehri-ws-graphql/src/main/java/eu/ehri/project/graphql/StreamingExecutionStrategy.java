@@ -77,7 +77,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
     public void executeStream(ExecutionContext context, ExecutionStrategyParameters parameters) throws IOException {
         InstrumentationExecutionStrategyParameters instrumentationParameters = new InstrumentationExecutionStrategyParameters(context, parameters);
 
-        ExecutionStrategyInstrumentationContext executionStrategyCtx = context.getInstrumentation().beginExecutionStrategy(instrumentationParameters);
+        ExecutionStrategyInstrumentationContext executionStrategyCtx = context.getInstrumentation().beginExecutionStrategy(instrumentationParameters, context.getInstrumentationState());
 
         MergedSelectionSet fields = parameters.getFields();
 
@@ -156,7 +156,7 @@ public class StreamingExecutionStrategy extends ExecutionStrategy {
                 .schema(context.getGraphQLSchema())
                 .objectType(resolvedObjectType)
                 .fragments(context.getFragmentsByName())
-                .variables(context.getVariables())
+                .variables(context.getCoercedVariables().toMap())
                 .build();
 
         final MergedField field = parameters.getField();

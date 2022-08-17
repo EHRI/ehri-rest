@@ -11,6 +11,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.ws.base.AbstractAccessibleResource;
 import eu.ehri.project.ws.errors.ExecutionError;
 import graphql.*;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.instrumentation.ChainedInstrumentation;
 import graphql.execution.instrumentation.Instrumentation;
@@ -109,8 +110,6 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         return executionResult;
     }
 
-    // FIXME: no way to know here if instrumentation threw an error such as exceeding
-    // the query depth. The result will be an empty string.
     private StreamingOutput lazyExecution(GraphQLSchema schema, GraphQLQuery q) {
         final ExecutionInput input = ExecutionInput.newExecutionInput()
                 .query(q.getQuery())
@@ -143,7 +142,7 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
         return new ChainedInstrumentation(
                 // FIXME: for now, max complexity checks are disabled because they hinder testing, and we
                 // cannot at the moment override/inject testing-specific configuration.
-                //new MaxQueryComplexityInstrumentation(anonymous ? MAX_COMPLEXITY_ANON : MAX_COMPLEXITY),
+                new MaxQueryComplexityInstrumentation(anonymous ? MAX_COMPLEXITY_ANON : MAX_COMPLEXITY),
                 new MaxQueryDepthInstrumentation(anonymous ? MAX_DEPTH_ANON : MAX_DEPTH)
         );
     }
