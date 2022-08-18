@@ -284,6 +284,7 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
         // might be to do with the Jersey impl used by Neo4j?
         //assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
         //assertEquals("chunked", response.getHeaders().getFirst("Transfer-Encoding"));
+        // System.out.println(data);
         assertEquals("c1", data.path("data").path("c1").path("id").textValue());
         assertFalse(data.path("data").path("topLevelDocumentaryUnits").path("items").path(0).isMissingNode());
     }
