@@ -126,8 +126,11 @@ public class GraphQLResource extends AbstractAccessibleResource<Accessible> {
                  final JsonGenerator generator = jsonFactory.createGenerator(outputStream).useDefaultPrettyPrinter()) {
                 StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
 
+                // We have to reinitialize the schema within the current graphql transaction,
+                // in order to do actual data fetching...
+                GraphQLSchema schema2 = new GraphQLImpl(api(), true).getSchema();
                 final GraphQL graphQL = GraphQL
-                        .newGraphQL(schema)
+                        .newGraphQL(schema2)
                         .instrumentation(getInstrumentation())
                         .queryExecutionStrategy(strategy)
                         .build();
