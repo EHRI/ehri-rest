@@ -84,7 +84,7 @@ def get_version_stamp(ctx):
 @task
 def online_backup(ctx, dir, tar = True):
     """Create an online backup to directory `dir`"""
-    if files.exists(dir):
+    if files.exists(ctx, dir):
         print(f"Remote directory '{dir}' already exists!")
         sys.exit(1)
     tar_name = dir + ".tgz"
