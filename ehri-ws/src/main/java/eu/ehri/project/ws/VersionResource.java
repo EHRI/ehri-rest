@@ -25,7 +25,7 @@ import eu.ehri.project.ws.base.GetResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.events.Version;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -39,8 +39,8 @@ import javax.ws.rs.core.Response;
 @Path(AbstractResource.RESOURCE_ENDPOINT_PREFIX + "/" + Entities.VERSION)
 public class VersionResource extends AbstractAccessibleResource<Version> implements GetResource {
 
-    public VersionResource(@Context GraphDatabaseService database) {
-        super(database, Version.class);
+    public VersionResource(@Context DatabaseManagementService service) {
+        super(service, Version.class);
     }
 
     /**

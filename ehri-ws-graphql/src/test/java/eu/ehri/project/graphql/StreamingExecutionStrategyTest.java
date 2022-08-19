@@ -26,6 +26,8 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
 import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.execution.instrumentation.ChainedInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
 import graphql.schema.GraphQLSchema;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
@@ -44,6 +46,10 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public JsonNode executeStream(String query, Map<String, Object> params) throws Exception {
+        return executeStream(query, params, new ChainedInstrumentation());
+    }
+
+    public JsonNode executeStream(String query, Map<String, Object> params, Instrumentation instrumentation) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
@@ -59,7 +65,7 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
             final GraphQL graphQL = GraphQL
                     .newGraphQL(schema)
                     .queryExecutionStrategy(strategy)
-                    .instrumentation(new MaxQueryDepthInstrumentation(5))
+                    .instrumentation(instrumentation)
                     .build();
 
             graphQL.execute(input);
@@ -78,13 +84,21 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
     @Test
     public void textExecuteMaxDepth() throws Exception {
         String testQuery = readResourceFileAsString("testquery-depth20.graphql");
-        JsonNode json = executeStream(testQuery, Collections.emptyMap());
+        JsonNode json = executeStream(testQuery, Collections.emptyMap(), new MaxQueryDepthInstrumentation(10));
         // System.out.println("JSON: " + json);
         assertEquals("", json.toPrettyString());
     }
 
     @Test
     public void textExecute() throws Exception {
+        String testQuery = readResourceFileAsString("testquery.graphql");
+        JsonNode json = executeStream(testQuery, Collections.emptyMap());
+        // System.out.println("JSON: " + json);
+        assertEquals("c1", json.path("data").path("c1").path("id").textValue());
+    }
+
+    @Test
+    public void textExecute2() throws Exception {
         String testQuery = readResourceFileAsString("testquery-connection.graphql");
         JsonNode json = executeStream(testQuery, Collections.emptyMap());
         // System.out.println("JSON: " + json);

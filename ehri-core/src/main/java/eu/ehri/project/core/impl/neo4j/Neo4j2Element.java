@@ -5,22 +5,18 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.ElementHelper;
+import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 
 abstract class Neo4j2Element implements Element {
 
     protected final Neo4j2Graph graph;
-    protected PropertyContainer rawElement;
+    protected Entity rawElement;
 
     public Neo4j2Element(Neo4j2Graph graph) {
         this.graph = graph;
@@ -63,7 +59,7 @@ abstract class Neo4j2Element implements Element {
         return this.getId().hashCode();
     }
 
-    public PropertyContainer getRawElement() {
+    public Entity getRawElement() {
         return this.rawElement;
     }
 

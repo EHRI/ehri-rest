@@ -30,17 +30,13 @@ import eu.ehri.project.oaipmh.OaiPmhExporter;
 import eu.ehri.project.oaipmh.OaiPmhRenderer;
 import eu.ehri.project.oaipmh.OaiPmhState;
 import eu.ehri.project.oaipmh.errors.OaiPmhError;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedOutputStream;
@@ -62,8 +58,8 @@ public class OaiPmhResource extends AbstractResource {
 
 
 
-    public OaiPmhResource(@Context GraphDatabaseService database) {
-        super(database);
+    public OaiPmhResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

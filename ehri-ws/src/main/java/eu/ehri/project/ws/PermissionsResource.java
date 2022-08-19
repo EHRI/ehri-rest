@@ -32,14 +32,9 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.dbms.api.DatabaseManagementService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -53,8 +48,8 @@ public class PermissionsResource extends AbstractResource {
 
     public static final String ENDPOINT = "permissions";
 
-    public PermissionsResource(@Context GraphDatabaseService database) {
-        super(database);
+    public PermissionsResource(@Context DatabaseManagementService service) {
+        super(service);
     }
 
     /**

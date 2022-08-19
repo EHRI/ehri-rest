@@ -21,14 +21,15 @@ package eu.ehri.project.core.impl;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.project.core.Tx;
-import eu.ehri.project.core.impl.TxNeo4jGraph;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
@@ -41,18 +42,19 @@ import static org.junit.Assert.*;
 public class TxNeo4JGraphTest {
 
     private TxNeo4jGraph graph;
+    private Path tmpPath;
 
     @Before
     public void setUp() throws Exception {
-        GraphDatabaseService rawGraph = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                .newGraphDatabase();
-        graph = new TxNeo4jGraph(rawGraph);
+        tmpPath = Files.createTempDirectory("neo4j-tmp");
+        graph = new TxNeo4jGraph(tmpPath.toString());
     }
 
     @After
     public void tearDown() throws Exception {
         try {
             graph.shutdown();
+            FileUtils.deleteDirectory(tmpPath.toFile());
         } catch (Exception e) {
             // Ignoring problems here...
         }
