@@ -28,7 +28,7 @@ import eu.ehri.project.models.annotations.Fetch;
 /**
  * An entity that can have {@link Address}es.
  */
-public interface Addressable {
+public interface Addressable extends Entity {
 
     @Dependent
     @Fetch(value = Ontology.ENTITY_HAS_ADDRESS, whenNotLite = true)
