@@ -32,7 +32,6 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
@@ -199,28 +198,28 @@ public class GraphQLImpl {
                 "authorities", oneToManyRelationshipConnectionFetcher(c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())
         ));
 
-        Map<Class<? extends Entity>, GraphQLObjectType> types = ImmutableMap.<Class<? extends Entity>, GraphQLObjectType>builder()
-                .put(DocumentaryUnit.class, documentaryUnitType)
-                .put(DocumentaryUnitDescription.class, documentaryUnitDescriptionType)
-                .put(Repository.class, repositoryType)
-                .put(RepositoryDescription.class, repositoryDescriptionType)
-                .put(HistoricalAgent.class, historicalAgentType)
-                .put(HistoricalAgentDescription.class, historicalAgentDescriptionType)
-                .put(Concept.class, conceptType)
-                .put(ConceptDescription.class, conceptDescriptionType)
-                .put(Country.class, countryType)
-                .put(Vocabulary.class, vocabularyType)
-                .put(AuthoritativeSet.class, authoritativeSetType)
-                .put(Link.class, linkType)
-                .put(Annotation.class, annotationType)
-                .put(Address.class, addressType)
-                .put(AccessPoint.class, accessPointType)
-                .put(DatePeriod.class, datePeriodType)
-                .build();
+        List<GraphQLObjectType> nodeTypes = Lists.newArrayList(
+                documentaryUnitType,
+                documentaryUnitDescriptionType,
+                repositoryType,
+                repositoryDescriptionType,
+                historicalAgentType,
+                historicalAgentDescriptionType,
+                conceptType,
+                conceptDescriptionType,
+                countryType,
+                vocabularyType,
+                authoritativeSetType,
+                linkType,
+                annotationType,
+                addressType,
+                accessPointType,
+                datePeriodType
+        );
 
-        for (Map.Entry<Class<? extends Entity>, GraphQLObjectType> pair : types.entrySet()) {
-            GraphQLObjectType type = pair.getValue();
+        for (GraphQLObjectType type : nodeTypes) {
             for (GraphQLFieldDefinition field : type.getFieldDefinitions()) {
+                // Handle generic traversals...
                 switch (field.getName()) {
                     case Bundle.ID_KEY:
                         builder.dataFetcher(type, field, idDataFetcher);
@@ -264,13 +263,11 @@ public class GraphQLImpl {
 
                     default:
                 }
-                // Add a default data fetch which returns an object attribute...
+                // Add a default data fetcher which returns an object attribute...
                 if (field.getType() instanceof GraphQLList) {
                     builder.dataFetcherIfAbsent(coordinates(type, field), listDataFetcher(attributeDataFetcher));
-                } else if (field.getType() instanceof GraphQLScalarType) {
+                } else {
                     builder.dataFetcherIfAbsent(coordinates(type, field), attributeDataFetcher);
-                } else if (!builder.hasDataFetcher(coordinates(type, field))) {
-                    System.out.println("No coordinates! " + type.getName() + " -> " + field.getName());
                 }
             }
         }
