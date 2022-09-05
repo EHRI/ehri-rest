@@ -171,6 +171,9 @@ public class JenaSkosExporter implements SkosExporter {
         } else if (SkosRDFVocabulary.GENERAL_PROPS.containsKey(key)) {
             writeListOrScalar(model, resource,
                     model.createProperty(SkosRDFVocabulary.GENERAL_PROPS.get(key).toString()), property, null);
+        } else if (SkosRDFVocabulary.GEO_PROPS.containsKey(key)) {
+            writeListOrScalar(model, resource,
+                    model.createProperty(SkosRDFVocabulary.GEO_PROPS.get(key).toString()), property, null);
         }
     }
 

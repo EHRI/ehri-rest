@@ -338,14 +338,24 @@ public final class JenaSkosImporter implements SkosImporter {
         for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GENERAL_PROPS.entrySet()) {
             for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                 if (target.isLiteral()) {
+                    builder.addDataMultiValue(prop.getKey(), target.asLiteral().getString());
+                } else {
+                    builder.addDataMultiValue(prop.getKey(), target.toString());
+                }
+            }
+        }
+
+        for (Map.Entry<String, URI> prop : SkosRDFVocabulary.GEO_PROPS.entrySet()) {
+            for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
+                if (target.isLiteral()) {
                     if (prop.getKey().equals("latitude/longitude")) {
                         String[] latLon = target.asLiteral().getString().split(",");
                         if (latLon.length > 1) {
-                            builder.addDataValue("latitude", latLon[0]);
-                            builder.addDataValue("longitude", latLon[1]);
+                            builder.addDataValue("latitude", Double.valueOf(latLon[0]));
+                            builder.addDataValue("longitude", Double.valueOf(latLon[1]));
                         }
                     } else {
-                        builder.addDataMultiValue(prop.getKey(), target.asLiteral().getString());
+                        builder.addDataMultiValue(prop.getKey(), Double.valueOf(target.asLiteral().getString()));
                     }
                 } else {
                     builder.addDataMultiValue(prop.getKey(), target.toString());

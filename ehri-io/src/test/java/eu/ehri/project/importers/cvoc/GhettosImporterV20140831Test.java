@@ -71,8 +71,8 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         Concept ghetto0 = manager.getEntity("cvoc1-0", Concept.class);
         //  <geo:lat>52.43333333333333</geo:lat>
         //	<geo:long>20.716666666666665</geo:long>
-        assertEquals("52.43333333333333", ghetto0.getProperty("latitude"));
-        assertEquals("20.716666666666665", ghetto0.getProperty("longitude"));
+        assertEquals(Double.valueOf(52.43333333333333), ghetto0.getProperty("latitude"));
+        assertEquals(Double.valueOf(20.716666666666665), ghetto0.getProperty("longitude"));
 
         InputStream iosV2 = ClassLoader.getSystemResourceAsStream("cvoc/ghettos-v20140831.rdf.xml");
         int origCount = getNodeCount(graph);
@@ -92,7 +92,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
 
         Concept ghetto0v2 = manager.getEntity("cvoc1-0", Concept.class);
         assertEquals(ghetto0, ghetto0v2);
-        assertEquals("48.6666666667", ghetto0v2.getProperty("latitude"));
-        assertEquals("26.5666666667", ghetto0v2.getProperty("longitude"));
+        assertEquals(Double.valueOf(48.6666666667), ghetto0v2.getProperty("latitude"));
+        assertEquals(Double.valueOf(26.5666666667), ghetto0v2.getProperty("longitude"));
     }
 }

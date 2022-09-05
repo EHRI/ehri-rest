@@ -93,14 +93,18 @@ public enum SkosRDFVocabulary {
 
     // Language-agnostic properties.
     public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
-            .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
-            .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
-            .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
             .put("url", URI.create("http://xmlns.com/foaf/0.1/isPrimaryTopicOf"))
             .put("date", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasTime"))
             .put("person", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasActor"))
             .put("place", URI.create("http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace"))
             .put("seeAlso", URI.create(RDFS.seeAlso.getURI()))
+            .build();
+
+    // Geo props
+    public static final Map<String, URI> GEO_PROPS = ImmutableMap.<String, URI>builder()
+            .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
+            .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
+            .put("latitude/longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat_long"))
             .build();
 
     // Properties that end up as undeterminedRelation nodes.
