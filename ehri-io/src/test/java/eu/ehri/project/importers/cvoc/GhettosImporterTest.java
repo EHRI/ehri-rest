@@ -72,8 +72,8 @@ public class GhettosImporterTest extends AbstractImporterTest {
         Concept ghetto0 = list.get(0);
         //  <geo:lat>52.43333333333333</geo:lat>
         //	<geo:long>20.716666666666665</geo:long>
-        assertEquals("52.43333333333333", ghetto0.getProperty("latitude"));
-        assertEquals("20.716666666666665", ghetto0.getProperty("longitude"));
+        assertEquals(Double.valueOf(52.43333333333333), ghetto0.getProperty("latitude"));
+        assertEquals(Double.valueOf(20.716666666666665), ghetto0.getProperty("longitude"));
 
         // and print the tree
         printConceptTree(System.out, list.get(0));
