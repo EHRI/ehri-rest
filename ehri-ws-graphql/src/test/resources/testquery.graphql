@@ -99,6 +99,7 @@ query test {
             }
             context {
                 id
+                description
             }
         }
     }

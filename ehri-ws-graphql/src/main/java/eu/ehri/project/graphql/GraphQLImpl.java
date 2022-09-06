@@ -122,11 +122,11 @@ public class GraphQLImpl {
     public GraphQLSchema getSchema() {
         return GraphQLSchema.newSchema()
                 .query(queryType())
+                .codeRegistry(codeRegistry())
                 // NB: this needed because the date type is only
                 // references via a type reference to avoid forward-
                 // declaration problems...
-                .codeRegistry(codeRegistry())
-                .additionalTypes(Sets.newHashSet(datePeriodType, systemEventType))
+                .additionalTypes(Sets.newHashSet(addressType, datePeriodType, systemEventType))
                 .build();
     }
 
@@ -150,7 +150,7 @@ public class GraphQLImpl {
                 .typeResolver(temporalDescriptionInterface, descriptionTypeResolver)
                 .typeResolver(temporalInterface, entityTypeResolver);
 
-        // Documentary Unit graph traversals...
+        // Documentary Unit traversals...
         builder.dataFetchers(documentaryUnitType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(DocumentaryUnit.class).countChildren()),
                 "repository", manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository()),
@@ -161,7 +161,7 @@ public class GraphQLImpl {
                 "ancestors", oneToManyRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getAncestors())
         ));
 
-        // Repository graph traversals
+        // Repository traversals
         builder.dataFetchers(repositoryType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(Repository.class).countChildren()),
                 "documentaryUnits", hierarchicalOneToManyRelationshipConnectionFetcher(
@@ -170,14 +170,14 @@ public class GraphQLImpl {
                 "country", manyToOneRelationshipFetcher(r -> r.as(Repository.class).getCountry())
         ));
 
-        // Country graph traversals
+        // Country traversals
         builder.dataFetchers(countryType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(Country.class).countChildren()),
                 "name", transformingDataFetcher(idDataFetcher, LanguageHelpers::countryCodeToName),
                 "repositories", oneToManyRelationshipConnectionFetcher(c -> c.as(Country.class).getRepositories())
         ));
 
-        // Concept graph traversals
+        // Concept traversals
         builder.dataFetchers(conceptType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(Concept.class).countChildren()),
                 "vocabulary", manyToOneRelationshipFetcher(c -> c.as(Concept.class).getVocabulary()),
@@ -186,13 +186,13 @@ public class GraphQLImpl {
                 "narrower", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getNarrowerConcepts())
         ));
 
-        // Vocabularies graph traversals
+        // Vocabularies traversals
         builder.dataFetchers(vocabularyType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(Vocabulary.class).countChildren()),
                 "concepts", oneToManyRelationshipConnectionFetcher(c -> c.as(Vocabulary.class).getConcepts())
         ));
 
-        // AuthoritativeSet graph traversals
+        // AuthoritativeSet traversals
         builder.dataFetchers(authoritativeSetType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(AuthoritativeSet.class).countChildren()),
                 "authorities", oneToManyRelationshipConnectionFetcher(c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())
@@ -274,6 +274,9 @@ public class GraphQLImpl {
 
         // Hack: override type for access points, since it's not a node type
         builder.dataFetcher(coordinates(accessPointType.getName(), Ontology.ACCESS_POINT_TYPE), attributeDataFetcher);
+
+        // Description field for link is a scalar attribute...
+        builder.dataFetcher(coordinates(linkType.getName(), Ontology.LINK_HAS_DESCRIPTION), attributeDataFetcher);
 
         // Add a special field for annotation author
         builder.dataFetcher(coordinates(annotationType.getName(), "by"), annotationNameDataFetcher);
