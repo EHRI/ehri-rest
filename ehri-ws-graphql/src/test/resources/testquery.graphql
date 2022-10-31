@@ -180,6 +180,20 @@ query test {
         }
     }
 
+    r4: Repository(id: "r4") {
+        links {
+            targets {
+                id
+            }
+        }
+    }
+
+    cvocc2: CvocConcept(id: "cvocc2") {
+        related {
+            id
+        }
+    }
+
     wrongType: HistoricalAgent(id: "c1") {
         id
     }

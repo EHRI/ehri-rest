@@ -150,54 +150,6 @@ public class GraphQLImpl {
                 .typeResolver(temporalDescriptionInterface, descriptionTypeResolver)
                 .typeResolver(temporalInterface, entityTypeResolver);
 
-        // Documentary Unit traversals...
-        builder.dataFetchers(documentaryUnitType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(DocumentaryUnit.class).countChildren()),
-                "repository", manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository()),
-                "children", hierarchicalOneToManyRelationshipConnectionFetcher(
-                        d -> d.as(DocumentaryUnit.class).getChildren(), d -> d.as(DocumentaryUnit.class).getAllChildren()
-                ),
-                "parent", manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getParent()),
-                "ancestors", oneToManyRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getAncestors())
-        ));
-
-        // Repository traversals
-        builder.dataFetchers(repositoryType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(Repository.class).countChildren()),
-                "documentaryUnits", hierarchicalOneToManyRelationshipConnectionFetcher(
-                        r -> r.as(Repository.class).getTopLevelDocumentaryUnits(),
-                        r -> r.as(Repository.class).getAllDocumentaryUnits()),
-                "country", manyToOneRelationshipFetcher(r -> r.as(Repository.class).getCountry())
-        ));
-
-        // Country traversals
-        builder.dataFetchers(countryType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(Country.class).countChildren()),
-                "name", transformingDataFetcher(idDataFetcher, LanguageHelpers::countryCodeToName),
-                "repositories", oneToManyRelationshipConnectionFetcher(c -> c.as(Country.class).getRepositories())
-        ));
-
-        // Concept traversals
-        builder.dataFetchers(conceptType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(Concept.class).countChildren()),
-                "vocabulary", manyToOneRelationshipFetcher(c -> c.as(Concept.class).getVocabulary()),
-                "related", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getRelatedConcepts()),
-                "broader", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getBroaderConcepts()),
-                "narrower", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getNarrowerConcepts())
-        ));
-
-        // Vocabularies traversals
-        builder.dataFetchers(vocabularyType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(Vocabulary.class).countChildren()),
-                "concepts", oneToManyRelationshipConnectionFetcher(c -> c.as(Vocabulary.class).getConcepts())
-        ));
-
-        // AuthoritativeSet traversals
-        builder.dataFetchers(authoritativeSetType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(AuthoritativeSet.class).countChildren()),
-                "authorities", oneToManyRelationshipConnectionFetcher(c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())
-        ));
-
         List<GraphQLObjectType> nodeTypes = Lists.newArrayList(
                 documentaryUnitType,
                 documentaryUnitDescriptionType,
@@ -258,9 +210,10 @@ public class GraphQLImpl {
                         builder.dataFetcher(coordinates(type, field), descriptionDataFetcher);
                         break;
                     case "related":
+                        // NB: for CvocConcept types this is overridden below to return a
+                        // set of CvocConcepts rather than Relationship objects
                         builder.dataFetcher(coordinates(type, field), relatedItemsDataFetcher);
                         break;
-
                     default:
                 }
                 // Add a default data fetcher which returns an object attribute...
@@ -271,6 +224,65 @@ public class GraphQLImpl {
                 }
             }
         }
+
+        // Documentary Unit traversals...
+        builder.dataFetchers(documentaryUnitType.getName(), ImmutableMap.of(
+                "itemCount", itemCountDataFetcher(c -> c.as(DocumentaryUnit.class).countChildren()),
+                "repository", manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getRepository()),
+                "children", hierarchicalOneToManyRelationshipConnectionFetcher(
+                        d -> d.as(DocumentaryUnit.class).getChildren(), d -> d.as(DocumentaryUnit.class).getAllChildren()
+                ),
+                "parent", manyToOneRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getParent()),
+                "ancestors", oneToManyRelationshipFetcher(d -> d.as(DocumentaryUnit.class).getAncestors())
+        ));
+
+        // Repository traversals
+        builder.dataFetchers(repositoryType.getName(), ImmutableMap.of(
+                "itemCount", itemCountDataFetcher(c -> c.as(Repository.class).countChildren()),
+                "documentaryUnits", hierarchicalOneToManyRelationshipConnectionFetcher(
+                        r -> r.as(Repository.class).getTopLevelDocumentaryUnits(),
+                        r -> r.as(Repository.class).getAllDocumentaryUnits()),
+                "country", manyToOneRelationshipFetcher(r -> r.as(Repository.class).getCountry())
+        ));
+
+        // Country traversals
+        builder.dataFetchers(countryType.getName(), ImmutableMap.of(
+                "itemCount", itemCountDataFetcher(c -> c.as(Country.class).countChildren()),
+                "name", transformingDataFetcher(idDataFetcher, LanguageHelpers::countryCodeToName),
+                "repositories", oneToManyRelationshipConnectionFetcher(c -> c.as(Country.class).getRepositories())
+        ));
+
+        // Concept traversals
+        // NB: due to an unfortunate mistake, the concept "related" field, which returns concepts
+        // that are conceptulally related, collides in naming with the generic "related" field, which
+        // returns a set of "Relationship" items.
+        builder.dataFetchers(conceptType.getName(), ImmutableMap.of(
+                "itemCount", itemCountDataFetcher(c -> c.as(Concept.class).countChildren()),
+                "vocabulary", manyToOneRelationshipFetcher(c -> c.as(Concept.class).getVocabulary()),
+                "related", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getRelatedConcepts()),
+                "broader", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getBroaderConcepts()),
+                "narrower", oneToManyRelationshipFetcher(c -> c.as(Concept.class).getNarrowerConcepts())
+        ));
+
+        // Vocabularies traversals
+        builder.dataFetchers(vocabularyType.getName(), ImmutableMap.of(
+                "itemCount", itemCountDataFetcher(c -> c.as(Vocabulary.class).countChildren()),
+                "concepts", oneToManyRelationshipConnectionFetcher(c -> c.as(Vocabulary.class).getConcepts())
+        ));
+
+        // AuthoritativeSet traversals
+        builder.dataFetchers(authoritativeSetType.getName(), ImmutableMap.of(
+                "itemCount", itemCountDataFetcher(c -> c.as(AuthoritativeSet.class).countChildren()),
+                "authorities", oneToManyRelationshipConnectionFetcher(c -> c.as(AuthoritativeSet.class).getAuthoritativeItems())
+        ));
+
+        // Links
+        builder.dataFetcher(coordinates(linkType.getName(), "targets"),
+                oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets()));
+
+        // Annotations
+        builder.dataFetcher(coordinates(annotationType.getName(), "targets"),
+                oneToManyRelationshipFetcher(a -> a.as(Annotation.class).getTargets()));
 
         // Hack: override type for access points, since it's not a node type
         builder.dataFetcher(coordinates(accessPointType.getName(), Ontology.ACCESS_POINT_TYPE), attributeDataFetcher);
