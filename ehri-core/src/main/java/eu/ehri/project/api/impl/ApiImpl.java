@@ -1,5 +1,6 @@
 package eu.ehri.project.api.impl;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.*;
@@ -17,11 +18,10 @@ import eu.ehri.project.persistence.*;
 import eu.ehri.project.utils.GraphInitializer;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static eu.ehri.project.models.Group.ADMIN_GROUP_IDENTIFIER;
 
 public class ApiImpl implements Api {
 
@@ -343,6 +343,20 @@ public class ApiImpl implements Api {
     }
 
     @Override
+    public Iterable<Link> getLinks(String id) {
+        final Predicate<Link> p = link -> {
+            for (Linkable target : link.getLinkTargets()) {
+                if (target.hasAccessRestriction() && !aclManager.canAccess(target, accessor)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        final Iterable<Link> links = manager.getEntityUnchecked(id, Linkable.class).getLinks();
+        return Iterables.filter(links, p::test);
+    }
+
+    @Override
     public Link createLink(String source, String target, List<String> bodies,
                            Bundle bundle, boolean directional, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied {
@@ -397,6 +411,11 @@ public class ApiImpl implements Api {
                     link, accessor.as(Actioner.class), EventTypes.link, logMessage)
                     .addSubjects(src).addSubjects(dst));
         return link;
+    }
+
+    @Override
+    public Iterable<Annotation> getAnnotations(String id) {
+        return manager.getEntityUnchecked(id, Annotatable.class).getAnnotations();
     }
 
     @Override

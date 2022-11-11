@@ -53,6 +53,22 @@ public class ApiLinkingTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testGetLinks() throws Exception {
+        List<Link> links = Lists.newArrayList(api(validUser).getLinks("c1"));
+        assertEquals(2, links.size());
+        assertTrue(links.contains(manager.getEntity("link1", Link.class)));
+        assertTrue(links.contains(manager.getEntity("link2", Link.class)));
+    }
+
+    @Test
+    public void testGetLinksWithAclFilter() throws Exception {
+        // Link1 should not be retrieved because target c1 is not visible to invalidUser
+        List<Link> links = Lists.newArrayList(api(invalidUser).getLinks("c4"));
+        assertEquals(1, links.size());
+        assertTrue(links.contains(manager.getEntity("link4", Link.class)));
+    }
+
+    @Test
     public void testCreateLink() throws Exception {
         DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
         HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);

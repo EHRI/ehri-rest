@@ -277,6 +277,17 @@ public interface Api {
             throws ItemNotFound, PermissionDenied, ValidationError, SerializationError;
 
     /**
+     * Get an item's links.
+     *
+     * Links are skipped if their targets are not accessible to the
+     * current user.
+     *
+     * @param id the target item
+     * @return an iterable of item links
+     */
+    Iterable<Link> getLinks(String id);
+
+    /**
      * Create a link between two items.
      *
      * @param source       the identifier of a Accessible source of this Annotation
@@ -321,6 +332,14 @@ public interface Api {
             throws ItemNotFound, ValidationError, PermissionDenied;
 
     /**
+     * Get an item's annotations.
+     *
+     * @param id the target item
+     * @return an iterable of item annotations
+     */
+    Iterable<Annotation> getAnnotations(String id);
+
+    /**
      * Create an annotation for a dependent node of an item. The entity and the
      * dependent item can be the same.
      *
@@ -335,7 +354,6 @@ public interface Api {
      * @throws ValidationError  if the input data is incomplete or does not meet requirements
      * @throws AccessDenied     if the user cannot access the target item
      */
-
     Annotation createAnnotation(String id, String did, Bundle bundle,
                                 Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws PermissionDenied, AccessDenied, ValidationError, ItemNotFound;

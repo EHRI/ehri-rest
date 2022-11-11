@@ -26,7 +26,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.ws.base.AbstractAccessibleResource;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.api.EventsApi;
 import eu.ehri.project.api.impl.ApiImpl;
@@ -41,6 +40,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.ws.base.AbstractAccessibleResource;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.w3c.dom.Document;
 
@@ -321,8 +321,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
         try (final Tx tx = beginTx()) {
             checkExists(id, Annotatable.class);
             Response page = streamingPage(() -> getQuery()
-                    .page(manager.getEntityUnchecked(id, Annotatable.class)
-                            .getAnnotations(), Annotation.class));
+                    .page(api().getAnnotations(id), Annotation.class));
             tx.success();
             return page;
         }
@@ -341,8 +340,7 @@ public class GenericResource extends AbstractAccessibleResource<Accessible> {
     public Response links(@PathParam("id") String id) throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             checkExists(id, Linkable.class);
-            Response page = streamingPage(() -> getQuery().page(
-                    manager.getEntityUnchecked(id, Linkable.class).getLinks(), Link.class));
+            Response page = streamingPage(() -> getQuery().page(api().getLinks(id), Link.class));
             tx.success();
             return page;
         }
