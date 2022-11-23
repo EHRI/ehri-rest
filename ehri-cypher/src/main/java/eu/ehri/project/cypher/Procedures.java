@@ -31,7 +31,7 @@ public class Procedures {
     @Deprecated
     @Procedure(value = "eu.ehri.project.cypher.countryCodeToName", deprecatedBy = "countryCodeToName")
     public Stream<Output> countryCodeToName(@Name("code") String code) {
-        return Stream.of(new Output(LanguageHelpers.iso3166dashOneCodeToName(code)));
+        return Stream.of(new Output(LanguageHelpers.countryCodeToName(code)));
     }
 
     @Deprecated
