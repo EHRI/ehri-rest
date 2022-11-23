@@ -18,7 +18,7 @@ public class Functions {
 
     @UserFunction
     public String countryCodeToName(@Name("code") String code) {
-        return code == null ? null : LanguageHelpers.iso3166dashOneCodeToName(code);
+        return code == null ? null : LanguageHelpers.countryCodeToName(code);
     }
 
     @UserFunction

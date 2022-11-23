@@ -73,4 +73,12 @@ public class LanguageHelpersTest {
         assertEquals("German", LanguageHelpers.codeToName("deu"));
         assertEquals("German", LanguageHelpers.codeToName("ger"));
     }
+
+    @Test
+    public void countryCodeToName() {
+        assertEquals("Germany", LanguageHelpers.countryCodeToName("de"));
+        assertEquals("United Kingdom", LanguageHelpers.countryCodeToName("gb"));
+        assertEquals("France", LanguageHelpers.countryCodeToName("fr"));
+        assertEquals("Kosovo", LanguageHelpers.countryCodeToName("xk"));
+    }
 }

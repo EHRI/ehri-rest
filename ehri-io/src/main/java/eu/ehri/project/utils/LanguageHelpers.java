@@ -43,6 +43,14 @@ public class LanguageHelpers {
     private static final Splitter codeSplitter = Splitter.on("-").omitEmptyStrings().limit(2);
 
     /**
+     * Hack around missing country codes in JDK8
+     */
+    private static final ImmutableBiMap<String, String> countryCodes = ImmutableBiMap.<String, String>builder()
+            .put("xk", "Kosovo")
+            .put("mk", "North Macedonia")
+            .build();
+
+    /**
      * Limited selection of bibliographical 3-letter codes for the languages
      * we're most likely to run into, and their mappings to ISO639-2 Term codes.
      */
@@ -434,9 +442,7 @@ public class LanguageHelpers {
         if (code.length() == 2 && locale2Map.containsKey(code)) {
             return locale2Map.get(code).getDisplayLanguage(Locale.ENGLISH);
         } else if (code.length() == 3) {
-            String termCode = iso639BibTermLookup.containsKey(code)
-                    ? iso639BibTermLookup.get(code)
-                    : code;
+            String termCode = iso639BibTermLookup.getOrDefault(code, code);
             String twoCode = locale3Map.get(termCode);
             if (locale2Map.containsKey(twoCode)) {
                 return locale2Map.get(twoCode).getDisplayLanguage(Locale.ENGLISH);
@@ -451,19 +457,12 @@ public class LanguageHelpers {
      * @param code the 2-letter country code
      * @return the country name, or the code as a fallback
      */
-    public static String iso3166dashOneCodeToName(String code) {
-        return new Locale(Locale.ENGLISH.getLanguage(), code)
-                .getDisplayCountry(Locale.ENGLISH);
-    }
-
-    /**
-     * Convert and ISO639-2 code to its (English) name.
-     *
-     * @param code the 2-letter country code
-     * @return the country name
-     */
     public static String countryCodeToName(String code) {
-        return new java.util.Locale(Locale.ENGLISH.getLanguage(), code)
-                .getDisplayCountry();
+        if (countryCodes.containsKey(code)) {
+            return countryCodes.get(code);
+        } else {
+            return new java.util.Locale(Locale.ENGLISH.getLanguage(), code)
+                    .getDisplayCountry(Locale.ENGLISH);
+        }
     }
 }

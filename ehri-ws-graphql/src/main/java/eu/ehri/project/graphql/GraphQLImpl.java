@@ -246,11 +246,15 @@ public class GraphQLImpl {
         ));
 
         // Country traversals
-        builder.dataFetchers(countryType.getName(), ImmutableMap.of(
-                "itemCount", itemCountDataFetcher(c -> c.as(Country.class).countChildren()),
-                "name", transformingDataFetcher(idDataFetcher, LanguageHelpers::countryCodeToName),
-                "repositories", oneToManyRelationshipConnectionFetcher(c -> c.as(Country.class).getRepositories())
-        ));
+        builder.dataFetchers(countryType.getName(), ImmutableMap.<String, DataFetcher<?>>builder()
+                .put("itemCount", itemCountDataFetcher(c -> c.as(Country.class).countChildren()))
+                .put("name", transformingDataFetcher(idDataFetcher, LanguageHelpers::countryCodeToName))
+                .put("repositories", oneToManyRelationshipConnectionFetcher(c -> c.as(Country.class).getRepositories()))
+                // Properties which do not match attribute names
+                .put(CountryInfo.history.name(), keyDataFetcher("report"))
+                .put(CountryInfo.summary.name(), keyDataFetcher("dataSummary"))
+                .put(CountryInfo.extensive.name(), keyDataFetcher("dataExtensive"))
+                .build());
 
         // Concept traversals
         // NB: due to an unfortunate mistake, the concept "related" field, which returns concepts
@@ -542,6 +546,13 @@ public class GraphQLImpl {
         String name = env.getMergedField().getName();
         return source.getProperty(name);
     };
+
+    private static DataFetcher<Object> keyDataFetcher(String key) {
+        return env -> {
+            Entity source = env.getSource();
+            return source.getProperty(key);
+        };
+    }
 
     private static DataFetcher<List<?>> listDataFetcher(DataFetcher<?> fetcher) {
         return env -> {

@@ -9,6 +9,10 @@
   type: Country
   data:
     identifier: gb
+    report: Test
+    situation: Test
+    dataSummary: Test
+    dataExtensive: Test
 
 - id: nl
   type: Country
