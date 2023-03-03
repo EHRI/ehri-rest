@@ -5,23 +5,23 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.EntityClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
 
-import static eu.ehri.project.importers.util.DateParser.normaliseDate;
 import static org.junit.Assert.*;
 
 public class DateParserTest {
     private Map<String, Object> mapWithOneParseableDate;
     private Map<String, Object> mapWithMultipleDates;
     private Map<String, Object> mapWithMultipleDatesAsList;
+    private DateParser parser;
 
     @Before
     public void init() {
+        parser = new DateParser();
         mapWithOneParseableDate = Maps.newHashMap();
         mapWithOneParseableDate.put("unitDates", "1934/1936");
 
@@ -47,7 +47,7 @@ public class DateParserTest {
 
     @Test
     public void extractDatesFromDateProperty() {
-        List<Map<String, Object>> extractedDates = ImportHelpers.extractDates(mapWithOneParseableDate);
+        List<Map<String, Object>> extractedDates = parser.extractDates(mapWithOneParseableDate);
         assertEquals(1, extractedDates.size());
         assertEquals("1934/1936", extractedDates.get(0).get(Ontology.DATE_HAS_DESCRIPTION));
     }
@@ -55,7 +55,7 @@ public class DateParserTest {
     @Test
     public void removeDateFromDateProperty() {
         assertTrue(mapWithOneParseableDate.containsKey("unitDates"));
-        ImportHelpers.extractDates(mapWithOneParseableDate);
+        parser.extractDates(mapWithOneParseableDate);
         assertFalse(mapWithOneParseableDate.containsKey("unitDates"));
     }
 
@@ -65,7 +65,7 @@ public class DateParserTest {
         assertTrue(mapWithMultipleDates.containsKey("existDate"));
         assertTrue(mapWithMultipleDates.containsKey("unitDates"));
         assertTrue(mapWithMultipleDates.containsKey(Entities.DATE_PERIOD));
-        List<Map<String, Object>> dates = ImportHelpers.extractDates(mapWithMultipleDates);
+        List<Map<String, Object>> dates = parser.extractDates(mapWithMultipleDates);
         assertEquals(3, dates.size());
         assertFalse(mapWithMultipleDates.containsKey(Entities.DATE_PERIOD));
         assertEquals("summer 1978", mapWithMultipleDates.get("unitDates"));
@@ -75,27 +75,7 @@ public class DateParserTest {
     @Test
     public void removeDatesFromDatePropertyList() {
         assertTrue(mapWithMultipleDatesAsList.containsKey("unitDates"));
-        ImportHelpers.extractDates(mapWithMultipleDatesAsList);
+        parser.extractDates(mapWithMultipleDatesAsList);
         assertFalse(mapWithMultipleDatesAsList.containsKey("unitDates"));
-    }
-
-    @Test
-    public void beginDateYear() {
-        assertEquals("1944-01-01", normaliseDate("1944"));
-    }
-
-    @Test
-    public void beginDateYearMonth() {
-        assertEquals("1944-01-01", normaliseDate("1944-01"));
-    }
-
-    @Test
-    public void endDateYear() {
-        assertEquals("1944-12-31", normaliseDate("1944", true));
-    }
-
-    @Test
-    public void endDateYearMonth() {
-        assertEquals("1944-01-31", normaliseDate("1944-01", true));
     }
 }

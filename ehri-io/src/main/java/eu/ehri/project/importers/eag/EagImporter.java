@@ -109,7 +109,7 @@ public class EagImporter extends AbstractImporter<Map<String, Object>, Repositor
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (Map<String, Object> dpb : ImportHelpers.extractDates(itemData)) {
+        for (Map<String, Object> dpb : dateParser.extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 

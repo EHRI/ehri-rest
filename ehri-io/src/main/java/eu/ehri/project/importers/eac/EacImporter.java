@@ -30,12 +30,10 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
 import eu.ehri.project.importers.base.PermissionScopeFinder;
-import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -58,8 +56,6 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
     private static final String REL_TYPE = "type";
     private static final String REL_NAME = "name";
 
-    private final LinkResolver linkResolver;
-
     /**
      * Construct an EacImporter object.
      *
@@ -71,7 +67,6 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
      */
     public EacImporter(FramedGraph<?> graph, PermissionScopeFinder permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
         super(graph, permissionScope, actioner, options, log);
-        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
     }
 
     @Override
@@ -92,7 +87,7 @@ public class EacImporter extends AbstractImporter<Map<String, Object>, Historica
                 extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
         // Add dates and descriptions to the bundle since they are @Dependent relations.
-        for (Map<String, Object> dpb : ImportHelpers.extractDates(itemData)) {
+        for (Map<String, Object> dpb : dateParser.extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, Bundle.of(EntityClass.DATE_PERIOD, dpb));
         }
 

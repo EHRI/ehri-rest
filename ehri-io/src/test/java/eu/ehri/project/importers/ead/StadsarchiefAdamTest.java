@@ -66,12 +66,12 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits (archdesc, 5 children)
         // - 6 more DocumentDescription
-        // - 1 more DatePeriod
+        // - 4 more DatePeriod
         // - 6 more UnknownProperties 
         // - 7 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 18 more MaintenanceEvents
-        int newCount = origCount + 45;
+        int newCount = origCount + 49;
         assertEquals(newCount, getNodeCount(graph));
 
         DocumentaryUnit archdesc = graph.frame(
