@@ -207,12 +207,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         final String thisSourceFileId = descBundle.getDataValue(Ontology.SOURCEFILE_KEY);
 
-        // Ensure none of the parent items (not yet saved) have an invalid
-        // missing identifier
-        if (idPath.contains(null)) {
-            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Parent item has missing identifier");
-        }
-
         /*
          * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
          * TODO: so for now, it is added manually
@@ -220,8 +214,16 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
         List<String> itemIdPath = Lists.newArrayList(getPermissionScope().idPath());
         itemIdPath.addAll(idPath);
 
+
+        // Ensure none of the parent items (not yet saved) have an invalid
+        // missing identifier
+        if (itemIdPath.contains(null)) {
+            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Parent item has missing identifier");
+        }
+
         Bundle unitWithIds = unit.generateIds(itemIdPath);
         logger.debug("merging: docUnit's graph id = {}", unitWithIds.getId());
+
         // If the bundle exists, we merge
         if (manager.exists(unitWithIds.getId())) {
             try {

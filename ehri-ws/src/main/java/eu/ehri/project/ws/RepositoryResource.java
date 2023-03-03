@@ -128,7 +128,6 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
             @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam("batch") @DefaultValue("-1") int batchSize)
                 throws ItemNotFound, PermissionDenied, HierarchyError {
-        System.out.printf("All: %s, Batch size: %d%n", all, batchSize);
         try (final Tx tx = beginTx()) {
             Table out = deleteContents(id, all, version, batchSize);
             tx.success();

@@ -70,7 +70,7 @@ public abstract class AbstractImportManager implements ImportManager {
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
-    private String currentFile;
+    protected String currentFile;
     protected Integer currentPosition;
     protected final Class<? extends ItemImporter<?, ?>> importerClass;
     private int consecutiveIoErrors = 0;
@@ -130,7 +130,7 @@ public abstract class AbstractImportManager implements ImportManager {
         try {
             importInputStream(stream, tag, action, log);
         } catch (ValidationError e) {
-            throw new ImportValidationError(formatErrorLocation(), e);
+            throw new ImportValidationError(e.getMessage(), e);
         }
 
         // Commit the action if necessary
@@ -162,7 +162,9 @@ public abstract class AbstractImportManager implements ImportManager {
                 } catch (ValidationError e) {
                     log.addError(formatErrorLocation(), e.getMessage());
                     if (!options.tolerant) {
-                        throw new ImportValidationError(formatErrorLocation(), e);
+                        // when importing from an input stream there is no point giving
+                        // a formatted error location since the XML file is always null
+                        throw new ImportValidationError(e.getMessage(), e);
                     }
                 } catch (IOException | InputParseError e) {
                     e.printStackTrace();
@@ -335,8 +337,7 @@ public abstract class AbstractImportManager implements ImportManager {
     }
 
     private String formatErrorLocation() {
-        return String.format("File: %s, XML document: %d", currentFile,
-                currentPosition);
+        return String.format("File: %s, XML document: %d", currentFile, currentPosition);
     }
 
     private InputStream readUrl(URL url, int retry) throws IOException {

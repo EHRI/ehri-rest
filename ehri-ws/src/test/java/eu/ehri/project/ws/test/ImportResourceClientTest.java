@@ -174,6 +174,23 @@ public class ImportResourceClientTest extends AbstractResourceClientTest {
     }
 
     @Test
+    public void testImportEadWithValidationError() {
+        InputStream payloadStream = getClass()
+                .getClassLoader().getResourceAsStream("anonymous-c-levels.xml");
+        URI uri = getImportUrl("ead", "r1", "Error test", false)
+                .queryParam(HANDLER_PARAM, EadHandler.class.getName())
+                .queryParam(COMMIT_PARAM, true)
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .type(MediaType.TEXT_XML_TYPE)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        System.out.println(response.getEntity(String.class));
+        assertStatus(ClientResponse.Status.BAD_REQUEST, response);
+    }
+
+    @Test
     public void testImportSingleEadWithValidationErrorInTolerantMode() {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("invalid-ead.xml");
