@@ -30,21 +30,15 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporter;
-import eu.ehri.project.importers.links.LinkResolver;
 import eu.ehri.project.importers.util.ImportHelpers;
 import eu.ehri.project.models.AccessPointType;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AbstractUnit;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleManager;
-import eu.ehri.project.persistence.Messages;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +61,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private final EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
     private final Serializer mergeSerializer;
-    private final LinkResolver linkResolver;
 
     public static final String ACCESS_POINT = "AccessPoint";
 
@@ -83,8 +76,6 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
     public EadImporter(FramedGraph<?> graph, PermissionScope permissionScope, Actioner actioner, ImportOptions options, ImportLog log) {
         super(graph, permissionScope, actioner, options, log);
         mergeSerializer = new Serializer.Builder(graph).dependentOnly().build();
-        linkResolver = new LinkResolver(graph, actioner.as(Accessor.class));
-
     }
 
     /**
@@ -150,7 +141,7 @@ public class EadImporter extends AbstractImporter<Map<String, Object>, AbstractU
      * @throws ValidationError when data constraints are not met
      */
     protected Bundle getDescription(Map<String, Object> itemData) throws ValidationError {
-        List<Map<String, Object>> extractedDates = ImportHelpers.extractDates(itemData);
+        List<Map<String, Object>> extractedDates = dateParser.extractDates(itemData);
 
         Map<String, Object> raw = ImportHelpers.extractDescription(itemData, EntityClass.DOCUMENTARY_UNIT_DESCRIPTION);
 

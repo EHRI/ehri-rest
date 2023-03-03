@@ -102,6 +102,13 @@
             <version>1.4.1</version>
         </dependency>
 
+        <!-- Date parsing -->
+        <dependency>
+            <groupId>com.github.sisyphsu</groupId>
+            <artifactId>dateparser</artifactId>
+            <version>1.0.11</version>
+        </dependency>
+
         <!-- Jackson CSV -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>

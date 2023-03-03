@@ -168,18 +168,6 @@ public class ImportHelpers {
     }
 
     /**
-     * Extract a list of entity bundles for DatePeriods from the data,
-     * attempting to parse the unitdate attribute.
-     *
-     * @param data the data map. This is an out parameter from which
-     *             keys associated with extracted dates will be removed
-     * @return a list of entity bundles
-     */
-    public static List<Map<String, Object>> extractDates(Map<String, Object> data) {
-        return DateParser.extractDates(data);
-    }
-
-    /**
      * Extract the data from a sub-node.
      *
      * @param event a Map of event properties
