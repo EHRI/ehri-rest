@@ -72,6 +72,7 @@
                             <include>com.typesafe:config</include>
                             <include>com.flipkart.zjsonpatch:zjsonpatch</include>
                             <include>org.apache.commons:commons-collections4</include>
+                            <include>com.github.sisyphsu:*</include>
 
                             <!-- GraphQL deps -->
                             <include>org.antlr:antlr4-runtime</include>

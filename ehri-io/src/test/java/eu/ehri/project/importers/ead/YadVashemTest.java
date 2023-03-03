@@ -100,10 +100,10 @@ public class YadVashemTest extends AbstractImporterTest {
          * documentDescription: 3
          * maintenance event: 3
          * systemEvent: 1
-         * datePeriod: 1
+         * datePeriod: 3
          */
 
-        assertEquals(count + 18, getNodeCount(graph));
+        assertEquals(count + 20, getNodeCount(graph));
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         for (DocumentaryUnitDescription desc : m19.getDocumentDescriptions()) {
             logger.debug("Document description graph ID: {}", desc.getId());
@@ -144,9 +144,9 @@ public class YadVashemTest extends AbstractImporterTest {
         * maintenance event: 3
         * property: 1
         * systemEvent: 1
-        * datePeriod: 1
+        * datePeriod: 3
         */
-        assertEquals(count + 20, getNodeCount(graph));
+        assertEquals(count + 22, getNodeCount(graph));
         //ENG also imported:
         assertEquals(2, toList(m19.getDocumentDescriptions()).size());
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
