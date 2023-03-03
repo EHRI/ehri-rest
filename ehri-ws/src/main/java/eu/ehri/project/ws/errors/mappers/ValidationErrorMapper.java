@@ -37,6 +37,7 @@ public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
     public Response toResponse(ValidationError e) {
         return WebDeserializationError.errorToJson(
                 Status.BAD_REQUEST,
+                e.getMessage(),
                 e.getErrorSet().toData());
     }
 }

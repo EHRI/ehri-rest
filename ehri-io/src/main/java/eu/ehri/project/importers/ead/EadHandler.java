@@ -129,6 +129,8 @@ public class EadHandler extends SaxXmlHandler {
         super.startElement(uri, localName, qName, attributes);
 
         if (isUnitDelimiter(qName)) { //a new DocumentaryUnit should be created
+            logger.trace("Pushing placeholder null ID on scope stack (size: {})", scopeIds.size());
+            scopeIds.push(null); // an empty name that will be populated by the <did/unitid>
             children[depth] = Lists.newArrayList();
         }
         if (qName.equals("profiledesc")) {
@@ -199,18 +201,19 @@ public class EadHandler extends SaxXmlHandler {
             }
         }
 
-        // FIXME: We need to add the 'parent' identifier to the ID stack
+        // We need to add the 'parent' identifier to the ID stack
         // so that graph path IDs are created correctly. This currently
         // assumes there's a 'did' element from which we extract this
         // identifier.
         if (qName.equals(DID)) {
             extractIdentifier(currentGraphPath.peek());
             String topId = getCurrentTopIdentifier();
-            scopeIds.push(topId);
-            logger.trace("Current id path: {}", scopeIds);
+            logger.trace("Setting ID at top of stack (size: {}): {}", scopeIds.size(), topId);
+            scopeIds.set(scopeIds.size() - 1, topId);
         }
 
         if (needToCreateSubNode(qName)) {
+
             Map<String, Object> currentGraph = currentGraphPath.pop();
 
             if (isUnitDelimiter(qName)) {
@@ -271,6 +274,7 @@ public class EadHandler extends SaxXmlHandler {
                     }
                 } finally {
                     depth--;
+                    logger.trace("Popping scope stack (size: {}): {}", scopeIds.size(), scopeIds.peek());
                     scopeIds.pop();
                 }
             } else {
