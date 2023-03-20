@@ -20,7 +20,6 @@
 package eu.ehri.project.ws;
 
 import com.google.common.collect.Lists;
-import eu.ehri.project.ws.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -123,10 +122,13 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
     @Path("{id:[^/]+}/list")
     @Produces({MediaType.APPLICATION_JSON, CSV_MEDIA_TYPE})
     @Override
-    public Table deleteChildren(@PathParam("id") String id, @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, PermissionDenied, ValidationError, HierarchyError {
+    public Table deleteChildren(
+            @PathParam("id") String id,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all,
+            @QueryParam("batch") @DefaultValue("-1") int batchSize)
+                throws ItemNotFound, PermissionDenied, HierarchyError {
         try (final Tx tx = beginTx()) {
-            Table out = deleteContents(id, all);
+            Table out = deleteContents(id, all, batchSize);
             tx.success();
             return out;
         }

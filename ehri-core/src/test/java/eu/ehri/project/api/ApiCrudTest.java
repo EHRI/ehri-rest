@@ -241,4 +241,15 @@ public class ApiCrudTest extends AbstractFixtureTest {
         List<String> out = api(validUser).deleteChildren(item.getId(), true, Optional.empty());
         assertEquals(Lists.newArrayList("c2", "c3"), out);
     }
+
+    @Test
+    public void testDeleteChildrenWithBatchCallback() throws Exception {
+        final List<String> ids = Lists.newArrayList();
+        List<String> out = api(validUser).deleteChildren(item.getId(), true, (num, id) -> {
+            graph.getBaseGraph().commit();
+            ids.add(id);
+        }, Optional.empty());
+        assertEquals(Lists.newArrayList("c2", "c3"), out);
+        assertEquals(ids, out);
+    }
 }

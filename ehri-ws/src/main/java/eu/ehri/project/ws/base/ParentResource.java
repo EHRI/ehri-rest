@@ -86,6 +86,6 @@ public interface ParentResource {
      * @throws DeserializationError if the input data is not well formed
      * @throws ValidationError      if data constraints are not met
      */
-    Table deleteChildren(String id, boolean all)
+    Table deleteChildren(String id, boolean all, int batchSize)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound, HierarchyError;
 }
