@@ -95,6 +95,7 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     public Table deleteChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam("batch") @DefaultValue("-1") int batchSize)
                 throws PermissionDenied, ItemNotFound, ValidationError {
         try {

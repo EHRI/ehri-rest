@@ -222,7 +222,8 @@ public interface Api {
      * Delete all item's within the given item's permission scope.
      *
      * @param parentId   the parent ID
-     * @param all        whether to recursively delete children of this item.
+     * @param all        whether to recursively delete children of this item
+     * @param version    whether to create versions of deleted items
      * @param logMessage an optional log message
      * @return the IDs of delete items
      * @throws ItemNotFound       if the item does not exist
@@ -231,14 +232,15 @@ public interface Api {
      *                            structural problems with an item hierarchy
      * @throws SerializationError if a serialization error occurs during the operation
      */
-    List<String> deleteChildren(String parentId, boolean all, Optional<String> logMessage)
+    List<String> deleteChildren(String parentId, boolean all, boolean version, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError;
 
     /**
      * Delete all item's within the given item's permission scope.
      *
      * @param parentId   the parent ID
-     * @param all        whether to recursively delete children of this item.
+     * @param all        whether to recursively delete children of this item
+     * @param version    whether to create versions of deleted items
      * @param callback   a callback to run when an item is deleted
      * @param logMessage an optional log message
      * @return the IDs of delete items
@@ -248,7 +250,7 @@ public interface Api {
      *                            structural problems with an item hierarchy
      * @throws SerializationError if a serialization error occurs during the operation
      */
-    List<String> deleteChildren(String parentId, boolean all, BatchCallback callback, Optional<String> logMessage)
+    List<String> deleteChildren(String parentId, boolean all, boolean version, BatchCallback callback, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError;
 
     /**

@@ -110,7 +110,7 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
 
     @Test
     public void testDeleteChildren() throws Exception {
-        List<String> out = loggingApi(validUser).deleteChildren(item.getId(), true, Optional.empty());
+        List<String> out = loggingApi(validUser).deleteChildren(item.getId(), true, true, Optional.empty());
         assertEquals(Lists.newArrayList("c2", "c3"), out);
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(EventTypes.deletion, event.getEventType());

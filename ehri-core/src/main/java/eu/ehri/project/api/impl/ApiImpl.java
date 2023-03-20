@@ -506,13 +506,13 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public List<String> deleteChildren(String parentId, boolean all, Optional<String> logMessage)
+    public List<String> deleteChildren(String parentId, boolean all, boolean version, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError {
-        return deleteChildren(parentId, all, (i, num) -> {}, logMessage);
+        return deleteChildren(parentId, all, version, (i, num) -> {}, logMessage);
     }
 
-        @Override
-    public List<String> deleteChildren(String parentId, boolean all, BatchCallback callback, Optional<String> logMessage)
+    @Override
+    public List<String> deleteChildren(String parentId, boolean all, boolean version, BatchCallback callback, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError {
 
         Accessible parent = manager.getEntity(parentId, Accessible.class);
@@ -535,7 +535,9 @@ public class ApiImpl implements Api {
                     for (String id : ids) {
                         Entity entity = manager.getEntity(id, Entity.class);
                         ctx = ctx.addSubjects(entity.as(Accessible.class));
-                        ctx = ctx.createVersion(entity);
+                        if (version) {
+                            ctx = ctx.createVersion(entity);
+                        }
                     }
                     return ctx;
                 } catch (ItemNotFound e) {

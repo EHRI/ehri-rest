@@ -129,6 +129,7 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 entityUriBuilder(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, "list")
                         .queryParam(AbstractResource.ALL_PARAM, "true")
+                        .queryParam("batch", "2")
                         .build())
                 .delete(ClientResponse.class);
         assertStatus(OK, response);

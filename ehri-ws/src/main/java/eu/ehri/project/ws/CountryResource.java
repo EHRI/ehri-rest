@@ -115,10 +115,11 @@ public class CountryResource
     public Table deleteChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam("batch") @DefaultValue("-1") int batchSize)
                 throws ItemNotFound, PermissionDenied, HierarchyError {
         try (final Tx tx = beginTx()) {
-            Table out = deleteContents(id, all, batchSize);
+            Table out = deleteContents(id, all, version, batchSize);
             tx.success();
             return out;
         }

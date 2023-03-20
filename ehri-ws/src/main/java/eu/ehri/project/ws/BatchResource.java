@@ -121,8 +121,8 @@ public class BatchResource extends AbstractResource {
     @Path("delete")
     public String batchDelete(
             @QueryParam(SCOPE_PARAM) String scope,
-            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
-            @DefaultValue("true") @QueryParam(VERSION_PARAM) Boolean version,
+            @QueryParam(TOLERANT_PARAM) @DefaultValue("false") boolean tolerant,
+            @QueryParam(VERSION_PARAM) @DefaultValue("true") boolean version,
             @QueryParam(LOG_PARAM) String log,
             @QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit,
             Table ids) throws IOException, DeserializationError {
