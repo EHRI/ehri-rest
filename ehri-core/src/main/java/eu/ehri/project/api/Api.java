@@ -19,31 +19,19 @@
 
 package eu.ehri.project.api;
 
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.GlobalPermissionSet;
-import eu.ehri.project.acl.InheritedGlobalPermissionSet;
-import eu.ehri.project.acl.InheritedItemPermissionSet;
-import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.*;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.Promotable;
-import eu.ehri.project.persistence.ActionManager;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.persistence.VersionManager;
+import eu.ehri.project.persistence.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.Optional;
+import java.util.Set;
 
 
 public interface Api {
@@ -76,6 +64,10 @@ public interface Api {
     QueryApi query();
 
     Serializer serializer();
+
+    interface BatchCallback {
+        void onItemDeleted(int itemNumber, String id);
+    }
 
     /**
      * Fetch an item, as a user. This only provides access control.
@@ -240,6 +232,23 @@ public interface Api {
      * @throws SerializationError if a serialization error occurs during the operation
      */
     List<String> deleteChildren(String parentId, boolean all, Optional<String> logMessage)
+            throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError;
+
+    /**
+     * Delete all item's within the given item's permission scope.
+     *
+     * @param parentId   the parent ID
+     * @param all        whether to recursively delete children of this item.
+     * @param callback   a callback to run when an item is deleted
+     * @param logMessage an optional log message
+     * @return the IDs of delete items
+     * @throws ItemNotFound       if the item does not exist
+     * @throws PermissionDenied   if the user cannot perform the action
+     * @throws HierarchyError     if {{all}} is not given and the action would cause
+     *                            structural problems with an item hierarchy
+     * @throws SerializationError if a serialization error occurs during the operation
+     */
+    List<String> deleteChildren(String parentId, boolean all, BatchCallback callback, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError;
 
     /**

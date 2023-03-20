@@ -508,6 +508,12 @@ public class ApiImpl implements Api {
     @Override
     public List<String> deleteChildren(String parentId, boolean all, Optional<String> logMessage)
             throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError {
+        return deleteChildren(parentId, all, (i, num) -> {}, logMessage);
+    }
+
+        @Override
+    public List<String> deleteChildren(String parentId, boolean all, BatchCallback callback, Optional<String> logMessage)
+            throws ItemNotFound, PermissionDenied, SerializationError, HierarchyError {
 
         Accessible parent = manager.getEntity(parentId, Accessible.class);
         PermissionScope scope = parent.as(PermissionScope.class);
@@ -540,6 +546,7 @@ public class ApiImpl implements Api {
             try {
                 BundleManager dao = bundleManager.withScopeIds(scope.idPath());
                 PermissionUtils checker = helper.setScope(scope);
+                int i = 0;
                 for (String id : ids) {
                     Accessible item = manager.getEntity(id, Accessible.class);
                     if (!all) {
@@ -550,6 +557,8 @@ public class ApiImpl implements Api {
                     }
                     checker.checkEntityPermission(item, accessor, PermissionType.DELETE);
                     dao.delete(depSerializer.entityToBundle(item));
+                    i++;
+                    callback.onItemDeleted(i, id);
                 }
             } catch (SerializationError e) {
                 throw new RuntimeException(e);

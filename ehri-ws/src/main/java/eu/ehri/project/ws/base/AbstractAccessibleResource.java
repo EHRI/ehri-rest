@@ -291,11 +291,21 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      * @throws PermissionDenied if the user does not have permission to perform the action
      * @throws HierarchyError   if the action would orphan child items
      */
-    protected Table deleteContents(String id, boolean all)
+    protected Table deleteContents(String id, boolean all, int batchSize)
             throws ItemNotFound, PermissionDenied, HierarchyError {
         fetchAndCheckType(id);
         try {
-            List<String> data = api().deleteChildren(id, all, getLogMessage());
+            if (all && batchSize > -1) {
+                logger.info("Performing delete with commit size: {}", batchSize);
+            }
+            List<String> data = api().deleteChildren(id, all, (num, iid) -> {
+                // This is a hack for massive deletions that cannot fit into a
+                // single transaction.
+                if (batchSize > -1 && batchSize % num == 0) {
+                    logger.info("Committing after {} items", num);
+                    graph.getBaseGraph().commit();
+                }
+            }, getLogMessage());
             return Table.column(data);
         } catch (SerializationError e) {
             throw new RuntimeException(e);

@@ -19,7 +19,6 @@
 
 package eu.ehri.project.ws;
 
-import eu.ehri.project.ws.base.*;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -93,8 +92,11 @@ public class CvocConceptResource extends AbstractAccessibleResource<Concept>
     @DELETE
     @Path("{id:[^/]+}/all")
     @Override
-    public Table deleteChildren(@PathParam("id") String id, boolean all)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+    public Table deleteChildren(
+            @PathParam("id") String id,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all,
+            @QueryParam("batch") @DefaultValue("-1") int batchSize)
+                throws PermissionDenied, ItemNotFound, ValidationError {
         try {
             // NB: While it has hierarchical behaviour this does not
             // extend to full ownership so this action is essentially
