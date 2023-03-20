@@ -233,19 +233,19 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test(expected = HierarchyError.class)
     public void testDeleteChildrenWithError() throws Exception {
-        api(validUser).deleteChildren(item.getId(), false, Optional.empty());
+        api(validUser).deleteChildren(item.getId(), false, true, Optional.empty());
     }
 
     @Test
     public void testDeleteChildren() throws Exception {
-        List<String> out = api(validUser).deleteChildren(item.getId(), true, Optional.empty());
+        List<String> out = api(validUser).deleteChildren(item.getId(), true, true, Optional.empty());
         assertEquals(Lists.newArrayList("c2", "c3"), out);
     }
 
     @Test
     public void testDeleteChildrenWithBatchCallback() throws Exception {
         final List<String> ids = Lists.newArrayList();
-        List<String> out = api(validUser).deleteChildren(item.getId(), true, (num, id) -> {
+        List<String> out = api(validUser).deleteChildren(item.getId(), true, true, (num, id) -> {
             graph.getBaseGraph().commit();
             ids.add(id);
         }, Optional.empty());

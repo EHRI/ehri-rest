@@ -286,22 +286,23 @@ public class AbstractAccessibleResource<E extends Accessible> extends AbstractRe
      *
      * @param id  the item's ID
      * @param all whether to descend recursively into hierarchical items
+     * @param version whether to create versions of deleted items
      * @return a table of delete item IDs
      * @throws ItemNotFound     if the item does not exist
      * @throws PermissionDenied if the user does not have permission to perform the action
      * @throws HierarchyError   if the action would orphan child items
      */
-    protected Table deleteContents(String id, boolean all, int batchSize)
+    protected Table deleteContents(String id, boolean all, boolean version, int batchSize)
             throws ItemNotFound, PermissionDenied, HierarchyError {
         fetchAndCheckType(id);
         try {
             if (all && batchSize > -1) {
                 logger.info("Performing delete with commit size: {}", batchSize);
             }
-            List<String> data = api().deleteChildren(id, all, (num, iid) -> {
+            List<String> data = api().deleteChildren(id, all, version, (num, iid) -> {
                 // This is a hack for massive deletions that cannot fit into a
                 // single transaction.
-                if (batchSize > -1 && batchSize % num == 0) {
+                if (batchSize > -1 && num % batchSize == 0) {
                     logger.info("Committing after {} items", num);
                     graph.getBaseGraph().commit();
                 }

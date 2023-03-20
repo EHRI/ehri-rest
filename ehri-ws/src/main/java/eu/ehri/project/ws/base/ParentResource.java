@@ -78,6 +78,7 @@ public interface ParentResource {
      *
      * @param id  the parent resource ID
      * @param all descend into the hierarchy of any child items
+     * @param version create versions of deleted items
      * @return an ordered list of deleted item IDs
      * @throws ItemNotFound         if the parent does not exist
      * @throws HierarchyError       if an attempt is made to delete child items that have
@@ -86,6 +87,6 @@ public interface ParentResource {
      * @throws DeserializationError if the input data is not well formed
      * @throws ValidationError      if data constraints are not met
      */
-    Table deleteChildren(String id, boolean all, int batchSize)
+    Table deleteChildren(String id, boolean all, boolean version, int batchSize)
             throws PermissionDenied, ValidationError, DeserializationError, ItemNotFound, HierarchyError;
 }
