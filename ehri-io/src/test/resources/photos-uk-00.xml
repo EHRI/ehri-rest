@@ -1,0 +1,54 @@
+<ead xmlns="urn:isbn:1-931666-22-9">
+    <eadheader>
+    <eadid>8</eadid>
+    <filedesc>
+        <titlestmt>
+            <titleproper>Вулиця Вахнянина, кінець 1940-х років</titleproper>
+        </titlestmt>
+    </filedesc>
+    <profiledesc>
+    <langusage>
+        <language langcode="ukr">Ukrainian</language>
+    </langusage>
+    </profiledesc>
+    </eadheader>
+    <archdesc level="fonds">
+        <did>
+            <unitid>Photos</unitid>
+            <unittitle>Photos</unittitle>
+        </did>
+        <dsc>
+            <c01 level="collection">
+                <did>
+                    <unitid>14_pict</unitid>
+                    <unitid>35</unitid>
+                    <unittitle>Андрій Дорош</unittitle>
+                    <materialspec label="Web Source">
+                        <extptr xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://uma.lvivcenter.org/uk/collections/35/photos"/>
+                    </materialspec>
+                </did>
+                <c02 level="item">
+                    <did>
+                        <unitid>8</unitid>
+                        <unittitle>Вулиця Вахнянина, кінець 1940-х років</unittitle>
+                        <unitdate>1949</unitdate>
+                        <materialspec label="Web Source">
+                            <extptr xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://uma.lvivcenter.org/uk/photos/8"/>
+                        </materialspec>
+                        <physdesc><physfacet>Photograph</physfacet></physdesc>
+                        <note><p>Copyright: Юліан Дорош;"Галицька брама", Львів;Андрій Дорош</p></note>
+                        <origination label="creator"><name>Юліан Дорош</name></origination>
+                        <origination label="creator"><name>Галицька брама, Львів</name></origination>
+                        <origination label="creator"><name>Андрій Дорош</name></origination>
+                    </did>
+                    <controlaccess>
+                        <geogname>Львів</geogname>
+                        <subject>Коза</subject>
+<subject> вулиця Вахнянина</subject>
+<subject> післявоєнне місто</subject>
+                    </controlaccess>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>
