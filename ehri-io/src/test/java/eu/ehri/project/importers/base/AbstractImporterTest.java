@@ -19,6 +19,7 @@
 
 package eu.ehri.project.importers.base;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -26,6 +27,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.managers.SaxImportManager;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.DocumentaryUnitDescription;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
@@ -38,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -150,6 +154,22 @@ public abstract class AbstractImporterTest extends AbstractFixtureTest {
         indent += ".   ";// the '.' improves readability, but the whole printing could be improved
         for (Concept nc : c.getNarrowerConcepts()) {
             printConceptTree(out, nc, ++depth, indent); // recursive call
+        }
+    }
+
+    protected void printProps(final PrintStream out, DocumentaryUnit unit, String pad) {
+        out.println(pad + unit.getId());
+        for (DocumentaryUnitDescription d : unit.getDocumentDescriptions()) {
+            out.println(pad + d.getId());
+            final List<String> propertyKeys = Lists.newArrayList(d.getPropertyKeys());
+            propertyKeys.sort(String::compareTo);
+            for (String key : propertyKeys) {
+                out.printf("%s%-20s : %s%n", pad, key, d.getProperty(key));
+            }
+            out.println("");
+        }
+        for (DocumentaryUnit child : unit.getChildren()) {
+            printProps(out, child, pad + "    ");
         }
     }
 
