@@ -27,6 +27,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Meta;
 
 /**
  * A collection of 'related' concepts, or maybe a bit like the SKOS Concept Scheme
@@ -35,6 +36,7 @@ import eu.ehri.project.models.annotations.EntityType;
 @EntityType(EntityClass.CVOC_VOCABULARY)
 public interface Vocabulary extends AuthoritativeSet {
 
+    @Meta(CHILD_COUNT)
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     Iterable<Concept> getConcepts();
 
