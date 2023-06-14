@@ -43,10 +43,10 @@ public class DateRangeParserTest {
     }
 
     private void check(String sloppy, String canonical) {
-        assertEquals(Optional.of(DateRange.fromString(canonical, sloppy)), rangeParser.parse(sloppy));
+        assertEquals(DateRange.fromString(canonical, sloppy), rangeParser.parse(sloppy));
     }
 
     private void checkNone(String sloppy) {
-        assertEquals(Optional.empty(), rangeParser.parse(sloppy));
+        assertEquals(Optional.empty(), rangeParser.tryParse(sloppy));
     }
 }

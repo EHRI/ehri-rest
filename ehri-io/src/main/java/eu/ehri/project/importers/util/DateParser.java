@@ -98,7 +98,7 @@ public class DateParser {
     }
 
     private Optional<Map<String, Object>> extractDate(String date) {
-        return rangeParser.parse(date).map(DateRange::data);
+        return rangeParser.tryParse(date).map(DateRange::data);
     }
 
     private static Map<String, String> returnDatesAsString(Map<String, Object> data) {
