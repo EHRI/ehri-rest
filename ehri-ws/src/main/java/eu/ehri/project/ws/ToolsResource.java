@@ -23,20 +23,22 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.ws.base.AbstractResource;
-import eu.ehri.project.ws.errors.ConflictError;
 import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.cvoc.SchemaExporter;
+import eu.ehri.project.importers.util.DateRange;
+import eu.ehri.project.importers.util.DateRangeParser;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.tools.DbUpgrader1to2;
 import eu.ehri.project.tools.FindReplace;
@@ -44,7 +46,10 @@ import eu.ehri.project.tools.IdRegenerator;
 import eu.ehri.project.tools.Linker;
 import eu.ehri.project.utils.Table;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
+import eu.ehri.project.ws.base.AbstractResource;
+import eu.ehri.project.ws.errors.ConflictError;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.procedure.Name;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -53,9 +58,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -199,6 +205,62 @@ public class ToolsResource extends AbstractResource {
             tx.success();
             return linkCount;
         }
+    }
+
+    @POST
+    @Produces({CSV_MEDIA_TYPE})
+    @Path("check-dates")
+    public StreamingOutput checkDates(@QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
+        return outputStream -> {
+            try (final Tx tx = beginTx()) {
+                Serializer serializer = getSerializer().withDependentOnly(true);
+                DateRangeParser rangeParser = new DateRangeParser();
+                Api api = api().enableLogging(false).withAccessor(getCurrentUser());
+                AtomicInteger ok = new AtomicInteger(0);
+                AtomicInteger ko = new AtomicInteger(0);
+                getQuery()
+                        .withStreaming(true)
+                        .withLimit(-1)
+                        .page(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)
+                        .forEach(d -> {
+                            for (DocumentaryUnitDescription desc : d.getDocumentDescriptions()) {
+                                Iterable<DatePeriod> dates = desc.getDatePeriods();
+                                if (!dates.iterator().hasNext() && desc.getPropertyKeys().contains("unitDates")) {
+                                    List<String> unitDates = coerceList(desc.getProperty("unitDates"));
+                                    List<Bundle> datePeriods = Lists.newArrayList();
+                                    for (String unitDate : unitDates) {
+                                        try {
+                                            DateRange dateRange = rangeParser.parse(unitDate);
+                                            logger.info("{} -> {}", d.getId(), dateRange);
+                                            datePeriods.add(Bundle.of(EntityClass.DATE_PERIOD, dateRange.data()));
+                                            ok.getAndIncrement();
+                                        } catch (DateTimeException e) {
+                                            logger.warn("Unable to parse unitDate: {}", unitDate);
+                                            try {
+                                                outputStream.write(String.format("%s\n", unitDate).getBytes(StandardCharsets.UTF_8));
+                                            } catch (IOException ioException) {
+                                                throw new RuntimeException(ioException);
+                                            }
+                                            ko.getAndIncrement();
+                                        }
+                                    }
+                                    if (!datePeriods.isEmpty() && commit) {
+                                        try {
+                                            final Bundle descBundle = serializer.entityToBundle(desc);
+                                            descBundle.withRelations(Ontology.ENTITY_HAS_DATE, datePeriods);
+                                            api.updateDependent(d.getId(), descBundle, DocumentaryUnitDescription.class, Optional.empty());
+                                        } catch (SerializationError | PermissionDenied | ItemNotFound | ValidationError e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                if (commit) {
+                    tx.success();
+                }
+            }
+        };
     }
 
     /**
@@ -718,5 +780,17 @@ public class ToolsResource extends AbstractResource {
                 } else break;
             }
         }
+    }
+
+    public List<String> coerceList(Object data) {
+        if (data == null) {
+            return Collections.emptyList();
+        } else if (data instanceof List) {
+            @SuppressWarnings("unchecked") List<String> out = (List<String>) data;
+            return out;
+        } else if (data instanceof String[]) {
+            return Arrays.asList(((String[]) data));
+        }
+        return Collections.singletonList((String)data);
     }
 }
