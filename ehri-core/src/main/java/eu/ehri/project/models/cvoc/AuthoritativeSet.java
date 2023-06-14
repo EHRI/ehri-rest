@@ -24,6 +24,7 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.annotations.UniqueAdjacency;
 import eu.ehri.project.models.base.*;
 
@@ -35,6 +36,7 @@ import eu.ehri.project.models.base.*;
 @EntityType(EntityClass.AUTHORITATIVE_SET)
 public interface AuthoritativeSet extends Accessible, PermissionScope, ItemHolder, Named, Promotable {
 
+    @Meta(CHILD_COUNT)
     @UniqueAdjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     int countChildren();
 
