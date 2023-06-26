@@ -258,7 +258,7 @@ public class GraphQLImpl {
 
         // Concept traversals
         // NB: due to an unfortunate mistake, the concept "related" field, which returns concepts
-        // that are conceptulally related, collides in naming with the generic "related" field, which
+        // that are conceptually related, collides in naming with the generic "related" field, which
         // returns a set of "Relationship" items.
         builder.dataFetchers(conceptType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(Concept.class).countChildren()),
@@ -283,6 +283,9 @@ public class GraphQLImpl {
         // Links
         builder.dataFetcher(coordinates(linkType.getName(), "targets"),
                 oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkTargets()));
+
+        builder.dataFetcher(coordinates(linkType.getName(), "body"),
+                oneToManyRelationshipFetcher(a -> a.as(Link.class).getLinkBodies()));
 
         // Annotations
         builder.dataFetcher(coordinates(annotationType.getName(), "targets"),
@@ -1069,6 +1072,7 @@ public class GraphQLImpl {
     private final GraphQLObjectType accessPointType = newObject()
             .name(Entities.ACCESS_POINT)
             .description(__("accessPoint.description"))
+            .field(idField)
             .field(nonNullAttr(Ontology.NAME_KEY, __("accessPoint.field.name.description")))
             .field(newFieldDefinition()
                     .name(Ontology.ACCESS_POINT_TYPE)
