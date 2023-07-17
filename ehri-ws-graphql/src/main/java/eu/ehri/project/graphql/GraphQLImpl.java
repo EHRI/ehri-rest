@@ -1251,7 +1251,7 @@ public class GraphQLImpl {
                     GraphQLTypeReference.typeRef("repositories")))
             .fields(linksAndAnnotationsFields())
             .field(itemEventsFieldDefinition())
-            .withInterfaces(entityInterface, annotatableInterface)
+            .withInterfaces(entityInterface, annotatableInterface, linkableInterface)
             .build();
 
     private final GraphQLObjectType conceptType = newObject()
