@@ -34,7 +34,7 @@ import eu.ehri.project.models.base.*;
  * historical agents.
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
-public interface AuthoritativeSet extends Accessible, PermissionScope, ItemHolder, Named, Promotable {
+public interface AuthoritativeSet extends Accessible, PermissionScope, ItemHolder, Named, Promotable, Annotatable {
 
     @Meta(CHILD_COUNT)
     @UniqueAdjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)

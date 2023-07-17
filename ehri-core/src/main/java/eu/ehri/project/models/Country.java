@@ -30,17 +30,14 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.annotations.Meta;
 import eu.ehri.project.models.annotations.UniqueAdjacency;
-import eu.ehri.project.models.base.Annotatable;
-import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.Versioned;
+import eu.ehri.project.models.base.*;
 
 /**
  * Frame class representing a country. It's identifier should
  * be represented by an ISO3166 Alpha 2 code, lower cased.
  */
 @EntityType(EntityClass.COUNTRY)
-public interface Country extends PermissionScope, ItemHolder, Versioned, Annotatable {
+public interface Country extends PermissionScope, ItemHolder, Versioned, Annotatable, Linkable {
 
     /**
      * Alias function for fetching the country code identifier.
