@@ -20,11 +20,14 @@
 package eu.ehri.project.ws;
 
 import com.google.common.collect.Lists;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
+import eu.ehri.project.exporters.ead.Ead3Exporter;
+import eu.ehri.project.exporters.ead.EadExporter;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.tools.IdRegenerator;
@@ -191,9 +194,11 @@ public class DocumentaryUnitResource
      * @throws ItemNotFound if the item does not exist
      */
     @GET
-    @Path("{id:[^/]+}/ead")
+    @Path("{id:[^/]+}/{fmt:ead3?}")
     @Produces(MediaType.TEXT_XML)
-    public Response exportEad(@PathParam("id") String id,
+    public Response exportEad(
+            final @PathParam("id") String id,
+            final @PathParam("fmt") @DefaultValue("ead") String fmt,
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
@@ -201,7 +206,11 @@ public class DocumentaryUnitResource
             tx.success();
             return Response.ok((StreamingOutput) outputStream -> {
                 try (final Tx tx2 = beginTx()) {
-                    new Ead2002Exporter(api()).export(unit, outputStream, lang);
+                    final Api api = api();
+                    final EadExporter exporter = fmt.equals("ead")
+                            ? new Ead2002Exporter(api)
+                            : new Ead3Exporter(api);
+                    exporter.export(unit, outputStream, lang);
                     tx2.success();
                 }
             }).type(MediaType.TEXT_XML + "; charset=utf-8").build();
