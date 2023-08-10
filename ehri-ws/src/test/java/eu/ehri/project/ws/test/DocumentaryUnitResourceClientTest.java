@@ -446,6 +446,26 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
         assertEquals(expected, response.getEntity(Table.class));
     }
 
+    @Test
+    public void testExportEad() throws Exception {
+        ClientResponse response = callAs(getAdminUserProfileId(),
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1", "ead"))
+                .accept(MediaType.TEXT_XML_TYPE)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        String ead = response.getEntity(String.class);
+        assertThat(ead, containsString("<ead xmlns=\"urn:isbn:1-931666-22-9\""));
+
+        // Now check EAD3
+        response = callAs(getAdminUserProfileId(),
+                entityUri(Entities.DOCUMENTARY_UNIT, "c1", "ead3"))
+                .accept(MediaType.TEXT_XML_TYPE)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        String ead3 = response.getEntity(String.class);
+        assertThat(ead3, containsString("<ead xmlns=\"http://ead3.archivists.org/schema/\""));
+    }
+
     private URI getCreationUri() {
         return entityUri(Entities.REPOSITORY, TEST_HOLDER_IDENTIFIER);
     }
