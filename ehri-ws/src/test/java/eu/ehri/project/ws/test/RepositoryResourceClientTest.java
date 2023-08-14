@@ -140,7 +140,7 @@ public class RepositoryResourceClientTest extends AbstractResourceClientTest {
     @Test
     public void testExportEad() throws Exception {
         // Create
-        URI uri = entityUri(Entities.REPOSITORY, ID, "ead");
+        URI uri = entityUri(Entities.REPOSITORY, ID, "ead3");
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
         assertStatus(OK, response);

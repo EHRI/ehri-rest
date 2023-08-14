@@ -20,11 +20,14 @@
 package eu.ehri.project.ws;
 
 import com.google.common.collect.Lists;
+import eu.ehri.project.api.Api;
 import eu.ehri.project.core.Tx;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.exporters.ead.Ead2002Exporter;
+import eu.ehri.project.exporters.ead.Ead3Exporter;
 import eu.ehri.project.exporters.eag.Eag2012Exporter;
+import eu.ehri.project.exporters.xml.XmlExporter;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.json.BatchOperations;
@@ -44,6 +47,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Provides a web service interface for the Repository.
@@ -233,14 +237,22 @@ public class RepositoryResource extends AbstractAccessibleResource<Repository>
      * @throws ItemNotFound if the item does not exist
      */
     @GET
-    @Path("{id:[^/]+}/ead")
+    @Path("{id:[^/]+}/{fmt:ead3?}")
     @Produces("application/zip")
-    public Response exportEad(@PathParam("id") String id,
+    public Response exportEad(
+            final @PathParam("id") String id,
+            final @PathParam("fmt") @DefaultValue("ead") String fmt,
             final @QueryParam(LANG_PARAM) @DefaultValue(DEFAULT_LANG) String lang)
             throws ItemNotFound {
         try (final Tx tx = beginTx()) {
             checkExists(id, cls);
-            Response response = streamingXmlZip(() -> new Ead2002Exporter(api()), () -> {
+            final Supplier<XmlExporter<DocumentaryUnit>> exporter = () -> {
+                final Api api = api();
+                return fmt.equals("ead")
+                        ? new Ead2002Exporter(api)
+                        : new Ead3Exporter(api);
+            };
+            Response response = streamingXmlZip(exporter, () -> {
                 final Repository repo = manager.getEntityUnchecked(id, cls);
                 return repo.getTopLevelDocumentaryUnits();
             }, lang);
