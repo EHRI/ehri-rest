@@ -250,6 +250,7 @@ public class BatchOperations {
      */
     public int batchDelete(Collection<String> ids, Actioner actioner, Optional<String> logMessage)
             throws ItemNotFound {
+        boolean logged = false;
         int done = 0;
         if (!ids.isEmpty()) {
             try {
@@ -262,13 +263,16 @@ public class BatchOperations {
                         if (version) {
                             ctx = ctx.createVersion(entity);
                         }
+                        logged = true;
                     } catch (ItemNotFound e) {
                         if (!tolerant) {
                             throw e;
                         }
                     }
                 }
-                ctx.commit();
+                if (logged) {
+                    ctx.commit();
+                }
                 try {
                     for (String id : ids) {
                         dao.delete(serializer.entityToBundle(manager.getEntity(id, Entity.class)));

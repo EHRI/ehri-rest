@@ -207,4 +207,13 @@ public class BatchOperationsTest extends AbstractImporterTest {
         //  - 1 event
         assertEquals(nodesBefore, getNodeCount(graph));
     }
+
+    @Test
+    public void testBatchDeleteWithNoValidIds() throws Exception {
+        int nodesBefore = getNodeCount(graph);
+        int deleted = new BatchOperations(graph).setTolerant(true).batchDelete(Lists.newArrayList("NOT-AN-ID"),
+                validUser.as(Actioner.class), Optional.of("Test delete"));
+        assertEquals(0, deleted);
+        assertEquals(nodesBefore, getNodeCount(graph));
+    }
 }
