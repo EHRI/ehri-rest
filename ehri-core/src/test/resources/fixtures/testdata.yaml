@@ -408,6 +408,15 @@
           name: Documentary Unit m19
           languageCode: eng
           scopeAndContent: Some description text for m19
+        relationships:
+          relatesTo:
+            - id: ur5
+              type: AccessPoint
+              data:
+                name: Subject Access 2
+                type: subject
+                description: test description
+                category: associative
     heldBy: r1
     hasPermissionScope: r1
 
@@ -620,6 +629,17 @@
       - c4
       - r4
     hasLinkSource: c4
+
+- id: link5
+  type: Link
+  data:
+    type: copy
+    description: A link indicating that cvocc2 is related to c4
+  relationships:
+    hasLinkTarget:
+      - c4
+      - cvocc2
+    hasLinkBody: ur5
 
 --- # Permission grants
 
