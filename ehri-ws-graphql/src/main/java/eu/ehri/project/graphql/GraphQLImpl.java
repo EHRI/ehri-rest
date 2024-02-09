@@ -209,10 +209,11 @@ public class GraphQLImpl {
                     case "description":
                         builder.dataFetcher(coordinates(type, field), descriptionDataFetcher);
                         break;
-                    case "related":
+                    case "related": // deprecated
+                    case "connected":
                         // NB: for CvocConcept types this is overridden below to return a
                         // set of CvocConcepts rather than Relationship objects
-                        builder.dataFetcher(coordinates(type, field), relatedItemsDataFetcher);
+                        builder.dataFetcher(coordinates(type, field), connectedItemsDataFetcher);
                         break;
                     default:
                 }
@@ -259,7 +260,8 @@ public class GraphQLImpl {
         // Concept traversals
         // NB: due to an unfortunate mistake, the concept "related" field, which returns concepts
         // that are conceptually related, collides in naming with the generic "related" field, which
-        // returns a set of "Relationship" items.
+        // returns a set of "Relationship" items. The generic "related" field has now been deprecated
+        // and renamed "connected"
         builder.dataFetchers(conceptType.getName(), ImmutableMap.of(
                 "itemCount", itemCountDataFetcher(c -> c.as(Concept.class).countChildren()),
                 "vocabulary", manyToOneRelationshipFetcher(c -> c.as(Concept.class).getVocabulary()),
@@ -604,7 +606,7 @@ public class GraphQLImpl {
                     .getAnnotator())
                     .map(Named::getName).orElse(null);
 
-    private static final DataFetcher<List<Map<String, Object>>> relatedItemsDataFetcher = env -> {
+    private static final DataFetcher<List<Map<String, Object>>> connectedItemsDataFetcher = env -> {
         Entity source = env.getSource();
         Iterable<Link> links = source.as(Linkable.class).getLinks();
         return StreamSupport.stream(links.spliterator(), false).map(link -> {
@@ -838,19 +840,28 @@ public class GraphQLImpl {
                 .arguments(Lists.newArrayList(arguments));
     }
 
-    private GraphQLFieldDefinition relatedTypeFieldDefinition() {
+    private GraphQLFieldDefinition connectedTypeFieldDefinition() {
         return newFieldDefinition()
-                .name("related")
-                .description(__("graphql.field.related.description"))
-                .type(GraphQLList.list(relatedType))
+                .name("connected")
+                .description(__("graphql.field.connected.description"))
+                .type(GraphQLList.list(connectedType))
                 .build();
     }
 
-    private GraphQLFieldDefinition relatedItemsItemFieldDefinition() {
+    private GraphQLFieldDefinition deprecatedRelatedTypeFieldDefinition() {
+        return newFieldDefinition()
+                .name("related")
+                .description(__("graphql.field.related.description"))
+                .type(GraphQLList.list(connectedType))
+                .deprecate(__("graphql.field.related.deprecated"))
+                .build();
+    }
+
+    private GraphQLFieldDefinition connectedItemsItemFieldDefinition() {
         return newFieldDefinition()
                 .type(linkableInterface)
                 .name("item")
-                .description(__("graphql.field.related.item.description"))
+                .description(__("graphql.field.connected.item.description"))
                 .build();
     }
 
@@ -1095,7 +1106,7 @@ public class GraphQLImpl {
             .fields(listStringAttrs(ContactInfo.values()))
             .build();
 
-    private final GraphQLObjectType relatedType = newObject()
+    private final GraphQLObjectType connectedType = newObject()
             .name("Relationship")
             .description(__("relationship.description"))
             .field(newFieldDefinition()
@@ -1103,7 +1114,7 @@ public class GraphQLImpl {
                     .description(__("relationship.field.context.description"))
                     .type(GraphQLTypeReference.typeRef(Entities.LINK))
                     .build())
-            .field(relatedItemsItemFieldDefinition())
+            .field(connectedItemsItemFieldDefinition())
             .build();
 
 
@@ -1179,7 +1190,8 @@ public class GraphQLImpl {
             .field(itemFieldDefinition("country", __("repository.field.country.description"),
                     GraphQLTypeReference.typeRef(Entities.COUNTRY)))
             .fields(linksAndAnnotationsFields())
-            .field(relatedTypeFieldDefinition())
+            .field(connectedTypeFieldDefinition())
+            .field(deprecatedRelatedTypeFieldDefinition())
             .field(itemEventsFieldDefinition())
             .withInterfaces(entityInterface, describedInterface, linkableInterface, annotatableInterface)
             .build();
@@ -1200,7 +1212,8 @@ public class GraphQLImpl {
             .field(listFieldDefinition("ancestors", __("documentaryUnit.field.ancestors.description"),
                     GraphQLTypeReference.typeRef(Entities.DOCUMENTARY_UNIT)))
             .fields(linksAndAnnotationsFields())
-            .field(relatedTypeFieldDefinition())
+            .field(connectedTypeFieldDefinition())
+            .field(deprecatedRelatedTypeFieldDefinition())
             .field(itemEventsFieldDefinition())
             .withInterfaces(entityInterface, describedInterface, linkableInterface, annotatableInterface, temporalInterface)
             .build();
@@ -1213,7 +1226,8 @@ public class GraphQLImpl {
             .field(singleDescriptionFieldDefinition(historicalAgentDescriptionType))
             .field(descriptionsFieldDefinition(historicalAgentDescriptionType))
             .fields(linksAndAnnotationsFields())
-            .field(relatedTypeFieldDefinition())
+            .field(connectedTypeFieldDefinition())
+            .field(deprecatedRelatedTypeFieldDefinition())
             .field(itemEventsFieldDefinition())
             .withInterfaces(entityInterface, describedInterface, linkableInterface, annotatableInterface, temporalInterface)
             .build();
@@ -1264,10 +1278,10 @@ public class GraphQLImpl {
             .fields(geoFields)
             .field(descriptionsFieldDefinition(conceptDescriptionType))
             .field(singleDescriptionFieldDefinition(conceptDescriptionType))
-            .field(listFieldDefinition("related", __("cvocConcept.field.related.description"),
-                    GraphQLTypeReference.typeRef(Entities.CVOC_CONCEPT)))
             .field(itemCountFieldDefinition())
             .field(listFieldDefinition("broader", __("cvocConcept.field.broader.description"),
+                    GraphQLTypeReference.typeRef(Entities.CVOC_CONCEPT)))
+            .field(listFieldDefinition("related", __("cvocConcept.field.related.description"),
                     GraphQLTypeReference.typeRef(Entities.CVOC_CONCEPT)))
             .field(listFieldDefinition("narrower", __("cvocConcept.field.narrower.description"),
                     GraphQLTypeReference.typeRef(Entities.CVOC_CONCEPT)))
@@ -1275,6 +1289,7 @@ public class GraphQLImpl {
                     GraphQLTypeReference.typeRef(Entities.CVOC_VOCABULARY)))
             .fields(linksAndAnnotationsFields())
             .field(itemEventsFieldDefinition())
+            .field(connectedTypeFieldDefinition())
             .withInterfaces(entityInterface, describedInterface, linkableInterface, annotatableInterface)
             .build();
 

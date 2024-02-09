@@ -107,6 +107,22 @@ query test {
                 }
             }
         }
+        connected {
+            item {
+                ... on HistoricalAgent {
+                    id
+                }
+            }
+            context {
+                id
+                description
+                body {
+                    id
+                    name
+                    type
+                }
+            }
+        }
     }
 
     c4: DocumentaryUnit(id: "c4") {
@@ -196,6 +212,13 @@ query test {
     cvocc2: CvocConcept(id: "cvocc2") {
         related {
             id
+        }
+        connected {
+            context {
+                body {
+                    name
+                }
+            }
         }
     }
 

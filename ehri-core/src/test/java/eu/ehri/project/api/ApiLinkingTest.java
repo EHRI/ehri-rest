@@ -64,8 +64,9 @@ public class ApiLinkingTest extends AbstractFixtureTest {
     public void testGetLinksWithAclFilter() throws Exception {
         // Link1 should not be retrieved because target c1 is not visible to invalidUser
         List<Link> links = Lists.newArrayList(api(invalidUser).getLinks("c4"));
-        assertEquals(1, links.size());
+        assertEquals(2, links.size());
         assertTrue(links.contains(manager.getEntity("link4", Link.class)));
+        assertTrue(links.contains(manager.getEntity("link5", Link.class)));
     }
 
     @Test
