@@ -73,10 +73,6 @@ public class EntityAdd extends BaseCommand {
                 .type(String.class)
                 .desc("Identifier of scope to import into, i.e. repository")
                 .build());
-        options.addOption(Option.builder()
-                .longOpt("update")
-                .desc("Update item if it already exists")
-                .build());
     }
 
     @Override
@@ -155,11 +151,6 @@ public class EntityAdd extends BaseCommand {
         @SuppressWarnings("unchecked")
         Class<? extends Accessible> accessibleCls = (Class<? extends Accessible>) cls;
 
-        Api api = api(graph, user);
-        if (cmdLine.hasOption("update")) {
-            api.createOrUpdate(bundle.withId(id), accessibleCls, getLogMessage(logMessage));
-        } else {
-            api.create(bundle.withId(id), accessibleCls, getLogMessage(logMessage));
-        }
+        api(graph, user).create(bundle.withId(id), accessibleCls, getLogMessage(logMessage));
     }
 }
