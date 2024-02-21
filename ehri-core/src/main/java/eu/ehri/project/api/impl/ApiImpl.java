@@ -159,12 +159,6 @@ public class ApiImpl implements Api {
     }
 
     @Override
-    public <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls)
-            throws PermissionDenied, ValidationError, DeserializationError {
-        return createOrUpdate(bundle, cls, Optional.<String>empty());
-    }
-
-    @Override
     public int delete(String id) throws PermissionDenied, ValidationError, SerializationError, ItemNotFound, HierarchyError {
         return delete(id, Optional.empty());
     }
@@ -192,8 +186,7 @@ public class ApiImpl implements Api {
     @Override
     public <E extends Accessible> E create(Bundle bundle, Class<E> cls, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError {
-        helper.checkContentPermission(accessor, helper.getContentTypeEnum(cls),
-                PermissionType.CREATE);
+        helper.checkContentPermission(accessor, helper.getContentTypeEnum(cls), PermissionType.CREATE);
         E item = bundleManager.withScopeIds(scope.idPath()).create(bundle, cls);
         // If a user creates an item, grant them OWNER perms on it.
         // Owner permissions do not have a scope.
@@ -214,23 +207,6 @@ public class ApiImpl implements Api {
                         EventTypes.creation, logMessage));
         return item;
 
-    }
-
-    @Override
-    public <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError {
-        helper.checkContentPermission(accessor, helper.getContentTypeEnum(cls),
-                PermissionType.CREATE);
-        helper.checkContentPermission(accessor, helper.getContentTypeEnum(cls),
-                PermissionType.UPDATE);
-        Mutation<E> out = bundleManager.withScopeIds(scope.idPath()).createOrUpdate(bundle, cls);
-        if (out.updated()) {
-            commitEvent(() -> actionManager
-                    .newEventContext(out.getNode(), accessor.as(Actioner.class),
-                            EventTypes.modification, logMessage)
-                    .createVersion(out.getNode(), out.getPrior().get()));
-        }
-        return out;
     }
 
     @Override
@@ -373,6 +349,10 @@ public class ApiImpl implements Api {
             link.setLinkSource(src);
         }
         aclManager.setAccessors(link, accessibleTo);
+        if (!AclManager.belongsToAdmin(accessor)) {
+            aclManager.withScope(SystemScope.INSTANCE)
+                    .grantPermission(link, PermissionType.OWNER, accessor);
+        }
         for (String body : bodies) {
             Accessible item = manager.getEntity(body, Accessible.class);
             link.addLinkBody(item);
@@ -387,29 +367,16 @@ public class ApiImpl implements Api {
     public Link createAccessPointLink(String source, String target, String descriptionId, String bodyName,
                                       AccessPointType bodyType, Bundle bundle, Collection<Accessor> accessibleTo, Optional<String> logMessage)
             throws ItemNotFound, ValidationError, PermissionDenied {
-        Linkable src = manager.getEntity(source, Linkable.class);
-        Linkable dst = manager.getEntity(target, Linkable.class);
         Description description = manager.getEntity(descriptionId, Description.class);
-        helper.checkEntityPermission(src, accessor, PermissionType.ANNOTATE);
-        // TODO: Should this require perms to link another item???
-        //helper.checkEntityPermission(dst, user, PermissionType.ANNOTATE);
         helper.checkEntityPermission(description.getEntity(), accessor, PermissionType.UPDATE);
-        Link link = bundleManager.create(bundle, Link.class);
+        Link link = createLink(source, target, Collections.emptyList(), bundle, false, accessibleTo, logMessage);
         Bundle relBundle = Bundle.of(EntityClass.ACCESS_POINT)
                 .withDataValue(Ontology.NAME_KEY, bodyName)
                 .withDataValue(Ontology.ACCESS_POINT_TYPE, bodyType)
                 .withDataValue(Ontology.LINK_HAS_DESCRIPTION, link.getDescription());
         AccessPoint rel = bundleManager.create(relBundle, AccessPoint.class);
         description.addAccessPoint(rel);
-        link.addLinkTarget(src);
-        link.addLinkTarget(dst);
-        link.setLinker(accessor);
         link.addLinkBody(rel);
-        aclManager.setAccessors(link, accessibleTo);
-        commitEvent(() ->
-            actionManager.newEventContext(
-                    link, accessor.as(Actioner.class), EventTypes.link, logMessage)
-                    .addSubjects(src).addSubjects(dst));
         return link;
     }
 
@@ -439,9 +406,10 @@ public class ApiImpl implements Api {
         }
         annotation.setAnnotator(accessor.as(UserProfile.class));
         aclManager.setAccessors(annotation, accessibleTo);
-        aclManager.withScope(SystemScope.INSTANCE)
-                .grantPermission(annotation, PermissionType.OWNER, accessor);
-
+        if (!AclManager.belongsToAdmin(accessor)) {
+            aclManager.withScope(SystemScope.INSTANCE)
+                    .grantPermission(annotation, PermissionType.OWNER, accessor);
+        }
         commitEvent(() -> actionManager.setScope(entity)
                 .newEventContext(annotation,
                         accessor.as(Actioner.class),

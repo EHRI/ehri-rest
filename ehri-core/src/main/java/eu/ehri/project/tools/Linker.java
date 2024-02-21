@@ -27,15 +27,10 @@ import eu.ehri.project.api.ApiFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.AccessPoint;
-import eu.ehri.project.models.AccessPointType;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.DocumentaryUnitDescription;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
@@ -46,9 +41,7 @@ import eu.ehri.project.utils.Slugify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -73,8 +66,8 @@ public class Linker {
     private final Optional<String> logMessage;
 
     private Linker(FramedGraph<?> graph, Set<AccessPointType> accessPointTypes,
-            String defaultLanguageCode, Optional<String> logMessage,
-            boolean tolerant, boolean excludeSingles) {
+                   String defaultLanguageCode, Optional<String> logMessage,
+                   boolean tolerant, boolean excludeSingles) {
         this.graph = graph;
         this.accessPointTypes = accessPointTypes;
         this.defaultLanguageCode = defaultLanguageCode;
@@ -107,7 +100,7 @@ public class Linker {
      * @param vocabulary an existing (presumably empty) vocabulary
      * @param user       the user to whom to attribute the operation
      * @return the number of new links created
-     * @throws ValidationError if data constraints are not met
+     * @throws ValidationError  if data constraints are not met
      * @throws PermissionDenied if the user does not have permission to perform the current action
      */
     public int createAndLinkRepositoryVocabulary(
@@ -137,9 +130,7 @@ public class Linker {
                         } else {
                             conceptIdentifierNames.put(identifier, trimmedName);
                             identifierConcept.put(identifier, Optional.empty());
-                            int count = identifierCount.containsKey(identifier)
-                                    ? identifierCount.get(identifier)
-                                    : 0;
+                            int count = identifierCount.getOrDefault(identifier, 0);
                             identifierCount.put(identifier, count + 1);
                         }
                     }
@@ -215,6 +206,7 @@ public class Linker {
                             .contains(relationship.getRelationshipType())) {
 
                         String identifier = getIdentifier(relationship);
+                        List<String> bodies = Collections.singletonList(relationship.getId());
                         // if we're excluding "unique" access points, skip this...
                         if (identifierCount.get(identifier) < 2 && excludeSingles) {
                             continue;
@@ -227,14 +219,18 @@ public class Linker {
                                 Bundle linkBundle = Bundle.Builder.withClass(EntityClass.LINK)
                                         .addDataValue(Ontology.LINK_HAS_TYPE, LINK_TYPE)
                                         .build();
-                                Link link = api.create(linkBundle, Link.class);
-                                link.addLinkTarget(doc);
-                                link.addLinkTarget(concept);
-                                link.addLinkBody(relationship);
+                                Link link = api.createLink(
+                                        doc.getId(),
+                                        concept.getId(),
+                                        bodies,
+                                        linkBundle,
+                                        false,
+                                        Collections.emptyList(),
+                                        Optional.empty());
                                 linkEvent.addSubjects(link);
                                 linkCount++;
                             }
-                        } catch (DeserializationError e) {
+                        } catch (ItemNotFound e) {
                             throw new RuntimeException(e);
                         }
                     }
@@ -338,15 +334,13 @@ public class Linker {
         if (identifierCounts.isEmpty()) {
             return false;
         } else if (excludeSingles) {
-            Integer maxCount = 0;
+            int maxCount = 0;
             for (Integer c : identifierCounts.values()) {
                 if (c != null && c > maxCount) {
                     maxCount = c;
                 }
             }
-            if (maxCount < 2) {
-                return false;
-            }
+            return maxCount >= 2;
         }
         return true;
     }

@@ -22,7 +22,6 @@ package eu.ehri.project.api;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.HierarchyError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
@@ -33,7 +32,6 @@ import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,21 +59,6 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
         Repository repository = loggingApi(validUser).create(repoBundle, Repository.class);
         assertEquals(repository, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
-    }
-
-    @Test
-    public void testCreateOrUpdate() throws Exception {
-        Bundle before = depSerializer.entityToBundle(manager.getEntity("r1", Repository.class));
-        Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle())
-                .withId("r1");
-        Mutation<Repository> cou = loggingApi(validUser).createOrUpdate(repoBundle, Repository.class);
-        assertTrue(cou.updated());
-        SystemEvent event = am.getLatestGlobalEvent();
-        assertEquals(cou.getNode(), event.getSubjects().iterator().next());
-        assertTrue(event.getPriorVersions().iterator().hasNext());
-        Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
-        assertNotSame(old, repoBundle);
-        Assert.assertEquals(before, old);
     }
 
     @Test

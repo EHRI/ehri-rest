@@ -111,21 +111,6 @@ public interface Api {
             throws PermissionDenied, ValidationError, DeserializationError;
 
     /**
-     * Create or update a new object of type `E` from the given data, within the
-     * scope of `scope`.
-     *
-     * @param bundle the item's data bundle
-     * @param cls    the item's class
-     * @param <E>    the type of entity
-     * @return the created framed vertex
-     * @throws PermissionDenied     if the user cannot perform the action
-     * @throws ValidationError      if the input data is incomplete or does not meet requirements
-     * @throws DeserializationError if the input data cannot be deserialized correctly
-     */
-    <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls)
-            throws PermissionDenied, ValidationError, DeserializationError;
-
-    /**
      * Delete an object bundle, following dependency cascades, within the scope
      * of item `scope`.
      *
@@ -171,22 +156,6 @@ public interface Api {
      * @throws DeserializationError if the input data cannot be deserialized correctly
      */
     <E extends Accessible> E create(Bundle bundle, Class<E> cls, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError;
-
-    /**
-     * Create or update a new object of type `E` from the given data, within the
-     * scope of `scope`.
-     *
-     * @param bundle     the item's data bundle
-     * @param cls        the item's class
-     * @param logMessage a log message
-     * @param <E>        the type of entity
-     * @return the created framed vertex
-     * @throws PermissionDenied     if the user cannot perform the action
-     * @throws ValidationError      if the input data is incomplete or does not meet requirements
-     * @throws DeserializationError if the input data cannot be deserialized correctly
-     */
-    <E extends Accessible> Mutation<E> createOrUpdate(Bundle bundle, Class<E> cls, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError;
 
     /**

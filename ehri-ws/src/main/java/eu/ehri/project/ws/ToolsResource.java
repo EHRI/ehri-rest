@@ -23,6 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.ws.base.AbstractResource;
 import eu.ehri.project.ws.errors.ConflictError;
 import eu.ehri.project.acl.ContentTypes;
@@ -153,6 +155,53 @@ public class ToolsResource extends AbstractResource {
         return Response.ok((StreamingOutput) outputStream ->
                 schemaExporter.dumpSchema(outputStream, baseUri))
                 .type(mediaType + "; charset=utf-8").build();
+    }
+
+    /**
+     * Create missing OWNER permission grants for link items
+     * that are missing them.
+     *
+     * @param commit whether to commit the changes (defaults to false)
+     * @return the number of permission grants added
+     */
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("fix-link-permissions")
+    public String fixLinkPermissions(@QueryParam(COMMIT_PARAM) @DefaultValue("false") boolean commit) {
+        try (final Tx tx = beginTx()) {
+            logger.info("Fix link ownership permissions, commit={}", commit);
+            AclManager acl = new AclManager(graph);
+
+            // Get a big list of Link entities (we can't do this in an iterable because
+            // we need to flush the transaction periodically)
+            List<Link> links = Lists.newArrayList();
+            try (final CloseableIterable<Link> entities = manager.getEntities(EntityClass.LINK, Link.class)) {
+                for (Link link : entities) {
+                    links.add(link);
+                }
+            }
+            logger.info("Found {} links", links.size());
+
+            int count = 0;
+            int check = 0;
+            for (Link link : links) {
+                UserProfile profile = link.getLinker();
+                if (profile != null
+                        && !AclManager.belongsToAdmin(profile)
+                        && !acl.hasPermission(link, PermissionType.OWNER, profile)) {
+                    acl.grantPermission(link, PermissionType.OWNER, profile);
+                    logger.info("Added OWNER permission for link {} to {}", link.getId(), profile.getId());
+                    count++;
+                }
+                if (++check % 10000 == 0) {
+                    logger.info("Checked {} links", check);
+                }
+            }
+            if (commit) {
+                tx.success();
+            }
+            return String.valueOf(count);
+        }
     }
 
     /**
@@ -563,7 +612,6 @@ public class ToolsResource extends AbstractResource {
             if (commit) {
                 tx.success();
             }
-            tx.success();
             return Table.of(done);
         } catch (ItemNotFound e) {
             throw new DeserializationError("Unable to locate item with ID: " + e.getId());

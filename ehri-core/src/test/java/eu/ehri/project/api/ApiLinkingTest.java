@@ -21,6 +21,10 @@ package eu.ehri.project.api;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
@@ -74,23 +78,26 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
         HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
         AccessPoint rel = manager.getEntity("ur1", AccessPoint.class);
+        AclManager acl = new AclManager(graph);
         String linkDesc = "Test Link";
         String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = loggingApi(validUser)
+        // We have to first grant permission to create links...
+        acl.grantPermission(src, PermissionType.ANNOTATE, invalidUser);
+        Link link = loggingApi(invalidUser)
                 .createLink("c1", "a1", Lists.newArrayList("ur1"),
                         linkBundle, false, Lists.newArrayList(), Optional.empty());
         assertEquals(linkDesc, link.getDescription());
+        assertTrue(acl.hasPermission(link, PermissionType.OWNER, invalidUser));
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
         assertNull(link.getLinkSource());
         assertEquals(1, Iterables.size(link.getLinkBodies()));
         assertTrue(Iterables.contains(link.getLinkBodies(), rel));
-        assertTrue(Lists.newArrayList(api(validUser).actionManager()
+        assertTrue(Lists.newArrayList(api(invalidUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
     }
-
 
     @Test
     public void testCreateDirectionalLink() throws Exception {
@@ -117,6 +124,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
         HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
         DocumentaryUnitDescription desc = manager.getEntity("cd1", DocumentaryUnitDescription.class);
+        AclManager acl = new AclManager(graph);
         String linkDesc = "Test Link";
         String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
@@ -125,6 +133,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
                         linkDesc, AccessPointType.subject, linkBundle,
                         Lists.newArrayList(validUser, invalidUser), Optional.empty());
         assertNull(linkDesc, link.getLinkField());
+        assertTrue(acl.hasPermission(link, PermissionType.OWNER, validUser));
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -138,6 +147,24 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         assertTrue(link.hasAccessRestriction());
         assertTrue(Lists.newArrayList(api(validUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
+    }
+
+    @Test
+    public void testDeleteLink() throws Exception {
+        DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
+        AclManager acl = new AclManager(graph);
+        Bundle linkBundle = getLinkBundle("Delete test", "associative");
+        // We have to first grant permission to create links...
+        acl.grantPermission(src, PermissionType.ANNOTATE, invalidUser);
+        Link link = loggingApi(invalidUser)
+                .createLink("c1", "a1", Lists.newArrayList("ur1"),
+                        linkBundle, false, Lists.newArrayList(), Optional.empty());
+        assertEquals(2, Iterables.size(link.getLinkTargets()));
+
+        assertFalse(acl.hasPermission(ContentTypes.LINK, PermissionType.DELETE, invalidUser));
+        loggingApi(invalidUser).delete(link.getId());
+        assertEquals(api(invalidUser).actionManager()
+                .getLatestGlobalEvent().getEventType(), EventTypes.deletion);
     }
 
     private Bundle getLinkBundle(String linkDesc, String linkType) {

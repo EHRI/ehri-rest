@@ -6,7 +6,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.api.UserProfilesApi;
 import org.junit.Before;
 import org.junit.Test;
 
