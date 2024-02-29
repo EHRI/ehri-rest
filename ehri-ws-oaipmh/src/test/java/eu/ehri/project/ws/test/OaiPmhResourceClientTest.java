@@ -75,7 +75,7 @@ public class OaiPmhResourceClientTest extends AbstractResourceClientTest {
                 .header(OaiPmhResource.LIMIT_HEADER_NAME, limit)
                 .get(ClientResponse.class);
         String entity = response.getEntity(String.class);
-        //System.out.println(entity);
+        // System.out.println("OUT = " + entity);
         return parseDocument(entity);
     }
 
