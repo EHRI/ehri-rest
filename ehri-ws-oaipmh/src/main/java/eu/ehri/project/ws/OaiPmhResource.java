@@ -45,6 +45,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedOutputStream;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -61,7 +62,6 @@ public class OaiPmhResource extends AbstractResource {
     public static final String LIMIT_HEADER_NAME = "X-Limit";
 
 
-
     public OaiPmhResource(@Context GraphDatabaseService database) {
         super(database);
     }
@@ -69,7 +69,7 @@ public class OaiPmhResource extends AbstractResource {
     /**
      * OAI-PMH 2.0 base URL. See specification for usage.
      * <p>
-     * http://www.openarchives.org/OAI/openarchivesprotocol.html
+     * <a href="http://www.openarchives.org/OAI/openarchivesprotocol.html">...</a>
      *
      * @return an OAI-PMH XML payload as a chunked response.
      */
@@ -82,10 +82,14 @@ public class OaiPmhResource extends AbstractResource {
                  final BufferedOutputStream bufferedOut = new BufferedOutputStream(out);
                  final IndentingXMLStreamWriter sw = new IndentingXMLStreamWriter(
                          xmlOutputFactory.createXMLStreamWriter(bufferedOut))) {
+                // Fetch the language or use the default:
+                List<Locale> locales = requestHeaders.getAcceptableLanguages();
+                Locale locale = locales.isEmpty() ? Locale.ENGLISH : locales.get(0);
+                String lang = locale.getISO3Language();
                 Api api = anonymousApi();
                 OaiPmhExporter oaiPmh = new OaiPmhExporter(
                         OaiPmhData.create(api),
-                        OaiPmhRenderer.defaultRenderer(api, DEFAULT_LANG),
+                        OaiPmhRenderer.defaultRenderer(api, lang),
                         config);
                 try {
                     OaiPmhState state = OaiPmhState.parse(uriInfo.getRequestUri().getQuery(), limit);
@@ -112,7 +116,7 @@ public class OaiPmhResource extends AbstractResource {
         // Allow overriding the limit via a header. This is safe since
         // we stream requests. It's also very handy for testing.
         List<String> limit = requestHeaders.getRequestHeader(LIMIT_HEADER_NAME);
-        if (limit == null || limit.size() < 1) {
+        if (limit == null || limit.isEmpty()) {
             return defaultLimit;
         } else {
             try {
