@@ -46,7 +46,7 @@ public class QueryApiTest extends AbstractFixtureTest {
     }
 
     private QueryApi getQuery() {
-        return api(validUser).query();
+        return api(adminUser).query();
     }
 
     private QueryApi getQuery(Accessor accessor) {
@@ -58,7 +58,7 @@ public class QueryApiTest extends AbstractFixtureTest {
         QueryApi query = getQuery();
 
         // Check we're not admin
-        assertTrue(AclManager.belongsToAdmin(validUser));
+        assertTrue(AclManager.belongsToAdmin(adminUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = manager
@@ -99,7 +99,7 @@ public class QueryApiTest extends AbstractFixtureTest {
         QueryApi query = getQuery();
 
         // Check we're not admin
-        assertTrue(AclManager.belongsToAdmin(validUser));
+        assertTrue(AclManager.belongsToAdmin(adminUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = manager

@@ -48,7 +48,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
 
-        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary).importFile(ios, logMessage);
+        SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).importFile(ios, logMessage);
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -63,7 +63,7 @@ public class CampsImporterTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "675";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
@@ -84,7 +84,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
         importer.setTolerant(true);
         importer.importFile(ios, "Importing the camps as a SKOS file");
 
@@ -101,7 +101,7 @@ public class CampsImporterTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "675";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
@@ -116,7 +116,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         //import version 2
         String version2 = "cvoc/campsv02.rdf";
         ios = ClassLoader.getSystemResourceAsStream(version2);
-        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
             .allowUpdates(true)
             .importFile(ios, "Importing the modified camps as a SKOS file");
 

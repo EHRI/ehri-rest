@@ -49,7 +49,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     public void importAllEvents() throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/allEhriEvents.rdf");
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
         importer.setTolerant(true);
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
@@ -76,7 +76,7 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
                 .setTolerant(true);
         //auths
         // Before...
@@ -126,14 +126,14 @@ public class EventsSkosImporterTest extends AbstractImporterTest {
     public void withOutsideScheme() throws ItemNotFound, IOException, InputParseError, ValidationError {
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios1 = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
-        SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1)
+        SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
                 .setTolerant(true)
                 .importFile(ios1, logMessage);
 
         int count = getNodeCount(graph);
         Vocabulary vocabulary = manager.getEntity("cvoc2", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EVENT_SKOS);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
         importer.setTolerant(true);
 
         // Before...

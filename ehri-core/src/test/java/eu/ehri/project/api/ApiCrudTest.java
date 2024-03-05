@@ -47,14 +47,14 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test
     public void testDetail() throws ItemNotFound {
-        DocumentaryUnit unit = api(validUser).get(item.getId(), DocumentaryUnit.class);
+        DocumentaryUnit unit = api(adminUser).get(item.getId(), DocumentaryUnit.class);
         assertEquals(item.asVertex(), unit.asVertex());
     }
 
     @Test
     public void testUserProfile() throws ItemNotFound {
-        UserProfile user = api(validUser).get(validUser.getId(), UserProfile.class);
-        assertEquals(validUser.asVertex(), user.asVertex());
+        UserProfile user = api(adminUser).get(adminUser.getId(), UserProfile.class);
+        assertEquals(adminUser.asVertex(), user.asVertex());
     }
 
     @Test(expected = ItemNotFound.class)
@@ -64,20 +64,20 @@ public class ApiCrudTest extends AbstractFixtureTest {
 
     @Test(expected = ItemNotFound.class)
     public void testDetailPermissionDenied() throws ItemNotFound {
-        api(invalidUser).get(item.getId(), DocumentaryUnit.class);
+        api(basicUser).get(item.getId(), DocumentaryUnit.class);
     }
 
     @Test
     public void testCreate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
+        DocumentaryUnit unit = api(adminUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUnauthorized() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = api(invalidUser).create(bundle, DocumentaryUnit.class);
+        DocumentaryUnit unit = api(basicUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
     }
 
@@ -86,7 +86,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
 
         try {
-            api(invalidUser).create(bundle, DocumentaryUnit.class);
+            api(basicUser).create(bundle, DocumentaryUnit.class);
             fail("Creation should throw "
                     + PermissionDenied.class.getSimpleName());
         } catch (PermissionDenied e) {
@@ -95,9 +95,9 @@ public class ApiCrudTest extends AbstractFixtureTest {
             PermissionGrantTarget target = manager.getEntity(
                     ContentTypes.DOCUMENTARY_UNIT.getName(),
                     PermissionGrantTarget.class);
-            new AclManager(graph).grantPermission(target, PermissionType.CREATE, invalidUser
+            new AclManager(graph).grantPermission(target, PermissionType.CREATE, basicUser
             );
-            DocumentaryUnit unit = api(invalidUser).create(bundle, DocumentaryUnit.class);
+            DocumentaryUnit unit = api(basicUser).create(bundle, DocumentaryUnit.class);
             assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
         }
     }
@@ -108,21 +108,21 @@ public class ApiCrudTest extends AbstractFixtureTest {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
-        DocumentaryUnit unit = api(invalidUser)
+        DocumentaryUnit unit = api(basicUser)
                 .withScope(r1).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
     }
 
     @Test
     public void testUserDetailAccessDenied() throws ItemNotFound {
-        api(invalidUser).get(validUser.getId(), UserProfile.class);
+        api(basicUser).get(adminUser.getId(), UserProfile.class);
     }
 
     @Test
     public void testUpdate() throws Exception {
         Repository repository = manager.getEntity("r1", Repository.class);
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = api(validUser).withScope(repository)
+        DocumentaryUnit unit = api(adminUser).withScope(repository)
                 .create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
@@ -130,7 +130,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue(
                 "name", newName);
 
-        DocumentaryUnit changedUnit = api(validUser)
+        DocumentaryUnit changedUnit = api(adminUser)
                 .update(newBundle, DocumentaryUnit.class).getNode();
         assertEquals(newName, changedUnit.getProperty("name"));
         DocumentaryUnitDescription desc = graph.frame(
@@ -143,7 +143,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "ang")
                 .withDataValue(Ontology.IDENTIFIER_KEY, "Latn")
                 .withDataValue(Ontology.NAME_KEY, "Test Desc 2");
-        DocumentaryUnit changedUnit2 = api(validUser)
+        DocumentaryUnit changedUnit2 = api(adminUser)
                 .update(newBundle
                         .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, newDesc
                         ), DocumentaryUnit.class).getNode();
@@ -161,27 +161,27 @@ public class ApiCrudTest extends AbstractFixtureTest {
     @Test
     public void testUserUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = api(validUser).create(bundle, UserProfile.class);
+        UserProfile user = api(adminUser).create(bundle, UserProfile.class);
         assertEquals(TestData.TEST_USER_NAME, user.getName());
 
         String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue(
                 "name", newName);
-        UserProfile changedUser = api(validUser).update(newBundle, UserProfile.class).getNode();
+        UserProfile changedUser = api(adminUser).update(newBundle, UserProfile.class).getNode();
         assertEquals(newName, changedUser.getName());
     }
 
     @Test
     public void testUserCreate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = api(validUser).create(bundle, UserProfile.class);
+        UserProfile user = api(adminUser).create(bundle, UserProfile.class);
         assertEquals(TestData.TEST_USER_NAME, user.getName());
     }
 
     @Test
     public void testGroupCreate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestGroupBundle());
-        Group group = api(validUser).create(bundle, Group.class);
+        Group group = api(adminUser).create(bundle, Group.class);
         assertEquals(TestData.TEST_GROUP_NAME, group.getName());
     }
 
@@ -191,23 +191,23 @@ public class ApiCrudTest extends AbstractFixtureTest {
                 .removeDataValue("name");
 
         // This shouldn't barf because the collection does not need a name.
-        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
+        DocumentaryUnit unit = api(adminUser).create(bundle, DocumentaryUnit.class);
         assertNull(unit.getProperty("name"));
     }
 
     @Test(expected = HierarchyError.class)
     public void testDeleteWithHierarchyError() throws Exception {
-        api(validUser).delete(item.getId());
+        api(adminUser).delete(item.getId());
     }
 
     @Test
     public void testDeleteAdmin() throws Exception {
         try {
-            api(validUser).delete(Group.ADMIN_GROUP_IDENTIFIER);
+            api(adminUser).delete(Group.ADMIN_GROUP_IDENTIFIER);
             fail("Should not have been able to delete admin group");
         } catch (PermissionDenied e) {
             assertEquals(Group.ADMIN_GROUP_IDENTIFIER, e.getEntity());
-            assertEquals(validUser.getId(), e.getAccessor());
+            assertEquals(adminUser.getId(), e.getAccessor());
             assertEquals(PermissionType.DELETE.getName(), e.getPermission());
             assertEquals(SystemScope.getInstance().getId(), e.getScope());
         }
@@ -218,7 +218,7 @@ public class ApiCrudTest extends AbstractFixtureTest {
         int shouldDelete = 1;
 
         // FIXME: Surely there's a better way of doing this???
-        DocumentaryUnit c4 = api(validUser).get("c4", DocumentaryUnit.class);
+        DocumentaryUnit c4 = api(adminUser).get("c4", DocumentaryUnit.class);
         Iterator<Description> descIter = c4.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
@@ -227,25 +227,25 @@ public class ApiCrudTest extends AbstractFixtureTest {
             shouldDelete += Iterables.size(d.getUnknownProperties());
         }
 
-        int deleted = api(validUser).delete(c4.getId());
+        int deleted = api(adminUser).delete(c4.getId());
         assertEquals(shouldDelete, deleted);
     }
 
     @Test(expected = HierarchyError.class)
     public void testDeleteChildrenWithError() throws Exception {
-        api(validUser).deleteChildren(item.getId(), false, true, Optional.empty());
+        api(adminUser).deleteChildren(item.getId(), false, true, Optional.empty());
     }
 
     @Test
     public void testDeleteChildren() throws Exception {
-        List<String> out = api(validUser).deleteChildren(item.getId(), true, true, Optional.empty());
+        List<String> out = api(adminUser).deleteChildren(item.getId(), true, true, Optional.empty());
         assertEquals(Lists.newArrayList("c2", "c3"), out);
     }
 
     @Test
     public void testDeleteChildrenWithBatchCallback() throws Exception {
         final List<String> ids = Lists.newArrayList();
-        List<String> out = api(validUser).deleteChildren(item.getId(), true, true, (num, id) -> {
+        List<String> out = api(adminUser).deleteChildren(item.getId(), true, true, (num, id) -> {
             graph.getBaseGraph().commit();
             ids.add(id);
         }, Optional.empty());

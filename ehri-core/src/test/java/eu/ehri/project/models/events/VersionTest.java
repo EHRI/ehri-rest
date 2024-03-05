@@ -51,14 +51,14 @@ public class VersionTest extends AbstractFixtureTest {
         UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         SystemEvent first = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation).commit();
         assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Change the user twice in succession, with the data from userBundle2
         // and userBundle3
         SystemEvent second = actionManager.newEventContext(user,
-                validUser.as(Actioner.class),
+                adminUser.as(Actioner.class),
                 EventTypes.modification)
                 .createVersion(user).commit();
         Mutation<UserProfile> update1 = bundleManager
@@ -67,7 +67,7 @@ public class VersionTest extends AbstractFixtureTest {
 
         // and again
         SystemEvent third = actionManager.newEventContext(user,
-                validUser.as(Actioner.class),
+                adminUser.as(Actioner.class),
                 EventTypes.modification)
                 .createVersion(user).commit();
         Mutation<UserProfile> update2 = bundleManager.update(userBundle3, UserProfile.class);

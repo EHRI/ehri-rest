@@ -51,7 +51,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
     public void testImportExport1() throws Exception {
         Country nl = manager.getEntity("nl", Country.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml");
-        SaxImportManager importManager = SaxImportManager.create(graph, nl, validUser,
+        SaxImportManager importManager = SaxImportManager.create(graph, nl, adminUser,
                 EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
         importManager.importInputStream(ios, "Text EAG import/export");
         Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
@@ -103,7 +103,7 @@ public class Eag2012ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(Repository repository, String lang) throws Exception {
-        Eag2012Exporter exporter = new Eag2012Exporter(api(validUser));
+        Eag2012Exporter exporter = new Eag2012Exporter(api(adminUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(repository, baos, lang);
         String xml = baos.toString("UTF-8");

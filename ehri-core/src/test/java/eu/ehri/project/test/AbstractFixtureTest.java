@@ -29,8 +29,8 @@ import org.junit.BeforeClass;
 abstract public class AbstractFixtureTest extends ModelTestBase {
 
     // Members closely coupled to the test data!
-    protected UserProfile validUser;
-    protected UserProfile invalidUser;
+    protected UserProfile adminUser;
+    protected UserProfile basicUser;
     protected DocumentaryUnit item;
 
     @BeforeClass
@@ -43,8 +43,8 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         super.setUp();
         try {
             item = manager.getEntity("c1", DocumentaryUnit.class);
-            validUser = manager.getEntity("mike", UserProfile.class);
-            invalidUser = manager.getEntity("reto", UserProfile.class);
+            adminUser = manager.getEntity("mike", UserProfile.class);
+            basicUser = manager.getEntity("reto", UserProfile.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(e);
         }

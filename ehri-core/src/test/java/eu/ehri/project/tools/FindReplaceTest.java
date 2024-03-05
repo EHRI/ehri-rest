@@ -23,7 +23,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
         List<List<String>> names = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
                 "name", "Description",
-                "Test", validUser, "This is a test");
+                "Test", adminUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         names.sort(Comparator.comparing(o -> o.get(0)));
         GraphDiff diff = diffGraph(before, after);
@@ -47,7 +47,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
                 manager.getEntity("rd4", Description.class).getName());
 
         assertThat(names, equalTo(out));
-        assertThat(api(validUser)
+        assertThat(api(adminUser)
                         .actionManager().getLatestGlobalEvent().getLogMessage(),
                 equalTo("This is a test"));
     }
@@ -59,7 +59,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
         List<List<String>> done = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
                 "name", "Description",
-                "Test", validUser, "This is a test");
+                "Test", adminUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
         assertEquals(6, diff.added.size());
@@ -74,7 +74,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
         List<List<String>> todo = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.REPOSITORY_DESCRIPTION,
                 "name", "Description",
-                "Test", validUser, "This is a test");
+                "Test", adminUser, "This is a test");
         List<VertexProxy> after = getGraphState(graph);
         GraphDiff diff = diffGraph(before, after);
         assertEquals(0, diff.added.size());
@@ -88,7 +88,7 @@ public class FindReplaceTest extends AbstractFixtureTest {
         List<List<String>> todo = findReplace.findAndReplace(
                 EntityClass.REPOSITORY, EntityClass.ADDRESS,
                 "name", "Description",
-                "Test", validUser, "This is a test");
+                "Test", adminUser, "This is a test");
         assertEquals(0, todo.size());
     }
 }

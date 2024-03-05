@@ -59,14 +59,14 @@ public class SystemEventTest extends AbstractFixtureTest {
         UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         SystemEvent first = ctx.commit();
         assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Delete the user and log it
         ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.deletion);
         ctx2.commit();
         bundleManager.delete(serializer.entityToBundle(user));
@@ -84,14 +84,14 @@ public class SystemEventTest extends AbstractFixtureTest {
         UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         SystemEvent first = ctx.commit();
         assertEquals(1, Iterables.size(first.getSubjects()));
 
         // Delete the user and log it
         ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.modification);
         SystemEvent second = ctx2.commit();
         bundleManager.update(userBundle2, UserProfile.class);
@@ -100,7 +100,7 @@ public class SystemEventTest extends AbstractFixtureTest {
         bundleManager.update(userBundle3, UserProfile.class);
 
         ActionManager.EventContext ctx3 = actionManager.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.deletion);
         SystemEvent forth = ctx3.commit();
 
@@ -120,7 +120,7 @@ public class SystemEventTest extends AbstractFixtureTest {
 
         // Delete the user and log it
         ActionManager.EventContext ctx4 = actionManager.newEventContext(repository,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.modification);
         SystemEvent repoEvent = ctx4.commit();
 
@@ -133,7 +133,7 @@ public class SystemEventTest extends AbstractFixtureTest {
         UserProfile user = bundleManager.create(userBundle, UserProfile.class);
 
         ActionManager.EventContext ctx = actionManager.newEventContext(user,
-                validUser,
+                adminUser,
                 EventTypes.creation);
         SystemEvent first = ctx.commit();
         assertEquals(1, Iterables.size(first.getSubjects()));
@@ -141,14 +141,14 @@ public class SystemEventTest extends AbstractFixtureTest {
         // Do the same thing again after 1/2 second
         Thread.sleep(500);
         ActionManager.EventContext ctx2 = actionManager.newEventContext(user,
-                validUser,
+                adminUser,
                 EventTypes.creation);
         SystemEvent second = ctx2.commit();
 
         // And again after 1 full second
         Thread.sleep(500);
         ActionManager.EventContext ctx3 = actionManager.newEventContext(user,
-                validUser,
+                adminUser,
                 EventTypes.creation);
         SystemEvent third = ctx3.commit();
 

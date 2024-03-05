@@ -49,7 +49,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         assertNotNull(ios);
 
-        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary).importFile(ios, logMessage);
+        SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).importFile(ios, logMessage);
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -64,7 +64,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "675";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
@@ -86,7 +86,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
 
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
                 .setTolerant(true);
         importer.importFile(ios, "Importing the camps as a SKOS file");
 
@@ -103,7 +103,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "675";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
@@ -118,7 +118,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
         //import version 2
         String version2 = "cvoc/camps-v2-1.rdf.xml";
         ios = ClassLoader.getSystemResourceAsStream(version2);
-        importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
         .allowUpdates(true);
 
         // Before...

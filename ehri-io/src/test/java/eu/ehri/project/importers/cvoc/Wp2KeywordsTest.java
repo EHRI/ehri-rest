@@ -46,7 +46,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int vocCount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
                 .setTolerant(true).importFile(ios, logMessage);
 
         /*  How many new nodes will have been created? We should have

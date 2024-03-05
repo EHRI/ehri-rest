@@ -56,7 +56,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        CsvImportManager.create(graph, authoritativeSet, validUser,
+        CsvImportManager.create(graph, authoritativeSet, adminUser,
                 PersonalitiesImporter.class, ImportOptions.basic()).importInputStream(ios, logMessage);
         SystemEvent ev = actionManager.getLatestGlobalEvent();
 

@@ -39,8 +39,8 @@ public class AclGraphTest extends AbstractFixtureTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        validUserGraph = new AclGraph(graph.getBaseGraph(), validUser);
-        invalidUserGraph = new AclGraph(graph.getBaseGraph(), invalidUser);
+        validUserGraph = new AclGraph(graph.getBaseGraph(), adminUser);
+        invalidUserGraph = new AclGraph(graph.getBaseGraph(), basicUser);
     }
 
     @Test

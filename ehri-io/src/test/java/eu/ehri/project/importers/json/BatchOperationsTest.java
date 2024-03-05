@@ -35,7 +35,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
 
         ImportLog log = new BatchOperations(graph)
                 .setScope(scope)
-                .batchImport(payloadStream, validUser.as(Actioner.class), Optional.of(logMsg));
+                .batchImport(payloadStream, adminUser.as(Actioner.class), Optional.of(logMsg));
         assertTrue(log.hasDoneWork());
         assertEquals(1, log.getCreated());
         DocumentaryUnit newItem = manager.getEntity("nl-r1-test", DocumentaryUnit.class);
@@ -49,7 +49,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("import-test.json");
         ImportLog log2 = new BatchOperations(graph).setScope(scope).batchImport(payloadStream,
-                validUser.as(Actioner.class), Optional.of(logMsg));
+                adminUser.as(Actioner.class), Optional.of(logMsg));
         assertFalse(log2.hasDoneWork());
         int nodesAfter = getNodeCount(graph);
         int edgesAfter = getEdgeCount(graph);
@@ -65,7 +65,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
                 .getClassLoader().getResourceAsStream("import-test-validation-error.json");
         try {
             new BatchOperations(graph).batchImport(payloadStream,
-                    validUser.as(Actioner.class), Optional.of("Test create"));
+                    adminUser.as(Actioner.class), Optional.of("Test create"));
             fail("Import with validation error succeeded when it should have failed");
         } catch (ValidationError e) {
             assertEquals(1, e.getErrorSet().getDataValue("identifier").size());
@@ -84,7 +84,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         String logMsg = "Test partial update";
         int nodesBeforePatch = getNodeCount(graph);
         ImportLog log = new BatchOperations(graph).batchUpdate(payloadStream,
-                validUser.as(Actioner.class), Optional.of(logMsg));
+                adminUser.as(Actioner.class), Optional.of(logMsg));
         assertTrue(log.hasDoneWork());
         assertEquals(1, log.getUpdated());
         assertEquals(1, log.getUnchanged());
@@ -109,7 +109,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("import-patch-test.json");
         ImportLog log2 = new BatchOperations(graph).batchUpdate(payloadStream,
-                validUser.as(Actioner.class), Optional.of(logMsg));
+                adminUser.as(Actioner.class), Optional.of(logMsg));
         assertFalse(log2.hasDoneWork());
         int nodesAfter = getNodeCount(graph);
         int edgesAfter = getEdgeCount(graph);
@@ -122,7 +122,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         InputStream emptyStream = new ByteArrayInputStream("[]".getBytes());
         int nodesBefore = getNodeCount(graph);
         ImportLog log = new BatchOperations(graph).batchUpdate(emptyStream,
-                validUser.as(Actioner.class), Optional.of("Test partial update"));
+                adminUser.as(Actioner.class), Optional.of("Test partial update"));
         assertFalse(log.hasDoneWork());
         int nodesAfter = getNodeCount(graph);
         assertEquals(nodesBefore, nodesAfter);
@@ -136,7 +136,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
                 .getClassLoader().getResourceAsStream("import-patch-test-validation-error.json");
         try {
             new BatchOperations(graph).batchUpdate(payloadStream,
-                    validUser.as(Actioner.class), Optional.of("Test partial update"));
+                    adminUser.as(Actioner.class), Optional.of("Test partial update"));
             fail("Import with validation error succeeded when it should have failed");
         } catch (ValidationError e) {
             Collection<ErrorSet> describes = e.getErrorSet().getRelations("describes");
@@ -154,7 +154,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         InputStream payloadStream = getClass()
                 .getClassLoader().getResourceAsStream("import-patch-test-validation-error.json");
         ImportLog log = new BatchOperations(graph).setTolerant(true).batchUpdate(payloadStream,
-                validUser.as(Actioner.class), Optional.of("Test partial update"));
+                adminUser.as(Actioner.class), Optional.of("Test partial update"));
         assertTrue(log.hasDoneWork());
         assertEquals(1, log.getUpdated());
         assertEquals(1, log.getErrored());
@@ -168,7 +168,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
                 .getClassLoader().getResourceAsStream("import-patch-test-deserialization-error.json");
         try {
             new BatchOperations(graph).batchUpdate(payloadStream,
-                    validUser.as(Actioner.class), Optional.of("Test partial update"));
+                    adminUser.as(Actioner.class), Optional.of("Test partial update"));
             fail("Import with deserialization error succeeded when it should have failed");
         } catch (DeserializationError e) {
             // Okay...
@@ -181,7 +181,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
     public void testBatchDeleteWithVersioning() throws Exception {
         int nodesBefore = getNodeCount(graph);
         int deleted = new BatchOperations(graph).batchDelete(Lists.newArrayList("a1"),
-                validUser.as(Actioner.class), Optional.of("Test delete"));
+                adminUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(1, deleted);
         // By default, total nodes should have increased by 1, since we
         // deleted 3 nodes (item, description, date period) and created 4:
@@ -198,7 +198,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
         int deleted = new BatchOperations(graph)
                 .setVersioning(false)
                 .batchDelete(Lists.newArrayList("a1"),
-                        validUser.as(Actioner.class), Optional.of("Test delete"));
+                        adminUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(1, deleted);
         // By default, total nodes should have increased by 0, since we
         // deleted 3 nodes (item, description, date period) and created 4:
@@ -212,7 +212,7 @@ public class BatchOperationsTest extends AbstractImporterTest {
     public void testBatchDeleteWithNoValidIds() throws Exception {
         int nodesBefore = getNodeCount(graph);
         int deleted = new BatchOperations(graph).setTolerant(true).batchDelete(Lists.newArrayList("NOT-AN-ID"),
-                validUser.as(Actioner.class), Optional.of("Test delete"));
+                adminUser.as(Actioner.class), Optional.of("Test delete"));
         assertEquals(0, deleted);
         assertEquals(nodesBefore, getNodeCount(graph));
     }

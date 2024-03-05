@@ -55,7 +55,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = new BundleManager(graph).create(userBundle, UserProfile.class);
         ActionManager.EventContext ctx1 = am.newEventContext(user,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         SystemEvent first = ctx1.commit();
 
@@ -64,7 +64,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Repository repository = new BundleManager(graph).create(repoBundle, Repository.class);
 
         ActionManager.EventContext ctx2 = am.newEventContext(repository,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         assertEquals(EventTypes.creation, ctx2.getEventType());
         SystemEvent second = ctx2.commit();
@@ -76,7 +76,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         assertNotNull(second.getActioner());
 
         // Check the user is correctly linked
-        assertEquals(validUser, second.getActioner());
+        assertEquals(adminUser, second.getActioner());
 
         assertEquals(1, Iterables.size(repository.getHistory()));
         assertNotNull(repository.getLatestEvent());
@@ -100,7 +100,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit doc = new BundleManager(graph).create(docBundle, DocumentaryUnit.class);
         ActionManager.EventContext ctx = am.newEventContext(doc,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         SystemEvent log = ctx.commit();
         assertNotNull(log.getEventScope());
@@ -116,7 +116,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         int nodesBefore = getNodeCount(graph);
         int edgesBefore = getEdgeCount(graph);
         ActionManager.EventContext ctx1 = am.newEventContext(doc,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         assertEquals(nodesBefore, getNodeCount(graph));
         assertEquals(edgesBefore, getEdgeCount(graph));
@@ -138,7 +138,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         BundleManager dao = new BundleManager(graph);
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
         ActionManager.EventContext ctx1 = am.newEventContext(doc,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.creation);
         ctx1.commit();
         assertNull(doc.getPriorVersion());
@@ -146,7 +146,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
                 .withId(doc.getId())
                 .withDataValue("identifier", "changed"), DocumentaryUnit.class);
         ActionManager.EventContext ctx2 = am.newEventContext(doc,
-                graph.frame(validUser.asVertex(), Actioner.class),
+                graph.frame(adminUser.asVertex(), Actioner.class),
                 EventTypes.modification).createVersion(doc, docBundle);
         SystemEvent event = ctx2.commit();
         assertTrue(update.updated());

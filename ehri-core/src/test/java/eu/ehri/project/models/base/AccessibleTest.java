@@ -42,7 +42,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         Accessible admin = manager.getEntity(Group.ADMIN_GROUP_IDENTIFIER, Accessible.class);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
         assertEquals(2, accessors.size());
-        assertTrue(accessors.contains(validUser)); // mike
+        assertTrue(accessors.contains(adminUser)); // mike
         assertTrue(accessors.contains(admin));
     }
 
@@ -54,7 +54,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         assertEquals(2, accessors.size());
         c1.addAccessor(admin);
         assertEquals(2, Iterables.size(c1.getAccessors())); // same size
-        c1.addAccessor(invalidUser);
+        c1.addAccessor(basicUser);
         assertEquals(3, Iterables.size(c1.getAccessors()));
     }
 
@@ -65,7 +65,7 @@ public class AccessibleTest extends AbstractFixtureTest {
         c1.removeAccessor(admin);
         List<Accessor> accessors = Lists.newArrayList(c1.getAccessors());
         assertEquals(1, accessors.size());
-        assertTrue(accessors.contains(validUser));
+        assertTrue(accessors.contains(adminUser));
     }
 
     @Test
@@ -128,6 +128,6 @@ public class AccessibleTest extends AbstractFixtureTest {
     private Mutation<DocumentaryUnit> doUpdate(DocumentaryUnit unit) throws Exception {
         Bundle doc = new Serializer(graph).entityToBundle(unit)
                 .withDataValue("somekey", "someval");
-        return loggingApi(validUser).update(doc, DocumentaryUnit.class);
+        return loggingApi(adminUser).update(doc, DocumentaryUnit.class);
     }
 }

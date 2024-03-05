@@ -56,7 +56,7 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
     @Test
     public void testCreate() throws Exception {
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
-        Repository repository = loggingApi(validUser).create(repoBundle, Repository.class);
+        Repository repository = loggingApi(adminUser).create(repoBundle, Repository.class);
         assertEquals(repository, am.getLatestGlobalEvent()
                 .getSubjects().iterator().next());
     }
@@ -64,7 +64,7 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
     @Test
     public void testUpdate() throws Exception {
         Bundle before = depSerializer.entityToBundle(manager.getEntity("r1", Repository.class));
-        Mutation<Repository> cou = loggingApi(validUser)
+        Mutation<Repository> cou = loggingApi(adminUser)
                 .update(before.withDataValue("identifier", "new-id"), Repository.class);
         assertTrue(cou.updated());
         SystemEvent event = am.getLatestGlobalEvent();
@@ -78,22 +78,22 @@ public class ApiLoggingCrudTest extends AbstractFixtureTest {
     public void testDelete() throws Exception {
         Repository r1 = manager.getEntity("r2", Repository.class);
         Bundle before = depSerializer.entityToBundle(r1);
-        loggingApi(validUser).delete("r2");
+        loggingApi(adminUser).delete("r2");
         SystemEvent event = am.getLatestGlobalEvent();
         assertFalse(manager.exists("r2"));
         assertTrue(event.getPriorVersions().iterator().hasNext());
         Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(before, old);
-        Optional<Version> r1v = loggingApi(validUser).versionManager().versionAtDeletion("r2");
+        Optional<Version> r1v = loggingApi(adminUser).versionManager().versionAtDeletion("r2");
         assertTrue(r1v.isPresent());
-        List<Version> r1vl = Lists.newArrayList(loggingApi(validUser).versionManager()
+        List<Version> r1vl = Lists.newArrayList(loggingApi(adminUser).versionManager()
                 .versionsAtDeletion(EntityClass.REPOSITORY, null, null));
         assertEquals(1, r1vl.size());
     }
 
     @Test
     public void testDeleteChildren() throws Exception {
-        List<String> out = loggingApi(validUser).deleteChildren(item.getId(), true, true, Optional.empty());
+        List<String> out = loggingApi(adminUser).deleteChildren(item.getId(), true, true, Optional.empty());
         assertEquals(Lists.newArrayList("c2", "c3"), out);
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(EventTypes.deletion, event.getEventType());
