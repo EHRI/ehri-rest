@@ -137,15 +137,15 @@ public class VirtualEadTest extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, UNIT2 + "title")
                 .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "cze");
 
-        repository1 = api(validUser).create(repo1Bundle, Repository.class);
-        repository2 = api(validUser).create(repo2Bundle, Repository.class);
+        repository1 = api(adminUser).create(repo1Bundle, Repository.class);
+        repository2 = api(adminUser).create(repo2Bundle, Repository.class);
 
         documentaryUnit1Bundle = documentaryUnit1Bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, documentDescription1Bundle);
-        unit1 = api(validUser).create(documentaryUnit1Bundle, DocumentaryUnit.class);
+        unit1 = api(adminUser).create(documentaryUnit1Bundle, DocumentaryUnit.class);
         unit1.setRepository(repository1);
 
         documentaryUnit2Bundle = documentaryUnit2Bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, documentDescription2Bundle);
-        unit2 = api(validUser).create(documentaryUnit2Bundle, DocumentaryUnit.class);
+        unit2 = api(adminUser).create(documentaryUnit2Bundle, DocumentaryUnit.class);
         unit2.setRepository(repository2);
     }
 }

@@ -49,7 +49,7 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
         List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv");
-        ImportLog importLog = CsvImportManager.create(graph, ps, validUser, EadImporter.class, ImportOptions.basic())
+        ImportLog importLog = CsvImportManager.create(graph, ps, adminUser, EadImporter.class, ImportOptions.basic())
                 .importInputStream(ios, logMessage);
         System.out.println(importLog);
         // After...

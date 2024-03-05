@@ -58,7 +58,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
         assertNotNull(ios);
 
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
         importer.setTolerant(true);
 
         // Before...
@@ -82,7 +82,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "698";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, Concept.class));
@@ -108,7 +108,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
 
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
         InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc1)
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
                 .setTolerant(true);
         importer.importFile(ios, logMessage);
 
@@ -119,7 +119,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         Vocabulary cvoc2 = manager.getEntity("cvoc2", Vocabulary.class);
         InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM);
         assertNotNull(niod_ios);
-        SkosImporter niod_importer = SkosImporterFactory.newSkosImporter(graph, validUser, cvoc2);
+        SkosImporter niod_importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc2);
         niod_importer.setTolerant(true);
         int voccount = toList(cvoc2.getConcepts()).size();
 

@@ -47,7 +47,7 @@ public class StreamingExecutionStrategyTest extends AbstractFixtureTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (JsonGenerator generator = mapper.getFactory().createGenerator(out)
                 .useDefaultPrettyPrinter()) {
-            GraphQLSchema schema = new GraphQLImpl(api(validUser), true).getSchema();
+            GraphQLSchema schema = new GraphQLImpl(api(adminUser), true).getSchema();
 
             final StreamingExecutionStrategy strategy = StreamingExecutionStrategy.jsonGenerator(generator);
             final ExecutionInput input = ExecutionInput.newExecutionInput()

@@ -44,13 +44,13 @@ public class ApiLoggingTest extends AbstractFixtureTest {
     @Test
     public void testUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = api(validUser).create(bundle, DocumentaryUnit.class);
+        DocumentaryUnit unit = api(adminUser).create(bundle, DocumentaryUnit.class);
         assertEquals(TestData.TEST_COLLECTION_NAME, unit.getProperty("name"));
 
         String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
-        DocumentaryUnit changedUnit = api(validUser).update(newBundle, DocumentaryUnit.class).getNode();
+        DocumentaryUnit changedUnit = api(adminUser).update(newBundle, DocumentaryUnit.class).getNode();
         assertEquals(newName, changedUnit.getProperty("name"));
         assertTrue(changedUnit.getDescriptions().iterator().hasNext());
         DocumentaryUnitDescription desc = graph.frame(
@@ -69,13 +69,13 @@ public class ApiLoggingTest extends AbstractFixtureTest {
     @Test
     public void testUserUpdate() throws Exception {
         Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
-        UserProfile user = loggingApi(validUser).create(bundle, UserProfile.class);
+        UserProfile user = loggingApi(adminUser).create(bundle, UserProfile.class);
         assertEquals(TestData.TEST_USER_NAME, user.getName());
 
         String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue("name", newName);
 
-        UserProfile changedUser = loggingApi(validUser).update(newBundle, UserProfile.class).getNode();
+        UserProfile changedUser = loggingApi(adminUser).update(newBundle, UserProfile.class).getNode();
         assertEquals(newName, changedUser.getName());
 
         // Check we have an audit action.
@@ -83,8 +83,8 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         // FIXME: getLatestAction() should return a single item, but due to
         // a current (2.2.0) limitation in frames' @GremlinGroovy mechanism
         // it can't
-        assertEquals(1, Iterables.size(validUser.getLatestAction()));
-        SystemEvent event = Iterables.getFirst(validUser.getLatestAction(), null);
+        assertEquals(1, Iterables.size(adminUser.getLatestAction()));
+        SystemEvent event = Iterables.getFirst(adminUser.getLatestAction(), null);
         assertNotNull(event);
         assertNotNull(event.getFirstSubject());
         assertEquals(changedUser.asVertex(), event.getFirstSubject().asVertex());
@@ -115,10 +115,10 @@ public class ApiLoggingTest extends AbstractFixtureTest {
     @Test
     public void testDelete() throws Exception {
         int shouldDelete = 1;
-        int origActionCount = toList(validUser.getHistory()).size();
+        int origActionCount = toList(adminUser.getHistory()).size();
 
         // FIXME: Surely there's a better way of doing this???
-        DocumentaryUnit item = api(validUser).get("c4", DocumentaryUnit.class);
+        DocumentaryUnit item = api(adminUser).get("c4", DocumentaryUnit.class);
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentaryUnitDescription d = graph.frame(descIter.next().asVertex(), DocumentaryUnitDescription.class);
@@ -128,10 +128,10 @@ public class ApiLoggingTest extends AbstractFixtureTest {
         }
 
         String log = "Deleting item";
-        int deleted = loggingApi(validUser).delete(item.getId(), Optional.of(log));
+        int deleted = loggingApi(adminUser).delete(item.getId(), Optional.of(log));
         assertEquals(shouldDelete, deleted);
 
-        List<SystemEvent> actions = toList(validUser.getActions());
+        List<SystemEvent> actions = toList(adminUser.getActions());
 
         // Check there's an extra audit log for the user
         assertEquals(origActionCount + 1, actions.size());

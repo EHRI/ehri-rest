@@ -45,9 +45,9 @@ public class GroupTest extends AbstractFixtureTest {
         List<Accessor> list = Lists.newArrayList(admin.getMembers());
         long numMembers = list.size();
         // Adding same member twice should affect member count - it should be idempotent
-        admin.addMember(validUser);
+        admin.addMember(adminUser);
         assertEquals(numMembers, Iterables.size(admin.getMembers()));
-        admin.addMember(invalidUser);
+        admin.addMember(basicUser);
         assertEquals(numMembers + 1, Iterables.size(admin.getMembers()));
     }
 
@@ -57,9 +57,9 @@ public class GroupTest extends AbstractFixtureTest {
         List<Accessor> list = Lists.newArrayList(admin.getMembers());
         long numMembers = list.size();
         // Adding same member twice should affect member count - it should be idempotent
-        admin.removeMember(invalidUser);
+        admin.removeMember(basicUser);
         assertEquals(numMembers, Iterables.size(admin.getMembers()));
-        admin.removeMember(validUser);
+        admin.removeMember(adminUser);
         assertEquals(numMembers - 1, Iterables.size(admin.getMembers()));
     }
 

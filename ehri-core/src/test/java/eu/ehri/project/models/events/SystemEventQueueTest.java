@@ -16,7 +16,7 @@ public class SystemEventQueueTest extends AbstractFixtureTest {
         SystemEventQueue queue = manager.getEntity(ActionManager.GLOBAL_EVENT_ROOT, SystemEventQueue.class);
         assertNull(queue.getLatestEvent());
         ActionManager.EventContext ctx = new ActionManager(graph)
-                .newEventContext(validUser, validUser.as(Actioner.class), EventTypes.creation);
+                .newEventContext(adminUser, adminUser.as(Actioner.class), EventTypes.creation);
         SystemEvent commit = ctx.commit();
         assertEquals(commit, queue.getLatestEvent());
     }
@@ -25,7 +25,7 @@ public class SystemEventQueueTest extends AbstractFixtureTest {
     public void testGetSystemEvents() throws Exception {
         SystemEventQueue queue = manager.getEntity(ActionManager.GLOBAL_EVENT_ROOT, SystemEventQueue.class);
         new ActionManager(graph)
-                .newEventContext(validUser, validUser.as(Actioner.class), EventTypes.creation)
+                .newEventContext(adminUser, adminUser.as(Actioner.class), EventTypes.creation)
                 .commit();
         assertEquals(1, Iterators.size(queue.getSystemEvents().iterator()));
     }

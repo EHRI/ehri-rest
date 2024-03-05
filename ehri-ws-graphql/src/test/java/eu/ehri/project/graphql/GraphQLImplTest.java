@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 public class GraphQLImplTest extends AbstractFixtureTest {
     @Test
     public void testGetSchema() throws Exception {
-        GraphQLImpl graphQL = new GraphQLImpl(api(validUser));
+        GraphQLImpl graphQL = new GraphQLImpl(api(adminUser));
         GraphQLSchema schema = graphQL.getSchema();
         String testQuery = readResourceFileAsString("testquery.graphql");
         ExecutionResult result = GraphQL.newGraphQL(schema).build().execute(testQuery);

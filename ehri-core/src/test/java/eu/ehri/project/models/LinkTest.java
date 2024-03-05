@@ -32,7 +32,7 @@ public class LinkTest extends AbstractFixtureTest {
     @Test
     public void testGetLinker() throws Exception {
         Link link = manager.getEntity("link1", Link.class);
-        assertEquals(validUser, link.getLinker());
+        assertEquals(adminUser, link.getLinker());
     }
 
     @Test

@@ -17,7 +17,7 @@ public class LinkResolverTest extends AbstractFixtureTest {
     @Test
     public void solveUndeterminedRelationships() throws Exception {
         Described unit = manager.getEntity("c5", Described.class);
-        LinkResolver linkResolver = new LinkResolver(graph, validUser);
+        LinkResolver linkResolver = new LinkResolver(graph, adminUser);
         int created = linkResolver.solveUndeterminedRelationships(unit);
         assertEquals(2, created);
 

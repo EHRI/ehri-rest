@@ -59,7 +59,7 @@ public class VirtualUnitsApiTest extends AbstractFixtureTest {
         // Make a single-use iterator to test this works with streams.
         // The stream is iterated twice so it has to handle that correctly.
         Iterable<DocumentaryUnit> iter = () -> Lists.newArrayList(c1).iterator();
-        views(validUser).moveIncludedUnits(vu1, vu2, iter);
+        views(adminUser).moveIncludedUnits(vu1, vu2, iter);
         assertFalse(Iterables.contains(vu1.getIncludedUnits(), c1));
         assertTrue(Iterables.contains(vu2.getIncludedUnits(), c1));
     }

@@ -58,7 +58,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
 
     @Test
     public void testGetLinks() throws Exception {
-        List<Link> links = Lists.newArrayList(api(validUser).getLinks("c1"));
+        List<Link> links = Lists.newArrayList(api(adminUser).getLinks("c1"));
         assertEquals(2, links.size());
         assertTrue(links.contains(manager.getEntity("link1", Link.class)));
         assertTrue(links.contains(manager.getEntity("link2", Link.class)));
@@ -67,7 +67,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
     @Test
     public void testGetLinksWithAclFilter() throws Exception {
         // Link1 should not be retrieved because target c1 is not visible to invalidUser
-        List<Link> links = Lists.newArrayList(api(invalidUser).getLinks("c4"));
+        List<Link> links = Lists.newArrayList(api(basicUser).getLinks("c4"));
         assertEquals(2, links.size());
         assertTrue(links.contains(manager.getEntity("link4", Link.class)));
         assertTrue(links.contains(manager.getEntity("link5", Link.class)));
@@ -83,19 +83,19 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
         // We have to first grant permission to create links...
-        acl.grantPermission(src, PermissionType.ANNOTATE, invalidUser);
-        Link link = loggingApi(invalidUser)
+        acl.grantPermission(src, PermissionType.ANNOTATE, basicUser);
+        Link link = loggingApi(basicUser)
                 .createLink("c1", "a1", Lists.newArrayList("ur1"),
                         linkBundle, false, Lists.newArrayList(), Optional.empty());
         assertEquals(linkDesc, link.getDescription());
-        assertTrue(acl.hasPermission(link, PermissionType.OWNER, invalidUser));
+        assertTrue(acl.hasPermission(link, PermissionType.OWNER, basicUser));
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
         assertTrue(Iterables.contains(link.getLinkTargets(), dst));
         assertNull(link.getLinkSource());
         assertEquals(1, Iterables.size(link.getLinkBodies()));
         assertTrue(Iterables.contains(link.getLinkBodies(), rel));
-        assertTrue(Lists.newArrayList(api(invalidUser).actionManager()
+        assertTrue(Lists.newArrayList(api(basicUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
     }
 
@@ -103,7 +103,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
     public void testCreateDirectionalLink() throws Exception {
         DocumentaryUnit src = manager.getEntity("c1", DocumentaryUnit.class);
         HistoricalAgent dst = manager.getEntity("a1", HistoricalAgent.class);
-        Link link = loggingApi(validUser)
+        Link link = loggingApi(adminUser)
                 .createLink("c1", "a1", Lists.newArrayList("ur1"),
                         getLinkBundle("test", "associative"),
                         true, Lists.newArrayList(), Optional.empty());
@@ -114,7 +114,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateLinkWithoutPermission() throws Exception {
-        api(invalidUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
+        api(basicUser).createLink("c1", "a1", Lists.newArrayList("ur1"),
                 getLinkBundle("won't work!", "too bad!"), false,
                 Lists.newArrayList(), Optional.empty());
     }
@@ -128,12 +128,12 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         String linkDesc = "Test Link";
         String linkType = "associative";
         Bundle linkBundle = getLinkBundle(linkDesc, linkType);
-        Link link = loggingApi(validUser)
+        Link link = loggingApi(adminUser)
                 .createAccessPointLink("c1", "a1", "cd1",
                         linkDesc, AccessPointType.subject, linkBundle,
-                        Lists.newArrayList(validUser, invalidUser), Optional.empty());
+                        Lists.newArrayList(adminUser, basicUser), Optional.empty());
         assertNull(linkDesc, link.getLinkField());
-        assertTrue(acl.hasPermission(link, PermissionType.OWNER, validUser));
+        assertTrue(acl.hasPermission(link, PermissionType.OWNER, adminUser));
         assertEquals(linkDesc, link.getDescription());
         assertEquals(2, Iterables.size(link.getLinkTargets()));
         assertTrue(Iterables.contains(link.getLinkTargets(), src));
@@ -145,7 +145,7 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         Description d = rel.getDescription();
         assertEquals(desc, d);
         assertTrue(link.hasAccessRestriction());
-        assertTrue(Lists.newArrayList(api(validUser).actionManager()
+        assertTrue(Lists.newArrayList(api(adminUser).actionManager()
                 .getLatestGlobalEvent().getSubjects()).contains(link));
     }
 
@@ -155,15 +155,15 @@ public class ApiLinkingTest extends AbstractFixtureTest {
         AclManager acl = new AclManager(graph);
         Bundle linkBundle = getLinkBundle("Delete test", "associative");
         // We have to first grant permission to create links...
-        acl.grantPermission(src, PermissionType.ANNOTATE, invalidUser);
-        Link link = loggingApi(invalidUser)
+        acl.grantPermission(src, PermissionType.ANNOTATE, basicUser);
+        Link link = loggingApi(basicUser)
                 .createLink("c1", "a1", Lists.newArrayList("ur1"),
                         linkBundle, false, Lists.newArrayList(), Optional.empty());
         assertEquals(2, Iterables.size(link.getLinkTargets()));
 
-        assertFalse(acl.hasPermission(ContentTypes.LINK, PermissionType.DELETE, invalidUser));
-        loggingApi(invalidUser).delete(link.getId());
-        assertEquals(api(invalidUser).actionManager()
+        assertFalse(acl.hasPermission(ContentTypes.LINK, PermissionType.DELETE, basicUser));
+        loggingApi(basicUser).delete(link.getId());
+        assertEquals(api(basicUser).actionManager()
                 .getLatestGlobalEvent().getEventType(), EventTypes.deletion);
     }
 

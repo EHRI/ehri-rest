@@ -57,7 +57,7 @@ public class DublinCore11ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(Described item, String lang) throws Exception {
-        DublinCoreExporter exporter = new DublinCore11Exporter(api(validUser));
+        DublinCoreExporter exporter = new DublinCore11Exporter(api(adminUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(item, baos, lang);
         String xml = baos.toString("UTF-8");

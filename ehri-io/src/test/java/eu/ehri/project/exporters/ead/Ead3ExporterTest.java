@@ -164,7 +164,7 @@ public class Ead3ExporterTest extends XmlExporterTest {
     }
 
     private String testExport(DocumentaryUnit unit, String lang) throws Exception {
-        Ead3Exporter exporter = new Ead3Exporter(api(validUser));
+        Ead3Exporter exporter = new Ead3Exporter(api(adminUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(unit, baos, lang);
         String xml = baos.toString("UTF-8");
@@ -176,12 +176,12 @@ public class Ead3ExporterTest extends XmlExporterTest {
     private String testImportExport(Repository repository, String resourceName,
             String topLevelIdentifier, String lang) throws Exception {
         InputStream ios = ClassLoader.getSystemResourceAsStream(resourceName);
-        SaxImportManager.create(graph, repository, validUser,
+        SaxImportManager.create(graph, repository, adminUser,
                 EadImporter.class, EadHandler.class, ImportOptions.properties("ead3.properties"))
                 .importInputStream(ios, "Testing import/export");
         DocumentaryUnit fonds = graph.frame(
                 getVertexByIdentifier(graph, topLevelIdentifier), DocumentaryUnit.class);
-        Ead3Exporter exporter = new Ead3Exporter(api(validUser));
+        Ead3Exporter exporter = new Ead3Exporter(api(adminUser));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         exporter.export(fonds, baos, lang);
         String xml = baos.toString("UTF-8");

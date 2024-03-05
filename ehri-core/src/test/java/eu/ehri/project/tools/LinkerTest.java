@@ -54,7 +54,7 @@ public class LinkerTest extends AbstractFixtureTest {
         int newLinkCount = linker
                 .withExcludeSingles(false)
                 .withLogMessage(logMessage)
-                .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
+                .createAndLinkRepositoryVocabulary(repository, vocabulary, adminUser);
         assertEquals(5, newLinkCount);
         assertEquals(eventCount + 2,
                 Iterables.size(actionManager.getLatestGlobalEvents()));
@@ -72,7 +72,7 @@ public class LinkerTest extends AbstractFixtureTest {
         int newLinkCount = linker
                 .withExcludeSingles(false)
                 .withAccessPointType(AccessPointType.genre)
-                .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
+                .createAndLinkRepositoryVocabulary(repository, vocabulary, adminUser);
         assertEquals(0, newLinkCount);
         // No new events should have been created...
         assertEquals(eventCount,
@@ -88,7 +88,7 @@ public class LinkerTest extends AbstractFixtureTest {
         // This won't create any links because all of the access points only point
         // to single items
         int newLinkCount = linker.withExcludeSingles(true)
-            .createAndLinkRepositoryVocabulary(repository, vocabulary, validUser);
+            .createAndLinkRepositoryVocabulary(repository, vocabulary, adminUser);
         assertEquals(0, newLinkCount);
         // No new events should have been created...
         assertEquals(eventCount,

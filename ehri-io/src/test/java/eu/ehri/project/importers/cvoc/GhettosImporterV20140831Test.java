@@ -44,7 +44,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/ghettos.rdf");
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary)
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
                 .setTolerant(true)
                 .allowUpdates(true);
         ImportLog log = importer.importFile(ios, logMessage);
@@ -62,7 +62,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "0";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
 
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(

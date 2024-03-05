@@ -33,7 +33,7 @@ public class LinkImporterTest extends AbstractFixtureTest {
     @Test
     public void importLinks() throws Exception {
 
-        ImportLog log = new LinkImporter(graph, validUser, false)
+        ImportLog log = new LinkImporter(graph, adminUser, false)
                 .importLinks(goodData, "testing");
         assertEquals(3, log.getCreated());
         assertTrue("Link exists",
@@ -44,13 +44,13 @@ public class LinkImporterTest extends AbstractFixtureTest {
 
     @Test(expected = DeserializationError.class)
     public void importLinksWithMissingTarget() throws Exception {
-        new LinkImporter(graph, validUser, false)
+        new LinkImporter(graph, adminUser, false)
                 .importLinks(badData, "testing");
     }
 
     @Test
     public void importLinkWithAccessPoint() throws Exception {
-        new LinkImporter(graph, validUser, false)
+        new LinkImporter(graph, adminUser, false)
                 .importLinks(goodData, "testing");
         assertTrue("Link exists",
                 linkExists("r1", "c1", "ur1", "Test 2"));
@@ -58,7 +58,7 @@ public class LinkImporterTest extends AbstractFixtureTest {
 
     @Test
     public void importLinksWithMissingTargetInTolerantMode() throws Exception {
-        ImportLog log = new LinkImporter(graph, validUser, true)
+        ImportLog log = new LinkImporter(graph, adminUser, true)
                 .importLinks(badData, "testing");
         assertEquals(3, log.getCreated());
     }
@@ -72,7 +72,7 @@ public class LinkImporterTest extends AbstractFixtureTest {
                         ImmutableList.of("Disconnected Access 1", "r4") // Updated
 
         ));
-        ImportLog log = new LinkImporter(graph, validUser, false)
+        ImportLog log = new LinkImporter(graph, adminUser, false)
                 .importCoreferences(r1, data, "Testing");
         assertEquals(1, log.getCreated());
         assertEquals(1, log.getUpdated());

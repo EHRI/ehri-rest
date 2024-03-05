@@ -44,12 +44,12 @@ public class InheritedGlobalPermissionSetTest extends AbstractFixtureTest {
     @Test
     public void testHas() throws Exception {
         InheritedGlobalPermissionSet permissions1
-                = aclManager.getInheritedGlobalPermissions(invalidUser);
+                = aclManager.getInheritedGlobalPermissions(basicUser);
         assertFalse(permissions1.has(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE));
         assertFalse(permissions1.has(ContentTypes.DOCUMENTARY_UNIT, PermissionType.DELETE));
 
         InheritedGlobalPermissionSet permissions2
-                = aclManager.getInheritedGlobalPermissions(validUser);
+                = aclManager.getInheritedGlobalPermissions(adminUser);
         assertTrue(permissions2.has(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE));
         assertTrue(permissions2.has(ContentTypes.DOCUMENTARY_UNIT, PermissionType.DELETE));
     }
@@ -57,7 +57,7 @@ public class InheritedGlobalPermissionSetTest extends AbstractFixtureTest {
     @Test
     public void testSerialize() throws Exception {
         InheritedGlobalPermissionSet permissions
-                = aclManager.getInheritedGlobalPermissions(invalidUser);
+                = aclManager.getInheritedGlobalPermissions(basicUser);
         List<Map<String,GlobalPermissionSet>> list = permissions.serialize();
         assertEquals(2, list.size());
     }

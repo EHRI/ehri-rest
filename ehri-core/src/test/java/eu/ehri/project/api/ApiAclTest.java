@@ -163,14 +163,14 @@ public class ApiAclTest extends AbstractFixtureTest {
     public void testValidUserCanAddAccessorToGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        api(validUser).acl().addAccessorToGroup(group, user);
+        api(adminUser).acl().addAccessorToGroup(group, user);
     }
 
     @Test(expected = PermissionDenied.class)
     public void testInvalidUserCannotAddAccessorToGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("kcl", Group.class);
-        api(invalidUser).acl().addAccessorToGroup(group, user);
+        api(basicUser).acl().addAccessorToGroup(group, user);
     }
 
     @Test
@@ -178,7 +178,7 @@ public class ApiAclTest extends AbstractFixtureTest {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("dans", Group.class);
         assertTrue(Lists.newArrayList(group.getMembers()).contains(user));
-        api(validUser).acl().removeAccessorFromGroup(group, user);
+        api(adminUser).acl().removeAccessorFromGroup(group, user);
         assertFalse(Lists.newArrayList(group.getMembers()).contains(user));
     }
 
@@ -186,14 +186,14 @@ public class ApiAclTest extends AbstractFixtureTest {
     public void testInvalidUserCannotRemoveAccessorFromGroup() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("dans", Group.class);
-        api(invalidUser).acl().removeAccessorFromGroup(group, user);
+        api(basicUser).acl().removeAccessorFromGroup(group, user);
     }
 
     @Test
     public void testAddUserToGroupGranteeMembership() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("niod", Group.class);
-        Accessor grantee = invalidUser;
+        Accessor grantee = basicUser;
         // Grant the user specific permissions to update the group
         api(grantee).aclManager().grantPermission(
                 user.as(PermissionGrantTarget.class), PermissionType.GRANT, grantee);
@@ -217,7 +217,7 @@ public class ApiAclTest extends AbstractFixtureTest {
     public void testAddUserToGroupGranteePerms() throws Exception {
         Accessor user = manager.getEntity("linda", Accessor.class);
         Group group = manager.getEntity("soma", Group.class);
-        Accessor grantee = invalidUser;
+        Accessor grantee = basicUser;
         assertFalse(AclManager.belongsToAdmin(grantee));
         // Grant the user specific permissions to update the group
         group.addMember(grantee);

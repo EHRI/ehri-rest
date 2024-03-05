@@ -42,7 +42,7 @@ public class Wp2OrganisationsTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
     }

@@ -45,7 +45,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
 
@@ -62,7 +62,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
 
         // get a top concept
         String skosConceptId = "PLACE.ČSÚ.544256";
-        QueryApi query = api(validUser).query();
+        QueryApi query = api(adminUser).query();
 
         // Query for document identifier.
         List<Concept> list = toList(query.withLimit(1).page(

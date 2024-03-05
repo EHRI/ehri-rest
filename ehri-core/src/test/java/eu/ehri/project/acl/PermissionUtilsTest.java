@@ -46,14 +46,14 @@ public class PermissionUtilsTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCheckContentPermissionThrows() throws Exception {
-        viewHelper.checkContentPermission(invalidUser,
+        viewHelper.checkContentPermission(basicUser,
                 ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE);
     }
 
     @Test
     public void testCheckContentPermissionWithScope() throws Exception {
         Repository r1 = manager.getEntity("r1", Repository.class);
-        viewHelper.setScope(r1).checkContentPermission(invalidUser,
+        viewHelper.setScope(r1).checkContentPermission(basicUser,
                 ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE);
     }
 
@@ -82,13 +82,13 @@ public class PermissionUtilsTest extends AbstractFixtureTest {
     @Test
     public void testCheckReadAccess() throws Exception {
         DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
-        viewHelper.checkReadAccess(c1, validUser);
+        viewHelper.checkReadAccess(c1, adminUser);
     }
 
     @Test(expected = AccessDenied.class)
     public void testCheckReadAccessThrows() throws Exception {
         DocumentaryUnit c1 = manager.getEntity("c1", DocumentaryUnit.class);
-        viewHelper.checkReadAccess(c1, invalidUser);
+        viewHelper.checkReadAccess(c1, basicUser);
     }
 
     @Test

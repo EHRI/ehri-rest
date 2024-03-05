@@ -137,9 +137,9 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
                 .withDataValue(Ontology.NAME_KEY, "FAST Keywords");
         Bundle conceptBundle = Bundle.of(EntityClass.CVOC_CONCEPT)
                 .withDataValue(Ontology.IDENTIFIER_KEY, "fst894382");
-        Vocabulary vocabulary = api(validUser).create(vocabularyBundle, Vocabulary.class);
+        Vocabulary vocabulary = api(adminUser).create(vocabularyBundle, Vocabulary.class);
         logger.debug(vocabulary.getId());
-        Concept concept_716 = api(validUser).create(conceptBundle, Concept.class);
+        Concept concept_716 = api(adminUser).create(conceptBundle, Concept.class);
         vocabulary.addItem(concept_716);
 
 

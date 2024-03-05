@@ -62,7 +62,7 @@ public class EadSyncTest extends AbstractImporterTest {
     public void testUnitSyncWithUserGeneratedContent() throws Exception {
         DocumentaryUnit scope = manager.getEntity("nl-r1-ctop_level_fonds", DocumentaryUnit.class);
         Set<String> excludes = Sets.newHashSet();
-        Annotation testAnnotation = api(validUser).createAnnotation(
+        Annotation testAnnotation = api(adminUser).createAnnotation(
                 "nl-r1-ctop_level_fonds-c00001-c00002-2",
                 "nl-r1-ctop_level_fonds-c00001-c00002-2.eng-test_desc_id_eng",
                 Bundle.of(EntityClass.ANNOTATION, ImmutableMap.of("body", "Test annotation!")),
@@ -81,7 +81,7 @@ public class EadSyncTest extends AbstractImporterTest {
         assertEquals(unit, testAnnotation.getTargets().iterator().next());
         assertEquals(desc, testAnnotation.getTargetParts().iterator().next());
         // Transfer event prior to delete event...
-        SystemEvent transferEvent = api(validUser).actionManager()
+        SystemEvent transferEvent = api(adminUser).actionManager()
                 .getLatestGlobalEvent().getPriorEvent();
         assertEquals(EventTypes.modification, transferEvent.getEventType());
         assertEquals(logMessage, transferEvent.getLogMessage());
@@ -91,7 +91,7 @@ public class EadSyncTest extends AbstractImporterTest {
     public void testUnitSyncWithAccessControl() throws Exception {
         DocumentaryUnit scope = manager.getEntity("nl-r1-ctop_level_fonds", DocumentaryUnit.class);
         DocumentaryUnit child = manager.getEntity("nl-r1-ctop_level_fonds-c00001-c00002-2", DocumentaryUnit.class);
-        api(validUser).acl().setAccessors(child, Sets.newHashSet(validUser));
+        api(adminUser).acl().setAccessors(child, Sets.newHashSet(adminUser));
         runSync(scope, Sets.newHashSet(), "Test access sync", "hierarchical-ead-sync-test.xml");
 
         // Check the new item is in the VC
@@ -99,7 +99,7 @@ public class EadSyncTest extends AbstractImporterTest {
                 "nl-r1-ctop_level_fonds-c00001-c00002-2_parent-c00002_2", DocumentaryUnit.class);
         List<Accessor> accessors = Lists.newArrayList(moved.getAccessors());
         assertEquals(1, accessors.size());
-        assertTrue(accessors.contains(validUser));
+        assertTrue(accessors.contains(adminUser));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class EadSyncTest extends AbstractImporterTest {
     }
 
     private SyncLog runSync(PermissionScope scope, Set<String> excludes, String logMessage, String ead) throws Exception {
-        EadSync sync = EadSync.create(graph, api(validUser), scope, validUser, importManager);
+        EadSync sync = EadSync.create(graph, api(adminUser), scope, adminUser, importManager);
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead);
         return sync.sync(m -> {
             try {
@@ -156,7 +156,7 @@ public class EadSyncTest extends AbstractImporterTest {
         // right place
         assertFalse(manager.exists("nl-r1-ctop_level_fonds-c00001-c00002-2"));
         assertFalse(manager.exists("nl-r1-ctop_level_fonds-c00001-c00002-1"));
-        SystemEvent ev = api(validUser).actionManager().getLatestGlobalEvent();
+        SystemEvent ev = api(adminUser).actionManager().getLatestGlobalEvent();
         assertEquals(logMessage, ev.getLogMessage());
         assertEquals(log.deleted().size() + log.moved().size(), ev.subjectCount());
         assertEquals(scope, ev.getEventScope());
