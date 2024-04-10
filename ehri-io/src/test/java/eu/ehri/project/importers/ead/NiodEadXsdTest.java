@@ -20,25 +20,18 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ImportOptions;
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.DocumentaryUnitDescription;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class NiodEadXsdTest extends AbstractImporterTest {
@@ -61,13 +54,14 @@ public class NiodEadXsdTest extends AbstractImporterTest {
 
         //  Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         ImportOptions options = ImportOptions.properties("niodead.properties").withTolerant(true);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
+                    .importInputStream(ios, logMessage);
 
-        // One item without an ID errored
-        assertEquals(1, log.getErrored());
+            // One item without an ID errored
+            assertEquals(1, log.getErrored());
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

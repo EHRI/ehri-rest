@@ -76,82 +76,84 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "wp2ead.properties");
-        ImportLog log = importManager.importInputStream(ios, logMessage);
+        try (final InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
+             final InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log = importManager.importInputStream(ios, logMessage);
 
-        //printGraph(graph);
-        // How many new nodes will have been created? We should have
-        // - 4 more maintenance events
-        // - 4 more DocumentaryUnits fonds C1 C2 C3 
-        // - 4 more DocumentDescription
-        // - 1 more DatePeriod 0 0 1
-        // - 11 UndeterminedRelationship, 0 0 0 11
-        // - 5 more import Event links (4 for every Unit, 1 for the User)
-        // - 1 more import Event
-        // - 1 Link as resolved relationship 
+            //printGraph(graph);
+            // How many new nodes will have been created? We should have
+            // - 4 more maintenance events
+            // - 4 more DocumentaryUnits fonds C1 C2 C3
+            // - 4 more DocumentDescription
+            // - 1 more DatePeriod 0 0 1
+            // - 11 UndeterminedRelationship, 0 0 0 11
+            // - 5 more import Event links (4 for every Unit, 1 for the User)
+            // - 1 more import Event
+            // - 1 Link as resolved relationship
 
-        int newCount = count + 31;
-        assertEquals(newCount, getNodeCount(graph));
+            int newCount = count + 31;
+            assertEquals(newCount, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
-        assertTrue(docs.iterator().hasNext());
-        DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
+            Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
+            assertTrue(docs.iterator().hasNext());
+            DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
-        // check the child items
-        DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
-        DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
-        DocumentaryUnit c3 = graph.frame(getVertexByIdentifier(graph, C3), DocumentaryUnit.class);
+            // check the child items
+            DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
+            DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
+            DocumentaryUnit c3 = graph.frame(getVertexByIdentifier(graph, C3), DocumentaryUnit.class);
 
-        assertEquals(fonds, c1.getParent());
-        assertEquals(c1, c2.getParent());
-        assertEquals(c2, c3.getParent());
-        // Expect no duplication of ID parts
-        assertEquals(C3_ID, c3.getId());
+            assertEquals(fonds, c1.getParent());
+            assertEquals(c1, c2.getParent());
+            assertEquals(c2, c3.getParent());
+            // Expect no duplication of ID parts
+            assertEquals(C3_ID, c3.getId());
 
-        // Ensure the import action has the right number of subjects.
-        //        Iterable<Action> actions = unit.getHistory();
-        // Check we've created 6 items
-        assertEquals(4, log.getCreated());
-        SystemEvent ev = actionManager.getLatestGlobalEvent();
-        assertEquals(logMessage, ev.getLogMessage());
+            // Ensure the import action has the right number of subjects.
+            //        Iterable<Action> actions = unit.getHistory();
+            // Check we've created 6 items
+            assertEquals(4, log.getCreated());
+            SystemEvent ev = actionManager.getLatestGlobalEvent();
+            assertEquals(logMessage, ev.getLogMessage());
 
-        //assert keywords are matched to cvocs
-        assertTrue(!toList(c3.getLinks()).isEmpty());
-        for (Link a : c3.getLinks()) {
-            logger.debug(a.getLinkType() + " " + a.getDescription());
-            assertEquals("associative", a.getLinkType());
-            assertEquals(1, Iterables.size(a.getLinkBodies()));
+            //assert keywords are matched to cvocs
+            assertTrue(!toList(c3.getLinks()).isEmpty());
+            for (Link a : c3.getLinks()) {
+                logger.debug(a.getLinkType() + " " + a.getDescription());
+                assertEquals("associative", a.getLinkType());
+                assertEquals(1, Iterables.size(a.getLinkBodies()));
+            }
+
+            List<Accessible> subjects = toList(ev.getSubjects());
+            int countSubject = 0;
+            for (Accessible subject : subjects) {
+                logger.info("identifier: " + subject.getId());
+                countSubject++;
+            }
+            assertTrue(countSubject > 0);
+
+            assertEquals(4, subjects.size());
+            assertEquals(log.getChanged(), subjects.size());
+
+            // Check permission scopes
+            assertEquals(repository, fonds.getPermissionScope());
+            assertEquals(fonds, c1.getPermissionScope());
+            assertEquals(c1, c2.getPermissionScope());
+            assertEquals(c2, c3.getPermissionScope());
+
+            // Check the author of the top level description
+            for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
+                assertEquals("BT", d.getProperty("processInfo"));
+            }
+
+            // Check the importer is Idempotent
+            ImportLog log2 = importManager
+                    .withUpdates(true)
+                    .importInputStream(ios2, logMessage);
+            assertEquals(4, log2.getUnchanged());
+            //assertEquals(0, log2.getChanged());
+            assertEquals(newCount, getNodeCount(graph));
         }
-
-        List<Accessible> subjects = toList(ev.getSubjects());
-        int countSubject = 0;
-        for (Accessible subject : subjects) {
-            logger.info("identifier: " + subject.getId());
-            countSubject++;
-        }
-        assertTrue(countSubject > 0);
-
-        assertEquals(4, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
-
-        // Check permission scopes
-        assertEquals(repository, fonds.getPermissionScope());
-        assertEquals(fonds, c1.getPermissionScope());
-        assertEquals(c1, c2.getPermissionScope());
-        assertEquals(c2, c3.getPermissionScope());
-
-        // Check the author of the top level description
-        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
-            assertEquals("BT", d.getProperty("processInfo"));
-        }
-
-        // Check the importer is Idempotent
-        ImportLog log2 = importManager
-                .withUpdates(true)
-                .importInputStream(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
-        assertEquals(4, log2.getUnchanged());
-        //assertEquals(0, log2.getChanged());
-        assertEquals(newCount, getNodeCount(graph));
     }
 }

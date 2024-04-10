@@ -50,9 +50,10 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "bundesarchive.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "bundesarchive.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -71,14 +72,12 @@ public class BundesarchiveVcTest extends AbstractImporterTest {
         int newCount = origCount + 15;
 
         assertEquals(newCount, getNodeCount(graph));
+        graph.frame(getVertexByIdentifier(graph, ARCHDESC), DocumentaryUnit.class);
 
-        graph.frame(
-                getVertexByIdentifier(graph, ARCHDESC),
-                DocumentaryUnit.class);
-
-        InputStream iosvc = ClassLoader.getSystemResourceAsStream(VCFILE);
-        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
-                .importInputStream(iosvc, logMessage);
+        try (InputStream iosvc = ClassLoader.getSystemResourceAsStream(VCFILE)) {
+            saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
+                    .importInputStream(iosvc, logMessage);
+        }
         printGraph(graph);
 
         VirtualUnit ss = graph.frame(getVertexByIdentifier(graph, "0.0.0.0"), VirtualUnit.class);

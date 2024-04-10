@@ -51,9 +51,13 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                    .importInputStream(ios, logMessage);
+
+            // Check we've only created 1 *logical* item...
+            assertEquals(1, log.getChanged());
+        }
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -91,12 +95,8 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // Check the right nodes get created.
         int createCount = origCount + 13;
 
-        // - 4 more UnderterminedRelationship nodes
-
+        // - 4 more UndeterminedRelationship nodes
         assertEquals(createCount, getNodeCount(graph));
-
-        // Yet we've only created 1 *logical* item...
-        assertEquals(1, log.getChanged());
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
@@ -104,14 +104,15 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         assertEquals(logMessage, actions.get(0).getLogMessage());
 
         // Now re-import the same file
-        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = saxImportManager(EadImporter.class, EadHandler.class)
-                .importInputStream(ios2, logMessage);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                    .importInputStream(ios2, logMessage);
+            // No logical item should've been updated
+            assertEquals(0, log.getUpdated());
+        }
 
         // We should no new nodes (not even a SystemEvent)
         assertEquals(createCount, getNodeCount(graph));
-        // And no logical item should've been updated
-        assertEquals(0, log2.getUpdated());
 
         // Check permission scopes
         for (Accessible e : actionManager.getLatestGlobalEvent().getSubjects()) {

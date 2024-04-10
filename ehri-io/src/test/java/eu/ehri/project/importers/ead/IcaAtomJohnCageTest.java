@@ -37,9 +37,10 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(JOHNCAGEXML);
-        saxImportManager(EadImporter.class, EadHandler.class)
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(JOHNCAGEXML)) {
+            saxImportManager(EadImporter.class, EadHandler.class)
+                    .importInputStream(ios, logMessage);
+        }
         printGraph(graph);
 
         // How many new nodes will have been created? We should have

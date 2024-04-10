@@ -29,6 +29,7 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 
@@ -41,9 +42,11 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
     @Test
     public void testImportFile1() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        ImportLog importLog = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
-        assertEquals(1, importLog.getCreated());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE1)) {
+            ImportLog importLog = importer
+                    .importFile(ios, "simple 1");
+            assertEquals(1, importLog.getCreated());
+        }
     }
 
     @Test
@@ -51,9 +54,11 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
         // Setting a two-letter language code should result in a description
         // being created with the corresponding 3-letter code.
-        ImportLog importLog = importer.setDefaultLang("de")
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
-        assertEquals(1, importLog.getCreated());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE1)) {
+            ImportLog importLog = importer.setDefaultLang("de")
+                    .importFile(ios, "simple 1");
+            assertEquals(1, importLog.getCreated());
+        }
         Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
         assertEquals("deu", concept.as(Concept.class)
                 .getDescriptions().iterator().next().getLanguageOfDescription());
@@ -64,10 +69,12 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
         // Setting a two-letter language code should result in a description
         // being created with the corresponding 3-letter code.
-        ImportLog importLog = importer
-                .setFormat("N3")
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE6), "lang test");
-        assertEquals(1, importLog.getCreated());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE6)) {
+            ImportLog importLog = importer
+                    .setFormat("N3")
+                    .importFile(ios, "lang test");
+            assertEquals(1, importLog.getCreated());
+        }
         Accessible concept = actionManager.getLatestGlobalEvent().getFirstSubject();
         List<Description> descriptions = Ordering.from((Comparator<Description>) (d1, d2) -> ComparisonChain.start()
                 .compare(d1.getDescriptionCode(), d2.getDescriptionCode(),
@@ -87,54 +94,72 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
     public void testImportFile2() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
                 .setFormat("N3");
-        ImportLog importLog = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 2");
-        assertEquals(1, importLog.getCreated());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(FILE2)) {
+            ImportLog importLog = importer
+                    .importFile(ios, "simple 2");
+            assertEquals(1, importLog.getCreated());
+        }
     }
 
     @Test
     public void testImportFile3() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        ImportLog importLog1 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE3), "repositories");
-        assertEquals(23, importLog1.getCreated());
-        ImportLog importLog2 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE3), "repositories");
-        assertEquals(23, importLog2.getUnchanged());
+        try (InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE3)) {
+            ImportLog importLog1 = importer
+                    .importFile(ios1, "repositories");
+            assertEquals(23, importLog1.getCreated());
+        }
+        try (final InputStream ios2 = ClassLoader.getSystemResourceAsStream(FILE3)) {
+            ImportLog importLog2 = importer
+                    .importFile(ios2, "repositories");
+            assertEquals(23, importLog2.getUnchanged());
+        }
     }
 
     @Test
     public void testImportFile4() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        ImportLog importLog1 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE4), "camps");
-        assertEquals(8, importLog1.getCreated());
-        ImportLog importLog2 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE4), "camps");
-        assertEquals(8, importLog2.getUnchanged());
+        try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE4)) {
+            ImportLog importLog1 = importer
+                    .importFile(ios1, "camps");
+            assertEquals(8, importLog1.getCreated());
+        }
+        try (final InputStream ios2 = ClassLoader.getSystemResourceAsStream(FILE4)) {
+            ImportLog importLog2 = importer
+                    .importFile(ios2, "camps");
+            assertEquals(8, importLog2.getUnchanged());
+        }
     }
 
     @Test
     public void testImportFile5() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        ImportLog importLog1 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE5), "ghettos");
-        assertEquals(2, importLog1.getCreated());
-        ImportLog importLog2 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE5), "ghettos");
-        assertEquals(2, importLog2.getUnchanged());
+        try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE5)) {
+            ImportLog importLog1 = importer
+                    .importFile(ios1, "ghettos");
+            assertEquals(2, importLog1.getCreated());
+        }
+        try (final InputStream ios2 = ClassLoader.getSystemResourceAsStream(FILE5)) {
+            ImportLog importLog2 = importer
+                    .importFile(ios2, "ghettos");
+            assertEquals(2, importLog2.getUnchanged());
+        }
     }
 
     @Test
     public void testImportFile7SkosXL() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
                 .setFormat("N3");
-        ImportLog importLog = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE7), "simple 1 XL");
-        assertEquals(1, importLog.getCreated());
-        ImportLog importLog2 = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 1");
-        assertEquals(1, importLog2.getUnchanged());
+        try (final InputStream ios1 = ClassLoader.getSystemResourceAsStream(FILE7)) {
+            ImportLog importLog = importer
+                    .importFile(ios1, "simple 1 XL");
+            assertEquals(1, importLog.getCreated());
+        }
+        try (final InputStream ios2 = ClassLoader.getSystemResourceAsStream(FILE2)) {
+            ImportLog importLog2 = importer
+                    .importFile(ios2, "simple 1");
+            assertEquals(1, importLog2.getUnchanged());
+        }
     }
 
     @Test
@@ -143,9 +168,11 @@ public class JenaSkosImporterTest extends AbstractSkosTest {
                 .setBaseURI("http://sws.geonames.org/")
                 .setURISuffix("/")
                 .setFormat("TTL");
-        ImportLog importLog = importer
-                .importFile(ClassLoader.getSystemResourceAsStream(FILE8), "geonames");
-        assertEquals(3, importLog.getCreated());
+        try (final InputStream ios = ClassLoader.getSystemResourceAsStream(FILE8)) {
+            ImportLog importLog = importer
+                    .importFile(ios, "geonames");
+            assertEquals(3, importLog.getCreated());
+        }
         Iterable<Concept> concepts = graph.getVertices(Ontology.IDENTIFIER_KEY, "125605", Concept.class);
         assertTrue(concepts.iterator().hasNext());
         Concept larestan = concepts.iterator().next();

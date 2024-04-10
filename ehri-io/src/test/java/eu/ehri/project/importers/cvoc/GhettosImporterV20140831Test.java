@@ -42,12 +42,15 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/ghettos.rdf");
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                .setTolerant(true)
-                .allowUpdates(true);
-        ImportLog log = importer.importFile(ios, logMessage);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        SkosImporter importer;
+        ImportLog log;
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("cvoc/ghettos.rdf")) {
+            importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+                    .setTolerant(true)
+                    .allowUpdates(true);
+            log = importer.importFile(ios, logMessage);
+        }
 
         /*  How many new nodes will have been created? We should have
          * 2 more Concepts
@@ -58,7 +61,7 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
          */
         assertEquals(count + 16, getNodeCount(graph));
         assertEquals(2, log.getCreated());
-        assertEquals(voccount + 2, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 2, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "0";
@@ -74,9 +77,11 @@ public class GhettosImporterV20140831Test extends AbstractImporterTest {
         assertEquals(Double.valueOf(52.43333333333333), ghetto0.getProperty("latitude"));
         assertEquals(Double.valueOf(20.716666666666665), ghetto0.getProperty("longitude"));
 
-        InputStream iosV2 = ClassLoader.getSystemResourceAsStream("cvoc/ghettos-v20140831.rdf.xml");
-        int origCount = getNodeCount(graph);
-        importer.importFile(iosV2, logMessage);
+        int origCount;
+        try (InputStream iosV2 = ClassLoader.getSystemResourceAsStream("cvoc/ghettos-v20140831.rdf.xml")) {
+            origCount = getNodeCount(graph);
+            importer.importFile(iosV2, logMessage);
+        }
 
         /*
          * CREATED:

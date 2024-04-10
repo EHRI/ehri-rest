@@ -50,10 +50,11 @@ public class CegesomaCATest extends AbstractImporterTest {
     public void cegesomaTest() throws Exception {
         final String logMessage = "Importing an example Cegesoma EAD";
         int origCount = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, "cegesomaCA.properties")
-                .importInputStream(ios, logMessage);
-        assertTrue(log.hasDoneWork());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, "cegesomaCA.properties")
+                    .importInputStream(ios, logMessage);
+            assertTrue(log.hasDoneWork());
+        }
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)

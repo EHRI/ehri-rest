@@ -226,7 +226,7 @@ public class ImportResource extends AbstractResource {
      * @param allowUpdates  allow the importer to update items that already exist. If it
      *                      attempts to do so without this option enabled an error will
      *                      be thrown
-     * @param tolerant      whether or not to die on the first validation error
+     * @param tolerant      whether to die on the first validation error
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
@@ -320,7 +320,7 @@ public class ImportResource extends AbstractResource {
      * @param allowUpdates  allow the importer to update items that already exist. If it
      *                      attempts to do so without this option enabled an error will
      *                      be thrown
-     * @param tolerant      whether or not to die on the first validation error
+     * @param tolerant      whether to die on the first validation error
      * @param commit        commit the operation to the database. The default
      *                      mode is to operate as a dry-run
      * @param data          file data containing one of: a single EAD file,
@@ -385,7 +385,7 @@ public class ImportResource extends AbstractResource {
         } catch (EadSync.EadSyncError e) {
             throw new DeserializationError(e.getMessage());
         } catch (DeserializationError e) {
-            e.printStackTrace();
+            logger.error("Error during EAD sync: {}", e.getMessage(), e);
             throw e;
         }
     }

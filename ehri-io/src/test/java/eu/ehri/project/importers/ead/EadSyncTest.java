@@ -32,12 +32,13 @@ public class EadSyncTest extends AbstractImporterTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        InputStream ios = ClassLoader.getSystemResourceAsStream("hierarchical-ead.xml");
-        repo = manager.getEntity("r1", Repository.class);
-        importManager = saxImportManager(EadImporter.class, EadHandler.class)
-                .withScope(repo)
-                .withUpdates(true);
-        importManager.importInputStream(ios, "Initial setup");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("hierarchical-ead.xml")) {
+            repo = manager.getEntity("r1", Repository.class);
+            importManager = saxImportManager(EadImporter.class, EadHandler.class)
+                    .withScope(repo)
+                    .withUpdates(true);
+            importManager.importInputStream(ios, "Initial setup");
+        }
     }
 
     @Test
@@ -122,24 +123,26 @@ public class EadSyncTest extends AbstractImporterTest {
     public void testUnitSyncWithDuplicateIds() throws Exception {
         // Import the data again but with an additional item that duplicates
         // one of the local IDs. If they are non-unique we cannot sync.
-        importManager.withUpdates(true).withScope(repo)
-                .importInputStream(ClassLoader.getSystemResourceAsStream(
-                        "hierarchical-ead-sync-test-bad.xml"),
-                        "Adding item with non-unique ID");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(
+                "hierarchical-ead-sync-test-bad.xml")) {
+            importManager.withUpdates(true).withScope(repo)
+                    .importInputStream(ios, "Adding item with non-unique ID");
+        }
         Set<String> excludes = Sets.newHashSet();
         runSync(repo, excludes, "Test sync error", "hierarchical-ead.xml");
     }
 
     private SyncLog runSync(PermissionScope scope, Set<String> excludes, String logMessage, String ead) throws Exception {
         EadSync sync = EadSync.create(graph, api(adminUser), scope, adminUser, importManager);
-        InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead);
-        return sync.sync(m -> {
-            try {
-                return m.importInputStream(ios2, logMessage);
-            } catch (InputParseError e) {
-                throw new RuntimeException(e);
-            }
-        }, excludes, logMessage);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(ead)) {
+            return sync.sync(m -> {
+                try {
+                    return m.importInputStream(ios2, logMessage);
+                } catch (InputParseError e) {
+                    throw new RuntimeException(e);
+                }
+            }, excludes, logMessage);
+        }
     }
 
     private void checkSync(PermissionScope scope, String logMessage, SyncLog log) {

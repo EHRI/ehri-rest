@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
@@ -52,34 +53,36 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
         );
         for (Map.Entry<String, String> entry : files.entrySet()) {
 
-            SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
-                    .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
-                    .allowUpdates(true);
-            importer
-                    .importFile(ClassLoader.getSystemResourceAsStream(entry.getKey()), "test");
+            try (final InputStream stream = ClassLoader.getSystemResourceAsStream(entry.getKey());
+                 OutputStream outputStream = new ByteArrayOutputStream()) {
+                SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+                        .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue())
+                        .allowUpdates(true);
+                importer
+                        .importFile(stream, "test");
 
-            List<VertexProxy> before = getGraphState(graph);
-            int edgeCountBefore = getEdgeCount(graph);
-            SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
-                    .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue());
-            OutputStream outputStream = new ByteArrayOutputStream();
-            exporter.export(outputStream, "http://www.my.com/#");
-            String skos = outputStream.toString();
-            //System.out.println("EXPORT: " + skos);
-            ImportLog log = importer
-                    .setFormat(entry.getValue())
-                    .allowUpdates(true)
-                    .importFile(new ByteArrayInputStream(skos.getBytes()), "test");
-            List<VertexProxy> after = getGraphState(graph);
-            assertTrue(log.getUnchanged() > 0);
-            assertEquals(0, log.getChanged());
-            assertEquals(0, log.getCreated());
-            assertEquals(0, log.getErrored());
-            GraphDiff graphDiff = diffGraph(before, after);
-            assertTrue(graphDiff.added.isEmpty());
-            assertTrue(graphDiff.removed.isEmpty());
-            int edgeCountAfter = getEdgeCount(graph);
-            assertEquals(edgeCountBefore, edgeCountAfter);
+                List<VertexProxy> before = getGraphState(graph);
+                int edgeCountBefore = getEdgeCount(graph);
+                SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
+                        .setFormat(entry.getValue().equalsIgnoreCase("") ? null : entry.getValue());
+                exporter.export(outputStream, "http://www.my.com/#");
+                String skos = outputStream.toString();
+                //System.out.println("EXPORT: " + skos);
+                ImportLog log = importer
+                        .setFormat(entry.getValue())
+                        .allowUpdates(true)
+                        .importFile(new ByteArrayInputStream(skos.getBytes()), "test");
+                List<VertexProxy> after = getGraphState(graph);
+                assertTrue(log.getUnchanged() > 0);
+                assertEquals(0, log.getChanged());
+                assertEquals(0, log.getCreated());
+                assertEquals(0, log.getErrored());
+                GraphDiff graphDiff = diffGraph(before, after);
+                assertTrue(graphDiff.added.isEmpty());
+                assertTrue(graphDiff.removed.isEmpty());
+                int edgeCountAfter = getEdgeCount(graph);
+                assertEquals(edgeCountBefore, edgeCountAfter);
+            }
         }
     }
 
@@ -91,7 +94,7 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
 
         for (String format : formats) {
             String skos = exportFile(vocabulary, format, baseUri);
-             System.out.println(skos);
+            System.out.println(skos);
             assertTrue(skos.contains(baseUri));
             assertTrue(skos.contains(baseUri + "989"));
             assertTrue(skos.contains("dc:title"));
@@ -116,15 +119,16 @@ public class JenaSkosExporterTest extends AbstractSkosTest {
 
     private void importFile(Vocabulary vocabulary, String file) throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        importer.importFile(ClassLoader.getSystemResourceAsStream(file), "test");
+        try (final InputStream stream = ClassLoader.getSystemResourceAsStream(file)) {
+            importer.importFile(stream, "test");
+        }
     }
 
     private String exportFile(Vocabulary vocabulary, String format, String baseUri) throws Exception {
-        SkosExporter exporter = new JenaSkosExporter(graph, vocabulary)
-                .setFormat(format);
-        OutputStream outputStream = new ByteArrayOutputStream();
-
-        exporter.export(outputStream, baseUri);
-        return outputStream.toString();
+        SkosExporter exporter = new JenaSkosExporter(graph, vocabulary).setFormat(format);
+        try (OutputStream outputStream = new ByteArrayOutputStream()) {
+            exporter.export(outputStream, baseUri);
+            return outputStream.toString();
+        }
     }
 }

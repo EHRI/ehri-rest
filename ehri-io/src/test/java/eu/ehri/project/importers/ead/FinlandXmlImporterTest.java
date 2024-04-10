@@ -48,10 +48,11 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = saxImportManager(
                 EadImporter.class, EadHandler.class, "finlandead.properties");
-        importManager.importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            importManager.importInputStream(ios, logMessage);
+        }
 
         // After...
         int countAfter = getNodeCount(graph);
@@ -85,8 +86,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
         //import the english version:
-        ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        importManager.withUpdates(true).importInputStream(ios, logMessage);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG)) {
+            importManager.withUpdates(true).importInputStream(ios2, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -130,8 +132,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest {
         int countEng = getNodeCount(graph);
         // Before...
         List<VertexProxy> graphState1a = getGraphState(graph);
-        ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
-        importManager.withUpdates(true).importInputStream(ios, logMessage);
+        try (InputStream ios3 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG)) {
+            importManager.withUpdates(true).importInputStream(ios3, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2a = getGraphState(graph);
         GraphDiff diffa = diffGraph(graphState1a, graphState2a);

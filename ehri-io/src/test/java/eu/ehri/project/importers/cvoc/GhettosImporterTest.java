@@ -43,11 +43,13 @@ public class GhettosImporterTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, logMessage);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        ImportLog log;
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            importer.setTolerant(true);
+            log = importer.importFile(ios, logMessage);
+        }
         //printGraph(graph);
 
         /*  How many new nodes will have been created? We should have
@@ -59,7 +61,7 @@ public class GhettosImporterTest extends AbstractImporterTest {
          */
         assertEquals(count + 16, getNodeCount(graph));
         assertEquals(2, log.getCreated());
-        assertEquals(voccount + 2, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 2, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "0";

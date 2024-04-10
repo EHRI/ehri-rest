@@ -20,7 +20,6 @@
 package eu.ehri.project.importers.ead;
 
 import eu.ehri.project.importers.base.AbstractImporterTest;
-import eu.ehri.project.importers.managers.SaxImportManager;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -40,13 +39,14 @@ public class WegwijzerEadImporterTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = saxImportManager(
-                EadImporter.class, EadHandler.class, "wegwijzer.properties");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            saxImportManager(
+                    EadImporter.class, EadHandler.class, "wegwijzer.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        importManager.importInputStream(ios, logMessage);
         printGraph(graph);
 
         // After...

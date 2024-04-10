@@ -45,11 +45,11 @@ public class CampsV2_1Test extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        assertNotNull(ios);
-
-        SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).importFile(ios, logMessage);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
+            assertNotNull(ios);
+            SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).importFile(ios, logMessage);
+        }
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -60,7 +60,7 @@ public class CampsV2_1Test extends AbstractImporterTest {
          */
         int afterNodeCount = count + 26;
         assertEquals(afterNodeCount, getNodeCount(graph));
-        assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 8, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "675";
@@ -83,23 +83,26 @@ public class CampsV2_1Test extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        int afterNodeCount;
+        List<VertexProxy> graphState1;
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
 
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-                .setTolerant(true);
-        importer.importFile(ios, "Importing the camps as a SKOS file");
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
+                    .setTolerant(true);
+            importer.importFile(ios, "Importing the camps as a SKOS file");
+        }
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
          * 8 more Concepts
-       	 * 8 more ConceptDescription
-    	 * 9 more import Event links (8 for every Unit, 1 for the User)
+         * 8 more ConceptDescription
+         * 9 more import Event links (8 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        int afterNodeCount = count + 26;
+        afterNodeCount = count + 26;
         assertEquals(afterNodeCount, getNodeCount(graph));
-        assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 8, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "675";
@@ -117,13 +120,13 @@ public class CampsV2_1Test extends AbstractImporterTest {
 
         //import version 2
         String version2 = "cvoc/camps-v2-1.rdf.xml";
-        ios = ClassLoader.getSystemResourceAsStream(version2);
-        importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary)
-        .allowUpdates(true);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(version2)) {
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary).allowUpdates(true);
 
-        // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
-        importer.importFile(ios, "Importing the modified camps as a SKOS file");
+            // Before...
+            graphState1 = getGraphState(graph);
+            importer.importFile(ios2, "Importing the modified camps as a SKOS file");
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -140,6 +143,6 @@ public class CampsV2_1Test extends AbstractImporterTest {
          */
         afterNodeCount = count + 26 + 4;
         assertEquals(afterNodeCount, getNodeCount(graph));
-        assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 8, toList(vocabulary.getConcepts()).size());
     }
 }

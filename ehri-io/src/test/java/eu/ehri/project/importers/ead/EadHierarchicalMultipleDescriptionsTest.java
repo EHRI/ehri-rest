@@ -28,10 +28,11 @@ public class EadHierarchicalMultipleDescriptionsTest extends AbstractImporterTes
     @Test
     public void testUpdateDescription() throws Exception {
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream("photos-en-00.xml");
         ImportOptions options = ImportOptions.basic();
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, options);
-        importManager.importInputStream(ios, "Import English description");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("photos-en-00.xml")) {
+            importManager.importInputStream(ios, "Import English description");
+        }
 
         // Added: 1 event, 4 event links, 3 doc unit, 3 description, 1 date period, 7 access points
         assertEquals(count + 19, getNodeCount(this.graph));
@@ -39,9 +40,10 @@ public class EadHierarchicalMultipleDescriptionsTest extends AbstractImporterTes
         DocumentaryUnit unit = manager.getEntity("nl-r1-photos", DocumentaryUnit.class);
         assertEquals(1, Iterables.size(unit.getDocumentDescriptions()));
 
-        InputStream ios2 = ClassLoader.getSystemResourceAsStream("photos-uk-00.xml");
         SaxImportManager importManager2 = saxImportManager(EadImporter.class, EadHandler.class, options.withUpdates(true));
-        importManager2.importInputStream(ios2, "Import Ukrainian description");
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream("photos-uk-00.xml")) {
+            importManager2.importInputStream(ios2, "Import Ukrainian description");
+        }
 
         // Should have added: 1 event, 4 event links , 3 new descriptions, 1 new date period, 7 access points
         assertEquals(count + 19 + 16, getNodeCount(this.graph));

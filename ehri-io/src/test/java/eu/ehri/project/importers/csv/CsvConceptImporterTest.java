@@ -50,9 +50,9 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
     @Test
     public void testImportItems() throws Exception {
         AuthoritativeSet authoritativeSet = manager.getEntity("auths", AuthoritativeSet.class);
-        int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
-        assertEquals(2, voccount);
-        logger.debug("number of items: " + voccount);
+        int vocCount = toList(authoritativeSet.getAuthoritativeItems()).size();
+        assertEquals(2, vocCount);
+        logger.debug("number of items: " + vocCount);
         
         final String logMessage = "Importing some subjects";
         XmlImportProperties p = new XmlImportProperties("csvconcept.properties");
@@ -62,9 +62,10 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
         
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        CsvImportManager.create(graph, authoritativeSet, adminUser, CsvConceptImporter.class, ImportOptions.basic())
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            CsvImportManager.create(graph, authoritativeSet, adminUser, CsvConceptImporter.class, ImportOptions.basic())
+                    .importInputStream(ios, logMessage);
+        }
         /*
          * 18 Concept
          * 18 ConceptDesc
@@ -72,7 +73,7 @@ public class CsvConceptImporterTest extends AbstractImporterTest {
          * 1 more import Event
          */
         assertEquals(count+56, getNodeCount(graph));
-        assertEquals(voccount + 18, toList(authoritativeSet.getAuthoritativeItems()).size());
+        assertEquals(vocCount + 18, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
         for (Accessible subject : actionManager.getLatestGlobalEvent().getSubjects()) {

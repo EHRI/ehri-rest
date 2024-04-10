@@ -43,11 +43,13 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, logMessage);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            importer.setTolerant(true);
+            ImportLog log = importer.importFile(ios, logMessage);
+            assertEquals(2, log.getCreated());
+        }
 
         printGraph(graph);
         /*  How many new nodes will have been created? We should have
@@ -57,8 +59,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
          * 1 more import Event
          */
         assertEquals(count + 10, getNodeCount(graph));
-        assertEquals(2, log.getCreated());
-        assertEquals(voccount + 2, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 2, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "PLACE.ČSÚ.544256";

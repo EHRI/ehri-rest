@@ -57,9 +57,10 @@ public class StadsarchiefAdamTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         // Before...
-        InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "stadsarchief.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "stadsarchief.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         printGraph(graph);
         // How many new nodes will have been created? We should have

@@ -56,17 +56,18 @@ public class EacImporterTest extends AbstractImporterTest {
         String logMessage = String.format("Importing EAC %s without creating any annotation, " +
                 "since the targets are not present in the graph", eacFile);
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile)) {
 
-        // Before...
-        List<VertexProxy> graphState1 = GraphTestBase.getGraphState(graph);
-        saxImportManager(EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
-                .withScope(SystemScope.getInstance())
-                .importInputStream(ios, logMessage);
-        // After...
-        List<VertexProxy> graphState2 = GraphTestBase.getGraphState(graph);
-        GraphDiff diff = GraphTestBase.diffGraph(graphState1, graphState2);
-        diff.printDebug(System.out);
+            // Before...
+            List<VertexProxy> graphState1 = GraphTestBase.getGraphState(graph);
+            saxImportManager(EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
+                    .withScope(SystemScope.getInstance())
+                    .importInputStream(ios, logMessage);
+            // After...
+            List<VertexProxy> graphState2 = GraphTestBase.getGraphState(graph);
+            GraphDiff diff = GraphTestBase.diffGraph(graphState1, graphState2);
+            diff.printDebug(System.out);
+        }
 
         /*
          * How many new nodes will have been created? We should have
@@ -102,10 +103,21 @@ public class EacImporterTest extends AbstractImporterTest {
 
         List<VertexProxy> before = GraphTestBase.getGraphState(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile);
-        ImportLog log = saxImportManager(EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
-                .withScope(SystemScope.getInstance())
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(eacFile)) {
+            ImportLog log = saxImportManager(EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
+                    .withScope(SystemScope.getInstance())
+                    .importInputStream(ios, logMessage);
+            assertEquals(1, log.getCreated());
+
+            // Check we've only got one action
+            SystemEvent ev = actionManager.getLatestGlobalEvent();
+            assertEquals(logMessage, ev.getLogMessage());
+
+            // Ensure the import action has the right number of subjects.
+            List<Accessible> subjects = toList(ev.getSubjects());
+            assertEquals(1, subjects.size());
+            assertEquals(log.getChanged(), subjects.size());
+        }
 
         List<VertexProxy> after = GraphTestBase.getGraphState(graph);
         GraphTestBase.diffGraph(before, after).printDebug(System.err);
@@ -141,15 +153,5 @@ public class EacImporterTest extends AbstractImporterTest {
             assertEquals(d.getName(), c1.getName());
             assertEquals(d.getEntity().getId(), unit.getId());
         }
-
-        // Check we've only got one action
-        assertEquals(1, log.getCreated());
-        SystemEvent ev = actionManager.getLatestGlobalEvent();
-        assertEquals(logMessage, ev.getLogMessage());
-
-        // Ensure the import action has the right number of subjects.
-        List<Accessible> subjects = toList(ev.getSubjects());
-        assertEquals(1, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
     }
 }

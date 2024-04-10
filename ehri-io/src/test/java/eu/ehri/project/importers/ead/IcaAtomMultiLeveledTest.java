@@ -48,9 +48,14 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class)
+                    .importInputStream(ios, logMessage);
+
+            // Check we've only created 3 *logical* items...
+            assertEquals(0, log.getUpdated());
+            assertEquals(3, log.getCreated());
+        }
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -66,10 +71,6 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         int createCount = origCount + 23;
 
         assertEquals(createCount, getNodeCount(graph));
-
-        // Yet we've only created 3 *logical* items...
-        assertEquals(0, log.getUpdated());
-        assertEquals(3, log.getCreated());
 
         Iterable<Vertex> docs = graph.getVertices("identifier", "HR r000382HR HR-HDA 1551");
         assertTrue(docs.iterator().hasNext());
@@ -104,13 +105,14 @@ public class IcaAtomMultiLeveledTest extends AbstractImporterTest {
         assertEquals(logMessage, actions.get(0).getLogMessage());
 
         // Now re-import the same file
-        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = saxImportManager(EadImporter.class, EadHandler.class)
-                .importInputStream(ios2, logMessage);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log2 = saxImportManager(EadImporter.class, EadHandler.class)
+                    .importInputStream(ios2, logMessage);
 
-        // We should have no new nodes, not even SystemEvent
-        assertEquals(createCount, getNodeCount(graph));
-        // And no logical item should've been updated
-        assertEquals(0, log2.getUpdated());
+            // We should have no new nodes, not even SystemEvent
+            assertEquals(createCount, getNodeCount(graph));
+            // And no logical item should've been updated
+            assertEquals(0, log2.getUpdated());
+        }
     }
 }
