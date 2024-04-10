@@ -39,9 +39,10 @@ public class GenericEadImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int origCount = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream("generic-ead.xml");
-        saxImportManager(EadImporter.class, EadHandler.class, "ara.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("generic-ead.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "ara.properties")
+                    .importInputStream(ios, logMessage);
+        }
         /*
          * Nodes created:
          *  - 1 unit
@@ -58,41 +59,45 @@ public class GenericEadImporterTest extends AbstractImporterTest {
 
     @Test(expected = ImportValidationError.class)
     public void testImportInvalidItem() throws Exception {
-        InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
-        saxImportManager(EadImporter.class, EadHandler.class)
-                .importInputStream(ios, "Test invalid item import");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class)
+                    .importInputStream(ios, "Test invalid item import");
+        }
     }
 
     @Test
     public void testImportInvalidItemTolerant() throws Exception {
         int origCount = getNodeCount(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml");
-        ImportOptions options = ImportOptions.basic().withTolerant(true);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
-                .importInputStream(ios, "Test invalid item import");
-        System.out.println(log.getErrors());
-        assertEquals(1, log.getErrored());
-        assertEquals(origCount, getNodeCount(graph));
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("invalid-ead.xml")) {
+            ImportOptions options = ImportOptions.basic().withTolerant(true);
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
+                    .importInputStream(ios, "Test invalid item import");
+            System.out.println(log.getErrors());
+            assertEquals(1, log.getErrored());
+            assertEquals(origCount, getNodeCount(graph));
+        }
     }
 
     @Test
     public void testImportWithLang() throws Exception {
-        InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu.xml");
-        ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
-                .importInputStream(ios, "Test language import");
-        assertEquals(1, log.getCreated());
-        assertTrue(manager.exists("nl-r1-c00001.deu-2_deu"));
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-multilang-deu.xml")) {
+            ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
+                    .importInputStream(ios, "Test language import");
+            assertEquals(1, log.getCreated());
+            assertTrue(manager.exists("nl-r1-c00001.deu-2_deu"));
+        }
     }
 
     @Test
     public void testImportWithDefaultLang() throws Exception {
-        InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-no-lang.xml");
-        ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
-                .importInputStream(ios, "Test language import");
-        assertEquals(1, log.getCreated());
-        assertTrue(manager.exists("nl-r1-c00001.fre-1_fre"));
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("single-ead-no-lang.xml")) {
+            ImportOptions options = ImportOptions.basic().withDefaultLang("fre");
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, options)
+                    .importInputStream(ios, "Test language import");
+            assertEquals(1, log.getCreated());
+            assertTrue(manager.exists("nl-r1-c00001.fre-1_fre"));
+        }
     }
 }

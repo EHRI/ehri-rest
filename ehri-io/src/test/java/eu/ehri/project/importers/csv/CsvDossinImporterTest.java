@@ -48,24 +48,25 @@ public class CsvDossinImporterTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv");
-        ImportLog importLog = CsvImportManager.create(graph, ps, adminUser, EadImporter.class, ImportOptions.basic())
-                .importInputStream(ios, logMessage);
-        System.out.println(importLog);
-        // After...
-        List<VertexProxy> graphState2 = getGraphState(graph);
-        GraphDiff diff = diffGraph(graphState1, graphState2);
-        diff.printDebug(System.out);
-        /*
-         * null: 5
-         * relationship: 4
-         * DocumentaryUnit: 4
-         * documentDescription: 4
-         * systemEvent: 1
-         * datePeriod: 4
-         */
-        assertEquals(count + 22, getNodeCount(graph));
-        DocumentaryUnit unit = manager.getEntity("nl-r1-kd3", DocumentaryUnit.class);
-        assertEquals(ps, unit.getRepository());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("dossin.csv")) {
+            ImportLog importLog = CsvImportManager.create(graph, ps, adminUser, EadImporter.class, ImportOptions.basic())
+                    .importInputStream(ios, logMessage);
+            System.out.println(importLog);
+            // After...
+            List<VertexProxy> graphState2 = getGraphState(graph);
+            GraphDiff diff = diffGraph(graphState1, graphState2);
+            diff.printDebug(System.out);
+            /*
+             * null: 5
+             * relationship: 4
+             * DocumentaryUnit: 4
+             * documentDescription: 4
+             * systemEvent: 1
+             * datePeriod: 4
+             */
+            assertEquals(count + 22, getNodeCount(graph));
+            DocumentaryUnit unit = manager.getEntity("nl-r1-kd3", DocumentaryUnit.class);
+            assertEquals(ps, unit.getRepository());
+        }
     }
 }

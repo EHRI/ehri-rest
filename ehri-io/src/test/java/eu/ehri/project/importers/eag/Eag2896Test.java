@@ -59,10 +59,22 @@ public class Eag2896Test extends AbstractImporterTest {
         int count = getNodeCount(graph);
         logger.info("count of nodes before importing: " + count);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
         SaxImportManager importManager = SaxImportManager.create(graph, country, adminUser,
                 EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
-        ImportLog log = importManager.importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT)) {
+            ImportLog log = importManager.importInputStream(ios, logMessage);
+
+            // Check we've only got one action
+            assertEquals(1, log.getCreated());
+            SystemEvent ev = actionManager.getLatestGlobalEvent();
+            assertNotNull(ev);
+            assertEquals(logMessage, ev.getLogMessage());
+
+            // Ensure the import action has the right number of subjects.
+            List<Accessible> subjects = toList(ev.getSubjects());
+            assertEquals(1, subjects.size());
+            assertEquals(log.getChanged(), subjects.size());
+        }
         //printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more Repository
@@ -108,21 +120,13 @@ public class Eag2896Test extends AbstractImporterTest {
             assertEquals(IMPORTED_ITEM_ID, d.getDescribedEntity().getIdentifier());
         }
 
-        // Check we've only got one action
-        assertEquals(1, log.getCreated());
-        SystemEvent ev = actionManager.getLatestGlobalEvent();
-        assertNotNull(ev);
-        assertEquals(logMessage, ev.getLogMessage());
-
-        // Ensure the import action has the right number of subjects.
-        List<Accessible> subjects = toList(ev.getSubjects());
-        assertEquals(1, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
 
         // Test idempotency
         int edgeCount = getEdgeCount(graph);
-        ImportLog log2 = importManager.importInputStream(ClassLoader.getSystemResourceAsStream(SINGLE_UNIT), logMessage);
-        assertFalse(log2.hasDoneWork());
+        try (final InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT)) {
+            ImportLog log2 = importManager.importInputStream(ios2, logMessage);
+            assertFalse(log2.hasDoneWork());
+        }
         assertEquals(afterCount, getNodeCount(graph));
         assertEquals(edgeCount, getEdgeCount(graph));
     }

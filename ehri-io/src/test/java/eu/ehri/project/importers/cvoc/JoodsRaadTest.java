@@ -54,21 +54,22 @@ public class JoodsRaadTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
-        assertNotNull(ios);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
+            assertNotNull(ios);
 
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
-        importer.setTolerant(true);
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            importer.setTolerant(true);
 
-        // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
-        importer.importFile(ios, logMessage);
+            // Before...
+            List<VertexProxy> graphState1 = getGraphState(graph);
+            importer.importFile(ios, logMessage);
 
-        // After...
-        List<VertexProxy> graphState2 = getGraphState(graph);
-        GraphDiff diff = diffGraph(graphState1, graphState2);
-        diff.printDebug(System.out);
+            // After...
+            List<VertexProxy> graphState2 = getGraphState(graph);
+            GraphDiff diff = diffGraph(graphState1, graphState2);
+            diff.printDebug(System.out);
+        }
 
 
         /*  How many new nodes will have been created? We should have
@@ -78,7 +79,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
          * 1 more import Event
          */
         assertEquals(count + 21, getNodeCount(graph));
-        assertEquals(voccount + 5, toList(vocabulary.getConcepts()).size());
+        assertEquals(vocCount + 5, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
         String skosConceptId = "698";
@@ -107,25 +108,30 @@ public class JoodsRaadTest extends AbstractImporterTest {
         final String logMessage = "Importing a SKOS file";
 
         Vocabulary cvoc1 = manager.getEntity("cvoc1", Vocabulary.class);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
-                .setTolerant(true);
-        importer.importFile(ios, logMessage);
+        int count;
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(EHRI_SKOS_TERM)) {
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc1)
+                    .setTolerant(true);
+            importer.importFile(ios, logMessage);
 
 
-        int count = getNodeCount(graph);
-        assertNotNull(ios);
+            count = getNodeCount(graph);
+            assertNotNull(ios);
+        }
 
         Vocabulary cvoc2 = manager.getEntity("cvoc2", Vocabulary.class);
-        InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM);
-        assertNotNull(niod_ios);
-        SkosImporter niod_importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc2);
-        niod_importer.setTolerant(true);
-        int voccount = toList(cvoc2.getConcepts()).size();
+        int vocCount;
+        List<VertexProxy> graphState1;
+        try (InputStream niod_ios = ClassLoader.getSystemResourceAsStream(NIOD_SKOS_TERM)) {
+            assertNotNull(niod_ios);
+            SkosImporter niod_importer = SkosImporterFactory.newSkosImporter(graph, adminUser, cvoc2);
+            niod_importer.setTolerant(true);
+            vocCount = toList(cvoc2.getConcepts()).size();
 
-        // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
-        niod_importer.importFile(niod_ios, logMessage);
+            // Before...
+            graphState1 = getGraphState(graph);
+            niod_importer.importFile(niod_ios, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -140,7 +146,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
          * 1 more import Event
          */
         assertEquals(count + 6, getNodeCount(graph));
-        assertEquals(voccount + 1, toList(cvoc2.getConcepts()).size());
+        assertEquals(vocCount + 1, toList(cvoc2.getConcepts()).size());
 
         Concept term698 = manager.getEntity("cvoc1-698", Concept.class);
         boolean found = false;
@@ -165,8 +171,10 @@ public class JoodsRaadTest extends AbstractImporterTest {
             Link l = graph.frame(e.getVertex(Direction.OUT), Link.class);
             boolean bothTargetsFound = false;
             for (Linkable entity : l.getLinkTargets()) {
-                if (entity.equals(termJR))
+                if (entity.equals(termJR)) {
                     bothTargetsFound = true;
+                    break;
+                }
             }
             assertTrue(bothTargetsFound);
             for (String k : e.getVertex(Direction.OUT).getPropertyKeys()) {
@@ -187,7 +195,7 @@ public class JoodsRaadTest extends AbstractImporterTest {
         found = false;
         for (Concept rel : termJR.getRelatedConcepts()) {
             for (String key : rel.getPropertyKeys()) {
-                logger.debug(key + "" + rel.getProperty(key));
+                logger.debug(key + rel.getProperty(key));
             }
             found = true;
         }

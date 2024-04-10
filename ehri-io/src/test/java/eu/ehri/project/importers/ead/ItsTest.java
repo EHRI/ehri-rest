@@ -55,10 +55,11 @@ public class ItsTest extends AbstractImporterTest {
 
     @Test
     public void testUnitdate() throws Exception {
-        InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
         final String logMessage = "Importing a single EAD by ItsTest";
-        saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence.properties")
+                    .importInputStream(ios, logMessage);
+        }
         DocumentaryUnit unit = graph.frame(
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                 DocumentaryUnit.class);
@@ -76,80 +77,81 @@ public class ItsTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
 
+        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class,
+                "its-pertinence.properties").withUpdates(true);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
-        InputStream ios2 = ClassLoader.getSystemResourceAsStream(EAD_DE);
-        // Before...
-        List<VertexProxy> graphState1 = getGraphState(graph);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
+             InputStream ios2 = ClassLoader.getSystemResourceAsStream(EAD_DE)) {
+            // Before...
+            List<VertexProxy> graphState1 = getGraphState(graph);
 
-        SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence" +
-                ".properties").withUpdates(true);
-        ImportLog log_en = importManager.importInputStream(ios, logMessage);
-        ImportLog log_de = importManager.importInputStream(ios2, logMessage);
+            ImportLog log_en = importManager.importInputStream(ios, logMessage);
+            ImportLog log_de = importManager.importInputStream(ios2, logMessage);
 
-        // After...
-        List<VertexProxy> graphState2 = getGraphState(graph);
-        GraphDiff diff = diffGraph(graphState1, graphState2);
-        printGraph(graph);
-        diff.printDebug(System.out);
+            // After...
+            List<VertexProxy> graphState2 = getGraphState(graph);
+            GraphDiff diff = diffGraph(graphState1, graphState2);
+            printGraph(graph);
+            diff.printDebug(System.out);
 
-        /*
-         * relationship: 2
-         * null: 10 
-         * DocumentaryUnit: 4
-         * documentDescription: 8 
-         * maintenanceEvent: 32 (1+3)*8
-         * systemEvent: 2
-         * date: 3 (2 ENG, 1 GER)
-         */
-        int createCount = origCount + 61;
-        assertEquals(createCount, getNodeCount(graph));
+            /*
+             * relationship: 2
+             * null: 10
+             * DocumentaryUnit: 4
+             * documentDescription: 8
+             * maintenanceEvent: 32 (1+3)*8
+             * systemEvent: 2
+             * date: 3 (2 ENG, 1 GER)
+             */
+            int createCount = origCount + 61;
+            assertEquals(createCount, getNodeCount(graph));
 
-        // The first import creates 4? units
-        assertEquals(4, log_en.getCreated());
+            // The first import creates 4? units
+            assertEquals(4, log_en.getCreated());
 
-        // The second import does not create any units, but updates 4
-        assertEquals(0, log_de.getCreated());
-        assertEquals(4, log_de.getUpdated());
+            // The second import does not create any units, but updates 4
+            assertEquals(0, log_de.getCreated());
+            assertEquals(4, log_de.getUpdated());
 
-        Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
-        assertTrue(docs.iterator().hasNext());
-        DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
+            Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
+            assertTrue(docs.iterator().hasNext());
+            DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
 
-        assertEquals("nl-r1-de_its_ous_1_1_7", unit.getId());
+            assertEquals("nl-r1-de_its_ous_1_1_7", unit.getId());
 
-        assertEquals(1, unit.countChildren());
+            assertEquals(1, unit.countChildren());
 
-        for (Description d : unit.getDocumentDescriptions()) {
-            Iterable<DatePeriod> datePeriods = d.as(DocumentaryUnitDescription.class).getDatePeriods();
-            assertTrue(datePeriods.iterator().hasNext());
+            for (Description d : unit.getDocumentDescriptions()) {
+                Iterable<DatePeriod> datePeriods = d.as(DocumentaryUnitDescription.class).getDatePeriods();
+                assertTrue(datePeriods.iterator().hasNext());
 
-            logger.debug("Description language: " + d.getLanguageOfDescription());
-            if (d.getLanguageOfDescription().equals("eng")) {
-                assertEquals("Concentration Camp Esterwegen", d.getName());
-                assertTrue(d.getProperty("extentAndMedium").toString().endsWith("draft by Susanne Laux"));
+                logger.debug("Description language: " + d.getLanguageOfDescription());
+                if (d.getLanguageOfDescription().equals("eng")) {
+                    assertEquals("Concentration Camp Esterwegen", d.getName());
+                    assertTrue(d.getProperty("extentAndMedium").toString().endsWith("draft by Susanne Laux"));
 
-                assertEquals("2 folders\n\ndigitised\n\n7\n\nOriginals, Photocopies\n\ndraft by Susanne Laux", d.getProperty("extentAndMedium"));
+                    assertEquals("2 folders\n\ndigitised\n\n7\n\nOriginals, Photocopies\n\ndraft by Susanne Laux", d.getProperty("extentAndMedium"));
 
-            } else if (d.getLanguageOfDescription().equals("deu")) {
-                assertEquals("Konzentrationslager Esterwegen", d.getName());
-            } else {
-                fail("Unexpected language: " + d.getLanguageOfDescription());
+                } else if (d.getLanguageOfDescription().equals("deu")) {
+                    assertEquals("Konzentrationslager Esterwegen", d.getName());
+                } else {
+                    fail("Unexpected language: " + d.getLanguageOfDescription());
+                }
+
             }
 
+
+            SystemEvent event = unit.getLatestEvent();
+            assertNotNull(event);
+
+            List<SystemEvent> actions = toList(unit.getHistory());
+            // we did two imports, so two actions
+            assertEquals(2, actions.size());
+            assertEquals(logMessage, actions.get(0).getLogMessage());
+
+            // Check scope is correct...
+            assertEquals(repository, unit.getPermissionScope());
         }
-
-
-        SystemEvent event = unit.getLatestEvent();
-        assertNotNull(event);
-
-        List<SystemEvent> actions = toList(unit.getHistory());
-        // we did two imports, so two actions
-        assertEquals(2, actions.size());
-        assertEquals(logMessage, actions.get(0).getLogMessage());
-
-        // Check scope is correct...
-        assertEquals(repository, unit.getPermissionScope());
     }
 
     @Test
@@ -158,13 +160,13 @@ public class ItsTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
 
-
-        InputStream ios = ClassLoader.getSystemResourceAsStream(GESTAPO);
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EadImporter.class, EadHandler.class, "its-provenance.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(GESTAPO)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "its-provenance.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -223,14 +225,13 @@ public class ItsTest extends AbstractImporterTest {
         final String logMessage = "Importing the gestapo (provenance) EAD by ItsTest";
 
         int origCount = getNodeCount(graph);
-
-
-        InputStream ios = ClassLoader.getSystemResourceAsStream(GESTAPO_WHOLE);
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EadImporter.class, EadHandler.class, "its-provenance.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(GESTAPO_WHOLE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "its-provenance.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -255,13 +256,13 @@ public class ItsTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
 
-
-        InputStream ios = ClassLoader.getSystemResourceAsStream("esterwegen-whole.xml");
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("esterwegen-whole.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "its-pertinence.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);

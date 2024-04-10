@@ -40,11 +40,13 @@ public class Wp2OrganisationsTest extends AbstractImporterTest {
         Vocabulary vocabulary = manager.getEntity("cvoc1", Vocabulary.class);
 
         int count = getNodeCount(graph);
-        int voccount = toList(vocabulary.getConcepts()).size();
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
-        importer.setTolerant(true);
-        ImportLog log = importer.importFile(ios, logMessage);
+        int vocCount = toList(vocabulary.getConcepts()).size();
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE)) {
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, adminUser, vocabulary);
+            importer.setTolerant(true);
+            ImportLog log = importer.importFile(ios, logMessage);
+            // FIXME: add an assertion???
+        }
     }
 
 }

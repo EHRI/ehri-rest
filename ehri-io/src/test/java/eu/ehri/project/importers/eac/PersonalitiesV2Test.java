@@ -56,15 +56,16 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
     public void newPersonalitiesWithoutCreatedBy() throws Exception {
         final String file = "PersonalitiesV2withoutCreatedBy.xml";
         final String logMessage = "Importing EAC " + file;
-        InputStream ios = ClassLoader.getSystemResourceAsStream(file);
         int count = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
-                .withScope(SystemScope.getInstance())
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(file)) {
+            saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
+                    .withScope(SystemScope.getInstance())
+                    .importInputStream(ios, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -97,15 +98,16 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
     public void newPersonalitiesWithoutReferredNodes() throws Exception {
         final String SINGLE_EAC = "PersonalitiesV2.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC;
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
         int count = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
-                .withScope(SystemScope.getInstance())
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC)) {
+            saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
+                    .withScope(SystemScope.getInstance())
+                    .importInputStream(ios, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -149,15 +151,16 @@ public class PersonalitiesV2Test extends AbstractImporterTest {
 
         final String SINGLE_EAC = "PersonalitiesV2.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC;
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
         int count = getNodeCount(graph);
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
-                .withScope(SystemScope.getInstance())
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC)) {
+            saxImportManager(EacImporter.class, EacHandler.class, PROPERTIES)
+                    .withScope(SystemScope.getInstance())
+                    .importInputStream(ios, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

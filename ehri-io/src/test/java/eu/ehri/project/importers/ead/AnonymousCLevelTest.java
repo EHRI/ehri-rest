@@ -37,8 +37,7 @@ public class AnonymousCLevelTest extends AbstractImporterTest {
     @Test
     public void testImportItems() throws Exception {
         String ead = "anonymous-c-levels.xml";
-        InputStream ios = ClassLoader.getSystemResourceAsStream(ead);
-        try {
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(ead)) {
             saxImportManager(EadImporter.class, EadHandler.class).importInputStream(ios, "Test");
             fail("Import with " + ead + " should have thrown a validation error");
         } catch (ImportValidationError ex) {
@@ -51,11 +50,12 @@ public class AnonymousCLevelTest extends AbstractImporterTest {
     @Test
     public void testImportItemsTolerant() throws Exception {
         String ead = "anonymous-c-levels.xml";
-        InputStream ios = ClassLoader.getSystemResourceAsStream(ead);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, ImportOptions.basic().withTolerant(true))
-                .importInputStream(ios, "Test");
-        System.out.println(log.getData());
-        assertEquals(2, log.getCreated());
-        assertEquals(2, log.getErrored());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(ead)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, ImportOptions.basic().withTolerant(true))
+                    .importInputStream(ios, "Test");
+            System.out.println(log.getData());
+            assertEquals(2, log.getCreated());
+            assertEquals(2, log.getErrored());
+        }
     }
 }

@@ -60,18 +60,21 @@ public class IpnTest extends AbstractImporterTest {
     public void polishVirtualCollectionTest() throws Exception {
         final String logMessage = "Importing a part of the IPN Virtual Collection";
 
-        InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
-                .importInputStream(ios1, logMessage);
+        try (InputStream ios1 = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                    .importInputStream(ios1, logMessage);
+        }
 
-        InputStream ios2 = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
-                .importInputStream(ios2, logMessage);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                    .importInputStream(ios2, logMessage);
+        }
 
         int origCount = getNodeCount(graph);
-        InputStream iosVc = ClassLoader.getSystemResourceAsStream(VC_XMLFILE);
-        saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
-                .importInputStream(iosVc, logMessage);
+        try (InputStream iosVc = ClassLoader.getSystemResourceAsStream(VC_XMLFILE)) {
+            saxImportManager(VirtualEadImporter.class, VirtualEadHandler.class, "vc.properties")
+                    .importInputStream(iosVc, logMessage);
+        }
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -100,9 +103,10 @@ public class IpnTest extends AbstractImporterTest {
         int origCount = getNodeCount(graph);
 
         // Before...
-        InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_1_XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                    .importInputStream(ios, logMessage);
+        }
         // After...
 
         // How many new nodes will have been created? We should have
@@ -186,9 +190,10 @@ public class IpnTest extends AbstractImporterTest {
 
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(BRANCH_2_XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "polishBranch.properties")
+                    .importInputStream(ios, logMessage);
+        }
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
         GraphDiff diff = diffGraph(graphState1, graphState2);

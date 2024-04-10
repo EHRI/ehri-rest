@@ -81,12 +81,13 @@ public class YadVashemTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1);
         ImportOptions options = ImportOptions.properties("yadvashem.properties")
                 .withUpdates(true)
                 .withUseSourceId(true);
-        saxImportManager(EadImporter.class, EadHandler.class, options)
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_C1)) {
+            saxImportManager(EadImporter.class, EadHandler.class, options)
+                    .importInputStream(ios, logMessage);
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -123,12 +124,13 @@ public class YadVashemTest extends AbstractImporterTest {
         // Before...
         List<VertexProxy> graphState1 = getGraphState(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportOptions options = ImportOptions.properties("yadvashem.properties")
                 .withUpdates(true)
                 .withUseSourceId(true);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, options);
-        importManager.importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            importManager.importInputStream(ios, logMessage);
+        }
 
         // After...
         List<VertexProxy> graphState2 = getGraphState(graph);
@@ -159,8 +161,9 @@ public class YadVashemTest extends AbstractImporterTest {
         }
         assertEquals(1, nrOfDesc);
 
-        ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
-        importManager.withUpdates(true).importInputStream(ios, logMessage);
+        try (InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB)) {
+            importManager.withUpdates(true).importInputStream(ios2, logMessage);
+        }
 
         //HEB also imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
@@ -192,17 +195,18 @@ public class YadVashemTest extends AbstractImporterTest {
         System.out.println(count + " " + count + " " + count_heb);
         printGraph(graph);
 
-        ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_HEB)) {
+            importManager.importInputStream(ios, logMessage);
+        }
         // Before...
         List<VertexProxy> graphState1_heb = getGraphState(graph);
         logger.debug("reimport HEB");
-        importManager.importInputStream(ios, logMessage);
         // After...
         List<VertexProxy> graphState2_heb = getGraphState(graph);
         GraphDiff diff_heb = diffGraph(graphState1_heb, graphState2_heb);
         diff_heb.printDebug(System.out);
         logger.debug("reimport HEB");
-        //HEB re imported:
+        //HEB re-imported:
         assertEquals(3, toList(m19.getDocumentDescriptions()).size());
         assertEquals(count_heb, getNodeCount(graph));
     }
@@ -210,10 +214,11 @@ public class YadVashemTest extends AbstractImporterTest {
     @Test
     public void testIdempotentImportViaXmlAndZip() throws Exception {
         String resource = "MS1_O84_HEB-partial-unicode.xml";
-        InputStream ios = ClassLoader.getSystemResourceAsStream(resource);
         SaxImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class, "yadvashem.properties");
-        ImportLog log = importManager.importInputStream(ios, "Test");
-        assertEquals(1, log.getCreated());
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(resource)) {
+            ImportLog log = importManager.importInputStream(ios, "Test");
+            assertEquals(1, log.getCreated());
+        }
 
         File temp = File.createTempFile("test-zip", ".zip");
         temp.deleteOnExit();

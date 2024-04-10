@@ -58,10 +58,25 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportManager importManager = saxImportManager(EadImporter.class, EadHandler.class);
-        ImportLog log = importManager.importInputStream(ios, logMessage);
 
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log = importManager.importInputStream(ios, logMessage);
+
+            // Ensure the import action has the right number of subjects.
+            // Check we've created 4 items
+            assertEquals(5, log.getCreated());
+            SystemEvent ev = actionManager.getLatestGlobalEvent();
+            assertEquals(logMessage, ev.getLogMessage());
+
+            List<Accessible> subjects = toList(ev.getSubjects());
+            for (Accessible subject : subjects) {
+                logger.info("identifier: " + subject.getId());
+            }
+
+            assertEquals(5, subjects.size());
+            assertEquals(log.getChanged(), subjects.size());
+        }
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits
@@ -102,24 +117,9 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
         assertEquals(c2, c2_1.getParent());
         assertEquals(c2, c2_2.getParent());
 
-        // Ensure unit the the grandparent of cc1
+        // Ensure unit the grandparent of cc1
         List<DocumentaryUnit> ancestors = toList(c2_1.getAncestors());
         assertEquals(fonds_unit, ancestors.get(ancestors.size() - 1));
-
-        // Ensure the import action has the right number of subjects.
-//        Iterable<Action> actions = unit.getHistory();
-        // Check we've created 4 items
-        assertEquals(5, log.getCreated());
-        SystemEvent ev = actionManager.getLatestGlobalEvent();
-        assertEquals(logMessage, ev.getLogMessage());
-
-
-        List<Accessible> subjects = toList(ev.getSubjects());
-        for (Accessible subject : subjects)
-            logger.info("identifier: " + subject.getId());
-
-        assertEquals(5, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
 
         // Check all descriptions have an IMPORT creationProcess
         for (Description d : c1.getDocumentDescriptions()) {
@@ -134,9 +134,10 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest {
         assertEquals(c2, c2_2.getPermissionScope());
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManager.importInputStream(
-                ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
-        assertEquals(5, log2.getUnchanged());
+        try (final InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log2 = importManager.importInputStream(ios2, logMessage);
+            assertEquals(5, log2.getUnchanged());
+        }
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));
     }

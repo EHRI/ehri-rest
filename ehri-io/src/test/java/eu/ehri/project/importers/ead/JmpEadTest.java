@@ -51,41 +51,42 @@ public class JmpEadTest extends AbstractImporterTest {
         final String logMessage = "Importing JMP EAD";
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, "wp2ead.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            ImportLog log = saxImportManager(EadImporter.class, EadHandler.class, "wp2ead.properties")
+                    .importInputStream(ios, logMessage);
 
-        // How many new nodes will have been created? We should have
-        // - 1 more DocumentaryUnits fonds C1 C2 C3 4,5,6
-        // - 1 more DocumentDescription
-        // - 0 more DatePeriod 0 0 1 
-        // - 3 UndeterminedRelationship, 0 0 0 11
-        // - 2 more import Event links (4 for every Unit, 1 for the User)
-        // - 1 more import Event
-        // - 0 Annotation as resolved relationship 
-        // - 1 unknownProperty
+            // How many new nodes will have been created? We should have
+            // - 1 more DocumentaryUnits fonds C1 C2 C3 4,5,6
+            // - 1 more DocumentDescription
+            // - 0 more DatePeriod 0 0 1
+            // - 3 UndeterminedRelationship, 0 0 0 11
+            // - 2 more import Event links (4 for every Unit, 1 for the User)
+            // - 1 more import Event
+            // - 0 Annotation as resolved relationship
+            // - 1 unknownProperty
 
-        printGraph(graph);
-        int newCount = count + 12;
-        assertEquals(newCount, getNodeCount(graph));
+            printGraph(graph);
+            int newCount = count + 12;
+            assertEquals(newCount, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
-        assertTrue(docs.iterator().hasNext());
-        DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
+            Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
+            assertTrue(docs.iterator().hasNext());
+            DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
-        for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
-            List<String> langs = d.getProperty("languageOfMaterial");
-            assertFalse(langs.isEmpty());
-            assertEquals("deu", langs.get(0));
+            for (DocumentaryUnitDescription d : fonds.getDocumentDescriptions()) {
+                List<String> langs = d.getProperty("languageOfMaterial");
+                assertFalse(langs.isEmpty());
+                assertEquals("deu", langs.get(0));
+            }
+
+            List<Accessible> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
+
+            //huh, should be 7?
+            assertEquals(1, subjects.size());
+            assertEquals(log.getChanged(), subjects.size());
+
+            // Check permission scopes
+            assertEquals(agent, fonds.getPermissionScope());
         }
-
-        List<Accessible> subjects = toList(actionManager.getLatestGlobalEvent().getSubjects());
-
-        //huh, should be 7?
-        assertEquals(1, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
-
-        // Check permission scopes
-        assertEquals(agent, fonds.getPermissionScope());
     }
 }

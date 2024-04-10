@@ -44,9 +44,9 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
     @Test
     public void testImportItems() throws Exception {
         AuthoritativeSet authoritativeSet = manager.getEntity("auths", AuthoritativeSet.class);
-        int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
-        assertEquals(2, voccount);
-        logger.debug("number of items: " + voccount);
+        int vocCount = toList(authoritativeSet.getAuthoritativeItems()).size();
+        assertEquals(2, vocCount);
+        logger.debug("number of items: " + vocCount);
 
         final String logMessage = "Importing some WP18 Personalities records";
         XmlImportProperties p = new XmlImportProperties("personalities.properties");
@@ -55,9 +55,10 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
         assertTrue(p.containsProperty("Pseudonyms"));
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        CsvImportManager.create(graph, authoritativeSet, adminUser,
-                PersonalitiesImporter.class, ImportOptions.basic()).importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD)) {
+            CsvImportManager.create(graph, authoritativeSet, adminUser,
+                    PersonalitiesImporter.class, ImportOptions.basic()).importInputStream(ios, logMessage);
+        }
         SystemEvent ev = actionManager.getLatestGlobalEvent();
 
         /*
@@ -68,7 +69,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest {
          * 1 more import Event
          */
         assertEquals(count + 34, getNodeCount(graph));
-        assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
+        assertEquals(vocCount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
         for (Accessible subject : ev.getSubjects()) {

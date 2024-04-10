@@ -49,16 +49,17 @@ public class Eac2010ExporterTest extends XmlExporterTest {
     @Test
     public void testImportExport1() throws Exception {
         AuthoritativeSet auths = manager.getEntity("auths", AuthoritativeSet.class);
-        InputStream ios = ClassLoader.getSystemResourceAsStream("abwehr.xml");
-        String logMessage = "Test EAC import/export";
-        SaxImportManager.create(graph, auths, adminUser,
-                EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
-                .importInputStream(ios, logMessage);
-        HistoricalAgent repo = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
-        String xml = testExport(repo, "eng");
-        Document doc = parseDocument(xml);
-        assertXPath(doc, logMessage,
-                "//eac-cpf/control/maintenanceHistory/maintenanceEvent[3]/eventDescription");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("abwehr.xml")) {
+            String logMessage = "Test EAC import/export";
+            SaxImportManager.create(graph, auths, adminUser,
+                            EacImporter.class, EacHandler.class, ImportOptions.properties("eac.properties"))
+                    .importInputStream(ios, logMessage);
+            HistoricalAgent repo = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
+            String xml = testExport(repo, "eng");
+            Document doc = parseDocument(xml);
+            assertXPath(doc, logMessage,
+                    "//eac-cpf/control/maintenanceHistory/maintenanceEvent[3]/eventDescription");
+        }
     }
 
     @Test
@@ -106,12 +107,13 @@ public class Eac2010ExporterTest extends XmlExporterTest {
 
     private String testExport(HistoricalAgent agent, String lang) throws Exception {
         Eac2010Exporter exporter = new Eac2010Exporter(api(adminUser));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        exporter.export(agent, baos, lang);
-        String xml = baos.toString("UTF-8");
-        //System.out.println(xml);
-        isValidEac(xml);
-        return xml;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            exporter.export(agent, baos, lang);
+            String xml = baos.toString("UTF-8");
+            //System.out.println(xml);
+            isValidEac(xml);
+            return xml;
+        }
     }
 
     private void isValidEac(String eacXml) throws IOException, SAXException {

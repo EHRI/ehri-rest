@@ -50,12 +50,13 @@ public class Eag2012ExporterTest extends XmlExporterTest {
     @Test
     public void testImportExport1() throws Exception {
         Country nl = manager.getEntity("nl", Country.class);
-        InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml");
-        SaxImportManager importManager = SaxImportManager.create(graph, nl, adminUser,
-                EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
-        importManager.importInputStream(ios, "Text EAG import/export");
-        Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
-        testExport(repo, "eng");
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("eag-2896.xml")) {
+            SaxImportManager importManager = SaxImportManager.create(graph, nl, adminUser,
+                    EagImporter.class, EagHandler.class, ImportOptions.properties("eag.properties"));
+            importManager.importInputStream(ios, "Text EAG import/export");
+            Repository repo = graph.frame(getVertexByIdentifier(graph, "NL-002896"), Repository.class);
+            testExport(repo, "eng");
+        }
     }
 
     @Test
@@ -104,12 +105,13 @@ public class Eag2012ExporterTest extends XmlExporterTest {
 
     private String testExport(Repository repository, String lang) throws Exception {
         Eag2012Exporter exporter = new Eag2012Exporter(api(adminUser));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        exporter.export(repository, baos, lang);
-        String xml = baos.toString("UTF-8");
-        //System.out.println(xml);
-        isValidEag(xml);
-        return xml;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            exporter.export(repository, baos, lang);
+            String xml = baos.toString("UTF-8");
+            //System.out.println(xml);
+            isValidEag(xml);
+            return xml;
+        }
     }
 
     private void isValidEag(String eagXml) throws IOException, SAXException {

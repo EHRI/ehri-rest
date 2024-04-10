@@ -36,10 +36,11 @@ public class Ead3ImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAD 3";
 
         int origCount = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream("simple-ead3.xml");
         List<VertexProxy> before = getGraphState(graph);
-        saxImportManager(EadImporter.class, EadHandler.class, "ead3.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream("simple-ead3.xml")) {
+            saxImportManager(EadImporter.class, EadHandler.class, "ead3.properties")
+                    .importInputStream(ios, logMessage);
+        }
         List<VertexProxy> after = getGraphState(graph);
         diffGraph(before, after).printDebug(System.out, true);
 

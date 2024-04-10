@@ -56,9 +56,10 @@ public class CegesomaABTest extends AbstractImporterTest {
 
         int origCount = getNodeCount(graph);
 
-        InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        saxImportManager(EadImporter.class, EadHandler.class, "cegesomaAB.properties")
-                .importInputStream(ios, logMessage);
+        try (InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE)) {
+            saxImportManager(EadImporter.class, EadHandler.class, "cegesomaAB.properties")
+                    .importInputStream(ios, logMessage);
+        }
 
         // How many new nodes will have been created? We should have
         /*
