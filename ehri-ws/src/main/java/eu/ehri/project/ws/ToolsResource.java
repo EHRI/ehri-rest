@@ -650,6 +650,7 @@ public class ToolsResource extends AbstractResource {
                 item.setPermissionScope(parent);
                 if (Entities.DOCUMENTARY_UNIT.equals(parent.getType())) {
                     parent.as(DocumentaryUnit.class).addChild(item);
+                    item.setRepository(null);
                 } else if (Entities.REPOSITORY.equals(parent.getType())) {
                     item.setRepository(parent.as(Repository.class));
                 } else {

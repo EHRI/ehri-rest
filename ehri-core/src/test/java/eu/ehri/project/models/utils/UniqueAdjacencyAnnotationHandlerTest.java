@@ -12,8 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class UniqueAdjacencyAnnotationHandlerTest extends GraphTestBase {
 
@@ -87,6 +86,14 @@ public class UniqueAdjacencyAnnotationHandlerTest extends GraphTestBase {
     }
 
     @Test
+    public void testUniqueAdjacencySetNull() throws Exception {
+        f1.setUnique(f2);
+        assertEquals(f2, f1.getUnique());
+        f1.setUnique(null);
+        assertNull(f1.getUnique());
+    }
+
+    @Test
     public void testUniqueAdjacencyIsSingle() throws Exception {
         assertFalse(f1.isSingle());
         f1.addSingle(f2);
@@ -102,6 +109,7 @@ public class UniqueAdjacencyAnnotationHandlerTest extends GraphTestBase {
         f1.addNormal(f2);
         f1.addNormal(f2);
         f1.addNormal(f3);
+        assertEquals(3, f1.countNormal());
         assertEquals(3, Iterables.size(
                 f1.asVertex().getEdges(Direction.OUT, NORMAL)));
     }
