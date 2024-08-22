@@ -72,6 +72,7 @@ public class GraphQLImpl {
     private static final String FROM_PARAM = "from";
     private static final String AFTER_PARAM = "after";
     private static final String ALL_PARAM = "all";
+    private static final String LANG_PARAM = "lang";
     private static final String TOP_LEVEL_PARAM = "topLevel";
 
     private static final String HAS_PREVIOUS_PAGE = "hasPreviousPage";
@@ -574,19 +575,21 @@ public class GraphQLImpl {
 
     private static final DataFetcher<Description> descriptionDataFetcher = env -> {
         String lang = env.getArgument(Ontology.LANGUAGE_OF_DESCRIPTION);
+        String lang2 = env.getArgument(LANG_PARAM);
         String code = env.getArgument(Ontology.IDENTIFIER_KEY);
 
         Entity source = env.getSource();
         Iterable<Description> descriptions = source.as(Described.class).getDescriptions();
 
-        if (lang == null && code == null) {
+        if (lang == null && lang2 == null && code == null) {
             int at = env.getArgument(SLICE_PARAM);
             List<Description> descList = Lists.newArrayList(descriptions);
             return at >= 1 && descList.size() >= at ? descList.get(at - 1) : null;
         } else {
+            String checkedCode = LanguageHelpers.convertCode(lang2).orElse(lang);
             for (Description next : descriptions) {
                 String langCode = next.getLanguageOfDescription();
-                if (langCode.equalsIgnoreCase(lang)) {
+                if (langCode.equalsIgnoreCase(checkedCode)) {
                     if (code != null && !code.isEmpty()) {
                         String ident = next.getDescriptionCode();
                         if (ident.equals(code)) {
@@ -711,6 +714,13 @@ public class GraphQLImpl {
                 .argument(newArgument()
                         .name(Ontology.LANGUAGE_OF_DESCRIPTION)
                         .description(__("graphql.argument.languageCode.description"))
+                        .deprecate("Use the 'lang' argument instead. This accepts ISO 639-1 2-letter codes in addition to 639-2 3-letter codes.")
+                        .type(GraphQLString)
+                        .build()
+                )
+                .argument(newArgument()
+                        .name(LANG_PARAM)
+                        .description(__("graphql.argument.lang.description"))
                         .type(GraphQLString)
                         .build()
                 )

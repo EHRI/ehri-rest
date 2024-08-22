@@ -382,6 +382,21 @@ public class LanguageHelpers {
         return getBestDescription(item, Optional.empty(), langCode);
     }
 
+    public static Optional<String> convertCode(String twoOrThree) {
+        if (twoOrThree == null) {
+            return Optional.empty();
+        }
+        String codeLower = twoOrThree.toLowerCase();
+        if (twoOrThree.length() == 2 && locale2Map.containsKey(twoOrThree)) {
+            return Optional.of(locale2Map.get(twoOrThree).getISO3Language());
+        } else if (twoOrThree.length() == 3 && iso639BibTermLookup.containsKey(twoOrThree)) {
+            return Optional.of(iso639BibTermLookup.get(twoOrThree));
+        } else if (locale3Map.containsKey(codeLower)) {
+            return Optional.of(codeLower);
+        }
+        return Optional.empty();
+    }
+
     /**
      * Take an ISO-639-1 code or a language name and try and map to a valid ISO639-2 code.
      *
