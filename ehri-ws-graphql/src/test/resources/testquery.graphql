@@ -22,7 +22,7 @@ query test {
                 type
             }
         }
-        description(languageCode: "eng", identifier: "c1-desc2") {
+        description(lang: "EN", identifier: "c1-desc2") {
             name
             languageCode
             scopeAndContent

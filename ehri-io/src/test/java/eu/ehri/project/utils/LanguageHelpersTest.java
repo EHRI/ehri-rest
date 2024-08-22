@@ -23,14 +23,13 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class LanguageHelpersTest {
 
     @Test
-    public void testIso639DashTwoCode() throws Exception {
+    public void testIso639DashTwoCode() {
         // two-to-three
         assertEquals("sqi", LanguageHelpers.iso639DashTwoCode("sq"));
         // bibliographic to term
@@ -41,7 +40,16 @@ public class LanguageHelpersTest {
     }
 
     @Test
-    public void testIso639DashOneCode() throws Exception {
+    public void testConvertCode() {
+        assertEquals(Optional.of("sqi"), LanguageHelpers.convertCode("sq"));
+        assertEquals(Optional.of("sqi"), LanguageHelpers.convertCode("alb"));
+        assertEquals(Optional.of("eng"), LanguageHelpers.convertCode("en"));
+        assertEquals(Optional.empty(), LanguageHelpers.convertCode(null));
+        assertEquals(Optional.empty(), LanguageHelpers.convertCode("unknown"));
+    }
+
+    @Test
+    public void testIso639DashOneCode() {
         assertEquals("en", LanguageHelpers.iso639DashOneCode("eng"));
         assertEquals("cs", LanguageHelpers.iso639DashOneCode("ces"));
         assertEquals("cs", LanguageHelpers.iso639DashOneCode("cze"));
@@ -53,7 +61,7 @@ public class LanguageHelpersTest {
     }
 
     @Test
-    public void testCountryCodeToContinent() throws Exception {
+    public void testCountryCodeToContinent() {
         Optional<String> c1 = LanguageHelpers.countryCodeToContinent("gb");
         assertTrue(c1.isPresent());
         assertEquals("Europe", c1.get());
@@ -68,7 +76,7 @@ public class LanguageHelpersTest {
     }
 
     @Test
-    public void testCodeToName() throws Exception {
+    public void testCodeToName() {
         assertEquals("English", LanguageHelpers.codeToName("eng"));
         assertEquals("German", LanguageHelpers.codeToName("deu"));
         assertEquals("German", LanguageHelpers.codeToName("ger"));

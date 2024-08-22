@@ -244,9 +244,7 @@ public final class BundleValidator {
      */
     private void checkIntegrity(Bundle bundle, ErrorSet.Builder builder) {
         if (bundle.getId() == null) {
-            builder.addError(Bundle.ID_KEY,
-                    MessageFormat.format(Messages.getString("BundleValidator.missingIdForCreate"),
-                    bundle.getId()));
+            builder.addError(Bundle.ID_KEY, Messages.getString("BundleValidator.missingIdForCreate"));
         }
         if (manager.exists(bundle.getId())) {
             ListMultimap<String, String> idErrors = bundle
