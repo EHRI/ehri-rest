@@ -714,7 +714,6 @@ public class GraphQLImpl {
                 .argument(newArgument()
                         .name(Ontology.LANGUAGE_OF_DESCRIPTION)
                         .description(__("graphql.argument.languageCode.description"))
-                        .deprecate("Use the 'lang' argument instead. This accepts ISO 639-1 2-letter codes in addition to 639-2 3-letter codes.")
                         .type(GraphQLString)
                         .build()
                 )
