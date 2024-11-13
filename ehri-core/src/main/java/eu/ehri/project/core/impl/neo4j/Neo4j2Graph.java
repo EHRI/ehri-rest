@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
 /**
- * A Blueprints implementation of the graph database Neo4j (http://neo4j.org)
+ * A Blueprints implementation of the <a href="http://neo4j.org">Neo4j graph database</a>
  */
 public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseService> {
     private static final Logger logger = Logger.getLogger(Neo4j2Graph.class.getName());
@@ -80,7 +80,7 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     public Neo4j2Graph(String directory, Map<String, String> configuration) {
         try {
             DatabaseManagementServiceBuilder builder = new DatabaseManagementServiceBuilder(Paths.get(directory));
-            builder = (configuration != null) ? builder.setConfigRaw(configuration) : builder;
+//            builder = (configuration != null) ? builder.setConfigRaw(configuration) : builder;
             this.managementService = builder.build();
             this.rawGraph = managementService.database( DEFAULT_DATABASE_NAME );
         } catch (Exception e) {
@@ -158,15 +158,36 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
 
     public CloseableIterable<Vertex> getVerticesByLabel(final String label) {
         this.autoStartTransaction(false);
-        ResourceIterable<Node> wrap = () -> getTransaction().findNodes(Label.label(label));
+        ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
+            @Override
+            public ResourceIterator<Node> iterator() {
+                return getTransaction().findNodes(Label.label(label));
+            }
+            @Override
+            public void close() {
+//                getTransaction().close();
+            }
+        };
         return new Neo4j2VertexIterable(wrap, this);
     }
 
     public CloseableIterable<Vertex> getVerticesByLabelKeyValue(
             final String label, final String key, final Object value) {
-        ResourceIterable<Node> wrap = () -> {
-            autoStartTransaction(false);
-            return getTransaction().findNodes(Label.label(label), key, value);
+//        ResourceIterable<Node> wrap = () -> {
+//            autoStartTransaction(false);
+//            return getTransaction().findNodes(Label.label(label), key, value);
+//        };
+        ResourceIterable<Node> wrap = new ResourceIterable<Node>() {
+            @Override
+            public ResourceIterator<Node> iterator() {
+                autoStartTransaction(false);
+                return getTransaction().findNodes(Label.label(label), key, value);
+            }
+
+            @Override
+            public void close() {
+//                getTransaction().close();
+            }
         };
         return new Neo4j2VertexIterable(wrap, this);
     }
@@ -333,9 +354,21 @@ public class Neo4j2Graph implements TransactionalGraph, MetaGraph<GraphDatabaseS
     }
 
     public CloseableIterable<Map<String, Object>> query(String query, Map<String, Object> params) {
-        ResourceIterable<Map<String, Object>> wrap = () -> {
-            autoStartTransaction(false);
-            return getTransaction().execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+//        ResourceIterable<Map<String, Object>> wrap = () -> {
+//            autoStartTransaction(false);
+//            return getTransaction().execute(query, params == null ? Collections.<String, Object>emptyMap() : params);
+//        };
+        ResourceIterable<Map<String, Object>> wrap = new ResourceIterable<>() {
+            @Override
+            public ResourceIterator<Map<String, Object>> iterator() {
+                autoStartTransaction(false);
+                return getTransaction().execute(query, params == null ? Collections.emptyMap() : params);
+            }
+
+            @Override
+            public void close() {
+                getTransaction().close();
+            }
         };
         return new WrappingCloseableIterable<>(wrap);
     }
