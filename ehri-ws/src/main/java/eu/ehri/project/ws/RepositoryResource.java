@@ -37,6 +37,7 @@ import eu.ehri.project.models.base.Accessible;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.base.*;
 import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;

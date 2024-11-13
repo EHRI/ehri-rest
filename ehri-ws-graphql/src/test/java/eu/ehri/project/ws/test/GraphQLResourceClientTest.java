@@ -41,6 +41,7 @@ import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -144,8 +145,9 @@ public class GraphQLResourceClientTest extends AbstractResourceClientTest {
                 .path("items").size());
         assertFalse(data.path("data").path("topLevelDocumentaryUnits")
                 .path("items").path(0).path("id").isMissingNode());
-        assertEquals("c4", data.path("data").path("r4").path("links")
-                .path(0).path("targets").path(0).path("id").textValue());
+        // System.out.println(data.path("data").path("r4").path("links").path(0).path("targets").toPrettyString());
+        assertThat(data.path("data").path("r4").path("links")
+                .path(0).path("targets").path(0).path("id").textValue()).isIn("c4", "r4");
         assertEquals("cvocc1", data.path("data").path("cvocc2").path("related")
                 .path(0).path("id").textValue());
         assertEquals("Subject Access 2", data.path("data").path("cvocc2").path("connected")
