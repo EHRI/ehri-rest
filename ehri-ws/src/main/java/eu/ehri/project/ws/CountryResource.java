@@ -27,6 +27,7 @@ import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.utils.Table;
+import eu.ehri.project.ws.base.*;
 import org.neo4j.dbms.api.DatabaseManagementService;
 
 import javax.ws.rs.*;

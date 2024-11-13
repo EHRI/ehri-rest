@@ -452,8 +452,8 @@ public class DocumentaryUnitResourceClientTest extends AbstractResourceClientTes
                 entityUri(Entities.DOCUMENTARY_UNIT, "c1", "ead"))
                 .accept(MediaType.TEXT_XML_TYPE)
                 .get(ClientResponse.class);
-        assertStatus(OK, response);
         String ead = response.getEntity(String.class);
+        assertStatus(OK, response);
         assertThat(ead, containsString("<ead xmlns=\"urn:isbn:1-931666-22-9\""));
 
         // Now check EAD3
