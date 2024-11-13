@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.driver.*;
+import org.neo4j.driver.Record;
 import org.neo4j.harness.junit.rule.Neo4jRule;
 
 import java.util.Collections;
