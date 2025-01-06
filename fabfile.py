@@ -8,7 +8,6 @@ from datetime import datetime
 
 from fabric import task
 from invoke import run as local
-from patchwork import files
 
 
 deploys_dir = "/opt/neo4j/ehri-rest/deploys"
@@ -56,7 +55,7 @@ def get_artifact_version(ctx):
     """Get the current artifact version from Maven"""
     return local(
         "mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate" +
-        " -Dexpression=project.version|grep -Ev '(^\[|Download\w+:)'").stdout.strip()
+        " -Dexpression=project.version|grep -Ev '(^\\[|Download\\w+:)'").stdout.strip()
 
 
 @task
@@ -84,7 +83,7 @@ def get_version_stamp(ctx):
 @task
 def online_backup(ctx, dir, tar = True):
     """Create an online backup to directory `dir`"""
-    if files.exists(ctx, dir):
+    if check_file_exists(ctx, dir):
         print(f"Remote directory '{dir}' already exists!")
         sys.exit(1)
     tar_name = dir + ".tgz"
@@ -112,3 +111,14 @@ def online_clone_db(ctx, dir):
 
 def get_timestamp():
     return datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+def check_file_exists(ctx, remote_path):
+    """
+    Check if a file or directory exists on the remote server.
+    """
+    try:
+        result = ctx.run(f'test -e {remote_path} && echo "EXISTS" || echo "NOT_FOUND"', hide=True)
+        return result.stdout.strip() == "EXISTS"
+    except Exception as e:
+        return False
